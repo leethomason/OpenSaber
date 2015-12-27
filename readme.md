@@ -163,7 +163,7 @@ Note that in either case, the actual battery voltage varies significantly,
 and the control circuit has to account for that.
 
 ### Emitter Electronics
-Basic, but hard to miniturize, circuit. It is documented in LEDControl.txt.
+Basic, but hard to miniturize, circuit. It is documented in ledControl.txt.
 I had it custom printed at PCBExpress - a fab file emmitter.pcb is provided.
 
 FIXME image of circuit
