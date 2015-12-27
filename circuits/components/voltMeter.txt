@@ -1,0 +1,75 @@
+---- Version A ----
+
+Uses the Arduino internal reference voltage.
+
+
+       Vbat
+         o                            
+         |                            
+         /   R1 = 10k Ohm             
+         /                            
+         |                            
+Apin o---+                            
+         |
+         /   R2 = 47k Ohm
+         /
+         |                            
+         |                            
+        ===                    
+
+Vout = Vbat * R1 / (R1 + R2),
+Vbat = Vout * (R1 + R2) / R1
+Vref = 1.1 (internal)
+
+Vout = Vref * Apin
+Vbat = Vref * Apin * (R1 + R2) / R1
+
+R1 = 10k, R2 = 47k, (R1+R2)/R1 = 5.7
+   = 1.1 * Apin * 5.7 (where Apin 0-1)
+   = 6.27 * Apin
+
+Actual range of the analog input 0-1023,
+and output of the function is in millivolts.
+
+UVOLT_MULT = 6129
+Measuring (accounting for variation, resistor error, etc.)
+UVOLT_MULT = 5990
+  
+
+---- Version B ----
+PROS: more accurate
+CONS: more space, requires a Voltage Reference Diode
+
+
+                                             Vcc measurement                          
+                                             (Voltage divider so measured             
+  Reference Voltage                          voltage < 2.5V reference)                
+                                                                                      
+       Vcc=3.7                                   Vcc=3.7                              
+         o                                         o                                  
+         |                                         |                                 
+         /   R1 = 10k Ohm                          /   R1 = 6.8k Ohm                  
+         /                                         /                                  
+AR       +                               PIN_VCC   +                                  
+    O+---+                                    O+---+                                  
+         +                                         |                                  
+         _                                         |                                  
+         ^   Voltage Reference Diode               /   R2 = 4.7k Ohm                  
+         |   LM385BZ+2.5G                          /                                  
+         |                                         |                                  
+         |                                         |                                  
+        ===                                       ===                                 
+                                                                                      
+                                           Vpin = Vcc * R2 / (R1 + R2)                
+                                                = Vcc * 0.4087                        
+                                                                                      
+                                           Vref = 2.5                                 
+                                           Vmeasured = Vref / Vpin                    
+                                                     = PIN_VCC * Vref * (R1 + R2) / R2
+                                                     = PIN_VCC * 6.117                
+                                                                                      
+                                           PIN_VCC 0-1023                             
+                                           Vref in mVolts = 2500                      
+                                           Vmeasured (mV) = 6117 / 1023               
+                                                                                      
+                                           UVOLT_MULT (in MICROvolts) = 5979 = 1000 * Vref * (R1 + R2) / R2        

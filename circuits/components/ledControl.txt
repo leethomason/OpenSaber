@@ -1,0 +1,33 @@
+                                                         Emitter end. 3 high power,     
+                                                         common anode LEDs. Circuit only
+                                                         shown for one.                 
+                                   Vcc = 3.7                                            
+                                   +-------------+---+--+-----+-----+                   
+                                                 |   |  |     |     |                   
+                                                 |   |  |     |     |                   
+                                                 |   |  V+    V+    V+                  
+                                  Rled           |   |  |     ...   ...                       
+                     Rring      D---//------------------+                               
+      PWM control  +--//--+--G M                 |   |                                  
+  PIN_EMITTER_RED         |     S             C ---  / R1                               
+PIN_EMITTER_GREEN         /     |               ---  /                                  
+ PIN_EMITTER_BLUE    Rtie /     |                |   |                                  
+                          |     |                |   |                                  
+                         ===   ===              =======                                 
+                                                                                        
+                    The per-LED control        A capacitor (and cap drain)              
+                    circuit. (3 for RGB        tries to even out the (large)            
+                    LED).                      power draw from LEDs.                    
+                                                                                        
+                    M: power mosfet            C 470 uF                                 
+                    NXP PHP36N03LT,127         R1 220k Ohm                              
+                                                                                        
+                    Rled resistance for LED,                                            
+                    typ 1-3 ohms                                                        
+                                                                                        
+                    Rring (de-ring resistor) 10 ohm                                     
+
+                    Rtie (tie down resistor, prevents                                   
+                    MOSFET from floating high)                                          
+                    47k Ohms 
+                    [check; 100k makes more sense]
