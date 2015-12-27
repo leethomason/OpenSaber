@@ -177,6 +177,7 @@ bool CMDParser::processCMD(uint8_t* c) {
     database->dumpLog();
   }
   else if (strEqual(action, ID)) {
+    printLead(action);
     Serial.println(F(ID_STR));
   }
   else if (strEqual(action, STATUS)) {
@@ -185,6 +186,8 @@ bool CMDParser::processCMD(uint8_t* c) {
     static const char* space = "-----------";
     delay(DELAY);
     Serial.println(space);
+    printLead(ID);      Serial.println(F(ID_STR));
+    delay(DELAY);
     printLead(PAL);     Serial.println(database->paletteIndex());
     delay(DELAY);
     printLead(FONT);    Serial.println(database->soundFont());
