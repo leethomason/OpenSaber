@@ -3,6 +3,7 @@
 #include "cmdparser.h"
 #include "saberdb.h"
 #include "blade.h"
+#include "electrical.h"
 
 #include "../Grinliz_Arduino_Util/Grinliz_Arduino_Util.h"
 
@@ -70,10 +71,10 @@ bool CMDParser::processCMD(uint8_t* c) {
   static const char PWM[]     = "pwm";
   static const char MOTION[]  = "mot";
   static const char IMPACT[]  = "imp";
-  //static const char ACCEL[]   = "acc";
   static const char STATUS[]  = "stat";
   static const char RESET[]   = "reset";
   static const char LOG[]     = "log";
+  static const char ID[]      = "id";
 
   tokenize(&action, &value);
   #if SERIAL_DEBUG == 1
@@ -174,6 +175,9 @@ bool CMDParser::processCMD(uint8_t* c) {
   }
   else if (strEqual(action, LOG)) {
     database->dumpLog();
+  }
+  else if (strEqual(action, ID)) {
+    Serial.println(F(ID_STR));
   }
   else if (strEqual(action, STATUS)) {
     static const int DELAY = 20;  // don't saturate the serial line. Too much for SoftwareSerial.

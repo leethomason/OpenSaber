@@ -42,6 +42,7 @@ static const int32_t UVOLT_MULT = 5980;  // micro-volts
  static const int32_t UVOLT_MULT = 5990;
 
 #if EMITTER == TEST_EMITTER
+#define ID_STR "Test Emitter"
 static const int32_t LED_RANGE = 80;  // 255 for full range
 
 static const int32_t RED_VF   = 2100;                         // milli-volts
@@ -55,7 +56,9 @@ static const int32_t GREEN_R  = int32_t(100) * int32_t(1000);
 static const int32_t BLUE_VF  = 2100;
 static const int32_t BLUE_I   = 20;
 static const int32_t BLUE_R   = int32_t(47) * int32_t(1000);
+
 #elif EMITTER == SENTRIS_EMITTER
+#define ID_STR "Gecko (Sentris Body) RGB Luxeon"
 static const int32_t LED_RANGE = 255;  // 255 for full range
 
 /*
