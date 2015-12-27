@@ -1,0 +1,44 @@
+Issues:
+x read startup time from sound card
+x red led for low power: flash power button?
+x reset command
+- optimize string uses, mem usage, etc.
+- blade flash ghetto - double pulse? blend? always brighter?
+- Direction in the motion
+
+Issues constructed:
+- tune motion and impact
+ 
+Issues Next:
+- Jedi Blade Controller
+	- changeable volume
+	- motion and impact setting
+- Blade Jitter
+- Hold effect
+- handle 'retract' when blade isn't fully ignited
+ 
+Fixed
+x account for Vcc
+x de-ring resistors
+x rework MMA code
+x figure out names: palette & font
+x pull down resistors for gates. woh.
+x sound on/off
+x integrate sound calls into state code
+x split out blade rendering code
+x switch blade color banks
+x correct ignite / retract times. From sound files?
+x sound
+x sound priorities
+x motion sensing
+x EEPROM writer sketch
+x way to reset EEPROM
+
+
+0123456789012345
+----------------
+0a   100 000 050
+Bld	 100 000 050
+
+SFX 1 Vol 140
+Cfg
