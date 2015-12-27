@@ -1,4 +1,4 @@
-** Welcome to Open Saber! **
+**Welcome to Open Saber**
 
 The goal of open saber is provide source code, circuit diagrams, and 
 documentation for making an Arduino (and compatible) based lightsaber.
