@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include "../Grinliz_Arduino_Util/Grinliz_Arduino_Util.h"
+
 class SaberDB;
 
 class CMDParser 
@@ -10,20 +12,21 @@ class CMDParser
   public:
     CMDParser(SaberDB* database);
 
-    void push(int c);
+    void push(int c)                { token.append(c); }
     bool processCMD(uint8_t* color);
-    const char* getBuffer() { return token; }
-    void clearBuffer() { token[0] = 0; }
+    const char* getBuffer() const   { return token.c_str(); }
+    void clearBuffer() { token.clear(); }
 
   private:
-    void tokenize(char** action, char** value);
+    void tokenize();
     void printHexColor(const uint8_t* color);
     void parseHexColor(const char* str, uint8_t* c);
     void printLead(const char* str);
   
     SaberDB* database;
-    static const int TOKEN_LEN = 20;
-    char token[TOKEN_LEN];
+    CStr<18> token;
+    CStr<6>  action;
+    CStr<10> value;
 };
 
 

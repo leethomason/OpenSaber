@@ -8,6 +8,7 @@ template<> struct CompileTimeAssert <true> {};
 static const int EEPROM_SIZE = 512;
 
 // --- Configuration ---
+// Note: Serial connection should be set to 19200 baud with a newline after commands.
 #define SERIAL_DEBUG 0
 //#define SABER_ACCELEROMETER
 #define SABER_SOUND_ON

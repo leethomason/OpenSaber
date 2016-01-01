@@ -133,10 +133,6 @@ void changeState(uint8_t state)
 {
   currentState   = state;
   stateStartTime = millis();
-
-#if SERIAL_DEBUG == 1
-  Serial.println(name);
-#endif
 }
 
 void onOffHandler(const Button&) {
@@ -271,7 +267,7 @@ void readSerial() {
   // Flush the buffer, optionally echo.
 #ifdef SABER_SOUND_ON
   while (softSer.available()) {
-    // This read seem important to fixing random hangs in comm
+    // This read seems important to fixing random hangs in comm
     // to the AudioFX. Flushing a buffer? timing?
     int v = softSer.read();
     (void)v;
@@ -283,7 +279,6 @@ void readSerial() {
 }
 
 void serialEvent() {
-
   bool processed = false;
   uint8_t color[NCHANNELS] = {0};
   int savedVolume = saberDB.volume();

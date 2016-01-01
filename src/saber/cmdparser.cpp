@@ -5,35 +5,24 @@
 #include "blade.h"
 #include "electrical.h"
 
-#include "../Grinliz_Arduino_Util/Grinliz_Arduino_Util.h"
-
 CMDParser::CMDParser(SaberDB* _db) {
   database = _db;
-  token[0] = 0;
 }
 
-
-void CMDParser::push(int c) {
-  for(int i=0; i<TOKEN_LEN-1; ++i) {
-    if (token[i] == 0) {
-      token[i] = c;
-      token[i+1] = 0;
-      return;
-    }
-  }
-}
-
-void CMDParser::tokenize(char** action, char** value)
+void CMDParser::tokenize()
 {
-  *action = 0;
-  *value = 0;
-  if (token[0] == 0) return;
+  action.clear();
+  value.clear();
+  if (token.empty()) return;
 
-  *action = token;
-  char* p = strstr(token, " ");
-  if (!p) return;
-  *p = 0;
-  *value = p+1;
+  int i = 0;
+  while(token[i] && token[i] != ' ') {
+    action.append(token[i]);
+  }
+  i++;
+  while(token[i]) {
+    value.append(token[i]);
+  }
 }
 
 void CMDParser::printHexColor(const uint8_t* color) {
@@ -54,7 +43,6 @@ void CMDParser::printLead(const char* str) {
 }
 
 bool CMDParser::processCMD(uint8_t* c) {
-  char *action = 0, *value = 0;
   for (int i = 0; i < NCHANNELS; ++i) {
     c[i] = 0;
   }
@@ -76,111 +64,111 @@ bool CMDParser::processCMD(uint8_t* c) {
   static const char LOG[]     = "log";
   static const char ID[]      = "id";
 
-  tokenize(&action, &value);
+  tokenize();
   #if SERIAL_DEBUG == 1
-  Serial.print("CMD:"); Serial.print(action); Serial.print(":"); Serial.println(value);
+  Serial.print("CMD:"); Serial.print(action); Serial.print(":"); Serial.println(value.c_str());
   #endif
-  bool isSet = (value != 0);
+  bool isSet = !value.empty();
 
-  if (strEqual(action, BC)) {
+  if (action == BC) {
     if (isSet) {
-      parseHexColor(value + 1, c);
+      parseHexColor(value.c_str() + 1, c);
       database->setBladeColor(c);
     }
-    printLead(action);
+    printLead(action.c_str());
     printHexColor(database->bladeColor()); Serial.print('\n');
   }
-  else if (strEqual(action, IC)) {
+  else if (action == IC) {
     if (isSet) {
-      parseHexColor(value + 1, c);
+      parseHexColor(value.c_str() + 1, c);
       database->setImpactColor(c);
     }
-    printLead(action);
+    printLead(action.c_str());
     printHexColor(database->impactColor()); Serial.print('\n');
   }
-  else if (strEqual(action, PAL)) {
+  else if (action == PAL) {
     if (isSet) {
-      int pal = atoi(value);
+      int pal = atoi(value.c_str());
       database->setPalette(pal);
     }
-    printLead(action);
+    printLead(action.c_str());
     Serial.println(database->paletteIndex());
   }
-  else if (strEqual(action, FONT)) {
+  else if (action == FONT) {
     if (isSet) {
-      int f = atoi(value);
+      int f = atoi(value.c_str());
       database->setSoundFont(f);
     }
-    printLead(action);
+    printLead(action.c_str());
     Serial.println(database->soundFont());
   }
-  else if (strEqual(action, AUDIO)) {
+  else if (action == AUDIO) {
     if (isSet) {
-      int onOff = atoi(value);
+      int onOff = atoi(value.c_str());
       database->setSoundOn(onOff ? true : false);
     }
-    printLead(action);
+    printLead(action.c_str());
     Serial.println(database->soundOn());
   }
-  else if (strEqual(action, VOL)) {
+  else if (action == VOL) {
     if (isSet) {
-      int volume = constrain(atoi(value), 0, 204);
+      int volume = constrain(atoi(value.c_str()), 0, 204);
       database->setVolume(volume);
     }
-    printLead(action);
+    printLead(action.c_str());
     Serial.println(database->volume());
   }
-  else if (strEqual(action, AMPS)) {
-    printLead(action);
+  else if (action == AMPS) {
+    printLead(action.c_str());
     Serial.println(Blade::blade().power());
   }
-  else if (strEqual(action, VOLTS)) {
-    printLead(action);
+  else if (action == VOLTS) {
+    printLead(action.c_str());
     Serial.println(Blade::blade().voltage());
   }
-  else if (strEqual(action, UTIL)) {
-    printLead(action);
+  else if (action == UTIL) {
+    printLead(action.c_str());
     for(int i=0; i<NCHANNELS; ++i) {
       Serial.print(Blade::blade().util(i));
       Serial.print(' ');
     }
     Serial.print('\n');
   }
-  else if (strEqual(action, PWM)) {
-    printLead(action);
+  else if (action == PWM) {
+    printLead(action.c_str());
     for(int i=0; i<NCHANNELS; ++i) {
       Serial.print(Blade::blade().pwmVal(i));
       Serial.print(' ');
     }
     Serial.print('\n');
   }
-  else if (strEqual(action, MOTION)) {
+  else if (action == MOTION) {
     if (isSet) {
-      float v = atof(value);
+      float v = atof(value.c_str());
       database->setMotion(v);
     }
-    printLead(action);
+    printLead(action.c_str());
     Serial.println(database->motion());
   }
-  else if (strEqual(action, IMPACT)) {
+  else if (action == IMPACT) {
     if (isSet) {
-      float v = atof(value);
+      float v = atof(value.c_str());
       database->setImpact(v);
     }
-    printLead(action);
+    printLead(action.c_str());
     Serial.println(database->impact());
   }
-  else if (strEqual(action, RESET)) {
+  else if (action == RESET) {
     database->writeDefaults();
   }
-  else if (strEqual(action, LOG)) {
+  else if (action == LOG) {
     database->dumpLog();
   }
-  else if (strEqual(action, ID)) {
-    printLead(action);
+  else if (action == ID) {
+    printLead(action.c_str());
     Serial.println(F(ID_STR));
   }
-  else if (strEqual(action, STATUS)) {
+  else if (action == STATUS) {
     static const int DELAY = 20;  // don't saturate the serial line. Too much for SoftwareSerial.
     
     static const char* space = "-----------";
@@ -227,7 +215,7 @@ bool CMDParser::processCMD(uint8_t* c) {
     printLead(IC);      printHexColor(database->impactColor()); Serial.print('\n');
     Serial.println(space);
   }
-  token[0] = 0;
+  token.clear();
   return isSet;
 }
 
