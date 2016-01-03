@@ -7,7 +7,7 @@
 // Libraries.
 #include <Button.h>
 #include <Adafruit_Soundboard.h>
-#include <Adafruit_MMA8451.h>
+#include <Adafruit_LIS3DH.h>
 #include <Grinliz_Arduino_Util.h>
 
 // Includes
@@ -43,7 +43,7 @@ ButtonCB buttonA(PIN_SWITCH_A, Button::PULL_UP);
 ButtonCB buttonB(PIN_SWITCH_B, Button::PULL_UP);
 SaberDB saberDB;
 #ifdef SABER_ACCELEROMETER
-Adafruit_MMA8451 mma;
+Adafruit_LIS3DH accel;
 #endif
 
 #ifdef SABER_SOUND_ON
@@ -66,19 +66,19 @@ void setup() {
 
   TCNT1 = 0x7FFF; // set blue & green channels out of phase
 
-  saberDB.log("MMA");
+  saberDB.log("ACC");
 #ifdef SABER_ACCELEROMETER
-  if (!mma.begin()) {
+  if (!accel.begin()) {
 #if SERIAL_DEBUG == 1
-    Serial.println(F("MMMA8451 ERROR"));
+    Serial.println(F("ACCELEROMETER ERROR"));
 #endif
   }
   else {
 #if SERIAL_DEBUG == 1
-    Serial.println(F("MMA8451 open."));
+    Serial.println(F("ACCELEROMETER open."));
 #endif
-    mma.setRange(MMA8451_RANGE_4_G);
-    mma.setDataRate(MMA8451_DATARATE_100_HZ);
+    accel.setRange(LIS3DH_RANGE_4_G);
+    accel.setDataRate(LIS3DH_DATARATE_100_HZ);
   }
 #endif
 
@@ -286,6 +286,9 @@ void serialEvent() {
   while (Serial.available()) {
     int c = Serial.read();
     if (c == '\n') {
+      #if 1
+      Serial.print("event "); Serial.println(cmdParser.getBuffer());
+      #endif
       if (*cmdParser.getBuffer() == '$') {
         // sound!
         softSer.println(cmdParser.getBuffer() + 1);
@@ -322,8 +325,8 @@ void loop() {
 
   if (bladeOn()) {
 #ifdef SABER_ACCELEROMETER
-    mma.read();
-    float g2 = mma.x_g * mma.x_g + mma.y_g * mma.y_g + mma.z_g * mma.z_g;
+    accel.read();
+    float g2 = accel.x_g * accel.x_g + accel.y_g * accel.y_g + accel.z_g * accel.z_g;
 
     if (currentState == BLADE_ON) {
       float motion = saberDB.motion();

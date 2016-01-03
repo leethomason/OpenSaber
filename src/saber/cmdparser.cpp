@@ -11,18 +11,28 @@ CMDParser::CMDParser(SaberDB* _db) {
 
 void CMDParser::tokenize()
 {
+//  Serial.print("token ");  Serial.println(token.c_str());  
   action.clear();
   value.clear();
   if (token.empty()) return;
 
+//  Serial.println("not empty");
+
   int i = 0;
-  while(token[i] && token[i] != ' ') {
+  Serial.println(i);
+  for( ; token[i] && token[i] != ' '; i++) {
     action.append(token[i]);
   }
-  i++;
-  while(token[i]) {
-    value.append(token[i]);
+  Serial.println(i);
+  if (token[i] == ' ') {
+    i++;
+    for( ; token[i]; i++) {
+      value.append(token[i]);
+    }
   }
+//  Serial.println(i);
+//  Serial.print("action "); Serial.println(action.c_str());
+//  Serial.print("value  "); Serial.println(value.c_str());
 }
 
 void CMDParser::printHexColor(const uint8_t* color) {
@@ -66,7 +76,7 @@ bool CMDParser::processCMD(uint8_t* c) {
 
   tokenize();
   #if SERIAL_DEBUG == 1
-  Serial.print("CMD:"); Serial.print(action); Serial.print(":"); Serial.println(value.c_str());
+  Serial.print("CMD:"); Serial.print(action.c_str()); Serial.print(":"); Serial.println(value.c_str());
   #endif
   bool isSet = !value.empty();
 

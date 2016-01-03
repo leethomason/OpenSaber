@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <Grinliz_Arduino_Util.h>
 #include "../../../avr/libraries/EEPROM/EEPROM.h"
 #include "saberdb.h"
 

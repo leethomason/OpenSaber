@@ -54,13 +54,13 @@ void SFX::listFiles(uint8_t id, const FileInfo& fileInfo) {
   const char* name = fileInfo.filename;
   int slot = -1;
 
-  if      (strstr(name, "BLDON") || strstr(name, "POWERON"))      slot = SFX_POWER_ON;
-  else if (strstr(name, "BLDOFF") || strstr(name, "POWEROFF"))    slot = SFX_POWER_OFF;
-  else if (strstr(name, "IDLE") || strstr(name, "HUM"))           slot = SFX_IDLE;
-  else if (strstr(name, "IMPACT") || strstr(name, "CLASH"))       slot = SFX_IMPACT;
-  else if (strstr(name, "MOTION") || strstr(name, "SWING"))       slot = SFX_MOTION;
+  if      (strstr(name, "BLDON")   || strstr(name, "POWERON"))    slot = SFX_POWER_ON;
+  else if (strstr(name, "BLDOFF")  || strstr(name, "POWEROFF"))   slot = SFX_POWER_OFF;
+  else if (strstr(name, "IDLE")    || strstr(name, "HUM"))        slot = SFX_IDLE;
+  else if (strstr(name, "IMPACT")  || strstr(name, "CLASH"))      slot = SFX_IMPACT;
+  else if (strstr(name, "MOTION")  || strstr(name, "SWING"))      slot = SFX_MOTION;
   else if (strstr(name, "USRHOLD") || strstr(name, "LOCKUP"))     slot = SFX_USER_HOLD;
-  else if (strstr(name, "USRTAP") || strstr(name, "BLASTER"))     slot = SFX_USER_TAP;
+  else if (strstr(name, "USRTAP")  || strstr(name, "BLASTER"))    slot = SFX_USER_TAP;
 
   if (slot >= 0) {
     if (instance->sfxLocation[slot].start == 255) {
