@@ -37,7 +37,7 @@ bool     paletteChange = false; // used to prevent sound fx on palette changes
 uint8_t  nIndicator = 0;
 uint32_t indicatorStart = 0;
 uint32_t  reflashTime = 0;
-
+bool     flashOnClash = false;
 
 ButtonCB buttonA(PIN_SWITCH_A, Button::PULL_UP);
 ButtonCB buttonB(PIN_SWITCH_B, Button::PULL_UP);
@@ -53,7 +53,6 @@ SFX sfx(&softSer);
 
 CMDParser cmdParser(&saberDB);
 Blade blade;
-
 
 void setup() {
   pinMode(PIN_LED_LOW_POWER, OUTPUT);
@@ -186,6 +185,7 @@ void buttonBHoldHandler(const Button&) {
       changeState(BLADE_FLASH);
 #ifdef SABER_SOUND_ON
       sfx.playSound(SFX_USER_HOLD, SFX_OVERRIDE);
+      flashOnClash = true;
 #endif
       reflashTime = millis() + random(800) + 500;
     }
@@ -193,9 +193,10 @@ void buttonBHoldHandler(const Button&) {
 }
 
 void buttonBReleaseHandler(const Button& b) {
-  if (b.held()) {
+  if (flashOnClash && currentState != BLADE_OFF) {
     sfx.playSound(SFX_IDLE, SFX_OVERRIDE);
   }
+  flashOnClash = false;
 }
 
 void buttonBClickHandler(const Button&) {
@@ -387,7 +388,7 @@ void loop() {
   }
   if (reflashTime && msec >= reflashTime) {
     reflashTime = 0;
-    if (buttonB.held() && currentState == BLADE_ON) {
+    if (flashOnClash && currentState == BLADE_ON) {
       changeState(BLADE_FLASH);
       reflashTime = msec + random(800) + 200;
     }

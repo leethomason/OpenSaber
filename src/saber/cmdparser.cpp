@@ -19,11 +19,11 @@ void CMDParser::tokenize()
 //  Serial.println("not empty");
 
   int i = 0;
-  Serial.println(i);
+  //Serial.println(i);
   for( ; token[i] && token[i] != ' '; i++) {
     action.append(token[i]);
   }
-  Serial.println(i);
+  //Serial.println(i);
   if (token[i] == ' ') {
     i++;
     for( ; token[i]; i++) {

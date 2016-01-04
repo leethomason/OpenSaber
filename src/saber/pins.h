@@ -6,9 +6,9 @@ static const int EEPROM_SIZE = 512;
 // --- Configuration ---
 // Note: Serial connection should be set to 19200 baud with a newline after commands.
 #define SERIAL_DEBUG 0
-#define SABER_ACCELEROMETER
+//#define SABER_ACCELEROMETER
 #define SABER_SOUND_ON
-//#define SABER_VOLTMETER
+#define SABER_VOLTMETER
 #define SABER_LOGGING
 // Don't forget to set the emmitter in electrical.h!
   
