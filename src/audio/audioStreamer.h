@@ -11,7 +11,7 @@ class AudioStreamer {
     ~AudioStreamer();
 
     void play(File* file);
-    void fillBuffer();
+    int fillBuffer();
 
     static int16_t readS16(File& file);
     static uint32_t readU32(File& file, int n);
@@ -19,11 +19,13 @@ class AudioStreamer {
     static void interuptFunc();
 
   private:
+    void fillBuffer(int start, int n);
+  
     File* file;
-    uint32_t startTimeMicro;
-    uint32_t freq;
-    uint32_t currentSample;
-    uint32_t endSample;
+    uint32_t nSamples;
+    uint32_t nChannels; // 1 or 2
+    uint32_t freq;      // 1 (22) or 2 (44)
+    uint32_t bytesPerSample;
 };
 
 #endif // AUDIO_STREAMER_INCLUDED
