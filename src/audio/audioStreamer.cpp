@@ -1,5 +1,6 @@
 #include "audioStreamer.h"
 #include <SD.h>
+#include <Grinliz_Arduino_Util.h>
 
 // 22.05 kHz playback, 2 bytes per sample, mono.
 // 44,100 bytes / second
@@ -7,9 +8,10 @@ static const uint32_t BUFFER_SIZE = 4096; // 1/4 second
 static const uint32_t BUFFER_SIZE_MASK = BUFFER_SIZE - 1;
 
 uint16_t buffer[BUFFER_SIZE];
-uint32_t samplesRemaining = 0;
-volatile uint32_t playHead = 0;
 uint32_t dataHead = 0;
+
+volatile uint32_t playHead = 0;   // owned by interrupt, read by main
+uint32_t samplesRemaining = 0;    // owned by interrupt (after set)
 
 AudioStreamer::AudioStreamer() {
 }
@@ -38,10 +40,10 @@ void AudioStreamer::play(File* _file) {
   Serial.print("nSamples:        "); Serial.println(nSamples);
 
   file->seek(44);
-  fillBuffer(0, BUFFER_SIZE);
 
+  fillBuffer(0, BUFFER_SIZE);
   playHead = 0;
-  dataHead = BUFFER_SIZE - 1;
+  dataHead = 0;
   samplesRemaining = nSamples;
 
   /*
@@ -75,22 +77,44 @@ int16_t AudioStreamer::readS16(File& file) {
   return v;
 }
 
-void AudioStreamer::fillBuffer(int start, int n) {
-  int pos = start;
-  while (n--) {
-    int32_t v0 = readS16(*file) + 32767;
-    int32_t v1 = readS16(*file) + 32767;
-    buffer[pos & BUFFER_SIZE_MASK] = uint16_t((v0 + v1) / 2);
-    ++pos;
+void AudioStreamer::fillBuffer(int pos, int n) {
+  if (freq == 1) {
+    // 22kHz
+    while (n--) {
+      int32_t v0 = readS16(*file) + 32767;
+      buffer[pos & BUFFER_SIZE_MASK] = v0;
+      ++pos;
+      if (nChannels == 2) {
+        file->read();
+      }
+    }
+  }
+  else {
+    // 44kHz - downsample
+    while (n--) {
+      int32_t v0 = readS16(*file) + 32767;
+      int32_t v1 = readS16(*file) + 32767;
+      buffer[pos & BUFFER_SIZE_MASK] = uint16_t((v0 + v1) / 2);
+      ++pos;
+      if (nChannels == 2) {
+        file->read();
+        file->read();
+      }
+    }
   }
 }
 
 int AudioStreamer::fillBuffer() {
-  noInterrupts();
-  uint32_t delta = ((playHead + BUFFER_SIZE - dataHead) & BUFFER_SIZE_MASK) - 1;
-  interrupts();
+  // playHead dataHead
+  // 0        0 (4096)  0 (full buffer)
+  // 0        4095      1
+  // 1        0         1
+  // 0        1         4095
+
+  uint32_t _playHead = atomicRead(&playHead) & BUFFER_SIZE_MASK;
+  uint32_t delta = (_playHead + BUFFER_SIZE - dataHead) & BUFFER_SIZE_MASK;
   fillBuffer(dataHead, delta);
-  dataHead = (playHead + BUFFER_SIZE - 1) & BUFFER_SIZE_MASK;
+  dataHead = _playHead;
   return delta;
 }
 
