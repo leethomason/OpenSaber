@@ -9,11 +9,16 @@ static const uint32_t BUFFER_SIZE_MASK = BUFFER_SIZE - 1;
 
 uint16_t buffer[BUFFER_SIZE];
 uint32_t dataHead = 0;
+uint32_t samplesRemaining = 0;
 
-volatile uint32_t playHead = 0;   // owned by interrupt, read by main
-uint32_t samplesRemaining = 0;    // owned by interrupt (after set)
+volatile uint8_t  playVolume = 128; // 0 - 128
+volatile uint32_t playHead = 0;     // owned by interrupt, read by main
 
 AudioStreamer::AudioStreamer() {
+  playHead = 0;
+  dataHead = 0;
+  playVolume = 0;
+  memset(buffer, 0, sizeof(buffer[0]) * BUFFER_SIZE);
 }
 
 AudioStreamer::~AudioStreamer() {
@@ -45,6 +50,7 @@ void AudioStreamer::play(File* _file) {
   playHead = 0;
   dataHead = 0;
   samplesRemaining = nSamples;
+  playVolume = 128;
 
   /*
     uint32_t startTime = millis();
@@ -112,17 +118,23 @@ int AudioStreamer::fillBuffer() {
   // 0        1         4095
 
   uint32_t _playHead = atomicRead(&playHead) & BUFFER_SIZE_MASK;
-  uint32_t delta = (_playHead + BUFFER_SIZE - dataHead) & BUFFER_SIZE_MASK;
-  fillBuffer(dataHead, delta);
-  dataHead = _playHead;
-  return delta;
+  uint32_t nToFill   = (_playHead + BUFFER_SIZE - dataHead) & BUFFER_SIZE_MASK;
+  uint32_t nFromCard = min(nToFill, samplesRemaining);
+
+  fillBuffer(dataHead, nFromCard);
+  dataHead = (dataHead + nFromCard) & BUFFER_SIZE_MASK;
+
+  nToFill -= nFromCard;
+  while(nToFill--) {
+    buffer[dataHead] = 0;
+    dataHead = (dataHead + 1) & BUFFER_SIZE_MASK;
+  }
+  return nFromCard;
 }
 
 void AudioStreamer::interuptFunc() {
-  if (samplesRemaining) {
-    --samplesRemaining;
-    analogWrite(A14, buffer[playHead]);
-    playHead = (playHead + 1) & BUFFER_SIZE_MASK;
-  }
+  uint32_t v = (uint32_t(buffer[playHead]) * playVolume) >> 7;
+  analogWrite(A14, v);
+  playHead = (playHead + 1) & BUFFER_SIZE_MASK;
 }
 
