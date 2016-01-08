@@ -10,6 +10,7 @@ static const uint32_t BUFFER_SIZE_MASK = BUFFER_SIZE - 1;
 uint16_t buffer[BUFFER_SIZE];
 uint32_t dataHead = 0;
 uint32_t samplesRemaining = 0;
+uint8_t  looping = 0;
 
 volatile uint8_t  playVolume = 128; // 0 - 128
 volatile uint32_t playHead = 0;     // owned by interrupt, read by main
@@ -50,6 +51,7 @@ void AudioStreamer::play(File* _file) {
   playHead = 0;
   dataHead = 0;
   samplesRemaining = nSamples;
+  looping = 1;
   playVolume = 128;
 
   /*
@@ -125,6 +127,16 @@ int AudioStreamer::fillBuffer() {
   dataHead = (dataHead + nFromCard) & BUFFER_SIZE_MASK;
 
   nToFill -= nFromCard;
+
+  // Handle the looping case by going 
+  // back to the beginning.
+  if (nToFill && looping) {
+    samplesRemaining = nSamples;  // reset.
+    file->seek(44);
+    return fillBuffer() + nFromCard;
+  }
+
+  // If not looping, fill with 0.
   while(nToFill--) {
     buffer[dataHead] = 0;
     dataHead = (dataHead + 1) & BUFFER_SIZE_MASK;
