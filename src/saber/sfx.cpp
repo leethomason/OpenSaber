@@ -1,6 +1,11 @@
 #include "sfx.h"
 #include "pins.h"
 
+// 4: 204
+// 3: 180
+// 2: 170
+// 1: 160      
+
 //#define DEBUG_DEEP
 
 #if SERIAL_DEBUG == 1

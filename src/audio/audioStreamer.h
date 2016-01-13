@@ -26,6 +26,7 @@ class AudioStreamer {
     uint32_t nChannels; // 1 or 2
     uint32_t freq;      // 1 (22) or 2 (44)
     uint32_t bytesPerSample;
+    uint32_t wavePos;
 };
 
 #endif // AUDIO_STREAMER_INCLUDED

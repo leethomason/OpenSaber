@@ -36,7 +36,7 @@ uint32_t lastVccTime = 0;
 bool     paletteChange = false; // used to prevent sound fx on palette changes
 uint8_t  nIndicator = 0;
 uint32_t indicatorStart = 0;
-uint32_t  reflashTime = 0;
+uint32_t reflashTime = 0;
 bool     flashOnClash = false;
 
 ButtonCB buttonA(PIN_SWITCH_A, Button::PULL_UP);
@@ -327,13 +327,14 @@ void loop() {
   if (bladeOn()) {
 #ifdef SABER_ACCELEROMETER
     accel.read();
-    float g2 = accel.x_g * accel.x_g + accel.y_g * accel.y_g + accel.z_g * accel.z_g;
+    float g2_noZ = accel.x_g * accel.x_g + accel.y_g * accel.y_g;
+    float g2 = g2_noZ + accel.z_g * accel.z_g;
 
     if (currentState == BLADE_ON) {
       float motion = saberDB.motion();
       float impact = saberDB.impact();
 
-      if (g2 >= impact * impact) {
+      if ((g2_noZ >= impact * impact)) {
 #ifdef SABER_SOUND_ON
         bool sound = sfx.playSound(SFX_IMPACT, SFX_GREATER_OR_EQUAL);
 #else
@@ -384,7 +385,12 @@ void loop() {
       nIndicator--;
       indicatorStart = msec;
     }
-    digitalWrite(PIN_LED_LOW_POWER, nIndicator && (msec - indicatorStart) < INDICATOR_TIME / 2 ? HIGH : LOW);
+    uint32_t state = nIndicator && (msec - indicatorStart) < INDICATOR_TIME / 2 ? HIGH : LOW;
+    digitalWrite(PIN_LED_LOW_POWER, state);
+    digitalWrite(PIN_LED_A, state);
+    if (nIndicator == 0) {
+      digitalWrite(PIN_LED_A, HIGH);
+    }
   }
   if (reflashTime && msec >= reflashTime) {
     reflashTime = 0;

@@ -4,7 +4,7 @@
 
 // 22.05 kHz playback, 2 bytes per sample, mono.
 // 44,100 bytes / second
-static const uint32_t BUFFER_SIZE = 4096; // 1/4 second
+static const uint32_t BUFFER_SIZE = 4096*2;
 static const uint32_t BUFFER_SIZE_MASK = BUFFER_SIZE - 1;
 
 uint16_t buffer[BUFFER_SIZE];
@@ -47,12 +47,13 @@ void AudioStreamer::play(File* _file) {
 
   file->seek(44);
 
+  wavePos = 0;
   fillBuffer(0, BUFFER_SIZE);
   playHead = 0;
   dataHead = 0;
   samplesRemaining = nSamples;
   looping = 1;
-  playVolume = 128;
+  playVolume = 80;
 
   /*
     uint32_t startTime = millis();
@@ -86,6 +87,20 @@ int16_t AudioStreamer::readS16(File& file) {
 }
 
 void AudioStreamer::fillBuffer(int pos, int n) {
+#if 1
+  // 440 Hz
+  // 22050 samples / sec
+  // every 50 samples a wave
+  static const uint32_t LEN = 50;
+
+  for(int i=0; i<n; ++i) {
+    float s = sin(float(wavePos) * 0.126f) + 1.0f;
+    buffer[pos & BUFFER_SIZE_MASK] = 30000.0f * s;
+    pos++;
+    wavePos++;
+    wavePos = wavePos % LEN;
+  }
+#else
   if (freq == 1) {
     // 22kHz
     while (n--) {
@@ -102,7 +117,7 @@ void AudioStreamer::fillBuffer(int pos, int n) {
     while (n--) {
       int32_t v0 = readS16(*file) + 32767;
       int32_t v1 = readS16(*file) + 32767;
-      buffer[pos & BUFFER_SIZE_MASK] = uint16_t((v0 + v1) / 2);
+      buffer[pos & BUFFER_SIZE_MASK] = (v0 + v1) / 2;
       ++pos;
       if (nChannels == 2) {
         file->read();
@@ -110,6 +125,7 @@ void AudioStreamer::fillBuffer(int pos, int n) {
       }
     }
   }
+#endif
 }
 
 int AudioStreamer::fillBuffer() {
@@ -121,16 +137,16 @@ int AudioStreamer::fillBuffer() {
 
   uint32_t _playHead = atomicRead(&playHead) & BUFFER_SIZE_MASK;
   uint32_t nToFill   = (_playHead + BUFFER_SIZE - dataHead) & BUFFER_SIZE_MASK;
+  //if (nToFill > 500) nToFill -= 100;
   uint32_t nFromCard = min(nToFill, samplesRemaining);
 
   fillBuffer(dataHead, nFromCard);
   dataHead = (dataHead + nFromCard) & BUFFER_SIZE_MASK;
 
   nToFill -= nFromCard;
+  samplesRemaining -= nFromCard;
 
-  // Handle the looping case by going 
-  // back to the beginning.
-  if (nToFill && looping) {
+  if (!samplesRemaining && looping) {
     samplesRemaining = nSamples;  // reset.
     file->seek(44);
     return fillBuffer() + nFromCard;
@@ -145,7 +161,7 @@ int AudioStreamer::fillBuffer() {
 }
 
 void AudioStreamer::interuptFunc() {
-  uint32_t v = (uint32_t(buffer[playHead]) * playVolume) >> 7;
+  uint32_t v = (uint32_t(buffer[playHead]) * uint32_t(playVolume)) >> 7;
   analogWrite(A14, v);
   playHead = (playHead + 1) & BUFFER_SIZE_MASK;
 }

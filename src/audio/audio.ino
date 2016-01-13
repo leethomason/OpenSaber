@@ -74,23 +74,10 @@ void blinkLED()
   digitalWrite(2, state);
 }
 
-uint32_t wave = 0;
-void testWave() {
-  wave = wave ? 0 : 65525;
-  analogWrite(A14, wave);
-}
-
-//float phase = 0.0;
-//float twopi = 3.14159 * 2;
-
 void loop() {
-  /*
-  static const uint32_t WIDTH = 2273;
-  uint32_t wave = micros() % WIDTH;
-  analogWrite(A14, wave < WIDTH / 2 ? 65535 : 0);
-*/
   delay(100);
-  int n = streamer.fillBuffer();
-  Serial.println(n);
+  //int n = 
+  streamer.fillBuffer();
+  //Serial.println(n);
 }
 
