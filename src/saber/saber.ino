@@ -18,8 +18,8 @@
 #include "cmdparser.h"
 #include "blade.h"
 
-static const uint8_t  BLACK[NCHANNELS] = {0};
-static const uint32_t FLASH_TIME   = 120;
+static const uint8_t  BLACK[NCHANNELS]  = {0};
+static const uint32_t FLASH_TIME        = 120;
 static const uint32_t VCC_TIME_INTERVAL = 4000;
 
 enum {  BLADE_OFF,
@@ -38,6 +38,8 @@ uint8_t  nIndicator = 0;
 uint32_t indicatorStart = 0;
 uint32_t reflashTime = 0;
 bool     flashOnClash = false;
+uint8_t  volumeRequest = 0;
+bool     soundWasOff = true;
 
 ButtonCB buttonA(PIN_SWITCH_A, Button::PULL_UP);
 ButtonCB buttonB(PIN_SWITCH_B, Button::PULL_UP);
@@ -95,7 +97,7 @@ void setup() {
 
   saberDB.log("BTN");
   blade.setRGB(BLACK);
-  
+
   buttonA.holdHandler(onOffHandler);
   buttonA.clickHandler(checkPowerHandler);
 
@@ -152,6 +154,10 @@ void onOffHandler(const Button&) {
   }
 }
 
+uint32_t calcReflashTime() {
+  millis() + random(500) + 200;
+}
+
 void checkPowerHandler(const Button&) {
   int32_t vcc = readVcc();
   if      (vcc > 3950) nIndicator = 4;
@@ -161,34 +167,61 @@ void checkPowerHandler(const Button&) {
   indicatorStart = millis();
 }
 
-void setSoundOn(bool on) {
+void setSound() {
 #ifdef SABER_SOUND_ON
-  sfx.setSoundOn(on);
-  saberDB.setSoundOn(sfx.isSoundOn());
-  digitalWrite(PIN_LED_B, sfx.isSoundOn() ? HIGH : LOW);
+  if (currentState == BLADE_OFF) {
+    if (sfx.getVol() != saberDB.volume()) {
+#if SERIAL_DEBUG == 1
+      Serial.print("setSound cycle. on=");
+      Serial.print(saberDB.soundOn() ? 1 : 0);
+      Serial.print(" vol=");
+      Serial.println(saberDB.volume());
+#endif
+      digitalWrite(PIN_LED_B, LOW);
+      // Setting the volume after the blade has been used just...turns
+      // the output to junk. And sets the volume to max. I think a bug
+      // in the Audio FX?
+      sfx.init();
+      sfx.setVol(saberDB.volume());
+      sfx.setSoundOn(saberDB.soundOn());
+    }
+    else if (sfx.isSoundOn() != saberDB.soundOn()) {
+#if SERIAL_DEBUG == 1
+      Serial.print("setSound on/off. on=");
+      Serial.print(saberDB.soundOn() ? 1 : 0);
+      Serial.print(" vol=");
+      Serial.println(saberDB.volume());
+#endif
+      sfx.setSoundOn(saberDB.soundOn());
+    }
+    digitalWrite(PIN_LED_B, saberDB.soundOn());
+  }
 #endif
 }
 
 void buttonBPressHandler(const Button&) {
   paletteChange = false;
+  volumeRequest = 0;
+  soundWasOff = !saberDB.soundOn();
 }
 
 void buttonBHoldHandler(const Button&) {
 #if SERIAL_DEBUG == 1
   Serial.println("buttonBHoldHandler");
 #endif
-  if (currentState == BLADE_OFF) {
-    setSoundOn(!saberDB.soundOn());
-  }
-  else {
+  if (currentState != BLADE_OFF) {
     if (!paletteChange) {
       changeState(BLADE_FLASH);
 #ifdef SABER_SOUND_ON
       sfx.playSound(SFX_USER_HOLD, SFX_OVERRIDE);
       flashOnClash = true;
 #endif
-      reflashTime = millis() + random(800) + 500;
+      reflashTime = calcReflashTime();
     }
+  }
+  else if (currentState == BLADE_OFF && saberDB.soundOn()) {
+    saberDB.setSoundOn(false);
+    setSound();
   }
 }
 
@@ -197,6 +230,16 @@ void buttonBReleaseHandler(const Button& b) {
     sfx.playSound(SFX_IDLE, SFX_OVERRIDE);
   }
   flashOnClash = false;
+  if (currentState == BLADE_OFF) {
+    if (soundWasOff && volumeRequest) {
+      if (volumeRequest == 1)       saberDB.setVolume(160);
+      else if (volumeRequest == 2)  saberDB.setVolume(170);
+      else if (volumeRequest == 3)  saberDB.setVolume(185);
+      else                          saberDB.setVolume(200);
+      saberDB.setSoundOn(true);
+    }
+    setSound();
+  }
 }
 
 void buttonBClickHandler(const Button&) {
@@ -222,7 +265,7 @@ void processBladeState()
   switch (currentState) {
     case BLADE_OFF:
       break;
-      
+
     case BLADE_ON:
       blade.setRGB(saberDB.bladeColor());
       break;
@@ -287,9 +330,9 @@ void serialEvent() {
   while (Serial.available()) {
     int c = Serial.read();
     if (c == '\n') {
-      #if 1
+#if 0
       Serial.print("event "); Serial.println(cmdParser.getBuffer());
-      #endif
+#endif
       if (*cmdParser.getBuffer() == '$') {
         // sound!
         softSer.println(cmdParser.getBuffer() + 1);
@@ -304,19 +347,7 @@ void serialEvent() {
     }
   }
   if (processed) {
-    setSoundOn(saberDB.soundOn());
-    if (   saberDB.soundOn()
-           && currentState == BLADE_OFF
-           && (savedVolume != saberDB.volume()))
-    {
-      digitalWrite(PIN_LED_B, LOW);
-      // Setting the volume after the blade has been used just...turns
-      // the output to junk. And sets the volume to max. I think a bug
-      // in the Audio FX?
-      sfx.init();
-      sfx.setVol(saberDB.volume());
-      digitalWrite(PIN_LED_B, HIGH);
-    }
+    setSound();
   }
 }
 
@@ -363,7 +394,7 @@ void loop() {
 #endif
   }
 
-  // Special cases:
+  // Special case: color switch.
   if (buttonA.press() && buttonB.isDown()) {
     saberDB.nextPalette();
     paletteChange = true;
@@ -372,6 +403,18 @@ void loop() {
 #ifdef SABER_SOUND_ON
   sfx.process();
 #endif
+
+  // Special case: turn on/off volume.
+  if (currentState == BLADE_OFF && buttonB.isDown() && soundWasOff) {
+    uint32_t thresh = buttonB.holdThreshold();
+    if (buttonB.holdTime() >= thresh) {
+      uint32_t onTime = buttonB.holdTime() - thresh;
+      volumeRequest  = onTime / (thresh * 2) + 1;
+      uint32_t state = onTime / (thresh);
+      digitalWrite(PIN_LED_B, (state & 1) ? LOW : HIGH);
+    }
+  }
+
   readSerial();
 
   const uint32_t msec = millis();
@@ -396,7 +439,7 @@ void loop() {
     reflashTime = 0;
     if (flashOnClash && currentState == BLADE_ON) {
       changeState(BLADE_FLASH);
-      reflashTime = msec + random(800) + 200;
+      reflashTime = calcReflashTime();
     }
   }
 }

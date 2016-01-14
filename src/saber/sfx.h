@@ -41,6 +41,7 @@ public:
   
   // Only works if no sound playing. And slow.
   uint8_t setVol(int vol);
+  uint8_t getVol() const { return volume; }
   
 private:
   static void listFiles(uint8_t id, const FileInfo& fileInfo);
