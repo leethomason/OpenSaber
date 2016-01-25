@@ -18,7 +18,8 @@ The Open Saber site / repo is 3 things:
 - Documentation & circuit diagrams for circuits and components.
 
 The example platform is the "Gecko" saber, which is a SaberZ Sentris body (the
-empty hilt option) with Open Saber electronics.
+empty hilt option) with Open Saber electronics. You can see it in action
+here: https://youtu.be/9_-Rfe4UBJM
 
 ## Features:
 - Support for 3 LED RGB "any color" saber 
@@ -69,6 +70,7 @@ I am not affiliated with any of these, but have found them all useful.
   http://forums.thecustomsabershop.com/showthread.php?2025-Step-2-I-have-decided-to-make-a-LED-saber
 
 ### Saber bodies
+- SaberZ sells "empty hilts": http://saberz.com/
 - The Custom Saber Shop (http://www.thecustomsabershop.com)
 - UltraSabers http://www.ultrasabers.com/, in the "Build your own
   Lightsaber" section.
