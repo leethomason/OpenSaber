@@ -12,7 +12,7 @@ AudioOutputAnalog   dac;
 AudioConnection     patchCord1(playWav, 0, dac, 0);
 
 AudioPlayer::AudioPlayer() {
-  
+  startPlayingTime = 0;
 }
 
 void AudioPlayer::init() {
@@ -36,9 +36,15 @@ void AudioPlayer::play(const char* filename) {
   
   playWav.play(filename);
   // remember, about a 5ms warmup for header to be loaded and start playing.
+  startPlayingTime = millis();
 }
 
 void AudioPlayer::stop() {
   playWav.stop();
+}
+
+bool AudioPlayer::isPlaying() const {
+  uint32_t warmTime = 
+  if (millis() <
 }
 
