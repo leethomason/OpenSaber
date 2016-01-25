@@ -70,6 +70,7 @@ I am not affiliated with any of these, but have found them all useful.
   http://forums.thecustomsabershop.com/showthread.php?2025-Step-2-I-have-decided-to-make-a-LED-saber
 
 ### Saber bodies
+- SaberZ sells "empty hilts": http://saberz.com/
 - The Custom Saber Shop (http://www.thecustomsabershop.com)
 - UltraSabers http://www.ultrasabers.com/, in the "Build your own
   Lightsaber" section.
