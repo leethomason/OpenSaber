@@ -9,7 +9,7 @@ with Arduinos. There are certainly commercial solutions to saber electronics,
 but if you want to build and contribute to the code and internals, this site
 is for you!
 
-FIXME saber image
+![Image of Saber](img/GeckoOnMat.jpg)
 
 The Open Saber site / repo is 3 things:
 - Overview of the (electrical) design of a saber.
@@ -29,6 +29,28 @@ empty hilt option) with Open Saber electronics.
 - Battery level tracking and indicator
 - Command set to program saber with computer
 - Recharge port / kill key port
+
+## Dirction
+
+The SaberZ case is great, but I would like to expand the design to other cases.
+
+While the "Gecko" is fully functioning and a bunch of fun, it is has some
+"version 1" problems.
+
+- Too many wires. A bunch of wires make it hard to connect, and take up
+  a shocking amount of space inside the saber. The solution is twofold:
+  - Move much more circuitry to the PCB
+  - Integrate the audio into the microcontroller, or use a much
+    smaller audio board.
+- Communication between the main microcontroller and the audio is tricky,
+  with some strange limitations.
+- The connection between the switch plate and the main body is kludgy;
+  again mainly addressed by more space, which means fewer wires, which
+  means more on the PCB.
+
+A V2 design is in the works, as well as design changes for other saber cases.
+
+![Image of Saber](img/Gecko3.jpg)
 
 ## Resources
 
@@ -70,33 +92,33 @@ update for other designs!)
 Technically speaking, to organize you electrical thoughts, a saber is a *very* 
 fancy flashlight. 
 
-FIXME: add photo diagram
+![Image of Saber](img/Schematic.png)
 
 In roughly front to back order, an open saber is:
 
-- A **blade holder**. (1" is standard.)
-- A **lens** to focus the LED. The Gecko uses a 10511 Carclo Lens.
-- 3 (or 4) **LEDs** in the 1-Watt range. Red, green, blue, and sometimes white or
-  another color. (Gecko-Sentris uses the  The Gecko uses a "Luxeon Rebel - 
-  Endor Star RGB High Power LED"  which fits nicely in the case.)
-- A **heat sink** for cooling the LED. Often part of the saber body. 
-  TCSS provides them as well.
-- **Emitter electronics** bridge from the microcontroller to the high power 
-  LEDs. MOSFETs, resister, and capacitors. 
-- **Power and Auxillary** switch (momentary on, typically 12mm).
-- **Power port**. Typically 2.1 mm; there's are pros and cons of this design. 
-  (See below.)
-- **Micro controller** which is the "brain" of the saber. Gecko uses an
-  Adafruit Pro Trinket 3.3V. Any 3.3V arduino compatible (that fits in the case)
-  with enough RAM should work.
-- **Accelerometer**. Gecko-Sentris uses an "Adafruit LIS3DH Triple-Axis 
-  Accelerometer."
-- **Audio output microcontroller**. Gecko uses an Adafruit Audio FX ID 2217, 
-  although I'm interested in switching this to a "generic" microcontoller.
-- 3.7v Li-Ion **battery**. TCSS and Adafruit both sell good, small, long lasting
-  batteries. Need something rated 2000mAh or better.
-- **Speaker**. So hard to get a good, small, speaker not broken in shipment. 
-  TCSS and Adafruit carry them, as well as Mouser and Digikey.
+1.   A **blade holder**. (1" is standard.)
+2.   A **lens** to focus the LED. The Gecko uses a 10511 Carclo Lens.
+3.   3 (or 4) **LEDs** in the 1-Watt range. Red, green, blue, and sometimes white or
+    another color. (Gecko uses the  The Gecko uses a "Luxeon Rebel - 
+    Endor Star RGB High Power LED"  which fits nicely in the case.)
+4.   A **heat sink** for cooling the LED. Often part of the saber body. 
+    TCSS provides them as well.
+5.  **Emitter electronics** bridge from the microcontroller to the high power 
+    LEDs. MOSFETs, resister, and capacitors. 
+6.  **Power and Auxillary** switch (momentary on, typically 12mm).
+7.  **Power port**. Typically 2.1 mm; there's are pros and cons of this design. 
+    (See below.)
+8.  **Micro controller** which is the "brain" of the saber. Gecko uses an
+    Adafruit Pro Trinket 3.3V. Any 3.3V arduino compatible (that fits in the case)
+    with enough RAM should work.
+9.  **Accelerometer**. Gecko uses an "Adafruit LIS3DH Triple-Axis 
+    Accelerometer."
+10. **Audio output microcontroller**. Gecko uses an Adafruit Audio FX ID 2217, 
+    although I'm interested in switching this to a "generic" microcontoller.
+11. 3.7v Li-Ion **battery**. TCSS and Adafruit both sell good, small, long lasting
+    batteries. Need something rated 2000mAh or better.
+12. **Speaker**. So hard to get a good, small, speaker not broken in shipment. 
+    TCSS and Adafruit carry them, as well as Mouser and Digikey.
 
 ## Directory Organization
 
@@ -108,6 +130,7 @@ In roughly front to back order, an open saber is:
     - components - circuit diagrams (as text files) of the different
       sub-systems.
     - pcb - printed circurit board diagrams
+  - img - images and diagrams used by the docs
 
 ## Wiring
 
@@ -166,8 +189,6 @@ and the control circuit has to account for that.
 Basic, but hard to miniturize, circuit. It is documented in ledControl.txt.
 I had it custom printed at PCBExpress - a fab file emmitter.pcb is provided.
 
-FIXME image of circuit
-
 The parts of the circuit are:
 1. Capacitor for buffering power to the LEDs.
 2. PWM boost from logic current to power current for controller the LED color.
@@ -206,22 +227,22 @@ The code assumes 2 switches.
 - A: the main switch. Hold for power, tap for battery level indicator.
 - B: the auxillary switch. When the blade is on, tap for "blaster effect",
   hold for "lockup effect". When the blade is off, hold to toggle sound.
+  When the sound turns on, hold for 1-4 flashes to set volume.
 
 You may also (when the blade is on) hold auxillary and then tap the main
 switch to cycle through the blade color / sound palettes.
 
-The switch plate on the Gecko-Sentris is removable. It has a (regrettably 
+The switch plate on the Gecko is removable. It has a (regrettably 
 complex) set of connections to allow the switch to disconnect. Resistors for
 the indicator LEDs are "inlined" in the switch, so they don't need to be part
 of the Emitter circuit.
 
 ### Audio Board
 
-The audio board is an Adafruit breakout that is run in UART mode. (I 
-sometimes feel like I'm over-stretching this board.) It (currently) supports one
-sound font, and can recognize the default or crystal focus naming scheme.
-Sounds are loaded directly to the board by connecting a micro-usb, and it
-mounds as a hard drive.
+The audio board is an Adafruit breakout that is run in UART mode. It 
+(currently) supports one sound font, and can recognize the default or 
+crystal focus naming scheme. Sounds are loaded directly to the board by 
+connecting a micro-usb, and it mounds as a hard drive.
 
 All the names can be postfixed with a number for random variation: `SWING` or
 `SWING01` for example. Note that the card / code is limited to 8.3 filenames.
@@ -264,7 +285,9 @@ https://github.com/leethomason/Button
 
 #### Accelerometer
 
-FIXME: new accelerometer
+The current design uses the (really great) LIS3DH unmodified.
+
+https://github.com/adafruit/Adafruit_LIS3DH
 
 ### AudioFX
 
@@ -364,3 +387,4 @@ for more chipsets is desirable. Specificially some ideas that are interesting:
   going into UI modes, etc. Would be nice to support one-button sabers with
   all the features.
 
+![Image of Saber](img/BladeTeal.jpg)
