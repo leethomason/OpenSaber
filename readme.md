@@ -189,9 +189,11 @@ and the control circuit has to account for that.
 
 ### Emitter Electronics
 Basic, but hard to miniturize, circuit. It is documented in ledControl.txt.
-I had it custom printed at PCBExpress - a fab file emmitter.pcb is provided.
+I had it custom printed at PCBExpress - a fab file is provided in the 
+'circuits' sub-directory.
 
 The parts of the circuit are:
+
 1. Capacitor for buffering power to the LEDs.
 2. PWM boost from logic current to power current for controller the LED color.
    A MOSFET, de-ring resister, tie down resister, and LED power control 
