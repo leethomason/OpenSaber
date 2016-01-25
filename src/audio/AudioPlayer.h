@@ -1,12 +1,17 @@
 #ifndef OPEN_SABER_AUDIO_INCLUDED
 #define OPEN_SABER_AUDIO_INCLUDED
 
+#include <stdint.h>
+
+// - Shutdown pin when not playing
+//
+
 class AudioPlayer
 {
 public:
-	AudioPlayer();
+  AudioPlayer();
 
-	void init();
+  void init();
 
   void play(const char* filename);
   void stop();

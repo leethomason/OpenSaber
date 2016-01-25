@@ -44,7 +44,11 @@ void AudioPlayer::stop() {
 }
 
 bool AudioPlayer::isPlaying() const {
-  uint32_t warmTime = 
-  if (millis() <
+  uint32_t currentTime = millis();
+  uint32_t warmTime = startPlayingTime + 20u;  // PJRC uses a 5ms time. Can be generous; no reason to support sub-second samples.
+  if (currentTime > warmTime) {
+    return playWav.isPlaying();
+  }
+  return true;
 }
 
