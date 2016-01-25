@@ -100,8 +100,8 @@ In roughly front to back order, an open saber is:
 
 1.   A **blade holder**. (1" is standard.)
 2.   A **lens** to focus the LED. The Gecko uses a 10511 Carclo Lens.
-3.   3 (or 4) **LEDs** in the 1-Watt range. Red, green, blue, and sometimes white or
-    another color. (Gecko uses the  The Gecko uses a "Luxeon Rebel - 
+3.   3 (or 4) **LEDs** in the 1-Watt each range. Red, green, blue, and sometimes white or
+    another color. (Gecko uses a "Luxeon Rebel - 
     Endor Star RGB High Power LED"  which fits nicely in the case.)
 4.   A **heat sink** for cooling the LED. Often part of the saber body. 
     TCSS provides them as well.
