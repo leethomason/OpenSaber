@@ -18,7 +18,8 @@ The Open Saber site / repo is 3 things:
 - Documentation & circuit diagrams for circuits and components.
 
 The example platform is the "Gecko" saber, which is a SaberZ Sentris body (the
-empty hilt option) with Open Saber electronics.
+empty hilt option) with Open Saber electronics. You can see it in action
+here: https://youtu.be/9_-Rfe4UBJM
 
 ## Features:
 - Support for 3 LED RGB "any color" saber 
