@@ -31,9 +31,9 @@ here: https://youtu.be/9_-Rfe4UBJM
 - Command set to program saber with computer
 - Recharge port / kill key port
 
-## Dirction
+## Direction
 
-The SaberZ case is great, but I would like to expand the design to other cases.
+The SaberZ case is great (truly) but I would like to expand the design to other cases.
 
 While the "Gecko" is fully functioning and a bunch of fun, it is has some
 "version 1" problems.
