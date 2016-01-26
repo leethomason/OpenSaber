@@ -4,7 +4,6 @@
 #define SDCARD_CS_PIN    10
 #define SDCARD_MOSI_PIN  11
 #define SDCARD_SCK_PIN   13
-
-
+#define AMP_SHUTDOWN_PIN 8
 
 #endif // OPEN_SABER_AUDIO_PINS_INCLUDED

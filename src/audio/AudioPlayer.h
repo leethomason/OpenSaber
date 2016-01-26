@@ -16,9 +16,18 @@ public:
   void play(const char* filename);
   void stop();
   bool isPlaying() const;
+  void mute(bool m);
+  bool isMuted() const;
+
+  void doLoop();
 
 private:
-  uint32_t startPlayingTime;
+  void setShutdown();
+
+  uint32_t m_startPlayingTime;
+  uint32_t m_stopPlayingTime;
+  bool m_muted;
+  bool m_shutdown;
 };
 
 #endif // OPEN_SABER_AUDIO_INCLUDED
