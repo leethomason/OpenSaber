@@ -7,7 +7,6 @@
 
 #include "AudioPlayer.h"
 
-
 ButtonCB buttonA;
 ButtonCB buttonB;
 AudioPlayer audioPlayer;

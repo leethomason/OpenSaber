@@ -67,11 +67,11 @@ void AudioPlayer::doLoop() {
 }
 
 void AudioPlayer::setShutdown() {
-  uint32_t currentTime = millis();
-  uint32_t coolTime = m_stopPlayingTime + 20u;
+ // uint32_t currentTime = millis();
+  //uint32_t coolTime = m_stopPlayingTime + 20u;
 
-  bool shouldBeShutdown = m_muted ||
-                          (m_stopPlayingTime && currentTime > coolTime);
+  bool shouldBeShutdown = m_muted;
+                          //|| (m_stopPlayingTime && currentTime > coolTime);
 
   if (shouldBeShutdown && !m_shutdown) {
     digitalWrite(AMP_SHUTDOWN_PIN, LOW);
