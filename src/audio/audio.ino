@@ -57,6 +57,7 @@ void buttonBClickHandler(const Button& button) {
 void loop() {
   buttonA.process();
   buttonB.process();
+  audioPlayer.doLoop();
   //  playFile("IMPERIAL.WAV");
   //  playFile("440HZ.WAV");
   //  playFile("DEMICHEL.WAV");

@@ -2,9 +2,7 @@
 #define OPEN_SABER_AUDIO_INCLUDED
 
 #include <stdint.h>
-
-// - Shutdown pin when not playing
-//
+#include <Grinliz_Arduino_Util.h>
 
 class AudioPlayer
 {
@@ -13,21 +11,25 @@ public:
 
   void init();
 
-  void play(const char* filename);
+  void play(const char* filename, int id);
   void stop();
   bool isPlaying() const;
+
   void mute(bool m);
   bool isMuted() const;
 
   void doLoop();
 
+  int ID() const { return m_id; }
+
 private:
   void setShutdown();
 
+  bool     m_muted;
+  bool     m_shutdown;
+  int      m_id;
   uint32_t m_startPlayingTime;
   uint32_t m_stopPlayingTime;
-  bool m_muted;
-  bool m_shutdown;
 };
 
 #endif // OPEN_SABER_AUDIO_INCLUDED
