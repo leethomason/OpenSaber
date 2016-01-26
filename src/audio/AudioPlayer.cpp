@@ -15,7 +15,7 @@ AudioPlayer::AudioPlayer() {
   m_startPlayingTime = 0;
   m_muted = false;
   m_shutdown = false;
-  m_priority = 0;
+  m_id = 0;
   pinMode(AMP_SHUTDOWN_PIN, INPUT);
 }
 
@@ -37,7 +37,7 @@ void AudioPlayer::init() {
 
 void AudioPlayer::play(const char* filename, int id) {
   Serial.print("AudioPlayer::play: "); Serial.println(filename);
-  
+
   playWav.play(filename);
   // remember, about a 5ms warmup for header to be loaded and start playing.
   m_startPlayingTime = millis();
@@ -83,10 +83,3 @@ void AudioPlayer::setShutdown() {
   m_shutdown = shouldBeShutdown;
 }
 
-//const char* AudioPlayer::filename() const {
-//  return m_filename.c_str();
-//}
-
-int AudioPlayer::id() const {
-  return m_id;
-}

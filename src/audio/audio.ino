@@ -12,7 +12,6 @@ ButtonCB buttonA;
 ButtonCB buttonB;
 AudioPlayer audioPlayer;
 
-static const int NUM_TRACKS = 3;
 int track = 0;
 
 void setup() {
@@ -31,12 +30,14 @@ void setup() {
 
 void buttonAClickHandler(const Button& button) {
   Serial.println("buttonAClickHandler");
+
+  static const int NUM_TRACKS = 3;
   track = (track + 1) % NUM_TRACKS;
   audioPlayer.stop();
   switch (track) {
-    case 0: audioPlayer.play("FIATI.WAV");    break;
-    case 1: audioPlayer.play("DEMICHEL.WAV"); break;
-    case 2: audioPlayer.play("ELYSIUM.WAV");  break;
+    case 0: audioPlayer.play("FIATI.WAV", 0);    break;
+    case 1: audioPlayer.play("DEMICHEL.WAV", 1); break;
+    case 2: audioPlayer.play("ELYSIUM.WAV", 2);  break;
   }
 }
 
