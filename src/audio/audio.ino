@@ -34,9 +34,9 @@ void buttonAClickHandler(const Button& button) {
   track = (track + 1) % NUM_TRACKS;
   audioPlayer.stop();
   switch (track) {
-    case 0: audioPlayer.play("FIATI.WAV", 0);    break;
-    case 1: audioPlayer.play("DEMICHEL.WAV", 1); break;
-    case 2: audioPlayer.play("ELYSIUM.WAV", 2);  break;
+    case 0: audioPlayer.play("FIATI.WAV");    break;
+    case 1: audioPlayer.play("DEMICHEL.WAV"); break;
+    case 2: audioPlayer.play("ELYSIUM.WAV");  break;
   }
 }
 
@@ -52,12 +52,15 @@ void buttonBClickHandler(const Button& button) {
   Serial.print(AudioMemoryUsage());
   Serial.print(",");
   Serial.println(AudioMemoryUsageMax());
+
+  audioPlayer.mute(!audioPlayer.isMuted());
+  //audioPlayer.stop();
 }
 
 void loop() {
   buttonA.process();
   buttonB.process();
-  audioPlayer.doLoop();
+  //audioPlayer.doLoop();
   //  playFile("IMPERIAL.WAV");
   //  playFile("440HZ.WAV");
   //  playFile("DEMICHEL.WAV");

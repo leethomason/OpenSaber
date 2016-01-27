@@ -10,27 +10,27 @@ class AudioPlayer
 
     void init();
 
-    void play(const char* filename, int id);
+    void play(const char* filename);
     void stop();
     bool isPlaying() const;
 
     void mute(bool m);
-    bool isMuted() const;
+    bool isMuted() const { return m_muted; }
 
-    void doLoop();
+    //void doLoop();
 
-    int ID() const {
-      return m_id;
-    }
+    //int ID() const {
+   //   return m_id;
+    //}
 
   private:
     void setShutdown();
 
     bool     m_muted;
     bool     m_shutdown;
-    int      m_id;
+    //int      m_id;
     uint32_t m_startPlayingTime;
-    uint32_t m_stopPlayingTime;
+    //uint32_t m_stopPlayingTime;
 };
 
 #endif // OPEN_SABER_AUDIO_INCLUDED

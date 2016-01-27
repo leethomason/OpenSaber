@@ -1,6 +1,8 @@
 #ifndef OPEN_SABER_AUDIO_PLAYER_INCLUDED
 #define OPEN_SABER_AUDIO_PLAYER_INCLUDED
 
+#include <stdint.h>
+
 class AudioPlayer;
 
 // SFX in priority order!
