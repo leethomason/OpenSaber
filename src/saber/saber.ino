@@ -27,6 +27,9 @@ SOFTWARE.
 #include <Wire.h>
 #include <SPI.h>
 #include <Adafruit_Sensor.h>
+#include <SD.h>
+#include <SerialFlash.h>
+#include <Audio.h>
 
 // Libraries.
 #include <Button.h>
@@ -74,8 +77,8 @@ Adafruit_LIS3DH accel;
 #endif
 
 #ifdef SABER_SOUND_ON
-SoftwareSerial softSer(PIN_SFX_TX, PIN_SFX_RX);
-SFX sfx(&softSer);
+AudioPlayer audioPlayer;
+SFX sfx(&audioPlayer);
 #endif
 
 CMDParser cmdParser(&saberDB);

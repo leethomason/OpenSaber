@@ -24,7 +24,6 @@ SOFTWARE.
 #define SFX_HEADER
 
 #include <Arduino.h>
-#include <Adafruit_Soundboard.h>
 
 // SFX in priority order!
 enum {
@@ -48,7 +47,7 @@ enum {
 class SFX
 {
 public:
-  SFX(Stream* streamToAudio);
+  SFX(AudioPlayer* audioPlayer);
 
   bool init();
   bool playSound(int sfx, int mode);
