@@ -39,7 +39,11 @@ SOFTWARE.
 SFX* SFX::instance = 0;
 
 SFX::SFX(Stream* _streamToAudio)
+#ifdef SABER_SOUND_ON
   : adaAudio(_streamToAudio, 0, PIN_SFX_RST)
+#else
+  : adaAudio(_streamToAudio, 0, 15)
+#endif
 {
   instance = this;
   currentSound = 255;
@@ -58,7 +62,9 @@ bool SFX::init()
   #endif
   adaAudio.reset();
   volume = adaAudio.volDown();
+#ifdef SABER_SOUND_ON
   pinMode(PIN_SFX_ACTIVITY, INPUT);
+#endif
 
   if (nSoundFiles == 0) {
     nSoundFiles = adaAudio.listFiles(0, 0, listFiles);
@@ -120,8 +126,10 @@ void SFX::dumpLocations()
 }
 
 bool SFX::activity() const {
+#ifdef SABER_SOUND_ON
   if (digitalRead(PIN_SFX_ACTIVITY) == LOW)
     return true;
+#endif
   return false;
 }
 

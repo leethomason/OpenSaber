@@ -27,12 +27,12 @@ static const int EEPROM_SIZE = 512;
 
 // --- Configuration ---
 // Note: Serial connection should be set to 19200 baud with a newline after commands.
-#define SERIAL_DEBUG 0
+#define SERIAL_DEBUG 1
 
-#define SABER_ACCELEROMETER
-#define SABER_SOUND_ON
-#define SABER_VOLTMETER
-#define SABER_LOGGING
+//#define SABER_ACCELEROMETER
+//#define SABER_SOUND_ON
+//#define SABER_VOLTMETER
+//#define SABER_LOGGING
 // Don't forget to set the emmitter in electrical.h!
   
 /*
@@ -52,35 +52,35 @@ static const int EEPROM_SIZE = 512;
  * Set Timer1: phase
  */ 
 
-/* Adafruit Trinket Pro 3V */
-// Reserve serial         0
-// Reserve serial         1
-// Trinket no pin 2
+/* Teensy 3.2 */
+// Reserve RX1            0
+// Reserve TX1            1
+// shutdown               2
 #define PIN_SWITCH_A      3   // switch - power (also PWM)
-#define PIN_LED_A         4   // switch LED - power
-// Unused                 5
+#define PIN_SWITCH_B      4
+#define PIN_LED_A         5   // switch LED - power
 #define PIN_LED_B         6   // switch LED - audio
-// Trinket no pin 7
-#define PIN_SFX_RST       8
-#define PIN_EMITTER_BLUE  9   // T1 (get blue and green in different phase!)
-#define PIN_EMITTER_RED   10  // T1
-#define PIN_EMITTER_GREEN 11  // T2 
-#define PIN_SFX_ACTIVITY  12
-#define PIN_LED_LOW_POWER 13
-#define PIN_VMETER        A0  // read analog voltage
-#define PIN_SWITCH_B      A1  // switch - audio
-#define PIN_SFX_RX        A2
-#define PIN_SFX_TX        A3
-#define PIN_ACCEL_SDA     A4  // general I2C (blue)
-#define PIN_ACCEL_SCL     A5  // general I2C (green)
-// Avoid A6                   // UNO doesn't have A6 and A7. Trinket does...
-// Avoid A7
+// reserve rx3            7
+// reserve tx3            8
+// RX2, pwm               9
+// SD: CS                 10
+// SD: DOUT               11
+// SD: DIN                12
+// SD: SCK                13
+#define PIN_LED_LOW_POWER 14
+// 15
+// 16
+// 17
+// 18
+// 19
+// 20
+#define PIN_EMITTER_BLUE  21
+#define PIN_EMITTER_GREEN 22
+#define PIN_EMITTER_RED   23
 
-/* Adafruit Audio FX */
-// Reset                  to PIN_SFX_RST
-// Activity               to PIN_SFX_ACTIVITY
-// UG                     to ground (UART mode)
-
+//#define PIN_VMETER        A0  // read analog voltage
+//#define PIN_ACCEL_SDA     A4  // general I2C (blue)
+//#define PIN_ACCEL_SCL     A5  // general I2C (green)
 
 enum {
   RED,

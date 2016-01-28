@@ -1,22 +1,22 @@
 /*
 Copyright (c) 2016 Lee Thomason, Grinning Lizard Software
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of 
-this software and associated documentation files (the "Software"), to deal in 
-the Software without restriction, including without limitation the rights to 
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies 
-of the Software, and to permit persons to whom the Software is furnished to do 
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
 so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all 
+The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
@@ -25,6 +25,8 @@ SOFTWARE.
 //DO NOT INCLUDE: #include <EEPROM.h> has a static global class. (!?)
 #include <SoftwareSerial.h>
 #include <Wire.h>
+#include <SPI.h>
+#include <Adafruit_Sensor.h>
 
 // Libraries.
 #include <Button.h>
@@ -82,13 +84,17 @@ Blade blade;
 void setup() {
   pinMode(PIN_LED_LOW_POWER, OUTPUT);
   digitalWrite(PIN_LED_LOW_POWER, LOW);
+
   Serial.begin(19200);  // still need to turn it on in case a command line is connected.
+  while (!Serial) {
+    delay(100);
+  }
 #if SERIAL_DEBUG == 1
   Serial.println("setup()");
 #endif
   saberDB.log("STR");
 
-  TCNT1 = 0x7FFF; // set blue & green channels out of phase
+  //TCNT1 = 0x7FFF; // set blue & green channels out of phase
 
   saberDB.log("ACC");
 #ifdef SABER_ACCELEROMETER
@@ -178,7 +184,7 @@ void onOffHandler(const Button&) {
 }
 
 uint32_t calcReflashTime() {
-  millis() + random(500) + 200;
+  return millis() + random(500) + 200;
 }
 
 void checkPowerHandler(const Button&) {
@@ -250,7 +256,9 @@ void buttonBHoldHandler(const Button&) {
 
 void buttonBReleaseHandler(const Button& b) {
   if (flashOnClash && currentState != BLADE_OFF) {
+#ifdef SABER_SOUND_ON
     sfx.playSound(SFX_IDLE, SFX_OVERRIDE);
+#endif
   }
   flashOnClash = false;
   if (currentState == BLADE_OFF) {
@@ -295,7 +303,11 @@ void processBladeState()
 
     case BLADE_IGNITE:
       {
+#ifdef SABER_SOUND_ON
         bool done = blade.setInterp(millis() - stateStartTime, sfx.getIgniteTime(), BLACK, saberDB.bladeColor());
+#else
+        bool done = blade.setInterp(millis() - stateStartTime, 1000, BLACK, saberDB.bladeColor());
+#endif
         if (done) {
           changeState(BLADE_ON);
         }
@@ -304,7 +316,11 @@ void processBladeState()
 
     case BLADE_RETRACT:
       {
+#ifdef SABER_SOUND_ON
         bool done = blade.setInterp(millis() - stateStartTime, sfx.getRetractTime(), saberDB.bladeColor(), BLACK);
+#else
+        bool done = blade.setInterp(millis() - stateStartTime, 1000, saberDB.bladeColor(), BLACK);
+#endif
         if (done) {
           changeState(BLADE_OFF);
         }
@@ -349,6 +365,7 @@ void serialEvent() {
   bool processed = false;
   uint8_t color[NCHANNELS] = {0};
   int savedVolume = saberDB.volume();
+  (void)savedVolume;
 
   while (Serial.available()) {
     int c = Serial.read();
@@ -357,8 +374,10 @@ void serialEvent() {
       Serial.print("event "); Serial.println(cmdParser.getBuffer());
 #endif
       if (*cmdParser.getBuffer() == '$') {
+#ifdef SABER_SOUND_ON
         // sound!
         softSer.println(cmdParser.getBuffer() + 1);
+#endif
         cmdParser.clearBuffer();
       }
       else {
