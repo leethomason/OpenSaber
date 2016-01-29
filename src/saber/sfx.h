@@ -24,18 +24,21 @@ SOFTWARE.
 #define SFX_HEADER
 
 #include <Arduino.h>
+#include <Grinliz_Arduino_Util.h>
 
 // SFX in priority order!
-enum {
-  SFX_IDLE,       // 0
-  SFX_MOTION,     // 1
-  SFX_IMPACT,     // 2
-  SFX_USER_TAP,   // 3
-  SFX_USER_HOLD,  // 4
-  SFX_POWER_ON,   // 5
-  SFX_POWER_OFF,  // 6
+enum {            //  Max
+  SFX_IDLE,       //  1
+  SFX_MOTION,     //  16
+  SFX_IMPACT,     //  16
+  SFX_USER_TAP,   //  4
+  SFX_USER_HOLD,  //  1
+  SFX_POWER_ON,   //  4
+  SFX_POWER_OFF,  //  4
 
-  NUM_SFX_TYPES
+  NUM_SFX_TYPES,
+  MAX_SFX_FILES = 48,
+  SFX_NONE = 255
 };
 
 enum {
@@ -44,6 +47,8 @@ enum {
   SFX_OVERRIDE
 };
 
+class AudioPlayer;
+
 class SFX
 {
 public:
@@ -51,23 +56,23 @@ public:
 
   bool init();
   bool playSound(int sfx, int mode);
+  bool bladeOn(bool on);
   void process();
 
-  const uint32_t getIgniteTime() const { return igniteTime ? igniteTime : 1000; }
-  const uint32_t getRetractTime() const { return retractTime ? retractTime : 1000; }
+  const uint32_t getIgniteTime() const { return 1000; }
+  const uint32_t getRetractTime() const { return 1000; }
 
   // Only works if no sound playing
-  void setSoundOn(bool on);
-  bool isSoundOn() const { return soundOn; }
+  void mute(bool muted) {}
+  bool isMuted() const  { return false; }
   
   // Only works if no sound playing. And slow.
-  uint8_t setVol(int vol);
-  uint8_t getVol() const { return volume; }
+  uint8_t setVolume204(int vol) { return vol; }
+  uint8_t getVolume204() const  { return 200; }
   
 private:
-  static void listFiles(uint8_t id, const FileInfo& fileInfo);
-  void dumpLocations();
-  bool activity() const;
+  bool scanFiles();
+  void addFile(const char* filename);
 
   // note: initialize to 255
   struct SFXLocation {
@@ -77,25 +82,14 @@ private:
     const bool InUse() const { return start < 255 && count < 255; }
   };
 
-  enum {
-    SOUND_NOT_PLAYING,
-    SOUND_QUEUED,
-    SOUND_PLAYING
-  };
-
-  uint8_t currentSound;
-  uint8_t nSoundFiles;
-  uint8_t soundState;
-  uint8_t volume;
-  bool    bladeOn;
-  bool    soundOn;
-  uint32_t  igniteTime;
-  uint32_t  retractTime;
-
-  Adafruit_Soundboard adaAudio;
-  SFXLocation sfxLocation[NUM_SFX_TYPES];
-
-  static SFX* instance;
+  AudioPlayer* m_player;
+  bool         m_bladeOn;
+  int          m_numFilenames;
+  int          m_currentSound;
+  SFXLocation  m_location[NUM_SFX_TYPES];
+  CStr<13>     m_filename[MAX_SFX_FILES];
+  
+  static SFX*  m_instance;
 };
 
 #endif // SFX_HEADER

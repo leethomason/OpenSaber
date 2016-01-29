@@ -1,32 +1,35 @@
 /*
 Copyright (c) 2016 Lee Thomason, Grinning Lizard Software
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of 
-this software and associated documentation files (the "Software"), to deal in 
-the Software without restriction, including without limitation the rights to 
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies 
-of the Software, and to permit persons to whom the Software is furnished to do 
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
 so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all 
+The above copyright notice and this permission notice shall be included in all
 copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#include <SD.h>
+
 #include "sfx.h"
 #include "pins.h"
+#include "AudioPlayer.h"
 
 // 4: 204
 // 3: 180
 // 2: 170
-// 1: 160      
+// 1: 160
 
 //#define DEBUG_DEEP
 
@@ -36,56 +39,60 @@ SOFTWARE.
 # define ASSERT(x)
 #endif
 
-SFX* SFX::instance = 0;
+SFX* SFX::m_instance = 0;
 
-SFX::SFX(Stream* _streamToAudio)
-#ifdef SABER_SOUND_ON
-  : adaAudio(_streamToAudio, 0, PIN_SFX_RST)
-#else
-  : adaAudio(_streamToAudio, 0, 15)
-#endif
+SFX::SFX(AudioPlayer* audioPlayer)
 {
-  instance = this;
-  currentSound = 255;
-  soundState = SOUND_NOT_PLAYING;
-  bladeOn = false;
-  soundOn = true;
-  memset(sfxLocation, 255, sizeof(sfxLocation[0])*NUM_SFX_TYPES);
-  igniteTime = 0;
-  retractTime = 0;
+  m_instance = this;
+  m_player = audioPlayer;
+  m_numFilenames = 0;
+  memset(m_location, 255, sizeof(SFXLocation)*NUM_SFX_TYPES);
 }
 
-bool SFX::init() 
+bool SFX::init()
 {
-  #if SERIAL_DEBUG == 1
+#if SERIAL_DEBUG == 1
   Serial.println(F("SFX::init()"));
-  #endif
-  adaAudio.reset();
-  volume = adaAudio.volDown();
-#ifdef SABER_SOUND_ON
-  pinMode(PIN_SFX_ACTIVITY, INPUT);
 #endif
+  m_player->init();
+  return scanFiles();
+}
 
-  if (nSoundFiles == 0) {
-    nSoundFiles = adaAudio.listFiles(0, 0, listFiles);
-
-    #if SERIAL_DEBUG == 1
-    Serial.print(F("SFX::init vol:")); Serial.print(volume); Serial.print(F(" nFiles:")); Serial.println(nSoundFiles);
-    dumpLocations();
-    #endif
+bool SFX::scanFiles() {
+  Serial.println("scanFiles()");
+  File root = SD.open("/");
+  while (true) {
+    File entry =  root.openNextFile();
+    if (!entry) {
+      // no more files
+      break;
+    }
+    if (entry.isDirectory()) {
+      continue;
+    }
+    else {
+      Serial.println(entry.name());
+      addFile(entry.name());
+    }
+    entry.close();
   }
+  root.close();
+
+  Serial.print("IDLE      "); Serial.print(m_location[SFX_IDLE].start);      Serial.print(" "); Serial.println(m_location[SFX_IDLE].count);
+  Serial.print("MOTION    "); Serial.print(m_location[SFX_MOTION].start);    Serial.print(" "); Serial.println(m_location[SFX_MOTION].count);
+  Serial.print("IMPACT    "); Serial.print(m_location[SFX_IMPACT].start);    Serial.print(" "); Serial.println(m_location[SFX_IMPACT].count);
+  Serial.print("USER_TAP  "); Serial.print(m_location[SFX_USER_TAP].start);  Serial.print(" "); Serial.println(m_location[SFX_USER_TAP].count);
+  Serial.print("USER_HOLD "); Serial.print(m_location[SFX_USER_HOLD].start); Serial.print(" "); Serial.println(m_location[SFX_USER_HOLD].count);
+  Serial.print("POWER_ON  "); Serial.print(m_location[SFX_POWER_ON].start);  Serial.print(" "); Serial.println(m_location[SFX_POWER_ON].count);
+  Serial.print("POWER_OFF "); Serial.print(m_location[SFX_POWER_OFF].start); Serial.print(" "); Serial.println(m_location[SFX_POWER_OFF].count);
   return true;
 }
 
-/*static*/
-void SFX::listFiles(uint8_t id, const FileInfo& fileInfo) {
-  #if SERIAL_DEBUG == 1
-  Serial.print(id); Serial.print(" "); Serial.print(fileInfo.filename), Serial.print(" "); Serial.println(fileInfo.size);
-  #endif
-
-  // This relies on getting files in 1) alphabetical order and 2) all caps from the AudioFX!
-  const char* name = fileInfo.filename;
+void SFX::addFile(const char* name) {
+  // This relies on getting files in 1) alphabetical order and 2) all caps
   int slot = -1;
+
+  if (strstr(name, "POWERONF")) return;
 
   if      (strstr(name, "BLDON")   || strstr(name, "POWERON"))    slot = SFX_POWER_ON;
   else if (strstr(name, "BLDOFF")  || strstr(name, "POWEROFF"))   slot = SFX_POWER_OFF;
@@ -95,11 +102,17 @@ void SFX::listFiles(uint8_t id, const FileInfo& fileInfo) {
   else if (strstr(name, "USRHOLD") || strstr(name, "LOCKUP"))     slot = SFX_USER_HOLD;
   else if (strstr(name, "USRTAP")  || strstr(name, "BLASTER"))    slot = SFX_USER_TAP;
 
-  if (slot >= 0) {
-    if (instance->sfxLocation[slot].start == 255) {
-      instance->sfxLocation[slot].start = id;
-      instance->sfxLocation[slot].count = 1;
+  if (slot == -1) return;
 
+  if (slot >= 0 && m_numFilenames < MAX_SFX_FILES) {
+    m_filename[m_numFilenames] = name;
+
+    if (m_location[slot].start == 255) {
+      m_location[slot].start = m_numFilenames;
+      m_location[slot].count = 1;
+
+      // FIXME compute ignite / retract.
+      /*
       if (slot == SFX_POWER_ON && instance->igniteTime == 0) {
         instance->igniteTime = fileInfo.size / int32_t(44);  // 2 channels * 22k FIXME only works for 22k sounds!!
         instance->igniteTime = instance->igniteTime * 8 / 10;
@@ -109,127 +122,67 @@ void SFX::listFiles(uint8_t id, const FileInfo& fileInfo) {
         instance->retractTime = fileInfo.size / int32_t(44);
         //Serial.print("retract "); Serial.println(instance->retractTime);
       }
+      */
     }
     else {
-      instance->sfxLocation[slot].count++;
+      m_location[slot].count++;
     }
+    m_numFilenames++;
   }
-}
-
-void SFX::dumpLocations() 
-{
-  #if SERIAL_DEBUG == 1
-  for (int i = 0; i < NUM_SFX_TYPES; ++i) {
-    Serial.print(i); Serial.print(" "); Serial.print(sfxLocation[i].start); Serial.print(" "); Serial.println(sfxLocation[i].count);
-  }
-  #endif
-}
-
-bool SFX::activity() const {
-#ifdef SABER_SOUND_ON
-  if (digitalRead(PIN_SFX_ACTIVITY) == LOW)
-    return true;
-#endif
-  return false;
 }
 
 bool SFX::playSound(int sound, int mode) {
-  if (!soundOn) return false;
-
   ASSERT(sound >= 0);
   ASSERT(sound < NUM_SFX_TYPES);
-  #if SERIAL_DEBUG == 1
-  #ifdef DEBUG_DEEP
+#if SERIAL_DEBUG == 1
+#ifdef DEBUG_DEEP
   Serial.print(F("SFX playSound() sound:")); Serial.println(sound);
   Serial.print(F("SFX bladeOn:")); Serial.println(bladeOn);
   Serial.print(F("SFX currentSound:")); Serial.println(currentSound);
-  #endif
-  #endif
+#endif
+#endif
 
-  if (!bladeOn && (sound != SFX_POWER_ON)) {
+  if (!m_bladeOn && (sound != SFX_POWER_ON)) {
     return false ; // don't play sound with blade off
   }
 
   if (sound == SFX_POWER_ON) {
-    if (bladeOn) return false;  // defensive error check.
-    bladeOn = true;
+    if (m_bladeOn) return false;  // defensive error check.
+    m_bladeOn = true;
   }
   else if (sound == SFX_POWER_OFF) {
-    if (!bladeOn) return false;  // defensive error check.
-    bladeOn = false;
+    if (!m_bladeOn) return false;  // defensive error check.
+    m_bladeOn = false;
   }
 
-  if (   currentSound == 255
-         || (mode == SFX_OVERRIDE)
-         || (mode == SFX_GREATER && sound > currentSound)
-         || (mode == SFX_GREATER_OR_EQUAL && sound >= currentSound))
-  {
-    ASSERT(sfxLocation[sound].start != 255);
-    if (sfxLocation[sound].start != 255) {
-      ASSERT(sfxLocation[sound].count < 255);
-      ASSERT(sfxLocation[sound].count > 0);
-      if (activity() || soundState == SOUND_QUEUED) {
-        bool stoppedOkay = adaAudio.stop();
-        ASSERT(stoppedOkay);
-        (void)stoppedOkay;
-      }
-      int track = sfxLocation[sound].start + random(sfxLocation[sound].count);
-      ASSERT(track >= 0);
-      ASSERT(track < nSoundFiles);
+  if (!m_player->isPlaying()) {
+    m_currentSound = SFX_NONE;
+  }
 
-      #if SERIAL_DEBUG == 1
-      Serial.print(F("SFX play track ")); Serial.print(track);
-      Serial.print( " "); Serial.print(currentSound); Serial.print(F("->")); Serial.println(sound);
-      #endif
-      bool playOkay = adaAudio.playTrack(track);
-      ASSERT(playOkay);
-      (void)playOkay;
-      soundState = SOUND_QUEUED;
-      currentSound = sound;
-      return true;
-    }
+  if (   m_currentSound == SFX_NONE
+         || (mode == SFX_OVERRIDE)
+         || (mode == SFX_GREATER && sound > m_currentSound)
+         || (mode == SFX_GREATER_OR_EQUAL && sound >= m_currentSound))
+  {
+    int track = m_location[sound].start + random(m_location[sound].count);
+    ASSERT(track >= 0);
+    ASSERT(track < m_numFilenames);
+
+#if SERIAL_DEBUG == 1
+    Serial.print(F("SFX play track ")); Serial.print(m_filename[track].c_str());
+#endif
+    m_player->play(m_filename[track].c_str());
+    m_currentSound = sound;
+    return true;
   }
   return false;
 }
 
 void SFX::process() {
   // Play the idle sound if the blade is on.
-  if (activity()) {
-    if (soundState == SOUND_QUEUED) {
-      soundState = SOUND_PLAYING;
-    }
-  }
-  else {
-    if (soundState == SOUND_QUEUED) {
-      // Do nothing. Sound on it's way. Activity not set yet.
-    }
-    else {
-      currentSound = 255;
-      if (bladeOn) {
-        playSound(SFX_IDLE, SFX_OVERRIDE);
-      }
-      else {
-        soundState = SOUND_NOT_PLAYING;
-      }
-    }
+  if (m_bladeOn && !m_player->isPlaying()) {
+    playSound(SFX_IDLE, SFX_OVERRIDE);
   }
 }
 
-
-uint8_t SFX::setVol(int vol) {
-  // Only works if not playing!!!
-  if (!activity()) {
-    #if SERIAL_DEBUG == 1
-    Serial.print("SFX setVol "); Serial.println(vol);
-    #endif
-    volume = adaAudio.setVol(vol);
-  }
-  return volume;
-}
-
-void SFX::setSoundOn(bool on) {
-  if (!activity()) {
-    soundOn = on;
-  }
-}
 

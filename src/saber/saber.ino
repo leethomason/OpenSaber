@@ -22,24 +22,21 @@ SOFTWARE.
 
 
 // Arduino Libraries
-//DO NOT INCLUDE: #include <EEPROM.h> has a static global class. (!?)
+#include <EEPROM.h>
 #include <SoftwareSerial.h>
 #include <Wire.h>
 #include <SPI.h>
-#include <Adafruit_Sensor.h>
 #include <SD.h>
 #include <SerialFlash.h>
+
 #include <Audio.h>
-
-// Libraries.
 #include <Button.h>
-
-#include <Adafruit_Soundboard.h>
 #include <Adafruit_LIS3DH.h>
 #include <Grinliz_Arduino_Util.h>
 
 // Includes
 #include "sfx.h"
+#include "AudioPlayer.h"
 #include "pins.h"
 #include "electrical.h"
 #include "saberdb.h"
@@ -117,7 +114,6 @@ void setup() {
 
   saberDB.log("SFX");
 #ifdef SABER_SOUND_ON
-  softSer.begin(9600);
   sfx.init();
 #endif
 
@@ -142,8 +138,8 @@ void setup() {
   saberDB.readData();
 
 #ifdef SABER_SOUND_ON
-  sfx.setSoundOn(saberDB.soundOn());
-  sfx.setVol(saberDB.volume());
+  sfx.mute(!saberDB.soundOn());
+  sfx.setVolume204(saberDB.volume());
 #endif
 
   saberDB.log("VCC");
@@ -201,33 +197,8 @@ void checkPowerHandler(const Button&) {
 
 void setSound() {
 #ifdef SABER_SOUND_ON
-  if (currentState == BLADE_OFF) {
-    if (sfx.getVol() != saberDB.volume()) {
-#if SERIAL_DEBUG == 1
-      Serial.print("setSound cycle. on=");
-      Serial.print(saberDB.soundOn() ? 1 : 0);
-      Serial.print(" vol=");
-      Serial.println(saberDB.volume());
-#endif
-      digitalWrite(PIN_LED_B, LOW);
-      // Setting the volume after the blade has been used just...turns
-      // the output to junk. And sets the volume to max. I think a bug
-      // in the Audio FX?
-      sfx.init();
-      sfx.setVol(saberDB.volume());
-      sfx.setSoundOn(saberDB.soundOn());
-    }
-    else if (sfx.isSoundOn() != saberDB.soundOn()) {
-#if SERIAL_DEBUG == 1
-      Serial.print("setSound on/off. on=");
-      Serial.print(saberDB.soundOn() ? 1 : 0);
-      Serial.print(" vol=");
-      Serial.println(saberDB.volume());
-#endif
-      sfx.setSoundOn(saberDB.soundOn());
-    }
-    digitalWrite(PIN_LED_B, saberDB.soundOn());
-  }
+  sfx.setVolume204(saberDB.volume());
+  sfx.mute(!saberDB.soundOn());
 #endif
 }
 
@@ -349,43 +320,17 @@ void processBladeState()
   }
 }
 
-void readSerial() {
-  // Flush the buffer, optionally echo.
-#ifdef SABER_SOUND_ON
-  while (softSer.available()) {
-    // This read seems important to fixing random hangs in comm
-    // to the AudioFX. Flushing a buffer? timing?
-    int v = softSer.read();
-    (void)v;
-#if SERIAL_DEBUG == 1
-    Serial.write(v);
-#endif
-  }
-#endif
-}
-
 void serialEvent() {
   bool processed = false;
   uint8_t color[NCHANNELS] = {0};
-  int savedVolume = saberDB.volume();
-  (void)savedVolume;
 
   while (Serial.available()) {
     int c = Serial.read();
     if (c == '\n') {
-#if 0
+#if 1
       Serial.print("event "); Serial.println(cmdParser.getBuffer());
 #endif
-      if (*cmdParser.getBuffer() == '$') {
-#ifdef SABER_SOUND_ON
-        // sound!
-        softSer.println(cmdParser.getBuffer() + 1);
-#endif
-        cmdParser.clearBuffer();
-      }
-      else {
-        processed = cmdParser.processCMD(color);
-      }
+      processed = cmdParser.processCMD(color);
     }
     else {
       cmdParser.push(c);
@@ -459,8 +404,6 @@ void loop() {
       digitalWrite(PIN_LED_B, (state & 1) ? LOW : HIGH);
     }
   }
-
-  readSerial();
 
   const uint32_t msec = millis();
 

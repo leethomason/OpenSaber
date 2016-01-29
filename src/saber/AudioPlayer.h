@@ -17,12 +17,6 @@ class AudioPlayer
     void mute(bool m);
     bool isMuted() const { return m_muted; }
 
-    //void doLoop();
-
-    //int ID() const {
-   //   return m_id;
-    //}
-
   private:
     void setShutdown();
 
