@@ -71,8 +71,9 @@ public:
   uint8_t getVolume204() const  { return 200; }
   
 private:
-  bool scanFiles();
-  void addFile(const char* filename);
+  void scanFiles();
+  void addFile(const char* filename, int index);
+  int calcSlot(const char* filename); // -1 if not a supported file
 
   // note: initialize to 255
   struct SFXLocation {

@@ -55,10 +55,16 @@ bool SFX::init()
   Serial.println(F("SFX::init()"));
 #endif
   m_player->init();
-  return scanFiles();
+  scanFiles();
+  return true;
 }
 
-bool SFX::scanFiles() {
+void SFX::scanFiles()
+{
+  // First get the files,
+  // then sort the files,
+  // finally assign location info.
+
   Serial.println("scanFiles()");
   File root = SD.open("/");
   while (true) {
@@ -71,12 +77,21 @@ bool SFX::scanFiles() {
       continue;
     }
     else {
-      Serial.println(entry.name());
-      addFile(entry.name());
+      int slot = calcSlot(entry.name());
+      if (slot >= 0 && m_numFilenames < MAX_SFX_FILES) {
+        m_filename[m_numFilenames++] = entry.name();
+      }
     }
     entry.close();
   }
   root.close();
+
+  combSort(m_filename, m_numFilenames);
+
+  for (int i = 0; i < m_numFilenames; ++i) {
+    Serial.println(m_filename[i].c_str());
+    addFile(m_filename[i].c_str(), i);
+  }
 
   Serial.print("IDLE      "); Serial.print(m_location[SFX_IDLE].start);      Serial.print(" "); Serial.println(m_location[SFX_IDLE].count);
   Serial.print("MOTION    "); Serial.print(m_location[SFX_MOTION].start);    Serial.print(" "); Serial.println(m_location[SFX_MOTION].count);
@@ -85,14 +100,13 @@ bool SFX::scanFiles() {
   Serial.print("USER_HOLD "); Serial.print(m_location[SFX_USER_HOLD].start); Serial.print(" "); Serial.println(m_location[SFX_USER_HOLD].count);
   Serial.print("POWER_ON  "); Serial.print(m_location[SFX_POWER_ON].start);  Serial.print(" "); Serial.println(m_location[SFX_POWER_ON].count);
   Serial.print("POWER_OFF "); Serial.print(m_location[SFX_POWER_OFF].start); Serial.print(" "); Serial.println(m_location[SFX_POWER_OFF].count);
-  return true;
 }
 
-void SFX::addFile(const char* name) {
-  // This relies on getting files in 1) alphabetical order and 2) all caps
+int SFX::calcSlot(const char* name )
+{
   int slot = -1;
 
-  if (strstr(name, "POWERONF")) return;
+  if (strstr(name, "POWERONF")) return -1;
 
   if      (strstr(name, "BLDON")   || strstr(name, "POWERON"))    slot = SFX_POWER_ON;
   else if (strstr(name, "BLDOFF")  || strstr(name, "POWEROFF"))   slot = SFX_POWER_OFF;
@@ -102,32 +116,20 @@ void SFX::addFile(const char* name) {
   else if (strstr(name, "USRHOLD") || strstr(name, "LOCKUP"))     slot = SFX_USER_HOLD;
   else if (strstr(name, "USRTAP")  || strstr(name, "BLASTER"))    slot = SFX_USER_TAP;
 
+  return slot;
+}
+
+void SFX::addFile(const char* name, int index)
+{
+  int slot = calcSlot(name);
   if (slot == -1) return;
 
-  if (slot >= 0 && m_numFilenames < MAX_SFX_FILES) {
-    m_filename[m_numFilenames] = name;
-
-    if (m_location[slot].start == 255) {
-      m_location[slot].start = m_numFilenames;
-      m_location[slot].count = 1;
-
-      // FIXME compute ignite / retract.
-      /*
-      if (slot == SFX_POWER_ON && instance->igniteTime == 0) {
-        instance->igniteTime = fileInfo.size / int32_t(44);  // 2 channels * 22k FIXME only works for 22k sounds!!
-        instance->igniteTime = instance->igniteTime * 8 / 10;
-        //Serial.print("ignite "); Serial.println(instance->igniteTime);
-      }
-      if (slot == SFX_POWER_OFF && instance->retractTime == 0) {
-        instance->retractTime = fileInfo.size / int32_t(44);
-        //Serial.print("retract "); Serial.println(instance->retractTime);
-      }
-      */
-    }
-    else {
-      m_location[slot].count++;
-    }
-    m_numFilenames++;
+  if (m_location[slot].start == 255) {
+    m_location[slot].start = index;
+    m_location[slot].count = 1;
+  }
+  else {
+    m_location[slot].count++;
   }
 }
 
