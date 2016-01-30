@@ -34,9 +34,19 @@ void buttonAClickHandler(const Button& button) {
   track = (track + 1) % NUM_TRACKS;
   audioPlayer.stop();
   switch (track) {
+    /*
     case 0: audioPlayer.play("FIATI.WAV");    break;
     case 1: audioPlayer.play("DEMICHEL.WAV"); break;
     case 2: audioPlayer.play("ELYSIUM.WAV");  break;
+    */
+    /*
+    case 0: audioPlayer.play("BLASTER.WAV");    break;
+    case 1: audioPlayer.play("CLASH1.WAV"); break;
+    case 2: audioPlayer.play("SWING1.WAV");  break;
+    */
+    case 0: audioPlayer.play("B16M22.WAV");    break;
+    case 1: audioPlayer.play("B16M44.WAV"); break;
+    case 2: audioPlayer.play("BLASTER.WAV");  break;
   }
 }
 

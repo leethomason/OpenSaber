@@ -171,7 +171,7 @@ bool SFX::playSound(int sound, int mode) {
     ASSERT(track < m_numFilenames);
 
 #if SERIAL_DEBUG == 1
-    Serial.print(F("SFX play track ")); Serial.print(m_filename[track].c_str());
+    Serial.print(F("SFX play track ")); Serial.print(m_filename[track].c_str()); Serial.print("... ");
 #endif
     m_player->play(m_filename[track].c_str());
     m_currentSound = sound;
