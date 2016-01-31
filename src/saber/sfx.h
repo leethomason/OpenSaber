@@ -59,21 +59,22 @@ public:
   bool bladeOn(bool on);
   void process();
 
-  const uint32_t getIgniteTime() const { return 1000; }
-  const uint32_t getRetractTime() const { return 1000; }
+  const uint32_t getIgniteTime() const    { return m_igniteTime; }
+  const uint32_t getRetractTime() const   { return m_retractTime; }
 
-  // Only works if no sound playing
-  void mute(bool muted) {}
-  bool isMuted() const  { return false; }
+  void mute(bool muted);
+  bool isMuted() const;
   
-  // Only works if no sound playing. And slow.
-  uint8_t setVolume204(int vol) { return vol; }
-  uint8_t getVolume204() const  { return 200; }
+  void setVolume204(int vol);
+  uint8_t getVolume204() const;
   
 private:
   void scanFiles();
   void addFile(const char* filename, int index);
   int calcSlot(const char* filename); // -1 if not a supported file
+  void readIgniteRetract();
+  bool readHeader(const char* filename, uint8_t* nChannels, uint32_t* nSamplesPerSec, uint32_t* lengthMillis);
+  uint32_t readU32(File& file, int n);
 
   // note: initialize to 255
   struct SFXLocation {
@@ -85,8 +86,10 @@ private:
 
   AudioPlayer* m_player;
   bool         m_bladeOn;
-  int          m_numFilenames;
-  int          m_currentSound;
+  int8_t       m_numFilenames;
+  int8_t       m_currentSound;
+  uint32_t     m_igniteTime;
+  uint32_t     m_retractTime;
   SFXLocation  m_location[NUM_SFX_TYPES];
   CStr<13>     m_filename[MAX_SFX_FILES];
   

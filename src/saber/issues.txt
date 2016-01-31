@@ -1,23 +1,18 @@
 Issues:
+- font name
+- bootup sound
+- shutdown audio
+x ignite / retract times
+- test audio output with scope
+- test LED output with scope
+- multiple sound banks
+ 
+Fixed
+x tune motion and impact
 x read startup time from sound card
 x red led for low power: flash power button?
 x reset command
-- optimize string uses, mem usage, etc.
-- blade flash ghetto - double pulse? blend? always brighter?
-- Direction in the motion
-
-Issues constructed:
-- tune motion and impact
- 
-Issues Next:
-- Jedi Blade Controller
-	- changeable volume
-	- motion and impact setting
-- Blade Jitter
-- Hold effect
-- handle 'retract' when blade isn't fully ignited
- 
-Fixed
+x optimize string uses, mem usage, etc.
 x account for Vcc
 x de-ring resistors
 x rework MMA code

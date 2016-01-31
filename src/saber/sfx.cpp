@@ -46,6 +46,8 @@ SFX::SFX(AudioPlayer* audioPlayer)
   m_instance = this;
   m_player = audioPlayer;
   m_numFilenames = 0;
+  m_igniteTime = 1000;
+  m_retractTime = 1000;
   memset(m_location, 255, sizeof(SFXLocation)*NUM_SFX_TYPES);
 }
 
@@ -56,6 +58,7 @@ bool SFX::init()
 #endif
   m_player->init();
   scanFiles();
+  readIgniteRetract();
   return true;
 }
 
@@ -133,7 +136,8 @@ void SFX::addFile(const char* name, int index)
   }
 }
 
-bool SFX::playSound(int sound, int mode) {
+bool SFX::playSound(int sound, int mode)
+{
   ASSERT(sound >= 0);
   ASSERT(sound < NUM_SFX_TYPES);
 #if SERIAL_DEBUG == 1
@@ -180,11 +184,84 @@ bool SFX::playSound(int sound, int mode) {
   return false;
 }
 
-void SFX::process() {
+void SFX::process()
+{
   // Play the idle sound if the blade is on.
   if (m_bladeOn && !m_player->isPlaying()) {
     playSound(SFX_IDLE, SFX_OVERRIDE);
   }
 }
 
+uint32_t SFX::readU32(File& file, int n) {
+  uint32_t v = 0;
+  for (int i = 0; i < n; ++i) {
+    int b = file.read();
+    v += b << (i * 8);
+  }
+  return v;
+}
+
+bool SFX::readHeader(const char* filename, uint8_t* nChannels, uint32_t* nSamplesPerSec, uint32_t* lengthMillis)
+{
+  File file = SD.open(filename);
+  if (file) {
+    Serial.println(filename);
+    file.seek(22);
+    *nChannels = readU32(file, 2);
+    Serial.print("channels:        "); Serial.println(*nChannels);
+    *nSamplesPerSec = readU32(file, 4);
+    Serial.print("nSamplesPerSec:  "); Serial.println(*nSamplesPerSec);
+    uint32_t nAvgBytesPerSec = readU32(file, 4);
+    Serial.print("nAvgBytesPerSec: "); Serial.println(nAvgBytesPerSec);
+    Serial.print("nBlockAlign:     "); Serial.println(readU32(file, 2));
+    Serial.print("wBitsPerSample:  "); Serial.println(readU32(file, 2));
+    *lengthMillis = (file.size() - 44u) * 1000u / (nAvgBytesPerSec);
+    Serial.print("length millis:   "); Serial.println(*lengthMillis);
+    file.close();
+    return true;
+  }
+  return false;
+}
+
+
+void SFX::readIgniteRetract()
+{
+  uint8_t nChannels = 0;
+  uint32_t samples = 0;
+
+  if (m_location[SFX_POWER_ON].start < 255)
+    readHeader(m_filename[m_location[SFX_POWER_ON].start].c_str(), &nChannels, &samples, &m_igniteTime);
+  if (m_location[SFX_POWER_OFF].start < 255)
+    readHeader(m_filename[m_location[SFX_POWER_OFF].start].c_str(), &nChannels, &samples, &m_retractTime);
+}
+
+
+void SFX::mute(bool muted)
+{
+  m_player->mute(muted);
+
+}
+
+bool SFX::isMuted() const
+{
+  return m_player->isMuted();
+}
+
+void SFX::setVolume204(int vol)
+{
+  if (vol >= 204) {
+    m_player->setVolume(1.0f);
+  }
+  else {
+    static const float INV = 0.0049;
+    float v = float(vol) * INV;
+    m_player->setVolume(v);
+  }
+}
+
+
+uint8_t SFX::getVolume204() const
+{
+  return m_player->volume() * 204.0f + 0.5f;
+}
 

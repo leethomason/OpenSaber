@@ -17,20 +17,16 @@ class AudioPlayer
     void mute(bool m);
     bool isMuted() const { return m_muted; }
 
-    //void doLoop();
-
-    //int ID() const {
-   //   return m_id;
-    //}
+    void setVolume(float v);
+    float volume() const { return m_volume; }
 
   private:
     void setShutdown();
 
     bool     m_muted;
     bool     m_shutdown;
-    //int      m_id;
     uint32_t m_startPlayingTime;
-    //uint32_t m_stopPlayingTime;
+    float    m_volume;
 };
 
 #endif // OPEN_SABER_AUDIO_INCLUDED

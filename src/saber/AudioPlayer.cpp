@@ -8,14 +8,16 @@
 #include <Audio.h>
 
 AudioPlaySdWav      playWav;
+AudioMixer4         mixer;
 AudioOutputAnalog   dac;
-AudioConnection     patchCord1(playWav, 0, dac, 0);
+AudioConnection     patchCord1(playWav, mixer);
+AudioConnection     patchCord2(mixer, 0, dac, 0);
 
 AudioPlayer::AudioPlayer() {
   m_startPlayingTime = 0;
   m_muted = false;
   m_shutdown = false;
-//  m_id = 0;
+  m_volume = 1;
   pinMode(PIN_AMP_SHUTDOWN, INPUT);
 }
 
@@ -35,14 +37,12 @@ void AudioPlayer::init() {
   }
 }
 
-void AudioPlayer::play(const char* filename) {
-  Serial.print("AudioPlayer::play: "); Serial.println(filename);
-
+void AudioPlayer::play(const char* filename) 
+{
   playWav.play(filename);
+  Serial.print("AudioPlayer::play: "); Serial.println(filename);// Serial.print(" len(ms)="); Serial.println(playWav.lengthMillis());
   // remember, about a 5ms warmup for header to be loaded and start playing.
   m_startPlayingTime = millis();
- // m_stopPlayingTime = 0;
-  //m_id = id;
 }
 
 void AudioPlayer::stop() {
@@ -59,21 +59,8 @@ bool AudioPlayer::isPlaying() const {
   return true;
 }
 
-/*
-void AudioPlayer::doLoop() {
-  if (m_startPlayingTime && !m_stopPlayingTime && !isPlaying()) {
-    m_stopPlayingTime = millis();
-  }
-  setShutdown();
-}
-*/
-
 void AudioPlayer::setShutdown() {
- // uint32_t currentTime = millis();
-  //uint32_t coolTime = m_stopPlayingTime + 20u;
-
   bool shouldBeShutdown = m_muted;
-                          //|| (m_stopPlayingTime && currentTime > coolTime);
 
   if (shouldBeShutdown && !m_shutdown) {
     digitalWrite(PIN_AMP_SHUTDOWN, LOW);
@@ -88,5 +75,10 @@ void AudioPlayer::setShutdown() {
 void AudioPlayer::mute(bool m) {
   m_muted = m;
   setShutdown();
+}
+
+void AudioPlayer::setVolume(float v) {
+  m_volume = v;
+  mixer.gain(0, m_volume);
 }
 
