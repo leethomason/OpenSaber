@@ -86,6 +86,7 @@ private:
 
   AudioPlayer* m_player;
   bool         m_bladeOn;
+  bool         m_muted;
   int8_t       m_numFilenames;
   int8_t       m_currentSound;
   uint32_t     m_igniteTime;

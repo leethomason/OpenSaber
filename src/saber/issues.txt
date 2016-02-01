@@ -1,15 +1,16 @@
 Issues:
-- fix sound light
 - test full circuit
-- bootup sound
-- shutdown audio
-- font name
+- switch to battery version
 - test audio output with scope
 - test LED output with scope
 - multiple sound banks
-x ignite / retract times
  
 Fixed
+x fix sound light
+x bootup sound
+x shutdown audio
+x font name
+x ignite / retract times
 x tune motion and impact
 x read startup time from sound card
 x red led for low power: flash power button?

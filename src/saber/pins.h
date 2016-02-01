@@ -29,10 +29,11 @@ static const int EEPROM_SIZE = 512;
 // Note: Serial connection should be set to 19200 baud with a newline after commands.
 #define SERIAL_DEBUG 1
 
-//#define SABER_ACCELEROMETER
+#define SABER_ACCELEROMETER
 #define SABER_SOUND_ON
-//#define SABER_VOLTMETER
-//#define SABER_LOGGING
+#define SABER_SOUND_SHUTDOWN
+#define SABER_VOLTMETER
+#define SABER_LOGGING
 // Don't forget to set the emmitter in electrical.h!
   
 /*
@@ -62,25 +63,21 @@ static const int EEPROM_SIZE = 512;
 #define PIN_LED_B         6   // switch LED - audio
 // reserve rx3            7
 // reserve tx3            8
-// RX2, pwm               9
+//                        9
 #define PIN_SDCARD_CS     10
 #define PIN_SDCARD_MOSI   11
 // SD: DIN                12
 #define PIN_SDCARD_SCK    13
-#define PIN_LED_LOW_POWER 14
+#define PIN_VMETER        14
 // 15
 // 16
 // 17
-// 18
-// 19
+#define PIN_SDA           18
+#define PIN_SDL           19
 // 20
 #define PIN_EMITTER_BLUE  21
 #define PIN_EMITTER_GREEN 22
 #define PIN_EMITTER_RED   23
-
-//#define PIN_VMETER        A0  // read analog voltage
-//#define PIN_ACCEL_SDA     A4  // general I2C (blue)
-//#define PIN_ACCEL_SCL     A5  // general I2C (green)
 
 enum {
   RED,
