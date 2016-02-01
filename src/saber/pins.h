@@ -55,7 +55,7 @@ static const int EEPROM_SIZE = 512;
 /* Teensy 3.2 */
 // Reserve RX1            0
 // Reserve TX1            1
-// shutdown               2
+#define PIN_AMP_SHUTDOWN  2
 #define PIN_SWITCH_A      3   // switch - power (also PWM)
 #define PIN_SWITCH_B      4
 #define PIN_LED_A         5   // switch LED - power
@@ -63,10 +63,10 @@ static const int EEPROM_SIZE = 512;
 // reserve rx3            7
 // reserve tx3            8
 // RX2, pwm               9
-// SD: CS                 10
-// SD: DOUT               11
+#define PIN_SDCARD_CS     10
+#define PIN_SDCARD_MOSI   11
 // SD: DIN                12
-// SD: SCK                13
+#define PIN_SDCARD_SCK    13
 #define PIN_LED_LOW_POWER 14
 // 15
 // 16

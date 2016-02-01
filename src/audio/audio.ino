@@ -37,8 +37,20 @@ void buttonAClickHandler(const Button& button) {
     case 0: audioPlayer.play("FIATI.WAV");    break;
     case 1: audioPlayer.play("DEMICHEL.WAV"); break;
     case 2: audioPlayer.play("ELYSIUM.WAV");  break;
+    /*
+    case 0: audioPlayer.play("BLASTER.WAV");    break;
+    case 1: audioPlayer.play("CLASH1.WAV"); break;
+    case 2: audioPlayer.play("SWING1.WAV");  break;
+    */
+    /*
+    case 0: audioPlayer.play("B16M22.WAV");    break;
+    case 1: audioPlayer.play("B16M44.WAV"); break;
+    case 2: audioPlayer.play("BLASTER.WAV");  break;
+    */
   }
 }
+
+int sequence = 0;
 
 void buttonBClickHandler(const Button& button) {
   Serial.println("buttonBClickHandler");
@@ -53,8 +65,16 @@ void buttonBClickHandler(const Button& button) {
   Serial.print(",");
   Serial.println(AudioMemoryUsageMax());
 
-  audioPlayer.mute(!audioPlayer.isMuted());
+  //audioPlayer.mute(!audioPlayer.isMuted());
   //audioPlayer.stop();
+
+  switch(sequence) {
+    case 0: audioPlayer.setVolume(0.7); break;
+    case 1: audioPlayer.setVolume(1);   break;
+    case 2: audioPlayer.setVolume(1.2); break;
+  }
+  sequence = (sequence + 1) % 3;
+  Serial.print("Volume "); Serial.println(audioPlayer.volume());
 }
 
 void loop() {

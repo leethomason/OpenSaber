@@ -241,12 +241,10 @@ complex) set of connections to allow the switch to disconnect. Resistors for
 the indicator LEDs are "inlined" in the switch, so they don't need to be part
 of the Emitter circuit.
 
-### Audio Board
+### Audio
 
-The audio board is an Adafruit breakout that is run in UART mode. It 
-(currently) supports one sound font, and can recognize the default or 
-crystal focus naming scheme. Sounds are loaded directly to the board by 
-connecting a micro-usb, and it mounds as a hard drive.
+Audio playback is integrated into the main micro controller. It takes
+44.1kHz in; you will need to convert files to 44.1.
 
 All the names can be postfixed with a number for random variation: `SWING` or
 `SWING01` for example. Note that the card / code is limited to 8.3 filenames.
