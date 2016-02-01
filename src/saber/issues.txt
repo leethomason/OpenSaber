@@ -2,8 +2,8 @@ Issues:
 x fix sound light
 - test full circuit
 x bootup sound
-- shutdown audio
-- font name
+x shutdown audio
+x font name
 - test audio output with scope
 - test LED output with scope
 - multiple sound banks

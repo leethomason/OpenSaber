@@ -47,7 +47,6 @@ void AudioPlayer::play(const char* filename)
 
 void AudioPlayer::stop() {
   playWav.stop();
-//  m_stopPlayingTime = millis();
 }
 
 bool AudioPlayer::isPlaying() const {

@@ -48,6 +48,7 @@ SFX::SFX(AudioPlayer* audioPlayer)
   m_numFilenames = 0;
   m_igniteTime = 1000;
   m_retractTime = 1000;
+  m_muted = false;
   memset(m_location, 255, sizeof(SFXLocation)*NUM_SFX_TYPES);
 }
 
@@ -59,6 +60,7 @@ bool SFX::init()
   m_player->init();
   scanFiles();
   readIgniteRetract();
+  m_player->mute(true); // nothing is happening; connect shutdown pin.
   return true;
 }
 
@@ -154,6 +156,7 @@ bool SFX::playSound(int sound, int mode)
 
   if (sound == SFX_POWER_ON) {
     if (m_bladeOn) return false;  // defensive error check.
+    m_player->mute(m_muted);
     m_bladeOn = true;
   }
   else if (sound == SFX_POWER_OFF) {
@@ -189,6 +192,11 @@ void SFX::process()
   // Play the idle sound if the blade is on.
   if (m_bladeOn && !m_player->isPlaying()) {
     playSound(SFX_IDLE, SFX_OVERRIDE);
+  }
+  if (!m_bladeOn && !m_player->isPlaying()) {
+#ifdef SABER_SOUND_SHUTDOWN
+    m_player->mute(true);
+#endif
   }
 }
 
@@ -238,13 +246,15 @@ void SFX::readIgniteRetract()
 
 void SFX::mute(bool muted)
 {
-  m_player->mute(muted);
-
+  m_muted = muted;
+  if (m_muted) {
+    m_player->mute(m_muted);
+  }
 }
 
 bool SFX::isMuted() const
 {
-  return m_player->isMuted();
+  return m_muted;
 }
 
 void SFX::setVolume204(int vol)
