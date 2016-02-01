@@ -82,9 +82,6 @@ CMDParser cmdParser(&saberDB);
 Blade blade;
 
 void setup() {
-  pinMode(PIN_LED_LOW_POWER, OUTPUT);
-  digitalWrite(PIN_LED_LOW_POWER, LOW);
-
   Serial.begin(19200);  // still need to turn it on in case a command line is connected.
   while (!Serial) {
     delay(100);
@@ -418,7 +415,6 @@ void loop() {
       indicatorStart = msec;
     }
     uint32_t state = nIndicator && (msec - indicatorStart) < INDICATOR_TIME / 2 ? HIGH : LOW;
-    digitalWrite(PIN_LED_LOW_POWER, state);
     digitalWrite(PIN_LED_A, state);
     if (nIndicator == 0) {
       digitalWrite(PIN_LED_A, HIGH);

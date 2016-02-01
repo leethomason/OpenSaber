@@ -6,12 +6,12 @@ Uses the Arduino internal reference voltage.
        Vbat
          o                            
          |                            
-         /   R1 = 10k Ohm             
+         /   R1 = 47k Ohm             
          /                            
          |                            
 Apin o---+                            
          |
-         /   R2 = 47k Ohm
+         /   R2 = 10k Ohm
          /
          |                            
          |                            

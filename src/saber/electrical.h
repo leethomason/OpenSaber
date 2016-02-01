@@ -31,37 +31,22 @@ SOFTWARE.
 static const int32_t NOMINAL_VOLTAGE = 3700;
 
 /*
- * This is the code if using a voltage regulator.
- *
- * Converts A0 in to millivolts.
- * AnalogPin returns 0-1023
- * Reference is 2.5V
- * Vin = Vref * (R1 + R2) / R2
- * R1 = 6.8k R2 = 4.7k
- * Vin = 2.5 * 2.447 = 6.12
- * In this case, 1023 is 6117mv or 6,117,000uV
- * mult = 5980, measured 5960 
-static const int32_t UVOLT_MULT = 5980;  // micro-volts
- */
-
-/*
  * This is the code if using a voltage divider.
  * Much simpler, slightly less accurate, fewer components.
  * 
  * Vout = Vbat * R1 / (R1 + R2),
  * Vbat = Vout * (R1 + R2) / R1
- * Vref = 1.1 (internal)
+ * Vref = 1.2 (internal)
  * Vout = Vref * Apin
  * Vbat = Vref * Apin * (R1 + R2) / R1
- *      R1 = 10k, R2 = 47k, (R1+R2)/R1 = 5.7
- *      = 1.1 * A * 5.7
+ *      = 1.2 * A * 5.7
  *      = 6.27 * A
  *  Unit conversion: 6270 = 1023 * MULT / 1000
  *  UVOLT_MULT = 6129
  *  But we measure 5.10 volts.
  *  Correcting: 
  */
- static const int32_t UVOLT_MULT = 5990;
+ static const int32_t UVOLT_MULT = 6840;
 
 #if EMITTER == TEST_EMITTER
 #define ID_STR "Test Emitter"

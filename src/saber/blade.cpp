@@ -108,8 +108,6 @@ void Blade::setVoltage(int milliVolts) {
     }
   }
   setRGB(color);
-
-  digitalWrite(PIN_LED_LOW_POWER, milliVolts < LOW_VOLTAGE ? HIGH : LOW);  
 }
 
 
