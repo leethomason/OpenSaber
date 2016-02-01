@@ -120,7 +120,7 @@ void setup() {
   saberDB.log("VLT");
 #ifdef SABER_VOLTMETER
   analogReference(INTERNAL);  // 1.1 volts
-  analogRead(PIN_VMETER);        // warm up the DAC to avoid spurious initial value.
+  analogRead(PIN_VMETER);     // warm up the ADC to avoid spurious initial value.
 #endif
 
   saberDB.log("BTN");
@@ -200,6 +200,7 @@ void setSound() {
   sfx.setVolume204(saberDB.volume());
   sfx.mute(!saberDB.soundOn());
 #endif
+  digitalWrite(PIN_LED_B, saberDB.soundOn());
 }
 
 void buttonBPressHandler(const Button&) {

@@ -1,11 +1,13 @@
 Issues:
-- font name
+- fix sound light
+- test full circuit
 - bootup sound
 - shutdown audio
-x ignite / retract times
+- font name
 - test audio output with scope
 - test LED output with scope
 - multiple sound banks
+x ignite / retract times
  
 Fixed
 x tune motion and impact
