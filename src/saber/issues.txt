@@ -1,7 +1,7 @@
 Issues:
-- fix sound light
+x fix sound light
 - test full circuit
-- bootup sound
+x bootup sound
 - shutdown audio
 - font name
 - test audio output with scope
