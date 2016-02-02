@@ -49,6 +49,7 @@ SFX::SFX(AudioPlayer* audioPlayer)
   m_igniteTime = 1000;
   m_retractTime = 1000;
   m_muted = false;
+  m_numFonts = 0;
   memset(m_location, 255, sizeof(SFXLocation)*NUM_SFX_TYPES);
 }
 
@@ -58,20 +59,58 @@ bool SFX::init()
   Serial.println(F("SFX::init()"));
 #endif
   m_player->init();
-  scanFiles();
+  scanFonts();
+  scanFiles(0);
   readIgniteRetract();
   m_player->mute(true); // nothing is happening; connect shutdown pin.
   return true;
 }
 
-void SFX::scanFiles()
+void SFX::scanFonts()
+{
+  m_numFonts = 0;
+  Serial.println("scanFonts()");
+  File root = SD.open("/");
+  while (true) {
+    File entry =  root.openNextFile();
+    if (!entry) {
+      // no more files
+      break;
+    }
+    if (entry.isDirectory()) {
+      static const int N = 4;
+      const char* NAMES[N] = { "HUM.WAV", "IDLE.WAV", "POWERON.WAV", "IGNITE.WAV" };
+      for(int i=0; i<N; ++i) {
+        CStr<25> path;
+        path = entry.name();
+        path.append('/');
+        path.append(NAMES[i]);
+
+        File file = SD.open(path.c_str());
+        if (file) {
+          m_dirName[m_numFonts++] = entry.name();
+          file.close();
+        }
+      }
+    }
+    entry.close();
+  }
+  root.close();
+
+  combSort(m_dirName, m_numFonts);
+  for(int i=0; i<m_numFonts; ++i) {
+    Serial.println(m_dirName[i].c_str());
+  }
+}
+
+void SFX::scanFiles(uint8_t index)
 {
   // First get the files,
   // then sort the files,
   // finally assign location info.
 
-  Serial.println("scanFiles()");
-  File root = SD.open("/");
+  Serial.print("scanFiles "); Serial.println(index);
+  File root = SD.open(m_dirName[index].c_str());
   while (true) {
     File entry =  root.openNextFile();
     if (!entry) {
@@ -129,7 +168,7 @@ void SFX::addFile(const char* name, int index)
   int slot = calcSlot(name);
   if (slot == -1) return;
 
-  if (m_location[slot].start == 255) {
+  if (!m_location[slot].InUse()) {
     m_location[slot].start = index;
     m_location[slot].count = 1;
   }
@@ -237,9 +276,9 @@ void SFX::readIgniteRetract()
   uint8_t nChannels = 0;
   uint32_t samples = 0;
 
-  if (m_location[SFX_POWER_ON].start < 255)
+  if (m_location[SFX_POWER_ON].InUse())
     readHeader(m_filename[m_location[SFX_POWER_ON].start].c_str(), &nChannels, &samples, &m_igniteTime);
-  if (m_location[SFX_POWER_OFF].start < 255)
+  if (m_location[SFX_POWER_OFF].InUsed())
     readHeader(m_filename[m_location[SFX_POWER_OFF].start].c_str(), &nChannels, &samples, &m_retractTime);
 }
 

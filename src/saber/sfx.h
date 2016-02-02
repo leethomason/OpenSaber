@@ -38,6 +38,7 @@ enum {            //  Max
 
   NUM_SFX_TYPES,
   MAX_SFX_FILES = 48,
+  MAX_FONTS = 8,
   SFX_NONE = 255
 };
 
@@ -67,9 +68,14 @@ public:
   
   void setVolume204(int vol);
   uint8_t getVolume204() const;
-  
+
+  void setFont(uint8_t font);
+  const char* fontName(uint8_t font) const;
+
 private:
+  void scanFonts();
   void scanFiles();
+
   void addFile(const char* filename, int index);
   int calcSlot(const char* filename); // -1 if not a supported file
   void readIgniteRetract();
@@ -87,12 +93,15 @@ private:
   AudioPlayer* m_player;
   bool         m_bladeOn;
   bool         m_muted;
+  uint8_t      m_numFonts;
   int8_t       m_numFilenames;
   int8_t       m_currentSound;
   uint32_t     m_igniteTime;
   uint32_t     m_retractTime;
+
   SFXLocation  m_location[NUM_SFX_TYPES];
   CStr<13>     m_filename[MAX_SFX_FILES];
+  CStr<9>      m_dirName[MAX_FONTS];
   
   static SFX*  m_instance;
 };

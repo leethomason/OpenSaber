@@ -4,12 +4,12 @@ Issues:
 - test audio output with scope
 - test LED output with scope
 - multiple sound banks
+- font name
  
 Fixed
 x fix sound light
 x bootup sound
 x shutdown audio
-x font name
 x ignite / retract times
 x tune motion and impact
 x read startup time from sound card
