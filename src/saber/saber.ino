@@ -112,6 +112,7 @@ void setup() {
   saberDB.log("SFX");
 #ifdef SABER_SOUND_ON
   sfx.init();
+  sfx.scanFiles(0);
 #endif
 
   saberDB.log("VLT");

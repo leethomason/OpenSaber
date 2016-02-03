@@ -56,6 +56,8 @@ public:
   SFX(AudioPlayer* audioPlayer);
 
   bool init();
+  void scanFiles(uint8_t font);
+
   bool playSound(int sfx, int mode);
   bool bladeOn(bool on);
   void process();
@@ -73,8 +75,9 @@ public:
   const char* fontName(uint8_t font) const;
 
 private:
+  void filePath(CStr<25>* str, int id);
+  void filePath(CStr<25>* str, const char* dir, const char* file);
   void scanFonts();
-  void scanFiles();
 
   void addFile(const char* filename, int index);
   int calcSlot(const char* filename); // -1 if not a supported file
@@ -96,6 +99,7 @@ private:
   uint8_t      m_numFonts;
   int8_t       m_numFilenames;
   int8_t       m_currentSound;
+  uint8_t      m_currentFont;
   uint32_t     m_igniteTime;
   uint32_t     m_retractTime;
 

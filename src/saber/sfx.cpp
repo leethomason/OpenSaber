@@ -50,6 +50,7 @@ SFX::SFX(AudioPlayer* audioPlayer)
   m_retractTime = 1000;
   m_muted = false;
   m_numFonts = 0;
+  m_currentFont = 0;
   memset(m_location, 255, sizeof(SFXLocation)*NUM_SFX_TYPES);
 }
 
@@ -60,12 +61,28 @@ bool SFX::init()
 #endif
   m_player->init();
   scanFonts();
-  scanFiles(0);
-  readIgniteRetract();
   m_player->mute(true); // nothing is happening; connect shutdown pin.
   return true;
 }
 
+void SFX::filePath(CStr<25>* path, const char* dir, const char* file)
+{
+  path->clear();
+  *path = dir;
+  path->append('/');
+  path->append(file);  
+}
+
+void SFX::filePath(CStr<25>* path, int index) 
+{
+  path->clear();
+  if (m_numFonts > 0) {
+    *path = m_dirName[m_currentFont].c_str();
+    path->append('/');
+  }
+  path->append(m_filename[index].c_str());
+}
+  
 void SFX::scanFonts()
 {
   m_numFonts = 0;
@@ -82,14 +99,14 @@ void SFX::scanFonts()
       const char* NAMES[N] = { "HUM.WAV", "IDLE.WAV", "POWERON.WAV", "IGNITE.WAV" };
       for(int i=0; i<N; ++i) {
         CStr<25> path;
-        path = entry.name();
-        path.append('/');
-        path.append(NAMES[i]);
+        filePath(&path, entry.name(), NAMES[i]);
+        //Serial.println(path.c_str());
 
         File file = SD.open(path.c_str());
         if (file) {
           m_dirName[m_numFonts++] = entry.name();
           file.close();
+          break;
         }
       }
     }
@@ -98,9 +115,12 @@ void SFX::scanFonts()
   root.close();
 
   combSort(m_dirName, m_numFonts);
+  Serial.println("Fonts:");
   for(int i=0; i<m_numFonts; ++i) {
-    Serial.println(m_dirName[i].c_str());
+    Serial.print(i); Serial.print(": "); Serial.println(m_dirName[i].c_str());
   }
+  Serial.println("--");
+  readIgniteRetract();
 }
 
 void SFX::scanFiles(uint8_t index)
@@ -108,6 +128,7 @@ void SFX::scanFiles(uint8_t index)
   // First get the files,
   // then sort the files,
   // finally assign location info.
+  memset(m_location, 255, sizeof(SFXLocation)*NUM_SFX_TYPES);
 
   Serial.print("scanFiles "); Serial.println(index);
   File root = SD.open(m_dirName[index].c_str());
@@ -133,7 +154,6 @@ void SFX::scanFiles(uint8_t index)
   combSort(m_filename, m_numFilenames);
 
   for (int i = 0; i < m_numFilenames; ++i) {
-    Serial.println(m_filename[i].c_str());
     addFile(m_filename[i].c_str(), i);
   }
 
@@ -144,6 +164,8 @@ void SFX::scanFiles(uint8_t index)
   Serial.print("USER_HOLD "); Serial.print(m_location[SFX_USER_HOLD].start); Serial.print(" "); Serial.println(m_location[SFX_USER_HOLD].count);
   Serial.print("POWER_ON  "); Serial.print(m_location[SFX_POWER_ON].start);  Serial.print(" "); Serial.println(m_location[SFX_POWER_ON].count);
   Serial.print("POWER_OFF "); Serial.print(m_location[SFX_POWER_OFF].start); Serial.print(" "); Serial.println(m_location[SFX_POWER_OFF].count);
+
+  readIgniteRetract();
 }
 
 int SFX::calcSlot(const char* name )
@@ -219,7 +241,14 @@ bool SFX::playSound(int sound, int mode)
 #if SERIAL_DEBUG == 1
     Serial.print(F("SFX play track ")); Serial.print(m_filename[track].c_str()); Serial.print("... ");
 #endif
-    m_player->play(m_filename[track].c_str());
+    CStr<25> path;
+    if (m_numFonts > 0) {
+      filePath(&path, m_dirName[m_currentFont].c_str(), m_filename[track].c_str());
+    }
+    else {
+      path = m_filename[track].c_str();
+    }
+    m_player->play(path.c_str());
     m_currentSound = sound;
     return true;
   }
@@ -275,11 +304,15 @@ void SFX::readIgniteRetract()
 {
   uint8_t nChannels = 0;
   uint32_t samples = 0;
+  CStr<25> path;
 
-  if (m_location[SFX_POWER_ON].InUse())
-    readHeader(m_filename[m_location[SFX_POWER_ON].start].c_str(), &nChannels, &samples, &m_igniteTime);
-  if (m_location[SFX_POWER_OFF].InUsed())
-    readHeader(m_filename[m_location[SFX_POWER_OFF].start].c_str(), &nChannels, &samples, &m_retractTime);
+  if (m_location[SFX_POWER_ON].InUse()) {
+    filePath(&path, m_location[SFX_POWER_ON].start);
+    readHeader(path.c_str(), &nChannels, &samples, &m_igniteTime);
+  }
+  if (m_location[SFX_POWER_OFF].InUse())
+    filePath(&path, m_location[SFX_POWER_OFF].start);
+    readHeader(path.c_str(), &nChannels, &samples, &m_retractTime);
 }
 
 

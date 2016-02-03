@@ -7,10 +7,18 @@
 #include <SerialFlash.h>
 #include <Audio.h>
 
+//#define SINE_WAVE_TEST
+
+AudioSynthWaveformSine sineWav;
 AudioPlaySdWav      playWav;
+
 AudioMixer4         mixer;
 AudioOutputAnalog   dac;
+#ifdef SINE_WAVE_TEST
+AudioConnection     patchCord1(sineWav, mixer);
+#else
 AudioConnection     patchCord1(playWav, mixer);
+#endif
 AudioConnection     patchCord2(mixer, 0, dac, 0);
 
 AudioPlayer::AudioPlayer() {
@@ -35,25 +43,36 @@ void AudioPlayer::init() {
       delay(500);
     }
   }
+#ifdef SINE_WAVE_TEST
+  sineWav.amplitude(1.0);
+  sineWav.frequency(440);
+#endif
 }
 
 void AudioPlayer::play(const char* filename) 
 {
   playWav.play(filename);
+  
   Serial.print("AudioPlayer::play: "); Serial.println(filename);// Serial.print(" len(ms)="); Serial.println(playWav.lengthMillis());
   // remember, about a 5ms warmup for header to be loaded and start playing.
   m_startPlayingTime = millis();
 }
 
 void AudioPlayer::stop() {
+#ifndef SINE_WAVE_TEST
   playWav.stop();
+#endif
 }
 
 bool AudioPlayer::isPlaying() const {
   uint32_t currentTime = millis();
   uint32_t warmTime = m_startPlayingTime + 20u;  // PJRC uses a 5ms time. Can be generous; no reason to support sub-second samples.
   if (m_startPlayingTime && currentTime > warmTime) {
+#ifdef SINE_WAVE_TEST
+  return true;
+#else
     return playWav.isPlaying();
+#endif
   }
   return true;
 }
