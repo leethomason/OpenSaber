@@ -25,6 +25,7 @@ SOFTWARE.
 
 #include <Arduino.h>
 #include <Grinliz_Arduino_Util.h>
+#include <SD.h>
 
 // SFX in priority order!
 enum {            //  Max
@@ -54,12 +55,13 @@ class SFX
 {
 public:
   SFX(AudioPlayer* audioPlayer);
+  static SFX* instance() { return m_instance; }
 
   bool init();
   void scanFiles(uint8_t font);
 
   bool playSound(int sfx, int mode);
-  bool bladeOn(bool on);
+  bool bladeOn() const                    { return m_bladeOn; }
   void process();
 
   const uint32_t getIgniteTime() const    { return m_igniteTime; }
@@ -71,8 +73,9 @@ public:
   void setVolume204(int vol);
   uint8_t getVolume204() const;
 
-  void setFont(uint8_t font);
+  uint8_t setFont(uint8_t font);
   const char* fontName(uint8_t font) const;
+  const char* currentFontName() const;
 
 private:
   void filePath(CStr<25>* str, int id);

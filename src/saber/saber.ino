@@ -112,7 +112,8 @@ void setup() {
   saberDB.log("SFX");
 #ifdef SABER_SOUND_ON
   sfx.init();
-  sfx.scanFiles(0);
+  sfx.setFont(saberDB.soundFont());
+  Serial.print("Font: "); Serial.println(sfx.currentFontName());
 #endif
 
   saberDB.log("VLT");
@@ -387,6 +388,7 @@ void loop() {
   if (buttonA.press() && buttonB.isDown()) {
     saberDB.nextPalette();
     paletteChange = true;
+    cmdParser.bringPaletteCurrent();
   }
   processBladeState();
 #ifdef SABER_SOUND_ON
@@ -430,7 +432,6 @@ void loop() {
   }
 }
 
-
 int32_t readVcc() {
 #ifdef SABER_VOLTMETER
   int32_t analog = analogRead(PIN_VMETER);
@@ -440,4 +441,5 @@ int32_t readVcc() {
   return NOMINAL_VOLTAGE;
 #endif
 }
+
 

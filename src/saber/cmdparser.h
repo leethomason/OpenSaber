@@ -24,8 +24,7 @@ SOFTWARE.
 #define SABER_CMD_PARSER
 
 #include <stdint.h>
-
-#include "../Grinliz_Arduino_Util/Grinliz_Arduino_Util.h"
+#include <Grinliz_Arduino_Util.h>
 
 class SaberDB;
 
@@ -34,10 +33,12 @@ class CMDParser
   public:
     CMDParser(SaberDB* database);
 
-    void push(int c)                { token.append(c); }
+    void push(int c)                  { token.append(c); }
     bool processCMD(uint8_t* color);
-    const char* getBuffer() const   { return token.c_str(); }
-    void clearBuffer() { token.clear(); }
+    const char* getBuffer() const     { return token.c_str(); }
+    void clearBuffer()                { token.clear(); }
+
+    void bringPaletteCurrent();
 
   private:
     void tokenize();

@@ -129,6 +129,7 @@ void SFX::scanFiles(uint8_t index)
   // then sort the files,
   // finally assign location info.
   memset(m_location, 255, sizeof(SFXLocation)*NUM_SFX_TYPES);
+  m_numFilenames = 0;
 
   Serial.print("scanFiles "); Serial.println(index);
   File root = SD.open(m_dirName[index].c_str());
@@ -345,5 +346,25 @@ void SFX::setVolume204(int vol)
 uint8_t SFX::getVolume204() const
 {
   return m_player->volume() * 204.0f + 0.5f;
+}
+
+uint8_t SFX::setFont(uint8_t font)
+{
+  if (m_numFonts) {
+    m_currentFont = font % m_numFonts;
+    scanFiles(m_currentFont);
+  }
+  else {
+    m_currentFont = 0;
+  }
+  return m_currentFont;
+}
+
+const char* SFX::currentFontName() const
+{
+  if (m_numFonts) {
+    return m_dirName[m_currentFont].c_str();
+  }
+  return "no font";
 }
 

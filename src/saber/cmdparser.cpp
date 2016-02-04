@@ -26,31 +26,10 @@ SOFTWARE.
 #include "saberdb.h"
 #include "blade.h"
 #include "electrical.h"
+#include "SFX.h"
 
 CMDParser::CMDParser(SaberDB* _db) {
-  database = _db;/*
-Copyright (c) 2016 Lee Thomason, Grinning Lizard Software
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of 
-this software and associated documentation files (the "Software"), to deal in 
-the Software without restriction, including without limitation the rights to 
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies 
-of the Software, and to permit persons to whom the Software is furnished to do 
-so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all 
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
-SOFTWARE.
-*/
-
-
+  database = _db;
 }
 
 void CMDParser::tokenize()
@@ -144,6 +123,7 @@ bool CMDParser::processCMD(uint8_t* c) {
     if (isSet) {
       int pal = atoi(value.c_str());
       database->setPalette(pal);
+      CMDParser::bringPaletteCurrent();
     }
     printLead(action.c_str());
     Serial.println(database->paletteIndex());
@@ -152,9 +132,12 @@ bool CMDParser::processCMD(uint8_t* c) {
     if (isSet) {
       int f = atoi(value.c_str());
       database->setSoundFont(f);
+      CMDParser::bringPaletteCurrent();
     }
     printLead(action.c_str());
-    Serial.println(database->soundFont());
+    Serial.print(database->soundFont());
+    Serial.print(" ");
+    Serial.println(SFX::instance()->currentFontName());
   }
   else if (action == AUDIO) {
     if (isSet) {
@@ -232,7 +215,10 @@ bool CMDParser::processCMD(uint8_t* c) {
     delay(DELAY);
     printLead(PAL);     Serial.println(database->paletteIndex());
     delay(DELAY);
-    printLead(FONT);    Serial.println(database->soundFont());
+    printLead(FONT);    
+    Serial.print(database->soundFont());
+    Serial.print(" ");
+    Serial.println(SFX::instance()->currentFontName());
     delay(DELAY);
     printLead(AUDIO);   Serial.println(database->soundOn());
     delay(DELAY);
@@ -273,4 +259,17 @@ bool CMDParser::processCMD(uint8_t* c) {
   return isSet;
 }
 
+
+void CMDParser::bringPaletteCurrent()
+{
+  const uint8_t* bladeColor  = database->bladeColor();
+  uint8_t soundFont          = database->soundFont();
+  SFX* sfx = SFX::instance();
+  bool bladeOn               = sfx->bladeOn();
+  
+  if (bladeOn) {
+    Blade::blade().setRGB(bladeColor);
+  }
+  sfx->setFont(soundFont);
+}
 
