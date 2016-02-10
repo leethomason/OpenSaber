@@ -45,39 +45,32 @@ static const int EEPROM_SIZE = 512;
  *  Toggle sound:   Hold B (Blade off)
  */
 
-/*
- * Timer Notes:
- * Timer0 -> Pins 5, 6 fast PWM
- * Timer1 -> Pins 9, 10 phase correct, in setup() TCNT1=0x7FFF; to shift phase
- * Timer2 -> Pins 11, 3 phase correct
- * Set Timer1: phase
- */ 
-
 /* Teensy 3.2 */
-// Reserve RX1            0
-// Reserve TX1            1
+#define PIN_RX1           0
+#define PIN_TX1           1
 #define PIN_AMP_SHUTDOWN  2
-#define PIN_SWITCH_A      3   // switch - power (also PWM)
-#define PIN_SWITCH_B      4
-#define PIN_LED_A         5   // switch LED - power
-#define PIN_LED_B         6   // switch LED - audio
-// reserve rx3            7
-// reserve tx3            8
-//                        9
+// reserve crystal R      3
+// reserve crystal G      4
+// reserve crystal B      5
+#define PIN_SWITCH_A      6   // switch - power (also PWM)
+#define PIN_SWITCH_B      7
+#define PIN_LED_A         8   // switch LED - power
+#define PIN_LED_B         9   // switch LED - audio
 #define PIN_SDCARD_CS     10
 #define PIN_SDCARD_MOSI   11
 // SD: DIN                12
 #define PIN_SDCARD_SCK    13
 #define PIN_VMETER        14
-// 15
-// 16
-// 17
+#define PIN_OLED_DC       15
+#define PIN_OLED_RESET    16 
+#define PIN_OLED_CS       17
 #define PIN_SDA           18
 #define PIN_SDL           19
 // 20
 #define PIN_EMITTER_BLUE  21
 #define PIN_EMITTER_GREEN 22
 #define PIN_EMITTER_RED   23
+// A14: DAC out
 
 enum {
   RED,
