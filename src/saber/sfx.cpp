@@ -26,13 +26,6 @@ SOFTWARE.
 #include "pins.h"
 #include "AudioPlayer.h"
 
-// 4: 204
-// 3: 180
-// 2: 170
-// 1: 160
-
-//#define DEBUG_DEEP
-
 #if SERIAL_DEBUG == 1
 # define ASSERT(x) if (!(x)) { Serial.print("SFX-ASSERT:"); Serial.print(#x); Serial.print(" "); Serial.print(__LINE__); }
 #else
@@ -44,13 +37,17 @@ SFX* SFX::m_instance = 0;
 SFX::SFX(AudioPlayer* audioPlayer)
 {
   m_instance = this;
+
   m_player = audioPlayer;
-  m_numFilenames = 0;
-  m_igniteTime = 1000;
-  m_retractTime = 1000;
+  m_bladeOn = false;
   m_muted = false;
   m_numFonts = 0;
+  m_numFilenames = 0;
+  m_currentSound = SFX_NONE;
   m_currentFont = 0;
+  m_igniteTime = 1000;
+  m_retractTime = 1000;
+
   memset(m_location, 255, sizeof(SFXLocation)*NUM_SFX_TYPES);
 }
 
@@ -95,12 +92,12 @@ void SFX::scanFonts()
       break;
     }
     if (entry.isDirectory()) {
+      // Scan for a sound font with a limited, reasonable set of files.
       static const int N = 4;
       const char* NAMES[N] = { "HUM.WAV", "IDLE.WAV", "POWERON.WAV", "IGNITE.WAV" };
       for(int i=0; i<N; ++i) {
         CStr<25> path;
         filePath(&path, entry.name(), NAMES[i]);
-        //Serial.println(path.c_str());
 
         File file = SD.open(path.c_str());
         if (file) {
@@ -119,8 +116,7 @@ void SFX::scanFonts()
   for(int i=0; i<m_numFonts; ++i) {
     Serial.print(i); Serial.print(": "); Serial.println(m_dirName[i].c_str());
   }
-  Serial.println("--");
-  readIgniteRetract();
+  Serial.println("");
 }
 
 void SFX::scanFiles(uint8_t index)
@@ -152,6 +148,8 @@ void SFX::scanFiles(uint8_t index)
   }
   root.close();
 
+  // They often come in weird order, which is a bummer.
+  // Simple sort seems fast enough.
   combSort(m_filename, m_numFilenames);
 
   for (int i = 0; i < m_numFilenames; ++i) {
@@ -175,13 +173,13 @@ int SFX::calcSlot(const char* name )
 
   if (strstr(name, "POWERONF")) return -1;
 
-  if      (strstr(name, "BLDON")   || strstr(name, "POWERON"))    slot = SFX_POWER_ON;
-  else if (strstr(name, "BLDOFF")  || strstr(name, "POWEROFF"))   slot = SFX_POWER_OFF;
-  else if (strstr(name, "IDLE")    || strstr(name, "HUM"))        slot = SFX_IDLE;
-  else if (strstr(name, "IMPACT")  || strstr(name, "CLASH"))      slot = SFX_IMPACT;
-  else if (strstr(name, "MOTION")  || strstr(name, "SWING"))      slot = SFX_MOTION;
-  else if (strstr(name, "USRHOLD") || strstr(name, "LOCKUP"))     slot = SFX_USER_HOLD;
-  else if (strstr(name, "USRTAP")  || strstr(name, "BLASTER"))    slot = SFX_USER_TAP;
+  if      (strStarts(name, "BLDON")   || strStarts(name, "POWERON"))    slot = SFX_POWER_ON;
+  else if (strStarts(name, "BLDOFF")  || strStarts(name, "POWEROFF"))   slot = SFX_POWER_OFF;
+  else if (strStarts(name, "IDLE")    || strStarts(name, "HUM"))        slot = SFX_IDLE;
+  else if (strStarts(name, "IMPACT")  || strStarts(name, "CLASH"))      slot = SFX_IMPACT;
+  else if (strStarts(name, "MOTION")  || strStarts(name, "SWING"))      slot = SFX_MOTION;
+  else if (strStarts(name, "USRHOLD") || strStarts(name, "LOCKUP"))     slot = SFX_USER_HOLD;
+  else if (strStarts(name, "USRTAP")  || strStarts(name, "BLASTER"))    slot = SFX_USER_TAP;
 
   return slot;
 }
@@ -217,12 +215,14 @@ bool SFX::playSound(int sound, int mode)
   }
 
   if (sound == SFX_POWER_ON) {
-    if (m_bladeOn) return false;  // defensive error check.
+    if (m_bladeOn) 
+      return false;  // defensive error check.
     m_player->mute(m_muted);
     m_bladeOn = true;
   }
   else if (sound == SFX_POWER_OFF) {
-    if (!m_bladeOn) return false;  // defensive error check.
+    if (!m_bladeOn) 
+      return false;  // defensive error check.
     m_bladeOn = false;
   }
 
@@ -332,6 +332,7 @@ bool SFX::isMuted() const
 
 void SFX::setVolume204(int vol)
 {
+  vol = constrain(vol, 0, 204);
   if (vol >= 204) {
     m_player->setVolume(1.0f);
   }
@@ -365,6 +366,6 @@ const char* SFX::currentFontName() const
   if (m_numFonts) {
     return m_dirName[m_currentFont].c_str();
   }
-  return "no font";
+  return "<none>";
 }
 

@@ -1,10 +1,11 @@
 Issues:
+- start system with audio shutdown
 - test full circuit
 - switch to battery version
 - test audio output with scope
 - test LED output with scope
-- multiple sound banks
-- font name
+x multiple sound banks
+x font name
  
 Fixed
 x fix sound light

@@ -14,10 +14,10 @@ AudioConnection     patchCord1(playWav, mixer);
 AudioConnection     patchCord2(mixer, 0, dac, 0);
 
 AudioPlayer::AudioPlayer() {
-  m_startPlayingTime = 0;
   m_muted = false;
   m_shutdown = false;
-  m_volume = 1;
+  m_startPlayingTime = 0;
+  m_volume = 1.0f;
   pinMode(PIN_AMP_SHUTDOWN, INPUT);
 }
 
@@ -59,22 +59,16 @@ bool AudioPlayer::isPlaying() const {
   return true;
 }
 
-void AudioPlayer::setShutdown() {
-  bool shouldBeShutdown = m_muted;
-
-  if (shouldBeShutdown && !m_shutdown) {
+void AudioPlayer::mute(bool m) {
+  m_muted = m;
+  if (m_muted && !m_shutdown) {
     digitalWrite(PIN_AMP_SHUTDOWN, LOW);
     pinMode(PIN_AMP_SHUTDOWN, OUTPUT);
   }
-  else if (!shouldBeShutdown && m_shutdown) {
+  else if (!m_muted && m_shutdown) {
     pinMode(PIN_AMP_SHUTDOWN, INPUT);
   }
-  m_shutdown = shouldBeShutdown;
-}
-
-void AudioPlayer::mute(bool m) {
-  m_muted = m;
-  setShutdown();
+  m_shutdown = m_muted;
 }
 
 void AudioPlayer::setVolume(float v) {
