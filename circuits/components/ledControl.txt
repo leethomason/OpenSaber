@@ -1,19 +1,22 @@
                                                          Emitter end. 3 high power,     
                                                          common anode LEDs. Circuit only
                                                          shown for one.                 
-                                   Vcc = 3.7                                            
-                                   +-------------+---+--+-----+-----+                   
-                                                 |   |  |     |     |                   
-                                                 |   |  |     |     |                   
-                                                 |   |  V+    V+    V+                  
-                                  Rled           |   |  |     ...   ...                       
-                     Rring      D---//------------------+                               
-      PWM control  +--//--+--G M                 |   |                                  
-  PIN_EMITTER_RED         |     S             C ---  / R1                               
-PIN_EMITTER_GREEN         /     |               ---  /                                  
- PIN_EMITTER_BLUE    Rtie /     |                |   |                                  
-                          |     |                |   |                                  
-                         ===   ===              =======                                 
+                Vcc = 3.7 (3.5-4.2)                                         
+                  +-------------+-----+-----+-----+
+                               LED   LED   LED    |             
+                                |    ...   ...    | 
+                                |                 |
+                                / Rled           |
+                                /                 |
+                                |                 |
+                                |                 |
+                     Rring      D                 +------+           
+      PWM control  +--//--+--G M                  |      |             
+  PIN_EMITTER_RED         |     S                 C ---  / R1                               
+PIN_EMITTER_GREEN         /     |                   ---  /                                  
+ PIN_EMITTER_BLUE    Rtie /     |                 |      |                                  
+                          |     |                 |      |                                  
+                         ===   ===               ===    ===                                 
                                                                                         
                     The per-LED control        A capacitor (and cap drain)              
                     circuit. (3 for RGB        tries to even out the (large)            
