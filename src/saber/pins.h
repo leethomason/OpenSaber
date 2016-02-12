@@ -45,6 +45,7 @@ static const int EEPROM_SIZE = 512;
  *  Toggle sound:   Hold B (Blade off)
  */
 
+
 /* Teensy 3.2 */
 #define PIN_RX1           0
 #define PIN_TX1           1
