@@ -61,8 +61,8 @@ static const int EEPROM_SIZE = 512;
 #define PIN_SDCARD_MOSI   11
 // SD: DIN                12
 #define PIN_SDCARD_SCK    13
-#define PIN_VMETER        14
-#define PIN_OLED_DC       15
+#define PIN_OLED_DC       14
+#define PIN_VMETER        15
 #define PIN_OLED_RESET    16 
 #define PIN_OLED_CS       17
 #define PIN_SDA           18

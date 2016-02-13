@@ -1,0 +1,61 @@
+- check pins
+- check header 
+- create inverse header
+- check circuits
+- check power / conductivity
+- label resistors, caps
+
+Header Pins:
+	Power to:
+		P1: Bat+     (shared)
+     	P3: Bat-     (to battery, insulated)
+	 	P2: Ground   (switched connection to Bat-)
+	Control:
+   		vcc	  (supply)
+	  	A-Logic
+	  	A-leD
+	  	B-Logic
+	  	B-leD
+	Data: 
+		TX
+	  	RX
+
+	PCB pin outs:
+	Battery: (near)
+		Bat+
+		Bat-
+	Accel: (back)
+		Vcc
+		grd
+		SDL
+		SDA
+	Audio: (back)
+		vbat
+		agrd (hopped)
+		dac
+		shutdown
+	SD Card: (???)
+		vcc
+		grd
+		CS
+		MOSI
+		MISO
+		SCK
+	Display: (back)
+		vcc
+		grd
+		CS
+		MOSI
+		SCK
+		DC
+		RESET
+	Crystal
+		cr
+		cg
+		cb
+	LED 
+		Vbat
+		R
+		G
+		B
+*/
