@@ -50,27 +50,27 @@ static const int EEPROM_SIZE = 512;
 #define PIN_RX1           0
 #define PIN_TX1           1
 #define PIN_AMP_SHUTDOWN  2
-// reserve crystal R      3
-// reserve crystal G      4
-// reserve crystal B      5
-#define PIN_SWITCH_A      6   // switch - power (also PWM)
-#define PIN_SWITCH_B      7
+#define PIN_CRYSTAL_R     3
+#define PIN_CRYSTAL_G     4
+#define PIN_CRYSTAL_B     5
+#define PIN_SWITCH_B      6
+#define PIN_SWITCH_A      7   // switch - power (also PWM)
 #define PIN_LED_A         8   // switch LED - power
 #define PIN_LED_B         9   // switch LED - audio
 #define PIN_SDCARD_CS     10
 #define PIN_SDCARD_MOSI   11
-// SD: DIN                12
+#define PIN_SDCARD_MISO   12
 #define PIN_SDCARD_SCK    13
 #define PIN_OLED_DC       14
 #define PIN_VMETER        15
 #define PIN_OLED_RESET    16 
 #define PIN_OLED_CS       17
 #define PIN_SDA           18
-#define PIN_SDL           19
+#define PIN_SCL           19
 // 20
-#define PIN_EMITTER_BLUE  21
+#define PIN_EMITTER_RED   21
 #define PIN_EMITTER_GREEN 22
-#define PIN_EMITTER_RED   23
+#define PIN_EMITTER_BLUE  23
 // A14: DAC out
 
 enum {

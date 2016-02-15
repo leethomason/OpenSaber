@@ -1,9 +1,10 @@
-- check pins
-- check header 
-- create inverse header
-- check circuits
-- check power / conductivity
-- label resistors, caps
+x check pins
+x check header 
+x create inverse header
+x label resistors, caps
+x check circuits
+x check power / conductivity
+- check alt grnd, vcc, etc. on live circuit
 
 Header Pins:
 	Power to:
