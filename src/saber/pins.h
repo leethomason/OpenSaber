@@ -31,20 +31,10 @@ static const int EEPROM_SIZE = 512;
 
 #define SABER_ACCELEROMETER
 #define SABER_SOUND_ON
-//#define SABER_SOUND_SHUTDOWN
+#define SABER_SOUND_SHUTDOWN
 //#define SABER_VOLTMETER
 #define SABER_LOGGING
 // Don't forget to set the emmitter in electrical.h!
-  
-/*
- * Actions:
- *  Blade on/off:   Hold A
- *  Parry blaster:  Tap B
- *  Lock-up         Hold B
- *  Switch color:   Hold B, Tap A (Blade on)
- *  Toggle sound:   Hold B (Blade off)
- */
-
 
 /* Teensy 3.2 */
 #define PIN_RX1           0
@@ -55,8 +45,8 @@ static const int EEPROM_SIZE = 512;
 #define PIN_CRYSTAL_B     5
 #define PIN_SWITCH_B      6
 #define PIN_SWITCH_A      7   // switch - power (also PWM)
-#define PIN_LED_A         8   // switch LED - power
-#define PIN_LED_B         9   // switch LED - audio
+#define PIN_LED_B         8   // switch LED - audio
+#define PIN_LED_A         9   // switch LED - power
 #define PIN_SDCARD_CS     10
 #define PIN_SDCARD_MOSI   11
 #define PIN_SDCARD_MISO   12

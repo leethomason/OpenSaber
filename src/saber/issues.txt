@@ -1,13 +1,14 @@
 Issues:
 - start system with audio shutdown
 - test full circuit
-- switch to battery version
-- test audio output with scope
-- test LED output with scope
-x multiple sound banks
-x font name
+- doesn't start with correct font
  
 Fixed
+x switch to battery version
+x test audio output with scope
+x test LED output with scope
+x multiple sound banks
+x font name
 x fix sound light
 x bootup sound
 x shutdown audio

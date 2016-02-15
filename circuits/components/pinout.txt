@@ -4,7 +4,9 @@ x create inverse header
 x label resistors, caps
 x check circuits
 x check power / conductivity
-- check alt grnd, vcc, etc. on live circuit
+x add caps!
+x re-test audio w/o caps
+- check alt grnd, vcc, etc. on battery circuit
 
 Header Pins:
 	Power to:
@@ -59,4 +61,4 @@ Header Pins:
 		R
 		G
 		B
-*/
+
