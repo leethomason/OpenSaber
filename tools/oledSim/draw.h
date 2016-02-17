@@ -4,5 +4,7 @@
 #include <stdint.h>
 
 const uint8_t* get_hw(int* width, int* height);
+const uint8_t* get_tt(int* width, int* height);
+
 
 #endif // DRAW_INCLUDED

@@ -38,17 +38,38 @@ void Display::Commit()
 void Display::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h)
 {
 	const int nRows = height / 8;
-	const int bitmapRows = h / 8;
+	const int bitmapRows = (h+7) / 8;
 
 	const int x0 = MAX(0, x);
 	const int x1 = MIN(x + w, width);
 	const int dx = x1 - x0;
 
+	const int r0 = y / 8;
+	const int r1 = (y + h) / 8;
+	for (int r = r0; r < r1; ++r) {
+		mask[r] = 0xff;
+	}
+
+
+	const uint8_t* src = bitmap + (x0-x) * bitmapRows;// +(i - x) * bitmapRows + (bitmapRows - 1);
 	for (int i = x0; i < x1; ++i) {
 		uint8_t* dst = buffer + i * nRows;
-		const uint8_t* src = bitmap + (i - x) * bitmapRows + (bitmapRows - 1);
 		for (int r = 0; r < bitmapRows; ++r) {
-			*dst++ = *src--;
+			*dst++ = *src++;
+		}
+	}
+}
+
+
+void Display::Fill(int c)
+{
+	uint8_t* dst = buffer;
+	uint8_t value = c ? 0xff : 0;
+
+	const int nRows = height / 8;
+	for (int i = 0; i < width; ++i) {
+		for (int j = 0; j < nRows; ++j) {
+			*dst++ = value;
 		}
 	}
 }

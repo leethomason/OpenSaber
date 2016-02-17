@@ -9,11 +9,16 @@
 
 void Draw(Display* d)
 {
+	d->Fill(1);
+
 	int texW = 0, texH = 0;
 	const uint8_t* tex = get_hw(&texW, &texH);
 	d->DrawBitmap(-6, 0, tex, texW, texH);
 	d->DrawBitmap(20, 0, tex, texW, texH);
 	d->DrawBitmap(120, 0, tex, texW, texH);
+
+	tex = get_tt(&texW, &texH);
+	d->DrawBitmap(40, 0, tex, texW, texH);
 }
 
 
