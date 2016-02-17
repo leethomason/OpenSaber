@@ -87,6 +87,20 @@ void Display::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, bool
 }
 
 
+void Display::DrawStr(const char* str, int x, int y, glyphMetrics metrics)
+{
+	int cx = x;
+	while (str && *str) {
+		int advance = 0, texW = 0, texR = 0;
+		const uint8_t* mem = metrics(*str, &advance, &texW, &texR);
+		int texH = texR * 8;
+		DrawBitmap(cx, y, mem, texW, texH, false);
+		cx += advance;
+
+		++str;
+	}
+}
+
 void Display::Fill(int c)
 {
 	uint8_t* dst = buffer;

@@ -3,6 +3,9 @@
 
 #include <stdint.h>
 
+typedef const uint8_t* (*glyphMetrics)(int charID, int* advance, int* w, int* rows);
+
+
 class Display
 {
 public:
@@ -10,6 +13,7 @@ public:
 	~Display();
 
 	void DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, bool mask=true);
+	void DrawStr(const char* str, int x, int y, glyphMetrics metrics);
 	void Fill(int c);
 
 	const uint32_t* Pixels() const { return pixels; }

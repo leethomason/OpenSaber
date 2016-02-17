@@ -25,7 +25,7 @@ void Draw(Display* d)
 	d->DrawBitmap(80, 8, tex, texW, texH);
 	d->DrawBitmap(100, 20, tex, texW, texH);
 	*/
-
+	/*
 	tex = getGlypth_consolas('A', &advance, &texW, &texR);
 	texH = texR * 8;
 	d->DrawBitmap(0, 0, tex, texW, texH, false);
@@ -34,6 +34,9 @@ void Draw(Display* d)
 	tex = getGlypth_consolas('B', &advance, &texW, &texR);
 	texH = texR * 8;
 	d->DrawBitmap(x, 0, tex, texW, texH, false);
+	*/
+
+	d->DrawStr("HELLO WORLD", 0, 0, getGlypth_consolas);
 
 	/*
 	// Test pattern. dot-space-line

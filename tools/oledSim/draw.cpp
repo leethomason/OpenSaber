@@ -53,9 +53,7 @@ const uint8_t* get_tt(int* width, int* height)
 // 
 //  Font data for Consolas 10pt
 // 
-
-// Character bitmaps for Consolas 10pt
-const uint8_t consolas_10ptBitmaps[] = 
+static const uint8_t consolas_10ptBitmaps[] = 
 {
 	// @0 'A' (6 pixels wide)
 	0xF0, 0x00, //     ####  
@@ -263,7 +261,7 @@ struct GlypthInfo {
 
 // Character descriptors for Consolas 10pt
 // { [Char width in bits], [Offset into consolas_10ptCharBitmaps in bytes] }
-const GlypthInfo consolas_10ptDescriptors[] = 
+static const GlypthInfo consolas_10ptDescriptors[] = 
 {
 	{6, 0}, 		// A 
 	{5, 12}, 		// B 
@@ -304,7 +302,7 @@ const uint8_t* getGlypth_consolas(int charID, int* advance, int* w, int* rows)
 		*rows = 2;
 		return consolas_10ptBitmaps + offset;
 	}
-	*advance = 2;
+	*advance = 4;
 	*w = 0;
 	*rows = 0;
 	return 0;
