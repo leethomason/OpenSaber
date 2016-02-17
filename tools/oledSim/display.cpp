@@ -1,6 +1,9 @@
 #include "display.h"
 #include <string.h>
 
+#define MIN(x, y) ((x) < (y) ? (x) : (y))
+#define MAX(x, y) ((x) > (y) ? (x) : (y))
+
 Display::Display(int w, int h)
 {
 	width = w;
@@ -37,9 +40,13 @@ void Display::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h)
 	const int nRows = height / 8;
 	const int bitmapRows = h / 8;
 
-	for (int i = 0; i < w; ++i) {
+	const int x0 = MAX(0, x);
+	const int x1 = MIN(x + w, width);
+	const int dx = x1 - x0;
+
+	for (int i = x0; i < x1; ++i) {
 		uint8_t* dst = buffer + i * nRows;
-		const uint8_t* src = bitmap + i * bitmapRows + (bitmapRows - 1);
+		const uint8_t* src = bitmap + (i - x) * bitmapRows + (bitmapRows - 1);
 		for (int r = 0; r < bitmapRows; ++r) {
 			*dst++ = *src--;
 		}
