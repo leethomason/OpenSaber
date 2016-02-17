@@ -35,28 +35,54 @@ void Display::Commit()
 	}
 }
 
-void Display::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h)
+void Display::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, bool doMask)
 {
+	if (!bitmap) return;
+
 	const int nRows = height / 8;
-	const int bitmapRows = (h+7) / 8;
+	const int texRows = (h + 7) / 8;
 
 	const int x0 = MAX(0, x);
 	const int x1 = MIN(x + w, width);
 	const int dx = x1 - x0;
 
-	const int r0 = y / 8;
-	const int r1 = (y + h) / 8;
+	const int r0 = MAX(0, y / 8);
+	const int r1 = MIN((y + h + 7) / 8, height / 8);
+	const int dr = r1 - r0;
+	const unsigned shift = (y+256) - ((y+256) / 8) * 8;
+	const unsigned downShift = 8 - shift;
+
 	for (int r = r0; r < r1; ++r) {
-		mask[r] = 0xff;
+		mask[r] = doMask ? 0xff : 0;
 	}
 
+	static const uint8_t LOW[8] = {
+		0xff, 0xfe, 0xfc, 0xf8, 0xf0, 0xe0, 0xc0, 0x80
+	};
+	static const uint8_t HIGH[8] = {
+		0xff, 0x7f, 0x3f, 0x1f, 0x0f, 0x7, 0x3, 0x1
+	};
 
-	const uint8_t* src = bitmap + (x0-x) * bitmapRows;// +(i - x) * bitmapRows + (bitmapRows - 1);
+	if (doMask) {
+		int trim = y - r0 * 8;
+		mask[r0] = LOW[trim];
+
+		trim = (r1)* 8 - (y + h);
+		mask[r1 - 1] &= HIGH[trim];
+	}
+
+	const uint8_t* src = bitmap + (x0-x) * texRows;
 	for (int i = x0; i < x1; ++i) {
-		uint8_t* dst = buffer + i * nRows;
-		for (int r = 0; r < bitmapRows; ++r) {
-			*dst++ = *src++;
+		uint8_t* dst = buffer + i * nRows + r0;
+		for (int r = 0; r < dr; ++r) {
+			*dst = *dst & (~mask[r + r0]);
+			*dst |= *(src + r) << shift;
+			if (r) {
+				*dst |= *(src + r - 1) >> downShift;
+			}
+			dst++;
 		}
+		src += texRows;
 	}
 }
 

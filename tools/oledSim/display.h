@@ -9,7 +9,7 @@ public:
 	Display(int w, int h);
 	~Display();
 
-	void DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h);
+	void DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, bool mask=true);
 	void Fill(int c);
 
 	const uint32_t* Pixels() const { return pixels; }

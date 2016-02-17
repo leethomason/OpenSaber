@@ -38,7 +38,7 @@ void setup()
   display.println("Hello Jedi");
 
   uint8_t* buffer = display.getBuffer();
-  *buffer = 0xff;
+  *buffer = 0xf1;
   
   display.display();
 }

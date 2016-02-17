@@ -9,16 +9,37 @@
 
 void Draw(Display* d)
 {
-	d->Fill(1);
+	d->Fill(0);
 
-	int texW = 0, texH = 0;
+	int texW = 0, texH = 0, texR = 0, advance = 0;
 	const uint8_t* tex = get_hw(&texW, &texH);
-	d->DrawBitmap(-6, 0, tex, texW, texH);
-	d->DrawBitmap(20, 0, tex, texW, texH);
-	d->DrawBitmap(120, 0, tex, texW, texH);
-
+	/*
+	d->DrawBitmap(6, 0, tex, texW, texH);
+	//d->DrawBitmap(20, 0, tex, texW, texH);
+	//d->DrawBitmap(120, 0, tex, texW, texH);
+	
 	tex = get_tt(&texW, &texH);
-	d->DrawBitmap(40, 0, tex, texW, texH);
+	d->DrawBitmap(40, 5, tex, texW, texH);
+	//d->DrawBitmap(60, 4, tex, texW, texH);
+	d->DrawBitmap(60, 7, tex, texW, texH);
+	d->DrawBitmap(80, 8, tex, texW, texH);
+	d->DrawBitmap(100, 20, tex, texW, texH);
+	*/
+
+	tex = getGlypth_consolas('A', &advance, &texW, &texR);
+	texH = texR * 8;
+	d->DrawBitmap(0, 0, tex, texW, texH, false);
+
+	int x = advance;
+	tex = getGlypth_consolas('B', &advance, &texW, &texR);
+	texH = texR * 8;
+	d->DrawBitmap(x, 0, tex, texW, texH, false);
+
+	/*
+	// Test pattern. dot-space-line
+	uint8_t* buf = d->Buffer();
+	*buf = 0xf1;
+	*/
 }
 
 
