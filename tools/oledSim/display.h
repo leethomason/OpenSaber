@@ -12,8 +12,10 @@ public:
 	Display(int w, int h);
 	~Display();
 
-	void DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, bool mask=true);
-	void DrawStr(const char* str, int x, int y, glyphMetrics metrics);
+	bool DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h,
+					bool mask = true, int clip0 = 0, int clip1 = 256);
+	bool DrawStr(const char* str, int x, int y, glyphMetrics metrics, 
+				 int clip0 = 0, int clip1 = 256);
 	void Fill(int c);
 
 	const uint32_t* Pixels() const { return pixels; }

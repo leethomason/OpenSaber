@@ -7,7 +7,10 @@
 #include "display.h"
 #include "draw.h"
 
-void Draw(Display* d)
+int tOffset = 0;
+int line = 0;
+
+void Draw(Display* d, uint32_t time)
 {
 	d->Fill(0);
 
@@ -36,7 +39,19 @@ void Draw(Display* d)
 	d->DrawBitmap(x, 0, tex, texW, texH, false);
 	*/
 
-	d->DrawStr("HELLO WORLD", 0, 0, getGlypth_consolas);
+	static const char* lines[] = {
+		"THERE IS NO IGNORANCE, THERE IS ATTENTION.",
+		"THERE IS NO SELF, THERE IS THE FORCE"
+	};
+
+	int dx = (time - tOffset) / 50;
+	bool render = d->DrawStr(lines[line], 107 - dx, 22, getGlypth_consolas, 10, 108);
+	if (!render && !line) {
+		line = 1;
+		tOffset = time;
+	}
+	
+	//d->DrawStr("THERE IS NO IGNORANCE", 10, 22, getGlypth_consolas, 10, 108);
 
 	/*
 	// Test pattern. dot-space-line
@@ -72,12 +87,13 @@ int main(int, char**){
 	SDL_SetRenderDrawColor(ren, 128, 128, 128, 255);
 
 	SDL_Event e;
-	while (SDL_WaitEvent(&e)){
+	while (true) {
+		SDL_PollEvent(&e);
 		if (e.type == SDL_QUIT){
 			break;
 		}
 
-		Draw(&display);
+		Draw(&display, SDL_GetTicks());
 		display.Commit();
 
 		const SDL_Rect src = { 0, 0, WIDTH, HEIGHT };

@@ -35,22 +35,24 @@ void Display::Commit()
 	}
 }
 
-void Display::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, bool doMask)
+bool Display::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, bool doMask, int clip0, int clip1)
 {
-	if (!bitmap) return;
+	if (!bitmap) return false;
 
 	const int nRows = height / 8;
 	const int texRows = (h + 7) / 8;
 
-	const int x0 = MAX(0, x);
-	const int x1 = MIN(x + w, width);
+	const int x0 = MAX(MAX(clip0, 0), x);
+	const int x1 = MIN(x + w, MIN(width, clip1));
 	const int dx = x1 - x0;
+	if (dx <= 0) return false;
 
 	const int r0 = MAX(0, y / 8);
 	const int r1 = MIN((y + h + 7) / 8, height / 8);
 	const int dr = r1 - r0;
 	const unsigned shift = (y+256) - ((y+256) / 8) * 8;
 	const unsigned downShift = 8 - shift;
+	if (dr <= 0) return false;
 
 	for (int r = r0; r < r1; ++r) {
 		mask[r] = doMask ? 0xff : 0;
@@ -69,6 +71,9 @@ void Display::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, bool
 
 		trim = (r1)* 8 - (y + h);
 		mask[r1 - 1] &= HIGH[trim];
+
+		if (r0 == r1 && mask[r0] == 0)
+			return false;
 	}
 
 	const uint8_t* src = bitmap + (x0-x) * texRows;
@@ -84,21 +89,25 @@ void Display::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, bool
 		}
 		src += texRows;
 	}
+	return true;
 }
 
 
-void Display::DrawStr(const char* str, int x, int y, glyphMetrics metrics)
+bool Display::DrawStr(const char* str, int x, int y, glyphMetrics metrics, int clip0, int clip1)
 {
 	int cx = x;
+	bool didRender = false;
 	while (str && *str) {
 		int advance = 0, texW = 0, texR = 0;
 		const uint8_t* mem = metrics(*str, &advance, &texW, &texR);
 		int texH = texR * 8;
-		DrawBitmap(cx, y, mem, texW, texH, false);
+		bool render = DrawBitmap(cx, y, mem, texW, texH, false, clip0, clip1);
+		didRender = didRender || render;
 		cx += advance;
 
 		++str;
 	}
+	return didRender;
 }
 
 void Display::Fill(int c)
