@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #include "display.h"
+#include "oledsim.h"
 #include "draw.h"
 
 int tOffset = 0;
@@ -38,13 +39,17 @@ void Draw(Display* d, uint32_t time)
 	texH = texR * 8;
 	d->DrawBitmap(x, 0, tex, texW, texH, false);
 	*/
+
+	tex = get_dial0(&texW, &texH);
+	d->DrawBitmap(0, 0, tex, texW, texH);
+
 	static const char* lines[] = {
 		"THERE IS NO IGNORANCE, THERE IS ATTENTION.",
 		"THERE IS NO SELF, THERE IS THE FORCE"
 	};
 
 	int dx = (time - tOffset) / 50;
-	bool render = d->DrawStr(lines[line], 107 - dx, 22, getGlypth_aurekBesh, 10, 108);
+	bool render = d->DrawStr(lines[line], 95 - dx, 22, getGlypth_aurekBesh, 32, 96);
 	if (!render && !line) {
 		line = 1;
 		tOffset = time;
@@ -82,7 +87,10 @@ int main(int, char**){
 	SDL_Texture* texture = SDL_CreateTexture(ren, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, WIDTH, HEIGHT);
 	assert(texture);
 
-	Display display(WIDTH, HEIGHT);
+	OledSim oled(WIDTH, HEIGHT);
+	Display display;
+	display.Attach(WIDTH, HEIGHT, oled.Buffer());
+
 	SDL_SetRenderDrawColor(ren, 128, 128, 128, 255);
 
 	SDL_Event e;
@@ -93,7 +101,7 @@ int main(int, char**){
 		}
 
 		Draw(&display, SDL_GetTicks());
-		display.Commit();
+		oled.Commit();
 
 		const SDL_Rect src = { 0, 0, WIDTH, HEIGHT };
 		SDL_Rect winRect;
@@ -103,7 +111,7 @@ int main(int, char**){
 		const int h = HEIGHT * scale;
 		SDL_Rect dst = { (winRect.w - w) / 2, (winRect.h - h) / 2, w, h };
 
-		SDL_UpdateTexture(texture, NULL, display.Pixels(), WIDTH * 4);
+		SDL_UpdateTexture(texture, NULL, oled.Pixels(), WIDTH * 4);
 		SDL_RenderClear(ren);
 		SDL_RenderCopy(ren, texture, &src, &dst);
 		SDL_RenderPresent(ren);

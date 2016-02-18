@@ -16,12 +16,18 @@
     <ClCompile Include="draw.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="oledsim.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="display.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="draw.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="oledsim.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

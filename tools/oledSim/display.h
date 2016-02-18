@@ -9,8 +9,9 @@ typedef const uint8_t* (*glyphMetrics)(int charID, int* advance, int* w, int* ro
 class Display
 {
 public:
-	Display(int w, int h);
-	~Display();
+	Display();
+
+	void Attach(int w, int h, uint8_t* buffer);
 
 	bool DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h,
 					bool mask = true, int clip0 = 0, int clip1 = 256);
@@ -18,17 +19,13 @@ public:
 				 int clip0 = 0, int clip1 = 256);
 	void Fill(int c);
 
-	const uint32_t* Pixels() const { return pixels; }
-	uint8_t* Buffer() { return buffer;}
-	void Commit();
-
 private:
 	int width;
 	int height;
+	uint8_t* buffer;
+
 	enum { MAX_ROWS = 4};
 	uint8_t mask[MAX_ROWS];
-	uint32_t* pixels;
-	uint8_t* buffer;
 };
 
 #endif // DISPLAY_INCLUDED
