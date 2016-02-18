@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 typedef const uint8_t* (*glyphMetrics)(int charID, int* advance, int* w, int* rows);
+typedef const uint8_t* (*textureData)(int* w, int* h);
 
 
 class Display
@@ -13,8 +14,14 @@ public:
 
 	void Attach(int w, int h, uint8_t* buffer);
 
+	enum {
+		NO_MASK = 0x01,
+		FLIP_X = 0x02
+	};
 	bool DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h,
-					bool mask = true, int clip0 = 0, int clip1 = 256);
+					int flags = 0, int clip0 = 0, int clip1 = 256);
+	bool DrawBitmap(int x, int y, textureData data, 
+					int flags = 0, int clip0 = 0, int clip1 = 256);
 	bool DrawStr(const char* str, int x, int y, glyphMetrics metrics, 
 				 int clip0 = 0, int clip1 = 256);
 	void Fill(int c);

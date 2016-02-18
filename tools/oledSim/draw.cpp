@@ -919,7 +919,35 @@ const uint8_t dial4Bitmaps[] =
 
 const uint8_t* get_dial0(int* width, int* height)
 {
-	if (width) *width = 32;
+	if (width) *width = 28;
 	if (height) *height = 32;
 	return dial0Bitmaps;
+}
+
+const uint8_t* get_dial1(int* width, int* height)
+{
+	if (width) *width = 28;
+	if (height) *height = 32;
+	return dial1Bitmaps;
+}
+
+const uint8_t* get_dial2(int* width, int* height)
+{
+	if (width) *width = 28;
+	if (height) *height = 32;
+	return dial2Bitmaps;
+}
+
+const uint8_t* get_dial3(int* width, int* height)
+{
+	if (width) *width = 28;
+	if (height) *height = 32;
+	return dial3Bitmaps;
+}
+
+const uint8_t* get_dial4(int* width, int* height)
+{
+	if (width) *width = 28;
+	if (height) *height = 32;
+	return dial4Bitmaps;
 }

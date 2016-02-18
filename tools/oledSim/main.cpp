@@ -15,33 +15,8 @@ void Draw(Display* d, uint32_t time)
 {
 	d->Fill(0);
 
-	int texW = 0, texH = 0, texR = 0, advance = 0;
-	const uint8_t* tex = get_hw(&texW, &texH);
-	/*
-	d->DrawBitmap(6, 0, tex, texW, texH);
-	//d->DrawBitmap(20, 0, tex, texW, texH);
-	//d->DrawBitmap(120, 0, tex, texW, texH);
-	
-	tex = get_tt(&texW, &texH);
-	d->DrawBitmap(40, 5, tex, texW, texH);
-	//d->DrawBitmap(60, 4, tex, texW, texH);
-	d->DrawBitmap(60, 7, tex, texW, texH);
-	d->DrawBitmap(80, 8, tex, texW, texH);
-	d->DrawBitmap(100, 20, tex, texW, texH);
-	*/
-	/*
-	tex = getGlypth_consolas('A', &advance, &texW, &texR);
-	texH = texR * 8;
-	d->DrawBitmap(0, 0, tex, texW, texH, false);
-
-	int x = advance;
-	tex = getGlypth_aurekBesh('B', &advance, &texW, &texR);
-	texH = texR * 8;
-	d->DrawBitmap(x, 0, tex, texW, texH, false);
-	*/
-
-	tex = get_dial0(&texW, &texH);
-	d->DrawBitmap(0, 0, tex, texW, texH);
+	d->DrawBitmap(0, 0, get_dial3);
+	d->DrawBitmap(128-28, 0, get_dial1, Display::FLIP_X);
 
 	static const char* lines[] = {
 		"THERE IS NO IGNORANCE, THERE IS ATTENTION.",
@@ -49,14 +24,12 @@ void Draw(Display* d, uint32_t time)
 	};
 
 	int dx = (time - tOffset) / 50;
-	bool render = d->DrawStr(lines[line], 95 - dx, 22, getGlypth_aurekBesh, 32, 96);
+	bool render = d->DrawStr(lines[line], 128- 28 - 1 - dx, 22, getGlypth_aurekBesh, 28, 128 - 28);
 	if (!render && !line) {
 		line = 1;
 		tOffset = time;
 	}
 	
-	//d->DrawStr("THERE IS NO IGNORANCE", 10, 22, getGlypth_consolas, 10, 108);
-
 	/*
 	// Test pattern. dot-space-line
 	uint8_t* buf = d->Buffer();

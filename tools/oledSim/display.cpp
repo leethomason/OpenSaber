@@ -18,7 +18,15 @@ void Display::Attach(int w, int h, uint8_t* buf)
 	buffer = buf;
 }
 
-bool Display::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, bool doMask, int clip0, int clip1)
+bool Display::DrawBitmap(int x, int y, textureData data, int flags, int clip0, int clip1)
+{
+	int texW = 0;
+	int texH = 0;
+	const uint8_t* tex = data(&texW, &texH);
+	return DrawBitmap(x, y, tex, texW, texH, flags, clip0, clip1);
+}
+
+bool Display::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, int flags, int clip0, int clip1)
 {
 	if (!bitmap) return false;
 
@@ -38,7 +46,7 @@ bool Display::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, bool
 	if (dr <= 0) return false;
 
 	for (int r = r0; r < r1; ++r) {
-		mask[r] = doMask ? 0xff : 0;
+		mask[r] = (flags & NO_MASK) ? 0 : 0xff;
 	}
 
 	static const uint8_t LOW[8] = {
@@ -48,7 +56,7 @@ bool Display::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, bool
 		0xff, 0x7f, 0x3f, 0x1f, 0x0f, 0x7, 0x3, 0x1
 	};
 
-	if (doMask) {
+	if (!(flags & NO_MASK)) {
 		int trim = y - r0 * 8;
 		mask[r0] = LOW[trim];
 
@@ -62,6 +70,9 @@ bool Display::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, bool
 	const uint8_t* src = bitmap + (x0-x) * texRows;
 	for (int i = x0; i < x1; ++i) {
 		uint8_t* dst = buffer + i * nRows + r0;
+		if (flags & FLIP_X) {
+			dst = buffer + (x1 - 1 - (i - x0)) * nRows;
+		}
 		for (int r = 0; r < dr; ++r) {
 			*dst = *dst & (~mask[r + r0]);
 			*dst |= *(src + r) << shift;
@@ -84,7 +95,7 @@ bool Display::DrawStr(const char* str, int x, int y, glyphMetrics metrics, int c
 		int advance = 0, texW = 0, texR = 0;
 		const uint8_t* mem = metrics(*str, &advance, &texW, &texR);
 		int texH = texR * 8;
-		bool render = DrawBitmap(cx, y, mem, texW, texH, false, clip0, clip1);
+		bool render = DrawBitmap(cx, y, mem, texW, texH, NO_MASK, clip0, clip1);
 		didRender = didRender || render;
 		cx += advance;
 
