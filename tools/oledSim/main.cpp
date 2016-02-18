@@ -34,18 +34,17 @@ void Draw(Display* d, uint32_t time)
 	d->DrawBitmap(0, 0, tex, texW, texH, false);
 
 	int x = advance;
-	tex = getGlypth_consolas('B', &advance, &texW, &texR);
+	tex = getGlypth_aurekBesh('B', &advance, &texW, &texR);
 	texH = texR * 8;
 	d->DrawBitmap(x, 0, tex, texW, texH, false);
 	*/
-
 	static const char* lines[] = {
 		"THERE IS NO IGNORANCE, THERE IS ATTENTION.",
 		"THERE IS NO SELF, THERE IS THE FORCE"
 	};
 
 	int dx = (time - tOffset) / 50;
-	bool render = d->DrawStr(lines[line], 107 - dx, 22, getGlypth_consolas, 10, 108);
+	bool render = d->DrawStr(lines[line], 107 - dx, 22, getGlypth_aurekBesh, 10, 108);
 	if (!render && !line) {
 		line = 1;
 		tOffset = time;
