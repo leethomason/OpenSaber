@@ -8,28 +8,57 @@
 #include "oledsim.h"
 #include "draw.h"
 
-int tOffset = 0;
 int line = 0;
+uint32_t prevTime = 0;
+uint32_t animTime = 0;
+
+static const int WIDTH = 128;
+static const int HEIGHT = 32;
 
 void Draw(Display* d, uint32_t time)
 {
 	d->Fill(0);
 
+	static const int DIAL_WIDTH = 28;
+
 	d->DrawBitmap(0, 0, get_dial3);
-	d->DrawBitmap(128-28, 0, get_dial1, Display::FLIP_X);
+	d->DrawBitmap(WIDTH - DIAL_WIDTH, 0, get_dial1, Display::FLIP_X);
+	d->DrawStr("P", 22, 12, getGlypth_aurekBesh);
+	d->DrawStr("V", 96, 12, getGlypth_aurekBesh);
+
+	//d->DrawRectangle(WIDTH / 2 - 1, 2, 3, 10);
 
 	static const char* lines[] = {
 		"THERE IS NO IGNORANCE, THERE IS ATTENTION.",
 		"THERE IS NO SELF, THERE IS THE FORCE"
 	};
 
-	int dx = (time - tOffset) / 50;
-	bool render = d->DrawStr(lines[line], 128- 28 - 1 - dx, 22, getGlypth_aurekBesh, 28, 128 - 28);
+	if (prevTime) {
+		animTime += time - prevTime;
+	}
+	prevTime = time;
+	
+	int dx = animTime / 100; // / 80;
+	bool render = d->DrawStr(lines[line], WIDTH - DIAL_WIDTH - 1 - dx, 22, getGlypth_aurekBesh, 
+							 DIAL_WIDTH, WIDTH - DIAL_WIDTH);
 	if (!render && !line) {
 		line = 1;
-		tOffset = time;
+		animTime = 0;
 	}
 	
+	/*
+	const int FONT = 5;	// 0-based
+	for (int i = 0; i <= FONT; ++i) {
+		int x = i % 4;
+		int y = i / 4;
+		d->DrawRectangle(WIDTH / 2 - 25 + x*5, y*5, 4, 4);
+	}
+
+	const uint8_t color[3] = { 0, 255, 100 };
+	for (int i = 0; i < 3; ++i) {
+		d->DrawRectangle(WIDTH / 2 + 6, i * 3, color[i] * 20 / 255, 2);
+	}
+	*/
 	/*
 	// Test pattern. dot-space-line
 	uint8_t* buf = d->Buffer();
@@ -54,9 +83,6 @@ int main(int, char**){
 	SDL_Renderer *ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	assert(ren);
 
-	static const int WIDTH = 128;
-	static const int HEIGHT = 32;
-
 	SDL_Texture* texture = SDL_CreateTexture(ren, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, WIDTH, HEIGHT);
 	assert(texture);
 
@@ -67,10 +93,16 @@ int main(int, char**){
 	SDL_SetRenderDrawColor(ren, 128, 128, 128, 255);
 
 	SDL_Event e;
+	int scale = 4;
 	while (true) {
 		SDL_PollEvent(&e);
 		if (e.type == SDL_QUIT){
 			break;
+		}
+		else if (e.type == SDL_KEYDOWN) {
+			if (e.key.keysym.sym >= SDLK_1 && e.key.keysym.sym <= SDLK_8) {
+				scale = e.key.keysym.sym - SDLK_0;
+			}
 		}
 
 		Draw(&display, SDL_GetTicks());
@@ -79,7 +111,6 @@ int main(int, char**){
 		const SDL_Rect src = { 0, 0, WIDTH, HEIGHT };
 		SDL_Rect winRect;
 		SDL_GetWindowSize(win, &winRect.w, &winRect.h);
-		const int scale = 4;
 		const int w = WIDTH * scale;
 		const int h = HEIGHT * scale;
 		SDL_Rect dst = { (winRect.w - w) / 2, (winRect.h - h) / 2, w, h };

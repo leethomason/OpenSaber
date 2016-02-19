@@ -24,9 +24,13 @@ public:
 					int flags = 0, int clip0 = 0, int clip1 = 256);
 	bool DrawStr(const char* str, int x, int y, glyphMetrics metrics, 
 				 int clip0 = 0, int clip1 = 256);
+	void DrawRectangle(int x, int y, int w, int h);
+
 	void Fill(int c);
 
 private:
+	void CalcMask(int y, int h, int* r0, int* r1);
+
 	int width;
 	int height;
 	uint8_t* buffer;

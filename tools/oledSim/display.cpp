@@ -39,7 +39,7 @@ bool Display::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, int 
 	if (dx <= 0) return false;
 
 	const int r0 = MAX(0, y / 8);
-	const int r1 = MIN((y + h + 7) / 8, height / 8);
+	const int r1 = MIN((y + h) / 8, nRows);
 	const int dr = r1 - r0;
 	const unsigned shift = (y+256) - ((y+256) / 8) * 8;
 	const unsigned downShift = 8 - shift;
@@ -49,20 +49,8 @@ bool Display::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, int 
 		mask[r] = (flags & NO_MASK) ? 0 : 0xff;
 	}
 
-	static const uint8_t LOW[8] = {
-		0xff, 0xfe, 0xfc, 0xf8, 0xf0, 0xe0, 0xc0, 0x80
-	};
-	static const uint8_t HIGH[8] = {
-		0xff, 0x7f, 0x3f, 0x1f, 0x0f, 0x7, 0x3, 0x1
-	};
-
 	if (!(flags & NO_MASK)) {
-		int trim = y - r0 * 8;
-		mask[r0] = LOW[trim];
-
-		trim = (r1)* 8 - (y + h);
-		mask[r1 - 1] &= HIGH[trim];
-
+		CalcMask(y, h, 0, 0);
 		if (r0 == r1 && mask[r0] == 0)
 			return false;
 	}
@@ -86,6 +74,45 @@ bool Display::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, int 
 	return true;
 }
 
+
+void Display::DrawRectangle(int x, int y, int w, int h)
+{
+	int r0 = 0, r1 = 0;
+	CalcMask(y, h, &r0, &r1);
+	int x0 = MAX(x, 0);
+	int x1 = MIN(x + w, width);
+	const int nRows = height / 8;
+
+	for (int x = x0; x < x1; ++x) {
+		uint8_t* dst = buffer + x * nRows + r0;
+		for (int r = r0; r < r1; ++r) {
+			*dst++ |= mask[r];
+		}
+	}
+}
+
+
+void Display::CalcMask(int y, int h, int* pr0, int* pr1)
+{
+	static const uint8_t LOW[8] = {
+		0xff, 0xfe, 0xfc, 0xf8, 0xf0, 0xe0, 0xc0, 0x80
+	};
+	static const uint8_t HIGH[8] = {
+		0xff, 0x7f, 0x3f, 0x1f, 0x0f, 0x7, 0x3, 0x1
+	};
+
+	const int r0 = MAX(0, y / 8);
+	const int r1 = MIN((y + h + 7) / 8, height / 8);
+
+	if (pr0) *pr0 = r0;
+	if (pr1) *pr1 = r1;
+
+	int trim = y - r0 * 8;
+	mask[r0] = LOW[trim];
+
+	trim = (r1)* 8 - (y + h);
+	mask[r1 - 1] &= HIGH[trim];
+}
 
 bool Display::DrawStr(const char* str, int x, int y, glyphMetrics metrics, int clip0, int clip1)
 {
