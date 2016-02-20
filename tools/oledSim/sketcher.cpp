@@ -1,6 +1,6 @@
 #include "sketcher.h"
 #include "display.h"
-#include "draw.h"
+#include "assets.h"
 
 #include <math.h>
 
@@ -29,13 +29,14 @@ void Sketcher::Draw(Display* d, uint32_t time, bool restMode)
 
 	//d->DrawRectangle(WIDTH / 2 - 1, 2, 3, 10);
 
-	static const int NLINES = 5;
+	static const int NLINES = 6;
 	static const char* lines[NLINES] = {
 		"THERE IS NO DISCORD, THERE IS SERENITY.",
 		"THERE IS NO THOUGHT, THERE IS PERCEPTION.",
 		"THERE IS NO IGNORANCE, THERE IS ATTENTION.",
 		"THERE IS NO DIVISION, THERE IS EMPATHY.",
-		"THERE IS NO SELF, THERE IS THE FORCE"
+		"THERE IS NO SELF, THERE IS THE FORCE.",
+		"MAY THE FORCE BE WITH YOU, ALWAYS."
 	};
 
 	if (prevTime) {
@@ -56,9 +57,10 @@ void Sketcher::Draw(Display* d, uint32_t time, bool restMode)
 	}
 	else {
 		for (int x = INNERX; x < DATA_WIDTH; ++x) {
-			d->DrawRectangle(x, 14 + 9 + 9 * sin(x / 3.0), 1, 1);
+			//d->DrawRectangle(x, 14 + 9 + 9 * sin(x / 3.0), 1, 1);
 			//d->DrawRectangle(x, 11 + 5 + 5 * sin(x / 3.0), 1, 1);
 			//d->DrawRectangle(x, 22 + 5 + 5 * sin(0.3 + x / 2.0), 1, 1);
+			d->DrawRectangle(x, 12, 1, 18);
 		}
 	}
 	

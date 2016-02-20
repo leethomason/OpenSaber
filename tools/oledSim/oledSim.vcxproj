@@ -68,15 +68,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="assets.cpp" />
     <ClCompile Include="display.cpp" />
-    <ClCompile Include="draw.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="oledsim.cpp" />
     <ClCompile Include="sketcher.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="assets.h" />
     <ClInclude Include="display.h" />
-    <ClInclude Include="draw.h" />
     <ClInclude Include="oledsim.h" />
     <ClInclude Include="sketcher.h" />
   </ItemGroup>

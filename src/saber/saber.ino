@@ -28,6 +28,8 @@ SOFTWARE.
 #include <SPI.h>
 #include <SD.h>
 #include <SerialFlash.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
 #include <Audio.h>
 #include <Button.h>
@@ -42,8 +44,10 @@ SOFTWARE.
 #include "saberdb.h"
 #include "cmdparser.h"
 #include "blade.h"
+#include "sketcher.h"
+#include "display.h"
 
-static const uint8_t  BLACK[NCHANNELS]  = {0};
+static const uint8_t  BLADE_BLACK[NCHANNELS]  = {0};
 static const uint32_t FLASH_TIME        = 120;
 static const uint32_t VCC_TIME_INTERVAL = 4000;
 
@@ -57,7 +61,7 @@ enum {  BLADE_OFF,
 static const uint32_t INDICATOR_TIME = 500;
 uint8_t  currentState = BLADE_OFF;
 uint32_t stateStartTime = 0;
-uint32_t lastVccTime = 0;
+uint32_t lastLoopTime = 0;
 bool     paletteChange = false; // used to prevent sound fx on palette changes
 uint8_t  nIndicator = 0;
 uint32_t indicatorStart = 0;
@@ -69,8 +73,16 @@ bool     soundWasOff = true;
 ButtonCB buttonA(PIN_SWITCH_A, Button::PULL_UP);
 ButtonCB buttonB(PIN_SWITCH_B, Button::PULL_UP);
 SaberDB saberDB;
+
 #ifdef SABER_ACCELEROMETER
 Adafruit_LIS3DH accel;
+#endif
+
+#ifdef SABER_DISPLAY
+Adafruit_SSD1306 display(PIN_OLED_DC, PIN_OLED_RESET, PIN_OLED_CS);
+Timer displayTimer(100);
+Sketcher sketcher;
+Display renderer;
 #endif
 
 #ifdef SABER_SOUND_ON
@@ -80,6 +92,7 @@ SFX sfx(&audioPlayer);
 
 CMDParser cmdParser(&saberDB);
 Blade blade;
+Timer vccTimer(VCC_TIME_INTERVAL);
 
 void setup() {
   Serial.begin(19200);  // still need to turn it on in case a command line is connected.
@@ -123,7 +136,7 @@ void setup() {
 #endif
 
   saberDB.log("BTN");
-  blade.setRGB(BLACK);
+  blade.setRGB(BLADE_BLACK);
 
   buttonA.holdHandler(onOffHandler);
   buttonA.clickHandler(checkPowerHandler);
@@ -143,7 +156,13 @@ void setup() {
 
   saberDB.log("VCC");
   blade.setVoltage(readVcc());
-  lastVccTime = millis();
+
+#ifdef SABER_DISPLAY
+  display.begin(SSD1306_SWITCHCAPVCC);
+  display.fillScreen(0);
+  display.display();
+  renderer.attach(display.getBuffer(), 128, 32);
+#endif
 
 #if SERIAL_DEBUG == 1
   Serial.println(F("Setup complete."));
@@ -155,6 +174,7 @@ void setup() {
   pinMode(PIN_LED_B, OUTPUT);
   digitalWrite(PIN_LED_B, saberDB.soundOn() ? HIGH : LOW);
   saberDB.log("END");
+  lastLoopTime = millis();
 }
 
 void changeState(uint8_t state)
@@ -278,9 +298,9 @@ void processBladeState()
     case BLADE_IGNITE:
       {
 #ifdef SABER_SOUND_ON
-        bool done = blade.setInterp(millis() - stateStartTime, sfx.getIgniteTime(), BLACK, saberDB.bladeColor());
+        bool done = blade.setInterp(millis() - stateStartTime, sfx.getIgniteTime(), BLADE_BLACK, saberDB.bladeColor());
 #else
-        bool done = blade.setInterp(millis() - stateStartTime, 1000, BLACK, saberDB.bladeColor());
+        bool done = blade.setInterp(millis() - stateStartTime, 1000, BLADE_BLACK, saberDB.bladeColor());
 #endif
         if (done) {
           changeState(BLADE_ON);
@@ -291,9 +311,9 @@ void processBladeState()
     case BLADE_RETRACT:
       {
 #ifdef SABER_SOUND_ON
-        bool done = blade.setInterp(millis() - stateStartTime, sfx.getRetractTime(), saberDB.bladeColor(), BLACK);
+        bool done = blade.setInterp(millis() - stateStartTime, sfx.getRetractTime(), saberDB.bladeColor(), BLADE_BLACK);
 #else
-        bool done = blade.setInterp(millis() - stateStartTime, 1000, saberDB.bladeColor(), BLACK);
+        bool done = blade.setInterp(millis() - stateStartTime, 1000, saberDB.bladeColor(), BLADE_BLACK);
 #endif
         if (done) {
           changeState(BLADE_OFF);
@@ -342,6 +362,10 @@ void serialEvent() {
 }
 
 void loop() {
+  const uint32_t msec = millis();
+  uint32_t deltaTime = msec - lastLoopTime;
+  lastLoopTime = msec;
+  
   buttonA.process();
   buttonB.process();
 
@@ -406,11 +430,8 @@ void loop() {
     }
   }
 
-  const uint32_t msec = millis();
-
-  if (msec - lastVccTime > VCC_TIME_INTERVAL) {
+  if (vccTimer.delta(deltaTime)) {
     blade.setVoltage(readVcc());
-    lastVccTime = msec;
   }
   if (nIndicator) {
     if (nIndicator && (msec - indicatorStart) >= INDICATOR_TIME) {
@@ -430,6 +451,13 @@ void loop() {
       reflashTime = calcReflashTime();
     }
   }
+
+#ifdef SABER_DISPLAY
+  if (displayTimer.delta(deltaTime)) {
+    sketcher.Draw(&renderer, msec, true);
+    display.display();
+  }
+#endif
 }
 
 int32_t readVcc() {

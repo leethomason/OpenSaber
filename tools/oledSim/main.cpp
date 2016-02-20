@@ -7,7 +7,7 @@
 
 #include "display.h"
 #include "oledsim.h"
-#include "draw.h"
+#include "assets.h"
 #include "sketcher.h"
 
 Sketcher sketcher;
