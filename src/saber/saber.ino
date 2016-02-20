@@ -458,6 +458,7 @@ void loop() {
 #ifdef SABER_DISPLAY
   if (displayTimer.delta(deltaTime)) {
     sketcher.Draw(&renderer, msec, true);
+    // see: SerialFlashChip.cpp in the teensy hardware source.
     SPI.beginTransaction(SPISettings(50000000, MSBFIRST, SPI_MODE0));
     display.display();
     SPI.endTransaction();
