@@ -69,15 +69,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="assets.cpp" />
-    <ClCompile Include="display.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="oledsim.cpp" />
+    <ClCompile Include="renderer.cpp" />
     <ClCompile Include="sketcher.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="assets.h" />
-    <ClInclude Include="display.h" />
     <ClInclude Include="oledsim.h" />
+    <ClInclude Include="renderer.h" />
     <ClInclude Include="sketcher.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -45,7 +45,7 @@ SOFTWARE.
 #include "cmdparser.h"
 #include "blade.h"
 #include "sketcher.h"
-#include "display.h"
+#include "renderer.h"
 
 static const uint8_t  BLADE_BLACK[NCHANNELS]  = {0};
 static const uint32_t FLASH_TIME        = 120;
@@ -82,7 +82,7 @@ Adafruit_LIS3DH accel;
 Adafruit_SSD1306 display(PIN_OLED_DC, PIN_OLED_RESET, PIN_OLED_CS);
 Timer displayTimer(100);
 Sketcher sketcher;
-Display renderer;
+Renderer renderer;
 #endif
 
 #ifdef SABER_SOUND_ON
@@ -161,7 +161,10 @@ void setup() {
   display.begin(SSD1306_SWITCHCAPVCC);
   display.fillScreen(0);
   display.display();
-  renderer.attach(display.getBuffer(), 128, 32);
+  renderer.Attach(128, 32, display.getBuffer());
+#if SERIAL_DEBUG == 1
+  Serial.println(F("OLED display connected."));
+#endif
 #endif
 
 #if SERIAL_DEBUG == 1
@@ -455,7 +458,9 @@ void loop() {
 #ifdef SABER_DISPLAY
   if (displayTimer.delta(deltaTime)) {
     sketcher.Draw(&renderer, msec, true);
+    SPI.beginTransaction(SPISettings(50000000, MSBFIRST, SPI_MODE0));
     display.display();
+    SPI.endTransaction();
   }
 #endif
 }

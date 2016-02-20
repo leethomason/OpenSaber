@@ -1,0 +1,6 @@
+*.bak
+*.dll
+*.opensdf
+*.sdf
+*.suo
+.gitignore

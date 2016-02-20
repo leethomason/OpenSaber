@@ -1,24 +1,24 @@
-#include "display.h"
+#include "renderer.h"
 #include <string.h>
 
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 
-Display::Display()
+Renderer::Renderer()
 {
 	width = 0;
 	height = 0;
 	buffer = 0;
 }
 
-void Display::Attach(int w, int h, uint8_t* buf)
+void Renderer::Attach(int w, int h, uint8_t* buf)
 {
 	width = w;
 	height = h;
 	buffer = buf;
 }
 
-bool Display::DrawBitmap(int x, int y, textureData data, int flags, int clip0, int clip1)
+bool Renderer::DrawBitmap(int x, int y, textureData data, int flags, int clip0, int clip1)
 {
 	int texW = 0;
 	int texH = 0;
@@ -26,7 +26,7 @@ bool Display::DrawBitmap(int x, int y, textureData data, int flags, int clip0, i
 	return DrawBitmap(x, y, tex, texW, texH, flags, clip0, clip1);
 }
 
-bool Display::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, int flags, int clip0, int clip1)
+bool Renderer::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, int flags, int clip0, int clip1)
 {
 	if (!bitmap) return false;
 
@@ -76,7 +76,7 @@ bool Display::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, int 
 }
 
 
-void Display::DrawRectangle(int x, int y, int w, int h)
+void Renderer::DrawRectangle(int x, int y, int w, int h)
 {
 	int r0 = 0, r1 = 0;
 	CalcMask(y, h, &r0, &r1);
@@ -93,7 +93,7 @@ void Display::DrawRectangle(int x, int y, int w, int h)
 }
 
 
-void Display::CalcMask(int y, int h, int* pr0, int* pr1)
+void Renderer::CalcMask(int y, int h, int* pr0, int* pr1)
 {
 	static const uint8_t LOW[8] = {
 		0xff, 0xfe, 0xfc, 0xf8, 0xf0, 0xe0, 0xc0, 0x80
@@ -115,7 +115,7 @@ void Display::CalcMask(int y, int h, int* pr0, int* pr1)
 	mask[r1 - 1] &= HIGH[trim];
 }
 
-bool Display::DrawStr(const char* str, int x, int y, glyphMetrics metrics, int clip0, int clip1)
+bool Renderer::DrawStr(const char* str, int x, int y, glyphMetrics metrics, int clip0, int clip1)
 {
 	int cx = x;
 	bool didRender = false;
@@ -132,7 +132,7 @@ bool Display::DrawStr(const char* str, int x, int y, glyphMetrics metrics, int c
 	return didRender;
 }
 
-void Display::Fill(int c)
+void Renderer::Fill(int c)
 {
 	uint8_t* dst = buffer;
 	uint8_t value = c ? 0xff : 0;

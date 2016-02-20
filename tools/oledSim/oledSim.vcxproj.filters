@@ -10,9 +10,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="display.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="oledsim.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -22,11 +19,11 @@
     <ClCompile Include="assets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="display.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="oledsim.h">
       <Filter>Source Files</Filter>
     </ClInclude>
@@ -34,6 +31,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="assets.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

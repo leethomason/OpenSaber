@@ -7,10 +7,10 @@ typedef const uint8_t* (*glyphMetrics)(int charID, int* advance, int* w, int* ro
 typedef const uint8_t* (*textureData)(int* w, int* h);
 
 
-class Display
+class Renderer
 {
 public:
-	Display();
+	Renderer();
 
 	void Attach(int w, int h, uint8_t* buffer);
 

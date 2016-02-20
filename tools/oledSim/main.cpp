@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <math.h>
 
-#include "display.h"
+#include "renderer.h"
 #include "oledsim.h"
 #include "assets.h"
 #include "sketcher.h"
@@ -14,7 +14,7 @@ Sketcher sketcher;
 static const int WIDTH = 128;
 static const int HEIGHT = 32;
 
-void Draw(Display* d, uint32_t time, bool restMode)
+void Draw(Renderer* d, uint32_t time, bool restMode)
 {
 	sketcher.Draw(d, time, restMode);
 }
@@ -40,7 +40,7 @@ int main(int, char**){
 	assert(texture);
 
 	OledSim oled(WIDTH, HEIGHT);
-	Display display;
+	Renderer display;
 	display.Attach(WIDTH, HEIGHT, oled.Buffer());
 
 	SDL_SetRenderDrawColor(ren, 128, 128, 128, 255);
