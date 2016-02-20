@@ -35,8 +35,7 @@ bool Renderer::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, int
 
 	const int x0 = MAX(MAX(clip0, 0), x);
 	const int x1 = MIN(x + w, MIN(width, clip1));
-	const int dx = x1 - x0;
-	if (dx <= 0) return false;
+	if (x1 <= x0) return false;
 
 	const int r0 = MAX(0, y / 8);
 	const int r1 = MIN((y + h + 7) / 8, nRows);	// r1 exclusive; higher.
