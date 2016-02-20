@@ -28,6 +28,8 @@ public:
 
 	void Fill(int c);
 
+	uint8_t* Buffer() { return buffer;  }
+
 private:
 	void CalcMask(int y, int h, int* r0, int* r1);
 

@@ -21,7 +21,11 @@ textureData Sketcher::GetDial(int value)
 void Sketcher::Draw(Renderer* d, uint32_t time, bool restMode)
 {
 	d->Fill(0);
+//	d->DrawBitmap(1, 4, GetDial(0));
+	d->DrawStr("U", 23, 12, getGlypth_aurekBesh6);
+	d->DrawStr("N", 40, 15, getGlypth_aurekBesh6);
 
+#if 0
 	d->DrawBitmap(0, 0, GetDial(power));
 	d->DrawBitmap(WIDTH - DIAL_WIDTH, 0, GetDial(volume), Renderer::FLIP_X);
 	d->DrawStr("P", 23, 12, getGlypth_aurekBesh6);
@@ -79,10 +83,12 @@ void Sketcher::Draw(Renderer* d, uint32_t time, bool restMode)
 	for (int i = 0; i < 3; ++i) {
 		d->DrawRectangle(CSTART, i * 3, 1 + color[i] * CWIDTH / 256, 2);
 	}
-	
-	/*
+#endif
+#if 0
 	// Test pattern. dot-space-line
 	uint8_t* buf = d->Buffer();
-	*buf = 0xf1;
-	*/
+	for (int i = 0; i < 130; ++i) {
+		buf[i] = i;
+	}
+#endif
 }

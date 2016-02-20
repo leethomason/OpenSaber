@@ -23,10 +23,10 @@ OledSim::~OledSim()
 
 void OledSim::Commit()
 {
-	int nRows = height / 8;
 	for (int j = 0; j < height; ++j) {
 		for (int i = 0; i < width; ++i) {
-			int index = nRows * i + j / 8;
+			int row = j / 8;
+			int index = i + row * width;
 			int shift = j & 7;
 			int mask = 1 << shift;
 			int bit = buffer[index] & mask;

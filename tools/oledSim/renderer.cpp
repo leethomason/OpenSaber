@@ -55,22 +55,25 @@ bool Renderer::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, int
 			return false;
 	}
 
-	const uint8_t* src = bitmap + (x0-x) * texRows;
-	for (int i = x0; i < x1; ++i) {
-		uint8_t* dst = buffer + i * nRows + r0;
-		if (flags & FLIP_X) {
-			dst = buffer + (x1 - 1 - (i - x0)) * nRows;
-		}
-		for (int r = 0; r < dr; ++r) {
-			*dst = *dst & (~mask[r + r0]);
-			if (r < texRows)
-				*dst |= *(src + r) << shift;
-			if (r) {
-				*dst |= *(src + r - 1) >> downShift;
+	const uint8_t* src = bitmap;
+	const int maxTexR = (y + h) / 8;
+
+	for (int r = r0; r < r1; ++r) {
+		uint8_t* dst = buffer + x0 + r * width;
+		for (int i = x0; i < x1; ++i) {
+			if (flags & FLIP_X) {
+				dst = buffer + (x1 - 1 - (i - x0)) * nRows;
+			}
+			*dst = *dst & (~mask[r]);
+			if (r < maxTexR) {
+				*dst |= *src << shift;
+			}
+			if (r > r0) {
+				*dst |= *(src - w) >> downShift;
 			}
 			dst++;
+			src++;
 		}
-		src += texRows;
 	}
 	return true;
 }
