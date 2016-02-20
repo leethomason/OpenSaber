@@ -23,11 +23,13 @@ void Sketcher::Draw(Renderer* d, uint32_t time, bool restMode)
 	d->Fill(0);
 //	d->DrawBitmap(1, 4, GetDial(0));
 
+	//d->DrawStr("U", 1, 8, getGlypth_aurekBesh6);
+
 #define TEST1
 #ifdef TEST1
-	//for (int i = 0; i < 11; ++i) {
-	int i = 8; {
-		d->DrawStr("U", 117 * i / 10, 24 * i / 10, getGlypth_aurekBesh6, 10, 100);
+	for (int i = 0; i < 11; ++i) {
+	//int i = 3; {
+		d->DrawStr("U", 117 * i / 10, 24 * i / 10, getGlypth_aurekBesh6); // , 10, 100);
 	}
 #endif
 

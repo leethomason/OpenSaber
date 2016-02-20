@@ -38,6 +38,7 @@ bool Renderer::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, int
 	if (x1 <= x0) return false;
 
 	const int r0 = MAX(0, y / 8);
+	const int rt = (y + h) / 7;
 	const int r1 = MIN((y + h + 7) / 8, nRows);	// r1 exclusive; higher.
 	const int dr = r1 - r0;
 	const unsigned shift = (y+256) - ((y+256) / 8) * 8;
@@ -55,16 +56,17 @@ bool Renderer::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, int
 	}
 
 	const uint8_t* src = bitmap;
-	const int maxTexR = (y + h) / 8;
+	const uint8_t* texEnd = bitmap + texRows * w;
 
 	for (int r = r0; r < r1; ++r) {
 		uint8_t* dst = buffer + x0 + r * width;
+		const uint8_t* src = bitmap + (r - r0) * w;
 		for (int i = x0; i < x1; ++i) {
-			if (flags & FLIP_X) {
-				dst = buffer + (x1 - 1 - (i - x0)) * nRows;
-			}
+			//if (flags & FLIP_X) {
+			//	dst = buffer + (x1 - 1 - (i - x0)) * nRows;
+			//}
 			*dst = *dst & (~mask[r]);
-			if (r < maxTexR) {
+			if (src < texEnd) {
 				*dst |= *src << shift;
 			}
 			if (r > r0) {
@@ -74,6 +76,7 @@ bool Renderer::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, int
 			src++;
 		}
 	}
+	
 	return true;
 }
 
