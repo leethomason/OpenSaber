@@ -19,6 +19,9 @@
     <ClCompile Include="oledsim.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="sketcher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="display.h">
@@ -28,6 +31,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="oledsim.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sketcher.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

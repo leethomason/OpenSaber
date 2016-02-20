@@ -72,11 +72,13 @@
     <ClCompile Include="draw.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="oledsim.cpp" />
+    <ClCompile Include="sketcher.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="display.h" />
     <ClInclude Include="draw.h" />
     <ClInclude Include="oledsim.h" />
+    <ClInclude Include="sketcher.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

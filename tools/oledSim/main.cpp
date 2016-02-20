@@ -3,67 +3,20 @@
 #include <assert.h>
 #include <string.h>
 #include <stdint.h>
+#include <math.h>
 
 #include "display.h"
 #include "oledsim.h"
 #include "draw.h"
+#include "sketcher.h"
 
-int line = 0;
-uint32_t prevTime = 0;
-uint32_t animTime = 0;
-
+Sketcher sketcher;
 static const int WIDTH = 128;
 static const int HEIGHT = 32;
 
-void Draw(Display* d, uint32_t time)
+void Draw(Display* d, uint32_t time, bool restMode)
 {
-	d->Fill(0);
-
-	static const int DIAL_WIDTH = 28;
-
-	d->DrawBitmap(0, 0, get_dial3);
-	d->DrawBitmap(WIDTH - DIAL_WIDTH, 0, get_dial1, Display::FLIP_X);
-	d->DrawStr("P", 22, 12, getGlypth_aurekBesh);
-	d->DrawStr("V", 96, 12, getGlypth_aurekBesh);
-
-	//d->DrawRectangle(WIDTH / 2 - 1, 2, 3, 10);
-
-	static const char* lines[] = {
-		"THERE IS NO IGNORANCE, THERE IS ATTENTION.",
-		"THERE IS NO SELF, THERE IS THE FORCE"
-	};
-
-	if (prevTime) {
-		animTime += time - prevTime;
-	}
-	prevTime = time;
-	
-	int dx = animTime / 100; // / 80;
-	bool render = d->DrawStr(lines[line], WIDTH - DIAL_WIDTH - 1 - dx, 22, getGlypth_aurekBesh, 
-							 DIAL_WIDTH, WIDTH - DIAL_WIDTH);
-	if (!render && !line) {
-		line = 1;
-		animTime = 0;
-	}
-	
-	/*
-	const int FONT = 5;	// 0-based
-	for (int i = 0; i <= FONT; ++i) {
-		int x = i % 4;
-		int y = i / 4;
-		d->DrawRectangle(WIDTH / 2 - 25 + x*5, y*5, 4, 4);
-	}
-
-	const uint8_t color[3] = { 0, 255, 100 };
-	for (int i = 0; i < 3; ++i) {
-		d->DrawRectangle(WIDTH / 2 + 6, i * 3, color[i] * 20 / 255, 2);
-	}
-	*/
-	/*
-	// Test pattern. dot-space-line
-	uint8_t* buf = d->Buffer();
-	*buf = 0xf1;
-	*/
+	sketcher.Draw(d, time, restMode);
 }
 
 
@@ -94,6 +47,10 @@ int main(int, char**){
 
 	SDL_Event e;
 	int scale = 4;
+	bool restMode = true;
+	sketcher.volume = 2;
+	sketcher.power = 3;
+
 	while (true) {
 		SDL_PollEvent(&e);
 		if (e.type == SDL_QUIT){
@@ -103,9 +60,18 @@ int main(int, char**){
 			if (e.key.keysym.sym >= SDLK_1 && e.key.keysym.sym <= SDLK_8) {
 				scale = e.key.keysym.sym - SDLK_0;
 			}
+			else if (e.key.keysym.sym == SDLK_SPACE) {
+				restMode = !restMode;
+			}
+			else if (e.key.keysym.sym == SDLK_p) {
+				sketcher.power = (sketcher.power + 1) % 5;
+			}
+			else if (e.key.keysym.sym == SDLK_v) {
+				sketcher.volume = (sketcher.volume + 1) % 5;
+			}
 		}
 
-		Draw(&display, SDL_GetTicks());
+		Draw(&display, SDL_GetTicks(), restMode);
 		oled.Commit();
 
 		const SDL_Rect src = { 0, 0, WIDTH, HEIGHT };

@@ -39,7 +39,7 @@ bool Display::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, int 
 	if (dx <= 0) return false;
 
 	const int r0 = MAX(0, y / 8);
-	const int r1 = MIN((y + h) / 8, nRows);
+	const int r1 = MIN((y + h + 7) / 8, nRows);	// r1 exclusive; higher.
 	const int dr = r1 - r0;
 	const unsigned shift = (y+256) - ((y+256) / 8) * 8;
 	const unsigned downShift = 8 - shift;
@@ -63,7 +63,8 @@ bool Display::DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h, int 
 		}
 		for (int r = 0; r < dr; ++r) {
 			*dst = *dst & (~mask[r + r0]);
-			*dst |= *(src + r) << shift;
+			if (r < texRows)
+				*dst |= *(src + r) << shift;
 			if (r) {
 				*dst |= *(src + r - 1) >> downShift;
 			}
