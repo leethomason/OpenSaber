@@ -21,21 +21,34 @@ textureData Sketcher::GetDial(int value)
 void Sketcher::Draw(Renderer* d, uint32_t time, bool restMode)
 {
 	d->Fill(0);
-//	d->DrawBitmap(1, 4, GetDial(0));
 
-	//d->DrawStr("U", 1, 8, getGlypth_aurekBesh6);
-
-#define TEST1
+//#define TEST4
 #ifdef TEST1
 	for (int i = 0; i < 11; ++i) {
-	//int i = 3; {
-		d->DrawStr("U", 117 * i / 10, 24 * i / 10, getGlypth_aurekBesh6); // , 10, 100);
+		d->DrawStr("U", -5 + 127 * i / 10, -5 + 34 * i / 10, getGlypth_aurekBesh6); // , 10, 100);
 	}
 #endif
+#ifdef TEST2
+	for (int i = 0; i < 4; ++i) {
+		d->DrawBitmap(100*i/3, 15*i/3, GetDial(0));
+	}
+#endif
+#ifdef TEST3
+	for (int i = 0; i < 4; ++i) {
+		d->DrawBitmap(100*i/3, 15 - 15*i/3, GetDial(1), Renderer::FLIP_X);
+	}
+#endif
+#ifdef TEST4
+	for(int i=0; i< 4; ++i) {
+		d->DrawRectangle(0, i*2, 128, 1);
+	}
+	for(int i=0; i< 4; ++i) {
+		d->DrawRectangle(i*2, 10, 1, 118);
+	}
+	d->DrawRectangle(20, 10, 108, 22);
+#endif
 
-//	d->DrawStr("N", 40, 15, getGlypth_aurekBesh6);
-
-#if 0
+#if 1
 	d->DrawBitmap(0, 0, GetDial(power));
 	d->DrawBitmap(WIDTH - DIAL_WIDTH, 0, GetDial(volume), Renderer::FLIP_X);
 	d->DrawStr("P", 23, 12, getGlypth_aurekBesh6);
