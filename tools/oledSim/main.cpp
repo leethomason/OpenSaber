@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <SDL.h>
 #include <assert.h>
 #include <string.h>
@@ -50,6 +51,14 @@ int main(int, char**){
 	bool restMode = true;
 	sketcher.volume = 2;
 	sketcher.power = 3;
+	for (int i = 0; i < Sketcher::DATA_WIDTH; ++i) {
+		sketcher.data[i] = int(127.8 * (sin(i * 0.2) + 1.0));
+	}
+	sketcher.color[0] = 0;
+	sketcher.color[1] = 255;
+	sketcher.color[2] = 100;
+	int pos = 0;
+	uint32_t lastUpdate = SDL_GetTicks();
 
 	while (true) {
 		SDL_PollEvent(&e);
@@ -68,6 +77,14 @@ int main(int, char**){
 			}
 			else if (e.key.keysym.sym == SDLK_v) {
 				sketcher.volume = (sketcher.volume + 1) % 5;
+			}
+			else if (e.key.keysym.sym == SDLK_c) {
+				uint8_t c0 = sketcher.color[0];
+				uint8_t c1 = sketcher.color[1];
+				uint8_t c2 = sketcher.color[2];
+				sketcher.color[0] = c1;
+				sketcher.color[1] = c2;
+				sketcher.color[2] = c0;
 			}
 		}
 

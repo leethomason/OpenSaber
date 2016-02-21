@@ -35,6 +35,7 @@ private:
 
 	int width;
 	int height;
+	int nRows;
 	uint8_t* buffer;
 
 	enum { MAX_ROWS = 4};

@@ -22,7 +22,7 @@ void Sketcher::Draw(Renderer* d, uint32_t time, bool restMode)
 {
 	d->Fill(0);
 
-//#define TEST4
+//#define TEST5
 #ifdef TEST1
 	for (int i = 0; i < 11; ++i) {
 		d->DrawStr("U", -5 + 127 * i / 10, -5 + 34 * i / 10, getGlypth_aurekBesh6); // , 10, 100);
@@ -47,14 +47,17 @@ void Sketcher::Draw(Renderer* d, uint32_t time, bool restMode)
 	}
 	d->DrawRectangle(20, 10, 108, 22);
 #endif
+#ifdef TEST5
+	for (int i = 0; i < 128; ++i) {
+		d->DrawRectangle(i, 24 + i % 8, 1, 1);
+	}
+#endif
 
 #if 1
 	d->DrawBitmap(0, 0, GetDial(power));
 	d->DrawBitmap(WIDTH - DIAL_WIDTH, 0, GetDial(volume), Renderer::FLIP_X);
 	d->DrawStr("P", 23, 12, getGlypth_aurekBesh6);
 	d->DrawStr("V", 96, 12, getGlypth_aurekBesh6);
-
-	//d->DrawRectangle(WIDTH / 2 - 1, 2, 3, 10);
 
 	static const int NLINES = 6;
 	static const char* lines[NLINES] = {
@@ -83,11 +86,9 @@ void Sketcher::Draw(Renderer* d, uint32_t time, bool restMode)
 		}
 	}
 	else {
-		for (int x = INNERX; x < DATA_WIDTH; ++x) {
-			//d->DrawRectangle(x, 14 + 9 + 9 * sin(x / 3.0), 1, 1);
-			//d->DrawRectangle(x, 11 + 5 + 5 * sin(x / 3.0), 1, 1);
-			//d->DrawRectangle(x, 22 + 5 + 5 * sin(0.3 + x / 2.0), 1, 1);
-			d->DrawRectangle(x, 12, 1, 18);
+		static const int HEIGHT = 18;
+		for (int i = 0; i < DATA_WIDTH; ++i) {
+			d->DrawRectangle(i + INNERX, 31 - 19 * data[i] / 255, 1, 1);
 		}
 	}
 	
@@ -100,7 +101,6 @@ void Sketcher::Draw(Renderer* d, uint32_t time, bool restMode)
 	}
 
 	// Current blade color
-	const uint8_t color[3] = { 0, 255, 100 };
 	static const int CSTART = WIDTH / 2 + 6;
 	static const int CWIDTH = WIDTH - CSTART - INNERX;
 	for (int i = 0; i < 3; ++i) {

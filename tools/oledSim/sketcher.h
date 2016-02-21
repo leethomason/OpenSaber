@@ -10,20 +10,22 @@ public:
 	enum {
 		WIDTH = 128,
 		HEIGHT = 32,
-		DATA_WIDTH = 90,
+		DATA_WIDTH = 52,
 		DIAL_WIDTH = 28,
 		INNERX = 38
 	};
 
 	void Draw(Renderer* d, uint32_t time, bool restMode);
 
-	int power;
-	int volume;
+	uint8_t power;
+	uint8_t volume;
+	uint8_t color[3];
+	uint8_t data[DATA_WIDTH];
 
 private:
 	textureData GetDial(int value);
 
-	int line = 0;
+	uint8_t line = 0;
 	uint32_t prevTime = 0;
 	uint32_t animTime = 0;
 };
