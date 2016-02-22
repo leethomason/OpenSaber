@@ -69,14 +69,9 @@ void Sketcher::Draw(Renderer* d, uint32_t time, bool restMode)
 #if 1
 	d->DrawBitmap(0, 0, GetDial(power));
 	d->DrawBitmap(WIDTH - DIAL_WIDTH, 0, GetDial(volume), Renderer::FLIP_X);
-	//if (restMode) {
-		//d->DrawStr("P", 28, 24, getGlypth_aurekBesh6);
-		//d->DrawStr("V", 92, 24, getGlypth_aurekBesh6);
-	//}
-	//else {
-		d->DrawStr("P", 23, 12, getGlypth_aurekBesh6);
-		d->DrawStr("V", 97, 12, getGlypth_aurekBesh6);
-	//}
+	d->DrawStr("P", 23, 12, getGlypth_aurekBesh6);
+	d->DrawStr("V", 97, 12, getGlypth_aurekBesh6);
+
 	static const int NLINES = 5;
 	static const char* lines[NLINES] = {
 		"THERE IS NO DISCORD, THERE IS SERENITY.",
@@ -106,7 +101,7 @@ void Sketcher::Draw(Renderer* d, uint32_t time, bool restMode)
 		static const int HEIGHT = 18;
 		uint8_t q = pos;
 		for (int i = DATA_WIDTH - 1; i >= 0; --i) {
-			d->DrawRectangle(i + INNERX, 31 - 19 * data[q] / 255, 1, 1);
+			d->DrawRectangle(i + INNERX, 31 - 16 * data[q] / 255, 1, 1);
 			q++;
 			if (q == DATA_WIDTH) q = 0;
 		}
@@ -117,14 +112,14 @@ void Sketcher::Draw(Renderer* d, uint32_t time, bool restMode)
 	for (int i = 0; i <= PALETTE; ++i) {
 		int x = i % 4;
 		int y = i / 4;
-		d->DrawRectangle(INNERX + x*5, y*5, 4, 4);
+		d->DrawRectangle(INNERX + x*6, y*6, 5, 5);
 	}
 
 	// Current blade color
 	static const int CSTART = WIDTH / 2 + 6;
 	static const int CWIDTH = WIDTH - CSTART - INNERX;
 	for (int i = 0; i < 3; ++i) {
-		d->DrawRectangle(CSTART, i * 3, 1 + color[i] * CWIDTH / 256, 2);
+		d->DrawRectangle(CSTART, i * 4, 1 + color[i] * CWIDTH / 256, 3);
 	}
 #endif
 #if 0
