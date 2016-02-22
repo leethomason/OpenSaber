@@ -15,7 +15,9 @@ public:
 		INNERX = 38
 	};
 
+	Sketcher();
 	void Draw(Renderer* d, uint32_t time, bool restMode);
+	void Push(uint8_t value);
 
 	uint8_t power;
 	uint8_t volume;
@@ -26,6 +28,7 @@ private:
 	textureData GetDial(int value);
 
 	uint8_t line = 0;
+	uint8_t pos = 0;
 	uint32_t prevTime = 0;
 	uint32_t animTime = 0;
 };

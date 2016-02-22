@@ -3,6 +3,12 @@
 #include "assets.h"
 
 #include <math.h>
+#include <string.h>
+
+Sketcher::Sketcher()
+{
+	memset(data, 0, DATA_WIDTH);
+}
 
 textureData Sketcher::GetDial(int value)
 {
@@ -16,6 +22,13 @@ textureData Sketcher::GetDial(int value)
 			break;
 	}
 	return td;
+}
+
+void Sketcher::Push(uint8_t val)
+{
+	data[pos] = val;
+	pos++;
+	if (pos == DATA_WIDTH) pos = 0;
 }
 
 void Sketcher::Draw(Renderer* d, uint32_t time, bool restMode)
@@ -56,17 +69,21 @@ void Sketcher::Draw(Renderer* d, uint32_t time, bool restMode)
 #if 1
 	d->DrawBitmap(0, 0, GetDial(power));
 	d->DrawBitmap(WIDTH - DIAL_WIDTH, 0, GetDial(volume), Renderer::FLIP_X);
-	d->DrawStr("P", 23, 12, getGlypth_aurekBesh6);
-	d->DrawStr("V", 96, 12, getGlypth_aurekBesh6);
-
-	static const int NLINES = 6;
+	//if (restMode) {
+		//d->DrawStr("P", 28, 24, getGlypth_aurekBesh6);
+		//d->DrawStr("V", 92, 24, getGlypth_aurekBesh6);
+	//}
+	//else {
+		d->DrawStr("P", 23, 12, getGlypth_aurekBesh6);
+		d->DrawStr("V", 97, 12, getGlypth_aurekBesh6);
+	//}
+	static const int NLINES = 5;
 	static const char* lines[NLINES] = {
 		"THERE IS NO DISCORD, THERE IS SERENITY.",
 		"THERE IS NO THOUGHT, THERE IS PERCEPTION.",
 		"THERE IS NO IGNORANCE, THERE IS ATTENTION.",
 		"THERE IS NO DIVISION, THERE IS EMPATHY.",
 		"THERE IS NO SELF, THERE IS THE FORCE.",
-		"MAY THE FORCE BE WITH YOU, ALWAYS."
 	};
 
 	if (prevTime) {
@@ -76,7 +93,7 @@ void Sketcher::Draw(Renderer* d, uint32_t time, bool restMode)
 	
 	if (restMode) {
 		int dx = animTime / 100; // / 80;
-		bool render = d->DrawStr(lines[line], WIDTH - DIAL_WIDTH - 1 - dx, 22, getGlypth_aurekBesh6,
+		bool render = d->DrawStr(lines[line], WIDTH - DIAL_WIDTH - 1 - dx, 23, getGlypth_aurekBesh6,
 								 DIAL_WIDTH, WIDTH - DIAL_WIDTH);
 		if (!render) {
 			++line;
@@ -87,8 +104,11 @@ void Sketcher::Draw(Renderer* d, uint32_t time, bool restMode)
 	}
 	else {
 		static const int HEIGHT = 18;
-		for (int i = 0; i < DATA_WIDTH; ++i) {
-			d->DrawRectangle(i + INNERX, 31 - 19 * data[i] / 255, 1, 1);
+		uint8_t q = pos;
+		for (int i = DATA_WIDTH - 1; i >= 0; --i) {
+			d->DrawRectangle(i + INNERX, 31 - 19 * data[q] / 255, 1, 1);
+			q++;
+			if (q == DATA_WIDTH) q = 0;
 		}
 	}
 	

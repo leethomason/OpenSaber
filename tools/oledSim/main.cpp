@@ -51,13 +51,10 @@ int main(int, char**){
 	bool restMode = true;
 	sketcher.volume = 2;
 	sketcher.power = 3;
-	for (int i = 0; i < Sketcher::DATA_WIDTH; ++i) {
-		sketcher.data[i] = int(127.8 * (sin(i * 0.2) + 1.0));
-	}
 	sketcher.color[0] = 0;
 	sketcher.color[1] = 255;
 	sketcher.color[2] = 100;
-	int pos = 0;
+	int count = 0;
 	uint32_t lastUpdate = SDL_GetTicks();
 
 	while (true) {
@@ -86,6 +83,14 @@ int main(int, char**){
 				sketcher.color[1] = c2;
 				sketcher.color[2] = c0;
 			}
+		}
+
+		uint32_t t = SDL_GetTicks();
+		if (t - lastUpdate > 100) {
+			lastUpdate = t;
+			uint8_t value = int(127.8 * (sin(count * 0.2) + 1.0));
+			++count;
+			sketcher.Push(value);
 		}
 
 		Draw(&display, SDL_GetTicks(), restMode);

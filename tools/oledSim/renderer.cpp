@@ -2,7 +2,9 @@
 #include <string.h>
 
 #if defined(_DEBUG) && defined(_MSC_VER)
-	#define ASSERT( x )		if ( !(x)) { _asm { int 3 } }
+#	define ASSERT( x )		if ( !(x)) { _asm { int 3 } }
+#else
+#	define ASSERT(x)
 #endif
 
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
