@@ -3,6 +3,13 @@
 #include "assets.h"
 
 #include <math.h>
+#include <string.h>
+
+Sketcher::Sketcher()
+{
+  color[0] = color[1] = color[2] = 0;
+	memset(data, 0, DATA_WIDTH);
+}
 
 textureData Sketcher::GetDial(int value)
 {
@@ -18,31 +25,61 @@ textureData Sketcher::GetDial(int value)
 	return td;
 }
 
+void Sketcher::Push(uint8_t val)
+{
+	data[pos] = val;
+	pos++;
+	if (pos == DATA_WIDTH) pos = 0;
+}
+
 void Sketcher::Draw(Renderer* d, uint32_t time, bool restMode)
 {
 	d->Fill(0);
 
-  uint8_t* b = d->Buffer();
-  for(int i=0; i<130; i++) {
-    b[i] = i;
-  }
+//#define TEST5
+#ifdef TEST1
+	for (int i = 0; i < 11; ++i) {
+		d->DrawStr("U", -5 + 127 * i / 10, -5 + 34 * i / 10, getGlypth_aurekBesh6); // , 10, 100);
+	}
+#endif
+#ifdef TEST2
+	for (int i = 0; i < 4; ++i) {
+		d->DrawBitmap(100*i/3, 15*i/3, GetDial(0));
+	}
+#endif
+#ifdef TEST3
+	for (int i = 0; i < 4; ++i) {
+		d->DrawBitmap(100*i/3, 15 - 15*i/3, GetDial(1), Renderer::FLIP_X);
+	}
+#endif
+#ifdef TEST4
+	for(int i=0; i< 4; ++i) {
+		d->DrawRectangle(0, i*2, 128, 1);
+	}
+	for(int i=0; i< 4; ++i) {
+		d->DrawRectangle(i*2, 10, 1, 118);
+	}
+	d->DrawRectangle(20, 10, 108, 22);
+#endif
+#ifdef TEST5
+	for (int i = 0; i < 128; ++i) {
+		d->DrawRectangle(i, 24 + i % 8, 1, 1);
+	}
+#endif
 
-	//d->DrawBitmap(0, 0, GetDial(power));
-  /*
+#if 1
+	d->DrawBitmap(0, 0, GetDial(power));
 	d->DrawBitmap(WIDTH - DIAL_WIDTH, 0, GetDial(volume), Renderer::FLIP_X);
 	d->DrawStr("P", 23, 12, getGlypth_aurekBesh6);
-	d->DrawStr("V", 96, 12, getGlypth_aurekBesh6);
+	d->DrawStr("V", 97, 12, getGlypth_aurekBesh6);
 
-	//d->DrawRectangle(WIDTH / 2 - 1, 2, 3, 10);
-
-	static const int NLINES = 6;
+	static const int NLINES = 5;
 	static const char* lines[NLINES] = {
 		"THERE IS NO DISCORD, THERE IS SERENITY.",
 		"THERE IS NO THOUGHT, THERE IS PERCEPTION.",
 		"THERE IS NO IGNORANCE, THERE IS ATTENTION.",
 		"THERE IS NO DIVISION, THERE IS EMPATHY.",
 		"THERE IS NO SELF, THERE IS THE FORCE.",
-		"MAY THE FORCE BE WITH YOU, ALWAYS."
 	};
 
 	if (prevTime) {
@@ -52,7 +89,7 @@ void Sketcher::Draw(Renderer* d, uint32_t time, bool restMode)
 	
 	if (restMode) {
 		int dx = animTime / 100; // / 80;
-		bool render = d->DrawStr(lines[line], WIDTH - DIAL_WIDTH - 1 - dx, 22, getGlypth_aurekBesh6,
+		bool render = d->DrawStr(lines[line], WIDTH - DIAL_WIDTH - 1 - dx, 23, getGlypth_aurekBesh6,
 								 DIAL_WIDTH, WIDTH - DIAL_WIDTH);
 		if (!render) {
 			++line;
@@ -62,33 +99,33 @@ void Sketcher::Draw(Renderer* d, uint32_t time, bool restMode)
 		}
 	}
 	else {
-		for (int x = INNERX; x < DATA_WIDTH; ++x) {
-			//d->DrawRectangle(x, 14 + 9 + 9 * sin(x / 3.0), 1, 1);
-			//d->DrawRectangle(x, 11 + 5 + 5 * sin(x / 3.0), 1, 1);
-			//d->DrawRectangle(x, 22 + 5 + 5 * sin(0.3 + x / 2.0), 1, 1);
-			d->DrawRectangle(x, 12, 1, 18);
+		uint8_t q = pos;
+		for (int i = DATA_WIDTH - 1; i >= 0; --i) {
+			d->DrawRectangle(i + INNERX, 31 - 16 * data[q] / 255, 1, 1);
+			q++;
+			if (q == DATA_WIDTH) q = 0;
 		}
 	}
 	
 	// Current Palette
-	const int PALETTE = 5;	// 0-based
-	for (int i = 0; i <= PALETTE; ++i) {
+	for (int i = 0; i <= palette; ++i) {
 		int x = i % 4;
 		int y = i / 4;
-		d->DrawRectangle(INNERX + x*5, y*5, 4, 4);
+		d->DrawRectangle(INNERX + x*6, y*6, 5, 5);
 	}
 
 	// Current blade color
-	const uint8_t color[3] = { 0, 255, 100 };
 	static const int CSTART = WIDTH / 2 + 6;
 	static const int CWIDTH = WIDTH - CSTART - INNERX;
 	for (int i = 0; i < 3; ++i) {
-		d->DrawRectangle(CSTART, i * 3, 1 + color[i] * CWIDTH / 256, 2);
+		d->DrawRectangle(CSTART, i * 4, 1 + color[i] * CWIDTH / 256, 3);
 	}
-	*/
-	/*
+#endif
+#if 0
 	// Test pattern. dot-space-line
 	uint8_t* buf = d->Buffer();
-	*buf = 0xf1;
-	*/
+	for (int i = 0; i < 130; ++i) {
+		buf[i] = i;
+	}
+#endif
 }

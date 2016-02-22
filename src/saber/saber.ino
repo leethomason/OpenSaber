@@ -1,5 +1,4 @@
-/*
-Copyright (c) 2016 Lee Thomason, Grinning Lizard Software
+/*  sketcher.palette = saberDB.currentPalette();ard Software
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -162,6 +161,14 @@ void setup() {
   display.fillScreen(0);
   display.display();
   renderer.Attach(128, 32, display.getBuffer());
+
+  sketcher.power = 3; // FIXME
+  sketcher.volume = saberDB.soundOn() ? 4 : 0; // FIXME
+  for(int i=0; i<3; ++i) {
+    sketcher.color[i] = saberDB.bladeColor()[i];
+  }
+  sketcher.palette = saberDB.paletteIndex();
+  
 #if SERIAL_DEBUG == 1
   Serial.println(F("OLED display connected."));
 #endif
@@ -416,6 +423,7 @@ void loop() {
     saberDB.nextPalette();
     paletteChange = true;
     cmdParser.bringPaletteCurrent();
+    sketcher.palette = saberDB.paletteIndex();
   }
   processBladeState();
 #ifdef SABER_SOUND_ON
