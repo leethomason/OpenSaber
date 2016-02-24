@@ -40,11 +40,10 @@ SFX::SFX(AudioPlayer* audioPlayer)
 
   m_player = audioPlayer;
   m_bladeOn = false;
-  m_muted = false;
   m_numFonts = 0;
   m_numFilenames = 0;
   m_currentSound = SFX_NONE;
-  m_currentFont = 0;
+  m_currentFont = -1;
   m_igniteTime = 1000;
   m_retractTime = 1000;
 
@@ -73,7 +72,7 @@ void SFX::filePath(CStr<25>* path, const char* dir, const char* file)
 void SFX::filePath(CStr<25>* path, int index) 
 {
   path->clear();
-  if (m_numFonts > 0) {
+  if (m_numFonts > 0 && m_currentFont >= 0) {
     *path = m_dirName[m_currentFont].c_str();
     path->append('/');
   }
@@ -217,7 +216,6 @@ bool SFX::playSound(int sound, int mode)
   if (sound == SFX_POWER_ON) {
     if (m_bladeOn) 
       return false;  // defensive error check.
-    m_player->mute(m_muted);
     m_bladeOn = true;
   }
   else if (sound == SFX_POWER_OFF) {
@@ -243,7 +241,7 @@ bool SFX::playSound(int sound, int mode)
     Serial.print(F("SFX play track ")); Serial.print(m_filename[track].c_str()); Serial.print("... ");
 #endif
     CStr<25> path;
-    if (m_numFonts > 0) {
+    if (m_numFonts > 0 && m_currentFont >= 0) {
       filePath(&path, m_dirName[m_currentFont].c_str(), m_filename[track].c_str());
     }
     else {
@@ -324,7 +322,7 @@ void SFX::mute(bool muted)
 
 bool SFX::isMuted() const
 {
-  return m_player->muted();
+  return m_player->isMuted();
 }
 
 void SFX::setVolume204(int vol)
@@ -349,6 +347,7 @@ uint8_t SFX::getVolume204() const
 
 uint8_t SFX::setFont(uint8_t font)
 {
+  Serial.print("setFont "); Serial.println(font);
   if (m_numFonts) {
     if (font != m_currentFont) {
       m_currentFont = font % m_numFonts;
@@ -363,7 +362,7 @@ uint8_t SFX::setFont(uint8_t font)
 
 const char* SFX::currentFontName() const
 {
-  if (m_numFonts) {
+  if (m_numFonts && m_currentFont >= 0) {
     return m_dirName[m_currentFont].c_str();
   }
   return "<none>";

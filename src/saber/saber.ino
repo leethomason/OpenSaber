@@ -72,6 +72,7 @@ bool     flashOnClash = false;
 uint8_t  volumeRequest = 0;
 bool     soundWasOff = true;
 float    maxGForce2 = 0.0f;
+int32_t  lastVCC = 3700;
 
 ButtonCB buttonA(PIN_SWITCH_A, Button::PULL_UP);
 ButtonCB buttonB(PIN_SWITCH_B, Button::PULL_UP);
@@ -110,6 +111,7 @@ void setup() {
   //TCNT1 = 0x7FFF; // set blue & green channels out of phase
 
 #ifdef SABER_ACCELEROMETER
+  Serial.println("Starting Accel");
   if (!accel.begin()) {
 #if SERIAL_DEBUG == 1
     Serial.println(F("ACCELEROMETER ERROR"));
@@ -166,12 +168,12 @@ void setup() {
   Serial.println(F("Setup complete."));
 #endif
 
-  syncToDB();
-
   // "power" lights
   pinMode(PIN_LED_A, OUTPUT);
   digitalWrite(PIN_LED_A, HIGH);
   pinMode(PIN_LED_B, OUTPUT);
+  syncToDB();
+
   lastLoopTime = millis();
 }
 
@@ -203,12 +205,19 @@ uint32_t calcReflashTime() {
   return millis() + random(500) + 200;
 }
 
+int vccToPowerLevel(int32_t vcc)
+{
+  int level = 0;
+  if      (vcc > 3950) level = 4;
+  else if (vcc > 3800) level = 3;
+  else if (vcc > 3650) level = 2;
+  else if (vcc > LOW_VOLTAGE) level = 1;
+  return level;
+}
+
 void checkPowerHandler(const Button&) {
   int32_t vcc = readVcc();
-  if      (vcc > 3950) nIndicator = 4;
-  else if (vcc > 3800) nIndicator = 3;
-  else if (vcc > 3650) nIndicator = 2;
-  else if (vcc > LOW_VOLTAGE) nIndicator = 1;
+  nIndicator = vccToPowerLevel(vcc);
   indicatorStart = millis();
 }
 
@@ -227,6 +236,7 @@ void syncToDB()
     sketcher.color[i] = saberDB.bladeColor()[i];
   }
   sketcher.palette = saberDB.paletteIndex();
+  sketcher.power = vccToPowerLevel(lastVCC);
 
   digitalWrite(PIN_LED_B, saberDB.soundOn() ? HIGH : LOW);
 }
@@ -441,7 +451,7 @@ void loop() {
     blade.setVoltage(readVcc());
   }
 
-  if (gforceDataTimer(deltaTime)) {
+  if (gforceDataTimer.delta(deltaTime)) {
     const float xm1 = constrain(maxGForce2, 0, 16);
     const uint8_t gForce = uint8_t(255.5f * (1.0f + 0.4 * xm1 - 0.0425 * xm1 * xm1 + 0.0015 * xm1 * xm1 * xm1));
     sketcher.Push(gForce);
@@ -469,7 +479,7 @@ void loop() {
 
 #ifdef SABER_DISPLAY
   if (displayTimer.delta(deltaTime)) {
-    sketcher.Draw(&renderer, msec, true);
+    sketcher.Draw(&renderer, msec, !bladeOn());
     // see: SerialFlashChip.cpp in the teensy hardware source.
     SPI.beginTransaction(SPISettings(50000000, MSBFIRST, SPI_MODE0));
     display.display();
@@ -482,6 +492,7 @@ int32_t readVcc() {
 #ifdef SABER_VOLTMETER
   int32_t analog = analogRead(PIN_VMETER);
   int32_t mV = analog * UVOLT_MULT / int32_t(1000);
+  lastVCC = mV;
   return mV;
 #else
   return NOMINAL_VOLTAGE;
