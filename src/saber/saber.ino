@@ -1,22 +1,22 @@
 /*  sketcher.palette = saberDB.currentPalette();ard Software
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+  of the Software, and to permit persons to whom the Software is furnished to do
+  so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
 */
 
 
@@ -58,6 +58,9 @@ enum {  BLADE_OFF,
      };
 
 static const uint32_t INDICATOR_TIME = 500;
+static const float GFORCE_RANGE = 4.0f;
+static const float GFORCE_RANGE_INV = 1.0f / GFORCE_RANGE;
+
 uint8_t  currentState = BLADE_OFF;
 uint32_t stateStartTime = 0;
 uint32_t lastLoopTime = 0;
@@ -68,6 +71,7 @@ uint32_t reflashTime = 0;
 bool     flashOnClash = false;
 uint8_t  volumeRequest = 0;
 bool     soundWasOff = true;
+float    maxGForce2 = 0.0f;
 
 ButtonCB buttonA(PIN_SWITCH_A, Button::PULL_UP);
 ButtonCB buttonB(PIN_SWITCH_B, Button::PULL_UP);
@@ -92,6 +96,7 @@ SFX sfx(&audioPlayer);
 CMDParser cmdParser(&saberDB);
 Blade blade;
 Timer vccTimer(VCC_TIME_INTERVAL);
+Timer gforceDataTimer(100);
 
 void setup() {
   Serial.begin(19200);  // still need to turn it on in case a command line is connected.
@@ -101,11 +106,9 @@ void setup() {
 #if SERIAL_DEBUG == 1
   Serial.println("setup()");
 #endif
-  saberDB.log("STR");
 
   //TCNT1 = 0x7FFF; // set blue & green channels out of phase
 
-  saberDB.log("ACC");
 #ifdef SABER_ACCELEROMETER
   if (!accel.begin()) {
 #if SERIAL_DEBUG == 1
@@ -121,20 +124,16 @@ void setup() {
   }
 #endif
 
-  saberDB.log("SFX");
+  saberDB.readData();
+
 #ifdef SABER_SOUND_ON
-  sfx.init();
-  sfx.setFont(saberDB.soundFont());
-  Serial.print("Font: "); Serial.println(sfx.currentFontName());
 #endif
 
-  saberDB.log("VLT");
 #ifdef SABER_VOLTMETER
   analogReference(INTERNAL);  // 1.1 volts
   analogRead(PIN_VMETER);     // warm up the ADC to avoid spurious initial value.
 #endif
 
-  saberDB.log("BTN");
   blade.setRGB(BLADE_BLACK);
 
   buttonA.holdHandler(onOffHandler);
@@ -145,15 +144,11 @@ void setup() {
   buttonB.holdHandler(buttonBHoldHandler);
   buttonB.pressHandler(buttonBPressHandler);
 
-  saberDB.log("EEP");
-  saberDB.readData();
-
 #ifdef SABER_SOUND_ON
-  sfx.mute(!saberDB.soundOn());
-  sfx.setVolume204(saberDB.volume());
+  sfx.init();
+  Serial.print("Font: "); Serial.println(sfx.currentFontName());
 #endif
 
-  saberDB.log("VCC");
   blade.setVoltage(readVcc());
 
 #ifdef SABER_DISPLAY
@@ -162,13 +157,6 @@ void setup() {
   display.display();
   renderer.Attach(128, 32, display.getBuffer());
 
-  sketcher.power = 3; // FIXME
-  sketcher.volume = saberDB.soundOn() ? 4 : 0; // FIXME
-  for(int i=0; i<3; ++i) {
-    sketcher.color[i] = saberDB.bladeColor()[i];
-  }
-  sketcher.palette = saberDB.paletteIndex();
-  
 #if SERIAL_DEBUG == 1
   Serial.println(F("OLED display connected."));
 #endif
@@ -178,12 +166,12 @@ void setup() {
   Serial.println(F("Setup complete."));
 #endif
 
+  syncToDB();
+
   // "power" lights
   pinMode(PIN_LED_A, OUTPUT);
   digitalWrite(PIN_LED_A, HIGH);
   pinMode(PIN_LED_B, OUTPUT);
-  digitalWrite(PIN_LED_B, saberDB.soundOn() ? HIGH : LOW);
-  saberDB.log("END");
   lastLoopTime = millis();
 }
 
@@ -224,12 +212,23 @@ void checkPowerHandler(const Button&) {
   indicatorStart = millis();
 }
 
-void setSound() {
-#ifdef SABER_SOUND_ON
-  sfx.setVolume204(saberDB.volume());
+/*
+   The saberDB is the source of true. (The Model.)
+   Bring other things in sync when it changes.
+*/
+void syncToDB()
+{
+  sfx.setFont(saberDB.soundFont());
   sfx.mute(!saberDB.soundOn());
-#endif
-  digitalWrite(PIN_LED_B, saberDB.soundOn());
+  sfx.setVolume204(saberDB.volume());
+
+  sketcher.volume = saberDB.volume4();
+  for (int i = 0; i < 3; ++i) {
+    sketcher.color[i] = saberDB.bladeColor()[i];
+  }
+  sketcher.palette = saberDB.paletteIndex();
+
+  digitalWrite(PIN_LED_B, saberDB.soundOn() ? HIGH : LOW);
 }
 
 void buttonBPressHandler(const Button&) {
@@ -254,7 +253,7 @@ void buttonBHoldHandler(const Button&) {
   }
   else if (currentState == BLADE_OFF && saberDB.soundOn()) {
     saberDB.setSoundOn(false);
-    setSound();
+    syncToDB();
   }
 }
 
@@ -267,13 +266,12 @@ void buttonBReleaseHandler(const Button& b) {
   flashOnClash = false;
   if (currentState == BLADE_OFF) {
     if (soundWasOff && volumeRequest) {
-      if (volumeRequest == 1)       saberDB.setVolume(160);
-      else if (volumeRequest == 2)  saberDB.setVolume(170);
-      else if (volumeRequest == 3)  saberDB.setVolume(185);
-      else                          saberDB.setVolume(200);
-      saberDB.setSoundOn(true);
+      if (volumeRequest == 1)       saberDB.setVolume4(1);
+      else if (volumeRequest == 2)  saberDB.setVolume4(2);
+      else if (volumeRequest == 3)  saberDB.setVolume4(3);
+      else                          saberDB.setVolume4(4);
     }
-    setSound();
+    syncToDB();
   }
 }
 
@@ -367,7 +365,7 @@ void serialEvent() {
     }
   }
   if (processed) {
-    setSound();
+    syncToDB();
   }
 }
 
@@ -375,7 +373,7 @@ void loop() {
   const uint32_t msec = millis();
   uint32_t deltaTime = msec - lastLoopTime;
   lastLoopTime = msec;
-  
+
   buttonA.process();
   buttonB.process();
 
@@ -384,35 +382,33 @@ void loop() {
     accel.read();
     float g2_noZ = accel.x_g * accel.x_g + accel.y_g * accel.y_g;
     float g2 = g2_noZ + accel.z_g * accel.z_g;
+    maxGForce2 = max(maxGForce2, g2);
 
-    if (currentState == BLADE_ON) {
-      float motion = saberDB.motion();
-      float impact = saberDB.impact();
+    float motion = saberDB.motion();
+    float impact = saberDB.impact();
 
-      if ((g2_noZ >= impact * impact)) {
+    if ((g2_noZ >= impact * impact)) {
 #ifdef SABER_SOUND_ON
-        bool sound = sfx.playSound(SFX_IMPACT, SFX_GREATER_OR_EQUAL);
+      bool sound = sfx.playSound(SFX_IMPACT, SFX_GREATER_OR_EQUAL);
 #else
-        bool sound = true;
+      bool sound = true;
 #endif
-        if (sound) {
+      if (sound) {
 #if SERIAL_DEBUG == 1
-          Serial.print(F("Impact. g=")); Serial.println(sqrt(g2));
+        Serial.print(F("Impact. g=")); Serial.println(sqrt(g2));
 #endif
-          changeState(BLADE_FLASH);
-        }
+        changeState(BLADE_FLASH);
       }
-      else if ( g2 >= motion * motion) {
+    }
+    else if ( g2 >= motion * motion) {
+      bool sound = true;
 #ifdef SABER_SOUND_ON
-        bool sound = sfx.playSound(SFX_MOTION, SFX_GREATER);
-#else
-        bool sound = true;
+      sound = sfx.playSound(SFX_MOTION, SFX_GREATER);
 #endif
-        if (sound) {
+      if (sound) {
 #if SERIAL_DEBUG == 1
-          Serial.print(F("Motion. g=")); Serial.println(sqrt(g2));
+        Serial.print(F("Motion. g=")); Serial.println(sqrt(g2));
 #endif
-        }
       }
     }
 #endif
@@ -444,6 +440,14 @@ void loop() {
   if (vccTimer.delta(deltaTime)) {
     blade.setVoltage(readVcc());
   }
+
+  if (gforceDataTimer(deltaTime)) {
+    const float xm1 = constrain(maxGForce2, 0, 16);
+    const uint8_t gForce = uint8_t(255.5f * (1.0f + 0.4 * xm1 - 0.0425 * xm1 * xm1 + 0.0015 * xm1 * xm1 * xm1));
+    sketcher.Push(gForce);
+    maxGForce2 = 0;
+  }
+
   if (nIndicator) {
     if (nIndicator && (msec - indicatorStart) >= INDICATOR_TIME) {
       nIndicator--;

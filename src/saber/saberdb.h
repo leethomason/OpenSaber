@@ -41,8 +41,13 @@ public:
 
   bool soundOn() const          { return dataHeader.soundOn != 0; }
   bool setSoundOn(bool on);
+
   uint8_t volume()              { return dataHeader.volume; }
   void setVolume(int v);
+
+  uint8_t volume4() const; // an approximation
+  // Turns sonud on/off, and/or sets volume.
+  void setVolume4(int vol);
 
   float motion() const          { return dataHeader.motion; }
   void setMotion(float motion);

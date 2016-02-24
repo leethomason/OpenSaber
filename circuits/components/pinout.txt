@@ -6,7 +6,6 @@ x check circuits
 x check power / conductivity
 x add caps!
 x re-test audio w/o caps
-- check alt grnd, vcc, etc. on battery circuit
 
 Header Pins:
 	Power to:

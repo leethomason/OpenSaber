@@ -114,6 +114,28 @@ void SaberDB::setVolume(int v) {
   EEPROM.put(headerAddr(), dataHeader);
 }
 
+void SaberDB::setVolume4(int v) 
+{
+  switch (v) {
+    case 0: setSoundOn(false); break;
+    case 1: setVolume(160); setSoundOn(true); break;
+    case 2: setVolume(170); setSoundOn(true); break;
+    case 3: setVolume(185); setSoundOn(true); break;
+    case 4: setVolume(204); setSoundOn(true); break;
+  }
+}
+
+uint8_t SaberDB::volume4() const
+{
+  if (!soundOn() || dataHeader.volume == 0) {
+    return 0;
+  }
+  if (dataHeader.volume == 204) return 4;
+  if (dataHeader.volume >= 185) return 3;
+  if (dataHeader.volume >= 170) return 2;
+  return 1;
+}
+
 void SaberDB::setMotion(float v) {
   v = constrain(v, 1.1, 10.0);
   dataHeader.motion = v;

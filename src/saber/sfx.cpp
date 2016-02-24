@@ -319,15 +319,12 @@ void SFX::readIgniteRetract()
 
 void SFX::mute(bool muted)
 {
-  m_muted = muted;
-  if (m_muted) {
-    m_player->mute(m_muted);
-  }
+  m_player->mute(muted);
 }
 
 bool SFX::isMuted() const
 {
-  return m_muted;
+  return m_player->muted();
 }
 
 void SFX::setVolume204(int vol)
@@ -349,11 +346,14 @@ uint8_t SFX::getVolume204() const
   return m_player->volume() * 204.0f + 0.5f;
 }
 
+
 uint8_t SFX::setFont(uint8_t font)
 {
   if (m_numFonts) {
-    m_currentFont = font % m_numFonts;
-    scanFiles(m_currentFont);
+    if (font != m_currentFont) {
+      m_currentFont = font % m_numFonts;
+      scanFiles(m_currentFont);
+    }
   }
   else {
     m_currentFont = 0;

@@ -1,8 +1,12 @@
 Issues:
-- start system with audio shutdown
+Pre-order:
 - test full circuit
+- check alt grnd, vcc, etc. on battery circuit
+
+Post-order:
+- start system with audio shutdown
 - doesn't start with correct font
- 
+
 Fixed
 x switch to battery version
 x test audio output with scope
