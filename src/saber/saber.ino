@@ -231,12 +231,14 @@ void syncToDB()
   sfx.mute(!saberDB.soundOn());
   sfx.setVolume204(saberDB.volume());
 
+#ifdef SABER_DISPLAY
   sketcher.volume = saberDB.volume4();
   for (int i = 0; i < 3; ++i) {
     sketcher.color[i] = saberDB.bladeColor()[i];
   }
   sketcher.palette = saberDB.paletteIndex();
   sketcher.power = vccToPowerLevel(lastVCC);
+#endif
 
   digitalWrite(PIN_LED_B, saberDB.soundOn() ? HIGH : LOW);
 }
@@ -387,7 +389,7 @@ void loop() {
   buttonA.process();
   buttonB.process();
 
-  if (bladeOn()) {
+  if (currentState == BLADE_ON) {
 #ifdef SABER_ACCELEROMETER
     accel.read();
     float g2_noZ = accel.x_g * accel.x_g + accel.y_g * accel.y_g;
@@ -429,7 +431,7 @@ void loop() {
     saberDB.nextPalette();
     paletteChange = true;
     cmdParser.bringPaletteCurrent();
-    sketcher.palette = saberDB.paletteIndex();
+    syncToDB();
   }
   processBladeState();
 #ifdef SABER_SOUND_ON
@@ -444,6 +446,9 @@ void loop() {
       volumeRequest  = onTime / (thresh * 2) + 1;
       uint32_t state = onTime / (thresh);
       digitalWrite(PIN_LED_B, (state & 1) ? LOW : HIGH);
+#ifdef SABER_DISPLAY
+      sketcher.volume = volumeRequest;
+#endif
     }
   }
 
@@ -452,9 +457,11 @@ void loop() {
   }
 
   if (gforceDataTimer.delta(deltaTime)) {
+#ifdef SABER_DISPLAY
     const float xm1 = constrain(maxGForce2, 0, 16);
     const uint8_t gForce = uint8_t(255.5f * (1.0f + 0.4 * xm1 - 0.0425 * xm1 * xm1 + 0.0015 * xm1 * xm1 * xm1));
     sketcher.Push(gForce);
+#endif
     maxGForce2 = 0;
   }
 

@@ -62,10 +62,12 @@ bool AudioPlayer::isPlaying() const {
 void AudioPlayer::mute(bool m) {
   m_muted = m;
   if (m_muted && !m_shutdown) {
+    Serial.println("shutdown audio");
     digitalWrite(PIN_AMP_SHUTDOWN, LOW);
     pinMode(PIN_AMP_SHUTDOWN, OUTPUT);
   }
   else if (!m_muted && m_shutdown) {
+    Serial.println("enable audio");
     pinMode(PIN_AMP_SHUTDOWN, INPUT);
   }
   m_shutdown = m_muted;

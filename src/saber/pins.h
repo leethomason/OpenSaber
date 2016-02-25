@@ -32,7 +32,7 @@ static const int EEPROM_SIZE = 512;
 #define SABER_ACCELEROMETER
 #define SABER_SOUND_ON
 #define SABER_SOUND_SHUTDOWN
-//#define SABER_VOLTMETER
+#define SABER_VOLTMETER
 #define SABER_LOGGING
 #define SABER_DISPLAY
 // Don't forget to set the emmitter in electrical.h!
