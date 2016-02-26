@@ -1,22 +1,23 @@
-/*  sketcher.palette = saberDB.currentPalette();ard Software
+/*
+Copyright (c) 2016 Lee Thomason, Grinning Lizard Software
 
-  Permission is hereby granted, free of charge, to any person obtaining a copy of
-  this software and associated documentation files (the "Software"), to deal in
-  the Software without restriction, including without limitation the rights to
-  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-  of the Software, and to permit persons to whom the Software is furnished to do
-  so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
 
-  The above copyright notice and this permission notice shall be included in all
-  copies or substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-  SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 */
 
 
@@ -425,6 +426,9 @@ void loop() {
     }
 #endif
   }
+  else {
+    maxGForce2 = 1;
+  }
 
   // Special case: color switch.
   if (buttonA.press() && buttonB.isDown()) {
@@ -458,9 +462,11 @@ void loop() {
 
   if (gforceDataTimer.delta(deltaTime)) {
 #ifdef SABER_DISPLAY
-    const float xm1 = constrain(maxGForce2, 0, 16);
-    const uint8_t gForce = uint8_t(255.5f * (1.0f + 0.4 * xm1 - 0.0425 * xm1 * xm1 + 0.0015 * xm1 * xm1 * xm1));
+    maxGForce2 = constrain(maxGForce2, 0.1, 16);
+    static const float MULT = 256.0f / GFORCE_RANGE;  // g=1 translates to uint8 64
+    const uint8_t gForce = constrain(sqrtf(maxGForce2) * MULT, 0, 255);
     sketcher.Push(gForce);
+    //Serial.print(maxGForce2); Serial.print(" "); Serial.println(gForce);
 #endif
     maxGForce2 = 0;
   }
@@ -486,7 +492,7 @@ void loop() {
 
 #ifdef SABER_DISPLAY
   if (displayTimer.delta(deltaTime)) {
-    sketcher.Draw(&renderer, msec, !bladeOn());
+    sketcher.Draw(&renderer, msec, currentState == BLADE_OFF);
     // see: SerialFlashChip.cpp in the teensy hardware source.
     SPI.beginTransaction(SPISettings(50000000, MSBFIRST, SPI_MODE0));
     display.display();

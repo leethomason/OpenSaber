@@ -98,7 +98,7 @@ private:
 
   AudioPlayer* m_player;
   bool         m_bladeOn;
-  //bool         m_muted;
+  bool         m_muted;
   uint8_t      m_numFonts;
   int8_t       m_numFilenames;
   int8_t       m_currentSound;

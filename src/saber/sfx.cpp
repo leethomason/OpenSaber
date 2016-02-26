@@ -40,6 +40,7 @@ SFX::SFX(AudioPlayer* audioPlayer)
 
   m_player = audioPlayer;
   m_bladeOn = false;
+  m_muted = false;
   m_numFonts = 0;
   m_numFilenames = 0;
   m_currentSound = SFX_NONE;
@@ -216,6 +217,7 @@ bool SFX::playSound(int sound, int mode)
   if (sound == SFX_POWER_ON) {
     if (m_bladeOn) 
       return false;  // defensive error check.
+    m_player->mute(m_muted);
     m_bladeOn = true;
   }
   else if (sound == SFX_POWER_OFF) {
@@ -317,12 +319,23 @@ void SFX::readIgniteRetract()
 
 void SFX::mute(bool muted)
 {
-  m_player->mute(muted);
+  // this->m_muted is a little different from m_player->mute()
+  // m_player->mute() controls the shutdown pin. We shutdown the
+  //   amp for sound quality reasons and power draw when not in
+  //   use.
+  // this->m_muted is more the "traditional" use of mute. No
+  //   sound is being output, but the audio system otherwise
+  //   runs and responds normally.
+  Serial.print("SFX::mute "); Serial.println(muted ? "true" : "false");
+  m_muted = muted;
+  if (m_muted) {
+    m_player->mute(m_muted);
+  }
 }
 
 bool SFX::isMuted() const
 {
-  return m_player->isMuted();
+  return m_muted;
 }
 
 void SFX::setVolume204(int vol)
