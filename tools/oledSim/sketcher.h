@@ -19,8 +19,9 @@ public:
 	void Draw(Renderer* d, uint32_t time, bool restMode);
 	void Push(uint8_t value);
 
-	uint8_t power;
-	uint8_t volume;
+	uint8_t power = 0;
+	uint8_t volume = 0;
+    uint8_t palette = 0;
 	uint8_t color[3];
 	uint8_t data[DATA_WIDTH];
 

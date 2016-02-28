@@ -62,6 +62,7 @@ bool Renderer::DrawBitmap(int x, int y, const uint8_t* tex, int texW, int texH, 
 
 	const uint8_t* src = tex;
 	const uint8_t* texEnd = tex + texRows * texW;
+  (void)src;
 
 	for (int r = r0; r < r1; ++r) {
 		if (r < 0 || r >= nRows) continue;

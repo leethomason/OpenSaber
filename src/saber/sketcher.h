@@ -21,7 +21,7 @@ public:
 
 	uint8_t power = 0;
 	uint8_t volume = 0;
-  uint8_t palette = 0;
+    uint8_t palette = 0;
 	uint8_t color[3];
 	uint8_t data[DATA_WIDTH];
 

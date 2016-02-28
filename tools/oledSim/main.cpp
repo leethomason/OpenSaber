@@ -83,6 +83,9 @@ int main(int, char**){
 				sketcher.color[1] = c2;
 				sketcher.color[2] = c0;
 			}
+			else if (e.key.keysym.sym == SDLK_f) {
+				sketcher.palette = (sketcher.palette + 1) % 8;
+			}
 		}
 
 		uint32_t t = SDL_GetTicks();

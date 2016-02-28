@@ -27,7 +27,7 @@ SOFTWARE.
 #include <Wire.h>
 #include <SPI.h>
 #include <SD.h>
-#include <SerialFlash.h>
+#include <SPIFlash.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
@@ -50,6 +50,7 @@ SOFTWARE.
 static const uint8_t  BLADE_BLACK[NCHANNELS]  = {0};
 static const uint32_t FLASH_TIME        = 120;
 static const uint32_t VCC_TIME_INTERVAL = 4000;
+static const uint32_t GFORCE_TIME_INTERVAL = 1000;
 
 enum {  BLADE_OFF,
         BLADE_IGNITE,
@@ -97,8 +98,9 @@ SFX sfx(&audioPlayer);
 
 CMDParser cmdParser(&saberDB);
 Blade blade;
-Timer vccTimer(VCC_TIME_INTERVAL);
-Timer gforceDataTimer(100);
+
+elapsedMillis vccTimer;
+elapsedMillis gforceDataTimer;
 
 void setup() {
   Serial.begin(19200);  // still need to turn it on in case a command line is connected.
@@ -456,17 +458,19 @@ void loop() {
     }
   }
 
-  if (vccTimer.delta(deltaTime)) {
+  if (vccTimer > VCC_TIME_INTERVAL) {
     blade.setVoltage(readVcc());
+    vccTimer -= VCC_TIME_INTERVAL;
   }
 
-  if (gforceDataTimer.delta(deltaTime)) {
+  if (gforceDataTimer > GFORCE_TIME_INTERVAL) {
 #ifdef SABER_DISPLAY
     maxGForce2 = constrain(maxGForce2, 0.1, 16);
     static const float MULT = 256.0f / GFORCE_RANGE;  // g=1 translates to uint8 64
     const uint8_t gForce = constrain(sqrtf(maxGForce2) * MULT, 0, 255);
     sketcher.Push(gForce);
     //Serial.print(maxGForce2); Serial.print(" "); Serial.println(gForce);
+    gforceDataTimer -= GFORCE_TIME_INTERVAL;
 #endif
     maxGForce2 = 0;
   }
