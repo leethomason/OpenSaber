@@ -50,7 +50,6 @@ SOFTWARE.
 static const uint8_t  BLADE_BLACK[NCHANNELS]  = {0};
 static const uint32_t FLASH_TIME        = 120;
 static const uint32_t VCC_TIME_INTERVAL = 4000;
-static const uint32_t GFORCE_TIME_INTERVAL = 1000;
 
 enum {  BLADE_OFF,
         BLADE_IGNITE,
@@ -65,7 +64,6 @@ static const float GFORCE_RANGE_INV = 1.0f / GFORCE_RANGE;
 
 uint8_t  currentState = BLADE_OFF;
 uint32_t stateStartTime = 0;
-uint32_t lastLoopTime = 0;
 bool     paletteChange = false; // used to prevent sound fx on palette changes
 uint8_t  nIndicator = 0;
 uint32_t indicatorStart = 0;
@@ -74,7 +72,7 @@ bool     flashOnClash = false;
 uint8_t  volumeRequest = 0;
 bool     soundWasOff = true;
 float    maxGForce2 = 0.0f;
-int32_t  lastVCC = 3700;
+int32_t  lastVCC = NOMINAL_VOLTAGE;
 
 ButtonCB buttonA(PIN_SWITCH_A, Button::PULL_UP);
 ButtonCB buttonB(PIN_SWITCH_B, Button::PULL_UP);
@@ -98,9 +96,8 @@ SFX sfx(&audioPlayer);
 
 CMDParser cmdParser(&saberDB);
 Blade blade;
-
-elapsedMillis vccTimer;
-elapsedMillis gforceDataTimer;
+Timer vccTimer(VCC_TIME_INTERVAL);
+Timer gforceDataTimer(100);
 
 void setup() {
   Serial.begin(19200);  // still need to turn it on in case a command line is connected.
@@ -176,8 +173,6 @@ void setup() {
   digitalWrite(PIN_LED_A, HIGH);
   pinMode(PIN_LED_B, OUTPUT);
   syncToDB();
-
-  lastLoopTime = millis();
 }
 
 void changeState(uint8_t state)
@@ -386,8 +381,6 @@ void serialEvent() {
 
 void loop() {
   const uint32_t msec = millis();
-  uint32_t deltaTime = msec - lastLoopTime;
-  lastLoopTime = msec;
 
   buttonA.process();
   buttonB.process();
@@ -458,19 +451,17 @@ void loop() {
     }
   }
 
-  if (vccTimer > VCC_TIME_INTERVAL) {
+  if (vccTimer.tick()) {
     blade.setVoltage(readVcc());
-    vccTimer -= VCC_TIME_INTERVAL;
   }
 
-  if (gforceDataTimer > GFORCE_TIME_INTERVAL) {
+  if (gforceDataTimer.tick()) {
 #ifdef SABER_DISPLAY
     maxGForce2 = constrain(maxGForce2, 0.1, 16);
     static const float MULT = 256.0f / GFORCE_RANGE;  // g=1 translates to uint8 64
     const uint8_t gForce = constrain(sqrtf(maxGForce2) * MULT, 0, 255);
     sketcher.Push(gForce);
     //Serial.print(maxGForce2); Serial.print(" "); Serial.println(gForce);
-    gforceDataTimer -= GFORCE_TIME_INTERVAL;
 #endif
     maxGForce2 = 0;
   }
@@ -495,7 +486,7 @@ void loop() {
   }
 
 #ifdef SABER_DISPLAY
-  if (displayTimer.delta(deltaTime)) {
+  if (displayTimer.tick()) {
     sketcher.Draw(&renderer, msec, currentState == BLADE_OFF);
     // see: SerialFlashChip.cpp in the teensy hardware source.
     SPI.beginTransaction(SPISettings(50000000, MSBFIRST, SPI_MODE0));

@@ -34,7 +34,7 @@ Blade::Blade() {
     pwm[i] = 0;
   }
 
-  vbat   = 3700;
+  vbat   = NOMINAL_VOLTAGE;
   for(int i = 0; i < NCHANNELS; ++i) {
     f1000[i] = 1000;
     color[i] = 0;
