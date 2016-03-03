@@ -32,7 +32,7 @@ void Sketcher::Push(uint8_t val)
   if (pos == DATA_WIDTH) pos = 0;
 }
 
-void Sketcher::Draw(Renderer* d, uint32_t time, bool restMode)
+void Sketcher::Draw(Renderer* d, uint32_t delta, bool restMode)
 {
   d->Fill(0);
 
@@ -82,10 +82,7 @@ void Sketcher::Draw(Renderer* d, uint32_t time, bool restMode)
     "THERE IS NO SELF, THERE IS THE FORCE.",
   };
 
-  if (prevTime) {
-    animTime += time - prevTime;
-  }
-  prevTime = time;
+  animTime += delta;
 
   if (restMode) {
     int dx = animTime / 100; // / 80;

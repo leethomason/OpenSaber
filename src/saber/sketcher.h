@@ -16,7 +16,7 @@ public:
 	};
 
 	Sketcher();
-	void Draw(Renderer* d, uint32_t time, bool restMode);
+	void Draw(Renderer* d, uint32_t deltaTime, bool restMode);
 	void Push(uint8_t value);
 
 	uint8_t power = 0;
@@ -30,7 +30,6 @@ private:
 
 	uint8_t line = 0;
 	uint8_t pos = 0;
-	uint32_t prevTime = 0;
 	uint32_t animTime = 0;
 };
 

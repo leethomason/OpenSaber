@@ -97,7 +97,7 @@ SFX sfx(&audioPlayer);
 CMDParser cmdParser(&saberDB);
 Blade blade;
 Timer vccTimer(VCC_TIME_INTERVAL);
-Timer gforceDataTimer(100);
+Timer gforceDataTimer(110);
 
 void setup() {
   Serial.begin(19200);  // still need to turn it on in case a command line is connected.
@@ -453,6 +453,7 @@ void loop() {
 
   if (vccTimer.tick()) {
     blade.setVoltage(readVcc());
+    //Serial.println("vcc");
   }
 
   if (gforceDataTimer.tick()) {
@@ -461,7 +462,7 @@ void loop() {
     static const float MULT = 256.0f / GFORCE_RANGE;  // g=1 translates to uint8 64
     const uint8_t gForce = constrain(sqrtf(maxGForce2) * MULT, 0, 255);
     sketcher.Push(gForce);
-    //Serial.print(maxGForce2); Serial.print(" "); Serial.println(gForce);
+    //Serial.print("gforce "); Serial.println(gForce);
 #endif
     maxGForce2 = 0;
   }
@@ -487,7 +488,8 @@ void loop() {
 
 #ifdef SABER_DISPLAY
   if (displayTimer.tick()) {
-    sketcher.Draw(&renderer, msec, currentState == BLADE_OFF);
+    //Serial.println("display");
+    sketcher.Draw(&renderer, displayTimer.period(), currentState == BLADE_OFF);
     // see: SerialFlashChip.cpp in the teensy hardware source.
     SPI.beginTransaction(SPISettings(50000000, MSBFIRST, SPI_MODE0));
     display.display();
