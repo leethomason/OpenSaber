@@ -165,6 +165,21 @@ bool Renderer::DrawStr(const char* str, int x, int y, glyphMetrics metrics, int 
 	return didRender;
 }
 
+
+int Renderer::StrWidth(const char* str, glyphMetrics metrics)
+{
+	int w = 0;
+	int d0 = 0, d1 = 0;
+	while (str && *str) {
+		int advance = 0;
+		metrics(*str, &advance, &d1, &d0);
+		w += advance;
+		++str;
+	}
+	return w;
+}
+
+
 void Renderer::Fill(int c)
 {
 	memset(buffer, c ? 0xff : 0, nRows * width);

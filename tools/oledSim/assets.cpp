@@ -1,6 +1,13 @@
 #include "assets.h"
 #include <stdint.h>
 
+char ToUpper(char c) {
+	if (c >= 'a' && c <= 'z') {
+		c = 'A' + c - 'a';
+	}
+	return c;
+}
+
 struct GlypthInfo {
 	uint8_t width;
 	uint16_t offset;
@@ -627,6 +634,7 @@ const GlypthInfo aurekBesh_6ptDescriptors[] =
 
 const uint8_t* getGlypth_aurekBesh6(int charID, int* advance, int* w, int* rows)
 {
+	charID = ToUpper(charID);
 	if (charID >= ',' && charID <= 'Z') {
 		int index = charID - ',';
 		int width = aurekBesh_6ptDescriptors[index].width;
@@ -1014,6 +1022,7 @@ const GlypthInfo calibri_8ptDescriptors[] =
 
 const uint8_t* getGlypth_calibri8(int charID, int* advance, int* w, int* rows)
 {
+	charID = ToUpper(charID);
 	if (charID >= ',' && charID <= 'Z') {
 		int index = charID - ',';
 		int width  = calibri_8ptDescriptors[index].width;

@@ -15,12 +15,6 @@ Sketcher sketcher;
 static const int WIDTH = 128;
 static const int HEIGHT = 32;
 
-void Draw(Renderer* d, uint32_t time, bool restMode)
-{
-	sketcher.Draw(d, time, restMode);
-}
-
-
 int main(int, char**){
 	if (SDL_Init(SDL_INIT_VIDEO) != 0){
 		printf("SDL_Init Error: %s\n", SDL_GetError());
@@ -48,14 +42,22 @@ int main(int, char**){
 
 	SDL_Event e;
 	int scale = 4;
-	bool restMode = true;
+	int mode = 0;
 	sketcher.volume = 2;
 	sketcher.power = 3;
-	sketcher.color[0] = 0;
-	sketcher.color[1] = 255;
-	sketcher.color[2] = 100;
 	int count = 0;
+	sketcher.fontName = "Bespin";
 	uint32_t lastUpdate = SDL_GetTicks();
+
+	const char* FONT_NAMES[8] = {
+		"Bespin", "Vader", "Vader", "ObiAni", "Bespin", "JainaSw", "Maul", "MAUL"
+	};
+	uint8_t COLORS[8] = { 0, 255, 100, 200, 255, 0, 20, 120 };
+	sketcher.color[0] = COLORS[0];
+	sketcher.color[1] = COLORS[1];
+	sketcher.color[2] = COLORS[2];
+
+	int palette = 0;
 
 	while (true) {
 		SDL_PollEvent(&e);
@@ -67,7 +69,7 @@ int main(int, char**){
 				scale = e.key.keysym.sym - SDLK_0;
 			}
 			else if (e.key.keysym.sym == SDLK_SPACE) {
-				restMode = !restMode;
+				mode = (mode + 1) % Sketcher::NUM_MODES;
 			}
 			else if (e.key.keysym.sym == SDLK_p) {
 				sketcher.power = (sketcher.power + 1) % 5;
@@ -76,15 +78,12 @@ int main(int, char**){
 				sketcher.volume = (sketcher.volume + 1) % 5;
 			}
 			else if (e.key.keysym.sym == SDLK_c) {
-				uint8_t c0 = sketcher.color[0];
-				uint8_t c1 = sketcher.color[1];
-				uint8_t c2 = sketcher.color[2];
-				sketcher.color[0] = c1;
-				sketcher.color[1] = c2;
-				sketcher.color[2] = c0;
-			}
-			else if (e.key.keysym.sym == SDLK_f) {
-				sketcher.palette = (sketcher.palette + 1) % 8;
+				palette = (palette + 1) % 8;
+				sketcher.color[0] = COLORS[(palette * 3 + 0) % 8];
+				sketcher.color[1] = COLORS[(palette * 2 + 1) % 8];
+				sketcher.color[2] = COLORS[(palette * 5 + 2) % 8];
+				sketcher.fontName = FONT_NAMES[palette];
+				sketcher.palette = palette;
 			}
 		}
 
@@ -94,9 +93,9 @@ int main(int, char**){
 			uint8_t value = int(127.8 * (sin(count * 0.2) + 1.0));
 			++count;
 			sketcher.Push(value);
+		sketcher.Draw(&display, 100, mode);
 		}
 
-		Draw(&display, SDL_GetTicks(), restMode);
 		oled.Commit();
 
 		const SDL_Rect src = { 0, 0, WIDTH, HEIGHT };

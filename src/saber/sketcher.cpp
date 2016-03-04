@@ -32,7 +32,7 @@ void Sketcher::Push(uint8_t val)
   if (pos == DATA_WIDTH) pos = 0;
 }
 
-void Sketcher::Draw(Renderer* d, uint32_t delta, bool restMode)
+void Sketcher::Draw(Renderer* d, uint32_t time, int mode)
 {
   d->Fill(0);
 
@@ -84,8 +84,9 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, bool restMode)
 
   animTime += delta;
 
-  if (restMode) {
-    int dx = animTime / 100; // / 80;
+	if (mode == REST_MODE) {
+		// Render the Jedi Creed.
+		int dx = animTime / 100;
     bool render = d->DrawStr(lines[line], WIDTH - DIAL_WIDTH - 1 - dx, 23, getGlypth_aurekBesh6,
                              DIAL_WIDTH, WIDTH - DIAL_WIDTH);
     if (!render) {
@@ -95,7 +96,20 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, bool restMode)
       animTime = 0;
     }
   }
-  else {
+
+	if (mode == PALETTE_MODE || mode == VOLUME_MODE) 
+	{
+		const char* label = mode == PALETTE_MODE ? "PAL" : "VOL";
+
+		int wName = d->StrWidth(fontName, getGlypth_calibri8);
+		int wPal = d->StrWidth(label, getGlypth_aurekBesh6);
+
+		d->DrawStr(fontName, WIDTH / 2 - wName / 2, 14, getGlypth_calibri8);
+		d->DrawStr(label, WIDTH / 2 - wPal / 2, 23, getGlypth_aurekBesh6);
+	}
+
+	if (mode == BLADE_ON_MODE) {
+		// Render accelerometer data.
     uint8_t q = pos;
     static const int TOP = 15;
     static const int H = 16;
@@ -114,7 +128,7 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, bool restMode)
 
   // Current Palette
   for (int i = 0; i <= palette; ++i) {
-    int x = i % 4;
+		int x = 3 - (i % 4);
     int y = i / 4;
     d->DrawRectangle(INNERX + x * 6, y * 6, 5, 5);
   }
