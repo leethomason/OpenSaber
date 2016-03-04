@@ -24,6 +24,7 @@ public:
 					int flags = 0, int clip0 = 0, int clip1 = 256);
 	bool DrawStr(const char* str, int x, int y, glyphMetrics metrics, 
 				 int clip0 = 0, int clip1 = 256);
+	int StrWidth(const char* str, glyphMetrics metrics);
 	void DrawRectangle(int x, int y, int w, int h);
 
 	void Fill(int c);
