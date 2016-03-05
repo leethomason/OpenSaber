@@ -26,5 +26,42 @@ private:
 	uint32_t m_startTime = 0;
 };
 
+enum {
+	BUTTON_MODE_NORMAL,
+	BUTTON_MODE_PALETTE,
+	BUTTON_MODE_VOLUME,
+	NUM_BUTTON_MODES
+};
+
+class ButtonMode
+{
+public:
+	ButtonMode() {}
+
+	void nextMode();
+	const int mode() const { return m_mode; }
+
+private:
+	uint8_t m_mode = BUTTON_MODE_NORMAL;
+};
+
+class LEDManager
+{
+public:
+	LEDManager(uint8_t pin);
+
+	void set(bool on);
+	void blink(uint8_t n, uint32_t cycle);
+	void process();
+	int  numBlinks() const;
+	bool blinking() const { return m_nBlink > 0; }
+
+private:
+	uint8_t  m_pin = 0;
+	uint8_t  m_nBlink = 0;
+	bool 	 m_on = false;
+	uint32_t m_cycle = 0;
+	uint32_t m_startTime = 0;
+};
 
 #endif // SABER_UTIL_INCLUDED

@@ -53,22 +53,26 @@ static const uint32_t FLASH_TIME        = 120;
 static const uint32_t VCC_TIME_INTERVAL = 4000;
 
 static const uint32_t INDICATOR_TIME = 500;
+static const uint32_t INDICATOR_CYCLE = INDICATOR_TIME * 2;
 static const float GFORCE_RANGE = 4.0f;
 static const float GFORCE_RANGE_INV = 1.0f / GFORCE_RANGE;
 
 bool     paletteChange = false; // used to prevent sound fx on palette changes
-uint8_t  nIndicator = 0;
-uint32_t indicatorStart = 0;
 uint32_t reflashTime = 0;
 bool     flashOnClash = false;
-uint8_t  volumeRequest = 0;
 bool     soundWasOff = true;
 float    maxGForce2 = 0.0f;
 int32_t  lastVCC = NOMINAL_VOLTAGE;
 
 BladeState bladeState;
 ButtonCB buttonA(PIN_SWITCH_A, Button::PULL_UP);
+LEDManager ledA(PIN_LED_A);
+#ifdef SABER_TWO_BUTTON
 ButtonCB buttonB(PIN_SWITCH_B, Button::PULL_UP);
+LEDManager ledB(PIN_LED_B);
+#else
+ButtonMode buttonMode;
+#endif
 SaberDB saberDB;
 
 #ifdef SABER_ACCELEROMETER
@@ -132,13 +136,15 @@ void setup() {
 
   blade.setRGB(BLADE_BLACK);
 
-  buttonA.holdHandler(onOffHandler);
-  buttonA.clickHandler(checkPowerHandler);
+  buttonA.holdHandler(buttonAHoldHandler);
+  buttonA.clickHandler(buttonAClickHandler);
 
+#ifdef SABER_TWO_BUTTON
   buttonB.clickHandler(buttonBClickHandler);
   buttonB.releaseHandler(buttonBReleaseHandler);
   buttonB.holdHandler(buttonBHoldHandler);
   buttonB.pressHandler(buttonBPressHandler);
+#endif
 
 #ifdef SABER_SOUND_ON
   sfx.init();
@@ -161,10 +167,7 @@ void setup() {
   Serial.println(F("Setup complete."));
 #endif
 
-  // "power" lights
-  pinMode(PIN_LED_A, OUTPUT);
-  digitalWrite(PIN_LED_A, HIGH);
-  pinMode(PIN_LED_B, OUTPUT);
+  ledA.set(true); // "power on" light
 
 #ifdef SABER_CRYSTAL
   pinMode(PIN_CRYSTAL_R, OUTPUT);
@@ -177,24 +180,6 @@ void setup() {
 #ifdef SABER_SOUND_ON
   Serial.print("Font: "); Serial.println(sfx.currentFontName());
 #endif
-}
-
-void onOffHandler(const Button&) {
-#if SERIAL_DEBUG == 1
-  Serial.println("onOffHandler");
-#endif
-  if (bladeState.state() == BLADE_OFF) {
-    bladeState.change(BLADE_IGNITE);
-#ifdef SABER_SOUND_ON
-    sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
-#endif
-  }
-  else if (bladeState.state() != BLADE_RETRACT) {
-    bladeState.change(BLADE_RETRACT);
-#ifdef SABER_SOUND_ON
-    sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
-#endif
-  }
 }
 
 uint32_t calcReflashTime() {
@@ -211,10 +196,28 @@ int vccToPowerLevel(int32_t vcc)
   return level;
 }
 
-void checkPowerHandler(const Button&) {
+void buttonAClickHandler(const Button&) {
   int32_t vcc = readVcc();
-  nIndicator = vccToPowerLevel(vcc);
-  indicatorStart = millis();
+  ledA.blink(vccToPowerLevel(vcc), INDICATOR_CYCLE);
+}
+
+
+void buttonAHoldHandler(const Button&) {
+#if SERIAL_DEBUG == 1
+  Serial.println("buttonAHoldHandler");
+#endif
+  if (bladeState.state() == BLADE_OFF) {
+    bladeState.change(BLADE_IGNITE);
+#ifdef SABER_SOUND_ON
+    sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
+#endif
+  }
+  else if (bladeState.state() != BLADE_RETRACT) {
+    bladeState.change(BLADE_RETRACT);
+#ifdef SABER_SOUND_ON
+    sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
+#endif
+  }
 }
 
 /*
@@ -236,12 +239,13 @@ void syncToDB()
   sketcher.power = vccToPowerLevel(lastVCC);
 #endif
 
-  digitalWrite(PIN_LED_B, saberDB.soundOn() ? HIGH : LOW);
+  //digitalWrite(PIN_LED_B, saberDB.soundOn() ? HIGH : LOW);
+  ledB.set(saberDB.soundOn());
 }
 
+#ifdef SABER_TWO_BUTTON
 void buttonBPressHandler(const Button&) {
   paletteChange = false;
-  volumeRequest = 0;
   soundWasOff = !saberDB.soundOn();
 }
 
@@ -259,9 +263,14 @@ void buttonBHoldHandler(const Button&) {
       reflashTime = calcReflashTime();
     }
   }
-  else if (bladeState.state() == BLADE_OFF && saberDB.soundOn()) {
-    saberDB.setSoundOn(false);
-    syncToDB();
+  else if (bladeState.state() == BLADE_OFF) {
+    if (saberDB.soundOn()) {
+      saberDB.setSoundOn(false);
+      syncToDB();
+    }
+    else {
+      ledB.blink(4, INDICATOR_CYCLE);
+    }
   }
 }
 
@@ -272,13 +281,9 @@ void buttonBReleaseHandler(const Button& b) {
 #endif
   }
   flashOnClash = false;
-  if (bladeState.state() == BLADE_OFF) {
-    if (soundWasOff && volumeRequest) {
-      if (volumeRequest == 1)       saberDB.setVolume4(1);
-      else if (volumeRequest == 2)  saberDB.setVolume4(2);
-      else if (volumeRequest == 3)  saberDB.setVolume4(3);
-      else                          saberDB.setVolume4(4);
-    }
+  if (bladeState.state() == BLADE_OFF && ledB.blinking()) {
+    int nBlinks = ledB.numBlinks();
+    saberDB.setVolume4(nBlinks);
     syncToDB();
   }
 }
@@ -296,6 +301,7 @@ void buttonBClickHandler(const Button&) {
     }
   }
 }
+#endif
 
 void processBladeState()
 {
@@ -369,7 +375,11 @@ void loop() {
   const uint32_t msec = millis();
 
   buttonA.process();
+  ledA.process();
+#ifdef SABER_TWO_BUTTON
   buttonB.process();
+  ledB.process();
+#endif
 
   if (bladeState.state() == BLADE_ON) {
 #ifdef SABER_ACCELEROMETER
@@ -411,6 +421,7 @@ void loop() {
     maxGForce2 = 1;
   }
 
+#ifdef SABER_TWO_BUTTON
   // Special case: color switch.
   if (buttonA.press() && buttonB.isDown()) {
     saberDB.nextPalette();
@@ -418,24 +429,13 @@ void loop() {
     cmdParser.bringPaletteCurrent();
     syncToDB();
   }
+ #endif
+  
   processBladeState();
+
 #ifdef SABER_SOUND_ON
   sfx.process();
 #endif
-
-  // Special case: turn on/off volume.
-  if (bladeState.state() == BLADE_OFF && buttonB.isDown() && soundWasOff) {
-    uint32_t thresh = buttonB.holdThreshold();
-    if (buttonB.holdTime() >= thresh) {
-      uint32_t onTime = buttonB.holdTime() - thresh;
-      volumeRequest  = onTime / (thresh * 2) + 1;
-      uint32_t state = onTime / (thresh);
-      digitalWrite(PIN_LED_B, (state & 1) ? LOW : HIGH);
-#ifdef SABER_DISPLAY
-      sketcher.volume = volumeRequest;
-#endif
-    }
-  }
 
   if (vccTimer.tick()) {
     blade.setVoltage(readVcc());
@@ -453,17 +453,6 @@ void loop() {
     maxGForce2 = 0;
   }
 
-  if (nIndicator) {
-    if (nIndicator && (msec - indicatorStart) >= INDICATOR_TIME) {
-      nIndicator--;
-      indicatorStart = msec;
-    }
-    uint32_t state = nIndicator && (msec - indicatorStart) < INDICATOR_TIME / 2 ? HIGH : LOW;
-    digitalWrite(PIN_LED_A, state);
-    if (nIndicator == 0) {
-      digitalWrite(PIN_LED_A, HIGH);
-    }
-  }
   if (reflashTime && msec >= reflashTime) {
     reflashTime = 0;
     if (flashOnClash && bladeState.state() == BLADE_ON) {
