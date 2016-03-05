@@ -26,12 +26,6 @@ SOFTWARE.
 #include "pins.h"
 #include "AudioPlayer.h"
 
-#if SERIAL_DEBUG == 1
-# define ASSERT(x) if (!(x)) { Serial.print("SFX-ASSERT:"); Serial.print(#x); Serial.print(" "); Serial.print(__LINE__); }
-#else
-# define ASSERT(x)
-#endif
-
 SFX* SFX::m_instance = 0;
 
 SFX::SFX(AudioPlayer* audioPlayer)

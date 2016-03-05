@@ -109,6 +109,9 @@ void setup() {
 #endif
 
   //TCNT1 = 0x7FFF; // set blue & green channels out of phase
+  // Database is the "source of truth".
+  // Set it up first.
+  saberDB.readData();
 
 #ifdef SABER_ACCELEROMETER
   Serial.println("Starting Accel");
@@ -125,8 +128,6 @@ void setup() {
     accel.setDataRate(LIS3DH_DATARATE_100_HZ);
   }
 #endif
-
-  saberDB.readData();
 
 #ifdef SABER_SOUND_ON
 #endif
@@ -148,7 +149,6 @@ void setup() {
 
 #ifdef SABER_SOUND_ON
   sfx.init();
-  Serial.print("Font: "); Serial.println(sfx.currentFontName());
 #endif
 
   blade.setVoltage(readVcc());
@@ -172,7 +172,18 @@ void setup() {
   pinMode(PIN_LED_A, OUTPUT);
   digitalWrite(PIN_LED_A, HIGH);
   pinMode(PIN_LED_B, OUTPUT);
+
+#ifdef SABER_CRYSTAL
+  pinMode(PIN_CRYSTAL_R, OUTPUT);
+  pinMode(PIN_CRYSTAL_G, OUTPUT);
+  pinMode(PIN_CRYSTAL_B, OUTPUT);
+#endif
+ 
   syncToDB();
+
+#ifdef SABER_SOUND_ON
+  Serial.print("Font: "); Serial.println(sfx.currentFontName());
+#endif
 }
 
 void changeState(uint8_t state)
@@ -489,12 +500,19 @@ void loop() {
 #ifdef SABER_DISPLAY
   if (displayTimer.tick()) {
     //Serial.println("display");
-    sketcher.Draw(&renderer, displayTimer.period(), currentState == BLADE_OFF);
+    sketcher.Draw(&renderer, displayTimer.period(), currentState == BLADE_OFF ? Sketcher::REST_MODE : Sketcher::BLADE_ON_MODE);
     // see: SerialFlashChip.cpp in the teensy hardware source.
     SPI.beginTransaction(SPISettings(50000000, MSBFIRST, SPI_MODE0));
     display.display();
     SPI.endTransaction();
   }
+#endif
+
+#ifdef SABER_CRYSTAL
+  const uint8_t* rgb = saberDB.bladeColor();
+  analogWrite(PIN_CRYSTAL_R, rgb[0]);
+  analogWrite(PIN_CRYSTAL_G, rgb[1]);
+  analogWrite(PIN_CRYSTAL_B, rgb[2]);
 #endif
 }
 

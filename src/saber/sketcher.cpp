@@ -32,7 +32,7 @@ void Sketcher::Push(uint8_t val)
   if (pos == DATA_WIDTH) pos = 0;
 }
 
-void Sketcher::Draw(Renderer* d, uint32_t time, int mode)
+void Sketcher::Draw(Renderer* d, uint32_t delta, int mode)
 {
   d->Fill(0);
 
