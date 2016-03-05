@@ -46,24 +46,16 @@ SOFTWARE.
 #include "blade.h"
 #include "sketcher.h"
 #include "renderer.h"
+#include "saberUtil.h"
 
 static const uint8_t  BLADE_BLACK[NCHANNELS]  = {0};
 static const uint32_t FLASH_TIME        = 120;
 static const uint32_t VCC_TIME_INTERVAL = 4000;
 
-enum {  BLADE_OFF,
-        BLADE_IGNITE,
-        BLADE_ON,
-        BLADE_FLASH,
-        BLADE_RETRACT
-     };
-
 static const uint32_t INDICATOR_TIME = 500;
 static const float GFORCE_RANGE = 4.0f;
 static const float GFORCE_RANGE_INV = 1.0f / GFORCE_RANGE;
 
-uint8_t  currentState = BLADE_OFF;
-uint32_t stateStartTime = 0;
 bool     paletteChange = false; // used to prevent sound fx on palette changes
 uint8_t  nIndicator = 0;
 uint32_t indicatorStart = 0;
@@ -74,6 +66,7 @@ bool     soundWasOff = true;
 float    maxGForce2 = 0.0f;
 int32_t  lastVCC = NOMINAL_VOLTAGE;
 
+BladeState bladeState;
 ButtonCB buttonA(PIN_SWITCH_A, Button::PULL_UP);
 ButtonCB buttonB(PIN_SWITCH_B, Button::PULL_UP);
 SaberDB saberDB;
@@ -186,24 +179,18 @@ void setup() {
 #endif
 }
 
-void changeState(uint8_t state)
-{
-  currentState   = state;
-  stateStartTime = millis();
-}
-
 void onOffHandler(const Button&) {
 #if SERIAL_DEBUG == 1
   Serial.println("onOffHandler");
 #endif
-  if (currentState == BLADE_OFF) {
-    changeState(BLADE_IGNITE);
+  if (bladeState.state() == BLADE_OFF) {
+    bladeState.change(BLADE_IGNITE);
 #ifdef SABER_SOUND_ON
     sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
 #endif
   }
-  else if (currentState != BLADE_RETRACT) {
-    changeState(BLADE_RETRACT);
+  else if (bladeState.state() != BLADE_RETRACT) {
+    bladeState.change(BLADE_RETRACT);
 #ifdef SABER_SOUND_ON
     sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
 #endif
@@ -262,9 +249,9 @@ void buttonBHoldHandler(const Button&) {
 #if SERIAL_DEBUG == 1
   Serial.println("buttonBHoldHandler");
 #endif
-  if (currentState != BLADE_OFF) {
+  if (bladeState.state() != BLADE_OFF) {
     if (!paletteChange) {
-      changeState(BLADE_FLASH);
+      bladeState.change(BLADE_FLASH);
 #ifdef SABER_SOUND_ON
       sfx.playSound(SFX_USER_HOLD, SFX_OVERRIDE);
       flashOnClash = true;
@@ -272,20 +259,20 @@ void buttonBHoldHandler(const Button&) {
       reflashTime = calcReflashTime();
     }
   }
-  else if (currentState == BLADE_OFF && saberDB.soundOn()) {
+  else if (bladeState.state() == BLADE_OFF && saberDB.soundOn()) {
     saberDB.setSoundOn(false);
     syncToDB();
   }
 }
 
 void buttonBReleaseHandler(const Button& b) {
-  if (flashOnClash && currentState != BLADE_OFF) {
+  if (flashOnClash && bladeState.state() != BLADE_OFF) {
 #ifdef SABER_SOUND_ON
     sfx.playSound(SFX_IDLE, SFX_OVERRIDE);
 #endif
   }
   flashOnClash = false;
-  if (currentState == BLADE_OFF) {
+  if (bladeState.state() == BLADE_OFF) {
     if (soundWasOff && volumeRequest) {
       if (volumeRequest == 1)       saberDB.setVolume4(1);
       else if (volumeRequest == 2)  saberDB.setVolume4(2);
@@ -300,9 +287,9 @@ void buttonBClickHandler(const Button&) {
 #if SERIAL_DEBUG == 1
   Serial.println("buttonBClickHandler");
 #endif
-  if (currentState == BLADE_ON) {
+  if (bladeState.state() == BLADE_ON) {
     if (!paletteChange) {
-      changeState(BLADE_FLASH);
+      bladeState.change(BLADE_FLASH);
 #ifdef SABER_SOUND_ON
       sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
 #endif
@@ -310,13 +297,9 @@ void buttonBClickHandler(const Button&) {
   }
 }
 
-bool bladeOn() {
-  return currentState >= BLADE_ON && currentState < BLADE_RETRACT;
-}
-
 void processBladeState()
 {
-  switch (currentState) {
+  switch (bladeState.state()) {
     case BLADE_OFF:
       break;
 
@@ -326,26 +309,18 @@ void processBladeState()
 
     case BLADE_IGNITE:
       {
-#ifdef SABER_SOUND_ON
-        bool done = blade.setInterp(millis() - stateStartTime, sfx.getIgniteTime(), BLADE_BLACK, saberDB.bladeColor());
-#else
-        bool done = blade.setInterp(millis() - stateStartTime, 1000, BLADE_BLACK, saberDB.bladeColor());
-#endif
+        bool done = blade.setInterp(millis() - bladeState.startTime(), sfx.getIgniteTime(), BLADE_BLACK, saberDB.bladeColor());
         if (done) {
-          changeState(BLADE_ON);
+          bladeState.change(BLADE_ON);
         }
       }
       break;
 
     case BLADE_RETRACT:
       {
-#ifdef SABER_SOUND_ON
-        bool done = blade.setInterp(millis() - stateStartTime, sfx.getRetractTime(), saberDB.bladeColor(), BLADE_BLACK);
-#else
-        bool done = blade.setInterp(millis() - stateStartTime, 1000, saberDB.bladeColor(), BLADE_BLACK);
-#endif
+        bool done = blade.setInterp(millis() - bladeState.startTime(), sfx.getRetractTime(), saberDB.bladeColor(), BLADE_BLACK);
         if (done) {
-          changeState(BLADE_OFF);
+          bladeState.change(BLADE_OFF);
         }
       }
       break;
@@ -353,10 +328,10 @@ void processBladeState()
     case BLADE_FLASH:
       // interpolate?
       {
-        uint32_t delta = millis() - stateStartTime;
+        uint32_t delta = millis() - bladeState.startTime();
         if (delta > FLASH_TIME) {
           blade.setRGB(saberDB.bladeColor());
-          changeState(BLADE_ON);
+          bladeState.change(BLADE_ON);
         }
         else {
           blade.setRGB(saberDB.impactColor());
@@ -396,7 +371,7 @@ void loop() {
   buttonA.process();
   buttonB.process();
 
-  if (currentState == BLADE_ON) {
+  if (bladeState.state() == BLADE_ON) {
 #ifdef SABER_ACCELEROMETER
     accel.read();
     float g2_noZ = accel.x_g * accel.x_g + accel.y_g * accel.y_g;
@@ -416,7 +391,7 @@ void loop() {
 #if SERIAL_DEBUG == 1
         Serial.print(F("Impact. g=")); Serial.println(sqrt(g2));
 #endif
-        changeState(BLADE_FLASH);
+        bladeState.change(BLADE_FLASH);
       }
     }
     else if ( g2 >= motion * motion) {
@@ -449,7 +424,7 @@ void loop() {
 #endif
 
   // Special case: turn on/off volume.
-  if (currentState == BLADE_OFF && buttonB.isDown() && soundWasOff) {
+  if (bladeState.state() == BLADE_OFF && buttonB.isDown() && soundWasOff) {
     uint32_t thresh = buttonB.holdThreshold();
     if (buttonB.holdTime() >= thresh) {
       uint32_t onTime = buttonB.holdTime() - thresh;
@@ -491,8 +466,8 @@ void loop() {
   }
   if (reflashTime && msec >= reflashTime) {
     reflashTime = 0;
-    if (flashOnClash && currentState == BLADE_ON) {
-      changeState(BLADE_FLASH);
+    if (flashOnClash && bladeState.state() == BLADE_ON) {
+      bladeState.change(BLADE_FLASH);
       reflashTime = calcReflashTime();
     }
   }
@@ -500,7 +475,7 @@ void loop() {
 #ifdef SABER_DISPLAY
   if (displayTimer.tick()) {
     //Serial.println("display");
-    sketcher.Draw(&renderer, displayTimer.period(), currentState == BLADE_OFF ? Sketcher::REST_MODE : Sketcher::BLADE_ON_MODE);
+    sketcher.Draw(&renderer, displayTimer.period(), bladeState.state() == BLADE_OFF ? Sketcher::REST_MODE : Sketcher::BLADE_ON_MODE);
     // see: SerialFlashChip.cpp in the teensy hardware source.
     SPI.beginTransaction(SPISettings(50000000, MSBFIRST, SPI_MODE0));
     display.display();
