@@ -196,6 +196,7 @@ bool SFX::playSound(int sound, int mode)
 {
   ASSERT(sound >= 0);
   ASSERT(sound < NUM_SFX_TYPES);
+
 #if SERIAL_DEBUG == 1
 #ifdef DEBUG_DEEP
   Serial.print(F("SFX playSound() sound:")); Serial.println(sound);
@@ -211,7 +212,9 @@ bool SFX::playSound(int sound, int mode)
   if (sound == SFX_POWER_ON) {
     if (m_bladeOn) 
       return false;  // defensive error check.
-    m_player->mute(m_muted);
+    if (m_player) {
+      m_player->mute(m_muted);
+    }
     m_bladeOn = true;
   }
   else if (sound == SFX_POWER_OFF) {
@@ -220,7 +223,7 @@ bool SFX::playSound(int sound, int mode)
     m_bladeOn = false;
   }
 
-  if (!m_player->isPlaying()) {
+  if (m_player && !m_player->isPlaying()) {
     m_currentSound = SFX_NONE;
   }
 
@@ -243,7 +246,9 @@ bool SFX::playSound(int sound, int mode)
     else {
       path = m_filename[track].c_str();
     }
-    m_player->play(path.c_str());
+    if (m_player) {
+      m_player->play(path.c_str());
+    }
     m_currentSound = sound;
     return true;
   }
@@ -252,6 +257,8 @@ bool SFX::playSound(int sound, int mode)
 
 void SFX::process()
 {
+  if (!m_player) return;
+
   // Play the idle sound if the blade is on.
   if (m_bladeOn && !m_player->isPlaying()) {
     playSound(SFX_IDLE, SFX_OVERRIDE);
@@ -322,7 +329,7 @@ void SFX::mute(bool muted)
   //   runs and responds normally.
   Serial.print("SFX::mute "); Serial.println(muted ? "true" : "false");
   m_muted = muted;
-  if (m_muted) {
+  if (m_player && m_muted) {
     m_player->mute(m_muted);
   }
 }
@@ -336,19 +343,23 @@ void SFX::setVolume204(int vol)
 {
   vol = constrain(vol, 0, 204);
   if (vol >= 204) {
-    m_player->setVolume(1.0f);
+    if (m_player)
+      m_player->setVolume(1.0f);
   }
   else {
     static const float INV = 0.0049;
     float v = float(vol) * INV;
-    m_player->setVolume(v);
+    if (m_player)
+      m_player->setVolume(v);
   }
 }
 
 
 uint8_t SFX::getVolume204() const
 {
-  return m_player->volume() * 204.0f + 0.5f;
+  if (m_player)
+    return m_player->volume() * 204.0f + 0.5f;
+  return 160;
 }
 
 
