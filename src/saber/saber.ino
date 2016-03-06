@@ -60,8 +60,7 @@ static const float GFORCE_RANGE_INV = 1.0f / GFORCE_RANGE;
 bool     paletteChange = false; // used to prevent sound fx on palette changes
 uint32_t reflashTime = 0;
 bool     flashOnClash = false;
-bool     soundWasOff = true;
-float    maxGForce2 = 0.0f;
+]float    maxGForce2 = 0.0f;
 int32_t  lastVCC = NOMINAL_VOLTAGE;
 
 BladeState bladeState;
@@ -246,7 +245,6 @@ void syncToDB()
 #ifdef SABER_TWO_BUTTON
 void buttonBPressHandler(const Button&) {
   paletteChange = false;
-  soundWasOff = !saberDB.soundOn();
 }
 
 void buttonBHoldHandler(const Button&) {

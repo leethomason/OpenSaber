@@ -37,7 +37,7 @@ void LEDManager::set(bool on)
 void LEDManager::blink(uint8_t n, uint32_t cycle)
 {
 	m_nBlink = n;
-	m_cycle = cycle;
+	m_cycle = cycle > 0 ? cycle : 1;
 	m_startTime = millis();
 }
 
@@ -60,7 +60,7 @@ void LEDManager::process()
 
 int LEDManager::numBlinks() const
 {
-	if (m_cycle == 0) return 0;
+	if (m_startTime == 0) return 0;
 
 	uint32_t n = (millis() - m_startTime) / m_cycle;
 	return n + 1;
