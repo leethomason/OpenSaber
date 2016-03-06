@@ -190,26 +190,6 @@ int vccToPowerLevel(int32_t vcc)
   return level;
 }
 
-void buttonAClickHandler(const Button&) {
-  int32_t vcc = readVcc();
-  ledA.blink(vccToPowerLevel(vcc), INDICATOR_CYCLE);
-}
-
-
-void buttonAHoldHandler(const Button&) {
-#if SERIAL_DEBUG == 1
-  Serial.println("buttonAHoldHandler");
-#endif
-  if (bladeState.state() == BLADE_OFF) {
-    bladeState.change(BLADE_IGNITE);
-    sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
-  }
-  else if (bladeState.state() != BLADE_RETRACT) {
-    bladeState.change(BLADE_RETRACT);
-    sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
-  }
-}
-
 /*
    The saberDB is the source of true. (The Model.)
    Bring other things in sync when it changes.
@@ -234,6 +214,26 @@ void syncToDB()
 }
 
 #ifdef SABER_TWO_BUTTON
+void buttonAClickHandler(const Button&) {
+  int32_t vcc = readVcc();
+  ledA.blink(vccToPowerLevel(vcc), INDICATOR_CYCLE);
+}
+
+
+void buttonAHoldHandler(const Button&) {
+#if SERIAL_DEBUG == 1
+  Serial.println("buttonAHoldHandler");
+#endif
+  if (bladeState.state() == BLADE_OFF) {
+    bladeState.change(BLADE_IGNITE);
+    sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
+  }
+  else if (bladeState.state() != BLADE_RETRACT) {
+    bladeState.change(BLADE_RETRACT);
+    sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
+  }
+}
+
 void buttonBPressHandler(const Button&) {
   paletteChange = false;
 }
