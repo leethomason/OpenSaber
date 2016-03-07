@@ -67,12 +67,13 @@ public:
   void log(const char* log);  // 4 chars or less
   void dumpLog();
 
+  static const int NUM_PALETTES = 8;
+
 private:
   int scanForLogStart();
   void clearLog();
 
 	static const int BASE_ADDR    = 20;
-	static const int NUM_PALETTES = 8;
   static const int NUM_SOUND_FONTS = 4;
   static const int LOG_SIZE = 3;
   static const int MAX_LOG = 64;

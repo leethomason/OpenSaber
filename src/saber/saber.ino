@@ -209,8 +209,9 @@ void syncToDB()
   sketcher.power = vccToPowerLevel(lastVCC);
 #endif
 
-  //digitalWrite(PIN_LED_B, saberDB.soundOn() ? HIGH : LOW);
+#ifdef SABER_TWO_BUTTON
   ledB.set(saberDB.soundOn());
+#endif
 }
 
 #ifdef SABER_TWO_BUTTON
@@ -284,6 +285,62 @@ void buttonBClickHandler(const Button&) {
     }
   }
 }
+
+#else
+
+void blinkVolumeHandler(const LEDManager& manager)
+{
+  saberDB.setVolume4(manager.numBlinks());
+  syncToDB();
+}
+
+void blinkPaletteHandler(const LEDManager& manager)
+{
+  saberDB.setPalette(manager.numBlinks());
+  syncToDB();
+}
+
+// One button case.
+void buttonAClickHandler(const Button&) 
+{
+  if (bladeState.bladeOff()) {
+    buttonMode.nextMode();
+  }
+  else if (bladeState.state() == BLADE_ON) {
+    bladeState.change(BLADE_FLASH);
+    sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
+  }
+}
+
+void buttonAHoldHandler(const Button&) 
+{
+  if (bladeState.state() == BLADE_OFF) {
+
+    if (buttonMode.mode() == BUTTON_MODE_NORMAL) {
+      bladeState.change(BLADE_IGNITE);
+      sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);      
+    }
+    else if (buttonMode.mode() == BUTTON_MODE_PALETTE) {
+      ledA.setHandler(blinkPaletteHandler);
+      ledA.blink(SaberDB::NUM_PALETTES, INDICATOR_CYCLE);
+    }
+    else if (buttonMode.mode() == BUTTON_MODE_VOLUME) {
+      ledA.setHandler(blinkVolumeHandler);
+      ledA.blink(4, INDICATOR_CYCLE);
+    }
+
+  }
+  else if (bladeState.state() != BLADE_RETRACT) {
+    bladeState.change(BLADE_RETRACT);
+    sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
+  }
+}
+
+void buttonAReleaseHandler(const Button&) 
+{
+  ledA.blink(0,0);
+}
+
 #endif
 
 void processBladeState()
@@ -440,7 +497,12 @@ void loop() {
 #ifdef SABER_DISPLAY
   if (displayTimer.tick()) {
     //Serial.println("display");
-    sketcher.Draw(&renderer, displayTimer.period(), bladeState.state() == BLADE_OFF ? Sketcher::REST_MODE : Sketcher::BLADE_ON_MODE);
+    int sketcherMode = (bladeState.state() == BLADE_OFF) ? Sketcher::REST_MODE : Sketcher::BLADE_ON_MODE;
+    switch(buttonMode.mode()) {
+      case BUTTON_MODE_PALETTE: sketcherMode = Sketcher::PALETTE_MODE; break;
+      case BUTTON_MODE_VOLUME:  sketcherMode = Sketcher::VOLUME_MODE;  break;
+    }
+    sketcher.Draw(&renderer, displayTimer.period(), sketcherMode);
     // see: SerialFlashChip.cpp in the teensy hardware source.
     SPI.beginTransaction(SPISettings(50000000, MSBFIRST, SPI_MODE0));
     display.display();
