@@ -35,3 +35,6 @@ H_POWER_CUTOUT		= 0.5;
 
 D_DATA_CUTOUT		= 0.36;
 H_DATA_CUTOUT		= 0.7;
+
+D_ROD				= 0.160;
+ROD_GAP 			= 0.050;
