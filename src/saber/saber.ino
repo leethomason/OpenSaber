@@ -321,12 +321,10 @@ void buttonAHoldHandler(const Button&)
       sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);      
     }
     else if (buttonMode.mode() == BUTTON_MODE_PALETTE) {
-      ledA.setHandler(blinkPaletteHandler);
-      ledA.blink(SaberDB::NUM_PALETTES, INDICATOR_CYCLE);
+      ledA.blink(SaberDB::NUM_PALETTES, INDICATOR_CYCLE, blinkPaletteHandler);
     }
     else if (buttonMode.mode() == BUTTON_MODE_VOLUME) {
-      ledA.setHandler(blinkVolumeHandler);
-      ledA.blink(4, INDICATOR_CYCLE);
+      ledA.blink(4, INDICATOR_CYCLE, blinkVolumeHandler);
     }
 
   }
@@ -442,8 +440,7 @@ void loop() {
       }
     }
     else if ( g2 >= motion * motion) {
-      bool sound = true;
-      sound = sfx.playSound(SFX_MOTION, SFX_GREATER);
+      bool sound = sfx.playSound(SFX_MOTION, SFX_GREATER);
       if (sound) {
 #if SERIAL_DEBUG == 1
         Serial.print(F("Motion. g=")); Serial.println(sqrt(g2));
@@ -458,7 +455,7 @@ void loop() {
 
 #ifdef SABER_TWO_BUTTON
   // Special case: color switch.
-  if (buttonA.press() && buttonB.isDown()) {
+  if (bladeState.bladeOff() && buttonA.press() && buttonB.isDown()) {
     saberDB.nextPalette();
     paletteChange = true;
     cmdParser.bringPaletteCurrent();
@@ -496,11 +493,13 @@ void loop() {
 
 #ifdef SABER_DISPLAY
   if (displayTimer.tick()) {
-    //Serial.println("display");
-    int sketcherMode = (bladeState.state() == BLADE_OFF) ? Sketcher::REST_MODE : Sketcher::BLADE_ON_MODE;
-    switch(buttonMode.mode()) {
-      case BUTTON_MODE_PALETTE: sketcherMode = Sketcher::PALETTE_MODE; break;
-      case BUTTON_MODE_VOLUME:  sketcherMode = Sketcher::VOLUME_MODE;  break;
+    int sketcherMode == Sketcher::BLADE_ON_MODE;
+    if (bladeState.state() == BLADE_OFF) {
+      switch(buttonMode.mode()) {
+        case BUTTON_MODE_PALETTE: sketcherMode = Sketcher::PALETTE_MODE; break;
+        case BUTTON_MODE_VOLUME:  sketcherMode = Sketcher::VOLUME_MODE;  break;
+        default:                  sketcherMode = Sketcher::REST_MODE;    break;
+      }
     }
     sketcher.Draw(&renderer, displayTimer.period(), sketcherMode);
     // see: SerialFlashChip.cpp in the teensy hardware source.
@@ -528,5 +527,3 @@ int32_t readVcc() {
   return NOMINAL_VOLTAGE;
 #endif
 }
-
-
