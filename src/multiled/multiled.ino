@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <Grinliz_Arduino_Util.h>
 
 static const int PIN_R = 11;
 static const int PIN_G = 10;
@@ -8,6 +9,8 @@ static const int PIN_LED_0 = 3;
 static const int PIN_LED_1 = 4;
 static const int PIN_LED_2 = 5;
 static const int PIN_LED_3 = 6;
+
+CStr<40> serialBuffer;
 
 //#define DEBUG_DEEP
 
@@ -55,7 +58,7 @@ static const RGB rgb[4] = {
 };
 */
 
-static const RGB rgb[4] = {
+RGB rgb[4] = {
   {255, 0, 0},
   {160, 0, 80},
   {80, 0, 160},
@@ -152,5 +155,21 @@ void multiplex()
 #endif
     delayMicroseconds(DELAY - accum);
   }
+}
+
+void serialEvent()
+{
+/*    while (Serial.available()) {
+    int c = Serial.read();
+    if (c == '\n') {
+      int n = serialBuffer.size() / 2;
+      n = constrain(n, 0, 12);
+      if (n) {
+        parseNHex(serialBufer.c_str(), &rgb[0].r, 
+      }
+    }
+    else {
+      serialBuffer.append(c);
+    }*/
 }
 
