@@ -493,7 +493,12 @@ void loop() {
 
 #ifdef SABER_DISPLAY
   if (displayTimer.tick()) {
-    int sketcherMode == Sketcher::BLADE_ON_MODE;
+    int sketcherMode = Sketcher::BLADE_ON_MODE;
+#ifdef SABER_TWO_BUTTON   
+    if (bladeState.state() == BLADE_OFF) {
+      sketcherMode = Sketcher::REST_MODE;
+    }
+#else
     if (bladeState.state() == BLADE_OFF) {
       switch(buttonMode.mode()) {
         case BUTTON_MODE_PALETTE: sketcherMode = Sketcher::PALETTE_MODE; break;
@@ -501,6 +506,7 @@ void loop() {
         default:                  sketcherMode = Sketcher::REST_MODE;    break;
       }
     }
+#endif    
     sketcher.Draw(&renderer, displayTimer.period(), sketcherMode);
     // see: SerialFlashChip.cpp in the teensy hardware source.
     SPI.beginTransaction(SPISettings(50000000, MSBFIRST, SPI_MODE0));

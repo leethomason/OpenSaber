@@ -35,8 +35,8 @@ static const int EEPROM_SIZE = 512;
 //#define SABER_VOLTMETER
 #define SABER_LOGGING
 #define SABER_DISPLAY
-#define SABER_CRYSTAL
-//#define SABER_TWO_BUTTON
+//#define SABER_CRYSTAL
+#define SABER_TWO_BUTTON
 // Don't forget to set the emmitter in electrical.h!
 
 /* Teensy 3.2 */
