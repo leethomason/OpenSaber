@@ -65,10 +65,10 @@ int32_t  lastVCC = NOMINAL_VOLTAGE;
 
 BladeState bladeState;
 ButtonCB buttonA(PIN_SWITCH_A, Button::PULL_UP);
-LEDManager ledA(PIN_LED_A);
+LEDManager ledA(PIN_LED_A, false);
 #ifdef SABER_TWO_BUTTON
 ButtonCB buttonB(PIN_SWITCH_B, Button::PULL_UP);
-LEDManager ledB(PIN_LED_B);
+LEDManager ledB(PIN_LED_B, false);
 #else
 ButtonMode buttonMode;
 #endif
@@ -528,3 +528,4 @@ int32_t readVcc() {
   return NOMINAL_VOLTAGE;
 #endif
 }
+
