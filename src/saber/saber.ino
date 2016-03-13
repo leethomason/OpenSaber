@@ -214,6 +214,12 @@ void syncToDB()
 #endif
 }
 
+void blinkVolumeHandler(const LEDManager& manager)
+{
+  saberDB.setVolume4(manager.numBlinks());
+  syncToDB();
+}
+
 #ifdef SABER_TWO_BUTTON
 void buttonAClickHandler(const Button&) {
   int32_t vcc = readVcc();
@@ -257,7 +263,7 @@ void buttonBHoldHandler(const Button&) {
       syncToDB();
     }
     else {
-      ledB.blink(4, INDICATOR_CYCLE);
+      ledB.blink(4, INDICATOR_CYCLE, blinkVolumeHandler);
     }
   }
 }
@@ -267,11 +273,6 @@ void buttonBReleaseHandler(const Button& b) {
     sfx.playSound(SFX_IDLE, SFX_OVERRIDE);
   }
   flashOnClash = false;
-  if (bladeState.state() == BLADE_OFF && ledB.blinking()) {
-    int nBlinks = ledB.numBlinks();
-    saberDB.setVolume4(nBlinks);
-    syncToDB();
-  }
 }
 
 void buttonBClickHandler(const Button&) {
@@ -287,12 +288,6 @@ void buttonBClickHandler(const Button&) {
 }
 
 #else
-
-void blinkVolumeHandler(const LEDManager& manager)
-{
-  saberDB.setVolume4(manager.numBlinks());
-  syncToDB();
-}
 
 void blinkPaletteHandler(const LEDManager& manager)
 {

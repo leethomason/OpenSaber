@@ -50,9 +50,11 @@ bool SFX::init()
 #if SERIAL_DEBUG == 1
   Serial.println(F("SFX::init()"));
 #endif
-  m_player->init();
+  if (m_player)
+    m_player->init();
   scanFonts();
-  m_player->mute(true); // nothing is happening; connect shutdown pin.
+  if (m_player)
+    m_player->mute(true); // nothing is happening; connect shutdown pin.
   return true;
 }
 
