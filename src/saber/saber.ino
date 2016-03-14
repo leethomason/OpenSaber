@@ -23,7 +23,6 @@ SOFTWARE.
 
 // Arduino Libraries
 #include <EEPROM.h>
-#include <SoftwareSerial.h>
 #include <Wire.h>
 #include <SPI.h>
 #include <SD.h>
@@ -210,12 +209,15 @@ void syncToDB()
 #endif
 
 #ifdef SABER_TWO_BUTTON
-  ledB.set(saberDB.soundOn());
+  if (!ledB.blinking()) {   // If blinking, then the LED is being used as UI.
+    ledB.set(saberDB.soundOn());
+  }
 #endif
 }
 
 void blinkVolumeHandler(const LEDManager& manager)
 {
+  Serial.println("blink");
   saberDB.setVolume4(manager.numBlinks());
   syncToDB();
 }
@@ -263,6 +265,7 @@ void buttonBHoldHandler(const Button&) {
       syncToDB();
     }
     else {
+      Serial.println("blink-4");
       ledB.blink(4, INDICATOR_CYCLE, blinkVolumeHandler);
     }
   }
@@ -273,6 +276,7 @@ void buttonBReleaseHandler(const Button& b) {
     sfx.playSound(SFX_IDLE, SFX_OVERRIDE);
   }
   flashOnClash = false;
+  ledB.blink(0,0);
 }
 
 void buttonBClickHandler(const Button&) {
