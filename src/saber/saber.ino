@@ -65,9 +65,9 @@ int32_t  lastVCC = NOMINAL_VOLTAGE;
 BladeState bladeState;
 ButtonCB buttonA(PIN_SWITCH_A, Button::PULL_UP);
 LEDManager ledA(PIN_LED_A, false);
+LEDManager ledB(PIN_LED_B, false);  // Still have LEDB support, even if 1 button.
 #ifdef SABER_TWO_BUTTON
 ButtonCB buttonB(PIN_SWITCH_B, Button::PULL_UP);
-LEDManager ledB(PIN_LED_B, false);
 #else
 ButtonMode buttonMode;
 #endif
@@ -135,6 +135,7 @@ void setup() {
 
   buttonA.holdHandler(buttonAHoldHandler);
   buttonA.clickHandler(buttonAClickHandler);
+  buttonA.releaseHandler(buttonAReleaseHandler);
 
 #ifdef SABER_TWO_BUTTON
   buttonB.clickHandler(buttonBClickHandler);
@@ -206,15 +207,15 @@ void syncToDB()
   }
   sketcher.palette = saberDB.paletteIndex();
   sketcher.power = vccToPowerLevel(lastVCC);
+  sketcher.fontName = sfx.currentFontName();
 #endif
 
-#ifdef SABER_TWO_BUTTON
   if (!ledB.blinking()) {   // If blinking, then the LED is being used as UI.
     ledB.set(saberDB.soundOn());
   }
-#endif
 }
 
+#ifdef SABER_TWO_BUTTON
 void blinkVolumeHandler(const LEDManager& manager)
 {
   Serial.println("blink");
@@ -222,7 +223,6 @@ void blinkVolumeHandler(const LEDManager& manager)
   syncToDB();
 }
 
-#ifdef SABER_TWO_BUTTON
 void buttonAClickHandler(const Button&)
 {
   // Special case: color switch.
@@ -306,9 +306,16 @@ void buttonBClickHandler(const Button&) {
 
 #else
 
+void blinkVolumeHandler(const LEDManager& manager)
+{
+  Serial.println("blink");
+  saberDB.setVolume4(manager.numBlinks() - 1);
+  syncToDB();
+}
+
 void blinkPaletteHandler(const LEDManager& manager)
 {
-  saberDB.setPalette(manager.numBlinks());
+  saberDB.setPalette(manager.numBlinks() - 1);
   syncToDB();
 }
 
@@ -333,10 +340,11 @@ void buttonAHoldHandler(const Button&)
       sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
     }
     else if (buttonMode.mode() == BUTTON_MODE_PALETTE) {
+      saberDB.setPalette(0);
       ledA.blink(SaberDB::NUM_PALETTES, INDICATOR_CYCLE, blinkPaletteHandler);
     }
     else if (buttonMode.mode() == BUTTON_MODE_VOLUME) {
-      ledA.blink(4, INDICATOR_CYCLE, blinkVolumeHandler);
+      ledA.blink(5, INDICATOR_CYCLE, blinkVolumeHandler);
     }
 
   }
