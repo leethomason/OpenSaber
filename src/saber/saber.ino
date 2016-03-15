@@ -1,23 +1,23 @@
 /*
-Copyright (c) 2016 Lee Thomason, Grinning Lizard Software
+  Copyright (c) 2016 Lee Thomason, Grinning Lizard Software
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+  of the Software, and to permit persons to whom the Software is furnished to do
+  so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
 */
 
 
@@ -169,7 +169,7 @@ void setup() {
   pinMode(PIN_CRYSTAL_G, OUTPUT);
   pinMode(PIN_CRYSTAL_B, OUTPUT);
 #endif
- 
+
   syncToDB();
 
   Serial.print("Font: "); Serial.println(sfx.currentFontName());
@@ -223,9 +223,19 @@ void blinkVolumeHandler(const LEDManager& manager)
 }
 
 #ifdef SABER_TWO_BUTTON
-void buttonAClickHandler(const Button&) {
-  int32_t vcc = readVcc();
-  ledA.blink(vccToPowerLevel(vcc), INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
+void buttonAClickHandler(const Button&)
+{
+  // Special case: color switch.
+  if (bladeState.state() == BLADE_ON && buttonB.isDown()) {
+    saberDB.nextPalette();
+    paletteChange = true;
+    cmdParser.bringPaletteCurrent();
+    syncToDB();
+  }
+  else {
+    int32_t vcc = readVcc();
+    ledA.blink(vccToPowerLevel(vcc), INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
+  }
 }
 
 
@@ -277,7 +287,7 @@ void buttonBReleaseHandler(const Button& b) {
   }
   flashOnClash = false;
   if (ledB.blinking()) {
-    ledB.blink(0,0);
+    ledB.blink(0, 0);
   }
   syncToDB();
 }
@@ -303,7 +313,7 @@ void blinkPaletteHandler(const LEDManager& manager)
 }
 
 // One button case.
-void buttonAClickHandler(const Button&) 
+void buttonAClickHandler(const Button&)
 {
   if (bladeState.bladeOff()) {
     buttonMode.nextMode();
@@ -314,13 +324,13 @@ void buttonAClickHandler(const Button&)
   }
 }
 
-void buttonAHoldHandler(const Button&) 
+void buttonAHoldHandler(const Button&)
 {
   if (bladeState.state() == BLADE_OFF) {
 
     if (buttonMode.mode() == BUTTON_MODE_NORMAL) {
       bladeState.change(BLADE_IGNITE);
-      sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);      
+      sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
     }
     else if (buttonMode.mode() == BUTTON_MODE_PALETTE) {
       ledA.blink(SaberDB::NUM_PALETTES, INDICATOR_CYCLE, blinkPaletteHandler);
@@ -336,9 +346,9 @@ void buttonAHoldHandler(const Button&)
   }
 }
 
-void buttonAReleaseHandler(const Button&) 
+void buttonAReleaseHandler(const Button&)
 {
-  ledA.blink(0,0);
+  ledA.blink(0, 0);
 }
 
 #endif
@@ -455,16 +465,6 @@ void loop() {
     maxGForce2 = 1;
   }
 
-#ifdef SABER_TWO_BUTTON
-  // Special case: color switch.
-  if (bladeState.state() == BLADE_ON && buttonA.press() && buttonB.isDown()) {
-    saberDB.nextPalette();
-    paletteChange = true;
-    cmdParser.bringPaletteCurrent();
-    syncToDB();
-  }
- #endif
-  
   processBladeState();
 
   sfx.process();
@@ -496,19 +496,19 @@ void loop() {
 #ifdef SABER_DISPLAY
   if (displayTimer.tick()) {
     int sketcherMode = Sketcher::BLADE_ON_MODE;
-#ifdef SABER_TWO_BUTTON   
+#ifdef SABER_TWO_BUTTON
     if (bladeState.state() == BLADE_OFF) {
       sketcherMode = Sketcher::REST_MODE;
     }
 #else
     if (bladeState.state() == BLADE_OFF) {
-      switch(buttonMode.mode()) {
+      switch (buttonMode.mode()) {
         case BUTTON_MODE_PALETTE: sketcherMode = Sketcher::PALETTE_MODE; break;
         case BUTTON_MODE_VOLUME:  sketcherMode = Sketcher::VOLUME_MODE;  break;
         default:                  sketcherMode = Sketcher::REST_MODE;    break;
       }
     }
-#endif    
+#endif
     sketcher.Draw(&renderer, displayTimer.period(), sketcherMode);
     // see: SerialFlashChip.cpp in the teensy hardware source.
     SPI.beginTransaction(SPISettings(50000000, MSBFIRST, SPI_MODE0));
