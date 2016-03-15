@@ -225,7 +225,7 @@ void blinkVolumeHandler(const LEDManager& manager)
 #ifdef SABER_TWO_BUTTON
 void buttonAClickHandler(const Button&) {
   int32_t vcc = readVcc();
-  ledA.blink(vccToPowerLevel(vcc), INDICATOR_CYCLE);
+  ledA.blink(vccToPowerLevel(vcc), INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
 }
 
 
@@ -276,7 +276,10 @@ void buttonBReleaseHandler(const Button& b) {
     sfx.playSound(SFX_IDLE, SFX_OVERRIDE);
   }
   flashOnClash = false;
-  ledB.blink(0,0);
+  if (ledB.blinking()) {
+    ledB.blink(0,0);
+  }
+  syncToDB();
 }
 
 void buttonBClickHandler(const Button&) {
@@ -454,7 +457,7 @@ void loop() {
 
 #ifdef SABER_TWO_BUTTON
   // Special case: color switch.
-  if (bladeState.bladeOff() && buttonA.press() && buttonB.isDown()) {
+  if (bladeState.state() == BLADE_ON && buttonA.press() && buttonB.isDown()) {
     saberDB.nextPalette();
     paletteChange = true;
     cmdParser.bringPaletteCurrent();
