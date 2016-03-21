@@ -7,7 +7,7 @@ MM_TO_INCHES = 1 / 25.4;
 
 // Inches.
 D_RING      		= 1.311;    // correct
-D_WALL      		= 1.225;    // correct
+D_WALL      		= 1.225;    // FIXME too small
 
 D_EMITTER_LED       = 0.75;     // correct
 D_EMITTER_THREAD    = 1.05;     // VERIY
