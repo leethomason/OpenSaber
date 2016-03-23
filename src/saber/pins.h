@@ -51,9 +51,9 @@ static const int EEPROM_SIZE = 512;
 #define PIN_LED_B         8   // switch LED - audio
 #define PIN_LED_A         9   // switch LED - power
 #define PIN_SDCARD_CS     10
-#define PIN_SDCARD_MOSI   11
-#define PIN_SDCARD_MISO   12
-#define PIN_SDCARD_SCK    13
+#define PIN_SABER_MOSI    11
+#define PIN_SABER_MISO    12
+#define PIN_SABER_CLOCK   13
 #define PIN_OLED_DC       14
 #define PIN_VMETER        15
 #define PIN_OLED_RESET    16 
