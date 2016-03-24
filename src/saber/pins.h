@@ -103,7 +103,10 @@ static const float DEFAULT_G_FORCE_IMPACT = 2.2f;
 #define PIN_EMITTER_GREEN 22
 #define PIN_EMITTER_BLUE  23
 
-Outputs
+Connections
+	Battery
+		Bat+
+		Bat-
 	Oled
 		CS
 		RST
@@ -123,6 +126,20 @@ Outputs
 		Aground x 2
 		VBat
 		DAC
+	Accel
+		SCL
+		SDA
+		Vin
+		Ground
+	Crystal
+		R
+		G
+		B
+		Ground
+	USB
+		D+
+		D-
+		Ground
 */
 
 #endif // PINS_HEADER
