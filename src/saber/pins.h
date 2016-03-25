@@ -84,34 +84,34 @@ static const float DEFAULT_G_FORCE_IMPACT = 2.2f;
 #define PIN_CRYSTAL_R     3
 #define PIN_CRYSTAL_G     4
 #define PIN_CRYSTAL_B     5
-#define PIN_SWITCH_B      6
-#define PIN_SWITCH_A      7   // switch - power (also PWM)
-#define PIN_LED_B         8   // switch LED - audio
-#define PIN_LED_A         9   // switch LED - power
+#define PIN_LED_A         6
+#define PIN_LED_B         7
+#define PIN_SWITCH_A      8
+#define PIN_SWITCH_B      9
 #define PIN_SDCARD_CS     10
 #define PIN_SABER_MOSI    11
 #define PIN_SABER_MISO    12
 #define PIN_SABER_CLOCK   13
 #define PIN_OLED_DC       14
-#define PIN_VMETER        15
+// 15 open
 #define PIN_OLED_RESET    16 
 #define PIN_OLED_CS       17
 #define PIN_SDA           18
 #define PIN_SCL           19
-// 20
-#define PIN_EMITTER_RED   21
+#define PIN_VMETER        20
+#define PIN_EMITTER_BLUE  21
 #define PIN_EMITTER_GREEN 22
-#define PIN_EMITTER_BLUE  23
+#define PIN_EMITTER_RED   23
 
 Connections
 	Battery
 		Bat+
 		Bat-
 	Oled
-		CS
-		RST
-		D/C
-		CLCK
+		CS 	17
+		RST 16
+		D/C 14
+		CLCK clock
 		MOSI
 		Vin
 		Ground
@@ -121,7 +121,7 @@ Connections
 		MOSI
 		MISO
 		CLCK
-		CS
+		CS  10
 	Audio
 		Aground x 2
 		VBat
@@ -132,9 +132,9 @@ Connections
 		Vin
 		Ground
 	Crystal
-		R
-		G
-		B
+		R 3
+		G 4
+		B 5
 		Ground
 	USB
 		D+
