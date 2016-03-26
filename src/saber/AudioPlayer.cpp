@@ -26,8 +26,9 @@ void AudioPlayer::init() {
   // detailed information, see the MemoryAndCpuUsage example
   AudioMemory(8);
 
-  SPI.setMOSI(PIN_SDCARD_MOSI);
-  SPI.setSCK(PIN_SDCARD_SCK);
+  SPI.setMOSI(PIN_SABER_MOSI);
+  SPI.setSCK(PIN_SABER_CLOCK);
+  #ifdef SABER_SOUND_ON
   if (!(SD.begin(PIN_SDCARD_CS))) {
     // stop here, but print a message repetitively
     while (1) {
@@ -35,6 +36,7 @@ void AudioPlayer::init() {
       delay(500);
     }
   }
+  #endif
 }
 
 void AudioPlayer::play(const char* filename) 
