@@ -36,10 +36,14 @@
 #include <Grinliz_Arduino_Util.h>
 
 // Includes
-#include "sfx.h"
-#include "AudioPlayer.h"
+// -- Must be first. Has configuration. -- //
 #include "pins.h"
 #include "electrical.h"
+
+#ifdef SABER_SOUND_ON
+#include "sfx.h"
+#include "AudioPlayer.h"
+#endif
 #include "saberdb.h"
 #include "cmdparser.h"
 #include "blade.h"
@@ -87,8 +91,6 @@ Renderer renderer;
 #ifdef SABER_SOUND_ON
 AudioPlayer audioPlayer;
 SFX sfx(&audioPlayer);
-#else
-SFX sfx(0);
 #endif
 
 CMDParser cmdParser(&saberDB);
@@ -144,7 +146,9 @@ void setup() {
   buttonB.pressHandler(buttonBPressHandler);
 #endif
 
+#ifdef SABER_SOUND_ON
   sfx.init();
+#endif
 
   blade.setVoltage(readVcc());
 
@@ -173,7 +177,10 @@ void setup() {
 
   syncToDB();
 
+#ifdef SABER_SOUND_ON
   Serial.print("Font: "); Serial.println(sfx.currentFontName());
+#endif
+  Serial.println("setup() complete.");
 }
 
 uint32_t calcReflashTime() {
@@ -196,9 +203,11 @@ int vccToPowerLevel(int32_t vcc)
 */
 void syncToDB()
 {
+#ifdef SABER_SOUND_ON
   sfx.setFont(saberDB.soundFont());
   sfx.mute(!saberDB.soundOn());
   sfx.setVolume204(saberDB.volume());
+#endif
 
 #ifdef SABER_DISPLAY
   sketcher.volume = saberDB.volume4();
@@ -207,7 +216,9 @@ void syncToDB()
   }
   sketcher.palette = saberDB.paletteIndex();
   sketcher.power = vccToPowerLevel(lastVCC);
+  #ifdef SABER_SOUND_ON
   sketcher.fontName = sfx.currentFontName();
+  #endif
 #endif
 
   if (!ledB.blinking()) {   // If blinking, then the LED is being used as UI.
@@ -248,16 +259,20 @@ void buttonAClickHandler(const Button&)
 
 
 void buttonAHoldHandler(const Button&) {
-#if SERIAL_DEBUG == 1
+# if SERIAL_DEBUG == 1
   Serial.println("buttonAHoldHandler");
-#endif
+# endif
   if (bladeState.state() == BLADE_OFF) {
     bladeState.change(BLADE_IGNITE);
+#   ifdef SABER_SOUND_ON
     sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
+#   endif
   }
   else if (bladeState.state() != BLADE_RETRACT) {
     bladeState.change(BLADE_RETRACT);
+#   ifdef SABER_SOUND_ON
     sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
+#   endif
   }
 }
 
@@ -272,7 +287,9 @@ void buttonBHoldHandler(const Button&) {
   if (bladeState.state() != BLADE_OFF) {
     if (!paletteChange) {
       bladeState.change(BLADE_FLASH);
+#ifdef SABER_SOUND_ON
       sfx.playSound(SFX_USER_HOLD, SFX_OVERRIDE);
+#endif
       flashOnClash = true;
       reflashTime = calcReflashTime();
     }
@@ -291,7 +308,9 @@ void buttonBHoldHandler(const Button&) {
 
 void buttonBReleaseHandler(const Button& b) {
   if (flashOnClash && bladeState.state() != BLADE_OFF) {
+#ifdef SABER_SOUND_ON
     sfx.playSound(SFX_IDLE, SFX_OVERRIDE);
+#endif
   }
   flashOnClash = false;
   if (ledB.blinking()) {
@@ -307,7 +326,9 @@ void buttonBClickHandler(const Button&) {
   if (bladeState.state() == BLADE_ON) {
     if (!paletteChange) {
       bladeState.change(BLADE_FLASH);
+#ifdef SABER_SOUND_ON
       sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
+#endif
     }
   }
 }
@@ -335,7 +356,9 @@ void buttonAClickHandler(const Button&)
   }
   else if (bladeState.state() == BLADE_ON) {
     bladeState.change(BLADE_FLASH);
+#ifdef SABER_SOUND_ON
     sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
+#endif
   }
 }
 
@@ -345,7 +368,9 @@ void buttonAHoldHandler(const Button&)
 
     if (buttonMode.mode() == BUTTON_MODE_NORMAL) {
       bladeState.change(BLADE_IGNITE);
+#ifdef SABER_SOUND_ON
       sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
+#endif
     }
     else if (buttonMode.mode() == BUTTON_MODE_PALETTE) {
       saberDB.setPalette(0);
@@ -358,7 +383,9 @@ void buttonAHoldHandler(const Button&)
   }
   else if (bladeState.state() != BLADE_RETRACT) {
     bladeState.change(BLADE_RETRACT);
+#ifdef SABER_SOUND_ON
     sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
+#endif
   }
 }
 
@@ -377,7 +404,11 @@ void processBladeState()
 
     case BLADE_IGNITE:
       {
-        bool done = blade.setInterp(millis() - bladeState.startTime(), sfx.getIgniteTime(), BLADE_BLACK, saberDB.bladeColor());
+        uint32_t igniteTime = 1000;
+#ifdef SABER_SOUND_ON
+        igniteTime = sfx.getIgniteTime();
+#endif
+        bool done = blade.setInterp(millis() - bladeState.startTime(), igniteTime, BLADE_BLACK, saberDB.bladeColor());
         if (done) {
           bladeState.change(BLADE_ON);
         }
@@ -386,7 +417,11 @@ void processBladeState()
 
     case BLADE_RETRACT:
       {
-        bool done = blade.setInterp(millis() - bladeState.startTime(), sfx.getRetractTime(), saberDB.bladeColor(), BLADE_BLACK);
+        uint32_t retractTime = 1000;
+#ifdef SABER_SOUND_ON
+        retractTime = sfx.getRetractTime();
+#endif        
+        bool done = blade.setInterp(millis() - bladeState.startTime(), retractTime, saberDB.bladeColor(), BLADE_BLACK);
         if (done) {
           bladeState.change(BLADE_OFF);
         }
@@ -454,7 +489,10 @@ void loop() {
     float impact = saberDB.impact();
 
     if ((g2_noZ >= impact * impact)) {
-      bool sound = sfx.playSound(SFX_IMPACT, SFX_GREATER_OR_EQUAL);
+      bool sound = false;
+#ifdef SABER_SOUND_ON      
+      sound = sfx.playSound(SFX_IMPACT, SFX_GREATER_OR_EQUAL);
+#endif
 
       if (sound) {
 #if SERIAL_DEBUG == 1
@@ -464,7 +502,10 @@ void loop() {
       }
     }
     else if ( g2 >= motion * motion) {
-      bool sound = sfx.playSound(SFX_MOTION, SFX_GREATER);
+      bool sound = false;
+#ifdef SABER_SOUND_ON
+      sound = sfx.playSound(SFX_MOTION, SFX_GREATER);
+#endif
       if (sound) {
 #if SERIAL_DEBUG == 1
         Serial.print(F("Motion. g=")); Serial.println(sqrt(g2));
@@ -479,7 +520,9 @@ void loop() {
 
   processBladeState();
 
+#ifdef SABER_SOUND_ON
   sfx.process();
+#endif
 
   if (vccTimer.tick()) {
     blade.setVoltage(readVcc());
