@@ -215,6 +215,11 @@ void syncToDB()
   }
 }
 
+void buttonAReleaseHandler(const Button&)
+{
+  ledA.blink(0, 0);
+}
+
 #ifdef SABER_TWO_BUTTON
 void blinkVolumeHandler(const LEDManager& manager)
 {
@@ -225,6 +230,9 @@ void blinkVolumeHandler(const LEDManager& manager)
 
 void buttonAClickHandler(const Button&)
 {
+#if SERIAL_DEBUG == 1
+  Serial.println("buttonAClickHandler");
+#endif
   // Special case: color switch.
   if (bladeState.state() == BLADE_ON && buttonB.isDown()) {
     saberDB.nextPalette();
@@ -354,10 +362,6 @@ void buttonAHoldHandler(const Button&)
   }
 }
 
-void buttonAReleaseHandler(const Button&)
-{
-  ledA.blink(0, 0);
-}
 
 #endif
 
