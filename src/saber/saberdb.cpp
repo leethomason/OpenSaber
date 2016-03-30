@@ -163,7 +163,6 @@ void SaberDB::setImpactColor(const uint8_t* color) {
 }
 
 void SaberDB::setSoundFont(int v) {
-  v = abs(v) % NUM_SOUND_FONTS;
   palette.sound = v;
   EEPROM.put(paletteAddr(dataHeader.currentPalette), palette);
 }

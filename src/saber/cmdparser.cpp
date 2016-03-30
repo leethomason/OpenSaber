@@ -87,7 +87,7 @@ bool CMDParser::processCMD(uint8_t* c) {
   static const char AUDIO[]   = "aud";
   static const char VOL[]     = "vol";
   static const char AMPS[]    = "amp";
-  static const char VOLTS[]   = "vcc";
+  static const char VOLTS[]   = "vbat";
   static const char UTIL[]    = "util";
   static const char PWM[]     = "pwm";
   static const char MOTION[]  = "mot";

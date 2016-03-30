@@ -39,7 +39,7 @@ enum {            //  Max
 
   NUM_SFX_TYPES,
   MAX_SFX_FILES = 48,
-  MAX_FONTS = 8,
+  MAX_FONTS = 10,
   SFX_NONE = 255
 };
 
