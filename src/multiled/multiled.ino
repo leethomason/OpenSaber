@@ -1,9 +1,9 @@
 #include <stdint.h>
 #include <Grinliz_Arduino_Util.h>
 
-static const int PIN_R = 8;
-static const int PIN_G = 6;
-static const int PIN_B = 5;
+#define PIN_R 8
+#define PIN_G 6
+#define PIN_B 5
 
 #define PIN_LED_0 A0
 #define PIN_LED_1 A1
