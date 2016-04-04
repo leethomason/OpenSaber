@@ -1,14 +1,14 @@
 #include <stdint.h>
 #include <Grinliz_Arduino_Util.h>
 
-static const int PIN_R = 11;
-static const int PIN_G = 10;
-static const int PIN_B = 9;
+static const int PIN_R = 8;
+static const int PIN_G = 6;
+static const int PIN_B = 5;
 
-static const int PIN_LED_0 = 3;
-static const int PIN_LED_1 = 4;
-static const int PIN_LED_2 = 5;
-static const int PIN_LED_3 = 6;
+#define PIN_LED_0 A0
+#define PIN_LED_1 A1
+#define PIN_LED_2 A2
+#define PIN_LED_3 A3
 
 CStr<40> serialBuffer;
 
@@ -24,11 +24,11 @@ void setup()
 {
   Serial.begin(19200);
 
-  digitalWrite(PIN_R, LOW);
-  digitalWrite(PIN_R, LOW);
-  digitalWrite(PIN_R, LOW);
+  digitalWrite(PIN_R, HIGH);
+  digitalWrite(PIN_G, HIGH);
+  digitalWrite(PIN_B, HIGH);
   
-  digitalWrite(PIN_LED_0, HIGH);
+  digitalWrite(PIN_LED_0, LOW);
   digitalWrite(PIN_LED_1, HIGH);
   digitalWrite(PIN_LED_2, HIGH);
   digitalWrite(PIN_LED_3, HIGH);
@@ -42,6 +42,7 @@ void setup()
   pinMode(PIN_LED_2, OUTPUT);
   pinMode(PIN_LED_3, OUTPUT);
 
+  Serial.println("setup()");
   multiplex();
 }
 
