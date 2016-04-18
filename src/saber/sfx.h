@@ -61,6 +61,7 @@ public:
   void scanFiles(uint8_t font);
 
   bool playSound(int sfx, int mode);
+  bool playSound(const char* sfx);
   bool bladeOn() const                    { return m_bladeOn; }
   void process();
 

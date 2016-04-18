@@ -19,9 +19,11 @@ void setup() {
     delay(500);
   }
   Serial.println("Hello");
-  buttonA.init(3);
-  buttonB.init(4);
+  buttonA.init(8);
+  buttonB.init(9);
+  
   audioPlayer.init();
+  audioPlayer.setVolume(0.2);
 
   buttonA.clickHandler(buttonAClickHandler);
   buttonB.clickHandler(buttonBClickHandler);

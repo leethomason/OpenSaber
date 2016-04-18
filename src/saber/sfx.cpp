@@ -248,13 +248,17 @@ bool SFX::playSound(int sound, int mode)
     else {
       path = m_filename[track].c_str();
     }
-    if (m_player) {
-      m_player->play(path.c_str());
-    }
+    m_player->play(path.c_str());
     m_currentSound = sound;
     return true;
   }
   return false;
+}
+
+bool SFX::playSound(const char* sfx)
+{
+  m_player->play(sfx);
+  return true;  
 }
 
 void SFX::process()

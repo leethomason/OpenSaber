@@ -38,13 +38,12 @@ class CMDParser
     const char* getBuffer() const     { return token.c_str(); }
     void clearBuffer()                { token.clear(); }
 
-    void bringPaletteCurrent();
-
   private:
     void tokenize();
     void printHexColor(const uint8_t* color);
     void parseHexColor(const char* str, uint8_t* c);
     void printLead(const char* str);
+    void printMAmps(const uint8_t* color);
   
     SaberDB* database;
     CStr<18> token;

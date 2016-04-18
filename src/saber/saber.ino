@@ -99,6 +99,9 @@ Timer vccTimer(VCC_TIME_INTERVAL);
 Timer gforceDataTimer(110);
 
 void setup() {
+  pinMode(PIN_AMP_SHUTDOWN, OUTPUT);
+  digitalWrite(PIN_AMP_SHUTDOWN, LOW);
+  
   Serial.begin(19200);  // still need to turn it on in case a command line is connected.
   while (!Serial) {
     delay(100);
@@ -248,7 +251,6 @@ void buttonAClickHandler(const Button&)
   if (bladeState.state() == BLADE_ON && buttonB.isDown()) {
     saberDB.nextPalette();
     paletteChange = true;
-    cmdParser.bringPaletteCurrent();
     syncToDB();
   }
   else {
@@ -481,8 +483,13 @@ void loop() {
   if (bladeState.state() == BLADE_ON) {
 #ifdef SABER_ACCELEROMETER
     accel.read();
-    float g2_noZ = accel.x_g * accel.x_g + accel.y_g * accel.y_g;
-    float g2 = g2_noZ + accel.z_g * accel.z_g;
+
+    float bladeAxis = (&accel.x_g)[BLADE_AXIS];
+    float normalA = (&accel.x_g)[NORMAL_AXIS_A];
+    float normalB = (&accel.x_g)[NORMAL_AXIS_B];
+    
+    float g2_noZ = normalA * normalA + normalB * normalB;
+    float g2 = g2_noZ + bladeAxis * bladeAxis;
     maxGForce2 = max(maxGForce2, g2);
 
     float motion = saberDB.motion();

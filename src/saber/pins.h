@@ -29,55 +29,17 @@ static const int EEPROM_SIZE = 512;
 // Note: Serial connection should be set to 19200 baud with a newline after commands.
 #define SERIAL_DEBUG 1
 
-//#define SABER_ACCELEROMETER
+#define SABER_ACCELEROMETER
 #define SABER_SOUND_ON
-//#define SABER_SOUND_SHUTDOWN
+#define SABER_SOUND_SHUTDOWN
 #define SABER_VOLTMETER
 //#define SABER_LOGGING
-//#define SABER_DISPLAY
+#define SABER_DISPLAY
 //#define SABER_CRYSTAL
 #define SABER_TWO_BUTTON
 // Don't forget to set the emmitter in electrical.h!
 
 /* Teensy 3.2 */
-#define PIN_RX1           0
-#define PIN_TX1           1
-#define PIN_AMP_SHUTDOWN  2
-#define PIN_CRYSTAL_R     3
-#define PIN_CRYSTAL_G     4
-#define PIN_CRYSTAL_B     5
-#define PIN_SWITCH_B      6
-#define PIN_SWITCH_A      7   // switch - power (also PWM)
-#define PIN_LED_B         8   // switch LED - audio
-#define PIN_LED_A         9   // switch LED - power
-#define PIN_SDCARD_CS     10
-#define PIN_SABER_MOSI    11
-#define PIN_SABER_MISO    12
-#define PIN_SABER_CLOCK   13
-#define PIN_OLED_DC       14
-#define PIN_VMETER        15
-#define PIN_OLED_RESET    16 
-#define PIN_OLED_CS       17
-#define PIN_SDA           18
-#define PIN_SCL           19
-// 20
-#define PIN_EMITTER_RED   21
-#define PIN_EMITTER_GREEN 22
-#define PIN_EMITTER_BLUE  23
-// A14: DAC out
-
-enum {
-  RED,
-  GREEN,
-  BLUE,
-  NCHANNELS
-};
-
-static const float DEFAULT_G_FORCE_MOTION = 1.3f;
-static const float DEFAULT_G_FORCE_IMPACT = 2.2f;
-
-/*
-// PCB V4
 #define PIN_RX1           0
 #define PIN_TX1           1
 #define PIN_AMP_SHUTDOWN  2
@@ -102,6 +64,18 @@ static const float DEFAULT_G_FORCE_IMPACT = 2.2f;
 #define PIN_EMITTER_BLUE  21
 #define PIN_EMITTER_GREEN 22
 #define PIN_EMITTER_RED   23
+
+enum {
+  RED,
+  GREEN,
+  BLUE,
+  NCHANNELS
+};
+
+static const float DEFAULT_G_FORCE_MOTION = 1.3f;
+static const float DEFAULT_G_FORCE_IMPACT = 2.2f;
+
+/*
 
 Connections
 	Battery

@@ -66,6 +66,13 @@ void CMDParser::printHexColor(const uint8_t* color) {
   }
 }
 
+void CMDParser::printMAmps(const uint8_t* c) {
+    Serial.print("(");
+    uint32_t amps = uint32_t(c[0]) * RED_I / uint32_t(255) + uint32_t(c[1]) * GREEN_I / uint32_t(255) + uint32_t(c[2]) * BLUE_I / uint32_t(255);
+    Serial.print(amps);
+    Serial.print(" mAmps)");
+}
+
 void CMDParser::parseHexColor(const char* str, uint8_t* c) {
   return parseNHex(str, c, NCHANNELS);
 }
@@ -86,7 +93,6 @@ bool CMDParser::processCMD(uint8_t* c) {
   static const char FONT []   = "font";
   static const char AUDIO[]   = "aud";
   static const char VOL[]     = "vol";
-  static const char AMPS[]    = "amp";
   static const char VOLTS[]   = "vbat";
   static const char UTIL[]    = "util";
   static const char PWM[]     = "pwm";
@@ -96,6 +102,8 @@ bool CMDParser::processCMD(uint8_t* c) {
   static const char RESET[]   = "reset";
   static const char LOG[]     = "log";
   static const char ID[]      = "id";
+  static const char LIST[]    = "list";
+  static const char PLAY[]    = "play";
 
   tokenize();
   #if SERIAL_DEBUG == 1
@@ -109,7 +117,11 @@ bool CMDParser::processCMD(uint8_t* c) {
       database->setBladeColor(c);
     }
     printLead(action.c_str());
-    printHexColor(database->bladeColor()); Serial.print('\n');
+    const uint8_t* c = database->bladeColor();
+    printHexColor(c); 
+    Serial.print(" ");
+    printMAmps(c);
+    Serial.print('\n');
   }
   else if (action == IC) {
     if (isSet) {
@@ -117,13 +129,15 @@ bool CMDParser::processCMD(uint8_t* c) {
       database->setImpactColor(c);
     }
     printLead(action.c_str());
-    printHexColor(database->impactColor()); Serial.print('\n');
+    printHexColor(database->impactColor()); 
+    Serial.print(" ");
+    printMAmps(database->impactColor());
+    Serial.print('\n');
   }
   else if (action == PAL) {
     if (isSet) {
       int pal = atoi(value.c_str());
       database->setPalette(pal);
-      CMDParser::bringPaletteCurrent();
     }
     printLead(action.c_str());
     Serial.println(database->paletteIndex());
@@ -132,7 +146,6 @@ bool CMDParser::processCMD(uint8_t* c) {
     if (isSet) {
       int f = atoi(value.c_str());
       database->setSoundFont(f);
-      CMDParser::bringPaletteCurrent();
     }
     printLead(action.c_str());
     Serial.print(database->soundFont());
@@ -154,10 +167,6 @@ bool CMDParser::processCMD(uint8_t* c) {
     }
     printLead(action.c_str());
     Serial.println(database->volume());
-  }
-  else if (action == AMPS) {
-    printLead(action.c_str());
-    Serial.println(Blade::blade().power());
   }
   else if (action == VOLTS) {
     printLead(action.c_str());
@@ -205,6 +214,30 @@ bool CMDParser::processCMD(uint8_t* c) {
     printLead(action.c_str());
     Serial.println(F(ID_STR));
   }
+  else if (action == LIST) {
+    File root = SD.open("/");
+    while (true) {
+      File entry =  root.openNextFile();
+      if (!entry) {
+        // no more files
+        break;
+      }
+      if (entry.isDirectory()) {
+        continue;
+      }
+      else {
+        Serial.println(entry.name());
+      }
+      entry.close();
+    }
+    root.close();    
+  }
+  else if (action == PLAY) {
+    #ifdef SABER_SOUND_ON
+    SFX* sfx = SFX::instance();
+    sfx->playSound(value.c_str());
+    #endif
+  }
   else if (action == STATUS) {
     static const int DELAY = 20;  // don't saturate the serial line. Too much for SoftwareSerial.
     
@@ -228,8 +261,6 @@ bool CMDParser::processCMD(uint8_t* c) {
     delay(DELAY);
     printLead(IMPACT);  Serial.println(database->impact());
     delay(DELAY);
-    printLead(AMPS);    Serial.println(Blade::blade().power());
-    delay(DELAY);
     printLead(VOLTS);   Serial.println(Blade::blade().voltage());
     delay(DELAY);
     printLead(UTIL);    
@@ -250,26 +281,20 @@ bool CMDParser::processCMD(uint8_t* c) {
     delay(DELAY);
 
     // font
-    printLead(BC);      printHexColor(database->bladeColor()); Serial.print('\n');
+    printLead(BC);      printHexColor(database->bladeColor());
+    Serial.print(" ");
+    printMAmps(database->bladeColor());
+    Serial.print('\n');
     delay(DELAY);
-    printLead(IC);      printHexColor(database->impactColor()); Serial.print('\n');
+
+    printLead(IC);      
+    printHexColor(database->impactColor());
+    Serial.print(" ");
+    printMAmps(database->impactColor());
+    Serial.print('\n');
     Serial.println(space);
   }
   token.clear();
   return isSet;
-}
-
-
-void CMDParser::bringPaletteCurrent()
-{
-  const uint8_t* bladeColor  = database->bladeColor();
-  uint8_t soundFont          = database->soundFont();
-  SFX* sfx = SFX::instance();
-  bool bladeOn               = sfx->bladeOn();
-  
-  if (bladeOn) {
-    Blade::blade().setRGB(bladeColor);
-  }
-  sfx->setFont(soundFont);
 }
 

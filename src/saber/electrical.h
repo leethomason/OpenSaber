@@ -46,7 +46,7 @@ static const int32_t NOMINAL_VOLTAGE = 3700;
  *  But we measure 5.10 volts.
  *  Correcting: 
  */
- static const int32_t UVOLT_MULT = 6840;
+ static const int32_t UVOLT_MULT = 6680;
 
 #if EMITTER == TEST_EMITTER
 #define ID_STR "Test Emitter"
@@ -68,6 +68,10 @@ static const int32_t BLUE_R   = int32_t(47) * int32_t(1000);
 #define ID_STR "Gecko (Sentris Body) RGB Luxeon"
 static const int32_t LED_RANGE = 255;  // 255 for full range
 
+#define BLADE_AXIS 1
+#define NORMAL_AXIS_A 0
+#define NORMAL_AXIS_B 2
+
 /*
  * Luxeon Rebel Endor (Tri-LED)
  * Nominal values. (Significant variation when measured.)
@@ -78,7 +82,7 @@ static const int32_t LED_RANGE = 255;  // 255 for full range
  */
 static const int32_t RED_VF   = 2900;   // milli-volts
 static const int32_t RED_I    = 350;    // milli-amps
-static const int32_t RED_R    = 2700;   // milli-ohms
+static const int32_t RED_R    = 2400;   // milli-ohms
 
 static const int32_t GREEN_VF = 3150;
 static const int32_t GREEN_I  = 350;
@@ -89,9 +93,8 @@ static const int32_t BLUE_I   = 350;
 static const int32_t BLUE_R   = 1800;
 
 #endif
-// FIXME: needs sound
-static const int BASE_AMPS   = 0;
 
+static const int HIGH_VOLTAGE = 4200;
 static const int LOW_VOLTAGE = 3500;
 
 #endif // ELECTRICAL_SABER_INCLUDED
