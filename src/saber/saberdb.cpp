@@ -34,14 +34,14 @@ SaberDB::SaberDB() {
 
 bool SaberDB::writeDefaults() {
   Palette defPalette[NUM_PALETTES] = {
-    { 0, 255, 0,    0, 200, 200,   0 },    // green
-    { 0, 0, 255,    0, 200, 255,   0 },    // blue
-    { 0, 255, 255,  150, 220, 200, 0 },    // cyan
-    { 255, 0, 0,    240, 200, 0,   0 },    // red
-    { 255, 106, 0,  255, 200, 100, 0 },    // amber
-    { 255, 200, 0,  200, 200, 100, 0 },    // sand
-    { 144, 0, 255,  144, 100, 255, 0 },    // purple
-    { 255, 64, 237, 200, 200, 100,  0 }    // pink
+    { 0, 0xff, 0,     0, 0xff, 0xa0,    0 },    // green
+    { 0, 0, 0xff,     0, 0xc8, 0xff,    0 },    // blue
+    { 0, 0xff, 0xff,  0, 0xa0, 0xff,    0 },    // cyan
+    { 0xff, 0, 0,     0xa0, 0x80, 0,    0 },    // red
+    { 0xff, 0x6a, 0,  0x80, 0xff, 0,    0 },    // amber
+    { 0xff, 0xc8, 0,  0xff, 0xff, 0,    0 },    // sand
+    { 0x90, 0, 0xff,  0x90, 0x64, 0xff, 0 },    // purple
+    { 0xff, 0x40, 0xed, 0x50, 0,  0xff,  0 }    // pink
   };
 
 #if SERIAL_DEBUG == 1
@@ -114,14 +114,19 @@ void SaberDB::setVolume(int v) {
   EEPROM.put(headerAddr(), dataHeader);
 }
 
+static const int VOLUME_1 = 30;
+static const int VOLUME_2 = 80;
+static const int VOLUME_3 = 120;
+static const int VOLUME_4 = 204;
+
 void SaberDB::setVolume4(int v) 
 {
   switch (v) {
     case 0: setSoundOn(false); break;
-    case 1: setVolume(160); setSoundOn(true); break;
-    case 2: setVolume(170); setSoundOn(true); break;
-    case 3: setVolume(185); setSoundOn(true); break;
-    case 4: setVolume(204); setSoundOn(true); break;
+    case 1: setVolume(VOLUME_1); setSoundOn(true); break;
+    case 2: setVolume(VOLUME_2); setSoundOn(true); break;
+    case 3: setVolume(VOLUME_3); setSoundOn(true); break;
+    case 4: setVolume(VOLUME_4); setSoundOn(true); break;
   }
 }
 
@@ -130,9 +135,9 @@ uint8_t SaberDB::volume4() const
   if (!soundOn() || dataHeader.volume == 0) {
     return 0;
   }
-  if (dataHeader.volume == 204) return 4;
-  if (dataHeader.volume >= 185) return 3;
-  if (dataHeader.volume >= 170) return 2;
+  if (dataHeader.volume == VOLUME_4) return 4;
+  if (dataHeader.volume >= VOLUME_3) return 3;
+  if (dataHeader.volume >= VOLUME_2) return 2;
   return 1;
 }
 

@@ -1,23 +1,23 @@
 /*
-Copyright (c) 2016 Lee Thomason, Grinning Lizard Software
+  Copyright (c) 2016 Lee Thomason, Grinning Lizard Software
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of 
-this software and associated documentation files (the "Software"), to deal in 
-the Software without restriction, including without limitation the rights to 
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies 
-of the Software, and to permit persons to whom the Software is furnished to do 
-so, subject to the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+  of the Software, and to permit persons to whom the Software is furnished to do
+  so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all 
-copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
-SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
 */
 
 #include <Arduino.h>
@@ -34,28 +34,28 @@ CMDParser::CMDParser(SaberDB* _db) {
 
 void CMDParser::tokenize()
 {
-//  Serial.print("token ");  Serial.println(token.c_str());  
+  //  sprint("token ");  Serial.println(token.c_str());
   action.clear();
   value.clear();
   if (token.empty()) return;
 
-//  Serial.println("not empty");
+  //  Serial.println("not empty");
 
   int i = 0;
   //Serial.println(i);
-  for( ; token[i] && token[i] != ' '; i++) {
+  for ( ; token[i] && token[i] != ' '; i++) {
     action.append(token[i]);
   }
   //Serial.println(i);
   if (token[i] == ' ') {
     i++;
-    for( ; token[i]; i++) {
+    for ( ; token[i]; i++) {
       value.append(token[i]);
     }
   }
-//  Serial.println(i);
-//  Serial.print("action "); Serial.println(action.c_str());
-//  Serial.print("value  "); Serial.println(value.c_str());
+  //  Serial.println(i);
+  //  Serial.print("action "); Serial.println(action.c_str());
+  //  Serial.print("value  "); Serial.println(value.c_str());
 }
 
 void CMDParser::printHexColor(const uint8_t* color) {
@@ -67,10 +67,10 @@ void CMDParser::printHexColor(const uint8_t* color) {
 }
 
 void CMDParser::printMAmps(const uint8_t* c) {
-    Serial.print("(");
-    uint32_t amps = uint32_t(c[0]) * RED_I / uint32_t(255) + uint32_t(c[1]) * GREEN_I / uint32_t(255) + uint32_t(c[2]) * BLUE_I / uint32_t(255);
-    Serial.print(amps);
-    Serial.print(" mAmps)");
+  Serial.print("(");
+  uint32_t amps = uint32_t(c[0]) * RED_I / uint32_t(255) + uint32_t(c[1]) * GREEN_I / uint32_t(255) + uint32_t(c[2]) * BLUE_I / uint32_t(255);
+  Serial.print(amps);
+  Serial.print(" mAmps)");
 }
 
 void CMDParser::parseHexColor(const char* str, uint8_t* c) {
@@ -79,7 +79,7 @@ void CMDParser::parseHexColor(const char* str, uint8_t* c) {
 
 void CMDParser::printLead(const char* str) {
   static const char* PREFIX = "[-]";
-  Serial.print(PREFIX); Serial.print(str); Serial.print(' '); 
+  Serial.print(PREFIX); Serial.print(str); Serial.print(' ');
 }
 
 bool CMDParser::processCMD(uint8_t* c) {
@@ -88,9 +88,10 @@ bool CMDParser::processCMD(uint8_t* c) {
   }
 
   static const char BC[]      = "bc";
-  static const char IC []     = "ic";
-  static const char PAL []    = "pal";
-  static const char FONT []   = "font";
+  static const char IC[]      = "ic";
+  static const char PAL[]     = "pal";
+  static const char FONT[]    = "font";
+  static const char FONTS[]   = "fonts";
   static const char AUDIO[]   = "aud";
   static const char VOL[]     = "vol";
   static const char VOLTS[]   = "vbat";
@@ -106,9 +107,9 @@ bool CMDParser::processCMD(uint8_t* c) {
   static const char PLAY[]    = "play";
 
   tokenize();
-  #if SERIAL_DEBUG == 1
+#if SERIAL_DEBUG == 1
   Serial.print("CMD:"); Serial.print(action.c_str()); Serial.print(":"); Serial.println(value.c_str());
-  #endif
+#endif
   bool isSet = !value.empty();
 
   if (action == BC) {
@@ -118,7 +119,7 @@ bool CMDParser::processCMD(uint8_t* c) {
     }
     printLead(action.c_str());
     const uint8_t* c = database->bladeColor();
-    printHexColor(c); 
+    printHexColor(c);
     Serial.print(" ");
     printMAmps(c);
     Serial.print('\n');
@@ -129,7 +130,7 @@ bool CMDParser::processCMD(uint8_t* c) {
       database->setImpactColor(c);
     }
     printLead(action.c_str());
-    printHexColor(database->impactColor()); 
+    printHexColor(database->impactColor());
     Serial.print(" ");
     printMAmps(database->impactColor());
     Serial.print('\n');
@@ -150,7 +151,7 @@ bool CMDParser::processCMD(uint8_t* c) {
     printLead(action.c_str());
     Serial.print(database->soundFont());
     Serial.print(" ");
-    Serial.println(SFX::instance()->currentFontName());
+    Serial.println(SFX::instance()->fontName(database->soundFont()));
   }
   else if (action == AUDIO) {
     if (isSet) {
@@ -174,7 +175,7 @@ bool CMDParser::processCMD(uint8_t* c) {
   }
   else if (action == UTIL) {
     printLead(action.c_str());
-    for(int i=0; i<NCHANNELS; ++i) {
+    for (int i = 0; i < NCHANNELS; ++i) {
       Serial.print(Blade::blade().util(i));
       Serial.print(' ');
     }
@@ -182,7 +183,7 @@ bool CMDParser::processCMD(uint8_t* c) {
   }
   else if (action == PWM) {
     printLead(action.c_str());
-    for(int i=0; i<NCHANNELS; ++i) {
+    for (int i = 0; i < NCHANNELS; ++i) {
       Serial.print(Blade::blade().pwmVal(i));
       Serial.print(' ');
     }
@@ -214,6 +215,17 @@ bool CMDParser::processCMD(uint8_t* c) {
     printLead(action.c_str());
     Serial.println(F(ID_STR));
   }
+  else if (action == FONTS) {
+#ifdef SABER_SOUND_ON
+    const SFX* sfx = SFX::instance();
+    for(int i=0; i<sfx->numFonts(); ++i) {
+      Serial.print(i);
+      Serial.print(": ");
+      const char* name = sfx->fontName(i);
+      Serial.println(name);
+    }
+#endif
+  }
   else if (action == LIST) {
     File root = SD.open("/");
     while (true) {
@@ -223,24 +235,23 @@ bool CMDParser::processCMD(uint8_t* c) {
         break;
       }
       if (entry.isDirectory()) {
-        continue;
+        Serial.print("d: ");
       }
-      else {
-        Serial.println(entry.name());
-      }
+      Serial.println(entry.name());
       entry.close();
     }
-    root.close();    
+    root.close();
   }
   else if (action == PLAY) {
-    #ifdef SABER_SOUND_ON
+#ifdef SABER_SOUND_ON
+    digitalWrite(PIN_AMP_SHUTDOWN, HIGH);
     SFX* sfx = SFX::instance();
     sfx->playSound(value.c_str());
-    #endif
+#endif
   }
   else if (action == STATUS) {
     static const int DELAY = 20;  // don't saturate the serial line. Too much for SoftwareSerial.
-    
+
     static const char* space = "-----------";
     delay(DELAY);
     Serial.println(space);
@@ -248,7 +259,7 @@ bool CMDParser::processCMD(uint8_t* c) {
     delay(DELAY);
     printLead(PAL);     Serial.println(database->paletteIndex());
     delay(DELAY);
-    printLead(FONT);    
+    printLead(FONT);
     Serial.print(database->soundFont());
     Serial.print(" ");
     Serial.println(SFX::instance()->currentFontName());
@@ -263,9 +274,9 @@ bool CMDParser::processCMD(uint8_t* c) {
     delay(DELAY);
     printLead(VOLTS);   Serial.println(Blade::blade().voltage());
     delay(DELAY);
-    printLead(UTIL);    
+    printLead(UTIL);
     delay(DELAY);
-    for(int i=0; i<NCHANNELS; ++i) {
+    for (int i = 0; i < NCHANNELS; ++i) {
       Serial.print(Blade::blade().util(i));
       Serial.print(' ');
     }
@@ -273,7 +284,7 @@ bool CMDParser::processCMD(uint8_t* c) {
     delay(DELAY);
 
     printLead(PWM);
-    for(int i=0; i<NCHANNELS; ++i) {
+    for (int i = 0; i < NCHANNELS; ++i) {
       Serial.print(Blade::blade().pwmVal(i));
       Serial.print(' ');
     }
@@ -287,7 +298,7 @@ bool CMDParser::processCMD(uint8_t* c) {
     Serial.print('\n');
     delay(DELAY);
 
-    printLead(IC);      
+    printLead(IC);
     printHexColor(database->impactColor());
     Serial.print(" ");
     printMAmps(database->impactColor());

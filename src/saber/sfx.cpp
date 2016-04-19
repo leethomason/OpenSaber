@@ -1,23 +1,23 @@
 /*
-Copyright (c) 2016 Lee Thomason, Grinning Lizard Software
+  Copyright (c) 2016 Lee Thomason, Grinning Lizard Software
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+  of the Software, and to permit persons to whom the Software is furnished to do
+  so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
 */
 
 #include <SD.h>
@@ -63,10 +63,10 @@ void SFX::filePath(CStr<25>* path, const char* dir, const char* file)
   path->clear();
   *path = dir;
   path->append('/');
-  path->append(file);  
+  path->append(file);
 }
 
-void SFX::filePath(CStr<25>* path, int index) 
+void SFX::filePath(CStr<25>* path, int index)
 {
   path->clear();
   if (m_numFonts > 0 && m_currentFont >= 0) {
@@ -75,11 +75,11 @@ void SFX::filePath(CStr<25>* path, int index)
   }
   path->append(m_filename[index].c_str());
 }
-  
+
 void SFX::scanFonts()
 {
   m_numFonts = 0;
-  Serial.println("scanFonts()");
+  //  Serial.println("scanFonts()");
   File root = SD.open("/");
   while (true) {
     File entry =  root.openNextFile();
@@ -91,7 +91,7 @@ void SFX::scanFonts()
       // Scan for a sound font with a limited, reasonable set of files.
       static const int N = 4;
       const char* NAMES[N] = { "HUM.WAV", "IDLE.WAV", "POWERON.WAV", "IGNITE.WAV" };
-      for(int i=0; i<N; ++i) {
+      for (int i = 0; i < N; ++i) {
         CStr<25> path;
         filePath(&path, entry.name(), NAMES[i]);
 
@@ -108,11 +108,13 @@ void SFX::scanFonts()
   root.close();
 
   combSort(m_dirName, m_numFonts);
+#if SERIAL_DEBUG == 1
   Serial.println("Fonts:");
-  for(int i=0; i<m_numFonts; ++i) {
+  for (int i = 0; i < m_numFonts; ++i) {
     Serial.print(i); Serial.print(": "); Serial.println(m_dirName[i].c_str());
   }
   Serial.println("");
+#endif
 }
 
 void SFX::scanFiles(uint8_t index)
@@ -123,7 +125,7 @@ void SFX::scanFiles(uint8_t index)
   memset(m_location, 255, sizeof(SFXLocation)*NUM_SFX_TYPES);
   m_numFilenames = 0;
 
-  Serial.print("scanFiles "); Serial.println(index);
+  //  Serial.print("scanFiles "); Serial.println(index);
   File root = SD.open(m_dirName[index].c_str());
   while (true) {
     File entry =  root.openNextFile();
@@ -152,6 +154,7 @@ void SFX::scanFiles(uint8_t index)
     addFile(m_filename[i].c_str(), i);
   }
 
+#if SERIAL_DEBUG == 1
   Serial.print("IDLE      "); Serial.print(m_location[SFX_IDLE].start);      Serial.print(" "); Serial.println(m_location[SFX_IDLE].count);
   Serial.print("MOTION    "); Serial.print(m_location[SFX_MOTION].start);    Serial.print(" "); Serial.println(m_location[SFX_MOTION].count);
   Serial.print("IMPACT    "); Serial.print(m_location[SFX_IMPACT].start);    Serial.print(" "); Serial.println(m_location[SFX_IMPACT].count);
@@ -159,7 +162,7 @@ void SFX::scanFiles(uint8_t index)
   Serial.print("USER_HOLD "); Serial.print(m_location[SFX_USER_HOLD].start); Serial.print(" "); Serial.println(m_location[SFX_USER_HOLD].count);
   Serial.print("POWER_ON  "); Serial.print(m_location[SFX_POWER_ON].start);  Serial.print(" "); Serial.println(m_location[SFX_POWER_ON].count);
   Serial.print("POWER_OFF "); Serial.print(m_location[SFX_POWER_OFF].start); Serial.print(" "); Serial.println(m_location[SFX_POWER_OFF].count);
-
+#endif
   readIgniteRetract();
 }
 
@@ -212,7 +215,7 @@ bool SFX::playSound(int sound, int mode)
   }
 
   if (sound == SFX_POWER_ON) {
-    if (m_bladeOn) 
+    if (m_bladeOn)
       return false;  // defensive error check.
     if (m_player) {
       m_player->mute(m_muted);
@@ -220,7 +223,7 @@ bool SFX::playSound(int sound, int mode)
     m_bladeOn = true;
   }
   else if (sound == SFX_POWER_OFF) {
-    if (!m_bladeOn) 
+    if (!m_bladeOn)
       return false;  // defensive error check.
     m_bladeOn = false;
   }
@@ -258,7 +261,7 @@ bool SFX::playSound(int sound, int mode)
 bool SFX::playSound(const char* sfx)
 {
   m_player->play(sfx);
-  return true;  
+  return true;
 }
 
 void SFX::process()
@@ -289,18 +292,28 @@ bool SFX::readHeader(const char* filename, uint8_t* nChannels, uint32_t* nSample
 {
   File file = SD.open(filename);
   if (file) {
+#if SERIAL_DEBUG == 1
     Serial.println(filename);
+#endif
     file.seek(22);
     *nChannels = readU32(file, 2);
+#if SERIAL_DEBUG == 1
     Serial.print("channels:        "); Serial.println(*nChannels);
+#endif
     *nSamplesPerSec = readU32(file, 4);
+#if SERIAL_DEBUG == 1
     Serial.print("nSamplesPerSec:  "); Serial.println(*nSamplesPerSec);
+#endif
     uint32_t nAvgBytesPerSec = readU32(file, 4);
+#if SERIAL_DEBUG == 1
     Serial.print("nAvgBytesPerSec: "); Serial.println(nAvgBytesPerSec);
     Serial.print("nBlockAlign:     "); Serial.println(readU32(file, 2));
     Serial.print("wBitsPerSample:  "); Serial.println(readU32(file, 2));
+#endif
     *lengthMillis = (file.size() - 44u) * 1000u / (nAvgBytesPerSec);
+#if SERIAL_DEBUG == 1
     Serial.print("length millis:   "); Serial.println(*lengthMillis);
+#endif
     file.close();
     return true;
   }
@@ -320,7 +333,7 @@ void SFX::readIgniteRetract()
   }
   if (m_location[SFX_POWER_OFF].InUse())
     filePath(&path, m_location[SFX_POWER_OFF].start);
-    readHeader(path.c_str(), &nChannels, &samples, &m_retractTime);
+  readHeader(path.c_str(), &nChannels, &samples, &m_retractTime);
 }
 
 
@@ -333,7 +346,9 @@ void SFX::mute(bool muted)
   // this->m_muted is more the "traditional" use of mute. No
   //   sound is being output, but the audio system otherwise
   //   runs and responds normally.
+#if SERIAL_DEBUG == 1
   Serial.print("SFX::mute "); Serial.println(muted ? "true" : "false");
+#endif
   m_muted = muted;
   if (m_player && m_muted) {
     m_player->mute(m_muted);
@@ -371,7 +386,7 @@ uint8_t SFX::getVolume204() const
 
 uint8_t SFX::setFont(uint8_t font)
 {
-  Serial.print("setFont "); Serial.println(font);
+  //Serial.print("setFont "); Serial.println(font);
   if (m_numFonts) {
     if (font != m_currentFont) {
       m_currentFont = font % m_numFonts;
@@ -390,5 +405,11 @@ const char* SFX::currentFontName() const
     return m_dirName[m_currentFont].c_str();
   }
   return "<none>";
+}
+
+const char* SFX::fontName(uint8_t font) const
+{
+  if (m_numFonts == 0) return "";
+  return m_dirName[font % m_numFonts].c_str();
 }
 

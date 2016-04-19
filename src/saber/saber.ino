@@ -101,7 +101,7 @@ Timer gforceDataTimer(110);
 void setup() {
   pinMode(PIN_AMP_SHUTDOWN, OUTPUT);
   digitalWrite(PIN_AMP_SHUTDOWN, LOW);
-  
+
   Serial.begin(19200);  // still need to turn it on in case a command line is connected.
   while (!Serial) {
     delay(100);
@@ -116,7 +116,9 @@ void setup() {
   saberDB.readData();
 
 #ifdef SABER_ACCELEROMETER
+#if SERIAL_DEBUG == 1
   Serial.println("Starting Accel");
+#endif
   if (!accel.begin()) {
 #if SERIAL_DEBUG == 1
     Serial.println(F("ACCELEROMETER ERROR"));
@@ -179,11 +181,9 @@ void setup() {
 #endif
 
   syncToDB();
-
-#ifdef SABER_SOUND_ON
-  Serial.print("Font: "); Serial.println(sfx.currentFontName());
-#endif
+#if SERIAL_DEBUG == 1
   Serial.println("setup() complete.");
+#endif
 }
 
 uint32_t calcReflashTime() {
@@ -219,9 +219,9 @@ void syncToDB()
   }
   sketcher.palette = saberDB.paletteIndex();
   sketcher.power = vccToPowerLevel(lastVCC);
-  #ifdef SABER_SOUND_ON
+#ifdef SABER_SOUND_ON
   sketcher.fontName = sfx.currentFontName();
-  #endif
+#endif
 #endif
 
   if (!ledB.blinking()) {   // If blinking, then the LED is being used as UI.
@@ -237,7 +237,6 @@ void buttonAReleaseHandler(const Button&)
 #ifdef SABER_TWO_BUTTON
 void blinkVolumeHandler(const LEDManager& manager)
 {
-  Serial.println("blink");
   saberDB.setVolume4(manager.numBlinks());
   syncToDB();
 }
@@ -302,7 +301,6 @@ void buttonBHoldHandler(const Button&) {
       syncToDB();
     }
     else {
-      Serial.println("blink-4");
       ledB.blink(4, INDICATOR_CYCLE, blinkVolumeHandler);
     }
   }
@@ -339,7 +337,6 @@ void buttonBClickHandler(const Button&) {
 
 void blinkVolumeHandler(const LEDManager& manager)
 {
-  Serial.println("blink");
   saberDB.setVolume4(manager.numBlinks() - 1);
   syncToDB();
 }
@@ -422,7 +419,7 @@ void processBladeState()
         uint32_t retractTime = 1000;
 #ifdef SABER_SOUND_ON
         retractTime = sfx.getRetractTime();
-#endif        
+#endif
         bool done = blade.setInterp(millis() - bladeState.startTime(), retractTime, saberDB.bladeColor(), BLADE_BLACK);
         if (done) {
           bladeState.change(BLADE_OFF);
@@ -456,7 +453,7 @@ void serialEvent() {
   while (Serial.available()) {
     int c = Serial.read();
     if (c == '\n') {
-#if 1
+#if 0
       Serial.print("event "); Serial.println(cmdParser.getBuffer());
 #endif
       processed = cmdParser.processCMD(color);
@@ -487,7 +484,7 @@ void loop() {
     float bladeAxis = (&accel.x_g)[BLADE_AXIS];
     float normalA = (&accel.x_g)[NORMAL_AXIS_A];
     float normalB = (&accel.x_g)[NORMAL_AXIS_B];
-    
+
     float g2_noZ = normalA * normalA + normalB * normalB;
     float g2 = g2_noZ + bladeAxis * bladeAxis;
     maxGForce2 = max(maxGForce2, g2);
@@ -497,7 +494,7 @@ void loop() {
 
     if ((g2_noZ >= impact * impact)) {
       bool sound = false;
-#ifdef SABER_SOUND_ON      
+#ifdef SABER_SOUND_ON
       sound = sfx.playSound(SFX_IMPACT, SFX_GREATER_OR_EQUAL);
 #endif
 

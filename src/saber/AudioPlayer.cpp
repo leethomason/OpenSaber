@@ -42,7 +42,7 @@ void AudioPlayer::init() {
 void AudioPlayer::play(const char* filename) 
 {
   playWav.play(filename);
-  Serial.print("AudioPlayer::play: "); Serial.println(filename);// Serial.print(" len(ms)="); Serial.println(playWav.lengthMillis());
+  //Serial.print("AudioPlayer::play: "); Serial.println(filename);// Serial.print(" len(ms)="); Serial.println(playWav.lengthMillis());
   // remember, about a 5ms warmup for header to be loaded and start playing.
   m_startPlayingTime = millis();
 }
@@ -64,13 +64,18 @@ bool AudioPlayer::isPlaying() const {
 void AudioPlayer::mute(bool m) {
   m_muted = m;
   if (m_muted && !m_shutdown) {
+#if SERIAL_DEBUG == 1
     Serial.println(" AudioPlayer::mute shutdown.");
+    #endif
     digitalWrite(PIN_AMP_SHUTDOWN, LOW);
     pinMode(PIN_AMP_SHUTDOWN, OUTPUT);
   }
   else if (!m_muted && m_shutdown) {
+#if SERIAL_DEBUG == 1
     Serial.println(" AudioPlayer::mute enable.");
+    #endif
     pinMode(PIN_AMP_SHUTDOWN, INPUT);
+    delay(10);  // warm up the amp.
   }
   m_shutdown = m_muted;
 }

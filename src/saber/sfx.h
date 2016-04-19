@@ -76,6 +76,7 @@ public:
 
   uint8_t setFont(uint8_t font);
   const char* fontName(uint8_t font) const;
+  int numFonts() const { return m_numFonts; }
   const char* currentFontName() const;
 
 private:
