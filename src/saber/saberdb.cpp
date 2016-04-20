@@ -28,8 +28,6 @@ SOFTWARE.
 
 SaberDB::SaberDB() {
   STATIC_ASSERT(BASE_ADDR + NUM_PALETTES * sizeof(Palette) + sizeof(DataHeader) < EEPROM_SIZE);
-  STATIC_ASSERT(BASE_ADDR + NUM_PALETTES * sizeof(Palette) + sizeof(DataHeader) + MAX_LOG * LOG_SIZE < EEPROM_SIZE);
-  logOffset = -1;
 }
 
 bool SaberDB::writeDefaults() {
@@ -60,7 +58,6 @@ bool SaberDB::writeDefaults() {
     strBufCpy(p.soundFont, 9, defNames[i]);
     EEPROM.put(paletteAddr(i), p);
   }
-  clearLog();
   readData();
 #if SERIAL_DEBUG == 1
   Serial.println(F("EEPROM default complete."));
@@ -86,6 +83,7 @@ bool SaberDB::readData() {
   Serial.println( maxLog);
 #endif
 */
+  setupInit();
   return true;
 }
 
@@ -102,6 +100,12 @@ void SaberDB::setPalette(int n) {
 
   EEPROM.put(headerAddr(), dataHeader);
   EEPROM.get(paletteAddr(dataHeader.currentPalette), palette);
+}
+
+void SaberDB::setupInit() 
+{
+  dataHeader.nSetup = dataHeader.nSetup + 1;
+  EEPROM.put(headerAddr(), dataHeader);
 }
 
 bool SaberDB::setSoundOn(bool on) {
@@ -177,64 +181,4 @@ void SaberDB::setSoundFont(const char* v) {
   strBufCpy(palette.soundFont, 9, v ? v : "");
   EEPROM.put(paletteAddr(dataHeader.currentPalette), palette);
 }
-
-void SaberDB::log(const char* v) {
-#ifdef SABER_LOGGING
-  if (logOffset < 0) {
-    logOffset = scanForLogStart();
-  }
-  if (logOffset == MAX_LOG) {
-    clearLog();
-    logOffset = 0;
-  }
-  int addr = logAddr() + LOG_SIZE * logOffset;
-
-  for (int i = 0; i < LOG_SIZE && v[i]; ++i) {
-    EEPROM.put(addr + i, v[i]);
-  }
-  logOffset++;
-#endif
-}
-
-int SaberDB::scanForLogStart() {
-  for(int i=0; i<MAX_LOG; ++i) {
-    int addr = logAddr() + i * LOG_SIZE;
-    char c = 0;
-    EEPROM.get(addr, c);
-    if (c == 0) {
-      return i;   
-    }
-  }
-  return MAX_LOG;
-}
-
- 
-void SaberDB::clearLog() {
-  for(int i=0; i<MAX_LOG; ++i) {
-    int addr = logAddr() + i * LOG_SIZE;
-    EEPROM.put(addr, char(0));
-  }
-}
-
-void SaberDB::dumpLog() {
-#ifdef SABER_LOGGING
-  int lineBreak = 0;
-  for (int i = 0; i < MAX_LOG; ++i) {
-    char msg[LOG_SIZE+1] = {0};
-    int addr = logAddr() + i * LOG_SIZE;
-    for(int k=0; k<LOG_SIZE; ++k) {
-      EEPROM.get(addr + k, msg[k]);      
-    }
-    if (msg[0] == 0) break;
-    Serial.print(msg); Serial.print(" "); 
-    lineBreak++;
-    if (lineBreak == 8) {
-      Serial.println(" ");
-      lineBreak = 0;
-    }
-  }
-  Serial.println(" ");
-#endif
-}
-
 

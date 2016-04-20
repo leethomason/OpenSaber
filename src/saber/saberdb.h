@@ -53,6 +53,7 @@ public:
   void setMotion(float motion);
   float impact() const          { return dataHeader.impact; }
   void setImpact(float impact);
+  uint32_t numSetupCalls() const { return dataHeader.nSetup; }
 
   // Palette
   const uint8_t* bladeColor() const   { return palette.bladeColor; }
@@ -64,18 +65,12 @@ public:
   const char* soundFont() const { return palette.soundFont; }
   void setSoundFont(const char*);
 
-  void log(const char* log);  // 4 chars or less
-  void dumpLog();
-
   static const int NUM_PALETTES = 8;
 
 private:
-  int scanForLogStart();
-  void clearLog();
+  void setupInit();
 
 	static const int BASE_ADDR    = 20;
-  static const int LOG_SIZE = 3;
-  static const int MAX_LOG = 64;
 
 	struct Palette {
 	  uint8_t bladeColor[NCHANNELS];
@@ -89,7 +84,8 @@ private:
 	    soundOn(1), 
 	    volume(160), 
 	    motion(DEFAULT_G_FORCE_MOTION), 
-	    impact(DEFAULT_G_FORCE_IMPACT) 
+	    impact(DEFAULT_G_FORCE_IMPACT),
+      nSetup(0)
 	  {}
 	  
 	  uint8_t currentPalette;
@@ -97,13 +93,12 @@ private:
     uint8_t volume;
     float   motion;
     float   impact;
+    uint32_t nSetup;
 	};
 
   const int headerAddr() const        { return BASE_ADDR; }
   const int paletteAddr(int i) const  { return BASE_ADDR + sizeof(DataHeader) + sizeof(Palette) * i; }
-  const int logAddr() const           { return BASE_ADDR + sizeof(DataHeader) + sizeof(Palette) * NUM_PALETTES; }
 
-  int         logOffset;
 	DataHeader	dataHeader;
 	Palette 		palette;
 };

@@ -101,7 +101,6 @@ bool CMDParser::processCMD(uint8_t* c) {
   static const char IMPACT[]  = "imp";
   static const char STATUS[]  = "stat";
   static const char RESET[]   = "reset";
-  static const char LOG[]     = "log";
   static const char ID[]      = "id";
   static const char LIST[]    = "list";
   static const char PLAY[]    = "play";
@@ -208,9 +207,6 @@ bool CMDParser::processCMD(uint8_t* c) {
     database->writeDefaults();
     Serial.println("reset complete.");
   }
-  else if (action == LOG) {
-    database->dumpLog();
-  }
   else if (action == ID) {
     printLead(action.c_str());
     Serial.println(F(ID_STR));
@@ -256,6 +252,7 @@ bool CMDParser::processCMD(uint8_t* c) {
     delay(DELAY);
     Serial.println(space);
     printLead(ID);      Serial.println(F(ID_STR));
+    Serial.print("# setup() "); Serial.println(database->numSetupCalls());
     delay(DELAY);
     printLead(PAL);     Serial.println(database->paletteIndex());
     delay(DELAY);
