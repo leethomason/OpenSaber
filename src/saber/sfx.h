@@ -75,6 +75,7 @@ public:
   uint8_t getVolume204() const;
 
   uint8_t setFont(uint8_t font);
+  uint8_t setFont(const char* fontName);
   const char* fontName(uint8_t font) const;
   int numFonts() const { return m_numFonts; }
   const char* currentFontName() const;

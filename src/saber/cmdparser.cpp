@@ -146,12 +146,11 @@ bool CMDParser::processCMD(uint8_t* c) {
   else if (action == FONT) {
     if (isSet) {
       int f = atoi(value.c_str());
-      database->setSoundFont(f);
+      const char* fontName = SFX::instance()->fontName(f);
+      database->setSoundFont(fontName);
     }
     printLead(action.c_str());
-    Serial.print(database->soundFont());
-    Serial.print(" ");
-    Serial.println(SFX::instance()->fontName(database->soundFont()));
+    Serial.println(database->soundFont());
   }
   else if (action == AUDIO) {
     if (isSet) {
@@ -207,6 +206,7 @@ bool CMDParser::processCMD(uint8_t* c) {
   }
   else if (action == RESET) {
     database->writeDefaults();
+    Serial.println("reset complete.");
   }
   else if (action == LOG) {
     database->dumpLog();
@@ -260,9 +260,7 @@ bool CMDParser::processCMD(uint8_t* c) {
     printLead(PAL);     Serial.println(database->paletteIndex());
     delay(DELAY);
     printLead(FONT);
-    Serial.print(database->soundFont());
-    Serial.print(" ");
-    Serial.println(SFX::instance()->currentFontName());
+    Serial.println(database->soundFont());
     delay(DELAY);
     printLead(AUDIO);   Serial.println(database->soundOn());
     delay(DELAY);

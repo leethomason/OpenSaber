@@ -399,6 +399,17 @@ uint8_t SFX::setFont(uint8_t font)
   return m_currentFont;
 }
 
+uint8_t SFX::setFont(const char* name)
+{
+  int i=0;
+  for(; i<m_numFonts; ++i) {
+    if (strEqual(name, fontName(i))) {
+      break;
+    }
+  }
+  return setFont(i);
+}
+
 const char* SFX::currentFontName() const
 {
   if (m_numFonts && m_currentFont >= 0) {

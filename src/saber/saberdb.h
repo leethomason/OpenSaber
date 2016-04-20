@@ -61,8 +61,8 @@ public:
   const uint8_t* impactColor() const  { return palette.impactColor; }
   void setImpactColor(const uint8_t* color);  
 
-  uint8_t soundFont() const { return palette.sound; }
-  void setSoundFont(int v);
+  const char* soundFont() const { return palette.soundFont; }
+  void setSoundFont(const char*);
 
   void log(const char* log);  // 4 chars or less
   void dumpLog();
@@ -80,7 +80,7 @@ private:
 	struct Palette {
 	  uint8_t bladeColor[NCHANNELS];
 	  uint8_t impactColor[NCHANNELS];
-	  uint8_t sound;
+	  char    soundFont[9]; // include the null terminator.
 	};
 
 	struct DataHeader {
