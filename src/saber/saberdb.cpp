@@ -33,7 +33,7 @@ SaberDB::SaberDB() {
 }
 
 bool SaberDB::writeDefaults() {
-  Palette defPalette[NUM_PALETTES] = {
+  static Palette defPalette[NUM_PALETTES] = {
     { 0, 0xff, 0,     0, 0xff, 0xa0,    0 },    // green
     { 0, 0, 0xff,     0, 0xc8, 0xff,    0 },    // blue
     { 0, 0xff, 0xff,  0, 0xa0, 0xff,    0 },    // cyan
@@ -42,6 +42,10 @@ bool SaberDB::writeDefaults() {
     { 0xff, 0xc8, 0,  0xff, 0xff, 0,    0 },    // sand
     { 0x90, 0, 0xff,  0x90, 0x64, 0xff, 0 },    // purple
     { 0xff, 0x40, 0xed, 0x50, 0,  0xff,  0 }    // pink
+  };
+  static const char* defNames[NUM_PALETTES] = {
+    "BESPIN2", "BESPIN2", "FATES", "VADER",
+    "ROGUE", "ROGUE", "JAINA", "ROGUE"
   };
 
 #if SERIAL_DEBUG == 1
@@ -52,7 +56,9 @@ bool SaberDB::writeDefaults() {
   EEPROM.put(headerAddr(), dataHeaderDefault);
 
   for (int i = 0; i < NUM_PALETTES; ++i) {
-    EEPROM.put(paletteAddr(i), defPalette[i]);
+    Palette p = defPalette[i];
+    strBufCpy(p.soundFont, 9, defNames[i]);
+    EEPROM.put(paletteAddr(i), p);
   }
   clearLog();
   readData();
