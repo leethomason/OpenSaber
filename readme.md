@@ -35,21 +35,14 @@ here: https://youtu.be/9_-Rfe4UBJM
 
 The SaberZ case is great (truly) but I would like to expand the design to other cases.
 
-While the "Gecko" is fully functioning and a bunch of fun, it is has some
-"version 1" problems.
+The v2 branch is now merged, and the Gecko electrons are now at v2,
+based off the Teensy 3.2 microcontroller. New in v2:
 
-- Too many wires. A bunch of wires make it hard to connect, and take up
-  a shocking amount of space inside the saber. The solution is twofold:
-  - Move much more circuitry to the PCB
-  - Integrate the audio into the microcontroller, or use a much
-    smaller audio board.
-- Communication between the main microcontroller and the audio is tricky,
-  with some strange limitations.
-- The connection between the switch plate and the main body is kludgy;
-  again mainly addressed by more space, which means fewer wires, which
-  means more on the PCB.
-
-A V2 design is in the works, as well as design changes for other saber cases.
+- Based on Teensy 3.2 microcontroller.
+- Audio is done in the Teensy, there is no need for a separate audio board.
+- Much of the electronics moved to a PCB
+- The PCB can be split between the emitter head (MOSFETS for the LED) and
+  the support electronics for the Teensy.
 
 ![Image of Saber](img/Gecko3.jpg)
 
@@ -81,6 +74,9 @@ I am not affiliated with any of these, but have found them all useful.
 ### Electronics
 - Adafruit. I'm a huge Adafruit fan; great electronics and documentation.
   http://adafruit.com/
+- PJRC who makes the Teensy and the Prop Shield.
+  https://www.pjrc.com/
+- Polulu makes some nice, simple breakout boards. https://www.pololu.com/
 - Sparkfun. https://www.sparkfun.com/
 - Mouser. http://www.mouser.com/ A huge selection of everything electronic.
 - DigiKey. http://www.digikey.com/ A huge selection of everything electronic.
@@ -96,7 +92,7 @@ fancy flashlight.
 
 ![Image of Saber](img/Schematic.png)
 
-In roughly front to back order, an open saber is:
+In roughly front to back order, an V2 saber is:
 
 1.   A **blade holder**. (1" is standard.)
 2.   A **lens** to focus the LED. The Gecko uses a 10511 Carclo Lens.
@@ -110,13 +106,13 @@ In roughly front to back order, an open saber is:
 6.  **Power and Auxillary** switch (momentary on, typically 12mm).
 7.  **Power port**. Typically 2.1 mm; there's are pros and cons of this design. 
     (See below.)
-8.  **Micro controller** which is the "brain" of the saber. Gecko uses an
-    Adafruit Pro Trinket 3.3V. Any 3.3V arduino compatible (that fits in the case)
-    with enough RAM should work.
-9.  **Accelerometer**. Gecko uses an "Adafruit LIS3DH Triple-Axis 
+8.  **Micro controller** which is the "brain" of the saber. Gecko V2 uses a
+    Teensy 3.1 3.3V. The Teensy (with an ARM M4 processor) is capable of
+    doing audio processing on the microcontroller.
+9.  **SD Card**. Gecko uses a simple SD card breakout board. This is where
+    the sound fonts are stored and saber operation is logged.
+10. **Accelerometer**. Gecko uses an "Adafruit LIS3DH Triple-Axis 
     Accelerometer."
-10. **Audio output microcontroller**. Gecko uses an Adafruit Audio FX ID 2217, 
-    although I'm interested in switching this to a "generic" microcontoller.
 11. 3.7v Li-Ion **battery**. TCSS and Adafruit both sell good, small, long lasting
     batteries. Need something rated 2000mAh or better.
 12. **Speaker**. So hard to get a good, small, speaker not broken in shipment. 
@@ -246,6 +242,9 @@ of the Emitter circuit.
 Audio playback is integrated into the main micro controller. It takes
 44.1kHz in; you will need to convert files to 44.1.
 
+You can have up to 10 sound "fonts" or sound banks. Each font
+needs to be in its own sub-directory, which will be the name of the font.
+
 All the names can be postfixed with a number for random variation: `SWING` or
 `SWING01` for example. Note that the card / code is limited to 8.3 filenames.
 You can't mix names in a group; using both BLDON and POWERON in the same
@@ -263,8 +262,7 @@ sound font will confuse the sound output.
 
 ## Code
 
-The code is really the heart of this project. It is designed around an
-Adafruit Trinket Pro 3V driving an Adafruit Audio FX board. 
+The code is really the heart of this project.
 
 First you will need to set up libraries. Then there are 2 files you should 
 start with to adapt to your saber, 'pins.h' and 'electrical.h'. The code
@@ -352,12 +350,12 @@ The saber has 8 palettes. The palette is a combination of:
   milli-amps. Note that the actual current draw tends to be less - something
   I'm still working out. Nevertheless, you should probably keep the current
   draw at 1000mA or less.
-- `vcc' is the current battery level, in milli-volts. 4200 is fresh, 3700 is 
+- `vbat' is the current battery level, in milli-volts. 4200 is fresh, 3700 is 
   nominal, 3500 is low. This is read from the Vmeter of the emitter circuit.
 - `util` is the current utilization of each channel. It is computed from Vcc.
   `90 90 76` means that the saber will use 90% red, 90% green, and 76% of
   the blue channel. This keeps the average current through the LED constant.
-  When Vcc drops to 3.7V, these will all be 100%.
+  When Vbat drops to 3.7V, these will all be 100%.
 - `pwm` is the current Pulse Width Modulation of the red, green, and blue LEDs.
 - `mot` and `mot <1.1+>` gets and sets the threshold, in g-force, that
   the saber will detect as motion, and play the motion sound effects.
@@ -365,6 +363,8 @@ The saber has 8 palettes. The palette is a combination of:
   the saber will dectect as impact, and play the impact sound effects.
 - `stat` will display all of the current saber settings.
 - `reset` will reset the palettes to their default values.
+- `font` get / sets the current sound font.
+- `fonts` lists the available sound fonts.
 
 ## Future Direction
 
@@ -378,13 +378,6 @@ for more chipsets is desirable. Specificially some ideas that are interesting:
 - Double blade support. Again, straightforward. Minor code adjustments.
 - Twirl detection. The saber can detect motion and impact, but it would be
   great to also be able to detect the twirl / spin motion.
-- Improved sound handling. This may mean moving away from the Audio FX (which
-  generally is a great little card) to something else. 
-  - Sounds fonts. It would be nice to be able to choose between distinctive
-    sounds for each palette.
-  - Crossfade to remove any "clicks" when switching sounds.
-  - Volume adjustment when the blade is on.
-  - MicroSD card support. 
 - UI guestures. Some sabers detect particular motions for changing palettes,
   going into UI modes, etc. Would be nice to support one-button sabers with
   all the features.
