@@ -90,6 +90,8 @@ update for other designs!)
 Technically speaking, to organize you electrical thoughts, a saber is a *very* 
 fancy flashlight. 
 
+NOTE: This is the v1 architecture. v2 loses the audio chip and adds an SD card.       
+
 ![Image of Saber](img/Schematic.png)
 
 In roughly front to back order, an V2 saber is:
