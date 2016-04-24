@@ -46,9 +46,7 @@ bool SaberDB::writeDefaults() {
     "ROGUE", "ROGUE", "JAINA", "ROGUE"
   };
 
-#if SERIAL_DEBUG == 1
-  Serial.println(F("Writing EEPROM default."));
-#endif
+  Log.p("Writing EEPROM default.").eol();
 
   DataHeader dataHeaderDefault;
   EEPROM.put(headerAddr(), dataHeaderDefault);
@@ -59,9 +57,7 @@ bool SaberDB::writeDefaults() {
     EEPROM.put(paletteAddr(i), p);
   }
   readData();
-#if SERIAL_DEBUG == 1
-  Serial.println(F("EEPROM default complete."));
-#endif
+  Log.p("EEPROM default complete.").eol();
   return true;
 }
 
@@ -70,19 +66,11 @@ bool SaberDB::readData() {
 
   EEPROM.get(headerAddr(), dataHeader);
   EEPROM.get(paletteAddr(dataHeader.currentPalette), palette);
-
-#if SERIAL_DEBUG == 1
+  /*
   Serial.print(F("Data header. currentPalette=")); Serial.print(dataHeader.currentPalette);
   Serial.print(F(" soundOn=")); Serial.println(dataHeader.soundOn);
   Serial.print(F("RGB ")); Serial.print(palette.bladeColor[0]); Serial.print(" "); Serial.print(palette.bladeColor[1]); Serial.print(" "); Serial.println(palette.bladeColor[2]);
-#endif
-/*
-#if SERIAL_DEBUG == 1
-  Serial.print( "nlog ");
-  int maxLog = (EEPROM_SIZE - (BASE_ADDR + NUM_PALETTES * sizeof(Palette) + sizeof(DataHeader))) / LOG_SIZE;
-  Serial.println( maxLog);
-#endif
-*/
+  */
   setupInit();
   return true;
 }
@@ -94,9 +82,7 @@ void SaberDB::nextPalette() {
 
 void SaberDB::setPalette(int n) {
   dataHeader.currentPalette = abs(n) % NUM_PALETTES;
-#if SERIAL_DEBUG == 1
-  Serial.print(F("Switch Palette to: ")); Serial.println(dataHeader.currentPalette);
-#endif
+  Log.p("Switch Palette to: ").p(dataHeader.currentPalette).eol();
 
   EEPROM.put(headerAddr(), dataHeader);
   EEPROM.get(paletteAddr(dataHeader.currentPalette), palette);
@@ -110,9 +96,7 @@ void SaberDB::setupInit()
 
 bool SaberDB::setSoundOn(bool on) {
   dataHeader.soundOn = on;
-#if SERIAL_DEBUG == 1
-  Serial.print(F("setSoundOn sound: ")); Serial.println(dataHeader.soundOn);
-#endif
+  Log.p("setSoundOn sound: ").p(dataHeader.soundOn).eol();
 
   EEPROM.put(headerAddr(), dataHeader);
   return true;

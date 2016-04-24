@@ -106,9 +106,7 @@ bool CMDParser::processCMD(uint8_t* c) {
   static const char PLAY[]    = "play";
 
   tokenize();
-#if SERIAL_DEBUG == 1
-  Serial.print("CMD:"); Serial.print(action.c_str()); Serial.print(":"); Serial.println(value.c_str());
-#endif
+  //Serial.print("CMD:"); Serial.print(action.c_str()); Serial.print(":"); Serial.println(value.c_str());
   bool isSet = !value.empty();
 
   if (action == BC) {

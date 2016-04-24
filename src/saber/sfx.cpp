@@ -47,9 +47,7 @@ SFX::SFX(AudioPlayer* audioPlayer)
 
 bool SFX::init()
 {
-#if SERIAL_DEBUG == 1
-  Serial.println(F("SFX::init()"));
-#endif
+  Log.p("SFX::init()").eol();
   if (m_player)
     m_player->init();
   scanFonts();
@@ -108,13 +106,11 @@ void SFX::scanFonts()
   root.close();
 
   combSort(m_dirName, m_numFonts);
-#if SERIAL_DEBUG == 1
-  Serial.println("Fonts:");
+
+  Log.p("Fonts:").eol();
   for (int i = 0; i < m_numFonts; ++i) {
-    Serial.print(i); Serial.print(": "); Serial.println(m_dirName[i].c_str());
+    Log.p(i).p(": ").p(m_dirName[i].c_str()).eol();
   }
-  Serial.println("");
-#endif
 }
 
 void SFX::scanFiles(uint8_t index)
@@ -154,15 +150,13 @@ void SFX::scanFiles(uint8_t index)
     addFile(m_filename[i].c_str(), i);
   }
 
-#if SERIAL_DEBUG == 1
-  Serial.print("IDLE      "); Serial.print(m_location[SFX_IDLE].start);      Serial.print(" "); Serial.println(m_location[SFX_IDLE].count);
-  Serial.print("MOTION    "); Serial.print(m_location[SFX_MOTION].start);    Serial.print(" "); Serial.println(m_location[SFX_MOTION].count);
-  Serial.print("IMPACT    "); Serial.print(m_location[SFX_IMPACT].start);    Serial.print(" "); Serial.println(m_location[SFX_IMPACT].count);
-  Serial.print("USER_TAP  "); Serial.print(m_location[SFX_USER_TAP].start);  Serial.print(" "); Serial.println(m_location[SFX_USER_TAP].count);
-  Serial.print("USER_HOLD "); Serial.print(m_location[SFX_USER_HOLD].start); Serial.print(" "); Serial.println(m_location[SFX_USER_HOLD].count);
-  Serial.print("POWER_ON  "); Serial.print(m_location[SFX_POWER_ON].start);  Serial.print(" "); Serial.println(m_location[SFX_POWER_ON].count);
-  Serial.print("POWER_OFF "); Serial.print(m_location[SFX_POWER_OFF].start); Serial.print(" "); Serial.println(m_location[SFX_POWER_OFF].count);
-#endif
+  Log.p("IDLE      ").p(m_location[SFX_IDLE].start).p(" ").p(m_location[SFX_IDLE].count).eol();
+  Log.p("MOTION    ").p(m_location[SFX_MOTION].start).p(" ").p(m_location[SFX_MOTION].count).eol();
+  Log.p("IMPACT    ").p(m_location[SFX_IMPACT].start).p(" ").p(m_location[SFX_IMPACT].count).eol();
+  Log.p("USER_TAP  ").p(m_location[SFX_USER_TAP].start).p(" ").p(m_location[SFX_USER_TAP].count).eol();
+  Log.p("USER_HOLD ").p(m_location[SFX_USER_HOLD].start).p(" ").p(m_location[SFX_USER_HOLD].count).eol();
+  Log.p("POWER_ON  ").p(m_location[SFX_POWER_ON].start).p(" ").p(m_location[SFX_POWER_ON].count).eol();
+  Log.p("POWER_OFF ").p(m_location[SFX_POWER_OFF].start).p(" ").p(m_location[SFX_POWER_OFF].count).eol();
   readIgniteRetract();
 }
 
@@ -241,9 +235,7 @@ bool SFX::playSound(int sound, int mode)
     ASSERT(track >= 0);
     ASSERT(track < m_numFilenames);
 
-#if SERIAL_DEBUG == 1
-    Serial.print(F("SFX play track ")); Serial.print(m_filename[track].c_str()); Serial.print("... ");
-#endif
+    Log.p("SFX play track ").p(m_filename[track].c_str()).eol();
     CStr<25> path;
     if (m_numFonts > 0 && m_currentFont >= 0) {
       filePath(&path, m_dirName[m_currentFont].c_str(), m_filename[track].c_str());
@@ -292,28 +284,19 @@ bool SFX::readHeader(const char* filename, uint8_t* nChannels, uint32_t* nSample
 {
   File file = SD.open(filename);
   if (file) {
-#if SERIAL_DEBUG == 1
-    Serial.println(filename);
-#endif
+    Log.p(filename).eol();
+
     file.seek(22);
     *nChannels = readU32(file, 2);
-#if SERIAL_DEBUG == 1
-    Serial.print("channels:        "); Serial.println(*nChannels);
-#endif
+    Log.p("channels:        ").p(*nChannels).eol();
     *nSamplesPerSec = readU32(file, 4);
-#if SERIAL_DEBUG == 1
-    Serial.print("nSamplesPerSec:  "); Serial.println(*nSamplesPerSec);
-#endif
+    Log.p("nSamplesPerSec:  ").p(*nSamplesPerSec).eol();
     uint32_t nAvgBytesPerSec = readU32(file, 4);
-#if SERIAL_DEBUG == 1
-    Serial.print("nAvgBytesPerSec: "); Serial.println(nAvgBytesPerSec);
-    Serial.print("nBlockAlign:     "); Serial.println(readU32(file, 2));
-    Serial.print("wBitsPerSample:  "); Serial.println(readU32(file, 2));
-#endif
+    //Serial.print("nAvgBytesPerSec: "); Serial.println(nAvgBytesPerSec);
+    //Serial.print("nBlockAlign:     "); Serial.println(readU32(file, 2));
+    //Serial.print("wBitsPerSample:  "); Serial.println(readU32(file, 2));
     *lengthMillis = (file.size() - 44u) * 1000u / (nAvgBytesPerSec);
-#if SERIAL_DEBUG == 1
-    Serial.print("length millis:   "); Serial.println(*lengthMillis);
-#endif
+    Log.p("length millis:   ").p(*lengthMillis).eol();
     file.close();
     return true;
   }
@@ -346,9 +329,8 @@ void SFX::mute(bool muted)
   // this->m_muted is more the "traditional" use of mute. No
   //   sound is being output, but the audio system otherwise
   //   runs and responds normally.
-#if SERIAL_DEBUG == 1
-  Serial.print("SFX::mute "); Serial.println(muted ? "true" : "false");
-#endif
+  Log.p("SFX::mute ").p(muted ? "true" : "false").eol();
+
   m_muted = muted;
   if (m_player && m_muted) {
     m_player->mute(m_muted);

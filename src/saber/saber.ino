@@ -97,37 +97,61 @@ CMDParser cmdParser(&saberDB);
 Blade blade;
 Timer vccTimer(VCC_TIME_INTERVAL);
 Timer gforceDataTimer(110);
+File logFile;
+
+void setupSD(int logCount) {
+
+  SPI.setMOSI(PIN_SABER_MOSI);
+  SPI.setSCK(PIN_SABER_CLOCK);
+#ifdef SABER_SOUND_ON
+  if (!(SD.begin(PIN_SDCARD_CS))) {
+    // stop here, but print a message repetitively
+    while (1) {
+      Serial.println("Unable to access the SD card");
+      delay(500);
+    }
+  }
+  SD.mkdir("logs");
+  char path[] = "logs/log00.txt";
+  path[8] = ((logCount / 10) % 10) + '0';
+  path[9] = (logCount % 10) + '0';
+  logFile = SD.open(path, FILE_WRITE);
+  logFile.print("Log open. Instance="); logFile.println(logCount);
+#endif
+}
 
 void setup() {
   pinMode(PIN_AMP_SHUTDOWN, OUTPUT);
   digitalWrite(PIN_AMP_SHUTDOWN, LOW);
 
   Serial.begin(19200);  // still need to turn it on in case a command line is connected.
+#if SERIAL_DEBUG == 1
   while (!Serial) {
     delay(100);
   }
-#if SERIAL_DEBUG == 1
-  Serial.println("setup()");
 #endif
-
   //TCNT1 = 0x7FFF; // set blue & green channels out of phase
   // Database is the "source of truth".
   // Set it up first.
   saberDB.readData();
 
+#if SERIAL_DEBUG == 1
+  Log.attachSerial(&Serial);
+#endif
+#ifdef SABER_SOUND_ON
+  setupSD(saberDB.numSetupCalls());
+  Log.attachLog(&logFile);
+#endif
+
+  Log.p("setup()").eol();
+
 #ifdef SABER_ACCELEROMETER
-#if SERIAL_DEBUG == 1
-  Serial.println("Starting Accel");
-#endif
+  Log.p("Accelerometer starting.").eol();
   if (!accel.begin()) {
-#if SERIAL_DEBUG == 1
-    Serial.println(F("ACCELEROMETER ERROR"));
-#endif
+    Log.p("Accelerometer ERROR.").eol();
   }
   else {
-#if SERIAL_DEBUG == 1
-    Serial.println(F("ACCELEROMETER open."));
-#endif
+    Log.p("Accelerometer open.").eol();
     accel.setRange(LIS3DH_RANGE_4_G);
     accel.setDataRate(LIS3DH_DATARATE_100_HZ);
   }
@@ -136,6 +160,7 @@ void setup() {
 #ifdef SABER_VOLTMETER
   analogReference(INTERNAL);  // 1.1 volts
   analogRead(PIN_VMETER);     // warm up the ADC to avoid spurious initial value.
+  Log.p("Voltmeter open.").eol();
 #endif
 
   blade.setRGB(BLADE_BLACK);
@@ -153,6 +178,7 @@ void setup() {
 
 #ifdef SABER_SOUND_ON
   sfx.init();
+  Log.p("sfx initialized.").eol();
 #endif
 
   blade.setVoltage(readVcc());
@@ -163,16 +189,8 @@ void setup() {
   display.display();
   renderer.Attach(128, 32, display.getBuffer());
 
-#if SERIAL_DEBUG == 1
-  Serial.println(F("OLED display connected."));
+  Log.p("OLED display connected.").eol();
 #endif
-#endif
-
-#if SERIAL_DEBUG == 1
-  Serial.println(F("Setup complete."));
-#endif
-
-  ledA.set(true); // "power on" light
 
 #ifdef SABER_CRYSTAL
   pinMode(PIN_CRYSTAL_R, OUTPUT);
@@ -181,9 +199,8 @@ void setup() {
 #endif
 
   syncToDB();
-#if SERIAL_DEBUG == 1
-  Serial.println("setup() complete.");
-#endif
+  ledA.set(true); // "power on" light
+  Log.p("[saber start]").eol();
 }
 
 uint32_t calcReflashTime() {
@@ -243,9 +260,7 @@ void blinkVolumeHandler(const LEDManager& manager)
 
 void buttonAClickHandler(const Button&)
 {
-#if SERIAL_DEBUG == 1
-  Serial.println("buttonAClickHandler");
-#endif
+  Log.p("buttonAClickHandler").eol();
   // Special case: color switch.
   if (bladeState.state() == BLADE_ON && buttonB.isDown()) {
     saberDB.nextPalette();
@@ -260,10 +275,9 @@ void buttonAClickHandler(const Button&)
 
 
 void buttonAHoldHandler(const Button&) {
-# if SERIAL_DEBUG == 1
-  Serial.println("buttonAHoldHandler");
-# endif
+  Log.p("buttonAHoldHandler").eol();
   if (bladeState.state() == BLADE_OFF) {
+    Log.p("[saber ignite]").eol();
     bladeState.change(BLADE_IGNITE);
 #   ifdef SABER_SOUND_ON
     sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
@@ -282,9 +296,7 @@ void buttonBPressHandler(const Button&) {
 }
 
 void buttonBHoldHandler(const Button&) {
-#if SERIAL_DEBUG == 1
-  Serial.println("buttonBHoldHandler");
-#endif
+  Log.p("buttonBHoldHandler").eol();
   if (bladeState.state() != BLADE_OFF) {
     if (!paletteChange) {
       bladeState.change(BLADE_FLASH);
@@ -320,9 +332,7 @@ void buttonBReleaseHandler(const Button& b) {
 }
 
 void buttonBClickHandler(const Button&) {
-#if SERIAL_DEBUG == 1
-  Serial.println("buttonBClickHandler");
-#endif
+  Log.p("buttonBClickHandler").eol();
   if (bladeState.state() == BLADE_ON) {
     if (!paletteChange) {
       bladeState.change(BLADE_FLASH);
@@ -423,6 +433,7 @@ void processBladeState()
         bool done = blade.setInterp(millis() - bladeState.startTime(), retractTime, saberDB.bladeColor(), BLADE_BLACK);
         if (done) {
           bladeState.change(BLADE_OFF);
+          Log.p("[saber off]").eol();
         }
       }
       break;
@@ -442,6 +453,7 @@ void processBladeState()
       break;
 
     default:
+      ASSERT(false);
       break;
   }
 }
@@ -481,6 +493,9 @@ void loop() {
 #ifdef SABER_ACCELEROMETER
     accel.read();
 
+    STATIC_ASSERT(BLADE_AXIS != NORMAL_AXIS_A);
+    STATIC_ASSERT(BLADE_AXIS != NORMAL_AXIS_B);
+
     float bladeAxis = (&accel.x_g)[BLADE_AXIS];
     float normalA = (&accel.x_g)[NORMAL_AXIS_A];
     float normalB = (&accel.x_g)[NORMAL_AXIS_B];
@@ -499,9 +514,7 @@ void loop() {
 #endif
 
       if (sound) {
-#if SERIAL_DEBUG == 1
-        Serial.print(F("Impact. g=")); Serial.println(sqrt(g2));
-#endif
+        Log.p("Impact. g=").p(sqrt(g2)).eol();
         bladeState.change(BLADE_FLASH);
       }
     }
@@ -511,9 +524,7 @@ void loop() {
       sound = sfx.playSound(SFX_MOTION, SFX_GREATER);
 #endif
       if (sound) {
-#if SERIAL_DEBUG == 1
-        Serial.print(F("Motion. g=")); Serial.println(sqrt(g2));
-#endif
+        Log.p("Motion. g=").p(sqrt(g2)).eol();
       }
     }
 #endif
@@ -523,14 +534,12 @@ void loop() {
   }
 
   processBladeState();
-
 #ifdef SABER_SOUND_ON
   sfx.process();
 #endif
 
   if (vccTimer.tick()) {
     blade.setVoltage(readVcc());
-    //Serial.println("vcc");
   }
 
   if (gforceDataTimer.tick()) {
@@ -539,7 +548,6 @@ void loop() {
     static const float MULT = 256.0f / GFORCE_RANGE;  // g=1 translates to uint8 64
     const uint8_t gForce = constrain(sqrtf(maxGForce2) * MULT, 0, 255);
     sketcher.Push(gForce);
-    //Serial.print("gforce "); Serial.println(gForce);
 #endif
     maxGForce2 = 0;
   }

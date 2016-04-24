@@ -6,6 +6,7 @@
 #include <SD.h>
 #include <SerialFlash.h>
 #include <Audio.h>
+#include <Grinliz_Arduino_Util.h>
 
 AudioPlaySdWav      playWav;
 AudioMixer4         mixer;
@@ -25,18 +26,6 @@ void AudioPlayer::init() {
   // Audio connections require memory to work.  For more
   // detailed information, see the MemoryAndCpuUsage example
   AudioMemory(8);
-
-  SPI.setMOSI(PIN_SABER_MOSI);
-  SPI.setSCK(PIN_SABER_CLOCK);
-  #ifdef SABER_SOUND_ON
-  if (!(SD.begin(PIN_SDCARD_CS))) {
-    // stop here, but print a message repetitively
-    while (1) {
-      Serial.println("Unable to access the SD card");
-      delay(500);
-    }
-  }
-  #endif
 }
 
 void AudioPlayer::play(const char* filename) 
@@ -64,16 +53,12 @@ bool AudioPlayer::isPlaying() const {
 void AudioPlayer::mute(bool m) {
   m_muted = m;
   if (m_muted && !m_shutdown) {
-#if SERIAL_DEBUG == 1
-    Serial.println(" AudioPlayer::mute shutdown.");
-    #endif
+    Log.p("AudioPlayer::mute shutdown.").eol();
     digitalWrite(PIN_AMP_SHUTDOWN, LOW);
     pinMode(PIN_AMP_SHUTDOWN, OUTPUT);
   }
   else if (!m_muted && m_shutdown) {
-#if SERIAL_DEBUG == 1
-    Serial.println(" AudioPlayer::mute enable.");
-    #endif
+    Log.p(" AudioPlayer::mute enable.").eol();
     pinMode(PIN_AMP_SHUTDOWN, INPUT);
     delay(10);  // warm up the amp.
   }
