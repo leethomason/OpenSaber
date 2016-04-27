@@ -52,19 +52,19 @@
 #include "saberUtil.h"
 
 static const uint8_t  BLADE_BLACK[NCHANNELS]  = {0};
-static const uint32_t FLASH_TIME        = 120;
-static const uint32_t VCC_TIME_INTERVAL = 4000;
+static const uint32_t FLASH_TIME              = 120;
+static const uint32_t VCC_TIME_INTERVAL       = 1000;
 
-static const uint32_t INDICATOR_TIME = 500;
-static const uint32_t INDICATOR_CYCLE = INDICATOR_TIME * 2;
-static const float GFORCE_RANGE = 4.0f;
-static const float GFORCE_RANGE_INV = 1.0f / GFORCE_RANGE;
+static const uint32_t INDICATOR_TIME   = 500;
+static const uint32_t INDICATOR_CYCLE  = INDICATOR_TIME * 2;
+static const float    GFORCE_RANGE     = 4.0f;
+static const float    GFORCE_RANGE_INV = 1.0f / GFORCE_RANGE;
 
 bool     paletteChange = false; // used to prevent sound fx on palette changes
-uint32_t reflashTime = 0;
-bool     flashOnClash = false;
-float    maxGForce2 = 0.0f;
-int32_t  lastVCC = NOMINAL_VOLTAGE;
+uint32_t reflashTime   = 0;
+bool     flashOnClash  = false;
+float    maxGForce2    = 0.0f;
+int32_t  lastVCC       = NOMINAL_VOLTAGE;
 
 BladeState bladeState;
 ButtonCB buttonA(PIN_SWITCH_A, Button::PULL_UP);
