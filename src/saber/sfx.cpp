@@ -256,6 +256,12 @@ bool SFX::playSound(const char* sfx)
   return true;
 }
 
+void SFX::stopSound()
+{
+  m_player->stop();
+  m_currentSound == SFX_NONE;
+}
+
 void SFX::process()
 {
   if (!m_player) return;

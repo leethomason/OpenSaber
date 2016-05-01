@@ -62,6 +62,8 @@ public:
 
   bool playSound(int sfx, int mode);
   bool playSound(const char* sfx);
+  void stopSound();
+  
   bool bladeOn() const                    { return m_bladeOn; }
   void process();
 

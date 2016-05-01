@@ -260,14 +260,20 @@ void blinkVolumeHandler(const LEDManager& manager)
 
 void buttonAClickHandler(const Button&)
 {
-  Log.p("buttonAClickHandler").eol();
+  Log.p("buttonAClickHandler...");
   // Special case: color switch.
   if (bladeState.state() == BLADE_ON && buttonB.isDown()) {
+    Log.p("palette change.").eol();
+    // The SD card memory streaming and the use of the SD
+    // file system lead to crashes. (Grr.) Stop the sound 
+    // here to see if it cleans up the problem.
+    sfx.stopSound();
     saberDB.nextPalette();
     paletteChange = true;
     syncToDB();
   }
   else {
+    Log.p("VBat.").eol();
     int32_t vcc = readVcc();
     ledA.blink(vccToPowerLevel(vcc), INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
   }
