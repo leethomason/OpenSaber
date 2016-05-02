@@ -69,6 +69,9 @@ public:
 
   const uint32_t getIgniteTime() const    { return m_igniteTime; }
   const uint32_t getRetractTime() const   { return m_retractTime; }
+  // Get the length of the currently playing file. Will
+  // return 0 if the file header isn't read yet.
+  const uint32_t lengthMillis() const;
 
   void mute(bool muted);
   bool isMuted() const;

@@ -76,3 +76,8 @@ void AudioPlayer::setVolume(float v) {
   mixer.gain(0, m_volume);
 }
 
+
+uint32_t AudioPlayer::lengthMillis() const
+{
+  return playWav.lengthMillis();
+}

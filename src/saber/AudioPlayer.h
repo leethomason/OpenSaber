@@ -13,6 +13,7 @@ class AudioPlayer
     void play(const char* filename);
     void stop();
     bool isPlaying() const;
+    uint32_t lengthMillis() const;  // only valid if header read; else 0.
 
     void mute(bool m);
     bool isMuted() const { return m_muted; }

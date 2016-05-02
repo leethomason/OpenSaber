@@ -503,6 +503,7 @@ void loop() {
   ledB.process();
 #endif
 
+  tester.process();
   if (bladeState.state() == BLADE_ON) {
 #ifdef SABER_ACCELEROMETER
     accel.read();
@@ -548,9 +549,11 @@ void loop() {
   }
 
   processBladeState();
+  tester.process();
 #ifdef SABER_SOUND_ON
   sfx.process();
 #endif
+  tester.process();
 
   if (vccTimer.tick()) {
     blade.setVoltage(readVcc());

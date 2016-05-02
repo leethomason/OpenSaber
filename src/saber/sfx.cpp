@@ -25,6 +25,7 @@
 #include "sfx.h"
 #include "pins.h"
 #include "AudioPlayer.h"
+#include "tester.h"
 
 SFX* SFX::m_instance = 0;
 
@@ -193,6 +194,9 @@ void SFX::addFile(const char* name, int index)
 
 bool SFX::playSound(int sound, int mode)
 {
+  // Flush out tests before switching sounds:
+  Tester::instance()->process();
+  
   ASSERT(sound >= 0);
   ASSERT(sound < NUM_SFX_TYPES);
 
@@ -235,7 +239,9 @@ bool SFX::playSound(int sound, int mode)
     ASSERT(track >= 0);
     ASSERT(track < m_numFilenames);
 
-    Log.p("SFX play track ").p(m_filename[track].c_str()).eol();
+    //Log.p("SFX play track ").p(m_filename[track].c_str()).eol();
+    Log.event("[SFX play]", m_filename[track].c_str());
+
     CStr<25> path;
     if (m_numFonts > 0 && m_currentFont >= 0) {
       filePath(&path, m_dirName[m_currentFont].c_str(), m_filename[track].c_str());
@@ -309,6 +315,10 @@ bool SFX::readHeader(const char* filename, uint8_t* nChannels, uint32_t* nSample
   return false;
 }
 
+const uint32_t SFX::lengthMillis() const
+{
+  return m_player->lengthMillis();
+}
 
 void SFX::readIgniteRetract()
 {
