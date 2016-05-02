@@ -50,6 +50,7 @@
 #include "sketcher.h"
 #include "renderer.h"
 #include "saberUtil.h"
+#include "tester.h"
 
 static const uint8_t  BLADE_BLACK[NCHANNELS]  = {0};
 static const uint32_t FLASH_TIME        = 120;
@@ -98,6 +99,8 @@ Blade blade;
 Timer vccTimer(VCC_TIME_INTERVAL);
 Timer gforceDataTimer(110);
 File logFile;
+
+Tester tester;
 
 void setupSD(int logCount) {
 
@@ -174,6 +177,12 @@ void setup() {
   buttonB.releaseHandler(buttonBReleaseHandler);
   buttonB.holdHandler(buttonBHoldHandler);
   buttonB.pressHandler(buttonBPressHandler);
+#endif
+
+#ifdef SABER_TWO_BUTTON
+  tester.attach(&buttonA, &buttonB);
+#else
+  tester.attach(&buttonA, 0);
 #endif
 
 #ifdef SABER_SOUND_ON
@@ -487,6 +496,7 @@ void serialEvent() {
 
 void loop() {
   const uint32_t msec = millis();
+  tester.process();
 
   buttonA.process();
   ledA.process();

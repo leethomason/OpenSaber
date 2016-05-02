@@ -27,6 +27,7 @@
 #include "blade.h"
 #include "electrical.h"
 #include "SFX.h"
+#include "Tester.h"
 
 CMDParser::CMDParser(SaberDB* _db) {
   database = _db;
@@ -105,6 +106,7 @@ bool CMDParser::processCMD(uint8_t* c) {
   static const char LIST[]    = "list";
   static const char PLAY[]    = "play";
   static const char LOG[]     = "log";
+  static const char TEST[]    = "test";
 
   static const int DELAY = 20;  // don't saturate the serial line. Too much for SoftwareSerial.
 
@@ -270,6 +272,10 @@ bool CMDParser::processCMD(uint8_t* c) {
     else {
       Serial.print("File open failed: "); Serial.println(path.c_str());
     }
+  }
+  else if (action == TEST) {
+    Tester* tester = Tester::instance();
+    tester->start();
   }
   else if (action == STATUS) {
     static const char* space = "-----------";
