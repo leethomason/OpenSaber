@@ -209,7 +209,7 @@ void setup() {
 
   syncToDB();
   ledA.set(true); // "power on" light
-  Log.p("[saber start]").eol();
+  Log.event("[saber start]");
 }
 
 uint32_t calcReflashTime() {
@@ -292,7 +292,6 @@ void buttonAClickHandler(const Button&)
 void buttonAHoldHandler(const Button&) {
   Log.p("buttonAHoldHandler").eol();
   if (bladeState.state() == BLADE_OFF) {
-    Log.p("[saber ignite]").eol();
     bladeState.change(BLADE_IGNITE);
 #   ifdef SABER_SOUND_ON
     sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
@@ -448,7 +447,6 @@ void processBladeState()
         bool done = blade.setInterp(millis() - bladeState.startTime(), retractTime, saberDB.bladeColor(), BLADE_BLACK);
         if (done) {
           bladeState.change(BLADE_OFF);
-          Log.p("[saber off]").eol();
         }
       }
       break;

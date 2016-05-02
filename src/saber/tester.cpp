@@ -41,8 +41,19 @@ bool Tester::igniteHumRetract()
 	ASSERT(buttonACB->cb_onHold);
 
 	if (testState == TEST_STATE_START) {
+		Log.p("Test start: igniteHumRetract").eol();
 		buttonACB->cb_onHold(*buttonA);
-		testState = TEST_STATE_NONE;
+		testState = TEST_STATE_RUN;
+	}
+	else if (testState == TEST_STATE_RUN) {
+		const char* e = Log.popEvent();
+		if (strEqual(e, "[BLADE_ON]")) {
+			buttonACB->cb_onHold(*buttonA);
+		}
+		else if (strEqual(e, "[BLADE_OFF]")) {
+			testState = TEST_STATE_NONE;
+			Log.p("Test done: igniteHumRetract").eol();
+		}
 	}
 	return true;
 }
