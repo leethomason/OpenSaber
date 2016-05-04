@@ -2,6 +2,7 @@
 #define SABER_TESTER_INCLUDED
 
 #include <stdint.h>
+#include <Grinliz_Arduino_Util.h>
 
 class Button;
 struct ButtonCBHandlers;
@@ -20,6 +21,8 @@ public:
 	virtual void start(Tester* tester)	{}
 	virtual int process(Tester* tester, const char* event, const char* eventData) = 0;
 
+	int finalResult = 0;
+
 protected:
 };
 
@@ -29,8 +32,8 @@ class Tester
 public:
 	Tester();
 	void attach(Button* buttonA, Button* buttonB);
-	void start();
 
+	void runTests();
 	void process();
 	static Tester* instance() { return s_instance; }
 
@@ -40,10 +43,12 @@ public:
 	void press(int button, uint32_t time);
 	void delayedPress(int button, uint32_t wait, uint32_t time);
 	void checkAudio(const char* name, uint32_t low, uint32_t high);
+	uint32_t getRandom() { return r.rand16(); }
 
 	int order = 0;
 
 private:	
+	void start();
 	enum {
 		TEST_STATE_NONE,
 		TEST_STATE_START,
@@ -51,8 +56,9 @@ private:
 		TEST_STATE_DONE
 	};
 
+	int currentTest = 0;
+	bool running = false;
 	int testState = 0;
-	Test* test = 0;
 	uint32_t delayTime = 0;
 
 	uint32_t testAudio = 0;
@@ -64,6 +70,7 @@ private:
 		uint32_t start;
 		uint32_t end;
 	};
+	Random r;
 	Press pressState[2];
 	Button* button[2];
 

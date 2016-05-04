@@ -275,7 +275,7 @@ bool CMDParser::processCMD(uint8_t* c) {
   }
   else if (action == TEST) {
     Tester* tester = Tester::instance();
-    tester->start();
+    tester->runTests();
   }
   else if (action == STATUS) {
     static const char* space = "-----------";

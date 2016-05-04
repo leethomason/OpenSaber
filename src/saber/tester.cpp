@@ -77,7 +77,7 @@ class IgniteRetractTest : public Test
 class PaletteTest : public Test
 {
 	int numChanges;
-	static const int NUM_TESTS = 24;
+	static const int NUM_ITERATION = 24;
 
 	virtual const char* name() const { return "PaletteTest"; }
 	virtual void start(Tester* tester) 
@@ -107,9 +107,10 @@ class PaletteTest : public Test
 			numChanges++;
 			tester->checkAudio("idle", 1000, 120000);		
 
-			if (numChanges < NUM_TESTS) {
+			if (numChanges < NUM_ITERATION) {
+				uint32_t offset = tester->getRandom() % 300;
 				tester->delayedPress(1, AUDIO_CHECKED_TIME, 500);
-				tester->delayedPress(0, AUDIO_CHECKED_TIME + 300, 100);
+				tester->delayedPress(0, AUDIO_CHECKED_TIME + offset, 100);
 			}
 			else {
 				tester->delayedPress(0, AUDIO_CHECKED_TIME, HOLD_TIME);
@@ -129,6 +130,12 @@ class PaletteTest : public Test
 IgniteRetractTest igniteRetractTest;
 PaletteTest paletteTest;
 
+Test* gTests[] = {
+	&igniteRetractTest,
+	&paletteTest,
+	0
+};
+
 Tester::Tester()
 {
 	s_instance = this;
@@ -136,6 +143,7 @@ Tester::Tester()
 		pressState[i].start = pressState[i].end = 0;
 		button[i] = 0;
 	}
+	running = false;
 }
 
 void Tester::attach(Button* buttonA, Button* buttonB)
@@ -144,13 +152,25 @@ void Tester::attach(Button* buttonA, Button* buttonB)
 	button[1] = buttonB;
 }
 
-void Tester::start()
+void Tester::runTests()
 {
-	order = 0;
-	TEST_EXISTS(button[0] != 0);
+	running = true;
 	for(int i=0; i<2; ++i) {
 		if (button[i]) button[i]->enableTestMode(true);
 	}
+	currentTest = 0;
+	start();
+}
+
+void Tester::start()
+{
+	Test* test = gTests[currentTest];
+	ASSERT(test);
+
+	order = 0;
+	TEST_EXISTS(button[0] != 0);
+	TEST_EXISTS(button[1] != 0);
+	r.setSeed(0);
 
 	//test = &igniteRetractTest;
 	test = &paletteTest;
@@ -161,6 +181,36 @@ void Tester::start()
 
 void Tester::process()
 {
+	if (!running) 
+		return;
+
+	Test* test = gTests[currentTest];
+	ASSERT(test);
+
+	if (test->finalResult == Test::TEST_ERROR || test->finalResult == Test::TEST_SUCCESS) {
+		++currentTest;
+		if (gTests[currentTest]) {
+			start();
+			test = gTests[currentTest];
+		}
+		else {
+			running = false;
+			for(int i=0; i<2; ++i) {
+				if (button[i]) button[i]->enableTestMode(false);
+			}
+			SPrint.p("******").eol();
+			for(int i = 0; gTests[i]; ++i) {
+				if (gTests[i]->finalResult == Test::TEST_ERROR)
+					SPrint.p("  Tester ERROR: '").p(gTests[i]->name()).p("'").eol();
+				else
+					SPrint.p("  Tester pass: '").p(gTests[i]->name()).p("'").eol();
+			}
+			SPrint.p("******").eol();
+			return;
+		}
+	}
+	ASSERT(test);
+
 	uint32_t m = millis();
 
 	for(int i=0; i<2; ++i) {
@@ -182,39 +232,30 @@ void Tester::process()
 		return;
 	}	
 
-	if (test) {
-		const char* e = 0;
-		const char* d = 0;
+	const char* e = 0;
+	const char* d = 0;
 
-		if (testAudio && testAudio <= m) {
-			testAudio = 0;
-			uint32_t len = SFX::instance()->lengthMillis();
-			Log.p("Audio test:").p(audioName).p(" time(millis)=").p(len).eol();
-			TEST_RANGE
-	(audioLow, audioHigh, len);
+	if (testAudio && testAudio <= m) {
+		testAudio = 0;
+		uint32_t len = SFX::instance()->lengthMillis();
+		Log.p("Audio test:").p(audioName).p(" time(millis)=").p(len).eol();
+		TEST_RANGE(audioLow, audioHigh, len);
+	}
+	e = Log.popEvent(&d);
+
+	if (e) {
+		//Log.p("dispatch: ").p(e).p(d ? d : "<none>").eol();
+		int result = test->process(this, e, d);
+
+		if (result == Test::TEST_ERROR) {
+			Log.p("**Tester ERROR: '").p(test->name()).p("'").eol();
+			test->finalResult = Test::TEST_ERROR;
+			test = 0;
 		}
-		e = Log.popEvent(&d);
-
-		if (e) {
-			//Log.p("dispatch: ").p(e).p(d ? d : "<none>").eol();
-			int result = test->process(this, e, d);
-			bool done = false;
-
-			if (result == Test::TEST_ERROR) {
-				Log.p("**Tester ERROR: '").p(test->name()).p("'").eol();
-				test = 0;
-				done = true;
-			}
-			else if (result == Test::TEST_SUCCESS) {
-				Log.p("**Tester pass: '").p(test->name()).p("'").eol();
-				test = 0;
-				done = true;
-			}
-			if (done) {
-				for(int i=0; i<2; ++i) {
-					if (button[i]) button[i]->enableTestMode(false);
-				}
-			}
+		else if (result == Test::TEST_SUCCESS) {
+			Log.p("**Tester pass: '").p(test->name()).p("'").eol();
+			test->finalResult = Test::TEST_SUCCESS;
+			test = 0;
 		}
 	}
 }
