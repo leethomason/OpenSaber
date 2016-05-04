@@ -273,10 +273,6 @@ void buttonAClickHandler(const Button&)
   // Special case: color switch.
   if (bladeState.state() == BLADE_ON && buttonB.isDown()) {
     Log.p("palette change.").eol();
-    // The SD card memory streaming and the use of the SD
-    // file system lead to crashes. (Grr.) Stop the sound 
-    // here to see if it cleans up the problem.
-    sfx.stopSound();
     saberDB.nextPalette();
     paletteChange = true;
     syncToDB();

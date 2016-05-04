@@ -21,17 +21,14 @@ public:
 	virtual int process(Tester* tester, const char* event, const char* eventData) = 0;
 
 protected:
-	void assertButtonA(Tester*);
 };
+
 
 class Tester
 {
-	friend class Test;
-	friend class IgniteRetractTest;
-
 public:
 	Tester();
-	void attach(const Button* buttonA, const Button* buttonB);
+	void attach(Button* buttonA, Button* buttonB);
 	void start();
 
 	void process();
@@ -40,6 +37,11 @@ public:
 	// interface for Test classes to call:
 	void delay(uint32_t time);
 	void fire(const char* event);
+	void press(int button, uint32_t time);
+	void delayedPress(int button, uint32_t wait, uint32_t time);
+	void checkAudio(const char* name, uint32_t low, uint32_t high);
+
+	int order = 0;
 
 private:	
 	enum {
@@ -52,12 +54,18 @@ private:
 	int testState = 0;
 	Test* test = 0;
 	uint32_t delayTime = 0;
-	const char* testEvent = 0;
 
-	const Button* buttonA = 0;
-	const Button* buttonB = 0;
-	const ButtonCBHandlers* buttonACB = 0;
-	const ButtonCBHandlers* buttonBCB = 0;	
+	uint32_t testAudio = 0;
+	const char* audioName = 0;
+	uint32_t audioLow = 0;
+	uint32_t audioHigh = 0;
+
+	struct Press {
+		uint32_t start;
+		uint32_t end;
+	};
+	Press pressState[2];
+	Button* button[2];
 
 	static Tester* s_instance;
 };
