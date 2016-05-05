@@ -54,7 +54,7 @@
 
 static const uint8_t  BLADE_BLACK[NCHANNELS]  = {0};
 static const uint32_t FLASH_TIME        = 120;
-static const uint32_t VCC_TIME_INTERVAL = 4000;
+static const uint32_t VBAT_TIME_INTERVAL = 500;
 
 static const uint32_t INDICATOR_TIME = 500;
 static const uint32_t INDICATOR_CYCLE = INDICATOR_TIME * 2;
@@ -65,7 +65,6 @@ bool     paletteChange = false; // used to prevent sound fx on palette changes
 uint32_t reflashTime = 0;
 bool     flashOnClash = false;
 float    maxGForce2 = 0.0f;
-int32_t  lastVCC = NOMINAL_VOLTAGE;
 
 BladeState bladeState;
 ButtonCB buttonA(PIN_SWITCH_A, Button::PULL_UP);
@@ -77,6 +76,7 @@ ButtonCB buttonB(PIN_SWITCH_B, Button::PULL_UP);
 ButtonMode buttonMode;
 #endif
 SaberDB saberDB;
+AveragePower averagePower;
 
 #ifdef SABER_ACCELEROMETER
 Adafruit_LIS3DH accel;
@@ -96,7 +96,7 @@ SFX sfx(&audioPlayer);
 
 CMDParser cmdParser(&saberDB);
 Blade blade;
-Timer vccTimer(VCC_TIME_INTERVAL);
+Timer vbatTimer(VBAT_TIME_INTERVAL);
 Timer gforceDataTimer(110);
 File logFile;
 
@@ -190,7 +190,7 @@ void setup() {
   Log.p("sfx initialized.").eol();
 #endif
 
-  blade.setVoltage(readVcc());
+  blade.setVoltage(averagePower.power());
 
 #ifdef SABER_DISPLAY
   display.begin(SSD1306_SWITCHCAPVCC);
@@ -216,13 +216,13 @@ uint32_t calcReflashTime() {
   return millis() + random(500) + 200;
 }
 
-int vccToPowerLevel(int32_t vcc)
+int vbatToPowerLevel(int32_t vbat)
 {
   int level = 0;
-  if      (vcc > 3950) level = 4;
-  else if (vcc > 3800) level = 3;
-  else if (vcc > 3650) level = 2;
-  else if (vcc > LOW_VOLTAGE) level = 1;
+  if      (vbat > 3950) level = 4;
+  else if (vbat > 3800) level = 3;
+  else if (vbat > 3650) level = 2;
+  else if (vbat > LOW_VOLTAGE) level = 1;
   return level;
 }
 
@@ -244,7 +244,7 @@ void syncToDB()
     sketcher.color[i] = saberDB.bladeColor()[i];
   }
   sketcher.palette = saberDB.paletteIndex();
-  sketcher.power = vccToPowerLevel(lastVCC);
+  sketcher.power = vbatToPowerLevel(averagePower.power());
 #ifdef SABER_SOUND_ON
   sketcher.fontName = sfx.currentFontName();
 #endif
@@ -278,9 +278,9 @@ void buttonAClickHandler(const Button&)
     syncToDB();
   }
   else {
-    Log.p("VBat.").eol();
-    int32_t vcc = readVcc();
-    ledA.blink(vccToPowerLevel(vcc), INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
+    int32_t vbat = averagePower.power();
+    Log.event("[Vbat]", vbat);
+    ledA.blink(vbatToPowerLevel(vbat), INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
   }
 }
 
@@ -551,8 +551,9 @@ void loop() {
 #endif
   tester.process();
 
-  if (vccTimer.tick()) {
-    blade.setVoltage(readVcc());
+  if (vbatTimer.tick()) {
+    averagePower.push(readVbat());
+    blade.setVoltage(averagePower.power());
   }
 
   if (gforceDataTimer.tick()) {
@@ -568,6 +569,7 @@ void loop() {
   if (reflashTime && msec >= reflashTime) {
     reflashTime = 0;
     if (flashOnClash && bladeState.state() == BLADE_ON) {
+      Log.event("[FlashOnClash]");
       bladeState.change(BLADE_FLASH);
       reflashTime = calcReflashTime();
     }
@@ -605,11 +607,10 @@ void loop() {
 #endif
 }
 
-int32_t readVcc() {
+int32_t readVbat() {
 #ifdef SABER_VOLTMETER
   int32_t analog = analogRead(PIN_VMETER);
   int32_t mV = analog * UVOLT_MULT / int32_t(1000);
-  lastVCC = mV;
   return mV;
 #else
   return NOMINAL_VOLTAGE;

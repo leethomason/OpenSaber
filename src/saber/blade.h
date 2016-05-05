@@ -53,6 +53,12 @@ class Blade
       return pwm[i];
     }
 
+    void getColor(uint8_t* c) {
+      for(int i=0; i<NCHANNELS; ++i) {
+        c[i] = color[i];
+      }
+    }
+
   private:
     uint8_t lerpU8(uint8_t a, uint8_t b, uint8_t t) const;
 

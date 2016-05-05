@@ -1,6 +1,10 @@
+#include "pins.h"
+#include "electrical.h"
 #include "tester.h"
 #include "sfx.h"
 #include "blade.h"
+#include "saberUtil.h"
+
 #include <Button.h>
 #include <Grinliz_Arduino_Util.h>
 
@@ -10,6 +14,8 @@ static const int HOLD_TIME = Button::DEFAULT_HOLD_TIME + 100;
 static const int PRESS_TIME = Button::DEFAULT_BOUNCE_DURATION * 2;
 static const int AUDIO_LAG_TIME = 100;
 static const int AUDIO_CHECKED_TIME = 200;
+static const int POWER_BUTTON = 0;
+static const int EFFECT_BUTTON = 1;
 
 #define TEST_EXISTS(expected) 				\
 	ASSERT(expected);								\
@@ -76,6 +82,7 @@ class IgniteRetractTest : public Test
 
 class PaletteTest : public Test
 {
+public:
 	int numChanges;
 	static const int NUM_ITERATION = 24;
 
@@ -126,13 +133,167 @@ class PaletteTest : public Test
 	}
 };
 
+class EffectTest : public Test
+{
+public:
+	int nFlash = 0;
+	bool firstCall = true;
 
+	virtual void start(Tester* tester) 
+	{
+		nFlash = 0;
+		firstCall = true;
+		tester->press(POWER_BUTTON, HOLD_TIME);
+	}
+};
+
+class BlasterTest : public EffectTest
+{
+public:
+	virtual const char* name() const { return "BlasterTest"; }
+
+	virtual int process(Tester* tester, const char* event, const char* eventData) 
+	{
+		int result = TEST_CONTINUE;
+
+		if (strEqual(event, "[BLADE_ON]")) {
+			tester->checkAudio("idle", 1000, 120000);	// hum
+			//Blade::blade().getColor(bc);
+			tester->delayedPress(EFFECT_BUTTON, AUDIO_CHECKED_TIME, 10);	// trigger flash
+		}
+		else if (strEqual(event, "[BLADE_FLASH]")) {
+			//Blade::blade().getColor(ic);
+			//bool equal = (bc[0] == ic[0] && bc[1] == ic[1] && bc[2] == ic[2]);
+			//TEST_EQUAL(false, equal);
+			tester->press(POWER_BUTTON, HOLD_TIME);
+		}
+		else if (strEqual(event, "[BLADE_OFF]")) {
+			result = TEST_SUCCESS;
+		}		
+		return result;
+	}
+};
+
+class ClashTest : public EffectTest
+{
+public:
+
+	virtual const char* name() const { return "ClashTest"; }
+
+	virtual int process(Tester* tester, const char* event, const char* eventData) 
+	{
+		int result = TEST_CONTINUE;
+
+		if (strEqual(event, "[BLADE_ON]")) {
+			if (firstCall) {
+				tester->checkAudio("idle", 1000, 120000);	// hum
+				//Blade::blade().getColor(bc);
+				tester->delayedPress(EFFECT_BUTTON, AUDIO_CHECKED_TIME,             3000);		// trigger clash
+				tester->delayedPress(POWER_BUTTON, AUDIO_CHECKED_TIME + 3000 + 200, HOLD_TIME);	// queue blade off
+				firstCall = false;
+			}
+		}
+		else if (strEqual(event, "[BLADE_FLASH]")) {
+			nFlash++;
+		}
+		else if (strEqual(event, "[BLADE_OFF]")) {
+			TEST_RANGE(3, 40, nFlash);
+			result = TEST_SUCCESS;
+		}		
+		return result;
+	}
+};
+
+
+class AveragePowerTest : public Test
+{
+public:
+	virtual const char* name() const { return "AveragePowerTest"; }
+	virtual void start(Tester* tester) 
+	{
+		AveragePower ave;
+		TEST_EQUAL(NOMINAL_VOLTAGE, ave.power());
+		for(int i=0; i<AveragePower::NUM_SAMPLES; ++i) {
+			ave.push(4000);			
+		}
+		TEST_EQUAL(4000, ave.power());
+		ave.push(1000);
+		TEST_EQUAL((4000*4 + 1000)/AveragePower::NUM_SAMPLES, ave.power());
+		tester->press(0, 50);
+	}
+
+	virtual int process(Tester* tester, const char* event, const char* eventData) 
+	{
+		if (strEqual(event, "[Vbat]")) {
+			TEST_RANGE(3200, 4300, Blade::blade().voltage());
+			return TEST_SUCCESS;
+		}
+		return TEST_CONTINUE;
+	}
+};
+
+
+class ButtonTest : public Test
+{
+public:
+	int t = 0;
+
+	virtual const char* name() const { return "ButtonTest"; }
+	virtual void start(Tester* tester)	
+	{
+		Button button(255);
+		button.enableTestMode(true);
+
+		// Press with bounce.
+		button.testPress();
+		button.process();
+		TEST_EQUAL(button.press(), true);
+		delay(5);
+		button.process();
+		button.testRelease();
+		button.process();
+		// should still be down: release filtered by de-bounce.
+		TEST_EQUAL(button.isDown(), true);
+		delay(5);
+		button.testPress();
+		button.process();
+		TEST_EQUAL(button.isDown(), true);
+
+		button.testRelease();
+		button.process();
+		// still too soon to register.
+		TEST_EQUAL(button.isDown(), true);
+
+		delay(25);
+		button.process();
+		// Not it has time to catch up, after bounce filter.
+		TEST_EQUAL(button.isDown(), false);
+
+		// Fire an event:
+		tester->press(0, 50);
+	}
+
+	virtual int process(Tester* tester, const char* event, const char* eventData) 
+	{
+		return TEST_SUCCESS;
+	}
+};
+
+
+ButtonTest buttonTest;
 IgniteRetractTest igniteRetractTest;
+BlasterTest blasterTest;
+ClashTest clashTest;
 PaletteTest paletteTest;
+AveragePowerTest averagePowerTest;
 
 Test* gTests[] = {
+	&buttonTest,
 	&igniteRetractTest,
+	&blasterTest,
+	&clashTest,
 	&paletteTest,
+	&averagePowerTest,
 	0
 };
 
@@ -154,9 +315,13 @@ void Tester::attach(Button* buttonA, Button* buttonB)
 
 void Tester::runTests()
 {
+	Log.attachSerial(&Serial);
 	running = true;
 	for(int i=0; i<2; ++i) {
 		if (button[i]) button[i]->enableTestMode(true);
+	}
+	for(int i=0; gTests[i]; i++) {
+		gTests[i]->finalResult = 0;
 	}
 	currentTest = 0;
 	start();
@@ -171,9 +336,6 @@ void Tester::start()
 	TEST_EXISTS(button[0] != 0);
 	TEST_EXISTS(button[1] != 0);
 	r.setSeed(0);
-
-	//test = &igniteRetractTest;
-	test = &paletteTest;
 
 	Log.p("Test start: '").p(test->name()).p("'").eol();
 	test->start(this);
@@ -198,14 +360,17 @@ void Tester::process()
 			for(int i=0; i<2; ++i) {
 				if (button[i]) button[i]->enableTestMode(false);
 			}
-			SPrint.p("******").eol();
+			Log.p("******").eol();
 			for(int i = 0; gTests[i]; ++i) {
 				if (gTests[i]->finalResult == Test::TEST_ERROR)
-					SPrint.p("  Tester ERROR: '").p(gTests[i]->name()).p("'").eol();
+					Log.p("  Tester ERROR: '").p(gTests[i]->name()).p("'").eol();
 				else
-					SPrint.p("  Tester pass: '").p(gTests[i]->name()).p("'").eol();
+					Log.p("  Tester pass: '").p(gTests[i]->name()).p("'").eol();
 			}
-			SPrint.p("******").eol();
+			Log.p("******").eol();
+			#if SERIAL_DEBUG == 0
+			Log.attachSerial(0);
+			#endif
 			return;
 		}
 	}
@@ -250,12 +415,10 @@ void Tester::process()
 		if (result == Test::TEST_ERROR) {
 			Log.p("**Tester ERROR: '").p(test->name()).p("'").eol();
 			test->finalResult = Test::TEST_ERROR;
-			test = 0;
 		}
 		else if (result == Test::TEST_SUCCESS) {
 			Log.p("**Tester pass: '").p(test->name()).p("'").eol();
 			test->finalResult = Test::TEST_SUCCESS;
-			test = 0;
 		}
 	}
 }

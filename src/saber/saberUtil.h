@@ -49,5 +49,23 @@ private:
 	uint8_t m_mode = BUTTON_MODE_NORMAL;
 };
 
+/**
+ * Power changes over time, and higher 
+ * draw changes the power. A small class
+ * to average out power changes.
+ */
+class AveragePower
+{
+public:
+	AveragePower();
+	void push(uint32_t milliVolts);
+	uint32_t power() { return m_power; }
+	enum { NUM_SAMPLES = 5};
+
+private:
+	uint32_t m_power;
+	uint32_t m_sample[NUM_SAMPLES];
+};
+
 
 #endif // SABER_UTIL_INCLUDED
