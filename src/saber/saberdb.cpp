@@ -37,8 +37,8 @@ bool SaberDB::writeDefaults() {
     { 0, 0, 0xff,     0, 0xc8, 0xff,    0 },    // blue
     { 0, 0xff, 0xff,  0, 0xa0, 0xff,    0 },    // cyan
     { 0xff, 0, 0,     0xa0, 0x80, 0,    0 },    // red
-    { 0xff, 0x6a, 0,  0x80, 0xff, 0,    0 },    // amber
-    { 0xff, 0xc8, 0,  0xff, 0xff, 0,    0 },    // sand
+    { 0xff, 0x40, 0,  0x80, 0xff, 0,    0 },    // amber
+    { 0xff, 0xc8, 0,  0xff, 0xa0, 0,    0 },    // sand
     { 0x90, 0, 0xff,  0x90, 0x64, 0xff, 0 },    // purple
     { 0xff, 0x40, 0xed, 0x50, 0,  0xff,  0 }    // pink
   };
@@ -118,10 +118,10 @@ void SaberDB::setVolume(int v) {
   EEPROM.put(headerAddr(), dataHeader);
 }
 
-static const int VOLUME_1 = 30;
-static const int VOLUME_2 = 80;
-static const int VOLUME_3 = 120;
-static const int VOLUME_4 = 204;
+static const int VOLUME_1 = 15;
+static const int VOLUME_2 = 30;
+static const int VOLUME_3 = 80;
+static const int VOLUME_4 = 120;
 
 void SaberDB::setVolume4(int v) 
 {

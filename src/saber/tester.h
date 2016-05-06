@@ -49,6 +49,8 @@ public:
 
 private:	
 	void start();
+	Test* done();
+
 	enum {
 		TEST_STATE_NONE,
 		TEST_STATE_START,

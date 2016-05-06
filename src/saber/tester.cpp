@@ -341,6 +341,36 @@ void Tester::start()
 	test->start(this);
 }
 
+Test* Tester::done()
+{
+	Test* test = 0;
+
+	++currentTest;
+	test = gTests[currentTest];
+
+	if (test) {
+		start();
+	}
+	else {
+		running = false;
+		for(int i=0; i<2; ++i) {
+			if (button[i]) button[i]->enableTestMode(false);
+		}
+		Log.p("******").eol();
+		for(int i = 0; gTests[i]; ++i) {
+			if (gTests[i]->finalResult == Test::TEST_ERROR)
+				Log.p("  Tester ERROR: '").p(gTests[i]->name()).p("'").eol();
+			else
+				Log.p("  Tester pass: '").p(gTests[i]->name()).p("'").eol();
+		}
+		Log.p("******").eol();
+		#if SERIAL_DEBUG == 0
+		Log.attachSerial(0);
+		#endif
+	}
+	return test;
+}
+
 void Tester::process()
 {
 	if (!running) 
@@ -350,29 +380,9 @@ void Tester::process()
 	ASSERT(test);
 
 	if (test->finalResult == Test::TEST_ERROR || test->finalResult == Test::TEST_SUCCESS) {
-		++currentTest;
-		if (gTests[currentTest]) {
-			start();
-			test = gTests[currentTest];
-		}
-		else {
-			running = false;
-			for(int i=0; i<2; ++i) {
-				if (button[i]) button[i]->enableTestMode(false);
-			}
-			Log.p("******").eol();
-			for(int i = 0; gTests[i]; ++i) {
-				if (gTests[i]->finalResult == Test::TEST_ERROR)
-					Log.p("  Tester ERROR: '").p(gTests[i]->name()).p("'").eol();
-				else
-					Log.p("  Tester pass: '").p(gTests[i]->name()).p("'").eol();
-			}
-			Log.p("******").eol();
-			#if SERIAL_DEBUG == 0
-			Log.attachSerial(0);
-			#endif
+		test = done();
+		if (!test)
 			return;
-		}
 	}
 	ASSERT(test);
 
@@ -380,14 +390,10 @@ void Tester::process()
 
 	for(int i=0; i<2; ++i) {
 		if (pressState[i].start && pressState[i].start <= m) {
-			//Log.p("test press ").p(i).p(" ").p(pressState[i].start).eol();
-			//Log.p("millis ").p(m).eol();
 			button[i]->testPress();
 			pressState[i].start = 0;
 		}
 		if (pressState[i].end && pressState[i].end <= m) {
-			//Log.p("test testRelease ").p(i).p(" ").p(pressState[i].end).eol();
-			//Log.p("millis ").p(m).eol();
 			button[i]->testRelease();
 			pressState[i].end = 0;
 		}
@@ -409,7 +415,6 @@ void Tester::process()
 	e = Log.popEvent(&d);
 
 	if (e) {
-		//Log.p("dispatch: ").p(e).p(d ? d : "<none>").eol();
 		int result = test->process(this, e, d);
 
 		if (result == Test::TEST_ERROR) {
@@ -439,7 +444,6 @@ void Tester::checkAudio(const char* name, uint32_t low, uint32_t high)
 void Tester::press(int button, uint32_t time)
 {
 	uint32_t m = millis();
-	//Log.p("press ").p(button).p(" ").p(time).p(" current ").p(m).eol();
 	pressState[button].start = m;
 	pressState[button].end = m + time;
 }
