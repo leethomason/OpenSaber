@@ -3,4 +3,6 @@
 *.opensdf
 *.sdf
 *.suo
+*.zip
+*.stl
 .gitignore

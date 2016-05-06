@@ -27,6 +27,7 @@
 #include "blade.h"
 #include "electrical.h"
 #include "SFX.h"
+#include "Tester.h"
 
 CMDParser::CMDParser(SaberDB* _db) {
   database = _db;
@@ -104,6 +105,10 @@ bool CMDParser::processCMD(uint8_t* c) {
   static const char ID[]      = "id";
   static const char LIST[]    = "list";
   static const char PLAY[]    = "play";
+  static const char LOG[]     = "log";
+  static const char TEST[]    = "test";
+
+  static const int DELAY = 20;  // don't saturate the serial line. Too much for SoftwareSerial.
 
   tokenize();
   //Serial.print("CMD:"); Serial.print(action.c_str()); Serial.print(":"); Serial.println(value.c_str());
@@ -212,7 +217,7 @@ bool CMDParser::processCMD(uint8_t* c) {
   else if (action == FONTS) {
 #ifdef SABER_SOUND_ON
     const SFX* sfx = SFX::instance();
-    for(int i=0; i<sfx->numFonts(); ++i) {
+    for (int i = 0; i < sfx->numFonts(); ++i) {
       Serial.print(i);
       Serial.print(": ");
       const char* name = sfx->fontName(i);
@@ -243,9 +248,36 @@ bool CMDParser::processCMD(uint8_t* c) {
     sfx->playSound(value.c_str());
 #endif
   }
+  else if (action == LOG) {
+    CStr<24> path;
+    path.append("LOGS/log");
+    path.append(value.c_str());
+    path.append(".txt");
+    int flushCount = 16;
+    File file = SD.open(path.c_str());
+    if (file) {
+      while (true) {
+        int c = file.read();
+        if (c < 0) {
+          file.close();
+          break;
+        }
+        Serial.write(c);
+        if (--flushCount == 0) {
+          flushCount = 16;
+          delay(DELAY);
+        }
+      }
+    }
+    else {
+      Serial.print("File open failed: "); Serial.println(path.c_str());
+    }
+  }
+  else if (action == TEST) {
+    Tester* tester = Tester::instance();
+    tester->runTests();
+  }
   else if (action == STATUS) {
-    static const int DELAY = 20;  // don't saturate the serial line. Too much for SoftwareSerial.
-
     static const char* space = "-----------";
     delay(DELAY);
     Serial.println(space);

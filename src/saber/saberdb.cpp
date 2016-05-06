@@ -24,6 +24,7 @@ SOFTWARE.
 #include <Grinliz_Arduino_Util.h>
 #include <EEPROM.h>
 #include "saberdb.h"
+#include "sfx.h"  // bug fix; generally don't want a dependency on sfx
 
 
 SaberDB::SaberDB() {
@@ -36,8 +37,8 @@ bool SaberDB::writeDefaults() {
     { 0, 0, 0xff,     0, 0xc8, 0xff,    0 },    // blue
     { 0, 0xff, 0xff,  0, 0xa0, 0xff,    0 },    // cyan
     { 0xff, 0, 0,     0xa0, 0x80, 0,    0 },    // red
-    { 0xff, 0x6a, 0,  0x80, 0xff, 0,    0 },    // amber
-    { 0xff, 0xc8, 0,  0xff, 0xff, 0,    0 },    // sand
+    { 0xff, 0x40, 0,  0x80, 0xff, 0,    0 },    // amber
+    { 0xff, 0xc8, 0,  0xff, 0xa0, 0,    0 },    // sand
     { 0x90, 0, 0xff,  0x90, 0x64, 0xff, 0 },    // purple
     { 0xff, 0x40, 0xed, 0x50, 0,  0xff,  0 }    // pink
   };
@@ -80,9 +81,18 @@ void SaberDB::nextPalette() {
   setPalette(dataHeader.currentPalette + 1);
 }
 
-void SaberDB::setPalette(int n) {
+void SaberDB::setPalette(int n) 
+{
+#ifdef SABER_SOUND_ON
+  // The SD card memory streaming and the use of the SD
+  // file system lead to crashes. (Grr.) Stop the sound 
+  // here to see if it cleans up the problem.
+  SFX::instance()->stopSound();
+#endif
+
   dataHeader.currentPalette = abs(n) % NUM_PALETTES;
-  Log.p("Switch Palette to: ").p(dataHeader.currentPalette).eol();
+  Log.event("[PALETTE]", dataHeader.currentPalette);
+  //Log.p("Switch Palette to: ").p(dataHeader.currentPalette).eol();
 
   EEPROM.put(headerAddr(), dataHeader);
   EEPROM.get(paletteAddr(dataHeader.currentPalette), palette);
@@ -108,10 +118,10 @@ void SaberDB::setVolume(int v) {
   EEPROM.put(headerAddr(), dataHeader);
 }
 
-static const int VOLUME_1 = 30;
-static const int VOLUME_2 = 80;
-static const int VOLUME_3 = 120;
-static const int VOLUME_4 = 204;
+static const int VOLUME_1 = 15;
+static const int VOLUME_2 = 30;
+static const int VOLUME_3 = 80;
+static const int VOLUME_4 = 120;
 
 void SaberDB::setVolume4(int v) 
 {

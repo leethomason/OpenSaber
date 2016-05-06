@@ -50,32 +50,33 @@
 #include "sketcher.h"
 #include "renderer.h"
 #include "saberUtil.h"
+#include "tester.h"
 
 static const uint8_t  BLADE_BLACK[NCHANNELS]  = {0};
 static const uint32_t FLASH_TIME              = 120;
-static const uint32_t VCC_TIME_INTERVAL       = 1000;
+static const uint32_t VBAT_TIME_INTERVAL      = 500;
 
-static const uint32_t INDICATOR_TIME   = 500;
-static const uint32_t INDICATOR_CYCLE  = INDICATOR_TIME * 2;
-static const float    GFORCE_RANGE     = 4.0f;
-static const float    GFORCE_RANGE_INV = 1.0f / GFORCE_RANGE;
+static const uint32_t INDICATOR_TIME          = 500;
+static const uint32_t INDICATOR_CYCLE         = INDICATOR_TIME * 2;
+static const float    GFORCE_RANGE            = 4.0f;
+static const float    GFORCE_RANGE_INV        = 1.0f / GFORCE_RANGE;
 
-bool     paletteChange = false; // used to prevent sound fx on palette changes
-uint32_t reflashTime   = 0;
-bool     flashOnClash  = false;
-float    maxGForce2    = 0.0f;
-int32_t  lastVCC       = NOMINAL_VOLTAGE;
+bool     paletteChange  = false; // used to prevent sound fx on palette changes
+uint32_t reflashTime    = 0;
+bool     flashOnClash   = false;
+float    maxGForce2     = 0.0f;
 
-BladeState bladeState;
-ButtonCB buttonA(PIN_SWITCH_A, Button::PULL_UP);
-LEDManager ledA(PIN_LED_A, false);
-LEDManager ledB(PIN_LED_B, false);  // Still have LEDB support, even if 1 button.
+BladeState  bladeState;
+ButtonCB    buttonA(PIN_SWITCH_A, Button::PULL_UP);
+LEDManager  ledA(PIN_LED_A, false);
+LEDManager  ledB(PIN_LED_B, false);  // Still have LEDB support, even if 1 button.
 #ifdef SABER_TWO_BUTTON
-ButtonCB buttonB(PIN_SWITCH_B, Button::PULL_UP);
+ButtonCB    buttonB(PIN_SWITCH_B, Button::PULL_UP);
 #else
-ButtonMode buttonMode;
+ButtonMode  buttonMode;
 #endif
-SaberDB saberDB;
+SaberDB     saberDB;
+averagePower averagePower;
 
 #ifdef SABER_ACCELEROMETER
 Adafruit_LIS3DH accel;
@@ -95,9 +96,11 @@ SFX sfx(&audioPlayer);
 
 CMDParser cmdParser(&saberDB);
 Blade blade;
-Timer vccTimer(VCC_TIME_INTERVAL);
+Timer vbatTimer(VBAT_TIME_INTERVAL);
 Timer gforceDataTimer(110);
 File logFile;
+
+Tester tester;
 
 void setupSD(int logCount) {
 
@@ -176,12 +179,18 @@ void setup() {
   buttonB.pressHandler(buttonBPressHandler);
 #endif
 
+#ifdef SABER_TWO_BUTTON
+  tester.attach(&buttonA, &buttonB);
+#else
+  tester.attach(&buttonA, 0);
+#endif
+
 #ifdef SABER_SOUND_ON
   sfx.init();
   Log.p("sfx initialized.").eol();
 #endif
 
-  blade.setVoltage(readVcc());
+  blade.setVoltage(averagePower.power());
 
 #ifdef SABER_DISPLAY
   display.begin(SSD1306_SWITCHCAPVCC);
@@ -200,20 +209,20 @@ void setup() {
 
   syncToDB();
   ledA.set(true); // "power on" light
-  Log.p("[saber start]").eol();
+  Log.event("[saber start]");
 }
 
 uint32_t calcReflashTime() {
   return millis() + random(500) + 200;
 }
 
-int vccToPowerLevel(int32_t vcc)
+int vbatToPowerLevel(int32_t vbat)
 {
   int level = 0;
-  if      (vcc > 3950) level = 4;
-  else if (vcc > 3800) level = 3;
-  else if (vcc > 3650) level = 2;
-  else if (vcc > LOW_VOLTAGE) level = 1;
+  if      (vbat > 3950) level = 4;
+  else if (vbat > 3800) level = 3;
+  else if (vbat > 3650) level = 2;
+  else if (vbat > LOW_VOLTAGE) level = 1;
   return level;
 }
 
@@ -235,7 +244,7 @@ void syncToDB()
     sketcher.color[i] = saberDB.bladeColor()[i];
   }
   sketcher.palette = saberDB.paletteIndex();
-  sketcher.power = vccToPowerLevel(lastVCC);
+  sketcher.power = vbatToPowerLevel(averagePower.power());
 #ifdef SABER_SOUND_ON
   sketcher.fontName = sfx.currentFontName();
 #endif
@@ -260,16 +269,18 @@ void blinkVolumeHandler(const LEDManager& manager)
 
 void buttonAClickHandler(const Button&)
 {
-  Log.p("buttonAClickHandler").eol();
+  Log.p("buttonAClickHandler...");
   // Special case: color switch.
   if (bladeState.state() == BLADE_ON && buttonB.isDown()) {
+    Log.p("palette change.").eol();
     saberDB.nextPalette();
     paletteChange = true;
     syncToDB();
   }
   else {
-    int32_t vcc = readVcc();
-    ledA.blink(vccToPowerLevel(vcc), INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
+    int32_t vbat = averagePower.power();
+    Log.event("[Vbat]", vbat);
+    ledA.blink(vbatToPowerLevel(vbat), INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
   }
 }
 
@@ -277,7 +288,6 @@ void buttonAClickHandler(const Button&)
 void buttonAHoldHandler(const Button&) {
   Log.p("buttonAHoldHandler").eol();
   if (bladeState.state() == BLADE_OFF) {
-    Log.p("[saber ignite]").eol();
     bladeState.change(BLADE_IGNITE);
 #   ifdef SABER_SOUND_ON
     sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
@@ -433,7 +443,6 @@ void processBladeState()
         bool done = blade.setInterp(millis() - bladeState.startTime(), retractTime, saberDB.bladeColor(), BLADE_BLACK);
         if (done) {
           bladeState.change(BLADE_OFF);
-          Log.p("[saber off]").eol();
         }
       }
       break;
@@ -481,6 +490,7 @@ void serialEvent() {
 
 void loop() {
   const uint32_t msec = millis();
+  tester.process();
 
   buttonA.process();
   ledA.process();
@@ -489,6 +499,7 @@ void loop() {
   ledB.process();
 #endif
 
+  tester.process();
   if (bladeState.state() == BLADE_ON) {
 #ifdef SABER_ACCELEROMETER
     accel.read();
@@ -534,12 +545,15 @@ void loop() {
   }
 
   processBladeState();
+  tester.process();
 #ifdef SABER_SOUND_ON
   sfx.process();
 #endif
+  tester.process();
 
-  if (vccTimer.tick()) {
-    blade.setVoltage(readVcc());
+  if (vbatTimer.tick()) {
+    averagePower.push(readVbat());
+    blade.setVoltage(averagePower.power());
   }
 
   if (gforceDataTimer.tick()) {
@@ -555,6 +569,7 @@ void loop() {
   if (reflashTime && msec >= reflashTime) {
     reflashTime = 0;
     if (flashOnClash && bladeState.state() == BLADE_ON) {
+      Log.event("[FlashOnClash]");
       bladeState.change(BLADE_FLASH);
       reflashTime = calcReflashTime();
     }
@@ -592,11 +607,10 @@ void loop() {
 #endif
 }
 
-int32_t readVcc() {
+int32_t readVbat() {
 #ifdef SABER_VOLTMETER
   int32_t analog = analogRead(PIN_VMETER);
   int32_t mV = analog * UVOLT_MULT / int32_t(1000);
-  lastVCC = mV;
   return mV;
 #else
   return NOMINAL_VOLTAGE;

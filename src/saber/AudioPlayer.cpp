@@ -30,7 +30,12 @@ void AudioPlayer::init() {
 
 void AudioPlayer::play(const char* filename) 
 {
-  playWav.play(filename);
+  bool okay = playWav.play(filename);
+  if (!okay) {
+    ASSERT(okay);
+    Log.p("Error playing:").p(filename).eol();
+  }
+  
   //Serial.print("AudioPlayer::play: "); Serial.println(filename);// Serial.print(" len(ms)="); Serial.println(playWav.lengthMillis());
   // remember, about a 5ms warmup for header to be loaded and start playing.
   m_startPlayingTime = millis();
@@ -38,7 +43,8 @@ void AudioPlayer::play(const char* filename)
 
 void AudioPlayer::stop() {
   playWav.stop();
-//  m_stopPlayingTime = millis();
+  // Cool the data xfer
+  delay(10);
 }
 
 bool AudioPlayer::isPlaying() const {
@@ -70,3 +76,8 @@ void AudioPlayer::setVolume(float v) {
   mixer.gain(0, m_volume);
 }
 
+
+uint32_t AudioPlayer::lengthMillis() const
+{
+  return playWav.lengthMillis();
+}
