@@ -19,7 +19,7 @@ AudioPlayer::AudioPlayer() {
   m_shutdown = false;
   m_startPlayingTime = 0;
   m_volume = 1.0f;
-  pinMode(PIN_AMP_SHUTDOWN, INPUT);
+  pinMode(PIN_AMP_EN, INPUT);
 }
 
 void AudioPlayer::init() {
@@ -60,12 +60,12 @@ void AudioPlayer::mute(bool m) {
   m_muted = m;
   if (m_muted && !m_shutdown) {
     Log.p("AudioPlayer::mute shutdown.").eol();
-    digitalWrite(PIN_AMP_SHUTDOWN, LOW);
-    pinMode(PIN_AMP_SHUTDOWN, OUTPUT);
+    digitalWrite(PIN_AMP_EN, LOW);
+    pinMode(PIN_AMP_EN, OUTPUT);
   }
   else if (!m_muted && m_shutdown) {
     Log.p(" AudioPlayer::mute enable.").eol();
-    pinMode(PIN_AMP_SHUTDOWN, INPUT);
+    pinMode(PIN_AMP_EN, INPUT);
     delay(10);  // warm up the amp.
   }
   m_shutdown = m_muted;

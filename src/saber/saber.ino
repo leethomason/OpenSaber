@@ -76,7 +76,7 @@ ButtonCB    buttonB(PIN_SWITCH_B, Button::PULL_UP);
 ButtonMode  buttonMode;
 #endif
 SaberDB     saberDB;
-averagePower averagePower;
+AveragePower averagePower;
 
 #ifdef SABER_ACCELEROMETER
 Adafruit_LIS3DH accel;
@@ -102,8 +102,8 @@ File logFile;
 
 Tester tester;
 
-void setupSD(int logCount) {
-
+void setupSD(int logCount) 
+{
   SPI.setMOSI(PIN_SABER_MOSI);
   SPI.setSCK(PIN_SABER_CLOCK);
 #ifdef SABER_SOUND_ON
@@ -124,8 +124,8 @@ void setupSD(int logCount) {
 }
 
 void setup() {
-  pinMode(PIN_AMP_SHUTDOWN, OUTPUT);
-  digitalWrite(PIN_AMP_SHUTDOWN, LOW);
+  pinMode(PIN_AMP_EN, OUTPUT);
+  digitalWrite(PIN_AMP_EN, LOW);
 
   Serial.begin(19200);  // still need to turn it on in case a command line is connected.
 #if SERIAL_DEBUG == 1

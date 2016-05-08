@@ -30,29 +30,34 @@ static const int EEPROM_SIZE = 512;
 #define SERIAL_DEBUG 1
 
 //#define SABER_ACCELEROMETER
-//#define SABER_SOUND_ON
-//#define SABER_SOUND_SHUTDOWN
+#define SABER_SOUND_ON
+#define SABER_SOUND_SHUTDOWN
 //#define SABER_VOLTMETER
 //#define SABER_DISPLAY
 //#define SABER_CRYSTAL
 #define SABER_TWO_BUTTON
 // Don't forget to set the emmitter in electrical.h!
 
-/* Teensy 3.2 */
+/* Teensy 3.2 with Prop Shield */
+// TBD
+
+// Digital
 #define PIN_RX1           0
 #define PIN_TX1           1
-#define PIN_AMP_SHUTDOWN  2
-// 3
-// 4
-// 5
-#define PIN_LED_A         6
-#define PIN_LED_B         7
+#define PIN_ACCEL_IRQ	  2	// fixed and unused
+#define PIN_LED_A         3
+#define PIN_LED_B         4
+#define PIN_AMP_EN        5 // fixed
+#define PIN_MEMORY_CS	  6	// fixed
+#define PIN_DOTSTAR_EN    7 // fixed
 #define PIN_SWITCH_A      8
 #define PIN_SWITCH_B      9
 #define PIN_SDCARD_CS     10
 #define PIN_SABER_MOSI    11
 #define PIN_SABER_MISO    12
 #define PIN_SABER_CLOCK   13
+
+// Analog
 #define PIN_OLED_DC       14
 // 15
 #define PIN_OLED_RESET    16 

@@ -243,7 +243,7 @@ bool CMDParser::processCMD(uint8_t* c) {
   }
   else if (action == PLAY) {
 #ifdef SABER_SOUND_ON
-    digitalWrite(PIN_AMP_SHUTDOWN, HIGH);
+    digitalWrite(PIN_AMP_EN, HIGH);
     SFX* sfx = SFX::instance();
     sfx->playSound(value.c_str());
 #endif
