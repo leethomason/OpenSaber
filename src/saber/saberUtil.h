@@ -60,7 +60,7 @@ public:
 	AveragePower();
 	void push(uint32_t milliVolts);
 	uint32_t power() { return m_power; }
-	enum { NUM_SAMPLES = 5};
+	enum { NUM_SAMPLES = 8};
 
 private:
 	uint32_t m_power;
