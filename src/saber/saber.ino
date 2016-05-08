@@ -33,6 +33,7 @@
 #include <Audio.h>
 #include <Button.h>
 #include <Adafruit_LIS3DH.h>
+#include <NXPMotionSense.h>
 #include <Grinliz_Arduino_Util.h>
 
 // Includes
@@ -78,8 +79,10 @@ ButtonMode  buttonMode;
 SaberDB     saberDB;
 AveragePower averagePower;
 
-#ifdef SABER_ACCELEROMETER
+#if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH
 Adafruit_LIS3DH accel;
+#elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
+NXPMotionSense accel;
 #endif
 
 #ifdef SABER_DISPLAY
@@ -148,8 +151,8 @@ void setup() {
 
   Log.p("setup()").eol();
 
-#ifdef SABER_ACCELEROMETER
-  Log.p("Accelerometer starting.").eol();
+#if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH
+  Log.p("LIS3DH Accelerometer starting.").eol();
   if (!accel.begin()) {
     Log.p("Accelerometer ERROR.").eol();
   }
@@ -157,6 +160,14 @@ void setup() {
     Log.p("Accelerometer open.").eol();
     accel.setRange(LIS3DH_RANGE_4_G);
     accel.setDataRate(LIS3DH_DATARATE_100_HZ);
+  }
+#elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
+  Log.p("NXP Accelerometer starting.").eol();
+  if (accel.begin()) {
+    Log.p("Accelerometer open.").eol();
+  }
+  else {
+    Log.p("Accelerometer ERROR.").eol();
   }
 #endif
 
@@ -501,7 +512,9 @@ void loop() {
 
   tester.process();
   if (bladeState.state() == BLADE_ON) {
-#ifdef SABER_ACCELEROMETER
+    float g2Normal = 1.0f;
+    float g2 = 1.0f;
+#if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH
     accel.read();
 
     STATIC_ASSERT(BLADE_AXIS != NORMAL_AXIS_A);
@@ -511,14 +524,26 @@ void loop() {
     float normalA = (&accel.x_g)[NORMAL_AXIS_A];
     float normalB = (&accel.x_g)[NORMAL_AXIS_B];
 
-    float g2_noZ = normalA * normalA + normalB * normalB;
-    float g2 = g2_noZ + bladeAxis * bladeAxis;
-    maxGForce2 = max(maxGForce2, g2);
+    g2Normal = normalA * normalA + normalB * normalB;
+    g2 = g2Normal + bladeAxis * bladeAxis;
 
+#elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
+    // Using the prop shield: x is in the blade direction,
+    // y & z are normal.
+
+    float ax=0, ay=0, az=0, gx=0, gy=0, gz=0;
+    accel.readMotionSensor(ax, ay, az, gx, gy, gz);
+    g2Normal = ay * ay + az * az;
+    g2 = g2Normal + ax * ax;
+    //Log.p("g2Normal ").p(g2Normal).p(" g2 ").p(g2).eol();
+    //delay(50);
+#endif
+
+    maxGForce2 = max(maxGForce2, g2);
     float motion = saberDB.motion();
     float impact = saberDB.impact();
 
-    if ((g2_noZ >= impact * impact)) {
+    if ((g2Normal >= impact * impact)) {
       bool sound = false;
 #ifdef SABER_SOUND_ON
       sound = sfx.playSound(SFX_IMPACT, SFX_GREATER_OR_EQUAL);
@@ -538,7 +563,6 @@ void loop() {
         Log.p("Motion. g=").p(sqrt(g2)).eol();
       }
     }
-#endif
   }
   else {
     maxGForce2 = 1;

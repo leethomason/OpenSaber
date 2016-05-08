@@ -24,12 +24,15 @@ SOFTWARE.
 #define PINS_HEADER
 
 static const int EEPROM_SIZE = 512;
+#define SABER_ACCELEROMETER_NONE 	0
+#define SABER_ACCELEROMETER_LIS3DH	1
+#define SABER_ACCELEROMETER_NXP		2
 
 // --- Configuration ---
 // Note: Serial connection should be set to 19200 baud with a newline after commands.
-#define SERIAL_DEBUG 1
+#define SERIAL_DEBUG 			1
 
-//#define SABER_ACCELEROMETER
+#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_NXP
 #define SABER_SOUND_ON
 #define SABER_SOUND_SHUTDOWN
 //#define SABER_VOLTMETER
