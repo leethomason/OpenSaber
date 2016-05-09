@@ -225,7 +225,7 @@ public:
 	virtual int process(Tester* tester, const char* event, const char* eventData) 
 	{
 		if (strEqual(event, "[Vbat]")) {
-			TEST_RANGE(3200, 4300, Blade::blade().voltage());
+			TEST_RANGE(3200, 5300, Blade::blade().voltage());
 			return TEST_SUCCESS;
 		}
 		return TEST_CONTINUE;
