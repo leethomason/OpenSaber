@@ -42,8 +42,6 @@ static const int EEPROM_SIZE = 512;
 // Don't forget to set the emmitter in electrical.h!
 
 /* Teensy 3.2 with Prop Shield */
-// TBD
-
 // Digital
 #define PIN_RX1           0
 #define PIN_TX1           1
@@ -83,44 +81,54 @@ static const float DEFAULT_G_FORCE_MOTION = 1.3f;
 static const float DEFAULT_G_FORCE_IMPACT = 2.2f;
 
 /*
-
 Connections
-	Battery
-		Bat+
-		Bat-
-	Oled
-		CS 	17
-		RST 16
-		D/C 14
-		CLCK clock
-		MOSI
-		Vin
-		Ground
-	SD
-		Ground
-		Vin
-		MOSI
-		MISO
-		CLCK
-		CS  10
-	Audio
-		Aground x 2
-		VBat
-		DAC
-	Accel
-		SCL
-		SDA
-		Vin
-		Ground
-	Crystal
-		R 3
-		G 4
-		B 5
-		Ground
-	USB
-		D+
-		D-
-		Ground
+	SaberZ
+		Battery
+			Bat+
+			Bat-
+		Audio
+			VBat
+			Aground x 2
+			DAC
+		Accel (LIS3DH)
+			Vcc
+			SCL
+			SDA
+			Ground
+		Crystal
+			R
+			G
+			B
+			Ground
+
+	Stack
+		Power
+			Bat+
+			V5
+			Ground (V5)
+			Ground (Bat-)
+
+		Oled
+			Vcc
+			MOSI
+			CLCK
+			CS
+			RST
+			D/C
+			Ground
+
+	Both
+		SD
+			Vcc
+			MOSI
+			MISO
+			CLCK
+			CS
+			Ground
+		USB
+			D+
+			D-
+			Ground
 */
 
 #endif // PINS_HEADER

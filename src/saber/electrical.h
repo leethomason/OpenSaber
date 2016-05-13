@@ -35,18 +35,9 @@ static const int32_t NOMINAL_VOLTAGE = 3700;
 /*
  * This is the code if using a voltage divider.
  * Much simpler, slightly less accurate, fewer components.
- * 
- * Vout = Vbat * R1 / (R1 + R2),
- * Vbat = Vout * (R1 + R2) / R1
- * Vref = 1.2 (internal)
- * Vout = Vref * Apin
- * Vbat = Vref * Apin * (R1 + R2) / R1
- *      = 1.2 * A * 5.7
- *      = 6.27 * A
- *  Unit conversion: 6270 = 1023 * MULT / 1000
- *  UVOLT_MULT = 6129
- *  But we measure 5.10 volts.
- *  Correcting: 
+ * I did have the equation for computing the voltage,
+ * but I usually just take a meter, measure, and tweak 
+ * the constant.
  */
  static const int32_t UVOLT_MULT = 6680;
 
