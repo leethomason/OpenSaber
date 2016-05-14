@@ -253,13 +253,15 @@ public:
 		maxV = 0;
 	}
 
-	void sample() {
-	  int32_t analog = analogRead(PIN_VMETER);
-	  int32_t mV = analog * UVOLT_MULT / int32_t(1000);
-	  sum += mV;
-	  minV = min(minV, mV);
-	  maxV = max(maxV, mV);
-	  ++nSamples;
+	void sample(Tester* tester) 
+	{
+		delayMicroseconds(400 + (tester->getRandom() % 400));
+		int32_t analog = analogRead(PIN_VMETER);
+		int32_t mV = analog * UVOLT_MULT / int32_t(1000);
+		sum += mV;
+		minV = min(minV, mV);
+		maxV = max(maxV, mV);
+		++nSamples;
 	}
 
 	virtual int process(Tester* tester, const char* event, const char* eventData) 
@@ -267,7 +269,7 @@ public:
 		int result = TEST_CONTINUE;
 
 		if (bladeOn && (nSamples < SAMPLES)) {
-			sample();
+			sample(tester);
 			tester->delayedPress(0, AUDIO_CHECKED_TIME, HOLD_TIME);
 		}
 
