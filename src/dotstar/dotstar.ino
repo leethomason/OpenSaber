@@ -4,7 +4,7 @@
 CRGB leds[NUM_LEDS];
 
 void setup() {
-  delay(200);
+  delay(2000);
   FastLED.setBrightness(20);
   FastLED.addLeds<APA102, BGR>(leds, NUM_LEDS);
   pinMode(7, OUTPUT);

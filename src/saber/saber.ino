@@ -35,6 +35,7 @@
 #include <Adafruit_LIS3DH.h>
 #include <NXPMotionSense.h>
 #include <Grinliz_Arduino_Util.h>
+#include <FastLED.h>
 
 // Includes
 // -- Must be first. Has configuration. -- //
@@ -78,6 +79,10 @@ ButtonMode  buttonMode;
 #endif
 SaberDB     saberDB;
 AveragePower averagePower;
+#if SABER_CRYSTAL == SABER_DOTSTAR
+#define NUM_LEDS 1
+CRGB leds[NUM_LEDS];
+#endif
 
 #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH
 Adafruit_LIS3DH accel;
@@ -212,10 +217,19 @@ void setup() {
   Log.p("OLED display connected.").eol();
 #endif
 
-#ifdef SABER_CRYSTAL
+#if SABER_CRYSTAL == SABER_RGB_CRYSTAL
   pinMode(PIN_CRYSTAL_R, OUTPUT);
   pinMode(PIN_CRYSTAL_G, OUTPUT);
   pinMode(PIN_CRYSTAL_B, OUTPUT);
+#elif SABER_CRYSTAL == SABER_DOTSTAR
+  FastLED.setBrightness(20);
+  FastLED.addLeds<APA102, BGR>(leds, NUM_LEDS);
+  pinMode(PIN_DOTSTAR_EN, OUTPUT);
+  leds[0] = CRGB::Green;
+
+  //digitalWrite(PIN_DOTSTAR_EN, HIGH);  // enable access to LEDs
+  //FastLED.show();
+  //digitalWrite(PIN_DOTSTAR_EN, LOW);  // enable access to LEDs
 #endif
 
   syncToDB();
@@ -623,11 +637,17 @@ void loop() {
   }
 #endif
 
-#ifdef SABER_CRYSTAL
+#if SABER_CRYSTAL == SABER_RGB_CRYSTAL
   const uint8_t* rgb = saberDB.bladeColor();
   analogWrite(PIN_CRYSTAL_R, rgb[0]);
   analogWrite(PIN_CRYSTAL_G, rgb[1]);
   analogWrite(PIN_CRYSTAL_B, rgb[2]);
+#elif SABER_CRYSTAL == SABER_DOTSTAR
+  const uint8_t* rgb = saberDB.bladeColor();
+  leds[0].red   = rgb[0];
+  leds[0].green = rgb[1];
+  leds[0].blue  = rgb[2];
+  //FastLED.show();
 #endif
 }
 

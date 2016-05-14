@@ -218,7 +218,7 @@ public:
 		}
 		TEST_EQUAL(4000, ave.power());
 		ave.push(1000);
-		TEST_EQUAL((4000*4 + 1000)/AveragePower::NUM_SAMPLES, ave.power());
+		TEST_EQUAL((4000*(AveragePower::NUM_SAMPLES-1) + 1000)/AveragePower::NUM_SAMPLES, ave.power());
 		tester->press(0, 50);
 	}
 
@@ -232,6 +232,58 @@ public:
 	}
 };
 
+
+class InstantPowerTest : public Test{
+public:
+	static const int SAMPLES = 4000;
+	int32_t nSamples = 0;
+	bool bladeOn = false;
+	int32_t sum = 0;
+	int32_t minV = 6000;
+	int32_t maxV = 0;
+
+	virtual const char* name() const { return "InstantPowerTest"; }
+	virtual void start(Tester* tester) 
+	{
+		tester->press(0, HOLD_TIME);
+		nSamples = 0;
+		bladeOn = false;
+		sum = 0;
+		minV = 6000;
+		maxV = 0;
+	}
+
+	void sample() {
+	  int32_t analog = analogRead(PIN_VMETER);
+	  int32_t mV = analog * UVOLT_MULT / int32_t(1000);
+	  sum += mV;
+	  minV = min(minV, mV);
+	  maxV = max(maxV, mV);
+	  ++nSamples;
+	}
+
+	virtual int process(Tester* tester, const char* event, const char* eventData) 
+	{
+		int result = TEST_CONTINUE;
+
+		if (bladeOn && (nSamples < SAMPLES)) {
+			sample();
+			tester->delayedPress(0, AUDIO_CHECKED_TIME, HOLD_TIME);
+		}
+
+		if (strEqual(event, "[BLADE_ON]")) {
+			bladeOn = true;
+		}
+		else if (strEqual(event, "[BLADE_OFF]")) {
+			result = TEST_SUCCESS;
+			int32_t ave = sum / nSamples;
+			int32_t delta = maxV - minV;
+			Log.p("minV=").p(minV).p(" ").p(" maxV=").p(maxV).p(" delta=").p(delta).p(" ave=").p(ave).eol();
+			TEST_RANGE(10, 400, delta);
+		}		
+		return result;
+	}	
+};
 
 class ButtonTest : public Test
 {
@@ -286,6 +338,7 @@ BlasterTest blasterTest;
 ClashTest clashTest;
 PaletteTest paletteTest;
 AveragePowerTest averagePowerTest;
+InstantPowerTest instantPowerTest;
 
 Test* gTests[] = {
 	&buttonTest,
@@ -294,6 +347,7 @@ Test* gTests[] = {
 	&clashTest,
 	&paletteTest,
 	&averagePowerTest,
+	&instantPowerTest,
 	0
 };
 
