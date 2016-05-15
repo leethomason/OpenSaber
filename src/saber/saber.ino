@@ -20,7 +20,6 @@
   SOFTWARE.
 */
 
-
 // Arduino Libraries
 #include <EEPROM.h>
 #include <Wire.h>
@@ -34,7 +33,7 @@
 #include <Adafruit_LIS3DH.h>
 #include <NXPMotionSense.h>
 #include <Grinliz_Arduino_Util.h>
-#include <FastLED.h>
+#include <DotStar.h>
 
 // Includes
 // -- Must be first. Has configuration. -- //
@@ -79,8 +78,9 @@ ButtonMode  buttonMode;
 SaberDB     saberDB;
 AveragePower averagePower;
 #if SABER_CRYSTAL == SABER_DOTSTAR
-#define NUM_LEDS 1
-CRGB leds[NUM_LEDS];
+#define NUM_LEDS 4
+DotStar::RGB leds[NUM_LEDS];
+DotStar dotstar(PIN_DOTSTAR_EN);
 #endif
 
 #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH
@@ -225,14 +225,13 @@ void setup() {
   pinMode(PIN_CRYSTAL_G, OUTPUT);
   pinMode(PIN_CRYSTAL_B, OUTPUT);
 #elif SABER_CRYSTAL == SABER_DOTSTAR
-  FastLED.setBrightness(20);
-  FastLED.addLeds<APA102, BGR>(leds, NUM_LEDS);
-  pinMode(PIN_DOTSTAR_EN, OUTPUT);
-  leds[0] = CRGB::Green;
-
-  //digitalWrite(PIN_DOTSTAR_EN, HIGH);  // enable access to LEDs
-  //FastLED.show();
-  //digitalWrite(PIN_DOTSTAR_EN, LOW);  // enable access to LEDs
+  dotstar.setBrightness(12);
+  dotstar.attachLEDs(leds, NUM_LEDS);
+  for(int i=0; i<NUM_LEDS; ++i) {
+    leds[i].set(0x00ff00);
+  }
+  dotstar.display();
+  dotstar.display();
 #endif
 
   syncToDB();
@@ -644,10 +643,12 @@ void loop() {
   analogWrite(PIN_CRYSTAL_B, rgb[2]);
 #elif SABER_CRYSTAL == SABER_DOTSTAR
   const uint8_t* rgb = saberDB.bladeColor();
-  leds[0].red   = rgb[0];
-  leds[0].green = rgb[1];
-  leds[0].blue  = rgb[2];
-  //FastLED.show();
+  for(int i=0; i<NUM_LEDS; ++i) {
+    leds[i].red   = rgb[0];
+    leds[i].green = rgb[1];
+    leds[i].blue  = rgb[2];
+  }
+  dotstar.display();
 #endif
 }
 
