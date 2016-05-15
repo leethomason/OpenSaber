@@ -27,8 +27,7 @@
 #include <SPI.h>
 #include <SD.h>
 #include <SPIFlash.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
+#include <OLED_SSD1306.h>
 
 #include <Audio.h>
 #include <Button.h>
@@ -91,7 +90,11 @@ NXPMotionSense accel;
 #endif
 
 #ifdef SABER_DISPLAY
-Adafruit_SSD1306 display(PIN_OLED_DC, PIN_OLED_RESET, PIN_OLED_CS);
+static const int OLED_WIDTH = 128;
+static const int OLED_HEIGHT = 32;
+uint8_t oledBuffer[OLED_WIDTH * OLED_HEIGHT / 8] = {0};
+
+OLED_SSD1306 display(PIN_OLED_DC, PIN_OLED_RESET, PIN_OLED_CS);
 Timer displayTimer(100);
 Sketcher sketcher;
 Renderer renderer;
@@ -209,10 +212,10 @@ void setup() {
   blade.setVoltage(averagePower.power());
 
 #ifdef SABER_DISPLAY
-  display.begin(SSD1306_SWITCHCAPVCC);
-  display.fillScreen(0);
-  display.display();
-  renderer.Attach(128, 32, display.getBuffer());
+  display.begin(OLED_WIDTH, OLED_HEIGHT, SSD1306_SWITCHCAPVCC);
+  renderer.Attach(OLED_WIDTH, OLED_HEIGHT, oledBuffer);
+  renderer.Fill(0);
+  display.display(oledBuffer);
 
   Log.p("OLED display connected.").eol();
 #endif
@@ -630,10 +633,7 @@ void loop() {
     }
 #endif
     sketcher.Draw(&renderer, displayTimer.period(), sketcherMode);
-    // see: SerialFlashChip.cpp in the teensy hardware source.
-    SPI.beginTransaction(SPISettings(50000000, MSBFIRST, SPI_MODE0));
-    display.display();
-    SPI.endTransaction();
+    display.display(oledBuffer);
   }
 #endif
 
