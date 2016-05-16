@@ -32,6 +32,9 @@ static const int EEPROM_SIZE = 512;
 #define SABER_DOTSTAR 				1
 #define SABER_RGB_CRYSTAL			2
 
+//#define SABER_DOTSTAR_CRYSTAL		0	// LED index if there is a crystal 
+#define SABER_DOTSTAR_UI			0	// start led index (of 4) if there is a UI
+#define SABER_NUM_LEDS				4
 
 // --- Configuration ---
 // Note: Serial connection should be set to 19200 baud with a newline after commands.
@@ -43,7 +46,7 @@ static const int EEPROM_SIZE = 512;
 #define SABER_VOLTMETER
 #define SABER_DISPLAY
 #define SABER_CRYSTAL			SABER_DOTSTAR
-#define SABER_TWO_BUTTON
+//#define SABER_TWO_BUTTON
 // Don't forget to set the emmitter in electrical.h!
 
 /* Teensy 3.2 with Prop Shield */

@@ -78,8 +78,7 @@ ButtonMode  buttonMode;
 SaberDB     saberDB;
 AveragePower averagePower;
 #if SABER_CRYSTAL == SABER_DOTSTAR
-#define NUM_LEDS 4
-DotStar::RGB leds[NUM_LEDS];
+DotStar::RGB leds[SABER_NUM_LEDS];
 DotStar dotstar(PIN_DOTSTAR_EN);
 #endif
 
@@ -228,7 +227,7 @@ void setup() {
   dotstar.setBrightness(12);
   dotstar.attachLEDs(leds, NUM_LEDS);
   for(int i=0; i<NUM_LEDS; ++i) {
-    leds[i].set(0x00ff00);
+    leds[i].set(0x010101);
   }
   dotstar.display();
   dotstar.display();
@@ -642,12 +641,15 @@ void loop() {
   analogWrite(PIN_CRYSTAL_G, rgb[1]);
   analogWrite(PIN_CRYSTAL_B, rgb[2]);
 #elif SABER_CRYSTAL == SABER_DOTSTAR
-  const uint8_t* rgb = saberDB.bladeColor();
-  for(int i=0; i<NUM_LEDS; ++i) {
-    leds[i].red   = rgb[0];
-    leds[i].green = rgb[1];
-    leds[i].blue  = rgb[2];
+  #ifdef SABER_DOTSTAR_CRYSTAL
+  {
+    const uint8_t* rgb = saberDB.bladeColor();
+    static const int index = SABER_DOTSTAR_CRYSTAL;
+    leds[index].red   = rgb[0];
+    leds[index].green = rgb[1];
+    leds[index].blue  = rgb[2];
   }
+  #endif
   dotstar.display();
 #endif
 }
