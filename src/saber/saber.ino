@@ -70,6 +70,9 @@ BladeState  bladeState;
 ButtonCB    buttonA(PIN_SWITCH_A, Button::PULL_UP);
 LEDManager  ledA(PIN_LED_A, false);
 LEDManager  ledB(PIN_LED_B, false);  // Still have LEDB support, even if 1 button.
+
+UIRenderData uiRenderData;
+
 #ifdef SABER_TWO_BUTTON
 ButtonCB    buttonB(PIN_SWITCH_B, Button::PULL_UP);
 #else
@@ -77,9 +80,13 @@ ButtonMode  buttonMode;
 #endif
 SaberDB     saberDB;
 AveragePower averagePower;
+
 #if SABER_CRYSTAL == SABER_DOTSTAR
 DotStar::RGB leds[SABER_NUM_LEDS];
 DotStar dotstar(PIN_DOTSTAR_EN);
+#  ifdef SABER_DOTSTAR_UI
+DotStarUI dotstarUI;
+#  endif
 #endif
 
 #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH
@@ -98,7 +105,6 @@ Timer displayTimer(100);
 Sketcher sketcher;
 Renderer renderer;
 #endif
-
 #ifdef SABER_SOUND_ON
 AudioPlayer audioPlayer;
 SFX sfx(&audioPlayer);
@@ -225,8 +231,8 @@ void setup() {
   pinMode(PIN_CRYSTAL_B, OUTPUT);
 #elif SABER_CRYSTAL == SABER_DOTSTAR
   dotstar.setBrightness(12);
-  dotstar.attachLEDs(leds, NUM_LEDS);
-  for(int i=0; i<NUM_LEDS; ++i) {
+  dotstar.attachLEDs(leds, SABER_NUM_LEDS);
+  for(int i=0; i<SABER_NUM_LEDS; ++i) {
     leds[i].set(0x010101);
   }
   dotstar.display();
@@ -264,16 +270,14 @@ void syncToDB()
   sfx.setVolume204(saberDB.volume());
 #endif
 
-#ifdef SABER_DISPLAY
-  sketcher.volume = saberDB.volume4();
+  uiRenderData.volume = saberDB.volume4();
   for (int i = 0; i < 3; ++i) {
-    sketcher.color[i] = saberDB.bladeColor()[i];
+    uiRenderData.color[i] = saberDB.bladeColor()[i];
   }
-  sketcher.palette = saberDB.paletteIndex();
-  sketcher.power = vbatToPowerLevel(averagePower.power());
+  uiRenderData.palette = saberDB.paletteIndex();
+  uiRenderData.power = vbatToPowerLevel(averagePower.power());
 #ifdef SABER_SOUND_ON
-  sketcher.fontName = sfx.currentFontName();
-#endif
+  uiRenderData.fontName = sfx.currentFontName();
 #endif
 
   if (!ledB.blinking()) {   // If blinking, then the LED is being used as UI.
@@ -614,14 +618,13 @@ void loop() {
     }
   }
 
-#ifdef SABER_DISPLAY
   if (displayTimer.tick()) {
     int sketcherMode = Sketcher::BLADE_ON_MODE;
-#ifdef SABER_TWO_BUTTON
+# ifdef SABER_TWO_BUTTON
     if (bladeState.state() == BLADE_OFF) {
       sketcherMode = Sketcher::REST_MODE;
     }
-#else
+# else
     if (bladeState.state() == BLADE_OFF) {
       switch (buttonMode.mode()) {
         case BUTTON_MODE_PALETTE: sketcherMode = Sketcher::PALETTE_MODE; break;
@@ -629,11 +632,18 @@ void loop() {
         default:                  sketcherMode = Sketcher::REST_MODE;    break;
       }
     }
-#endif
-    sketcher.Draw(&renderer, displayTimer.period(), sketcherMode);
+# endif
+# ifdef SABER_DISPLAY
+    sketcher.Draw(&renderer, displayTimer.period(), sketcherMode, &uiRenderData);
     display.display(oledBuffer);
+# endif 
+# if SABER_CRYSTAL == SABER_DOTSTAR
+#   ifdef SABER_DOTSTAR_UI
+      dotstarUI.Draw(leds + SABER_DOTSTAR_UI, sketcherMode, &uiRenderData);
+      dotstar.display();
+#   endif    
+# endif
   }
-#endif
 
 #if SABER_CRYSTAL == SABER_RGB_CRYSTAL
   const uint8_t* rgb = saberDB.bladeColor();
@@ -644,13 +654,12 @@ void loop() {
   #ifdef SABER_DOTSTAR_CRYSTAL
   {
     const uint8_t* rgb = saberDB.bladeColor();
-    static const int index = SABER_DOTSTAR_CRYSTAL;
-    leds[index].red   = rgb[0];
-    leds[index].green = rgb[1];
-    leds[index].blue  = rgb[2];
+    leds[SABER_DOTSTAR_CRYSTAL].red   = rgb[0];
+    leds[SABER_DOTSTAR_CRYSTAL].green = rgb[1];
+    leds[SABER_DOTSTAR_CRYSTAL].blue  = rgb[2];
+    dotstar.display();
   }
   #endif
-  dotstar.display();
 #endif
 }
 
