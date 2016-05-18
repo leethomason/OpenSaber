@@ -188,6 +188,12 @@ void setup() {
   analogReference(INTERNAL);  // 1.1 volts
   analogRead(PIN_VMETER);     // warm up the ADC to avoid spurious initial value.
   Log.p("Voltmeter open.").eol();
+  delay(50);
+  for(int i=0; i<AveragePower::NUM_SAMPLES; ++i) {
+    delay(10);
+    averagePower.push(readVbat());
+  }
+  Log.p("Voltmeter initialized.").eol();
 #endif
 
   blade.setRGB(BLADE_BLACK);

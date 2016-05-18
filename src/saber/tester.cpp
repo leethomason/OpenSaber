@@ -157,15 +157,21 @@ public:
 		int result = TEST_CONTINUE;
 
 		if (strEqual(event, "[BLADE_ON]")) {
-			tester->checkAudio("idle", 1000, 120000);	// hum
-			//Blade::blade().getColor(bc);
-			tester->delayedPress(EFFECT_BUTTON, AUDIO_CHECKED_TIME, 10);	// trigger flash
+			if (firstCall) {
+				tester->checkAudio("idle", 1000, 120000);	// hum
+				#ifdef SABER_TWO_BUTTON
+				tester->delayedPress(EFFECT_BUTTON, AUDIO_CHECKED_TIME, 10);	// trigger flash
+				#else
+				tester->delayedPress(POWER_BUTTON, AUDIO_CHECKED_TIME, 10);	// trigger flash
+				#endif
+				firstCall = false;
+			}
 		}
 		else if (strEqual(event, "[BLADE_FLASH]")) {
 			//Blade::blade().getColor(ic);
 			//bool equal = (bc[0] == ic[0] && bc[1] == ic[1] && bc[2] == ic[2]);
 			//TEST_EQUAL(false, equal);
-			tester->press(POWER_BUTTON, HOLD_TIME);
+			tester->delayedPress(POWER_BUTTON, 500, HOLD_TIME);
 		}
 		else if (strEqual(event, "[BLADE_OFF]")) {
 			result = TEST_SUCCESS;
@@ -346,9 +352,11 @@ Test* gTests[] = {
 	&buttonTest,
 	&igniteRetractTest,
 	&blasterTest,
+#	ifdef SABER_TWO_BUTTON
 	&clashTest,
 	&paletteTest,
 	&averagePowerTest,
+#	endif	
 	&instantPowerTest,
 	0
 };
@@ -390,7 +398,9 @@ void Tester::start()
 
 	order = 0;
 	TEST_EXISTS(button[0] != 0);
+#	ifdef SABER_TWO_BUTTON
 	TEST_EXISTS(button[1] != 0);
+#	endif
 	r.setSeed(0);
 
 	Log.p("Test start: '").p(test->name()).p("'").eol();
