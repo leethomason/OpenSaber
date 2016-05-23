@@ -84,9 +84,7 @@ AveragePower averagePower;
 #if SABER_CRYSTAL == SABER_DOTSTAR
 DotStar::RGB leds[SABER_NUM_LEDS];
 DotStar dotstar(PIN_DOTSTAR_EN);
-#  ifdef SABER_DOTSTAR_UI
-DotStarUI dotstarUI;
-#  endif
+DotStarUI dotstarUI; 
 #endif
 
 #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH

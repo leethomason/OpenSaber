@@ -33,7 +33,7 @@ public:
 	Tester();
 	void attach(Button* buttonA, Button* buttonB);
 
-	void runTests();
+	void runTests(int count = 1);
 	void process();
 	static Tester* instance() { return s_instance; }
 
@@ -62,6 +62,8 @@ private:
 	bool running = false;
 	int testState = 0;
 	uint32_t delayTime = 0;
+	int passCount = 0;
+	int nPasses = 1;
 
 	uint32_t testAudio = 0;
 	const char* audioName = 0;

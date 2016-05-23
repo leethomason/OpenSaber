@@ -377,10 +377,15 @@ void Tester::attach(Button* buttonA, Button* buttonB)
 	button[1] = buttonB;
 }
 
-void Tester::runTests()
+void Tester::runTests(int count)
 {
 	Log.attachSerial(&Serial);
+	passCount = 0;
+	nPasses = count;
+
+	if (nPasses < 1) nPasses = 1;
 	running = true;
+
 	for(int i=0; i<2; ++i) {
 		if (button[i]) button[i]->enableTestMode(true);
 	}
@@ -413,6 +418,17 @@ Test* Tester::done()
 
 	++currentTest;
 	test = gTests[currentTest];
+	
+	if (!test) {
+		++passCount;
+		if (passCount < nPasses) {
+			currentTest = 0;
+			test = gTests[currentTest];
+			for(int i=0; gTests[i]; ++i) {
+				gTests[i]->finalResult = 0;
+			}
+		}
+	}
 
 	if (test) {
 		start();
@@ -430,6 +446,7 @@ Test* Tester::done()
 				Log.p("  Tester pass: '").p(gTests[i]->name()).p("'").eol();
 		}
 		Log.p("******").eol();
+		Log.p("Test passes run=").p(nPasses).eol();
 		#if SERIAL_DEBUG == 0
 		Log.attachSerial(0);
 		#endif
