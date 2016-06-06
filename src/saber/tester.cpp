@@ -65,7 +65,9 @@ class IgniteRetractTest : public Test
 			TEST_ORDER(1);
 			TEST_RANGE(1, 255*3, Blade::blade().pwmVal(0) + Blade::blade().pwmVal(1) + Blade::blade().pwmVal(2));
 			tester->checkAudio("idle", 1000, 120000);	// hum
-			tester->delayedPress(0, AUDIO_CHECKED_TIME, HOLD_TIME);
+
+			uint32_t delayTime = tester->longTest() ? 5000 : AUDIO_CHECKED_TIME;
+			tester->delayedPress(0, delayTime, HOLD_TIME);
 		}
 		else if (strEqual(event, "[BLADE_RETRACT]")) {
 			TEST_ORDER(2);
@@ -377,11 +379,12 @@ void Tester::attach(Button* buttonA, Button* buttonB)
 	button[1] = buttonB;
 }
 
-void Tester::runTests(int count)
+void Tester::runTests(int count, bool longTest)
 {
 	Log.attachSerial(&Serial);
 	passCount = 0;
 	nPasses = count;
+	useLongTest = longTest;
 
 	if (nPasses < 1) nPasses = 1;
 	running = true;

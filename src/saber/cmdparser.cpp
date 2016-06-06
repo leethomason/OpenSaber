@@ -279,10 +279,18 @@ bool CMDParser::processCMD(uint8_t* c) {
     else if (action == TEST) {
         Tester* tester = Tester::instance();
         int count = 1;
+        bool longTest = false;
         if (!value.empty()) {
-            count = atoi(value.c_str());
+            const char* p = value.c_str();
+            if (*p == 'l') {
+                p++;
+                longTest = true;
+            }
+            if (*p) {
+                count = atoi(p);
+            }
         }
-        tester->runTests(count);
+        tester->runTests(count, longTest);
     }
     else if (action == STATUS) {
         static const char* space = "-----------";

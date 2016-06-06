@@ -33,7 +33,7 @@ public:
 	Tester();
 	void attach(Button* buttonA, Button* buttonB);
 
-	void runTests(int count = 1);
+	void runTests(int count = 1, bool longTestTime=false);
 	void process();
 	static Tester* instance() { return s_instance; }
 
@@ -44,6 +44,7 @@ public:
 	void delayedPress(int button, uint32_t wait, uint32_t time);
 	void checkAudio(const char* name, uint32_t low, uint32_t high);
 	uint32_t getRandom() { return r.rand16(); }
+	bool longTest() const { return useLongTest; }
 
 	int order = 0;
 
@@ -64,6 +65,7 @@ private:
 	uint32_t delayTime = 0;
 	int passCount = 0;
 	int nPasses = 1;
+	bool useLongTest;
 
 	uint32_t testAudio = 0;
 	const char* audioName = 0;
