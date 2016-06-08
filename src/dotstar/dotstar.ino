@@ -56,6 +56,7 @@ void setup()
 
 void loop() 
 {
+/*
   uint32_t t = millis();
   t = t / 1000;
 
@@ -65,4 +66,5 @@ void loop()
     leds[i].blue  = ((i+t) & 4) ? 0xff : 0;
   }
   dotstar.display();
+  */
 }

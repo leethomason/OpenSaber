@@ -81,7 +81,7 @@ ButtonMode  buttonMode;
 SaberDB     saberDB;
 AveragePower averagePower;
 
-#if SABER_CRYSTAL == SABER_DOTSTAR
+#ifdef SABER_LEDS
 DotStar::RGB leds[SABER_NUM_LEDS];
 DotStar dotstar(PIN_DOTSTAR_EN);
 DotStarUI dotstarUI;
@@ -230,12 +230,13 @@ void setup() {
     Log.p("OLED display connected.").eol();
 #endif
 
-#if SABER_CRYSTAL == SABER_RGB_CRYSTAL
-    pinMode(PIN_CRYSTAL_R, OUTPUT);
-    pinMode(PIN_CRYSTAL_G, OUTPUT);
-    pinMode(PIN_CRYSTAL_B, OUTPUT);
-#elif SABER_CRYSTAL == SABER_DOTSTAR
-    dotstar.setBrightness(12);
+//#if SABER_CRYSTAL == SABER_RGB_CRYSTAL
+//    pinMode(PIN_CRYSTAL_R, OUTPUT);
+//    pinMode(PIN_CRYSTAL_G, OUTPUT);
+//    pinMode(PIN_CRYSTAL_B, OUTPUT);
+//#elif SABER_CRYSTAL == SABER_DOTSTAR
+#ifdef SABER_LEDS
+    dotstar.setBrightness(16);
     dotstar.attachLEDs(leds, SABER_NUM_LEDS);
     for(int i=0; i<SABER_NUM_LEDS; ++i) {
         leds[i].set(0x010101);
@@ -631,11 +632,11 @@ void loop() {
         int sketcherMode = Sketcher::BLADE_ON_MODE;
         (void)sketcherMode; // If no display, won't be used, but don't need a warning.
 
-# ifdef SABER_TWO_BUTTON
+#ifdef SABER_TWO_BUTTON
         if (bladeState.state() == BLADE_OFF) {
             sketcherMode = Sketcher::REST_MODE;
         }
-# else
+#else
         if (bladeState.state() == BLADE_OFF) {
             switch (buttonMode.mode()) {
             case BUTTON_MODE_PALETTE:
@@ -649,26 +650,24 @@ void loop() {
                 break;
             }
         }
-# endif
-# ifdef SABER_DISPLAY
+#endif
+#ifdef SABER_DISPLAY
         sketcher.Draw(&renderer, displayTimer.period(), sketcherMode, &uiRenderData);
         display.display(oledBuffer);
-# endif
-# if SABER_CRYSTAL == SABER_DOTSTAR
-#   ifdef SABER_DOTSTAR_UI
-        dotstarUI.Draw(leds + SABER_DOTSTAR_UI, sketcherMode, &uiRenderData);
+#endif
+#ifdef SABER_LEDS
+        dotstarUI.Draw(leds, sketcherMode, &uiRenderData);
         dotstar.display();
-#   endif
-# endif
+#endif
     }
 
+/*
 #if SABER_CRYSTAL == SABER_RGB_CRYSTAL
     const uint8_t* rgb = saberDB.bladeColor();
     analogWrite(PIN_CRYSTAL_R, rgb[0]);
     analogWrite(PIN_CRYSTAL_G, rgb[1]);
     analogWrite(PIN_CRYSTAL_B, rgb[2]);
 #elif SABER_CRYSTAL == SABER_DOTSTAR
-#ifdef SABER_DOTSTAR_CRYSTAL
     {
         const uint8_t* rgb = saberDB.bladeColor();
         leds[SABER_DOTSTAR_CRYSTAL].red   = rgb[0];
@@ -677,7 +676,7 @@ void loop() {
         dotstar.display();
     }
 #endif
-#endif
+*/
 }
 
 int32_t readVbat() {

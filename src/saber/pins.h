@@ -28,12 +28,12 @@ static const int EEPROM_SIZE = 512;
 #define SABER_ACCELEROMETER_LIS3DH	1
 #define SABER_ACCELEROMETER_NXP		2
 
-#define SABER_NO_CRYSTAL 			0
-#define SABER_DOTSTAR 				1
-#define SABER_RGB_CRYSTAL			2
+//#define SABER_NO_CRYSTAL 			0
+//#define SABER_DOTSTAR_CRYSTAL		1
+//#define SABER_RGB_CRYSTAL			2
 
-#define SABER_DOTSTAR_CRYSTAL		0	// LED index if there is a crystal 
-#define SABER_DOTSTAR_UI			0	// start led index (of 4) if there is a UI
+//#define SABER_DOTSTAR_CRYSTAL		0	// LED index if there is a crystal 
+//#define SABER_DOTSTAR_UI			0	// start led index (of 4) if there is a UI
 #define SABER_NUM_LEDS				4
 
 // --- Configuration ---
@@ -45,7 +45,7 @@ static const int EEPROM_SIZE = 512;
 #define SABER_SOUND_SHUTDOWN
 #define SABER_VOLTMETER
 //#define SABER_DISPLAY
-#define SABER_CRYSTAL			SABER_DOTSTAR
+#define SABER_LEDS
 //#define SABER_TWO_BUTTON
 //#define SABER_LOCK
 // Don't forget to set the emmitter in electrical.h!
