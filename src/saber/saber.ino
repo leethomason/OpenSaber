@@ -38,7 +38,6 @@
 // Includes
 // -- Must be first. Has configuration. -- //
 #include "pins.h"
-#include "electrical.h"
 
 #ifdef SABER_SOUND_ON
 #include "sfx.h"
@@ -139,9 +138,6 @@ void setupSD(int logCount)
 }
 
 void setup() {
-    pinMode(PIN_AMP_EN, OUTPUT);
-    digitalWrite(PIN_AMP_EN, LOW);
-
     Serial.begin(19200);  // still need to turn it on in case a command line is connected.
 #if SERIAL_DEBUG == 1
     while (!Serial) {

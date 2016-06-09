@@ -25,7 +25,6 @@
 #include "cmdparser.h"
 #include "saberdb.h"
 #include "blade.h"
-#include "electrical.h"
 #include "SFX.h"
 #include "Tester.h"
 
@@ -244,11 +243,14 @@ bool CMDParser::processCMD(uint8_t* c) {
         root.close();
     }
     else if (action == PLAY) {
-#ifdef SABER_SOUND_ON
-        digitalWrite(PIN_AMP_EN, HIGH);
-        SFX* sfx = SFX::instance();
-        sfx->playSound(value.c_str());
-#endif
+        /*
+        Would be nice if this worked...
+        #ifdef SABER_SOUND_ON
+                digitalWrite(PIN_AMP_EN, HIGH);
+                SFX* sfx = SFX::instance();
+                sfx->playSound(value.c_str());
+        #endif
+        */
     }
     else if (action == LOG) {
         CStr<24> path;

@@ -1,5 +1,4 @@
 #include "pins.h"
-#include "electrical.h"
 #include "saberUtil.h"
 
 #include <Grinliz_Arduino_Util.h>

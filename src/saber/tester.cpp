@@ -1,5 +1,4 @@
 #include "pins.h"
-#include "electrical.h"
 #include "tester.h"
 #include "sfx.h"
 #include "blade.h"

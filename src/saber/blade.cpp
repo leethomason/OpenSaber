@@ -22,11 +22,11 @@
 
 #include "blade.h"
 #include "pins.h"
-#include "electrical.h"
 #include <Arduino.h>
 
 const int8_t Blade::pinRGB[NCHANNELS] = { PIN_EMITTER_RED, PIN_EMITTER_GREEN, PIN_EMITTER_BLUE };
 Blade* Blade::instance = 0;
+static const int32_t LED_RANGE = 255;
 
 Blade::Blade() {
   for (int i = 0; i < NCHANNELS; ++i) {
