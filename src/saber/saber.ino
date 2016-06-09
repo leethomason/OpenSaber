@@ -139,57 +139,57 @@ void setupSD(int logCount)
 
 void setup() {
     Serial.begin(19200);  // still need to turn it on in case a command line is connected.
-#if SERIAL_DEBUG == 1
-    while (!Serial) {
-        delay(100);
-    }
-#endif
+    #if SERIAL_DEBUG == 1
+        while (!Serial) {
+            delay(100);
+        }
+    #endif
     //TCNT1 = 0x7FFF; // set blue & green channels out of phase
     // Database is the "source of truth".
     // Set it up first.
     saberDB.readData();
 
-#if SERIAL_DEBUG == 1
-    Log.attachSerial(&Serial);
-#endif
-#ifdef SABER_SOUND_ON
-    setupSD(saberDB.numSetupCalls());
-    // Log.attachLog(&logFile);
-#endif
+    #if SERIAL_DEBUG == 1
+        Log.attachSerial(&Serial);
+    #endif
+    #ifdef SABER_SOUND_ON
+        setupSD(saberDB.numSetupCalls());
+        // Log.attachLog(&logFile);
+    #endif
 
     Log.p("setup()").eol();
 
-#if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH
-    Log.p("LIS3DH Accelerometer starting.").eol();
-    if (!accel.begin()) {
-        Log.p("Accelerometer ERROR.").eol();
-    }
-    else {
-        Log.p("Accelerometer open.").eol();
-        accel.setRange(LIS3DH_RANGE_4_G);
-        accel.setDataRate(LIS3DH_DATARATE_100_HZ);
-    }
-#elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
-    Log.p("NXP Accelerometer starting.").eol();
-    if (accel.begin()) {
-        Log.p("Accelerometer open.").eol();
-    }
-    else {
-        Log.p("Accelerometer ERROR.").eol();
-    }
-#endif
+    #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH
+        Log.p("LIS3DH Accelerometer starting.").eol();
+        if (!accel.begin()) {
+            Log.p("Accelerometer ERROR.").eol();
+        }
+        else {
+            Log.p("Accelerometer open.").eol();
+            accel.setRange(LIS3DH_RANGE_4_G);
+            accel.setDataRate(LIS3DH_DATARATE_100_HZ);
+        }
+    #elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
+        Log.p("NXP Accelerometer starting.").eol();
+        if (accel.begin()) {
+            Log.p("Accelerometer open.").eol();
+        }
+        else {
+            Log.p("Accelerometer ERROR.").eol();
+        }
+    #endif
 
-#ifdef SABER_VOLTMETER
-    analogReference(INTERNAL);  // 1.1 volts
-    analogRead(PIN_VMETER);     // warm up the ADC to avoid spurious initial value.
-    Log.p("Voltmeter open.").eol();
-    delay(50);
-    for(int i=0; i<AveragePower::NUM_SAMPLES; ++i) {
-        delay(10);
-        averagePower.push(readVbat());
-    }
-    Log.p("Voltmeter initialized.").eol();
-#endif
+    #ifdef SABER_VOLTMETER
+        analogReference(INTERNAL);  // 1.1 volts
+        analogRead(PIN_VMETER);     // warm up the ADC to avoid spurious initial value.
+        Log.p("Voltmeter open.").eol();
+        delay(50);
+        for(int i=0; i<AveragePower::NUM_SAMPLES; ++i) {
+            delay(10);
+            averagePower.push(readVbat());
+        }
+        Log.p("Voltmeter initialized.").eol();
+    #endif
 
     blade.setRGB(BLADE_BLACK);
 
@@ -197,50 +197,50 @@ void setup() {
     buttonA.clickHandler(buttonAClickHandler);
     buttonA.releaseHandler(buttonAReleaseHandler);
 
-#ifdef SABER_TWO_BUTTON
-    buttonB.clickHandler(buttonBClickHandler);
-    buttonB.releaseHandler(buttonBReleaseHandler);
-    buttonB.holdHandler(buttonBHoldHandler);
-    buttonB.pressHandler(buttonBPressHandler);
-#endif
+    #ifdef SABER_TWO_BUTTON
+        buttonB.clickHandler(buttonBClickHandler);
+        buttonB.releaseHandler(buttonBReleaseHandler);
+        buttonB.holdHandler(buttonBHoldHandler);
+        buttonB.pressHandler(buttonBPressHandler);
+    #endif
 
-#ifdef SABER_TWO_BUTTON
-    tester.attach(&buttonA, &buttonB);
-#else
-    tester.attach(&buttonA, 0);
-#endif
+    #ifdef SABER_TWO_BUTTON
+        tester.attach(&buttonA, &buttonB);
+    #else
+        tester.attach(&buttonA, 0);
+    #endif
 
-#ifdef SABER_SOUND_ON
-    sfx.init();
-    Log.p("sfx initialized.").eol();
-#endif
+    #ifdef SABER_SOUND_ON
+        sfx.init();
+        Log.p("sfx initialized.").eol();
+    #endif
 
     blade.setVoltage(averagePower.power());
 
-#ifdef SABER_DISPLAY
-    display.begin(OLED_WIDTH, OLED_HEIGHT, SSD1306_SWITCHCAPVCC);
-    renderer.Attach(OLED_WIDTH, OLED_HEIGHT, oledBuffer);
-    renderer.Fill(0);
-    display.display(oledBuffer);
+    #ifdef SABER_DISPLAY
+        display.begin(OLED_WIDTH, OLED_HEIGHT, SSD1306_SWITCHCAPVCC);
+        renderer.Attach(OLED_WIDTH, OLED_HEIGHT, oledBuffer);
+        renderer.Fill(0);
+        display.display(oledBuffer);
 
-    Log.p("OLED display connected.").eol();
-#endif
+        Log.p("OLED display connected.").eol();
+    #endif
 
 //#if SABER_CRYSTAL == SABER_RGB_CRYSTAL
 //    pinMode(PIN_CRYSTAL_R, OUTPUT);
 //    pinMode(PIN_CRYSTAL_G, OUTPUT);
 //    pinMode(PIN_CRYSTAL_B, OUTPUT);
 //#elif SABER_CRYSTAL == SABER_DOTSTAR
-#ifdef SABER_LEDS
-    dotstar.setBrightness(16);
-    dotstar.attachLEDs(leds, SABER_NUM_LEDS);
-    for(int i=0; i<SABER_NUM_LEDS; ++i) {
-        leds[i].set(0x010101);
-    }
-    dotstar.display();
-    dotstar.display();
-    Log.p("Crystal Dotstart initialized.").eol();
-#endif
+    #ifdef SABER_LEDS
+        dotstar.setBrightness(16);
+        dotstar.attachLEDs(leds, SABER_NUM_LEDS);
+        for(int i=0; i<SABER_NUM_LEDS; ++i) {
+            leds[i].set(0x010101);
+        }
+        dotstar.display();
+        dotstar.display();
+        Log.p("Crystal Dotstart initialized.").eol();
+    #endif
 
     syncToDB();
     ledA.set(true); // "power on" light
@@ -267,11 +267,11 @@ int vbatToPowerLevel(int32_t vbat)
 */
 void syncToDB()
 {
-#ifdef SABER_SOUND_ON
-    sfx.setFont(saberDB.soundFont());
-    sfx.mute(!saberDB.soundOn());
-    sfx.setVolume204(saberDB.volume());
-#endif
+    #ifdef SABER_SOUND_ON
+        sfx.setFont(saberDB.soundFont());
+        sfx.mute(!saberDB.soundOn());
+        sfx.setVolume204(saberDB.volume());
+    #endif
 
     uiRenderData.volume = saberDB.volume4();
     for (int i = 0; i < 3; ++i) {
@@ -279,9 +279,9 @@ void syncToDB()
     }
     uiRenderData.palette = saberDB.paletteIndex();
     uiRenderData.power = vbatToPowerLevel(averagePower.power());
-#ifdef SABER_SOUND_ON
-    uiRenderData.fontName = sfx.currentFontName();
-#endif
+    #ifdef SABER_SOUND_ON
+        uiRenderData.fontName = sfx.currentFontName();
+    #endif
 
     if (!ledB.blinking()) {   // If blinking, then the LED is being used as UI.
         ledB.set(saberDB.soundOn());
@@ -322,15 +322,15 @@ void buttonAHoldHandler(const Button&) {
     Log.p("buttonAHoldHandler").eol();
     if (bladeState.state() == BLADE_OFF) {
         bladeState.change(BLADE_IGNITE);
-#ifdef SABER_SOUND_ON
+        #ifdef SABER_SOUND_ON
           sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
-#endif
+        #endif
     }
     else if (bladeState.state() != BLADE_RETRACT) {
         bladeState.change(BLADE_RETRACT);
-#ifdef SABER_SOUND_ON
+        #ifdef SABER_SOUND_ON
           sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
-#endif
+        #endif
     }
 }
 
@@ -343,9 +343,9 @@ void buttonBHoldHandler(const Button&) {
     if (bladeState.state() != BLADE_OFF) {
         if (!paletteChange) {
             bladeState.change(BLADE_FLASH);
-#ifdef SABER_SOUND_ON
-            sfx.playSound(SFX_USER_HOLD, SFX_OVERRIDE);
-#endif
+            #ifdef SABER_SOUND_ON
+              sfx.playSound(SFX_USER_HOLD, SFX_OVERRIDE);
+            #endif
             flashOnClash = true;
             reflashTime = calcReflashTime();
         }
@@ -363,9 +363,9 @@ void buttonBHoldHandler(const Button&) {
 
 void buttonBReleaseHandler(const Button& b) {
     if (flashOnClash && bladeState.state() != BLADE_OFF) {
-#ifdef SABER_SOUND_ON
-        sfx.playSound(SFX_IDLE, SFX_OVERRIDE);
-#endif
+        #ifdef SABER_SOUND_ON
+            sfx.playSound(SFX_IDLE, SFX_OVERRIDE);
+        #endif
     }
     flashOnClash = false;
     if (ledB.blinking()) {
@@ -379,9 +379,9 @@ void buttonBClickHandler(const Button&) {
     if (bladeState.state() == BLADE_ON) {
         if (!paletteChange) {
             bladeState.change(BLADE_FLASH);
-#ifdef SABER_SOUND_ON
-            sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
-#endif
+            #ifdef SABER_SOUND_ON
+                sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
+            #endif
         }
     }
 }
@@ -409,9 +409,9 @@ void buttonAClickHandler(const Button&)
     }
     else if (bladeState.state() == BLADE_ON) {
         bladeState.change(BLADE_FLASH);
-#ifdef SABER_SOUND_ON
-        sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
-#endif
+        #ifdef SABER_SOUND_ON
+            sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
+        #endif
     }
 }
 
@@ -422,9 +422,9 @@ void buttonAHoldHandler(const Button&)
 
         if (buttonMode.mode() == BUTTON_MODE_NORMAL) {
             bladeState.change(BLADE_IGNITE);
-#ifdef SABER_SOUND_ON
-            sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
-#endif
+            #ifdef SABER_SOUND_ON
+                sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
+            #endif
         }
         else if (buttonMode.mode() == BUTTON_MODE_PALETTE) {
             saberDB.setPalette(0);
@@ -437,9 +437,9 @@ void buttonAHoldHandler(const Button&)
     }
     else if (bladeState.state() != BLADE_RETRACT) {
         bladeState.change(BLADE_RETRACT);
-#ifdef SABER_SOUND_ON
-        sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
-#endif
+        #ifdef SABER_SOUND_ON
+            sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
+        #endif
     }
 }
 
@@ -459,9 +459,9 @@ void processBladeState()
     case BLADE_IGNITE:
     {
         uint32_t igniteTime = 1000;
-#ifdef SABER_SOUND_ON
-        igniteTime = sfx.getIgniteTime();
-#endif
+        #ifdef SABER_SOUND_ON
+            igniteTime = sfx.getIgniteTime();
+        #endif
         bool done = blade.setInterp(millis() - bladeState.startTime(), igniteTime, BLADE_BLACK, saberDB.bladeColor());
         if (done) {
             bladeState.change(BLADE_ON);
@@ -472,9 +472,9 @@ void processBladeState()
     case BLADE_RETRACT:
     {
         uint32_t retractTime = 1000;
-#ifdef SABER_SOUND_ON
-        retractTime = sfx.getRetractTime();
-#endif
+        #ifdef SABER_SOUND_ON
+            retractTime = sfx.getRetractTime();
+        #endif
         bool done = blade.setInterp(millis() - bladeState.startTime(), retractTime, saberDB.bladeColor(), BLADE_BLACK);
         if (done) {
             bladeState.change(BLADE_OFF);
@@ -530,39 +530,39 @@ void loop() {
 
     buttonA.process();
     ledA.process();
-#ifdef SABER_TWO_BUTTON
-    buttonB.process();
-    ledB.process();
-#endif
+    #ifdef SABER_TWO_BUTTON
+        buttonB.process();
+        ledB.process();
+    #endif
 
     tester.process();
     if (bladeState.state() == BLADE_ON) {
         float g2Normal = 1.0f;
         float g2 = 1.0f;
-#if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH
-        accel.read();
+        #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH
+            accel.read();
 
-        STATIC_ASSERT(BLADE_AXIS != NORMAL_AXIS_A);
-        STATIC_ASSERT(BLADE_AXIS != NORMAL_AXIS_B);
+            STATIC_ASSERT(BLADE_AXIS != NORMAL_AXIS_A);
+            STATIC_ASSERT(BLADE_AXIS != NORMAL_AXIS_B);
 
-        float bladeAxis = (&accel.x_g)[BLADE_AXIS];
-        float normalA = (&accel.x_g)[NORMAL_AXIS_A];
-        float normalB = (&accel.x_g)[NORMAL_AXIS_B];
+            float bladeAxis = (&accel.x_g)[BLADE_AXIS];
+            float normalA = (&accel.x_g)[NORMAL_AXIS_A];
+            float normalB = (&accel.x_g)[NORMAL_AXIS_B];
 
-        g2Normal = normalA * normalA + normalB * normalB;
-        g2 = g2Normal + bladeAxis * bladeAxis;
+            g2Normal = normalA * normalA + normalB * normalB;
+            g2 = g2Normal + bladeAxis * bladeAxis;
 
-#elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
-        // Using the prop shield: x is in the blade direction,
-        // y & z are normal.
+        #elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
+            // Using the prop shield: x is in the blade direction,
+            // y & z are normal.
 
-        float ax=0, ay=0, az=0, gx=0, gy=0, gz=0;
-        accel.readMotionSensor(ax, ay, az, gx, gy, gz);
-        g2Normal = ay * ay + az * az;
-        g2 = g2Normal + ax * ax;
-        //Log.p("g2Normal ").p(g2Normal).p(" g2 ").p(g2).eol();
-        //delay(50);
-#endif
+            float ax=0, ay=0, az=0, gx=0, gy=0, gz=0;
+            accel.readMotionSensor(ax, ay, az, gx, gy, gz);
+            g2Normal = ay * ay + az * az;
+            g2 = g2Normal + ax * ax;
+            //Log.p("g2Normal ").p(g2Normal).p(" g2 ").p(g2).eol();
+            //delay(50);
+        #endif
 
         maxGForce2 = max(maxGForce2, g2);
         float motion = saberDB.motion();
@@ -570,9 +570,9 @@ void loop() {
 
         if ((g2Normal >= impact * impact)) {
             bool sound = false;
-#ifdef SABER_SOUND_ON
-            sound = sfx.playSound(SFX_IMPACT, SFX_GREATER_OR_EQUAL);
-#endif
+            #ifdef SABER_SOUND_ON
+                sound = sfx.playSound(SFX_IMPACT, SFX_GREATER_OR_EQUAL);
+            #endif
 
             if (sound) {
                 Log.p("Impact. g=").p(sqrt(g2)).eol();
@@ -581,9 +581,9 @@ void loop() {
         }
         else if ( g2 >= motion * motion) {
             bool sound = false;
-#ifdef SABER_SOUND_ON
-            sound = sfx.playSound(SFX_MOTION, SFX_GREATER);
-#endif
+            #ifdef SABER_SOUND_ON
+                sound = sfx.playSound(SFX_MOTION, SFX_GREATER);
+            #endif
             if (sound) {
                 Log.p("Motion. g=").p(sqrt(g2)).eol();
             }
@@ -595,9 +595,9 @@ void loop() {
 
     processBladeState();
     tester.process();
-#ifdef SABER_SOUND_ON
-    sfx.process();
-#endif
+    #ifdef SABER_SOUND_ON
+        sfx.process();
+    #endif
     tester.process();
 
     if (vbatTimer.tick()) {
@@ -606,12 +606,12 @@ void loop() {
     }
 
     if (gforceDataTimer.tick()) {
-#ifdef SABER_DISPLAY
-        maxGForce2 = constrain(maxGForce2, 0.1, 16);
-        static const float MULT = 256.0f / GFORCE_RANGE;  // g=1 translates to uint8 64
-        const uint8_t gForce = constrain(sqrtf(maxGForce2) * MULT, 0, 255);
-        sketcher.Push(gForce);
-#endif
+        #ifdef SABER_DISPLAY
+            maxGForce2 = constrain(maxGForce2, 0.1, 16);
+            static const float MULT = 256.0f / GFORCE_RANGE;  // g=1 translates to uint8 64
+            const uint8_t gForce = constrain(sqrtf(maxGForce2) * MULT, 0, 255);
+            sketcher.Push(gForce);
+        #endif
         maxGForce2 = 0;
     }
 
@@ -628,33 +628,33 @@ void loop() {
         int sketcherMode = Sketcher::BLADE_ON_MODE;
         (void)sketcherMode; // If no display, won't be used, but don't need a warning.
 
-#ifdef SABER_TWO_BUTTON
-        if (bladeState.state() == BLADE_OFF) {
-            sketcherMode = Sketcher::REST_MODE;
-        }
-#else
-        if (bladeState.state() == BLADE_OFF) {
-            switch (buttonMode.mode()) {
-            case BUTTON_MODE_PALETTE:
-                sketcherMode = Sketcher::PALETTE_MODE;
-                break;
-            case BUTTON_MODE_VOLUME:
-                sketcherMode = Sketcher::VOLUME_MODE;
-                break;
-            default:
+        #ifdef SABER_TWO_BUTTON
+            if (bladeState.state() == BLADE_OFF) {
                 sketcherMode = Sketcher::REST_MODE;
-                break;
             }
-        }
-#endif
-#ifdef SABER_DISPLAY
-        sketcher.Draw(&renderer, displayTimer.period(), sketcherMode, &uiRenderData);
-        display.display(oledBuffer);
-#endif
-#ifdef SABER_LEDS
-        dotstarUI.Draw(leds, sketcherMode, &uiRenderData);
-        dotstar.display();
-#endif
+        #else
+            if (bladeState.state() == BLADE_OFF) {
+                switch (buttonMode.mode()) {
+                case BUTTON_MODE_PALETTE:
+                    sketcherMode = Sketcher::PALETTE_MODE;
+                    break;
+                case BUTTON_MODE_VOLUME:
+                    sketcherMode = Sketcher::VOLUME_MODE;
+                    break;
+                default:
+                    sketcherMode = Sketcher::REST_MODE;
+                    break;
+                }
+            }
+        #endif
+        #ifdef SABER_DISPLAY
+            sketcher.Draw(&renderer, displayTimer.period(), sketcherMode, &uiRenderData);
+            display.display(oledBuffer);
+        #endif
+        #ifdef SABER_LEDS
+            dotstarUI.Draw(leds, sketcherMode, &uiRenderData);
+            dotstar.display();
+        #endif
     }
 
 /*
@@ -676,12 +676,12 @@ void loop() {
 }
 
 int32_t readVbat() {
-#ifdef SABER_VOLTMETER
-    int32_t analog = analogRead(PIN_VMETER);
-    int32_t mV = analog * UVOLT_MULT / int32_t(1000);
-    return mV;
-#else
-    return NOMINAL_VOLTAGE;
-#endif
+    #ifdef SABER_VOLTMETER
+        int32_t analog = analogRead(PIN_VMETER);
+        int32_t mV = analog * UVOLT_MULT / int32_t(1000);
+        return mV;
+    #else
+        return NOMINAL_VOLTAGE;
+    #endif
 }
 
