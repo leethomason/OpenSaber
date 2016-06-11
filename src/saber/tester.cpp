@@ -68,6 +68,10 @@ class IgniteRetractTest : public Test
 			uint32_t delayTime = tester->longTest() ? 5000 : AUDIO_CHECKED_TIME;
 			tester->delayedPress(0, delayTime, HOLD_TIME);
 		}
+		else if (strEqual(event, "[unlocked]")) {
+			Log.p("unlocked").eol();
+			tester->delayedPress(0, 200, 100);
+		}
 		else if (strEqual(event, "[BLADE_RETRACT]")) {
 			TEST_ORDER(2);
 			tester->checkAudio("retract", 500, 2000);
@@ -124,6 +128,9 @@ public:
 				tester->delayedPress(0, AUDIO_CHECKED_TIME, HOLD_TIME);
 			}
 		}		
+		else if (strEqual(event, "[unlocked]")) {
+			tester->delayedPress(0, 100, 100);
+		}
 		else if (strEqual(event, "[BLADE_RETRACT]")) {
 			tester->checkAudio("retract", 500, 2000);
 		}
@@ -174,6 +181,9 @@ public:
 			//TEST_EQUAL(false, equal);
 			tester->delayedPress(POWER_BUTTON, 500, HOLD_TIME);
 		}
+		else if (strEqual(event, "[unlocked]")) {
+			tester->delayedPress(0, 100, 100);
+		}
 		else if (strEqual(event, "[BLADE_OFF]")) {
 			result = TEST_SUCCESS;
 		}		
@@ -202,6 +212,9 @@ public:
 		}
 		else if (strEqual(event, "[BLADE_FLASH]")) {
 			nFlash++;
+		}
+		else if (strEqual(event, "[unlocked]")) {
+			tester->delayedPress(0, 100, 100);
 		}
 		else if (strEqual(event, "[BLADE_OFF]")) {
 			TEST_RANGE(3, 40, nFlash);
@@ -280,7 +293,10 @@ public:
 			tester->delayedPress(0, AUDIO_CHECKED_TIME, HOLD_TIME);
 		}
 
-		if (strEqual(event, "[BLADE_ON]")) {
+		if (strEqual(event, "[unlocked]")) {
+			tester->delayedPress(0, 100, 100);
+		}
+		else if (strEqual(event, "[BLADE_ON]")) {
 			bladeOn = true;
 		}
 		else if (strEqual(event, "[BLADE_OFF]")) {

@@ -65,6 +65,12 @@ uint32_t reflashTime    = 0;
 bool     flashOnClash   = false;
 float    maxGForce2     = 0.0f;
 
+#ifdef SABER_SOUND_ON
+// First things first: disable that audio to avoid clicking.
+AudioPlayer audioPlayer;
+SFX sfx(&audioPlayer);
+#endif
+
 BladeState  bladeState;
 ButtonCB    buttonA(PIN_SWITCH_A, Button::PULL_UP);
 LEDManager  ledA(PIN_LED_A, false);
@@ -102,10 +108,6 @@ OLED_SSD1306 display(PIN_OLED_DC, PIN_OLED_RESET, PIN_OLED_CS);
 Sketcher sketcher;
 Renderer renderer;
 #endif
-#ifdef SABER_SOUND_ON
-AudioPlayer audioPlayer;
-SFX sfx(&audioPlayer);
-#endif
 
 CMDParser cmdParser(&saberDB);
 Blade blade;
@@ -114,27 +116,28 @@ Timer gforceDataTimer(110);
 File logFile;
 
 Tester tester;
+uint32_t unlocked = 0;
 
 void setupSD(int logCount)
 {
     SPI.setMOSI(PIN_SABER_MOSI);
     SPI.setSCK(PIN_SABER_CLOCK);
-#ifdef SABER_SOUND_ON
-    if (!(SD.begin(PIN_SDCARD_CS))) {
-        // stop here, but print a message repetitively
-        while (1) {
-            Serial.println("Unable to access the SD card");
-            delay(500);
+    #ifdef SABER_SOUND_ON
+        if (!(SD.begin(PIN_SDCARD_CS))) {
+            // stop here, but print a message repetitively
+            while (1) {
+                Serial.println("Unable to access the SD card");
+                delay(500);
+            }
         }
-    }
-    SD.mkdir("logs");
-    char path[] = "logs/log00.txt";
-    path[8] = ((logCount / 10) % 10) + '0';
-    path[9] = (logCount % 10) + '0';
-    logFile = SD.open(path, FILE_WRITE);
-    logFile.print("Log open. Instance=");
-    logFile.println(logCount);
-#endif
+        SD.mkdir("logs");
+        char path[] = "logs/log00.txt";
+        path[8] = ((logCount / 10) % 10) + '0';
+        path[9] = (logCount % 10) + '0';
+        logFile = SD.open(path, FILE_WRITE);
+        logFile.print("Log open. Instance=");
+        logFile.println(logCount);
+    #endif
 }
 
 void setup() {
@@ -288,9 +291,19 @@ void syncToDB()
     }
 }
 
-void buttonAReleaseHandler(const Button&)
+void buttonAReleaseHandler(const Button& b)
 {
     ledA.blink(0, 0);
+    #ifdef SABER_LOCK
+        if (bladeState.bladeOn()) {
+            uint32_t holdTime = millis() - b.pressedTime();
+            Log.p("holdTime: ").p(holdTime).eol();
+            if (holdTime >= b.holdThreshold()) {
+                unlocked = millis();
+                Log.event("[unlocked]");
+            }
+        }
+    #endif
 }
 
 #ifdef SABER_TWO_BUTTON
@@ -311,9 +324,20 @@ void buttonAClickHandler(const Button&)
         syncToDB();
     }
     else {
-        int32_t vbat = averagePower.power();
-        Log.event("[Vbat]", vbat);
-        ledA.blink(vbatToPowerLevel(vbat), INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
+        #ifdef SABER_LOCK
+            if (millis() - unlocked <= Button::DEFAULT_HOLD_TIME) {
+                bladeState.change(BLADE_RETRACT);
+                #ifdef SABER_SOUND_ON
+                    sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
+                #endif
+            }
+            else 
+        #endif
+            {
+                int32_t vbat = averagePower.power();
+                Log.event("[Vbat]", vbat);
+                ledA.blink(vbatToPowerLevel(vbat), INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
+            }
     }
 }
 
@@ -323,13 +347,17 @@ void buttonAHoldHandler(const Button&) {
     if (bladeState.state() == BLADE_OFF) {
         bladeState.change(BLADE_IGNITE);
         #ifdef SABER_SOUND_ON
-          sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
+            sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
         #endif
     }
     else if (bladeState.state() != BLADE_RETRACT) {
-        bladeState.change(BLADE_RETRACT);
-        #ifdef SABER_SOUND_ON
-          sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
+        #ifdef SABER_LOCK
+            // see buttonAReleaseHandler
+        #else
+            bladeState.change(BLADE_RETRACT);
+            #ifdef SABER_SOUND_ON
+                sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
+            #endif
         #endif
     }
 }
@@ -344,7 +372,7 @@ void buttonBHoldHandler(const Button&) {
         if (!paletteChange) {
             bladeState.change(BLADE_FLASH);
             #ifdef SABER_SOUND_ON
-              sfx.playSound(SFX_USER_HOLD, SFX_OVERRIDE);
+                sfx.playSound(SFX_USER_HOLD, SFX_OVERRIDE);
             #endif
             flashOnClash = true;
             reflashTime = calcReflashTime();
@@ -509,10 +537,10 @@ void serialEvent() {
     while (Serial.available()) {
         int c = Serial.read();
         if (c == '\n') {
-#if 0
+            #if 0
             Serial.print("event ");
             Serial.println(cmdParser.getBuffer());
-#endif
+            #endif
             processed = cmdParser.processCMD(color);
         }
         else {
@@ -657,22 +685,22 @@ void loop() {
         #endif
     }
 
-/*
-#if SABER_CRYSTAL == SABER_RGB_CRYSTAL
-    const uint8_t* rgb = saberDB.bladeColor();
-    analogWrite(PIN_CRYSTAL_R, rgb[0]);
-    analogWrite(PIN_CRYSTAL_G, rgb[1]);
-    analogWrite(PIN_CRYSTAL_B, rgb[2]);
-#elif SABER_CRYSTAL == SABER_DOTSTAR
-    {
+    /*
+    #if SABER_CRYSTAL == SABER_RGB_CRYSTAL
         const uint8_t* rgb = saberDB.bladeColor();
-        leds[SABER_DOTSTAR_CRYSTAL].red   = rgb[0];
-        leds[SABER_DOTSTAR_CRYSTAL].green = rgb[1];
-        leds[SABER_DOTSTAR_CRYSTAL].blue  = rgb[2];
-        dotstar.display();
-    }
-#endif
-*/
+        analogWrite(PIN_CRYSTAL_R, rgb[0]);
+        analogWrite(PIN_CRYSTAL_G, rgb[1]);
+        analogWrite(PIN_CRYSTAL_B, rgb[2]);
+    #elif SABER_CRYSTAL == SABER_DOTSTAR
+        {
+            const uint8_t* rgb = saberDB.bladeColor();
+            leds[SABER_DOTSTAR_CRYSTAL].red   = rgb[0];
+            leds[SABER_DOTSTAR_CRYSTAL].green = rgb[1];
+            leds[SABER_DOTSTAR_CRYSTAL].blue  = rgb[2];
+            dotstar.display();
+        }
+    #endif
+    */
 }
 
 int32_t readVbat() {
