@@ -27,6 +27,7 @@
 #include "blade.h"
 #include "SFX.h"
 #include "Tester.h"
+#include "saberUtil.h"
 
 CMDParser::CMDParser(SaberDB* _db) {
     database = _db;
@@ -108,6 +109,7 @@ bool CMDParser::processCMD(uint8_t* c) {
     static const char PLAY[]    = "play";
     static const char LOG[]     = "log";
     static const char TEST[]    = "test";
+    static const char ACCEL[]   = "accel";
 
     static const int DELAY = 20;  // don't saturate the serial line. Too much for SoftwareSerial.
 
@@ -241,6 +243,15 @@ bool CMDParser::processCMD(uint8_t* c) {
             entry.close();
         }
         root.close();
+    }
+    else if (action == ACCEL) {
+        float ax, ay, az, g2, g2n;
+        Accelerometer::instance().read(&ax, &ay, &az, &g2, &g2n);
+        Serial.print( "x="); Serial.print(ax);
+        Serial.print(" y="); Serial.print(ay);
+        Serial.print(" z="); Serial.print(az);
+        Serial.print(" g="); Serial.print(sqrt(g2));
+        Serial.print(" gN="); Serial.print(sqrt(g2n));
     }
     else if (action == PLAY) {
         /*

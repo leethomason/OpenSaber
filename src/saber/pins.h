@@ -28,7 +28,7 @@ SOFTWARE.
 // --- Configuration ---
 // Note: Serial connection should be set to 19200 baud with a newline after commands.
 
-#define SERIAL_DEBUG 1
+#define SERIAL_DEBUG 0
 
 #define SABER_MODEL_TEST			0
 #define SABER_MODEL_GECKO			1	// PCB, Teensy 3, external amp and accel
@@ -56,9 +56,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 	static const int32_t UVOLT_MULT = 6680;	// FIXME
 	#define ID_STR "Gecko (Sentris Body) RGB Luxeon"
-	#define BLADE_AXIS 1					// FIXME
-	#define NORMAL_AXIS_A 0
-	#define NORMAL_AXIS_B 2
 
 	static const int32_t RED_VF   = 2900;   // milli-volts
 	static const int32_t RED_I    = 350;    // milli-amps
@@ -82,9 +79,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 	static const int32_t UVOLT_MULT = 6680; // FIXME
 	#define ID_STR "Black RGB Cree XPE2"
-	#define BLADE_AXIS 1					// FIXME
-	#define NORMAL_AXIS_A 0
-	#define NORMAL_AXIS_B 2
 
 	static const int32_t RED_VF   = 2100;   
 	static const int32_t RED_I    = 350;    

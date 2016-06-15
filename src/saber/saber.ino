@@ -92,11 +92,7 @@ DotStar dotstar(PIN_DOTSTAR_EN);
 DotStarUI dotstarUI;
 #endif
 
-#if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH
-Adafruit_LIS3DH accel;
-#elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
-NXPMotionSense accel;
-#endif
+Accelerometer accel;
 
 Timer displayTimer(100);
 #ifdef SABER_DISPLAY
@@ -162,25 +158,7 @@ void setup() {
 
     Log.p("setup()").eol();
 
-    #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH
-        Log.p("LIS3DH Accelerometer starting.").eol();
-        if (!accel.begin()) {
-            Log.p("Accelerometer ERROR.").eol();
-        }
-        else {
-            Log.p("Accelerometer open.").eol();
-            accel.setRange(LIS3DH_RANGE_4_G);
-            accel.setDataRate(LIS3DH_DATARATE_100_HZ);
-        }
-    #elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
-        Log.p("NXP Accelerometer starting.").eol();
-        if (accel.begin()) {
-            Log.p("Accelerometer open.").eol();
-        }
-        else {
-            Log.p("Accelerometer ERROR.").eol();
-        }
-    #endif
+    accel.begin();
 
     #ifdef SABER_VOLTMETER
         analogReference(INTERNAL);  // 1.1 volts
@@ -567,30 +545,8 @@ void loop() {
     if (bladeState.state() == BLADE_ON) {
         float g2Normal = 1.0f;
         float g2 = 1.0f;
-        #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH
-            accel.read();
-
-            STATIC_ASSERT(BLADE_AXIS != NORMAL_AXIS_A);
-            STATIC_ASSERT(BLADE_AXIS != NORMAL_AXIS_B);
-
-            float bladeAxis = (&accel.x_g)[BLADE_AXIS];
-            float normalA = (&accel.x_g)[NORMAL_AXIS_A];
-            float normalB = (&accel.x_g)[NORMAL_AXIS_B];
-
-            g2Normal = normalA * normalA + normalB * normalB;
-            g2 = g2Normal + bladeAxis * bladeAxis;
-
-        #elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
-            // Using the prop shield: x is in the blade direction,
-            // y & z are normal.
-
-            float ax=0, ay=0, az=0, gx=0, gy=0, gz=0;
-            accel.readMotionSensor(ax, ay, az, gx, gy, gz);
-            g2Normal = ay * ay + az * az;
-            g2 = g2Normal + ax * ax;
-            //Log.p("g2Normal ").p(g2Normal).p(" g2 ").p(g2).eol();
-            //delay(50);
-        #endif
+        float ax=0, ay=0, az=0;
+        accel.read(&ax, &ay, &az, &g2, &g2Normal);
 
         maxGForce2 = max(maxGForce2, g2);
         float motion = saberDB.motion();

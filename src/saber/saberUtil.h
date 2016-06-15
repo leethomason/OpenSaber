@@ -2,6 +2,7 @@
 #define SABER_UTIL_INCLUDED
 
 #include <stdint.h>
+#include "pins.h"
 
 enum {
     BLADE_OFF,
@@ -75,6 +76,19 @@ public:
 private:
     uint32_t m_power;
     uint32_t m_sample[NUM_SAMPLES];
+};
+
+class Accelerometer
+{
+public:
+    Accelerometer();
+    static Accelerometer& instance() { return *_instance; }
+
+    void begin();
+    void read(float* ax, float* ay, float* az, float* g2, float* g2normal);
+
+private:
+    static Accelerometer* _instance;
 };
 
 
