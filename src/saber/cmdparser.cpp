@@ -251,7 +251,7 @@ bool CMDParser::processCMD(uint8_t* c) {
         Serial.print(" y="); Serial.print(ay);
         Serial.print(" z="); Serial.print(az);
         Serial.print(" g="); Serial.print(sqrt(g2));
-        Serial.print(" gN="); Serial.print(sqrt(g2n));
+        Serial.print(" gN="); Serial.println(sqrt(g2n));
     }
     else if (action == PLAY) {
         /*
