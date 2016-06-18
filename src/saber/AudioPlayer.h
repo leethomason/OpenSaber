@@ -5,7 +5,7 @@
 
 class AudioPlayer
 {
-  public:
+public:
     AudioPlayer();
 
     void init();
@@ -16,12 +16,16 @@ class AudioPlayer
     uint32_t lengthMillis() const;  // only valid if header read; else 0.
 
     void mute(bool m);
-    bool isMuted() const { return m_muted; }
+    bool isMuted() const {
+        return m_muted;
+    }
 
     void setVolume(float v);
-    float volume() const { return m_volume; }
+    float volume() const {
+        return m_volume;
+    }
 
-  private:
+private:
     void setShutdown();
 
     bool     m_muted;
