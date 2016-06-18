@@ -11,7 +11,7 @@ intersection() {
                     english_thread(diameter=0.5, length=PORT_LEN * MM_TO_INCHES, threads_per_inch=28, internal=true);
                 }
                 else {
-                    cylinder(h=PORT_LEN, r=D_PORT_SCREW/2, $fn=FACES);
+                    cylinder(h=H_PORT + 1, r=D_PORT_SCREW/2, $fn=FACES);
                 }
             }
         }
