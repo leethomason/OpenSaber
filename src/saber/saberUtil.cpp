@@ -109,17 +109,17 @@ void Accelerometer::read(float* ax, float* ay, float* az, float* g2, float* g2No
         *ax = localAccel.x_g;
         *ay = localAccel.y_g;
         *az = localAccel.z_g;
-        *g2Normal = (*ax)*(*ax) +(*az)*(*az);
+        *g2Normal = (*ax)*(*ax) + (*az)*(*az);
         *g2 = *g2Normal + (*ay)*(*ay);
 
     #elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
         // Using the prop shield: x is in the blade direction,
         // y & z are normal.
 
-        float agx=0, gy=0, gz=0;
+        float gx=0, gy=0, gz=0;
         localAccel.readMotionSensor(*ax, *ay, *az, gx, gy, gz);
-        g2Normal = ay * ay + az * az;
-        g2 = g2Normal + ax * ax;
+        *g2Normal = (*ay) * (*ay) + (*az) * (*az);
+        *g2 = *g2Normal + (*ax) * (*ax);
     #else
         *ax = 0;
         *ay = 0;

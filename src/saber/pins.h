@@ -35,7 +35,7 @@ SOFTWARE.
 #define SABER_MODEL_BLACK			2	// PCB, Prop Shield, Teensy 3, Dotstar UI
 #define SABER_MODEL_SHOCK			3	// PCB, Prop Shield, Teensy 3, OLED
 
-#define SABER_MODEL 				SABER_MODEL_GECKO
+#define SABER_MODEL 				SABER_MODEL_BLACK
 
 static const int EEPROM_SIZE = 512;
 static const int32_t NOMINAL_VOLTAGE 	= 3700;
