@@ -46,6 +46,8 @@ based off the Teensy 3.2 microcontroller. New in v2:
 
 ![Image of Saber](img/Gecko3.jpg)
 
+## Open Saber Designs
+
 ## Resources
 
 I am not affiliated with any of these, but have found them all useful.
