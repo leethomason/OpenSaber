@@ -9,3 +9,16 @@ module tube(p_h, rOuter, rInner) {
 		}
 	}
 }
+
+/*
+needs a 2016 version.
+module tubeArc(deg, p_h, rOuter, rInner) {
+	//rotate([90,0,0]) {
+		rotate_extrude(angle=30) {
+			translate([rInner,0,0]) {
+				square(size=[rOuter-rInner, p_h], center=false);
+			}
+		}
+	//}
+}
+*/
