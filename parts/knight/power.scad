@@ -2,8 +2,11 @@ use <../threads.scad>
 use <../shapes.scad>
 include <dim.scad>
 
-EPS = 0.1;
-OFFSET = R_AFT - H_PORT;
+PORT_SCREW_PAD      = 3;
+PORT_LEN            = D_PORT_SCREW + PORT_SCREW_PAD * 2;
+H_PORT              = 6;
+EPS                 = 0.1;
+OFFSET              = R_AFT - H_PORT;
 
 difference() {
     intersection() {
