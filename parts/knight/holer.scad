@@ -4,10 +4,12 @@ use <../shapes.scad>
 INCHES_TO_MM = 25.4;
 MM_TO_INCHES = 1/ INCHES_TO_MM;
 
-D_SABER = 1.3 * INCHES_TO_MM;
-D_OUTER = D_SABER + 20;
-D_TUBE = 5;
-H = 30;
+D_SABER = 1.3 * INCHES_TO_MM;		// FIXME
+D_OUTER = D_SABER + 20;				// FIXME
+D_TUBE = 5;							// FIXME
+D_BIT  = 4;							// FIXME
+H = 30;						
+H_SLEEVE = 3;						// FIXME
 
 difference() 
 {
@@ -16,7 +18,10 @@ difference()
 		rotate([0,90,0]) {
 			for(r=[0:3]) {
 				rotate([r*20,0,0]) {
-					cylinder(h=H, r=D_TUBE/2,$fn=28);
+					translate([0,0,D_SABER/2 + H_SLEEVE]) {
+						cylinder(h=H, r=D_TUBE/2,$fn=28);
+					}
+					cylinder(h=H, r=D_BIT/2, $fn=28);
 				}
 			}
 		}
