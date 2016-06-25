@@ -8,7 +8,7 @@ D_SABER = 1.3 * INCHES_TO_MM;		// FIXME
 D_OUTER = D_SABER + 20;				// FIXME
 D_TUBE = 5;							// FIXME
 D_BIT  = 4;							// FIXME
-H = 30;						
+H = 30;								// FIXME
 H_SLEEVE = 3;						// FIXME
 
 difference() 
