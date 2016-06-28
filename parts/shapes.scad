@@ -1,4 +1,4 @@
-FACES = 180;
+	FACES = 180;
 EPSILON = 0.1;
 
 module tube(p_h, rOuter, rInner) {
@@ -11,7 +11,7 @@ module tube(p_h, rOuter, rInner) {
 }
 
 /*
-needs a 2016 version.
+needs a 2016 version.	
 module tubeArc(deg, p_h, rOuter, rInner) {
 	//rotate([90,0,0]) {
 		rotate_extrude(angle=30) {
