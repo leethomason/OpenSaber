@@ -11,3 +11,4 @@ D_PORT_SCREW		= 0.5 * INCHES_TO_MM;
 R_PORT_SCREW 		= D_PORT_SCREW / 2;
 
 FACES 				= 90;
+GAP					= 0.300;
