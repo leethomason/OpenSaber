@@ -29,7 +29,7 @@ union() {
     }
 }
 
-color("green"){
+*color("green"){
     tube(H_BARREL_LOWER + H_BARREL_BODY, D_THREAD / 2, (D_THREAD - T_WALL)/2);
     translate([0,0,H_BARREL_LOWER + H_BARREL_BODY]) {
         tube(H_BARREL_UPPER, (T_OUTER_LIP + D_THREAD) / 2, (D_THREAD - T_WALL - T_LIP)/2);

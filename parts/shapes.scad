@@ -1,4 +1,4 @@
-	FACES = 180;
+FACES = 180;
 EPSILON = 0.1;
 
 module tube(p_h, rOuter, rInner) {
@@ -7,6 +7,12 @@ module tube(p_h, rOuter, rInner) {
 		translate([0,0,-EPSILON]) {
 			cylinder(h=p_h + EPSILON*2, r=rInner, $fn=FACES);
 		}
+	}
+}
+
+module shelf(_r0, _h, _r1) {
+	rotate_extrude($fn=FACES) {
+		polygon([[_r0, 0], [_r1, _h], [_r0, _h]]);
 	}
 }
 
