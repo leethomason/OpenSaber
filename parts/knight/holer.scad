@@ -5,7 +5,7 @@ include <dim.scad>
 //INCHES_TO_MM = 25.4;
 //MM_TO_INCHES = 1/ INCHES_TO_MM;
 
-D_OUTER = D_SABER_OUTER + 10;         //+ 20;
+D_OUTER = D_SABER_OUTER + 20;       //
 D_TUBE = 5;							// FIXME
 D_BIT  = 4;							// FIXME
 H = 10;
