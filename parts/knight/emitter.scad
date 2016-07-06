@@ -7,9 +7,12 @@ MM_TO_INCHES = 1 / 25.4;
 FACES = 180;
 
 H_HEAT_SINK_THREAD = 0.37 * INCHES_TO_MM;
-H_VOL			   = 18;
+H_VOL			   = 17;
+X_SWITCH = 9.6;
+Z_SWITCH = 8;
+T_HOLDER = 3;
 
-RENDER_THREADS = false;
+RENDER_THREADS = true;
 
 // LED / button positive (above axis)
 // thread negative (below axis)
@@ -59,29 +62,7 @@ difference() {
 	
 }
 
-X_SWITCH = 9.6;
-Z_SWITCH = 8;
-
-// Switch holder
-/*
-translate([-X_SWITCH,0,18])
-{
-	rotate([0, -90, 0]) {
-   		
-        translate([0, 0, 0]) {
-			switch(false);
-		}
-        difference() 
-		{
-			cylinder(r=15/2, h=Z_SWITCH);
-			cylinder(r=12/2, h=Z_SWITCH);
-		}
-	}
-}
-*/
-
 // Switch holder v2
-T_HOLDER = 3;
 difference() 
 {
     intersection() 
@@ -93,16 +74,39 @@ difference()
     }    
     translate([-X_SWITCH, 0, H_HEAT_SINK_THREAD + Z_SWITCH]) {
         rotate([0, 90, 0]) {
-            if (RENDER_THREADS) {
-                metric_thread(diameter=12.0, length=T_HOLDER + 0.1, pitch=0.75, inner=true);
-            }
-            else {
-                cylinder(r=6, h=T_HOLDER + 0.1);
-            }
+            // Threads included, but can use bolt + nut.
+//            if (RENDER_THREADS) {
+//                metric_thread(diameter=12.0, length=T_HOLDER + 0.1, pitch=0.75, inner=true);
+  //          }
+  //          else {
+                cylinder(r=12/2, h=T_HOLDER + 0.1, $fn=FACES);
+  //          }
         }
     }
 }
 
+// Base support
+intersection() 
+{
+    emitterVolume();
+    if (false) {
+        // use bottom
+        translate([INCHES_TO_MM / 2 - T_HOLDER, -10, H_HEAT_SINK_THREAD]) {
+            cube([T_HOLDER, 20, 40]);
+        }
+    }
+    else {
+        // use sides
+        translate([-10, INCHES_TO_MM / 2 - T_HOLDER, H_HEAT_SINK_THREAD]) {
+            cube([14, T_HOLDER, 40]);
+        }
+        translate([-10, -INCHES_TO_MM / 2, H_HEAT_SINK_THREAD]) {
+            cube([14, T_HOLDER, 40]);
+        }        
+    }
+}
+
+// render switch
 *translate([-X_SWITCH, 0, H_HEAT_SINK_THREAD + Z_SWITCH]) {
     rotate([0, -90, 0]) {
         switch(false);
