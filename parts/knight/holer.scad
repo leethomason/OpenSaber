@@ -6,24 +6,25 @@ include <dim.scad>
 //MM_TO_INCHES = 1/ INCHES_TO_MM;
 
 D_OUTER = D_SABER_OUTER + 20;       //
-D_TUBE = 5;							// FIXME
-D_BIT  = 4;							// FIXME
+D_TUBE = 6;							// FIXME
+D_BIT  = 5;							// FIXME
 H = 10;
-H_SLEEVE = 3;						// FIXME
+H_SLEEVE = 2;						// FIXME
 THETA = 73.5;
 
 module puzzle() {
 	translate([0, 0, H/2]) {
 		rotate([90, 0, 90]) {
 			linear_extrude(height=30) {
-				W = 20;
+				W = 22;
 				polygon([[-W,0], [W,0], [W-4,10], [-W+4,10]]);
 			}
 		}
 	}
 }
 
-difference()
+//difference()
+intersection()
 {
 	difference() 
 	{
