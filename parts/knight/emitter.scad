@@ -7,7 +7,7 @@ MM_TO_INCHES = 1 / 25.4;
 FACES = 180;
 
 H_HEAT_SINK_THREAD = 0.37 * INCHES_TO_MM;
-H_VOL			   = 17;
+H_VOL			   = 16;
 X_SWITCH = 9.6;
 Z_SWITCH = 8;
 T_HOLDER = 3;
@@ -31,7 +31,7 @@ module switch(drawThread)
 				metric_thread(diameter=12.0, length=H_BODY, pitch=0.75);
 			}
 			else {
-				cylinder(h = H_BODY, r = 6.0);
+                cylinder(h = H_BODY, r = 6.0);
 			}
 		}
 	}
@@ -53,11 +53,17 @@ module emitterVolume()
 // LED holder
 difference() {
 	cylinder(h=H_HEAT_SINK_THREAD, r = INCHES_TO_MM / 2, $fn=FACES);
-	if (RENDER_THREADS) {
-		english_thread(diameter=0.5, length=H_HEAT_SINK_THREAD * MM_TO_INCHES, threads_per_inch=14, internal=true);
+	if (false) { //RENDER_THREADS) {
+        // 1/2 inch NPT 14 - grr. Not what I expected:
+        // https://en.wikipedia.org/wiki/National_pipe_thread
+        // better: https://mdmetric.com/tech/thddat19.htm
+        // nominal: 0.792
+		english_thread(diameter=0.8, length=H_HEAT_SINK_THREAD * MM_TO_INCHES, threads_per_inch=14, internal=true);
 	}
 	else {
-		cylinder(h=H_HEAT_SINK_THREAD, r = 0.5 * INCHES_TO_MM / 2);
+        translate([0, 0, -0.1]) {
+            cylinder(h=H_HEAT_SINK_THREAD + 0.2, r = 0.8 * INCHES_TO_MM / 2, $fn=FACES);
+        }
 	}
 	
 }
@@ -69,17 +75,24 @@ difference()
     {
         emitterVolume();
         translate([-X_SWITCH, -20, H_HEAT_SINK_THREAD]) {
-            cube([T_HOLDER, 40, 40]);
+            difference() {
+                cube([T_HOLDER, 40, 40]);
+                *translate([0, 0, -0.5]) {
+                    rotate([0, 45, 0]) {
+                        cube([T_HOLDER, 40, 40]);
+                    }
+                }
+            }
         }
     }    
-    translate([-X_SWITCH, 0, H_HEAT_SINK_THREAD + Z_SWITCH]) {
+    translate([-X_SWITCH - 0.1, 0, H_HEAT_SINK_THREAD + Z_SWITCH]) {
         rotate([0, 90, 0]) {
             // Threads included, but can use bolt + nut.
 //            if (RENDER_THREADS) {
 //                metric_thread(diameter=12.0, length=T_HOLDER + 0.1, pitch=0.75, inner=true);
   //          }
   //          else {
-                cylinder(r=12/2, h=T_HOLDER + 0.1, $fn=FACES);
+                cylinder(r=12/2, h=T_HOLDER + 0.2, $fn=FACES);
   //          }
         }
     }
