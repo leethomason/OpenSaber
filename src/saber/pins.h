@@ -77,20 +77,20 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_VOLTMETER
 	#define SABER_LEDS
 
-	static const int32_t UVOLT_MULT = 6680; // FIXME
-	#define ID_STR "Black RGB Cree XPE2"
+	static const int32_t UVOLT_MULT = 6680;
+	#define ID_STR "Black Knight RGB Cree XPE2"
 
 	static const int32_t RED_VF   = 2100;   
 	static const int32_t RED_I    = 350;    
-	static const int32_t RED_R    = 2400;   // FIXME
+	static const int32_t RED_R    = 4700;
 
 	static const int32_t GREEN_VF = 3400;
 	static const int32_t GREEN_I  = 350;
-	static const int32_t GREEN_R  = 1800;	// FIXME
+	static const int32_t GREEN_R  = 1500;
 
 	static const int32_t BLUE_VF  = 3100;
 	static const int32_t BLUE_I   = 350;
-	static const int32_t BLUE_R   = 1800;	// FIXME
+	static const int32_t BLUE_R   = 1000;
 
 #elif SABER_MODEL == SABER_MODEL_SHOCK
 	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
