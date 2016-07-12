@@ -46,7 +46,7 @@ based off the Teensy 3.2 microcontroller. New in v2:
 
 ![Image of Saber](img/Gecko3.jpg)
 
-## Other Open Saber Projects
+## Alternate Approaches
 
 - http://www.rocket-props.com/the-open-source-saber-project uses some 
   interesting ideas, including SMD componends and using buck-pucks.
@@ -64,7 +64,7 @@ I am not affiliated with any of these, but have found them all useful.
 - Genesis Custom Sabers Shop Secrets: 
   https://www.youtube.com/playlist?list=PLBZx-DMVqx7druzwlBkXoZZhd30_0LXNS
   Lots of good info on wiring and techniques.
-- "So you want to build a lED saber?" Different design than Open Saber,
+- "So you want to build a LED saber?" Different design than Open Saber,
   but still a nice overview: 
   http://forums.thecustomsabershop.com/showthread.php?2025-Step-2-I-have-decided-to-make-a-LED-saber
 
@@ -160,7 +160,7 @@ jack is such that:
 3. the circuit is live when nothing is plugged in
 
 This is useful, and convention for almost all saber designs, but a little 
-wierd. For it to work (safely) for case #1, the grounded sleeve of the recharge 
+weird. For it to work (safely) for case #1, the grounded sleeve of the recharge 
 port should be isolated from "true ground" and the case of the saber. You need 
 to be careful with a metal port, or use a insulated plastic one. (I went with
 an insulated plastic one.)
