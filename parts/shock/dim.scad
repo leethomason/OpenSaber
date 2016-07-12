@@ -6,8 +6,8 @@ VERSION_MINOR = 0;
 INCHES_TO_MM = 25.4;
 MM_TO_INCHES = 1 / INCHES_TO_MM;
 
-D_RING      		= 1.311 * INCHES_TO_MM;    // correct
-D_WALL      		= 1.250 * INCHES_TO_MM;    // FIXME too small was 1.225
+//D_RING      		= 1.311 * INCHES_TO_MM;
+D_WALL      		= 1.270 * INCHES_TO_MM;    // 1.225 -> 1.250
 
 D_EMITTER_LED       = 0.75 * INCHES_TO_MM;     // correct
 D_EMITTER_THREAD    = 1.05 * INCHES_TO_MM;     // VERIY
