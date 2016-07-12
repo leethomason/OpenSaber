@@ -46,7 +46,11 @@ based off the Teensy 3.2 microcontroller. New in v2:
 
 ![Image of Saber](img/Gecko3.jpg)
 
-## Open Saber Designs
+## Other Open Saber Projects
+
+- http://www.rocket-props.com/the-open-source-saber-project uses some 
+  interesting ideas, including SMD componends and using buck-pucks.
+  Nice approach, very different from this one.
 
 ## Resources
 
