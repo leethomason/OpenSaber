@@ -7,25 +7,19 @@ $fn = 90;
 H_RING = 16;
 T_RING = 2.5;
 
-PIN	   = 2.54;
-H_PIN  = 16;
-H_FEM_PIN_HOLDER = 8;
-T_HOLDER_WALL = 2;
-
 X_MC = 5;
 Y_MC = 2;
-WIDTH_MC = T_HOLDER_WALL * 2 + X_MC * PIN;
-HEIGHT_MC = T_HOLDER_WALL * 2 + Y_MC * PIN;
-OFFSET_MC = 15;
+OFFSET_MC = 10;
 
 X_EMITTER = 4;
 Y_EMITTER = 1;
-WIDTH_EMITTER  = T_HOLDER_WALL * 2 + X_EMITTER * PIN;
-HEIGHT_EMITTER = T_HOLDER_WALL * 2 + Y_EMITTER * PIN;
-OFFSET_EMITTER = 10; 
+OFFSET_EMITTER = 12; 
 
+PIN	   = 2.54;
+H_PIN_HOLDER = 8;
+T_HOLDER_WALL = 2;
 
-module port(xPins, yPins)
+module port(xPins, yPins, drawOuter)
 {
 	INNER_WIDTH  = xPins * PIN;
 	INNER_HEIGHT = yPins * PIN;
@@ -33,19 +27,26 @@ module port(xPins, yPins)
 	OUTER_HEIGHT = INNER_HEIGHT + T_HOLDER_WALL * 2; 
 
 	translate([-OUTER_WIDTH/2, -OUTER_HEIGHT/2, 0]) {
-		difference() {
-			cube(size=[OUTER_WIDTH, OUTER_HEIGHT, H_FEM_PIN_HOLDER]);
-			translate([T_HOLDER_WALL, T_HOLDER_WALL, 0]) {
-				cube(size=[INNER_WIDTH, INNER_HEIGHT, H_FEM_PIN_HOLDER]);
+		if (drawOuter) {
+			difference() {
+				cube(size=[OUTER_WIDTH, OUTER_HEIGHT, H_PIN_HOLDER]);
+				translate([T_HOLDER_WALL, T_HOLDER_WALL, -1]) {
+					cube(size=[INNER_WIDTH, INNER_HEIGHT, H_PIN_HOLDER + 2]);
+				}
 			}
 		}	
+		else {
+			translate([T_HOLDER_WALL, T_HOLDER_WALL, -10]) {
+				cube(size=[INNER_WIDTH, INNER_HEIGHT, H_PIN_HOLDER + 20]);
+			}
+		}
 	}
 }
 
 
-port(4, 2);
+//port(4, 2);
 
-/*
+
 difference() 
 {
 	union() {
@@ -58,25 +59,35 @@ difference()
 			}
 		}
 
-		*intersection() {
+		intersection() {
 			cylinder(h=H_RING, d=D_INNER);
 
-			// Microcontroller port.
-			translate([-WIDTH_MC/2, -OFFSET_MC, H_RING - H_FEM_PINS]) {
-				cube(size=[WIDTH_MC, H_FEM_PINS, H_FEM_PINS]);
+			union() {
+				// Microcontroller port.
+				translate([0, -OFFSET_MC, H_RING - H_PIN_HOLDER]) {
+					port(X_MC, Y_MC, true);
+				}
+				// Emitter port.
+				rotate([0, 0, 90]) {
+					translate([0, -OFFSET_EMITTER, 0]) {
+						port(X_EMITTER, Y_EMITTER, true);
+					}
+				}
 			}	
-			// Emitter port.
-			*translate([OFFSET_EMITTER, -WIDTH_EMITTER/2, 0]) {
-				cube(size=[HEIGHT_EMITTER, WIDTH_EMITTER, H_FEM_PINS]);
-			}
 		}
+
 	}
 
 	// Punch Microcontroller Port
-	*translate([-(X_MC * PIN)/2, -OFFSET_MC + T_HOLDER_WALL, 0]) {
-		cube(size=[X_MC * PIN, Y_MC * PIN, 40]);
-	}	
-
+	translate([0, -OFFSET_MC, H_RING - H_PIN_HOLDER]) {
+		port(X_MC, Y_MC, false);
+	}
+	// Punch emitter port.
+	rotate([0, 0, 90]) {
+		translate([0, -OFFSET_EMITTER, 0]) {
+			port(X_EMITTER, Y_EMITTER, false);
+		}
+	}
 }
 
 *color("green") {
@@ -86,4 +97,3 @@ difference()
 		}
 	}
 }
-*/
