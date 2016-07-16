@@ -6,8 +6,9 @@ VERSION_MINOR = 0;
 INCHES_TO_MM = 25.4;
 MM_TO_INCHES = 1 / INCHES_TO_MM;
 
-//D_RING      		= 1.311 * INCHES_TO_MM;
-D_WALL      		= 1.270 * INCHES_TO_MM;    // 1.225 -> 1.250
+// inner diameter of the lightsaber tube.
+// shock is constant, within tolerances
+D_INNER      		= 32.258;    // 1.225 -> 1.250 -> 1.270
 
 D_EMITTER_LED       = 0.75 * INCHES_TO_MM;     // correct
 D_EMITTER_THREAD    = 1.05 * INCHES_TO_MM;     // VERIY
@@ -27,7 +28,7 @@ W_INNER_DISPLAY		= 0.47 * INCHES_TO_MM;
 H_OUTER_DISPLAY		= 0.08 * INCHES_TO_MM;
 H_INNER_DISPLAY		= 0.14 * INCHES_TO_MM;
 
-D_SWITCH_CUTOUT		= 12.5;
+D_SWITCH			= 12;						// actually 12, by thread.
 H_SWITCH_CUTOUT		= 0.7 * INCHES_TO_MM;
 
 D_POWER_CUTOUT		= 0.5 * INCHES_TO_MM;
