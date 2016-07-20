@@ -6,14 +6,14 @@ $fn = 90;
 
 H_RING = 16;
 T_RING = 2.5;
+R_INNER = D_INNER / 2;
 
 X_MC = 5;
 Y_MC = 2;
-OFFSET_MC = 10;
+OFFSET_MC = 8;
 
 X_EMITTER = 4;
 Y_EMITTER = 1;
-OFFSET_EMITTER = 12; 
 
 PIN	   = 2.54;
 H_PIN_HOLDER = 8;
@@ -44,8 +44,7 @@ module port(xPins, yPins, drawOuter)
 }
 
 
-//port(4, 2);
-
+OFFSET_EMITTER = -PIN + sqrt(R_INNER * R_INNER - PIN * PIN * Y_EMITTER * Y_EMITTER);
 
 difference() 
 {
@@ -57,6 +56,11 @@ difference()
 					cylinder(d=D_SWITCH, h=D_INNER/2 + 1);
 				}
 			}
+            rotate([0, 0, 90]) {
+                translate([-X_EMITTER * PIN / 2, 0, -1]) {
+                    cube([X_EMITTER * PIN, 40, 20]);
+                }                
+            }
 		}
 
 		intersection() {
@@ -68,11 +72,17 @@ difference()
 					port(X_MC, Y_MC, true);
 				}
 				// Emitter port.
-				rotate([0, 0, 90]) {
+				*rotate([0, 0, 90]) {
 					translate([0, -OFFSET_EMITTER, 0]) {
 						port(X_EMITTER, Y_EMITTER, true);
 					}
 				}
+                rotate([0, 0, 90]) {
+                    translate([-20, OFFSET_EMITTER - T_HOLDER_WALL, 0]) {
+                        cube([40, T_HOLDER_WALL, H_PIN_HOLDER]);
+                        
+                    }
+                }                
 			}	
 		}
 
@@ -83,9 +93,9 @@ difference()
 		port(X_MC, Y_MC, false);
 	}
 	// Punch emitter port.
-	rotate([0, 0, 90]) {
-		translate([0, -OFFSET_EMITTER, 0]) {
-			port(X_EMITTER, Y_EMITTER, false);
+	*rotate([0, 0, 90]) {
+		translate([-X_EMITTER * PIN / 2, OFFSET_EMITTER, -1]) {
+			cube([X_EMITTER * PIN, Y_EMITTER * PIN, 20]);
 		}
 	}
 }

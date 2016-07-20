@@ -28,8 +28,7 @@ W_INNER_DISPLAY		= 0.47 * INCHES_TO_MM;
 H_OUTER_DISPLAY		= 0.08 * INCHES_TO_MM;
 H_INNER_DISPLAY		= 0.14 * INCHES_TO_MM;
 
-D_SWITCH			= 12;						// actually 12, by thread.
-H_SWITCH_CUTOUT		= 0.7 * INCHES_TO_MM;
+D_SWITCH			= 12.5;						// actually 12, by thread.
 
 D_POWER_CUTOUT		= 0.5 * INCHES_TO_MM;
 H_POWER_CUTOUT		= 0.5 * INCHES_TO_MM;
