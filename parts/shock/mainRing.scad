@@ -4,47 +4,33 @@ include <dim.scad>
 
 $fn = 90;
 
-H_RING = 16;
-T_RING = 2.5;
-R_INNER = D_INNER / 2;
-
 X_MC = 5;
 Y_MC = 2;
 OFFSET_MC = 8;
-
-X_EMITTER = 4;
-Y_EMITTER = 1;
-
-PIN	   = 2.54;
-H_PIN_HOLDER = 8;
-T_HOLDER_WALL = 2;
-
+	
 module port(xPins, yPins, drawOuter)
 {
 	INNER_WIDTH  = xPins * PIN;
 	INNER_HEIGHT = yPins * PIN;
-	OUTER_WIDTH  = INNER_WIDTH  + T_HOLDER_WALL * 2;
-	OUTER_HEIGHT = INNER_HEIGHT + T_HOLDER_WALL * 2; 
+	OUTER_WIDTH  = INNER_WIDTH  + T_PIN_HOLDER_WALL * 2;
+	OUTER_HEIGHT = INNER_HEIGHT + T_PIN_HOLDER_WALL * 2; 
 
 	translate([-OUTER_WIDTH/2, -OUTER_HEIGHT/2, 0]) {
 		if (drawOuter) {
 			difference() {
 				cube(size=[OUTER_WIDTH, OUTER_HEIGHT, H_PIN_HOLDER]);
-				translate([T_HOLDER_WALL, T_HOLDER_WALL, -1]) {
+				translate([T_PIN_HOLDER_WALL, T_PIN_HOLDER_WALL, -1]) {
 					cube(size=[INNER_WIDTH, INNER_HEIGHT, H_PIN_HOLDER + 2]);
 				}
 			}
 		}	
 		else {
-			translate([T_HOLDER_WALL, T_HOLDER_WALL, -10]) {
+			translate([T_PIN_HOLDER_WALL, T_PIN_HOLDER_WALL, -10]) {
 				cube(size=[INNER_WIDTH, INNER_HEIGHT, H_PIN_HOLDER + 20]);
 			}
 		}
 	}
 }
-
-
-OFFSET_EMITTER = -PIN + sqrt(R_INNER * R_INNER - PIN * PIN * Y_EMITTER * Y_EMITTER);
 
 difference() 
 {
@@ -72,14 +58,9 @@ difference()
 					port(X_MC, Y_MC, true);
 				}
 				// Emitter port.
-				*rotate([0, 0, 90]) {
-					translate([0, -OFFSET_EMITTER, 0]) {
-						port(X_EMITTER, Y_EMITTER, true);
-					}
-				}
                 rotate([0, 0, 90]) {
-                    translate([-20, OFFSET_EMITTER - T_HOLDER_WALL, 0]) {
-                        cube([40, T_HOLDER_WALL, H_PIN_HOLDER]);
+                    translate([-20, OFFSET_EMITTER - T_PIN_HOLDER_WALL, 0]) {
+                        cube([40, T_PIN_HOLDER_WALL, H_PIN_HOLDER]);
                         
                     }
                 }                
