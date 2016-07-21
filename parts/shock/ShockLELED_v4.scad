@@ -1,5 +1,6 @@
 include <dim.scad>
 use <../shapes.scad>
+use <vents.scad>
 
 // LED holder for Shock LE
 // Designed for Dynamic (LED Supply) heatsink
@@ -24,7 +25,7 @@ D_INNER_CAP = 20;                       // FIXME. measure. what d end cap holds 
 difference() {
     union() {
         // Top cap
-        *translate([0, 0, H_OUTER]) {
+        translate([0, 0, H_OUTER]) {
             difference() {
                 cylinder(h=H_RING, r=D_RING/2, $fn=FACES);
                 cylinder(h=H_RING, r=D_LED/2, $fn=FACES);
@@ -35,35 +36,51 @@ difference() {
         cylinder(h=H_OUTER, r=D_INNER/2, $fn=FACES);
     }
     cylinder(h=H_HEATSINK, r=D_HEATSINK/2, $fn=FACES);
+
+    // Vents / decoration / volume reduction
+    for(r=[0:5]) {
+        translate([0, 0, 16]) {
+            rotate([180, 0, r*60]) {
+                vent1(8, 8, 14, 20);
+            }
+        }
+    }
 }
 
-color("green")
+// Bottom part (connects to mainRing)
+color("gray")
 {
-    // Bottom part (connects to mainRing)
-    //intersection()
+    intersection()
     {
-        *translate([0, 0, -H_CONNECTOR]) {
+        translate([0, 0, -H_CONNECTOR]) {
             cylinder(h=H_CONNECTOR, r=D_INNER/2, $fn=FACES);
         }
         union() {
             // End cap.
-            *translate([0, 0, -H_CAP]) {
+            translate([0, 0, -H_CAP]) {
                 tube(H_CAP, D_INNER_CAP/2, D_INNER/2);
             }
 
-            // Emitter port.
-            //rotate([0, 0, 90]) 
-            /*
-            {
-                translate([-X_EMITTER * PIN / 2, OFFSET_EMITTER, -H_CONNECTOR]) {
-                    cube([X_EMITTER * PIN, PIN, H_CONNECTOR]);
-                    
+            // Pin holder & alignment
+            // Note that the end cap consumes the bottom of this part.
+            difference() {
+                // Emitter port.
+                translate([0, 0, -H_CONNECTOR]) {
+                    difference() {
+                        emitterHolder(H_CONNECTOR);
+                        emitterPin(H_CONNECTOR, true);
+                    }
                 }
-            } 
-            */
-            translate([0, 0, -H_CONNECTOR]) {
-                emitterPin(H_CONNECTOR);
-            }      
+                translate([-X_EMITTER * PIN /2, 0, -H_CONNECTOR/2]) {
+                    cube(size=[X_EMITTER * PIN, 40, H_CONNECTOR/2]);
+                }
+            }       
+            
+            rotate([0, 0, 180]) {
+                translate([0, 0, -H_CONNECTOR]) {
+                    emitterHolder(H_CONNECTOR);
+                }
+            }
         }                 
     }
 }

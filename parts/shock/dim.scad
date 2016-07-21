@@ -43,10 +43,22 @@ ROD_GAP 			= 0.050 * INCHES_TO_MM;
 
 OFFSET_EMITTER = -PIN + sqrt(R_INNER * R_INNER - PIN * PIN * X_EMITTER * X_EMITTER / 4);
 
-module emitterPin(h)
+module emitterPin(h, longY)
+{
+	Y = longY ? 40 : PIN;
+
+    translate([-X_EMITTER * PIN / 2, OFFSET_EMITTER, 0]) {
+        cube([X_EMITTER * PIN, Y, h]);
+    }	
+}
+
+module emitterHolder(h)
 {
     translate([-X_EMITTER * PIN / 2, OFFSET_EMITTER, 0]) {
-        cube([X_EMITTER * PIN, PIN, h]);
+    	translate([-T_PIN_HOLDER_WALL, -T_PIN_HOLDER_WALL, 0]) {
+      		cube([X_EMITTER * PIN + T_PIN_HOLDER_WALL*2, PIN + T_PIN_HOLDER_WALL*2, h]);
+    	}
     }	
+	
 }
 
