@@ -24,7 +24,7 @@ D_INNER_CAP = 20;                       // FIXME. measure. what d end cap holds 
 difference() {
     union() {
         // Top cap
-        translate([0, 0, H_OUTER]) {
+        *translate([0, 0, H_OUTER]) {
             difference() {
                 cylinder(h=H_RING, r=D_RING/2, $fn=FACES);
                 cylinder(h=H_RING, r=D_LED/2, $fn=FACES);

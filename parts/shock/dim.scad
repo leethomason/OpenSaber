@@ -41,7 +41,7 @@ D_SWITCH			= 12.5;						// actually 12, by thread.
 D_ROD				= 0.160 * INCHES_TO_MM;
 ROD_GAP 			= 0.050 * INCHES_TO_MM;
 
-OFFSET_EMITTER = -PIN + sqrt(R_INNER * R_INNER - PIN * PIN * Y_EMITTER * Y_EMITTER);
+OFFSET_EMITTER = -PIN + sqrt(R_INNER * R_INNER - PIN * PIN * X_EMITTER * X_EMITTER / 4);
 
 module emitterPin(h)
 {
