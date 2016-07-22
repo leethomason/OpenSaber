@@ -24,7 +24,7 @@ D_INNER_CAP = 20;                       // FIXME. measure. what d end cap holds 
 H_TEETH = 2;
 
 // Top part (emitter)
-difference() {
+*difference() {
     union() {
         // Top cap
         translate([0, 0, H_OUTER]) {
