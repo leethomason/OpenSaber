@@ -21,6 +21,8 @@ H_CONNECTOR = 20;
 H_CAP       = 3;
 D_INNER_CAP = 20;                       // FIXME. measure. what d end cap holds the emitter in place?
 
+H_TEETH = 2;
+
 // Top part (emitter)
 difference() {
     union() {
@@ -45,11 +47,27 @@ difference() {
             }
         }
     }
+
+    for(r=[0:2]) {
+        rotate([0, 0, r*60]) {
+            lock(H_TEETH);
+        }   
+    }
+
 }
 
 // Bottom part (connects to mainRing)
 color("gray")
 {
+    for(r=[0:2]) {
+        rotate([0, 0, r*60]) {
+            intersection() {
+                tube(H_TEETH, D_HEATSINK/2, D_INNER/2);
+                lock(H_TEETH);
+            }
+        }
+    }
+    
     intersection()
     {
         translate([0, 0, -H_CONNECTOR]) {
