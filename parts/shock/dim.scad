@@ -62,3 +62,11 @@ module emitterHolder(h)
 	
 }
 
+// Uses the same dimensions as the emitter holder so they 
+// can be used interchangeably.
+module lock(h)
+{
+    translate([-X_EMITTER * PIN / 2, -20, 0]) {
+		cube([X_EMITTER * PIN, 40, h]);
+	}	
+}

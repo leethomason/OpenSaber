@@ -9,6 +9,7 @@ Y_MC = 2;
 MC_OFFSET = 8;
 MC_WIDTH  = X_MC * PIN;
 MC_HEIGHT = Y_MC * PIN;
+H_LOCK = 4;
 	
 module portPin(h)
 {
@@ -66,10 +67,14 @@ intersection()
 }
 
 // Lock
-*color("green") {
-	translate([0, 0, H_RING/2]) {
-		rotate([-90, 0, 0]) {
-			cylinder(d=D_SWITCH, h=D_INNER/2 + 1);
+color("gray") {
+	translate([0, 0, -H_LOCK]) {
+		rotate([0, 0, 90]) {
+			difference() 
+			{
+				tube(H_LOCK, D_INNER/2 - T_RING, D_INNER/2);
+				lock(H_LOCK);
+			}
 		}
 	}
 }
