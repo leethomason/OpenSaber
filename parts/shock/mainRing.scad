@@ -6,7 +6,7 @@ $fn = 90;
 
 X_MC = 5;
 Y_MC = 2;
-MC_OFFSET = 8;
+MC_OFFSET = 6;
 MC_WIDTH  = X_MC * PIN;
 MC_HEIGHT = Y_MC * PIN;
 H_LOCK = 4;
@@ -36,6 +36,11 @@ intersection()
 		union() {
 			// The ring.
 			tube(H_RING, D_INNER/2 - T_RING, D_INNER/2);
+			// switch support.
+			translate([-D_SWITCH/2 - 2, D_INNER/2 - 6, 0]) {
+				cube(size=[D_SWITCH + 4, 10, H_RING]);
+			}
+
 			// Microcontroller port.
 			rotate([0, 0, 180]) {
 				translate([0, 0, H_RING - H_PIN_HOLDER]) {

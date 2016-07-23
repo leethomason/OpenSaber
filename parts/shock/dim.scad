@@ -63,7 +63,7 @@ module emitterHolder(h)
 // can be used interchangeably.
 module lock(h)
 {
-    translate([-X_EMITTER * PIN / 2, -20, 0]) {
-		cube([X_EMITTER * PIN, 40, h]);
+    translate([-X_EMITTER * PIN / 2 - T_PIN_HOLDER_WALL, -20, 0]) {
+		cube([X_EMITTER * PIN + T_PIN_HOLDER_WALL * 2, 40, h]);
 	}	
 }

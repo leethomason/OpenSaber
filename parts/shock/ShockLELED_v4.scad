@@ -24,7 +24,7 @@ D_INNER_CAP = 0.5 + 0.800 * INCHES_TO_MM;                       // end cap holds
 H_TEETH = 2;
 
 // Top part (emitter)
-difference() {
+*difference() {
     union() {
         // Top cap
         translate([0, 0, H_OUTER]) {
