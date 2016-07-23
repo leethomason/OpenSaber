@@ -14,12 +14,12 @@ D_LED       = 0.750 * INCHES_TO_MM;   // FIXME widen. hole where the light shine
 D_HEATSINK  = 1.000 * INCHES_TO_MM;
 
 H_RING      = 0.280 * INCHES_TO_MM;    // measured at 279
-H_HEATSINK  = 0.890 * INCHES_TO_MM;
+H_HEATSINK  = 0.5 + 0.890 * INCHES_TO_MM;
 H_OUTER     = 0.700 * INCHES_TO_MM;    // correct. height below ring.
 
 H_CONNECTOR = 20;
 H_CAP       = 3;
-D_INNER_CAP = 20;                       // FIXME. measure. what d end cap holds the emitter in place?
+D_INNER_CAP = 0.5 + 0.800 * INCHES_TO_MM;                       // end cap holds the emitter in place
 
 H_TEETH = 2;
 
@@ -43,7 +43,7 @@ difference() {
     for(r=[0:5]) {
         translate([0, 0, 16]) {
             rotate([180, 0, r*60]) {
-                vent1(8, 8, 14, 20);
+                vent1(11, 4, 13, 20);
             }
         }
     }
