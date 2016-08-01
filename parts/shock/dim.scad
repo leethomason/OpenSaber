@@ -18,6 +18,9 @@ PIN	   				= 2.54;
 H_PIN_HOLDER 		= 8;
 T_PIN_HOLDER_WALL 	= 2;
 
+N_TEETH				= 2;
+TEETH_ANGLE			= 90;
+
 // Pin counts:
 X_EMITTER 			= 4;
 Y_EMITTER 			= 1;

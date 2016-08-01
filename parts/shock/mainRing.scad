@@ -12,17 +12,19 @@ MC_HEIGHT = Y_MC * PIN;
 H_LOCK = 4;
 	
 module portPin(h)
-{
+{	
 	translate([-MC_WIDTH/2, MC_OFFSET, 0]) {
 		cube(size=[MC_WIDTH, MC_HEIGHT, h]);
 	}
 }
 
-module portHolder(h)
+module portHolder(h, longY)
 {
+	Y = longY ? 40 : MC_HEIGHT + T_PIN_HOLDER_WALL*2;
+
 	translate([-MC_WIDTH/2, MC_OFFSET, 0]) {
     	translate([-T_PIN_HOLDER_WALL, -T_PIN_HOLDER_WALL, 0]) {
-			cube(size=[MC_WIDTH + T_PIN_HOLDER_WALL*2, MC_HEIGHT + T_PIN_HOLDER_WALL*2, h]);
+			cube(size=[MC_WIDTH + T_PIN_HOLDER_WALL*2, Y, h]);
 		}
 	}
 }
@@ -44,12 +46,14 @@ intersection()
 			// Microcontroller port.
 			rotate([0, 0, 180]) {
 				translate([0, 0, H_RING - H_PIN_HOLDER]) {
-					portHolder(H_PIN_HOLDER);
+					portHolder(H_PIN_HOLDER, true);
 				}
 			}
 			// Emitter port
 			rotate([0, 0, 90]) {
-				emitterHolder(H_PIN_HOLDER);
+                translate([0, 0, H_LOCK]) {
+                    emitterHolder(H_PIN_HOLDER);
+                }
 			}
 		}
 
@@ -68,11 +72,16 @@ intersection()
 		rotate([0, 0, 90]) {
 			emitterPin(H_RING, true);
 		}
+        
+        // Remove lock
+		rotate([0, 0, 90]) {
+            lock(H_LOCK);
+		}
 	}
 }
 
 // Lock
-color("gray") {
+/*color("gray") {
 	translate([0, 0, -H_LOCK]) {
 		rotate([0, 0, 90]) {
 			difference() 
@@ -83,3 +92,4 @@ color("gray") {
 		}
 	}
 }
+*/
