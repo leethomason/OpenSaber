@@ -118,11 +118,6 @@ void SaberDB::setVolume(int v) {
   EEPROM.put(headerAddr(), dataHeader);
 }
 
-static const int VOLUME_1 = 15;
-static const int VOLUME_2 = 30;
-static const int VOLUME_3 = 80;
-static const int VOLUME_4 = 120;
-
 void SaberDB::setVolume4(int v) 
 {
   switch (v) {

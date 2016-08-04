@@ -92,6 +92,12 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int32_t BLUE_I   = 350;
 	static const int32_t BLUE_R   = 1000;
 
+	static const int VOLUME_1 = 15;
+	static const int VOLUME_2 = 50;
+	static const int VOLUME_3 = 120;
+	static const int VOLUME_4 = 200;
+
+
 #elif SABER_MODEL == SABER_MODEL_SHOCK
 	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
 	#define SABER_SOUND_ON
