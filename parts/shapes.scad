@@ -1,5 +1,7 @@
-FACES = 180;
+FACES   = 180;
 EPSILON = 0.1;
+PIN	    = 2.54;
+
 
 module tube(_h, _rInner, _rOuter) {
 	difference() {
@@ -16,3 +18,14 @@ module shelf(_r0, _h, _r1) {
 	}
 }
 
+
+module pinsAtTube(r, h, nX, nY, longY)
+{
+	OFFSET = sqrt(r * r - PIN * PIN * nX * nX / 4);
+
+	Y = longY ? 40 : PIN * nY;
+
+    translate([-nX * PIN / 2, OFFSET - PIN * nY, 0]) {
+        cube([nX * PIN, Y, h]);
+    }	
+}

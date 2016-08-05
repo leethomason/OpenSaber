@@ -213,7 +213,7 @@ void setup() {
 //    pinMode(PIN_CRYSTAL_B, OUTPUT);
 //#elif SABER_CRYSTAL == SABER_DOTSTAR
     #ifdef SABER_LEDS
-        dotstar.setBrightness(6);
+        dotstar.setBrightness(4);
         dotstar.attachLEDs(leds, SABER_NUM_LEDS);
         for(int i=0; i<SABER_NUM_LEDS; ++i) {
             leds[i].set(0x010101);
