@@ -1,29 +1,5 @@
-/*
-#include <FastLED.h>
-
-#define NUM_LEDS 4
-CRGB leds[NUM_LEDS];
-
-void setup() {
-  delay(2000);
-  FastLED.setBrightness(20);
-  FastLED.addLeds<APA102, BGR>(leds, NUM_LEDS);
-  pinMode(7, OUTPUT);
-  digitalWrite(7, HIGH);  // enable access to LEDs
-
-  leds[0] = CRGB::Red;
-  leds[1] = CRGB::Green;
-  leds[2] = CRGB::Blue;
-  leds[3] = CRGB::Yellow;
-  FastLED.show(); 
-}
-
-void loop() {
-}
-*/
-
-#include "dotstar.h"
-#define NUM_LEDS 4
+#include <DotStar.h>
+#define NUM_LEDS 1
 DotStar::RGB leds[NUM_LEDS];
 DotStar dotstar(7);
 
@@ -35,12 +11,12 @@ void setup()
   }
   Serial.println("Hello DotStar!!");
 
-  leds[0].set(0xff0000);
-  leds[1].set(0x00ff00);
-  leds[2].set(0x0000ff);
-  leds[3].set(0x00ffff);
+  leds[0].set(0xff00f0);
+  //leds[1].set(0x00ff00);
+  //leds[2].set(0x0000ff);
+  //leds[3].set(0x00ffff);
 
-  leds[0].red = 0xff;
+  //leds[0].red = 0xff;
 
   delay(2000);
   

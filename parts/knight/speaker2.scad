@@ -9,9 +9,10 @@ include <dim.scad>
 	SPKR_PLASTIC
 */
 
+PIN            = 2.54;
 TUBE_COUPLE_H  = 3.5;
 TUBE_COUPLE_D  = 25.4;
-SPKR_METAL_H   = 8 + 2.8;
+SPKR_METAL_H   = 8 + 1.5;
 SPKR_METAL_D   = 23.6;	
 SPKR_PLASTIC_H = 2.7;
 SPKR_PLASTIC_D = 28;
@@ -53,7 +54,9 @@ OFFSET              = R_AFT - H_PORT;
                 translate([OFFSET,-100,0]) {
                     cube(size=[200, 200, TUBE_COUPLE_H]);
                 }
-                pinsAtTube(R_AFT, 10, 1, 1, true);
+                translate([-PIN/2, INCHES_TO_MM/2-1, 0]) {
+                    cube(size=[PIN, PIN+1, 10]);
+                }
             }
         }
 	}
