@@ -39,7 +39,7 @@ W_INNER_DISPLAY		= 0.47 * INCHES_TO_MM;
 H_OUTER_DISPLAY		= 0.08 * INCHES_TO_MM;
 H_INNER_DISPLAY		= 0.14 * INCHES_TO_MM;
 
-D_SWITCH			= 12.5;						// actually 12, by thread. going larger assumes a washer
+D_SWITCH			= 12.5;						// actually 12, by thread.
 
 D_ROD				= 0.160 * INCHES_TO_MM;
 ROD_GAP 			= 0.050 * INCHES_TO_MM;
