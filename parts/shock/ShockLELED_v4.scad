@@ -10,14 +10,14 @@ EPSILON = 0.1;
 
 // Inches. I hate imperial.
 D_RING      = 1.312 * INCHES_TO_MM;   // correct, outer ring holds it in place.
-D_LED       = 0.750 * INCHES_TO_MM;   // FIXME widen. hole where the light shines.
+D_LED       = 20.000;                 // hole where the light shines.
 D_HEATSINK  = 1.000 * INCHES_TO_MM;
 
 H_RING      = 0.280 * INCHES_TO_MM;    // measured at 279
 H_HEATSINK  = 0.5 + 0.890 * INCHES_TO_MM;
 H_OUTER     = 0.700 * INCHES_TO_MM;    // correct. height below ring.
 
-H_CONNECTOR = 20;
+H_CONNECTOR = 13.4;
 H_CAP       = 3;
 D_INNER_CAP = 0.5 + 0.800 * INCHES_TO_MM;                       // end cap holds the emitter in place
 
@@ -43,13 +43,13 @@ H_TEETH = 2;
     for(r=[0:5]) {
         translate([0, 0, 16]) {
             rotate([180, 0, r*60]) {
-                vent1(11, 4, 13, 20);
+                vent1(11, 4, 12, 20);
             }
         }
     }
 
-    for(r=[0:2]) {
-        rotate([0, 0, r*60]) {
+    for(r=[0:(N_TEETH-1)]) {
+        rotate([0, 0, r*TEETH_ANGLE]) {
             lock(H_TEETH);
         }   
     }
@@ -57,10 +57,9 @@ H_TEETH = 2;
 }
 
 // Bottom part (connects to mainRing)
-color("gray")
-{
-    for(r=[0:2]) {
-        rotate([0, 0, r*60]) {
+color("gray") {
+    for(r=[0:(N_TEETH-1)]) {
+        rotate([0, 0, r*TEETH_ANGLE]) {
             intersection() {
                 tube(H_TEETH, D_HEATSINK/2, D_INNER/2);
                 lock(H_TEETH);
