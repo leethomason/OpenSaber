@@ -13,7 +13,7 @@ D_LED       = 20.000;                 // hole where the light shines.
 D_HEATSINK  = 1.000 * INCHES_TO_MM;
 
 H_RING      = 0.280 * INCHES_TO_MM;    // measured at 279
-H_HEATSINK  = 0.5 + 0.890 * INCHES_TO_MM;
+H_HEATSINK  = 0.45 + 0.890 * INCHES_TO_MM;
 H_OUTER     = 0.700 * INCHES_TO_MM;    // correct. height below ring.
 
 H_CONNECTOR = 13.4;
@@ -23,7 +23,7 @@ D_INNER_CAP = 0.5 + 0.800 * INCHES_TO_MM;                       // end cap holds
 H_TEETH = 2;
 
 // Top part (emitter)
-*difference() {
+difference() {
     union() {
         // Top cap
         translate([0, 0, H_OUTER]) {
@@ -56,7 +56,7 @@ H_TEETH = 2;
 }
 
 // Bottom part (connects to mainRing)
-color("gray") {
+*color("gray") {
     for(r=[0:(N_TEETH-1)]) {
         rotate([0, 0, r*TEETH_ANGLE]) {
             intersection() {
