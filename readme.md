@@ -156,6 +156,9 @@ In roughly front to back order, an saber is:
 
 ## Wiring
 
+Wiring diagram for Prop Shield version of saber (sorry for the terrible art): 
+[wiring v5 with prop shield](img/v5prop.png)
+
 ### Power Bus
 The saber uses a common ground. There are 4 positive power voltages. Please
 be aware of the power supply. Shorts between the supplies can cause big
