@@ -242,12 +242,12 @@ thusfar with the service.
   can be programmed directly via USB, but the PCB also provides an alternate
   connection to the USB.
 
-- ** LED amplifier ** The LED uses a 3 channel, 350ma (average) controller.
+- **LED amplifier** The LED uses a 3 channel, 350ma (average) controller.
   The microcrontroller uses an amplifier bridge made of 3 MOSFETS, 
   resistors, and a copacitor. Note the LED resistors
   are on the PCB and not off-board, as is conventional.
 
-- ** LED ** a 1 WATT Cree or Luxeon LED in a star configuration is typical.
+- **LED** a 1 WATT Cree or Luxeon LED in a star configuration is typical.
   The LED uses a common anode, as well as 3 control lines: Red, Green, and
   Blue. They 4 wires are connected from the LED to the front side of the 
   emitter electronics.
