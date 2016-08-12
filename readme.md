@@ -362,6 +362,37 @@ meter. There's some variability; once the saber is assembled, I suggest
 adjusting this value by checking computed vs. measured values. (Type 'vbat' on 
 the command line to get the current computed value.)
 
+##### "Constant Current" and tuning the voltmeter.
+
+The OpenSaber code will maintain an average of 350mA current
+(or whatever you specify) across the LED. This block of code in pins.h
+is important for tuning:
+
+````
+  static const int32_t UVOLT_MULT = 6680;
+  #define ID_STR "Gecko (Sentris Body) RGB Luxeon"
+
+  static const int32_t RED_VF   = 2900;   // milli-volts
+  static const int32_t RED_I    = 350;    // milli-amps
+  static const int32_t RED_R    = 2400;   // milli-ohms
+````
+
+VF: forward voltage, from the LED spec.
+I: milli-amps of power
+R: the resistor value you used
+
+And finally the UVOLT_MULT. It's a little tedious to calculate,
+and doesn't turn out to be useful to do so. Once your saber 
+is up and running, wait until it hits the 3.7 volt range.
+Measure the power with a voltmeter. Run `vbat` on the saber
+command line to get the measured value. Adjust UVOLT_MULT,
+and recompile.
+
+UVOLT_MULT' = UVOLT_MULT * V_measured / vbat
+
+And then re-check the `vbat` just to be sure. It should 
+be close, but doesn't need to be exact.
+
 ### Command line
 
 If you connect vias USB, you can open the COM port to the saber and
