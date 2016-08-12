@@ -39,7 +39,7 @@ here: https://youtu.be/9_-Rfe4UBJM.
 There are 2 working sabers on the OpenSaber design. A SaberZ case
 and an UltraSabers case. Version numbers don't help much - I'm
 just trying to keep master current - but where it comes up, this
-is the V3 platform which uses the V5 circuits. (Sorry for the incosistent
+is the V3 platform which uses the V5 circuits. (It's an incosistent
 versioning scheme.)
 
 - Based on Teensy 3.2 microcontroller.
@@ -157,7 +157,9 @@ In roughly front to back order, an saber is:
 ## Wiring
 
 Wiring diagram for Prop Shield version of saber (sorry for the terrible art): 
-[wiring v5 with prop shield](img/v5prop.png)
+[wiring v5 with prop shield](img/v5prop.png). 
+(Github isn't keen on image preview. You may need to clone the source and view
+locally.)
 
 ### Power Bus
 The saber uses a common ground. There are 4 positive power voltages. Please
@@ -294,7 +296,7 @@ you particular saber in "pins.h".
 
 ### Libraries
 
-\Regrettably, the 'saber' source code uses some forked libraries. They are
+Regrettably, the 'saber' source code uses some forked libraries. They are
 all available on the github pages. I regret having to fork - it adds 
 complexity and overhead - but there are issues I haven't otherwise been able 
 to work around.
@@ -316,7 +318,8 @@ https://github.com/adafruit/Adafruit_LIS3DH
 
 The OLED display is required to compile, although it isn't supported
 as part of OpenSaber yet.
-FIXME
+
+https://github.com/leethomason/OLED_SSD1306
 
 ### General Utility
 
