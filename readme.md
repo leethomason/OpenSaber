@@ -164,7 +164,8 @@ In roughly front to back order, an saber is:
 Wiring diagram for Prop Shield version of saber (sorry for the terrible art): 
 [wiring v5 with prop shield](img/v5prop.png). 
 (Github isn't keen on image preview. You may need to clone the source and view
-locally.)
+locally.) Not shown: the speaker connection (connects to the prop shield) and
+the DotStar connection (also connects to prop shield.)
 
 ### Power Bus
 The saber uses a common ground. There are 4 positive power voltages. Please
