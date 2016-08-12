@@ -45,7 +45,8 @@ versioning scheme.)
 - Based on Teensy 3.2 microcontroller.
 - Optionally uses a PJRC Prop Shield. The prop shield condenses
   a bunch of the electronics into one board, which is very 
-  handy. (Although sometimes it's useful to spread comonents out.)
+  handy. (Although sometimes it's useful to spread components out, to
+  be able to utilize space in the saber.)
   The PCB design contains both a prop shield version and a 
   breakout version.
 
@@ -114,8 +115,8 @@ In roughly front to back order, an saber is:
 
 1.  A **blade holder**. (1" is standard.)
 2.  A **lens** to focus the LED. The Gecko uses a 10511 Carclo Lens.
-3.  3 (or 4) **LEDs** in the 1-Watt each range. Red, green, blue, and sometimes white or
-    another color. (Gecko uses a "Luxeon Rebel - 
+3.  3 (or 4) **LEDs** in the 1-Watt each range. Red, green, blue, and 
+    sometimes white or another color. (Gecko uses a "Luxeon Rebel - 
     Endor Star RGB High Power LED"  which fits nicely in the case.)
 4.  A **heat sink** for cooling the LED. Often part of the saber body. 
     TCSS provides them as well. LEDs are kept to 350ma each (although you
@@ -135,11 +136,11 @@ In roughly front to back order, an saber is:
     the sound fonts are stored.
 9. **Accelerometer**. Gecko uses an "Adafruit LIS3DH Triple-Axis 
     Accelerometer."
-10. 3.7v Li-Ion **battery**. TCSS and Adafruit both sell good, small, long lasting
-    batteries. Need something rated 2000mAh or better.
-11. **Speaker**. TCSS and Adafruit carry them, as well as Mouser and Digikey. (I've had
-    a lot of inexpensive speakers arrived damaged from China, so I do recommend
-    a reputable supplier.)
+10. 3.7v Li-Ion **battery**. TCSS and Adafruit both sell good, small, long 
+    lasting batteries. Need something rated 2000mAh or better.
+11. **Speaker**. TCSS and Adafruit carry them, as well as Mouser and Digikey. 
+    (I've had a lot of inexpensive speakers arrived damaged from China, so I 
+    do recommend a reputable supplier.)
 
 ## Directory Organization
 
@@ -158,7 +159,8 @@ In roughly front to back order, an saber is:
 ### Power Bus
 The saber uses a common ground. There are 4 positive power voltages. Please
 be aware of the power supply. Shorts between the supplies can cause big
-issues. It's very important to not "cross" the power supplies or use the wrong one. 
+issues. It's very important to not "cross" the power supplies or use the 
+wrong one. 
 
 - Vbat, the battery power supply. Ranges from about 4.2 - 3.5V. Vbat delivers
   a **lot** of power, up to about 1A (1000mA) to the audio and LEDs. It also
@@ -166,8 +168,8 @@ issues. It's very important to not "cross" the power supplies or use the wrong o
 - Vcc, a 3.3V, regulated, constant, low-amp supply. Powers the switch LEDs and 
   other indicators. Vcc is provided by the microcontroller.
 - V5. If the propshield as well as Dotstar LEDs are being used, then there
-  should be a 5 volt power supply. I often use a super-tiny booster (from Polulu)
-  to go from Vbat to V5 to power the microcontroller.
+  should be a 5 volt power supply. I often use a super-tiny booster 
+  (from Polulu) to go from Vbat to V5 to power the microcontroller.
 - USB. When the saber is plugged into USB, there is Yet Another power supply.
   It's (VERY) important to not connect the USB power into the saber power.
   I often use a USB connector to save space; in this case, I simply don't
