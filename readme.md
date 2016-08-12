@@ -89,6 +89,11 @@ I am not affiliated with any of these, but have found them all useful.
 ### LEDs
 - LEDSupply. http://www.ledsupply.com/ has some nice RGB high power LEDs.
 
+### LED calculator
+An LED calculator is super handy for getting the right resistors for
+the different LEDs, whether high or low power.
+http://led.linear1.org/1led.wiz
+
 ### Electronics
 - Adafruit. I'm a huge Adafruit fan; great electronics and documentation.
   http://adafruit.com/
