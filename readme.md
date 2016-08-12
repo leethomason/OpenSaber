@@ -9,6 +9,9 @@ with Arduinos. There are certainly commercial solutions to saber electronics,
 but if you want to build and contribute to the code and internals, this site
 is for you!
 
+The information and documentation assume a basic knowledge of Arduinos,
+electronics, soldering, etc.
+
 ![Image of Saber](img/GeckoOnMat.jpg)
 
 The Open Saber site / repo is 3 things:
@@ -19,7 +22,7 @@ The Open Saber site / repo is 3 things:
 
 The example platform is the "Gecko" saber, which is a SaberZ Sentris body (the
 empty hilt option) with Open Saber electronics. You can see it in action
-here: https://youtu.be/9_-Rfe4UBJM
+here: https://youtu.be/9_-Rfe4UBJM.
 
 ## Features:
 - Support for 3 LED RGB "any color" saber 
@@ -31,18 +34,27 @@ here: https://youtu.be/9_-Rfe4UBJM
 - Command set to program saber with computer
 - Recharge port / kill key port
 
-## Direction
+## Status & Direction
 
-The SaberZ case is great (truly) but I would like to expand the design to other cases.
-
-The v2 branch is now merged, and the Gecko electrons are now at v2,
-based off the Teensy 3.2 microcontroller. New in v2:
+There are 2 working sabers on the OpenSaber design. A SaberZ case
+and an UltraSabers case. Version numbers don't help much - I'm
+just trying to keep master current - but where it comes up, this
+is the V3 platform which uses the V5 circuits. (Sorry for the incosistent
+versioning scheme.)
 
 - Based on Teensy 3.2 microcontroller.
-- Audio is done in the Teensy, there is no need for a separate audio board.
-- Much of the electronics moved to a PCB
-- The PCB can be split between the emitter head (MOSFETS for the LED) and
-  the support electronics for the Teensy.
+- Optionally uses a PJRC Prop Shield. The prop shield condenses
+  a bunch of the electronics into one board, which is very 
+  handy. (Although sometimes it's useful to spread components out, to
+  be able to utilize space in the saber.)
+  The PCB design contains both a prop shield version and a 
+  breakout version.
+
+Note that many commits to the github repo are parts for a 3D
+printer. While you are welcome to use them, the focus of 
+this site is the electronics, which can be re-used from saber
+to saber. The physical parts are unique to each saber (unless
+you use a standard case, of course.)
 
 ![Image of Saber](img/Gecko3.jpg)
 
@@ -86,52 +98,56 @@ I am not affiliated with any of these, but have found them all useful.
 - Sparkfun. https://www.sparkfun.com/
 - Mouser. http://www.mouser.com/ A huge selection of everything electronic.
 - DigiKey. http://www.digikey.com/ A huge selection of everything electronic.
+  I tend to have more success with DigiKey's search engine.
 
 ## Architecture
 
 An overview of the parts of a saber, with specific examples of the Gecko. 
-(But you can & should use your own parts, and send a Pull Request to 
-update for other designs!)
 
 Technically speaking, to organize you electrical thoughts, a saber is a *very* 
 fancy flashlight. 
 
-NOTE: This is the v1 architecture. v2 loses the audio chip and adds an SD card.       
+NOTE: This is the v1 architecture. Hope to get new photos up soon!
 
 ![Image of Saber](img/Schematic.png)
 
-In roughly front to back order, an V2 saber is:
+In roughly front to back order, an saber is:
 
-1.   A **blade holder**. (1" is standard.)
-2.   A **lens** to focus the LED. The Gecko uses a 10511 Carclo Lens.
-3.   3 (or 4) **LEDs** in the 1-Watt each range. Red, green, blue, and sometimes white or
-    another color. (Gecko uses a "Luxeon Rebel - 
+1.  A **blade holder**. (1" is standard.)
+2.  A **lens** to focus the LED. The Gecko uses a 10511 Carclo Lens.
+3.  3 (or 4) **LEDs** in the 1-Watt each range. Red, green, blue, and 
+    sometimes white or another color. (Gecko uses a "Luxeon Rebel - 
     Endor Star RGB High Power LED"  which fits nicely in the case.)
-4.   A **heat sink** for cooling the LED. Often part of the saber body. 
-    TCSS provides them as well.
-5.  **Emitter electronics** bridge from the microcontroller to the high power 
-    LEDs. MOSFETs, resister, and capacitors. 
-6.  **Power and Auxillary** switch (momentary on, typically 12mm).
-7.  **Power port**. Typically 2.1 mm; there's are pros and cons of this design. 
-    (See below.)
-8.  **Micro controller** which is the "brain" of the saber. Gecko V2 uses a
-    Teensy 3.1 3.3V. The Teensy (with an ARM M4 processor) is capable of
-    doing audio processing on the microcontroller.
-9.  **SD Card**. Gecko uses a simple SD card breakout board. This is where
-    the sound fonts are stored and saber operation is logged.
-10. **Accelerometer**. Gecko uses an "Adafruit LIS3DH Triple-Axis 
+4.  A **heat sink** for cooling the LED. Often part of the saber body. 
+    TCSS provides them as well. LEDs are kept to 350ma each (although you
+    can change this.) Many LED's, if cooled correctly, can take considerably
+    more power, but I haven't tested the actual cooling ability of the
+    various heat sinks I use.
+5.  **Power and Auxillary** switches (momentary on, typically 12mm). The
+    code supports both a one button version and a two button version. Both
+    versions support the same features except "clash sound" which is only
+    supported in the 2 button version. If the switches have LED rings, the
+    microcontroller will use them for power / volume display.
+6.  **Electronics**. Please see the full discussion below.
+7.  **Power port**. Typically 2.1 mm. If plugged into a Li-Ion charger,
+    charges the battery (and disconnects the microcontroller). If a kill key
+    is inserted, turns off the saber.
+8.  **SD Card**. Gecko uses a simple SD card breakout board. This is where
+    the sound fonts are stored.
+9. **Accelerometer**. Gecko uses an "Adafruit LIS3DH Triple-Axis 
     Accelerometer."
-11. 3.7v Li-Ion **battery**. TCSS and Adafruit both sell good, small, long lasting
-    batteries. Need something rated 2000mAh or better.
-12. **Speaker**. So hard to get a good, small, speaker not broken in shipment. 
-    TCSS and Adafruit carry them, as well as Mouser and Digikey.
+10. 3.7v Li-Ion **battery**. TCSS and Adafruit both sell good, small, long 
+    lasting batteries. Need something rated 2000mAh or better.
+11. **Speaker**. TCSS and Adafruit carry them, as well as Mouser and Digikey. 
+    (I've had a lot of inexpensive speakers arrived damaged from China, so I 
+    do recommend a reputable supplier.)
 
 ## Directory Organization
 
 - root
   - src - ardruito source code
     - saber - code for the saber itself
-    - lcdController - code for the controller box (completely optional)
+    - many other directories for test code and experiments
   - circuits
     - components - circuit diagrams (as text files) of the different
       sub-systems.
@@ -141,16 +157,25 @@ In roughly front to back order, an V2 saber is:
 ## Wiring
 
 ### Power Bus
-The saber uses a common ground. There are 2 positive power voltages:
+The saber uses a common ground. There are 4 positive power voltages. Please
+be aware of the power supply. Shorts between the supplies can cause big
+issues. It's very important to not "cross" the power supplies or use the 
+wrong one. 
+
 - Vbat, the battery power supply. Ranges from about 4.2 - 3.5V. Vbat delivers
   a **lot** of power, up to about 1A (1000mA) to the audio and LEDs. It also
   powers the micro-controllers.
 - Vcc, a 3.3V, regulated, constant, low-amp supply. Powers the switch LEDs and 
-  other indicators. 
-
-It's very important to not "cross" the power supplies or use the wrong one. 
-Vbat is high-power, inconsistent voltage, and Vcc is low-power consistent 
-voltage. 
+  other indicators. Vcc is provided by the microcontroller.
+- V5. If the propshield as well as Dotstar LEDs are being used, then there
+  should be a 5 volt power supply. I often use a super-tiny booster 
+  (from Polulu) to go from Vbat to V5 to power the microcontroller.
+- USB. When the saber is plugged into USB, there is Yet Another power supply.
+  It's (VERY) important to not connect the USB power into the saber power.
+  I often use a USB connector to save space; in this case, I simply don't
+  attach the positive power of the USB. If you use the USB connector on the
+  microcontoller, I usually open up a cable and cut the red power line.
+  You want to avoid connecting the USB power to the Li-Ion battery.
 
 #### Power Port
 Convention, and the current design, uses a 2.1mm recharge jack. Wiring of the
@@ -191,64 +216,52 @@ converters.)
 Note that in either case, the actual battery voltage varies significantly, 
 and the control circuit has to account for that.
 
-### Emitter Electronics
-Basic, but hard to miniturize, circuit. It is documented in ledControl.txt.
-I had it custom printed at PCBExpress - a fab file is provided in the 
-'circuits' sub-directory.
+### Electronics
 
-The parts of the circuit are:
+The electronics are the heart of the OpenSaber project. There
+are 2 configurations: with and without a Prop Shield. The files are
+PCBExpress files. I regret the proprietary solution, but I've been happy
+thusfar with the service.
 
-1. Capacitor for buffering power to the LEDs.
-2. PWM boost from logic current to power current for controller the LED color.
-   A MOSFET, de-ring resister, tie down resister, and LED power control 
-   resistor for each channel.
-3. Switch tie down resistors.
-4. Voltage divider for driving the voltage meter. The micro-controller
-   will account for Vbat above 3.7 by reducing the modulation on the LEDs,
-   thereby maintaining constant average current.
+- A **microcontroller**, the Teensy 3.2, is the micro-computer
+  that runs the softare. It controls the blade state, the color
+  of the LEDs, the color of the blade, and does audio processing.
 
-### LED to Emitter Electronics
-The LED uses a common anode, as well as 3 control lines: Red, Green, and
-Blue. They 4 wires are connected from the LED to the front side of the 
-emitter electronics.
+  It is soldered to a PCB and (optionally) a prop shield. The microcontroller
+  can be programmed directly via USB, but the PCB also provides an alternate
+  connection to the USB.
 
-### Micro-controller
-The 'saber' source code contains the 'pins.h' file, which documents all
-the pin connections. The connection groups are:
+- ** LED amplifier ** The LED uses a 3 channel, 350ma (average) controller.
+  The microcrontroller uses an amplifier bridge made of 3 MOSFETS, 
+  resistors, and a copacitor. Note the LED resistors
+  are on the PCB and not off-board, as is conventional.
 
-- Logic connection to the emitter electronics, for controlling the color of the
-  LEDs.
-- Connection to the (divided) voltage of Vbat, to adjust the LED power.
-- Connection to the switch.
-- Connection to the switch LEDs. (Indicator lights.)
-- Connection to the audio card.
-- Vbat / ground in.
-- Vcc out.
-- LED for battery level.
-
-In the Gecko, the micro-controller FTDI header is exposed
-so that the code can be updated, fixed, and debugged.
+- ** LED ** a 1 WATT Cree or Luxeon LED in a star configuration is typical.
+  The LED uses a common anode, as well as 3 control lines: Red, Green, and
+  Blue. They 4 wires are connected from the LED to the front side of the 
+  emitter electronics.
 
 ### Switches
 
-The code assumes 2 switches.
+The code assumes 1 or 2 switches.
 - A: the main switch. Hold for power, tap for battery level indicator.
 - B: the auxillary switch. When the blade is on, tap for "blaster effect",
   hold for "lockup effect". When the blade is off, hold to toggle sound.
   When the sound turns on, hold for 1-4 flashes to set volume.
 
-You may also (when the blade is on) hold auxillary and then tap the main
-switch to cycle through the blade color / sound palettes.
+In a 2 switch configuration, you may also (when the blade is on) 
+hold auxillary and then tap the main switch to cycle through the blade 
+color / sound palettes.
 
-The switch plate on the Gecko is removable. It has a (regrettably 
-complex) set of connections to allow the switch to disconnect. Resistors for
-the indicator LEDs are "inlined" in the switch, so they don't need to be part
-of the Emitter circuit.
+In a 1 switch configuration, a tap mode switches between "blade", "palette",
+and "volume". Long press either turns the blade on/off, or selects the 
+palette or valume.
 
 ### Audio
 
 Audio playback is integrated into the main micro controller. It takes
-44.1kHz in; you will need to convert files to 44.1.
+44.1kHz in; you will need to convert files to 44.1k. (They are typically
+*not* 44.1kHz when provided, so you will need to convert.)
 
 You can have up to 10 sound "fonts" or sound banks. Each font
 needs to be in its own sub-directory, which will be the name of the font.
@@ -270,18 +283,18 @@ sound font will confuse the sound output.
 
 ## Code
 
-The code is really the heart of this project.
+The code is really the heart of this project. The code
+is set up to compile in the Arduino IDE, using teh Teensyduino extension.
 
-First you will need to set up libraries. Then there are 2 files you should 
-start with to adapt to your saber, 'pins.h' and 'electrical.h'. The code
-is set up to compile in the Arduino IDE.
+First you will need to set up libraries. Then you need to configure
+you particular saber in "pins.h".
 
 ### Libraries
 
-Regrettably, the 'saber' source code uses some forked libraries. They are
-all available on the github pages. I regret having to fork - it adds complexity
-and overhead - but there are issues I haven't otherwise been able to work
-around.
+\Regrettably, the 'saber' source code uses some forked libraries. They are
+all available on the github pages. I regret having to fork - it adds 
+complexity and overhead - but there are issues I haven't otherwise been able 
+to work around.
 
 #### Button
 
@@ -294,16 +307,13 @@ https://github.com/leethomason/Button
 #### Accelerometer
 
 The current design uses the (really great) LIS3DH unmodified.
-
 https://github.com/adafruit/Adafruit_LIS3DH
 
-### AudioFX
+#### OLED
 
-The standard library uses quite a bit of memory and is limited to 25 files.
-For Open Saber usage, this doesn't work. This fork of the library 
-addresses those limitations.
-
-https://github.com/leethomason/Adafruit_Soundboard_library
+The OLED display is required to compile, although it isn't supported
+as part of OpenSaber yet.
+FIXME
 
 ### General Utility
 
@@ -311,13 +321,19 @@ Just some (simple) code to streamline Arduino programming.
 
 https://github.com/leethomason/Grinliz_Arduino_Util
 
+### DotStar
+
+I couldn't find a dotstar library that wasn't needlessly complex.
+
+https://github.com/leethomason/DotStar
+
 ### Config Files
 
 #### 'pins.h'
 
 'pins.h' contains the wiring pinout, documentation, and features switches.
 The tricky #define is the SERIAL_DEBUG macro. If on, you can connect
-the FTDI header and debug the saber. However, without an FTDI header, **the 
+the USB header and debug the saber. However, without a USB connection, **the 
 saber won't work if SERIAL_DEBUG = 1**. The serial port won't be found,
 the timeouts kick in, and the saber essentially "locks up". It's a great to
 be able to debug, but remember to SERIAL_DEBUG=0 and upload that sketch
@@ -326,41 +342,38 @@ when you are done.
 Pins contains a bunch of other macros, which you can disable when you 
 build the saber, and turn on one by one.
 
-#### 'electrical.h'
-
-'electrical.h' contains the description of the LED: forward voltage, 
+'pins.h' also contains the description of the LED: forward voltage, 
 resistor values, etc. You need to set this for your particular build.
 
 Note that there is an equation for UVOLT_MULT which controls the volt
 meter. There's some variability; once the saber is assembled, I suggest
-adjusting this value by checking computed vs. measured values. (Type 'vcc' on 
+adjusting this value by checking computed vs. measured values. (Type 'vbat' on 
 the command line to get the current computed value.)
 
 ### Command line
 
-If you connect an FTDI header, you can open the COM port to the saber and
+If you connect vias USB, you can open the COM port to the saber and
 issue commands. This works irrespective of SERIAL_DEBUG.
 
 The saber has 8 palettes. The palette is a combination of:
 - blade color
 - impact color
-(In the future, sound palette will also be supported.) 
+- sound font
 
-- `pal` returns the current palette. `pal <0-7>` sets the current palette.
 - `bc` will return the current blade color for current palette. `bc #rrggbb`
-  will set the blade color for the current palette.
+  will set the blade color for the current palette. It will also show the 
+  current draw of the color. I generally keep it at 1000mA or less, although
+  you could theoretically draw about 1/2 the batter capacity. Do keep in mind
+  how well your LED is able to sink heat.
 - `ic` gets / sets the impact color or "blade flash".
-- `aud` and `aud <0-1>` gets and sets audio on/off. Due to some limitations
-  of the Audio FX interface, *This only works when the blade is off.*
-- `vol` and `vol <0-204>` gets and sets the current volume. *This only works
-  when the blade is off.*
-- `amp` is the power draw of the blade color (for the current palette) in
-  milli-amps. Note that the actual current draw tends to be less - something
-  I'm still working out. Nevertheless, you should probably keep the current
-  draw at 1000mA or less.
+- `pal` returns the current palette. `pal <0-7>` sets the current palette.
+- `font` gets/sets the sound font in use.
+- `fonts` lists the available sound fonts.
+- `aud` and `aud <0-1>` gets and sets audio on/off.
+- `vol` and `vol <0-204>` gets and sets the current volume.
 - `vbat' is the current battery level, in milli-volts. 4200 is fresh, 3700 is 
   nominal, 3500 is low. This is read from the Vmeter of the emitter circuit.
-- `util` is the current utilization of each channel. It is computed from Vcc.
+- `util` is the current utilization of each channel. It is computed from Vbat.
   `90 90 76` means that the saber will use 90% red, 90% green, and 76% of
   the blue channel. This keeps the average current through the LED constant.
   When Vbat drops to 3.7V, these will all be 100%.
@@ -371,8 +384,9 @@ The saber has 8 palettes. The palette is a combination of:
   the saber will dectect as impact, and play the impact sound effects.
 - `stat` will display all of the current saber settings.
 - `reset` will reset the palettes to their default values.
-- `font` get / sets the current sound font.
-- `fonts` lists the available sound fonts.
+- `accel` prints the current accelerometer output. Useful for checking
+  calibration and that your axis are set up correctly.
+- `test` runs the saber test suite.
 
 ## Future Direction
 
