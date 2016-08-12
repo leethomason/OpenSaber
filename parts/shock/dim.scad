@@ -9,6 +9,9 @@ MM_TO_INCHES 		= 1 / INCHES_TO_MM;
 D_INNER      		= 32.258;    	// 1.225 -> 1.250 -> 1.270
 R_INNER 			= D_INNER / 2;
 
+// emitter head
+D_EMITTER_RING      = 1.312 * INCHES_TO_MM;
+
 // dimensions of the main ring.
 H_RING 				= 16;
 T_RING 				= 2.5;

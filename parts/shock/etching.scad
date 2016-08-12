@@ -1,7 +1,13 @@
-D_TUBE = 33.0;
+
+/* Test aluminum
+D_TUBE = 31.8;
+*/
+
+D_TUBE = 37.3;
+
 R_TUBE = D_TUBE / 2;
 L = 60;
-W = 25;
+W = 26;
 H = 30;
 T = 3;
 
