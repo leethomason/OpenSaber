@@ -39,7 +39,7 @@ here: https://youtu.be/9_-Rfe4UBJM.
 There are 2 working sabers on the OpenSaber design. A SaberZ case
 and an UltraSabers case. Version numbers don't help much - I'm
 just trying to keep master current - but where it comes up, this
-is the V3 platform which uses the V5 circuits. (Sorry for the incosistent
+is the V3 platform which uses the V5 circuits. (It's an incosistent
 versioning scheme.)
 
 - Based on Teensy 3.2 microcontroller.
@@ -88,6 +88,11 @@ I am not affiliated with any of these, but have found them all useful.
 
 ### LEDs
 - LEDSupply. http://www.ledsupply.com/ has some nice RGB high power LEDs.
+
+### LED calculator
+An LED calculator is super handy for getting the right resistors for
+the different LEDs, whether high or low power.
+http://led.linear1.org/1led.wiz
 
 ### Electronics
 - Adafruit. I'm a huge Adafruit fan; great electronics and documentation.
@@ -155,6 +160,12 @@ In roughly front to back order, an saber is:
   - img - images and diagrams used by the docs
 
 ## Wiring
+
+Wiring diagram for Prop Shield version of saber (sorry for the terrible art): 
+[wiring v5 with prop shield](img/v5prop.png). 
+(Github isn't keen on image preview. You may need to clone the source and view
+locally.) Not shown: the speaker connection (connects to the prop shield) and
+the DotStar connection (also connects to prop shield.)
 
 ### Power Bus
 The saber uses a common ground. There are 4 positive power voltages. Please
@@ -231,12 +242,12 @@ thusfar with the service.
   can be programmed directly via USB, but the PCB also provides an alternate
   connection to the USB.
 
-- ** LED amplifier ** The LED uses a 3 channel, 350ma (average) controller.
+- **LED amplifier** The LED uses a 3 channel, 350ma (average) controller.
   The microcrontroller uses an amplifier bridge made of 3 MOSFETS, 
   resistors, and a copacitor. Note the LED resistors
   are on the PCB and not off-board, as is conventional.
 
-- ** LED ** a 1 WATT Cree or Luxeon LED in a star configuration is typical.
+- **LED** a 1 WATT Cree or Luxeon LED in a star configuration is typical.
   The LED uses a common anode, as well as 3 control lines: Red, Green, and
   Blue. They 4 wires are connected from the LED to the front side of the 
   emitter electronics.
@@ -291,7 +302,7 @@ you particular saber in "pins.h".
 
 ### Libraries
 
-\Regrettably, the 'saber' source code uses some forked libraries. They are
+Regrettably, the 'saber' source code uses some forked libraries. They are
 all available on the github pages. I regret having to fork - it adds 
 complexity and overhead - but there are issues I haven't otherwise been able 
 to work around.
@@ -313,7 +324,8 @@ https://github.com/adafruit/Adafruit_LIS3DH
 
 The OLED display is required to compile, although it isn't supported
 as part of OpenSaber yet.
-FIXME
+
+https://github.com/leethomason/OLED_SSD1306
 
 ### General Utility
 
@@ -349,6 +361,37 @@ Note that there is an equation for UVOLT_MULT which controls the volt
 meter. There's some variability; once the saber is assembled, I suggest
 adjusting this value by checking computed vs. measured values. (Type 'vbat' on 
 the command line to get the current computed value.)
+
+##### "Constant Current" and tuning the voltmeter.
+
+The OpenSaber code will maintain an average of 350mA current
+(or whatever you specify) across the LED. This block of code in pins.h
+is important for tuning:
+
+````
+  static const int32_t UVOLT_MULT = 6680;
+  #define ID_STR "Gecko (Sentris Body) RGB Luxeon"
+
+  static const int32_t RED_VF   = 2900;   // milli-volts
+  static const int32_t RED_I    = 350;    // milli-amps
+  static const int32_t RED_R    = 2400;   // milli-ohms
+````
+
+VF: forward voltage, from the LED spec.
+I: milli-amps of power
+R: the resistor value you used
+
+And finally the UVOLT_MULT. It's a little tedious to calculate,
+and doesn't turn out to be useful to do so. Once your saber 
+is up and running, wait until it hits the 3.7 volt range.
+Measure the power with a voltmeter. Run `vbat` on the saber
+command line to get the measured value. Adjust UVOLT_MULT,
+and recompile.
+
+UVOLT_MULT' = UVOLT_MULT * V_measured / vbat
+
+And then re-check the `vbat` just to be sure. It should 
+be close, but doesn't need to be exact.
 
 ### Command line
 
