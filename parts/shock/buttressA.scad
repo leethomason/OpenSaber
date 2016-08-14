@@ -1,3 +1,3 @@
 include <buttress.scad>
-part(false, true, false, false);
+part(crystal=true, pcb=true);
 
