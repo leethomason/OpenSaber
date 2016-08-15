@@ -167,7 +167,7 @@ Wiring diagram for Prop Shield version of saber (sorry for the terrible art):
 locally.) Not shown: the speaker connection (connects to the prop shield) and
 the DotStar connection (also connects to prop shield.)
 
-An actual photo of a V5 circuit "Front" is
+An actual photo of a V5 circuit. "Front" is
 the direction of the pin header.
 
 ![v% with Prop Shield](img/v5propShield.jpg)
@@ -261,6 +261,12 @@ The electronics are the heart of the OpenSaber project. There
 are 2 configurations: with and without a Prop Shield. The files are
 PCBExpress files. I regret the proprietary solution, but I've been happy
 thusfar with the service.
+
+The prop shield "collects" 1) an audio amplifier, 2) a DotStar LED controller,
+and 3) an accelerometer onto one board. The PCB with and without the Prop
+Shield are functionally equivalent. But without the Prop Shield, you need
+to add the amp and accelerometer yourself. Depending on space contraints,
+one or the other is more appealing. (Which is why I maintain both versions.)
 
 - A **microcontroller**, the Teensy 3.2, is the micro-computer
   that runs the softare. It controls the blade state, the color
