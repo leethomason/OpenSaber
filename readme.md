@@ -167,6 +167,34 @@ Wiring diagram for Prop Shield version of saber (sorry for the terrible art):
 locally.) Not shown: the speaker connection (connects to the prop shield) and
 the DotStar connection (also connects to prop shield.)
 
+An actual photo of a V5 circuit "Front" is
+the direction of the pin header.
+
+![v% with Prop Shield](img/v5propShield.jpg)
+
+- The Teensy Microcontroller is the top board. (The reset button and USB have 
+  been removed in this build.) The microcontroller sits on top of the Prop 
+  Shield.
+- The Prop Shield is in the middle.
+  - front: 2 white wires are speaker out
+  - front: a blue and yellow wire that connect the USB on the Teensy 
+    above to the USB on the PCB below. (This is to set up an alternate USB 
+    connection since the standard port is removed. If you don't remove the
+    standard USB port, you don't need these wires.)
+  - rear: black, yellow, green, and red wires are the connection
+    to a DotStar LED chain. The DotStars can be used for User Indicators
+    (power, volume, color) or driving an internal crystal.
+- The OpenSaber PCB is on the bottom.
+  - front: A 10 pin header connects to the switch and blade LED.
+  - front: A 5V power booster and capacitor is nestled in between 2 MOSFETs. 
+    The placement is a little over engineered, honestly.
+  - front: red, black, and black lines are for ground and power in from
+    the battery.
+  - front: yellow, blue, and black lines are for connecting a (non-standard)
+    USB port. (Again, if you aren't moving / removing the USB, you probably
+    don't need this.)
+  - back: SD connections. The SD wires haven't been connected yet.
+  
 ### Power Bus
 The saber uses a common ground. There are 4 positive power voltages. Please
 be aware of the power supply. Shorts between the supplies can cause big

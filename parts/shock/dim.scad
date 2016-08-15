@@ -28,7 +28,7 @@ TEETH_ANGLE			= 90;
 X_EMITTER 			= 4;
 Y_EMITTER 			= 1;
 
-H_BUTTRESS			= 4;
+H_BUTTRESS			= 3;
 D_BATTERY			= 18.6;
 W_PCB				= 18;
 H_PCB				= 6;

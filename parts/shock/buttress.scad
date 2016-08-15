@@ -15,8 +15,8 @@ module part(battery=false, pcb=false, crystal=false) {
         }
         
         if(pcb) {
-            translate([-W_PCB/2, -0.41 * INCHES_TO_MM, -EPS]) {
-              cube(size=[W_PCB + 40, H_PCB, H_BUTTRESS + EPS2]);
+            translate([-W_PCB/2, -11, -EPS]) {
+              cube(size=[W_PCB + 40, H_PCB+1, H_BUTTRESS + EPS2]);
             }
         }
 
