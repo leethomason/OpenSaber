@@ -28,11 +28,13 @@ TEETH_ANGLE			= 90;
 X_EMITTER 			= 4;
 Y_EMITTER 			= 1;
 
-H_BUTTRESS			= 3;
+H_BUTTRESS			= 3;       // internal buttress / baffles
 D_BATTERY			= 18.6;
-W_PCB				= 18;
-H_PCB				= 6;
+W_PCB				= 18;      // This is the pcb width
+H_PCB				= 6;       // But the height varies a *lot*
 D_CRYSTAL           = 10;
+H_NOTCH             = 2;        // Bottom notch size (if present...)
+W_NOTCH             = 4;
 
 W_OUTER_DISPLAY		= 0.91 * INCHES_TO_MM;
 W_INNER_DISPLAY		= 0.47 * INCHES_TO_MM;
