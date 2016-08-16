@@ -1,41 +1,77 @@
-FACES = 180;
-EPSILON = 0.1;
-VERSION_MAJOR = 1;
-VERSION_MINOR = 0;
+FACES 				= 180;
+EPSILON 			= 0.1;
 
-INCHES_TO_MM = 25.4;
-MM_TO_INCHES = 1 / INCHES_TO_MM;
+INCHES_TO_MM 		= 25.4;
+MM_TO_INCHES 		= 1 / INCHES_TO_MM;
 
-//D_RING      		= 1.311 * INCHES_TO_MM;
-D_WALL      		= 1.270 * INCHES_TO_MM;    // 1.225 -> 1.250
+// inner diameter of the lightsaber tube.
+// shock is constant, within tolerances
+D_INNER      		= 32.258;    	// 1.225 -> 1.250 -> 1.270
+R_INNER 			= D_INNER / 2;
 
-D_EMITTER_LED       = 0.75 * INCHES_TO_MM;     // correct
-D_EMITTER_THREAD    = 1.05 * INCHES_TO_MM;     // VERIY
-H_EMITTER_RING      = 0.280 * INCHES_TO_MM;    // measured at 279
-H_EMITTER_INNER     = 0.110 * INCHES_TO_MM;
-H_EMITTER_LED       = 0.700 * INCHES_TO_MM;    // correct
+// emitter head
+D_EMITTER_RING      = 1.312 * INCHES_TO_MM;
 
-H_BUTTRESS			= 0.175 * INCHES_TO_MM;
+// dimensions of the main ring.
+H_RING 				= 16;
+T_RING 				= 2.5;
 
-D_BATTERY			= 0.732 * INCHES_TO_MM;
+// dimensions of pin holders and pins
+PIN	   				= 2.54;
+H_PIN_HOLDER 		= 8;
+T_PIN_HOLDER_WALL 	= 2;
 
-W_PCB				= 0.70 * INCHES_TO_MM;
-H_PCB				= 0.08 * INCHES_TO_MM;
+N_TEETH				= 2;
+TEETH_ANGLE			= 90;
+
+// Pin counts:
+X_EMITTER 			= 4;
+Y_EMITTER 			= 1;
+
+H_BUTTRESS			= 3;       // internal buttress / baffles
+D_BATTERY			= 18.6;
+W_PCB				= 18;      // This is the pcb width
+H_PCB				= 6;       // But the height varies a *lot*
+D_CRYSTAL           = 10;
+H_NOTCH             = 2;        // Bottom notch size (if present...)
+W_NOTCH             = 4;
 
 W_OUTER_DISPLAY		= 0.91 * INCHES_TO_MM;
 W_INNER_DISPLAY		= 0.47 * INCHES_TO_MM;
 H_OUTER_DISPLAY		= 0.08 * INCHES_TO_MM;
 H_INNER_DISPLAY		= 0.14 * INCHES_TO_MM;
 
-D_SWITCH_CUTOUT		= 12.5;
-H_SWITCH_CUTOUT		= 0.7 * INCHES_TO_MM;
-
-D_POWER_CUTOUT		= 0.5 * INCHES_TO_MM;
-H_POWER_CUTOUT		= 0.5 * INCHES_TO_MM;
-
-D_DATA_CUTOUT		= 0.36 * INCHES_TO_MM;
-H_DATA_CUTOUT		= 0.70 * INCHES_TO_MM;
+D_SWITCH			= 12.5;						// actually 12, by thread.
 
 D_ROD				= 0.160 * INCHES_TO_MM;
 ROD_GAP 			= 0.050 * INCHES_TO_MM;
 
+OFFSET_EMITTER = -PIN + sqrt(R_INNER * R_INNER - PIN * PIN * X_EMITTER * X_EMITTER / 4);
+
+module emitterPin(h, longY)
+{
+	Y = longY ? 40 : PIN;
+
+    translate([-X_EMITTER * PIN / 2, OFFSET_EMITTER, 0]) {
+        cube([X_EMITTER * PIN, Y, h]);
+    }	
+}
+
+module emitterHolder(h)
+{
+    translate([-X_EMITTER * PIN / 2, OFFSET_EMITTER, 0]) {
+    	translate([-T_PIN_HOLDER_WALL, -T_PIN_HOLDER_WALL, 0]) {
+      		cube([X_EMITTER * PIN + T_PIN_HOLDER_WALL*2, PIN + T_PIN_HOLDER_WALL*2, h]);
+    	}
+    }	
+	
+}
+
+// Uses the same dimensions as the emitter holder so they 
+// can be used interchangeably.
+module lock(h)
+{
+    translate([-X_EMITTER * PIN / 2 - T_PIN_HOLDER_WALL, -20, 0]) {
+		cube([X_EMITTER * PIN + T_PIN_HOLDER_WALL * 2, 40, h]);
+	}	
+}

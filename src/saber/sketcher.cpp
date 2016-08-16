@@ -80,12 +80,20 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* i
     d->DrawStr("P", 23, 12, getGlypth_aurekBesh6);
     d->DrawStr("V", 97, 12, getGlypth_aurekBesh6);
 
+    /* From Alain Bloch:
+    "There is no emotion. There is only stillness.
+    There is no thought. There is only silence.
+    There is no ignorance. There is only attention.
+    There is no division. There is only perception.
+    There is no self. There is only the Force."
+    */
+
     static const int NLINES = 5;
     static const char* lines[NLINES] = {
-        "THERE IS NO DISCORD, THERE IS SERENITY.",
-        "THERE IS NO THOUGHT, THERE IS PERCEPTION.",
+        "THERE IS NO DISQUIET, THERE IS STILLNESS.",
+        "THERE IS NO THOUGHT, THERE IS SILENCE.",
         "THERE IS NO IGNORANCE, THERE IS ATTENTION.",
-        "THERE IS NO DIVISION, THERE IS EMPATHY.",
+        "THERE IS NO DIVISION, THERE IS PERCEPTION.",
         "THERE IS NO SELF, THERE IS THE FORCE.",
     };
 

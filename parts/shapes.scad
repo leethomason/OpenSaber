@@ -1,11 +1,13 @@
-FACES = 180;
+FACES   = 180;
 EPSILON = 0.1;
+PIN	    = 2.54;
 
-module tube(p_h, rOuter, rInner) {
+
+module tube(_h, _rInner, _rOuter) {
 	difference() {
-		cylinder(h=p_h, r=rOuter, $fn=FACES);
+		cylinder(h=_h, r=_rOuter, $fn=FACES);
 		translate([0,0,-EPSILON]) {
-			cylinder(h=p_h + EPSILON*2, r=rInner, $fn=FACES);
+			cylinder(h=_h + EPSILON*2, r=_rInner, $fn=FACES);
 		}
 	}
 }
@@ -16,15 +18,14 @@ module shelf(_r0, _h, _r1) {
 	}
 }
 
-/*
-needs a 2016 version.	
-module tubeArc(deg, p_h, rOuter, rInner) {
-	//rotate([90,0,0]) {
-		rotate_extrude(angle=30) {
-			translate([rInner,0,0]) {
-				square(size=[rOuter-rInner, p_h], center=false);
-			}
-		}
-	//}
+
+module pinsAtTube(r, h, nX, nY, longY)
+{
+	OFFSET = sqrt(r * r - PIN * PIN * nX * nX / 4);
+
+	Y = longY ? 40 : PIN * nY;
+
+    translate([-nX * PIN / 2, OFFSET - PIN * nY, 0]) {
+        cube([nX * PIN, Y, h]);
+    }	
 }
-*/
