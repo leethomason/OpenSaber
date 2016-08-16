@@ -222,11 +222,11 @@ Specific LED usage:
 
 - LED indicator lights, usually on the buttons. Powered at Vcc,
   3.3 volts, stable from the microcontroller. In theory these
-  ofter take 20mA, about a 47 ohm resistors. But that is BRIGHT.
+  often take 20mA, about a 47 ohm resistors. But that is BRIGHT.
   I often use 500 to 1000 ohm resistors.
 
 - DotStar smart LEDs. Used for user indicators. (Power meter,
-  volume, etc.) Driven by the prop shield.
+  volume, etc.) Driven by the prop shield, requires no resistors.
 
 ### Power Bus
 The saber uses a common ground. There are 4 positive power voltages. Please
