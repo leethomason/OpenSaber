@@ -5,17 +5,22 @@ N = 4;
 H = 3;
 T = 2;
 
-cube(size=[W_NOTCH, H_NOTCH, H_RAIL]);
-for(i=[0:N-1]) {
-	h = (H_RAIL - H_BUTTRESS) * i / (N - 1);
-	if (i > 0) {
-		translate([0, H_NOTCH, h-H]) {
-			cube(size=[W_NOTCH, T, H]);
-		}
-	}
-	if (i < N-1) {
-		translate([0, H_NOTCH, h+H_BUTTRESS]) {
-			cube(size=[W_NOTCH, T, H]);
-		}
-	}
+$fn = 180;
+
+difference() {
+    intersection() 
+    {
+        translate([0, D_INNER/2, 0]) {
+            cylinder(h=H_RAIL, r=D_INNER/2);
+        }
+        translate([-W_NOTCH/2, 0, 0]) {
+            cube(size=[W_NOTCH, H_NOTCH + 2, H_RAIL]);
+        }
+    }
+    for(i=[0:N-1]) {
+        h = (H_RAIL - H_BUTTRESS) * i / (N - 1);
+        translate([-W_NOTCH/2, H_NOTCH, h]) {
+            cube(size=[W_NOTCH, T, H]);
+        }
+    }
 }
