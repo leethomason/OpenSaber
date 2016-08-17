@@ -89,11 +89,6 @@ I am not affiliated with any of these, but have found them all useful.
 ### LEDs
 - LEDSupply. http://www.ledsupply.com/ has some nice RGB high power LEDs.
 
-### LED calculator
-An LED calculator is super handy for getting the right resistors for
-the different LEDs, whether high or low power.
-http://led.linear1.org/1led.wiz
-
 ### Electronics
 - Adafruit. I'm a huge Adafruit fan; great electronics and documentation.
   http://adafruit.com/
@@ -195,6 +190,44 @@ the direction of the pin header.
     don't need this.)
   - back: SD connections. The SD wires haven't been connected yet.
   
+### LEDs
+
+LEDs are used in a bunch of places. Specific concerns are discussed
+below, but for all the LEDs it's good to have a handly calculator.
+The Vf comes from the LED data sheet. The Vsource depends on
+which circuit it is connected to.
+
+A LED calculator: http://led.linear1.org/1led.wiz
+
+This calculator will select the next higher standard resistor,
+which is almost always what you want. However, if you want to 
+calculate the exact resistance:
+
+R (ohms) = (Vs - Vf) / amps_through_led
+
+Specific LED usage:
+
+- The high power LED that lights the blade. Powered by the battery
+  at 4.2 to 3.5 volts. Typcially about 1 Watt
+  (or higher) per channel, and the resistors are typically 1 Watt.
+  Typically a Vf of about 3.0 and expects 350mA of power. But
+  get correct values from the datasheet! Generally has a resistor
+  of 1-4 ohms. Note that once you select an LED, and add the
+  resistor and specs into the `pins.h` file, the microcontroller
+  will use PWM to keep the power at the specified level (or less.)
+  This means you can sometimes round down on the resistor values:
+  for example, if the `perfect` resistor is 1.6 ohms, and the 
+  calculator recomends 1.8 ohms, you might use a 1.5ohm to give
+  the microcontroller a little more "range" to work with.
+
+- LED indicator lights, usually on the buttons. Powered at Vcc,
+  3.3 volts, stable from the microcontroller. In theory these
+  often take 20mA, about a 47 ohm resistors. But that is BRIGHT.
+  I often use 500 to 1000 ohm resistors.
+
+- DotStar smart LEDs. Used for user indicators. (Power meter,
+  volume, etc.) Driven by the prop shield, requires no resistors.
+
 ### Power Bus
 The saber uses a common ground. There are 4 positive power voltages. Please
 be aware of the power supply. Shorts between the supplies can cause big
