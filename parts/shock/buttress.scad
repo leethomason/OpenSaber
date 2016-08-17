@@ -5,7 +5,7 @@ EPS2 = EPS * 2;
 CRYSTAL_Y = 8;
 ROD_X = 11;
 ROD_Y = 3.5;
-D_ROD = 4;
+D_ROD = 3.4;
 
 module part(battery=false, pcb=0, crystal=false, showBolt=false, rods=true, biasRight=false) {
     notch = true;
@@ -36,10 +36,14 @@ module part(battery=false, pcb=0, crystal=false, showBolt=false, rods=true, bias
 
             }
             translate([0, CRYSTAL_Y/2, -EPS]) 
-//            translate([0, 0, -EPS]) 
             { 
-                rotate([0, 0, 60]) {
-                    cube(size=[20, 20, H_BUTTRESS + EPS2]);
+                //rotate([0, 0, 60]) {
+                //    cube(size=[20, 20, H_BUTTRESS + EPS2]);
+                //}
+                scale([1, 2, 1]) {
+                    rotate([0, 0, 45]) {
+                        cube(size=[20, 20, H_BUTTRESS + EPS2]);
+                    }
                 }
             }
         }
@@ -60,9 +64,6 @@ module part(battery=false, pcb=0, crystal=false, showBolt=false, rods=true, bias
             translate([-W_NOTCH/2, -D_INNER/2, -EPS]) {
                 cube(size=[W_NOTCH, H_NOTCH, H_BUTTRESS + EPS2]);
             }
-            //translate([-W_NOTCH/2, -D_INNER/2 + H_NOTCH/2, H_BUTTRESS/2]) {
-            //    cube(size=[W_NOTCH, H_NOTCH/2, H_BUTTRESS]);
-            //}
         }
 
     }

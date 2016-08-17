@@ -6,7 +6,7 @@ $fn = 90;
 
 X_MC = 5;
 Y_MC = 2;
-MC_OFFSET = 6;
+MC_OFFSET = 3;
 MC_WIDTH  = X_MC * PIN;
 MC_HEIGHT = Y_MC * PIN;
 H_LOCK = 4;
@@ -45,8 +45,8 @@ intersection()
 
 			// Microcontroller port.
 			rotate([0, 0, 180]) {
-				translate([0, 0, H_RING - H_PIN_HOLDER]) {
-					portHolder(H_PIN_HOLDER, true);
+				translate([0, 0, H_RING - H_PIN_HOLDER-2]) {
+					portHolder(H_PIN_HOLDER+2, true);
 				}
 			}
 			// Emitter port

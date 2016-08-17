@@ -1,6 +1,6 @@
 include <dim.scad>
 
-H_RAIL = 60;
+H_RAIL = 55;
 N = 4;
 H = 3;
 T = 2;
