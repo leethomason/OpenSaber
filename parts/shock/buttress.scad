@@ -7,8 +7,7 @@ ROD_X = 11;
 ROD_Y = 3.5;
 D_ROD = 4;
 
-module part(battery=false, pcb=false, crystal=false) {
-    rods = true;
+module part(battery=false, pcb=0, crystal=false, showBolt=false, rods=true, biasRight=false) {
     notch = true;
 
     difference() {
@@ -20,15 +19,14 @@ module part(battery=false, pcb=false, crystal=false) {
             }
         }
         
-        if(pcb) {
-            BIAS_RIGHT = false;
+        if(pcb > 0) {
             OFFSET = 40;
 
-            translate([-W_PCB/2 + (BIAS_RIGHT ? 0 : -OFFSET), -11, -EPS]) {
+            translate([-W_PCB/2 + (biasRight ? 0 : -OFFSET), -11, -EPS]) {
                 // Front: H_PCB
                 // Back pins: H_PCB + 1
                 // Center: 12
-                cube(size=[W_PCB + OFFSET, 12, H_BUTTRESS + EPS2]);
+                cube(size=[W_PCB + OFFSET, pcb, H_BUTTRESS + EPS2]);
             }
         }
 
@@ -69,7 +67,7 @@ module part(battery=false, pcb=false, crystal=false) {
 
     }
     // Rods.
-    #if (rods) {
+    if (showBolt) {
         for(r=[0:1]) {
             translate([0, ROD_Y, 0]) {
                 rotate([0, 0, r*180]) {
