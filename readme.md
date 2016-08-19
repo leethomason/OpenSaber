@@ -292,7 +292,7 @@ and the control circuit has to account for that.
 
 The electronics are the heart of the OpenSaber project. There
 are 2 configurations: with and without a Prop Shield. The files are
-PCBExpress files. I regret the proprietary solution, but I've been happy
+ExpressPCB files. I regret the proprietary solution, but I've been happy
 thusfar with the service.
 
 The prop shield "collects" 1) an audio amplifier, 2) a DotStar LED controller,
