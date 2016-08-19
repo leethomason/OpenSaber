@@ -8,7 +8,7 @@ ROD_Y = 3.5;
 D_ROD = 3.4;
 
 module part(battery=false, pcb=0, crystal=false, showBolt=false, rods=true, biasRight=false) {
-    notch = true;
+    notch = false;
 
     difference() {
         cylinder(h=H_BUTTRESS, r=D_INNER/2, $fn=FACES);

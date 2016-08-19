@@ -8,6 +8,8 @@ include <buttress.scad>
 POWER_X = 11;
 POWER_Y = 4;
 POWER_Z = 9;
+POWER_H = 12; // fixme
+
 T = 2;
 OFFSET_Y = D_INNER / 2 - POWER_Y - 1.9;
 
@@ -26,8 +28,17 @@ difference() {
     }        
 
     // Cable notch
+    /*
     translate([-CABLE_X/2, -1, 0]) {
         cube(size=[CABLE_X, 6, 3]);
+    }
+    */
+    for(r=[0:1]) {
+        bias = (r==0) ? 1 : -1;
+        //translate([6 * bias, 0, 0]) {
+        translate([9 * bias, 8, 0]) {
+            cylinder(r=2, h=H_BUTTRESS, $fn=40);
+        }
     }
 }
 
@@ -43,6 +54,13 @@ difference() {
     translate([-(POWER_X)/2, OFFSET_Y, -(POWER_Z)]) {
         cube(size=[POWER_X, POWER_Y, POWER_Z]);
     }
+    
+}
+translate([ -(POWER_X/2)/2, 
+            OFFSET_Y - POWER_H - 2, 
+            -(POWER_Z)]) 
+{
+    cube(size=[POWER_X/2, 2, POWER_Z]);
 }
 
 

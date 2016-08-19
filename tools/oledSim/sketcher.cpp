@@ -15,11 +15,11 @@ textureData Sketcher::GetDial(int value)
 {
 	textureData td = get_dial0;
 	switch (value) {
-		case 1: td = get_dial1; break;
-		case 2: td = get_dial2; break;
-		case 3: td = get_dial3; break;
-		case 4: td = get_dial4; break;
-		default:
+	case 1: td = get_dial1; break;
+	case 2: td = get_dial2; break;
+	case 3: td = get_dial3; break;
+	case 4: td = get_dial4; break;
+	default:
 		break;
 	}
 	return td;
@@ -75,20 +75,20 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode)
 
 	static const int NLINES = 5;
 	static const char* lines[NLINES] = {
-		"THERE IS NO DISCORD, THERE IS SERENITY.",
-		"THERE IS NO THOUGHT, THERE IS PERCEPTION.",
+		"THERE IS NO THOUGHT, THERE IS SILENCE.",
+		"THERE IS NO DISCORD, THERE IS STILLNESS.",
 		"THERE IS NO IGNORANCE, THERE IS ATTENTION.",
-		"THERE IS NO DIVISION, THERE IS EMPATHY.",
+		"THERE IS NO DIVISION, THERE IS PERCEPTION.",
 		"THERE IS NO SELF, THERE IS THE FORCE.",
 	};
 
-  animTime += delta;
+	animTime += delta;
 
 	if (mode == REST_MODE) {
 		// Render the Jedi Creed.
 		int dx = animTime / 100;
 		bool render = d->DrawStr(lines[line], WIDTH - DIAL_WIDTH - 1 - dx, 23, getGlypth_aurekBesh6,
-								 DIAL_WIDTH, WIDTH - DIAL_WIDTH);
+			DIAL_WIDTH, WIDTH - DIAL_WIDTH);
 		if (!render) {
 			++line;
 			if (line == NLINES)
@@ -97,7 +97,7 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode)
 		}
 	}
 
-	if (mode == PALETTE_MODE || mode == VOLUME_MODE) 
+	if (mode == PALETTE_MODE || mode == VOLUME_MODE)
 	{
 		const char* label = mode == PALETTE_MODE ? "PAL" : "VOL";
 
@@ -126,6 +126,14 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode)
 		}
 	}
 
+	/*	
+	if (mode == POEM_MODE) {
+		for (int i = 0; i < NLINES; ++i) {
+			d->DrawStr(lines[i], 0, i*7, getGlypth_calibri8);
+		}
+	}
+	*/
+
 	// Current Palette
 	for (int i = 0; i <= palette; ++i) {
 		int x = 3 - (i % 4);
@@ -147,4 +155,4 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode)
 		buf[i] = i;
 	}
 #endif
-	}
+}

@@ -9,6 +9,8 @@ const uint8_t* get_dial2(int* width, int* height);
 const uint8_t* get_dial3(int* width, int* height);
 const uint8_t* get_dial4(int* width, int* height);
 
+// Created using the DotFactory.
+// FIXME: document settings for DotFactory!
 const uint8_t* getGlypth_aurekBesh6(int charID, int* advance, int* w, int* rows);
 const uint8_t* getGlypth_calibri8(int charID, int* advance, int* w, int* rows);
 
