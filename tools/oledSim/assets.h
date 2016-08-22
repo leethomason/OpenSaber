@@ -13,5 +13,6 @@ const uint8_t* get_dial4(int* width, int* height);
 // FIXME: document settings for DotFactory!
 const uint8_t* getGlypth_aurekBesh6(int charID, int* advance, int* w, int* rows);
 const uint8_t* getGlypth_calibri8(int charID, int* advance, int* w, int* rows);
+const uint8_t* getGlypth_tomThumb5(int charID, int* advance, int* w, int* rows);
 
 #endif // DRAW_INCLUDED

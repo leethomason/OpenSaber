@@ -18,7 +18,7 @@ public:
 		BLADE_ON_MODE,
 		PALETTE_MODE,
 		VOLUME_MODE,
-		//POEM_MODE,
+		POEM_MODE,
 		NUM_MODES
 	};
 

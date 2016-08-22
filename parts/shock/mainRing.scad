@@ -6,7 +6,7 @@ $fn = 90;
 
 X_MC = 5;
 Y_MC = 2;
-MC_OFFSET = 3;
+MC_OFFSET = 4;
 MC_WIDTH  = X_MC * PIN;
 MC_HEIGHT = Y_MC * PIN;
 H_LOCK = 4;
