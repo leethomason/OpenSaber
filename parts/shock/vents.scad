@@ -2,45 +2,67 @@ use <../threads.scad>
 use <../shapes.scad>
 include <dim.scad>
 
-module vent1(w, h1, h2, extrusion)
+module vent1(w, h, n, extrusion)
 {
-	rotate([90, 0, 90]) {
-		linear_extrude(height=extrusion) {
-			polygon([[-w/2,0], [w/2,0], [w/2,h1], [0,h2], [-w/2,h1]]);
-		}
-	}
+    angle = 360 / n;
+    h1 = 0.6 * h;
+    h2 = h;
+    
+	for(r=[0:n-1]) {
+		rotate([0, 0, angle*r]) {
+            rotate([90, 0, 90]) {
+                linear_extrude(height=extrusion) {
+                    polygon([[-w/2,0], [w/2,0], [w/2,h1], [0,h2], [-w/2,h1]]);
+                }
+            }
+        }
+    }
 }
 
-module vent2(w, h, extrusion)
+module vent2(w, h, n, extrusion)
 {
-	rotate([90, 0, 90]) {
-		linear_extrude(height=extrusion) {
-			polygon([[0,0], [w/2,w/2], [w/2, h-w/2], [0, h], [-w/2, h-w/2], [-w/2, w/2]]);
-		}
-	}
+    angle = 360 / n;
+	for(r=[0:n-1]) {
+		rotate([0, 0, angle*r]) {
+
+            rotate([90, 0, 90]) {
+                linear_extrude(height=extrusion) {
+                    polygon([[0,0], [w/2,w/2], [w/2, h-w/2], [0, h], [-w/2, h-w/2], [-w/2, w/2]]);
+                }
+            }
+        }
+    }
 }
 
-module vent3(w, h1, h2, extrusion)
+module vent3(w, h, n, extrusion)
 {
+    h1 = 0.6 * h;
+    h2 = h;
+    
 	W = w / 2;
 	IW = W * 0.62;
 	IH = h1 * 0.38;
+    
+    angle = 360 / n;
+	for(r=[0:n-1]) {
+		rotate([0, 0, angle*r]) {
 
-	rotate([90, 0, 90]) {
-		linear_extrude(height=extrusion) {
-			difference() {
-				polygon([[-W,0], [W,0], [W,h1], [0,h2], [-W,h1]]);
-				polygon([[-IW, 0], [IW, 0], [IW, IH], [-IW, IH]]);
-			}
-		}
+            rotate([90, 0, 90]) {
+                linear_extrude(height=extrusion) {
+                    difference() {
+                        polygon([[-W,0], [W,0], [W,h1], [0,h2], [-W,h1]]);
+                        polygon([[-IW, 0], [IW, 0], [IW, IH], [-IW, IH]]);
+                    }
+                }
+            }
+        }
 	}
 }
 
 module vent4(h, r, extrusion)
 {
-	theta = 30;
-	alpha = 16;
-	w = sin(alpha) * r;
+    alpha = 16;
+    w = sin(alpha) * r;
 
 	for(i=[0:11]) {
 		rotate([0, 0, 30*i]) {
@@ -63,17 +85,14 @@ module vent4(h, r, extrusion)
 
 difference() 
 {
-	tube(16, D_INNER/2 - 2, D_INNER/2);	
-	*for(r=[0:5]) {
-		rotate([0, 0, 60*r]) {
-			translate([0, 0, 2]) {
-				//vent1(6, 7, 12, 40);
-				//vent2(6, 12, 40);
-				vent3(6, 7, 12, 40);
-			}
-		}
-	}
+    H = 16;
+    D = D_INNER;
+	tube(H, D/2 - 2, D/2);	
+    
 	translate([0, 0, 3]) {
-		vent4(10, D_INNER/2, 20);
+        //vent1(6, H-6, 10, 40);
+        //vent2(6, H-6, 8, 40);
+        vent3(6, H-6, 7, 40);
+		//vent4(H-6, D/2, D);
 	}
 }

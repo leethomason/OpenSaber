@@ -94,13 +94,9 @@ module part(battery=false, pcb=0, crystal="none", showBolt=false, rods=true, bia
                 scale([W_CRYSTAL, H_CRYSTAL, 1]) {
                     cylinder(h=H_CRYSTAL_HOLDER + H_BUTTRESS, r=0.5, $fn=FACES);   
                 }
-                for(r=[0:5]) {
-                    rotate([0, 0, r*60]) {
-                        translate([0, 0, 1]) {
-                            //vent1(3, H_CRYSTAL_HOLDER*.25, H_CRYSTAL_HOLDER*.50, 20);
-                            vent2(3, H_CRYSTAL_HOLDER-2, 20);
-                        }
-                    }
+                translate([0, 0, 1]) {
+                    //vent1(3, H_CRYSTAL_HOLDER*.25, H_CRYSTAL_HOLDER*.50, 20);
+                    vent2(3, H_CRYSTAL_HOLDER-2, 6, 20);
                 }
             }
         }

@@ -81,20 +81,27 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* i
     d->DrawStr("V", 97, 12, getGlypth_aurekBesh6);
 
     /* From Alain Bloch:
-    "There is no emotion. There is only stillness.
-    There is no thought. There is only silence.
-    There is no ignorance. There is only attention.
-    There is no division. There is only perception.
-    There is no self. There is only the Force."
+        There is no emotion. There is only stillness.
+        There is no thought. There is only silence.
+        There is no ignorance. There is only attention.
+        There is no division. There is only perception.
+        There is no self. There is only the Force.
+    */
+
+    /*
+        The crystal is the heart of the blade.
+        The heart is the crystal of the Jedi.
+        The Jedi is the crystal of the Force.
+        The Force is the blade of the heart.
     */
 
     static const int NLINES = 5;
     static const char* lines[NLINES] = {
-        "THERE IS NO DISQUIET, THERE IS STILLNESS.",
-        "THERE IS NO THOUGHT, THERE IS SILENCE.",
-        "THERE IS NO IGNORANCE, THERE IS ATTENTION.",
-        "THERE IS NO DIVISION, THERE IS PERCEPTION.",
-        "THERE IS NO SELF, THERE IS THE FORCE.",
+        "THERE IS NO DISCORD, THERE IS ONLY STILLNESS.",
+        "THERE IS NO THOUGHT, THERE IS ONLY SILENCE.",
+        "THERE IS NO IGNORANCE, THERE IS ONLY ATTENTION.",
+        "THERE IS NO DIVISION, THERE IS ONLY PERCEPTION.",
+        "THERE IS NO SELF, THERE IS ONLY THE FORCE.",
     };
 
     animTime += delta;

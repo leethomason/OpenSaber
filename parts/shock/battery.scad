@@ -29,24 +29,27 @@ difference() {
 	translate([0, 1.5, 0]) {
 		battery();
 	}
+    
+    // Carve out a little extra space under:
+    //translate([0, -6, 0]) {
+    //    cylinder(h=H_BAT_CASE, d=10);
+    //}
+    
+    // And now the vents:
+    H = H_BAT_CASE / 4 - 1;
+    translate([0, 0, 2]) {
+        vent2(8, H, 6, 20);
+    }
+    translate([0, 0, 2 + H*2]) {
+        vent2(8, H, 6, 20);
+    }
 
-	for(r=[0:5]) {
-        H = H_BAT_CASE / 4 - 1;
-		rotate([0, 0, r*60]) {
-			translate([0, 0, 2]) {
-				vent2(8, H, 20);
-			}
-			translate([0, 0, 2 + H*2]) {
-				vent2(8, H, 20);
-			}
-		}
-		rotate([0, 0, r*60 + 30]) {
-			translate([0, 0, 2 + H]) {
-				vent2(8, H, 20);
-			}		
-			translate([0, 0, 2 + H * 3]) {
-				vent2(8, H, 20);
-			}		
-		}
-	}
+    rotate([0, 0, 30]) {
+        translate([0, 0, 2 + H]) {
+            vent2(8, H, 6, 20);
+        }		
+        translate([0, 0, 2 + H * 3]) {
+            vent2(8, H, 6, 20);
+        }		
+    }
 }

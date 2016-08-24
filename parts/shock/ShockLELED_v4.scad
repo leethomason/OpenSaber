@@ -39,11 +39,9 @@ difference() {
     cylinder(h=H_HEATSINK, r=D_HEATSINK/2, $fn=FACES);
 
     // Vents / decoration / volume reduction
-    for(r=[0:5]) {
-        translate([0, 0, 16]) {
-            rotate([180, 0, r*60]) {
-                vent1(11, 4, 12, 20);
-            }
+    translate([0, 0, 16]) {
+        rotate([180, 0, 0]) {
+            vent1(11, 12, 6, 20);
         }
     }
 
