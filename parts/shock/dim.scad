@@ -54,6 +54,7 @@ H_BAT_CASE          = 81.0;
 X_BAT_CASE          = 20.8;
 Y_BAT_CASE          = 20.1;
 BAT_CASE_NOTCH      = 2.5;
+H_BATTERY           = 68;
 D_BATTERY           = 18.50;
 
 OFFSET_EMITTER = -PIN + sqrt(R_INNER * R_INNER - PIN * PIN * X_EMITTER * X_EMITTER / 4);
