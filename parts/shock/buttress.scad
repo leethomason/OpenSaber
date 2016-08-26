@@ -14,7 +14,7 @@ module part(battery=false, pcb=0, crystal="none", showBolt=false, rods=true, bia
         cylinder(h=H_BUTTRESS, r=D_INNER/2, $fn=FACES);
         
         if (battery) {
-            translate([0,.230 * INCHES_TO_MM, -EPSILON]) {
+            translate([0, 0, -EPS]) {
                cylinder(h=H_BUTTRESS + EPS2, r=D_BATTERY/2, $fn=FACES);    
             }
         }

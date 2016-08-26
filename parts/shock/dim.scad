@@ -31,7 +31,6 @@ X_EMITTER 			= 4;
 Y_EMITTER 			= 1;
 
 H_BUTTRESS			= 3;       // internal buttress / baffles
-D_BATTERY			= 18.6;
 W_PCB				= 18;      // This is the pcb width
 H_PCB				= 6;       // But the height varies a *lot*
 W_CRYSTAL           = 12.1;
@@ -50,12 +49,8 @@ D_SWITCH			= 12.5;						// actually 12, by thread.
 D_ROD				= 0.160 * INCHES_TO_MM;
 ROD_GAP 			= 0.050 * INCHES_TO_MM;
 
-H_BAT_CASE          = 81.0;
-X_BAT_CASE          = 20.8;
-Y_BAT_CASE          = 20.1;
-BAT_CASE_NOTCH      = 2.5;
 H_BATTERY           = 68;
-D_BATTERY           = 18.50;
+D_BATTERY           = 18.50;    // An 1850. Huh. 
 
 OFFSET_EMITTER = -PIN + sqrt(R_INNER * R_INNER - PIN * PIN * X_EMITTER * X_EMITTER / 4);
 

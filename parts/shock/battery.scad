@@ -1,55 +1,30 @@
 include <dim.scad>
 use <vents.scad>
 use <../shapes.scad>
+use <buttress.scad>
 
+EPS = 0.1;
+EPS2 = EPS * 2;
 $fn = 90;
 
-module battery()
-{
-	translate([-X_BAT_CASE / 2, -Y_BAT_CASE /2, 0]) {
-		difference() {
-			cube(size=[X_BAT_CASE, Y_BAT_CASE*.7, H_BAT_CASE]);	
-
-			{
-				cube(size=[BAT_CASE_NOTCH, BAT_CASE_NOTCH, H_BAT_CASE]);
-			}
-			translate([X_BAT_CASE - BAT_CASE_NOTCH, 0, 0]) {
-				cube(size=[BAT_CASE_NOTCH, BAT_CASE_NOTCH, H_BAT_CASE]);
-			}
-		}
-	}
-	translate([0, (Y_BAT_CASE - D_BATTERY)/2, 0]) {
-		cylinder(h=H_BAT_CASE, d=D_BATTERY);
-	}
-}
-
+H_AFT = 30;
 
 difference() {
-	cylinder(h=H_BAT_CASE, d=D_AFT);
-	translate([0, 1.5, 0]) {
-		battery();
-	}
+    union() {
+        part(lowerWiring=true, upperWiring=false, showBolt=true);
+        translate([0, 0, -H_AFT]) {
+            cylinder(h=H_AFT, d=D_AFT);
+        }
+    }
+    translate([0, 0, -H_AFT + H_BUTTRESS]) {
+        cylinder(h=H_AFT + 20, d=D_BATTERY);
+    }
+    BACK = 8;
+    UP = 9;
+    translate([-20, -UP, -BACK]) {
+        cube(size=[40, UP*2, BACK]);
+    }
     
-    // Carve out a little extra space under:
-    //translate([0, -6, 0]) {
-    //    cylinder(h=H_BAT_CASE, d=10);
-    //}
-    
-    // And now the vents:
-    H = H_BAT_CASE / 4 - 1;
-    translate([0, 0, 2]) {
-        vent2(8, H, 6, 20);
-    }
-    translate([0, 0, 2 + H*2]) {
-        vent2(8, H, 6, 20);
-    }
-
-    rotate([0, 0, 30]) {
-        translate([0, 0, 2 + H]) {
-            vent2(8, H, 6, 20);
-        }		
-        translate([0, 0, 2 + H * 3]) {
-            vent2(8, H, 6, 20);
-        }		
-    }
+    // diameter of battery is 18
+    //cylinder(d=12, h=H_BUTTRESS);
 }

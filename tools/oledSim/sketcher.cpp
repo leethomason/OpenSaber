@@ -76,7 +76,8 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode)
 #endif
 
 #if 1
-	if (mode != POEM_MODE) {
+	//if (mode != POEM_MODE) 
+	{
 		d->DrawBitmap(0, 0, GetDial(power));
 		d->DrawBitmap(WIDTH - DIAL_WIDTH, 0, GetDial(volume), Renderer::FLIP_X);
 		d->DrawStr("P", 23, 12, getGlypth_aurekBesh6);
@@ -84,11 +85,11 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode)
 	}
 	static const int NLINES = 5;
 	static const char* lines[NLINES] = {
-		"THERE IS NO THOUGHT, THERE IS SILENCE.",
-		"THERE IS NO DISCORD, THERE IS STILLNESS.",
-		"THERE IS NO IGNORANCE, THERE IS ATTENTION.",
-		"THERE IS NO DIVISION, THERE IS PERCEPTION.",
-		"THERE IS NO SELF, THERE IS THE FORCE.",
+		"THERE IS NO EMOTION, THERE IS ONLY STILLNESS.",
+		"THERE IS NO THOUGHT, THERE IS ONLY SILENCE.",
+		"THERE IS NO IGNORANCE, THERE IS ONLY ATTENTION.",
+		"THERE IS NO DIVISION, THERE IS ONLY PERCEPTION.",
+		"THERE IS NO SELF, THERE IS ONLY THE FORCE.",
 	};
 
 	animTime += delta;
@@ -135,12 +136,14 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode)
 		}
 	}
 
+	/*
 	if (mode == POEM_MODE) {
 		for (int i = 0; i < NLINES; ++i) {
 			d->DrawStr(lines[i], -36, 1 + i*6, getGlypth_tomThumb5);
 		}
 	}
-	else {
+	else  */
+	{
 		// Current Palette
 		for (int i = 0; i <= palette; ++i) {
 			int x = 3 - (i % 4);
