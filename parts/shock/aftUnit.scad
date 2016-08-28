@@ -10,6 +10,7 @@ $fn = 90;
 
 H_AFT = 30;
 SPACE = DISPLAY_MOUNT_L;
+DISPLAY_Y = 10;
 
 // FIXME: display heights
 
@@ -52,18 +53,27 @@ module aft()
 }
 
 
-difference() {
-    union() {
-        part(pcb=6, showBolt=true);
-        translate([0, 0, SPACE]) {
-            part(rods=false, battery=true);
+intersection()
+{
+    cylinder(h=100, d=D_INNER);
+    difference() {
+        union() {
+            part(pcb=6, showBolt=true);
+            translate([0, 0, SPACE]) {
+                part(rods=false, battery=true);
+            }
+            translate([0, 0, SPACE + H_BUTTRESS]) {
+                aft();
+            }
+            translate([-20, DISPLAY_Y-1.5, 0]) {
+                cube(size=[40, 1.5, SPACE]);
+            }
+            translate([-20, -D_INNER/2, 0]) {
+                cube(size=[40, 4, SPACE]);
+            }
+        }    
+        translate([-DISPLAY_W/2, DISPLAY_Y, -H_BUTTRESS/2]) {
+            display();
         }
-        translate([0, 0, SPACE + H_BUTTRESS]) {
-            aft();
-        }
-    }    
-    translate([-DISPLAY_W/2, 10, -H_BUTTRESS/2]) {
-        display();
     }
 }
-
