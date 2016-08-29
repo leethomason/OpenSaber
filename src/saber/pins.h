@@ -28,14 +28,14 @@ SOFTWARE.
 // --- Configuration ---
 // Note: Serial connection should be set to 19200 baud with a newline after commands.
 
-#define SERIAL_DEBUG 0
+#define SERIAL_DEBUG 1
 
 #define SABER_MODEL_TEST			0
 #define SABER_MODEL_GECKO			1	// PCB, Teensy 3, external amp and accel
 #define SABER_MODEL_BLACK			2	// PCB, Prop Shield, Teensy 3, Dotstar UI
 #define SABER_MODEL_SHOCK			3	// PCB, Prop Shield, Teensy 3, OLED
 
-#define SABER_MODEL 				SABER_MODEL_BLACK
+#define SABER_MODEL 				SABER_MODEL_SHOCK
 
 static const int EEPROM_SIZE = 512;
 static const int32_t NOMINAL_VOLTAGE 	= 3700;
@@ -80,8 +80,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int32_t UVOLT_MULT = 6680;
 	#define ID_STR "Black Knight RGB Cree XPE2"
 
-	// Not sure about resistor values.
-	// Using defaults.
 	static const int32_t RED_VF   = 2100;   
 	static const int32_t RED_I    = 350;    
 	static const int32_t RED_R    = 4700;
@@ -105,9 +103,29 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_SOUND_ON
 	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
-	#define SABER_DISPLAY
+	//#define SABER_DISPLAY
 
+	// FIXME TUNE ALL
 	static const int32_t UVOLT_MULT = 6680;
+	#define ID_STR "Golden Knight RGB Cree XPE2"
+
+	static const int32_t RED_VF   = 2100;   
+	static const int32_t RED_I    = 350;    
+	static const int32_t RED_R    = 4700;
+
+	static const int32_t GREEN_VF = 3400;
+	static const int32_t GREEN_I  = 350;
+	static const int32_t GREEN_R  = 1000;
+
+	static const int32_t BLUE_VF  = 3100;
+	static const int32_t BLUE_I   = 350;
+	static const int32_t BLUE_R   = 1800;
+
+	static const int VOLUME_1 = 15;
+	static const int VOLUME_2 = 50;
+	static const int VOLUME_3 = 120;
+	static const int VOLUME_4 = 200;
+
 #endif
 
 #if SABER_MODEL == SABER_MODEL_GECKO
@@ -137,7 +155,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_EMITTER_GREEN 22
 	#define PIN_EMITTER_RED   23
 
-#elif SABER_MODEL == SABER_MODEL_BLACK
+#elif ((SABER_MODEL == SABER_MODEL_BLACK) || (SABER_MODEL == SABER_MODEL_SHOCK))
 	/* Teensy 3.2 with Prop Shield */
 	// Digital
 	#define PIN_RX1           0

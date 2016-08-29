@@ -44,7 +44,7 @@ module aft()
     difference() {
         tube(H_AFT, D_BATTERY/2, D_AFT/2);    
         translate([0, 0, 2]) {
-            vent4(H_AFT - H_BUTTRESS - 4, R_AFT, 20);
+            vent2(7, H_AFT - H_BUTTRESS - 4, 8, 20);
         }
     }
     translate([0, 0, H_AFT - H_BUTTRESS]) {
@@ -53,27 +53,46 @@ module aft()
 }
 
 
-intersection()
-{
-    cylinder(h=100, d=D_INNER);
-    difference() {
-        union() {
-            part(pcb=6, showBolt=true);
-            translate([0, 0, SPACE]) {
-                part(rods=false, battery=true);
+module aftPart() {
+    intersection()
+    {
+        cylinder(h=100, d=D_INNER);
+        difference() {
+            union() {
+                part(pcb=6, showBolt=false);
+                translate([0, 0, SPACE]) {
+                    part(rods=false, battery=true);
+                }
+                translate([0, 0, SPACE + H_BUTTRESS]) {
+                    aft();
+                }
+                translate([-20, -D_INNER/2, 0]) {
+                    cube(size=[40, 4, SPACE]);
+                }
+                translate([-16, -5, H_BUTTRESS]) cube(size=[3, 3, SPACE]);
+                translate([13, -5, H_BUTTRESS]) cube(size=[3, 3, SPACE]);
+            }    
+            translate([-20, DISPLAY_Y, SPACE+H_BUTTRESS]) {
+                cube(size=[40, 10, 100]);
             }
-            translate([0, 0, SPACE + H_BUTTRESS]) {
-                aft();
+            translate([-DISPLAY_W/2, DISPLAY_Y, -H_BUTTRESS/2]) {
+                display();
             }
-            translate([-20, DISPLAY_Y-1.5, 0]) {
-                cube(size=[40, 1.5, SPACE]);
-            }
-            translate([-20, -D_INNER/2, 0]) {
-                cube(size=[40, 4, SPACE]);
-            }
-        }    
-        translate([-DISPLAY_W/2, DISPLAY_Y, -H_BUTTRESS/2]) {
-            display();
         }
     }
+}
+
+*intersection() {
+    translate([-20, -20, 0]) cube(size=[40, 40, SPACE-0.01]);
+    aftPart();
+}
+
+*intersection() {
+    translate([-20, -20, SPACE]) cube(size=[40, 40, H_BUTTRESS]);
+    aftPart();
+}
+
+intersection() {
+    translate([-20, -20, SPACE + H_BUTTRESS + 0.01]) cube(size=[40, 40, 100]);
+    aftPart();
 }
