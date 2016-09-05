@@ -12,7 +12,7 @@ D_AFT               = 25.8;
 R_AFT               = D_AFT / 2;
 
 // emitter head
-D_EMITTER_RING      = 1.312 * INCHES_TO_MM;
+D_EMITTER_RING      = 33.4;
 
 // dimensions of the main ring.
 H_RING 				= 16;
@@ -50,7 +50,7 @@ D_ROD				= 0.160 * INCHES_TO_MM;
 ROD_GAP 			= 0.050 * INCHES_TO_MM;
 
 H_BATTERY           = 68;
-D_BATTERY           = 18.50;    // An 1850. Huh. 
+D_BATTERY           = 18.50 + 0.5;    // An 1850. Huh. 
 
 OFFSET_EMITTER = -PIN + sqrt(R_INNER * R_INNER - PIN * PIN * X_EMITTER * X_EMITTER / 4);
 

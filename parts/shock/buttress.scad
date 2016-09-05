@@ -8,7 +8,7 @@ ROD_X = 11;
 ROD_Y = 3.5;
 D_ROD = 3.4;
 
-module part(battery=false, pcb=0, crystal="none", showBolt=false, rods=true, biasRight=false, lowerWiring=false, upperWiring=false, crystalHolder=false) {
+module buttress(battery=false, pcb=0, crystal="none", showBolt=false, rods=true, biasRight=false, lowerWiring=false, upperWiring=false, crystalHolder=false) {
     
     difference() {
         cylinder(h=H_BUTTRESS, r=D_INNER/2, $fn=FACES);
