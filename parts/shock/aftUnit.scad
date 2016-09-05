@@ -82,12 +82,12 @@ module aftPart() {
     }
 }
 
-*intersection() {
+intersection() {
     translate([-20, -20, 0]) cube(size=[40, 40, SPACE-0.01]);
     aftPart();
 }
 
-*intersection() {
+intersection() {
     translate([-20, -20, SPACE]) cube(size=[40, 40, H_BUTTRESS]);
     aftPart();
 }
