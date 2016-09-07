@@ -10,6 +10,7 @@ $fn = 90;
 
 H_AFT_RING = 31;
 H_AFT = 56;         // inclusive of speaker mount
+D_AFT_RING = 35;
 
 H_SPEAKER = 3.6;
 X_SPEAKER = 20;
@@ -53,15 +54,16 @@ module aft()
     color("red") {
         translate([0, 0, H_AFT_RING]) {
             // rear lock
-            tube(7, D_BATTERY/2, D_EMITTER_RING/2);
+            tube(7, D_BATTERY/2, D_AFT_RING/2);
         }
     }
     translate([0, 0, SPACE + H_BUTTRESS]) {
         difference() {
-            tube(H_BACK, D_BATTERY/2, D_AFT/2);   
+            tube(H_BACK, D_BATTERY/2, D_AFT/2);  
+
             H = H_BACK - H_BUTTRESS - 11;
-            translate([0, 0, 10]) {
-                vent2(7, H, 8, 20);
+            translate([0, 0, 11]) {
+                vent1(7, H, 8, 20);
             }
         }
     }
@@ -135,7 +137,7 @@ module aftPart() {
                     buttress(rods=false, battery=true);
                 }
                 aft();
-                speaker();
+                //speaker();
             }   
             // Space for display.
             CUT = 7;
@@ -174,10 +176,10 @@ module aftPart() {
 }
 
 // STAGE 3
-*union() {
+union() {
     difference() {
         intersection() {
-            translate([-20, -20, H_AFT_RING]) cube(size=[40, 40, H_BACK - H_BUTTRESS]);
+            translate([-20, -20, H_AFT_RING]) cube(size=[40, 40, 100]);
             aftPart();
         }
         stage2pins(true);
@@ -189,7 +191,9 @@ module aftPart() {
 union() 
 {
     difference() {
-        speaker();
+        color("yellow") {
+            speaker();
+        }
         stage3pins(true);
         wireHoles();
     }

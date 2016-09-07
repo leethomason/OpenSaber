@@ -5,7 +5,7 @@ include <dim.scad>
 module vent1(w, h, n, extrusion)
 {
     angle = 360 / n;
-    h1 = 0.6 * h;
+    h1 = h - w * 1.2;
     h2 = h;
     
 	for(r=[0:n-1]) {
