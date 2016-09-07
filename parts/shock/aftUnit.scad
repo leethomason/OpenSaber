@@ -22,8 +22,10 @@ H_BACK = H_AFT - H_SPEAKER - H_BUTTRESS;
 SPACE = DISPLAY_MOUNT_L;
 DISPLAY_Y = 9.5;
 
-R_THREAD = 1.2; // for a M2.5 bolt
+R_THREAD = 1.2;         // M2.5 bolt
 R_THREAD_HEAD = 2.4;
+
+R_DISPLAY_THREAD = 0.8; // M2 bolt
 
 module display()
 {
