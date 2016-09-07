@@ -12,7 +12,7 @@ H_AFT_RING = 31;
 H_AFT = 56;         // inclusive of speaker mount
 D_AFT_RING = 35;
 
-H_SPEAKER = 3.6;
+H_SPEAKER = 3.6 + 0.2;
 X_SPEAKER = 20;
 Y_SPEAKER = 14.2;
 Y_SPEAKER_INNER = 8.4;
@@ -22,7 +22,8 @@ H_BACK = H_AFT - H_SPEAKER - H_BUTTRESS;
 SPACE = DISPLAY_MOUNT_L;
 DISPLAY_Y = 9.5;
 
-// FIXME: display heights
+R_THREAD = 1.2; // for a M2.5 bolt
+R_THREAD_HEAD = 2.4;
 
 module display()
 {
@@ -100,21 +101,40 @@ module stage1rods()
     }
 }
 
-module stage2pins(useLong)
+module stage2threads()
 {
-    H = useLong ? 10 : 2;
-    translate([0, 0, H_AFT_RING]) {
-        translate([ 9, -7, 0]) cylinder(h=H, r=1);
-        translate([-9, -7, 0]) cylinder(h=H, r=1);
+    H = 10;
+    translate([0, 0, SPACE]) {
+        translate([ 11, -7, 0]) {
+            cylinder(h=H, r=R_THREAD);
+            //cylinder(h=1, r=R_THREAD_HEAD);
+        }
+        translate([-10, -7, 0]) {
+            cylinder(h=H, r=R_THREAD);
+            //cylinder(h=1, r=R_THREAD_HEAD);
+        }
     }
 }
 
-module stage3pins(useLong)
+module stage3threads()
 {
-    H = useLong ? 10 : 2.1;
-    translate([0, 0, SPACE + H_BUTTRESS + H_BACK - 0.1]) {
-        translate([0,  11, 0]) cylinder(h=H, r=1);
-        translate([0, -11, 0]) cylinder(h=H, r=1);
+    H = 5;
+    D = 4;
+    Y = 11;
+    BACK = SPACE + H_BUTTRESS*2 + H_BACK + H_SPEAKER - H - D;
+    translate([0, 0, BACK]) {
+        translate([ 0, Y, 0]) {
+            cylinder(h=10, r=R_THREAD);
+            translate([0, 0, H]) {
+                cylinder(h=10, r=R_THREAD_HEAD);
+            }
+        }
+        translate([0, -Y, 0]) {
+            cylinder(h=10, r=R_THREAD);
+            translate([0, 0, H]) {
+                cylinder(h=10, r=R_THREAD_HEAD);
+            }
+        }
     }
 }
 
@@ -153,7 +173,7 @@ module aftPart() {
 }
 
 // STAGE 1
-*union() {
+union() {
     intersection() {
         translate([-20, -20, 0]) cube(size=[40, 40, SPACE-0.01]);
         union() {
@@ -164,15 +184,15 @@ module aftPart() {
 }
 
 // STAGE 2
-*union() {
+union() {
     intersection() {
         translate([-20, -20, SPACE]) cube(size=[40, 40, H_AFT_RING - SPACE-0.01]);
         difference() {
             aftPart();
             stage1rods();
+            stage2threads();
         }
     }
-    stage2pins(false);
 }
 
 // STAGE 3
@@ -182,9 +202,9 @@ union() {
             translate([-20, -20, H_AFT_RING]) cube(size=[40, 40, 100]);
             aftPart();
         }
-        stage2pins(true);
+        stage2threads();
+        stage3threads();
     }
-    stage3pins(false);
 }
 
 // STAGE 4
@@ -194,7 +214,7 @@ union()
         color("yellow") {
             speaker();
         }
-        stage3pins(true);
+        stage3threads();
         wireHoles();
     }
 }
