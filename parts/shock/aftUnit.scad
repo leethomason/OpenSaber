@@ -10,7 +10,7 @@ $fn = 90;
 
 H_AFT_RING = 31;
 H_AFT = 56;         // inclusive of speaker mount
-D_AFT_RING = 35;
+D_AFT_RING = 33.5;
 
 H_SPEAKER = 3.6 + 0.2;
 X_SPEAKER = 20;
@@ -26,27 +26,28 @@ R_THREAD = 1.2;         // M2.5 bolt
 R_THREAD_HEAD = 2.4;
 
 R_DISPLAY_THREAD = 0.8; // M2 bolt
+DEPTH_DISPLAY_THREAD = 4;
+
+module displayBolt() 
+{
+    translate([0, -DEPTH_DISPLAY_THREAD, 0]) {
+        rotate([-90, 0, 0]) cylinder(r=R_DISPLAY_THREAD, h=20);
+    }
+}
 
 module display()
 {
     DW = (DISPLAY_W - DISPLAY_MOUNT_W)/2;
     DL = (DISPLAY_L - DISPLAY_MOUNT_L)/2;
 
-    difference() {
-        cube(size=[DISPLAY_W, 10, DISPLAY_L+0.5]);
-        translate([DW, 0, DL]) {
-            rotate([-90, 0, 0]) cylinder(d=D_DISPLAY_MOUNT, h=20);
-        }
-        translate([DISPLAY_W - DW, 0, DL]) {
-            rotate([-90, 0, 0]) cylinder(d=D_DISPLAY_MOUNT, h=20);
-        }
-        translate([DISPLAY_W - DW, 0, DISPLAY_L - DL]) {
-            rotate([-90, 0, 0]) cylinder(d=D_DISPLAY_MOUNT, h=20);
-        }
-        translate([DW, 0, DISPLAY_L - DL]) {
-            rotate([-90, 0, 0]) cylinder(d=D_DISPLAY_MOUNT, h=20);
-        }
-    }
+    cube(size=[DISPLAY_W, 10, DISPLAY_L+0.5]);
+    
+    // Correct holes are challenging b/c of manufacturing
+    translate([DW, 0, DL]) displayBolt();
+    translate([DISPLAY_W - DW, 0, DL]) displayBolt();
+    translate([DISPLAY_W - DW, 0, DISPLAY_L - DL]) displayBolt();
+    translate([DW, 0, DISPLAY_L - DL]) displayBolt();
+    
     translate([0, -1, 6]) {
         cube(size=[DISPLAY_W, 1, DISPLAY_L - 12]);
     }
@@ -149,28 +150,24 @@ module wireHoles()
 }
 
 module aftPart() {
-    intersection()
-    {
-        cylinder(h=100, d=D_INNER);
-        difference() {
-            union() {
-                buttress(pcb=7, showBolt=false);
-                translate([0, 0, SPACE]) {
-                    buttress(rods=false, battery=true);
-                }
-                aft();
-                //speaker();
-            }   
-            // Space for display.
-            CUT = 7;
-            translate([-CUT, DISPLAY_Y-2, SPACE]) {
-                cube(size=[CUT*2, 10, 9]);
+    difference() {
+        union() {
+            buttress(pcb=7, showBolt=false);
+            translate([0, 0, SPACE]) {
+                buttress(rods=false, battery=true);
             }
-            translate([-DISPLAY_W/2, DISPLAY_Y, -H_BUTTRESS/2]) {
-                display();
-            }
-            wireHoles();
+            aft();
+            //speaker();
+        }   
+        // Space for display.
+        CUT = 7;
+        translate([-CUT, DISPLAY_Y-2, SPACE]) {
+            cube(size=[CUT*2, 10, 9]);
         }
+        translate([-DISPLAY_W/2, DISPLAY_Y, -H_BUTTRESS/2]) {
+            display();
+        }
+        wireHoles();
     }
 }
 
@@ -209,8 +206,7 @@ union() {
     }
 }
 
-// STAGE 4
-union() 
+// STAGE 4*union() 
 {
     difference() {
         color("yellow") {
