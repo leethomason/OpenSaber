@@ -2,7 +2,6 @@ include <dim.scad>
 use <vents.scad>
 use <../shapes.scad>
 use <buttress.scad>
-use <buttressC.scad>
 
 EPS = 0.1;
 EPS2 = EPS * 2;
@@ -30,6 +29,8 @@ DEPTH_DISPLAY_THREAD = 4;
 
 module displayBolt() 
 {
+    // Pins are challenging to print small & accurate.
+    // Trying holes for M2 bolts instead.
     translate([0, -DEPTH_DISPLAY_THREAD, 0]) {
         rotate([-90, 0, 0]) cylinder(r=R_DISPLAY_THREAD, h=20);
     }
@@ -42,11 +43,10 @@ module display()
 
     cube(size=[DISPLAY_W, 10, DISPLAY_L+0.5]);
     
-    // Correct holes are challenging b/c of manufacturing
-    translate([DW, 0, DL]) displayBolt();
-    translate([DISPLAY_W - DW, 0, DL]) displayBolt();
-    translate([DISPLAY_W - DW, 0, DISPLAY_L - DL]) displayBolt();
-    translate([DW, 0, DISPLAY_L - DL]) displayBolt();
+    translate([DW, 0, DL])                          displayBolt();
+    translate([DISPLAY_W - DW, 0, DL])              displayBolt();
+    translate([DISPLAY_W - DW, 0, DISPLAY_L - DL])  displayBolt();
+    translate([DW, 0, DISPLAY_L - DL])              displayBolt();
     
     translate([0, -1, 6]) {
         cube(size=[DISPLAY_W, 1, DISPLAY_L - 12]);
@@ -55,12 +55,13 @@ module display()
 
 module aft()
 {
+    // rear lock
     color("red") {
         translate([0, 0, H_AFT_RING]) {
-            // rear lock
             tube(7, D_BATTERY/2, D_AFT_RING/2);
         }
     }
+
     translate([0, 0, SPACE + H_BUTTRESS]) {
         difference() {
             tube(H_BACK, D_BATTERY/2, D_AFT/2);  
@@ -108,13 +109,10 @@ module stage2threads()
 {
     H = 10;
     translate([0, 0, SPACE]) {
-        translate([ 11, -7, 0]) {
-            cylinder(h=H, r=R_THREAD);
-            //cylinder(h=1, r=R_THREAD_HEAD);
-        }
-        translate([-10, -7, 0]) {
-            cylinder(h=H, r=R_THREAD);
-            //cylinder(h=1, r=R_THREAD_HEAD);
+        for(bias=[-1,2,1]) {
+            translate([9*bias, -7, 0]) {
+                cylinder(h=H, r=R_THREAD);
+            }
         }
     }
 }
@@ -126,16 +124,12 @@ module stage3threads()
     Y = 11;
     BACK = SPACE + H_BUTTRESS*2 + H_BACK + H_SPEAKER - H - D;
     translate([0, 0, BACK]) {
-        translate([ 0, Y, 0]) {
-            cylinder(h=10, r=R_THREAD);
-            translate([0, 0, H]) {
-                cylinder(h=10, r=R_THREAD_HEAD);
-            }
-        }
-        translate([0, -Y, 0]) {
-            cylinder(h=10, r=R_THREAD);
-            translate([0, 0, H]) {
-                cylinder(h=10, r=R_THREAD_HEAD);
+        for(bias=[-1,2,1]) {
+            translate([ 0, Y*bias, 0]) {
+                cylinder(h=10, r=R_THREAD);
+                translate([0, 0, H]) {
+                    cylinder(h=10, r=R_THREAD_HEAD);
+                }
             }
         }
     }
@@ -144,11 +138,13 @@ module stage3threads()
 module wireHoles()
 {   
     translate([0, 0, H_BUTTRESS]) {
-        translate([11.2, 0, 0]) cylinder(h=100, r=1.2);
-        translate([-11.2, 0, 0]) cylinder(h=100, r=1.2);
+        for(bias=[-1,2,1]) {
+            translate([11.2*bias, 0, 0]) cylinder(h=100, r=1.2);
+        }
     }               
 }
 
+// Excludes speaker. Drawn separately.
 module aftPart() {
     difference() {
         union() {
@@ -157,7 +153,6 @@ module aftPart() {
                 buttress(rods=false, battery=true);
             }
             aft();
-            //speaker();
         }   
         // Space for display.
         CUT = 7;
@@ -206,7 +201,8 @@ union() {
     }
 }
 
-// STAGE 4*union() 
+// STAGE 4 
+union()
 {
     difference() {
         color("yellow") {

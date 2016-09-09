@@ -7,7 +7,7 @@ include <buttress.scad>
 
 POWER_X = 11;
 POWER_Y = 14.5;
-POWER_Z = 9;
+POWER_Z = 10;
 POWER_H = 12; // fixme
 
 T = 2;
@@ -20,7 +20,7 @@ LED_Z = 1.5;
 CABLE_X = 8;
 
 difference() {
-    part(crystal=false, pcb=7, biasRight=false, upperWiring=true);
+    buttress(crystal=false, pcb=7, biasRight=false, upperWiring=true);
     
     // LED holder
     translate([-LED_X/2, CRYSTAL_Y - LED_Y/2, H_BUTTRESS - LED_Z]) {
@@ -40,7 +40,7 @@ difference() {
     translate([-(POWER_X)/2 - T, OFFSET_Y, -(POWER_Z)]) {
         cube(size=[POWER_X + T, POWER_Y, POWER_Z]);
     }
-    translate([-(POWER_X)/2 - T, OFFSET_Y, -(POWER_Z) - T/2]) {
+    *translate([-(POWER_X)/2 - T, OFFSET_Y, -(POWER_Z) - T/2]) {
         cube(size=[POWER_X + T, POWER_Y/2, POWER_Z]);
     }
     

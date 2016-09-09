@@ -41,7 +41,7 @@ difference() {
     // Vents / decoration / volume reduction
     translate([0, 0, 16]) {
         rotate([180, 0, 0]) {
-            vent1(11, 12, 6, 20);
+            vent1(8, 12, 8, 20);
         }
     }
 
