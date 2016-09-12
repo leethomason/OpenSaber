@@ -107,19 +107,28 @@ module speaker()
     }
 }
 
-module stage1rods()
+module lowerStage1rods()
 {
-    intersection()
-    {
-        LEN = SPACE + H_BUTTRESS / 2;
-        cylinder(h=100, d=D_INNER);
-        union() {
-            translate([-20, -D_INNER/2, 0]) {
-                cube(size=[40, 4 - DROP, LEN]);
-            }
-            translate([-17, -4, 0]) cube(size=[4, 3, LEN]);
-            translate([13, -4, 0]) cube(size=[4, 3, LEN]);
+    LEN = SPACE + H_BUTTRESS / 2;
+    union() {
+        translate([-20, -D_INNER/2, 0]) {
+            cube(size=[40, 4 - DROP, LEN]);
         }
+        translate([-17, -4, 0]) cube(size=[4, 3, LEN]);
+        translate([13, -4, 0]) cube(size=[4, 3, LEN]);
+    }
+}
+
+module stage1rods(useIntersection)
+{
+    if (useIntersection) {
+        intersection() {
+            cylinder(h=100, d=D_INNER);
+            lowerStage1rods();
+        }
+    }
+    else {
+        lowerStage1rods();
     }
 }
 
@@ -142,14 +151,16 @@ module stage3threads()
 {
     H = 5;
     D = 4;
-    Y = 11;
+    Y = 10.5;
     BACK = SPACE + H_BUTTRESS*2 + H_BACK + H_SPEAKER - H - D;
     translate([0, 0, BACK]) {
-        for(bias=[-1,2,1]) {
-            translate([ 0, Y*bias, 0]) {
-                cylinder(h=10, r=R_DISPLAY_THREAD);
-                translate([0, 0, H]) {
-                    cylinder(h=10, r=R_DISPLAY_THREAD_HEAD);
+        for(r=[-30, 30, 30]) {
+            rotate([0, 0, r]) {
+                translate([ 0, Y, 0]) {
+                    cylinder(h=10, r=R_DISPLAY_THREAD);
+                    translate([0, 0, H]) {
+                        cylinder(h=10, r=R_DISPLAY_THREAD_HEAD);
+                    }
                 }
             }
         }
@@ -190,14 +201,14 @@ module aftPart() {
 }
 
 // STAGE 1
-*union() {
+union() {
     intersection() {
         translate([-20, -20, 0]) cube(size=[40, 40, SPACE-0.01]);
         union() {
             aftPart();
         }
     }
-    stage1rods();
+    stage1rods(true);
 }
 
 // STAGE 2
@@ -206,7 +217,7 @@ union() {
         translate([-20, -20, SPACE]) cube(size=[40, 40, H_AFT_RING - SPACE + H_LOCK]);
         difference() {
             aftPart();
-            stage1rods();
+            stage1rods(false);
             stage2threads();
         }
     }
@@ -216,7 +227,7 @@ union() {
 union() {
     difference() {
         intersection() {
-            translate([-20, -20, H_AFT_RING + H_LOCK]) cube(size=[40, 40, 100]);
+            translate([-20, -20, H_AFT_RING + H_LOCK + 0.01]) cube(size=[40, 40, 100]);
             aftPart();
         }
         stage2threads();
