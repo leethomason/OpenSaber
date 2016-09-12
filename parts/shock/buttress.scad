@@ -8,7 +8,9 @@ ROD_X = 11;
 ROD_Y = 3.5;
 D_ROD = 3.4;
 
-module buttress(battery=false, pcb=0, crystal="none", showBolt=false, rods=true, biasRight=false, lowerWiring=false, upperWiring=false, crystalHolder=false) {
+module buttress(battery=false, pcb=0, crystal="none", showBolt=false, rods=true, biasRight=false, lowerWiring=false, upperWiring=false, crystalHolder=0) {
+
+    H_C = crystalHolder > 0 ? crystalHolder : H_CRYSTAL;
     
     difference() {
         cylinder(h=H_BUTTRESS, r=D_INNER/2, $fn=FACES);
@@ -51,7 +53,7 @@ module buttress(battery=false, pcb=0, crystal="none", showBolt=false, rods=true,
         if (crystal == "body" || crystal == "tip") {
             translate([0, CRYSTAL_Y, -EPS]) {
                 if (crystal == "body") {
-                    scale([W_CRYSTAL, H_CRYSTAL, 1]) {
+                    scale([W_CRYSTAL, H_C, 1]) {
                         cylinder(h=H_BUTTRESS + EPS2, r=0.5, $fn=FACES);   
                     }
                 }
@@ -84,14 +86,14 @@ module buttress(battery=false, pcb=0, crystal="none", showBolt=false, rods=true,
 
     }
 
-    if (crystalHolder) {
+    if (crystalHolder > 0) {
         translate([0, CRYSTAL_Y, -H_CRYSTAL_HOLDER]) {
             difference() {
                 MULT = 1.15;
-                scale([W_CRYSTAL * MULT, H_CRYSTAL * MULT, 1]) {
+                scale([W_CRYSTAL * MULT, H_C * MULT, 1]) {
                     cylinder(h=H_CRYSTAL_HOLDER + H_BUTTRESS, r=0.5, $fn=FACES);   
                 }
-                scale([W_CRYSTAL, H_CRYSTAL, 1]) {
+                scale([W_CRYSTAL, H_C, 1]) {
                     cylinder(h=H_CRYSTAL_HOLDER + H_BUTTRESS, r=0.5, $fn=FACES);   
                 }
                 translate([0, 0, 1]) {

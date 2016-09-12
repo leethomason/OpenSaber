@@ -11,7 +11,8 @@ POWER_Z = 10;
 POWER_H = 12; // fixme
 
 T = 2;
-OFFSET_Y = -0.2;
+OFFSET_Y = -0.4;
+OFFSET_X = -1;
 
 LED_X = 13;
 LED_Y = 8;
@@ -25,24 +26,19 @@ difference() {
     // LED holder
     translate([-LED_X/2, CRYSTAL_Y - LED_Y/2, H_BUTTRESS - LED_Z]) {
         cube(size=[LED_X, LED_Y, LED_Z]);
-    }        
+    }    
+
+    // Extra wiring
+    translate([8.5, -2, 0]) cylinder(h=10, r=3, $fn=90);
+    translate([-11, -1, 0]) cylinder(h=10, r=2, $fn=90);
 }
-
-
-
-*cylinder(r=D_INNER/2, h=1);
 
 // Power port holder
 difference() {
-    translate([-(POWER_X + T)/2, OFFSET_Y-T, -(POWER_Z + T)]) {
+    translate([-(POWER_X + T)/2 + OFFSET_X, OFFSET_Y-T, -(POWER_Z + T)]) {
         cube(size=[POWER_X + T, POWER_Y+T, POWER_Z + T]);
     }
-    translate([-(POWER_X)/2 - T, OFFSET_Y, -(POWER_Z)]) {
+    translate([-(POWER_X)/2 - T + OFFSET_X, OFFSET_Y, -(POWER_Z)]) {
         cube(size=[POWER_X + T, POWER_Y, POWER_Z]);
     }
-    *translate([-(POWER_X)/2 - T, OFFSET_Y, -(POWER_Z) - T/2]) {
-        cube(size=[POWER_X + T, POWER_Y/2, POWER_Z]);
-    }
-    
-    
 }
