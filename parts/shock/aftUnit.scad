@@ -114,8 +114,14 @@ module lowerStage1rods()
         translate([-20, -D_INNER/2, 0]) {
             cube(size=[40, 4 - DROP, LEN]);
         }
+        /*
         translate([-17, -4, 0]) cube(size=[4, 3, LEN]);
         translate([13, -4, 0]) cube(size=[4, 3, LEN]);
+        */
+        color("yellow") {
+            translate([-15, -2, 0]) cylinder(d=4, h=LEN);
+            translate([ 14, -5, 0]) cylinder(d=6, h=LEN);
+        }
     }
 }
 
@@ -138,12 +144,7 @@ module stage2threads()
     //H = 10;
     H = 20;
     translate([0, 0, SPACE]) {
-        //for(bias=[-1,2,1]) {
-            //translate([10*bias, -7, 0]) {
-            translate([0, 11, 0]) {
-                cylinder(h=H, r=R_THREAD);
-            }
-        //}
+        translate([0, 11, 0]) cylinder(h=H, r=R_THREAD);
     }
 }
 
@@ -180,7 +181,7 @@ module wireHoles()
 module aftPart() {
     difference() {
         union() {
-            buttress(pcb=7, showBolt=false);
+            buttress(pcb=7, showBolt=true);
             translate([0, 0, SPACE]) {
                 buttress(rods=false);
             }
@@ -201,7 +202,7 @@ module aftPart() {
 }
 
 // STAGE 1
-union() {
+*union() {
     intersection() {
         translate([-20, -20, 0]) cube(size=[40, 40, SPACE-0.01]);
         union() {
@@ -224,7 +225,7 @@ union() {
 }
 
 // STAGE 3
-union() {
+*union() {
     difference() {
         intersection() {
             translate([-20, -20, H_AFT_RING + H_LOCK + 0.01]) cube(size=[40, 40, 100]);
@@ -236,7 +237,7 @@ union() {
 }
 
 // STAGE 4 
-union()
+*union()
 {
     difference() {
         color("yellow") {
