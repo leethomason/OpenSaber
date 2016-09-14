@@ -212,7 +212,7 @@ union() {
 }
 
 // STAGE 2
-union() {
+*union() {
     intersection() {
         translate([-20, -20, SPACE]) cube(size=[40, 40, H_AFT_RING - SPACE + H_LOCK]);
         difference() {
@@ -224,7 +224,7 @@ union() {
 }
 
 // STAGE 3
-union() {
+*union() {
     difference() {
         intersection() {
             translate([-20, -20, H_AFT_RING + H_LOCK + 0.01]) cube(size=[40, 40, 100]);
@@ -236,7 +236,7 @@ union() {
 }
 
 // STAGE 4 
-union()
+*union()
 {
     difference() {
         color("yellow") {
