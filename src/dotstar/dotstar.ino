@@ -11,7 +11,7 @@ void setup()
   }
   Serial.println("Hello DotStar!!");
 
-  leds[0].set(0xff00f0);
+  leds[0].set(0xff0000);
   //leds[1].set(0x00ff00);
   //leds[2].set(0x0000ff);
   //leds[3].set(0x00ffff);
@@ -21,7 +21,7 @@ void setup()
   delay(2000);
   
   dotstar.begin();
-  dotstar.setBrightness(10);
+  //dotstar.setBrightness(10);
   dotstar.attachLEDs(leds, NUM_LEDS);
   dotstar.display();
   dotstar.display();

@@ -96,9 +96,8 @@ module buttress(battery=false, pcb=0, crystal="none", showBolt=false, rods=true,
                 scale([W_CRYSTAL, H_C, 1]) {
                     cylinder(h=H_CRYSTAL_HOLDER + H_BUTTRESS, r=0.5, $fn=FACES);   
                 }
-                translate([0, 0, 1]) {
-                    //vent1(3, H_CRYSTAL_HOLDER*.25, H_CRYSTAL_HOLDER*.50, 20);
-                    vent2(3, H_CRYSTAL_HOLDER-2, 6, 20);
+                translate([-10, -3, 0]) {
+                    cube(size=[20, 6, H_CRYSTAL_HOLDER/2]);
                 }
             }
         }

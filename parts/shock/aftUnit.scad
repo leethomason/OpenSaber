@@ -10,7 +10,7 @@ $fn = 90;
 H_AFT_RING = 28.5;
 H_AFT = 52;         // inclusive of speaker mount
 D_AFT_RING = 33.5;
-H_LOCK = 7;
+H_LOCK = 6;
 
 H_SPEAKER = 3.6 + 0.2;
 X_SPEAKER = 20;
@@ -29,7 +29,7 @@ R_DISPLAY_THREAD = 0.8; // M2 bolt
 R_DISPLAY_THREAD_HEAD = 2.0;
 DEPTH_DISPLAY_THREAD = 4;
 
-DROP = 2;
+DROP = 1;
 
 module battery() {
     translate([0, -DROP, SPACE + H_BUTTRESS + H_BACK - H_BATTERY]) {
@@ -112,8 +112,14 @@ module lowerStage1rods()
     LEN = SPACE + H_BUTTRESS / 2;
     union() {
         translate([-20, -D_INNER/2, 0]) {
-            cube(size=[40, 4 - DROP, LEN]);
+            cube(size=[40, 3 - DROP, LEN]);
         }
+        /*
+        intersection() {
+            translate([-20, -D_INNER/2, 0]) cube(size=[40, D_INNER/2, LEN]);
+            tube(LEN, D_INNER/2 - 1.5, D_INNER/2);
+        }
+        */
         /*
         translate([-17, -4, 0]) cube(size=[4, 3, LEN]);
         translate([13, -4, 0]) cube(size=[4, 3, LEN]);
@@ -181,7 +187,7 @@ module wireHoles()
 module aftPart() {
     difference() {
         union() {
-            buttress(pcb=7, showBolt=true);
+            buttress(pcb=7, showBolt=false);
             translate([0, 0, SPACE]) {
                 buttress(rods=false);
             }
@@ -191,7 +197,7 @@ module aftPart() {
         
         // Space for display.
         CUT = 7;
-        translate([-CUT, DISPLAY_Y-3, SPACE-1]) {
+        translate([-CUT, DISPLAY_Y-3, SPACE-2]) {
             cube(size=[CUT*2, 20, 9]);
         }
         translate([-DISPLAY_W/2, DISPLAY_Y, -H_BUTTRESS/2]) {
@@ -213,7 +219,7 @@ module aftPart() {
 }
 
 // STAGE 2
-*union() {
+union() {
     intersection() {
         translate([-20, -20, SPACE]) cube(size=[40, 40, H_AFT_RING - SPACE + H_LOCK]);
         difference() {

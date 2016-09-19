@@ -71,11 +71,11 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 #elif SABER_MODEL == SABER_MODEL_BLACK
 	#define SABER_NUM_LEDS				4
+	#define SABER_LEDS
 	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
 	#define SABER_SOUND_ON
 	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
-	#define SABER_LEDS
 
 	static const int32_t UVOLT_MULT = 6680;
 	#define ID_STR "Black Knight RGB Cree XPE2"
@@ -103,6 +103,9 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_SOUND_ON
 	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
+	#define SABER_NUM_LEDS 	1
+	#define SABER_CRYSTAL
+
 	//#define SABER_DISPLAY
 
 	// FIXME TUNE ALL

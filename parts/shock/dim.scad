@@ -34,7 +34,7 @@ H_BUTTRESS			= 3;       // internal buttress / baffles
 W_PCB				= 18;      // This is the pcb width
 H_PCB				= 6;       // But the height varies a *lot*
 W_CRYSTAL           = 12.1;
-H_CRYSTAL           = 8.2;
+H_CRYSTAL           = 9; //8.2;
 D_CRYSTAL_TIP       = 5.5;
 H_CRYSTAL_HOLDER    = 8.0;
 

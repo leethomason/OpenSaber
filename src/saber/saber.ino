@@ -86,7 +86,7 @@ ButtonMode  buttonMode;
 SaberDB     saberDB;
 AveragePower averagePower;
 
-#ifdef SABER_LEDS
+#ifdef SABER_NUM_LEDS
 DotStar::RGB leds[SABER_NUM_LEDS];
 DotStar dotstar(PIN_DOTSTAR_EN);
 DotStarUI dotstarUI;
@@ -207,13 +207,10 @@ void setup() {
         Log.p("OLED display connected.").eol();
     #endif
 
-//#if SABER_CRYSTAL == SABER_RGB_CRYSTAL
-//    pinMode(PIN_CRYSTAL_R, OUTPUT);
-//    pinMode(PIN_CRYSTAL_G, OUTPUT);
-//    pinMode(PIN_CRYSTAL_B, OUTPUT);
-//#elif SABER_CRYSTAL == SABER_DOTSTAR
-    #ifdef SABER_LEDS
-        dotstar.setBrightness(4);
+    #if defined(SABER_NUM_LEDS)
+        #if defined(SABER_LEDS)
+            dotstar.setBrightness(4);
+        #endif
         dotstar.attachLEDs(leds, SABER_NUM_LEDS);
         for(int i=0; i<SABER_NUM_LEDS; ++i) {
             leds[i].set(0x010101);
@@ -641,23 +638,17 @@ void loop() {
         #endif
     }
 
-    /*
-    #if SABER_CRYSTAL == SABER_RGB_CRYSTAL
-        const uint8_t* rgb = saberDB.bladeColor();
-        analogWrite(PIN_CRYSTAL_R, rgb[0]);
-        analogWrite(PIN_CRYSTAL_G, rgb[1]);
-        analogWrite(PIN_CRYSTAL_B, rgb[2]);
-    #elif SABER_CRYSTAL == SABER_DOTSTAR
+    #if defined(SABER_CRYSTAL)
         {
             const uint8_t* rgb = saberDB.bladeColor();
-            leds[SABER_DOTSTAR_CRYSTAL].red   = rgb[0];
-            leds[SABER_DOTSTAR_CRYSTAL].green = rgb[1];
-            leds[SABER_DOTSTAR_CRYSTAL].blue  = rgb[2];
+            leds[0].red   = rgb[0];
+            leds[0].green = rgb[1];
+            leds[0].blue  = rgb[2];
             dotstar.display();
         }
     #endif
-    */
 }
+ 
 
 int32_t readVbat() {
     #ifdef SABER_VOLTMETER
