@@ -23,6 +23,7 @@ void calcColor(uint32_t t, const uint8_t* base, uint8_t* out)
 		int32_t scaledColor = int32_t(base[i]) * RATIO + s * RATIO_M1;
 		if (scaledColor < 0) scaledColor = 0;
 		assert(scaledColor <= 65535);
+
 		out[i] = uint8_t(scaledColor / DIV);
 	}
 }
