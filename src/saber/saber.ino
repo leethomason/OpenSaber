@@ -641,9 +641,16 @@ void loop() {
     #if defined(SABER_CRYSTAL)
         {
             const uint8_t* rgb = saberDB.bladeColor();
-            leds[0].red   = rgb[0];
-            leds[0].green = rgb[1];
-            leds[0].blue  = rgb[2];
+            if (bladeState.state() == BLADE_OFF) {
+                uint8_t outColor[3];
+                calcCrystalColor(msec, rgb, outColor);
+                leds[0].set(outColor[0], outColor[1], outColor[2]);
+            }
+            else {
+                leds[0].red   = rgb[0];
+                leds[0].green = rgb[1];
+                leds[0].blue  = rgb[2];
+            }
             dotstar.display();
         }
     #endif

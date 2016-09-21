@@ -225,3 +225,21 @@ void DotStarUI::Draw(DotStar::RGB* led, int mode, const UIRenderData* data)
         break;
     }
 }
+
+
+void calcCrystalColor(uint32_t t, const uint8_t* base, uint8_t* out)
+{
+    static const int32_t RATIO = 220;
+    static const int32_t RATIO_M1 = 256 - RATIO;
+    static const int32_t DIV = 256;
+
+    uint32_t tc[3] = { t / 53UL, t / 67UL, t / 79UL };
+
+    for (int i = 0; i < 3; ++i) {
+        int32_t s = isin(tc[i]);
+        int32_t scaledColor = int32_t(base[i]) * RATIO + s * RATIO_M1;
+        if (scaledColor < 0) scaledColor = 0;
+
+        out[i] = uint8_t(scaledColor / DIV);
+    }
+}

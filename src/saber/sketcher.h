@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <DotStar.h>
+#include <Grinliz_Arduino_Util.h>
 #include "renderer.h"
 
 struct UIRenderData
@@ -54,5 +55,8 @@ private:
     uint8_t pos = 0;
     uint32_t animTime = 0;
 };
+
+void calcCrystalColor(uint32_t msec, const uint8_t* base, uint8_t* out);
+
 
 #endif // SKETCHER_INCLUDED

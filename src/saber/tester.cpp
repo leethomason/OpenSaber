@@ -304,7 +304,7 @@ public:
 			int32_t ave = sum / nSamples;
 			int32_t delta = maxV - minV;
 			Log.p("minV=").p(minV).p(" ").p(" maxV=").p(maxV).p(" delta=").p(delta).p(" ave=").p(ave).eol();
-			TEST_RANGE(10, 400, delta);
+			TEST_RANGE(0, 400, delta);
 		}		
 		return result;
 	}	
