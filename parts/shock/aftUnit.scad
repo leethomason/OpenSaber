@@ -111,19 +111,13 @@ module lowerStage1rods()
 {
     LEN = SPACE + H_BUTTRESS / 2;
     union() {
-        translate([-20, -D_INNER/2, 0]) {
+        *translate([-20, -D_INNER/2, 0]) {
             cube(size=[40, 3 - DROP, LEN]);
         }
-        /*
         intersection() {
-            translate([-20, -D_INNER/2, 0]) cube(size=[40, D_INNER/2, LEN]);
-            tube(LEN, D_INNER/2 - 1.5, D_INNER/2);
+            translate([-8, -20, 0]) cube(size=[30, 17, LEN]);
+            tube(LEN, D_INNER/2 - 0.5 ,D_INNER/2);
         }
-        */
-        /*
-        translate([-17, -4, 0]) cube(size=[4, 3, LEN]);
-        translate([13, -4, 0]) cube(size=[4, 3, LEN]);
-        */
         color("yellow") {
             translate([-15, -2, 0]) cylinder(d=4, h=LEN);
             translate([ 14, -5, 0]) cylinder(d=6, h=LEN);
@@ -204,6 +198,10 @@ module aftPart() {
             display();
         }
         wireHoles();
+
+        translate([-20, -D_INNER/2, 0]) {
+            cube(size=[40, 7, 5]);
+        }
     }
 }
 

@@ -105,8 +105,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_VOLTMETER
 	#define SABER_NUM_LEDS 	1
 	#define SABER_CRYSTAL
-
-	//#define SABER_DISPLAY
+	#define SABER_DISPLAY
 
 	// FIXME TUNE ALL
 	static const int32_t UVOLT_MULT = 6680;
