@@ -87,22 +87,28 @@ module aft()
 
         H = H_BACK - H_BUTTRESS - 11;
         translate([0, 0, SPACE + H_BUTTRESS + 11]) {
-            vent1(7, H, 8, 20);
+            vent1(4, H, 6, 20);
         }
     }
 }
 
 module speaker()
 {
+    DELTA = 0.8;
+    SZ = SPACE + H_BUTTRESS*2 + H_BACK - DELTA;
+    
     difference() {
         translate([0, 0, SPACE + H_BUTTRESS + H_BACK]) {
-            cylinder(h=H_BUTTRESS + H_SPEAKER, d=D_AFT);
+            cylinder(h=H_BUTTRESS + H_SPEAKER - DELTA, d=D_AFT);
         }
-        translate([-X_SPEAKER/2, -Y_SPEAKER/2, SPACE + H_BUTTRESS*2 + H_BACK]) {
+        translate([-X_SPEAKER/2, -Y_SPEAKER/2, SZ]) {
             cube(size=[X_SPEAKER, Y_SPEAKER, 20]);
         }
-        translate([-20, -Y_SPEAKER_INNER/2, SPACE + H_BUTTRESS*2 + H_BACK]) {
+        translate([-20, -Y_SPEAKER_INNER/2, SZ]) {
             cube(size=[40, Y_SPEAKER_INNER, 20]);
+        }
+        translate([-2, -9, SZ-2]) {
+            cube(size=[4, 18, 10]);
         }
     }
 }
@@ -183,11 +189,15 @@ module aftPart() {
         union() {
             buttress(pcb=7, showBolt=false);
             translate([0, 0, SPACE]) {
-                buttress(rods=false);
+                buttress();
             }
             aft();
         }   
         battery();
+
+        translate([X_ROD, Y_ROD, 0]) {
+            cylinder(d=D_ROD, h=100, $fn=FACES);
+        }        
         
         // Space for display.
         CUT = 7;
@@ -217,7 +227,7 @@ module aftPart() {
 }
 
 // STAGE 2
-union() {
+*union() {
     intersection() {
         translate([-20, -20, SPACE]) cube(size=[40, 40, H_AFT_RING - SPACE + H_LOCK]);
         difference() {
@@ -229,7 +239,7 @@ union() {
 }
 
 // STAGE 3
-*union() {
+union() {
     difference() {
         intersection() {
             translate([-20, -20, H_AFT_RING + H_LOCK + 0.01]) cube(size=[40, 40, 100]);

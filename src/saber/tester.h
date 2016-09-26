@@ -75,6 +75,7 @@ private:
 	struct Press {
 		uint32_t start;
 		uint32_t end;
+		void reset() { start = end = 0; }
 	};
 	Random r;
 	Press pressState[2];

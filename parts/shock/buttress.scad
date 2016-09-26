@@ -4,9 +4,6 @@ use <vents.scad>
 EPS = 0.1;
 EPS2 = EPS * 2;
 CRYSTAL_Y = 8;
-ROD_X = 11;
-ROD_Y = 3.5;
-D_ROD = 3.4;
 
 module buttress(battery=false, pcb=0, crystal="none", showBolt=false, rods=true, biasRight=false, lowerWiring=false, upperWiring=false, crystalHolder=0) {
 
@@ -72,18 +69,11 @@ module buttress(battery=false, pcb=0, crystal="none", showBolt=false, rods=true,
             }
         }
 
-        if (rods) {
-            for(r=[0:1]) {
-                translate([0, ROD_Y, -EPS]) {
-                    rotate([0, 0, r*180]) {
-                        translate([ROD_X, 0, 0]) {
-                            cylinder(r=D_ROD/2, h=H_BUTTRESS + EPS2, $fn=FACES);
-                        }
-                    }
-                }
+        if (rods) {     
+            translate([X_ROD, Y_ROD, 0]) {
+                cylinder(d=D_ROD, h=H_BUTTRESS + EPS2, $fn=FACES);
             }
         }
-
     }
 
     if (crystalHolder > 0) {

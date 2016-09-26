@@ -4,6 +4,15 @@ EPSILON 			= 0.1;
 INCHES_TO_MM 		= 25.4;
 MM_TO_INCHES 		= 1 / INCHES_TO_MM;
 
+// Marks - absolute location.
+M_WAY_BACK          = 40;
+M_POMMEL            = -37.5;    // approximate. hard to measure.
+M_0                 = 0;        // physical back of the lightsaber.
+M_AFT_STOP          = 16.6;
+M_PORT_CENTER       = 57.8;
+
+H_FAR               = 200;
+
 // inner diameter of the lightsaber tube.
 // shock is constant, within tolerances
 D_INNER      		= 32.258;    	// 1.225 -> 1.250 -> 1.270
@@ -46,8 +55,9 @@ D_DISPLAY_MOUNT     = 2;
 
 D_SWITCH			= 12.5;						// actually 12, by thread.
 
-D_ROD				= 0.160 * INCHES_TO_MM;
-ROD_GAP 			= 0.050 * INCHES_TO_MM;
+X_ROD               = 10.5;
+Y_ROD               =  3.5;
+D_ROD               =  3.4;
 
 H_BATTERY           = 68;
 D_BATTERY           = 18.50 + 0.5;    // An 1850. Huh. 

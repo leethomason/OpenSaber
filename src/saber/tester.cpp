@@ -442,8 +442,12 @@ Test* Tester::done()
 		if (passCount < nPasses) {
 			currentTest = 0;
 			test = gTests[currentTest];
+
 			for(int i=0; gTests[i]; ++i) {
 				gTests[i]->finalResult = 0;
+			}
+			for(int i=0; i<2; ++i) {
+				pressState[i].reset();
 			}
 		}
 	}
