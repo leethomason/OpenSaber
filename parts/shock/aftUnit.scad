@@ -29,10 +29,8 @@ R_DISPLAY_THREAD = 0.8; // M2 bolt
 R_DISPLAY_THREAD_HEAD = 2.0;
 DEPTH_DISPLAY_THREAD = 4;
 
-DROP = 1;
-
 module battery() {
-    translate([0, -DROP, SPACE + H_BUTTRESS + H_BACK - H_BATTERY]) {
+    translate([0, -BATTERY_DROP, 0]) {
         cylinder(d=D_BATTERY, h = H_BATTERY);
     }
 }
@@ -117,9 +115,6 @@ module lowerStage1rods()
 {
     LEN = SPACE + H_BUTTRESS / 2;
     union() {
-        *translate([-20, -D_INNER/2, 0]) {
-            cube(size=[40, 3 - DROP, LEN]);
-        }
         intersection() {
             translate([-8, -20, 0]) cube(size=[30, 17, LEN]);
             tube(LEN, D_INNER/2 - 0.5 ,D_INNER/2);
@@ -216,7 +211,7 @@ module aftPart() {
 }
 
 // STAGE 1
-*union() {
+union() {
     intersection() {
         translate([-20, -20, 0]) cube(size=[40, 40, SPACE-0.01]);
         union() {
@@ -227,7 +222,7 @@ module aftPart() {
 }
 
 // STAGE 2
-*union() {
+union() {
     intersection() {
         translate([-20, -20, SPACE]) cube(size=[40, 40, H_AFT_RING - SPACE + H_LOCK]);
         difference() {
@@ -251,7 +246,7 @@ union() {
 }
 
 // STAGE 4 
-*union()
+union()
 {
     difference() {
         color("yellow") {
