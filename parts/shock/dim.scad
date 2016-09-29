@@ -56,6 +56,7 @@ W_CRYSTAL           = 12.1;
 H_CRYSTAL           = 9; //8.2;
 D_CRYSTAL_TIP       = 5.5;
 H_CRYSTAL_HOLDER    = 8.0;
+CRYSTAL_Y           = 8;        // offset up of the crystal
 
 DISPLAY_W           = 23;
 DISPLAY_L           = 32;

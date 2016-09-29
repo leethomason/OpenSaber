@@ -1,24 +1,30 @@
 include <dim.scad>
 use <buttress.scad>
 use <../shapes.scad>
+use <vents.scad>
 
 $fn=90;
+EPS = 0.01;
+EPS2 = EPS * 2;
 
 DISPLAY_INNER_W = (DISPLAY_W - DISPLAY_MOUNT_W)/2;
 DISPLAY_INNER_L = (DISPLAY_L - DISPLAY_MOUNT_L)/2;
+POWER_Z         = 10;
 
 M_SPEAKER_FRONT 	= M_SPEAKER_BACK + H_SPEAKER_HOLDER;
 M_BATTERY_BACK 		= M_SPEAKER_FRONT;
 M_AFT_STOP_FRONT	= M_AFT_STOP + H_AFT_RING;
 M_DISPLAY_BUTTRESS 	= M_DISPLAY + DISPLAY_L - DISPLAY_INNER_L - H_BUTTRESS / 2;
+M_PORT_BUTTRESS     = M_PORT_CENTER + POWER_Z / 2;
+M_CRYSTAL_BUTTRESS  = M_PORT_BUTTRESS + H_BUTTRESS + H_CRYSTAL_HOLDER;
 
 R_DISPLAY_THREAD = 0.8; // M2 bolt
 R_DISPLAY_THREAD_HEAD = 2.0;
 DEPTH_DISPLAY_THREAD = 4;
 
 module battery() {
-    translate([0, -BATTERY_DROP, M_BATTERY_BACK]) {
-        cylinder(d=D_BATTERY, h = H_BATTERY);
+    translate([0, -BATTERY_DROP, M_BATTERY_BACK - EPS]) {
+        cylinder(d=D_BATTERY, h = H_BATTERY + EPS2);
     }
 }
 
@@ -32,6 +38,7 @@ module innerTube() {
 	translate([0, 0, M_WAY_BACK]) cylinder(r=R_INNER, h=H_FAR);
 }
 
+
 module displayBolt() 
 {
     // Pins are challenging to print small & accurate.
@@ -44,20 +51,21 @@ module displayBolt()
 module displayConnectors()
 {
 	INSET = 2;
-   	LEN = M_DISPLAY_BUTTRESS - M_AFT_STOP_FRONT + 0.1 + INSET;;
+   	LEN     = M_DISPLAY_BUTTRESS - M_AFT_STOP_FRONT + 0.1 + INSET;
+   	LENLONG = M_DISPLAY_BUTTRESS - M_AFT_STOP_FRONT + H_BUTTRESS + INSET;
 
     intersection() {
 		innerTube();
-	    translate([0, 0, M_AFT_STOP_FRONT - INSET]) {
-		    color("yellow") {
-			    union() {
-			        intersection() {
-			            translate([-20, -20, 0]) cube(size=[30, 17, LEN]);
-			            tube(LEN, D_INNER/2 - 0.5, D_INNER/2);
-			        }
+		union() {			
+		    translate([0, 0, M_AFT_STOP_FRONT - INSET]) {
+		        intersection() {
+		            translate([-20, -20, 0]) cube(size=[30, 17, LENLONG]);
+		            tube(LENLONG, D_INNER/2 - 0.5, D_INNER/2);
+		        }
+			    color("yellow") {
 		            translate([-15, -2, 0]) cylinder(d=4, h=LEN);
 		            translate([ 14, -5, 0]) cylinder(d=6, h=LEN);
-			    }
+				}
 			}
 		}
 	}
@@ -94,19 +102,152 @@ module aftLock()
     }
  }
 
+module aftPowerHoles()
+{
+	translate([D_AFT/2 - 1.8, 0, M_WAY_BACK]) cylinder(h=H_FAR, d=2.5);
+	translate([-D_AFT/2 + 1.8, 0, M_WAY_BACK]) cylinder(h=H_FAR, d=2.5);
+}
 
+ module batteryHolder()
+ {
+ 	H = M_AFT_STOP - M_BATTERY_BACK;
+
+    translate([0, 0, M_BATTERY_BACK]) {
+	    difference() {
+        	cylinder(h=H, d=D_AFT);
+
+	    	translate([0, 0, H - 4]) {
+	        	rotate([180, 0, 0]) vent1(4, H-8, 6, 20);
+        	}
+        }
+    } 	
+ }
+
+module speakerHolder()
+{
+    DELTA = 0.8;
+    translate([0, 0, M_SPEAKER_BACK]) {
+        difference() 
+        {
+            cylinder(h=H_SPEAKER_HOLDER, d=D_AFT);
+            translate([-X_SPEAKER/2, -Y_SPEAKER/2, -EPS]) {
+                cube(size=[X_SPEAKER, Y_SPEAKER, H_SPEAKER + EPS]);
+            }
+            translate([-20, -Y_SPEAKER_INNER/2, -EPS]) {
+                cube(size=[40, Y_SPEAKER_INNER, H_SPEAKER + EPS]);
+            }
+            // Sound trough.
+            translate([-2, -9, -EPS]) {
+                cube(size=[4, 18, H_SPEAKER + 1]);
+            }
+        }
+    }     
+}
+
+module speakerBolts()
+{
+    translate([0, 0, M_SPEAKER_BACK]) {
+        translate([4.5, 9.5, -EPS]) {
+            cylinder(h=10, r=R_DISPLAY_THREAD);
+            cylinder(h=2, r=R_DISPLAY_THREAD_HEAD);
+        }
+        translate([-4.5, 9.5, -EPS]) {
+            cylinder(h=10, r=R_DISPLAY_THREAD);
+            cylinder(h=2, r=R_DISPLAY_THREAD_HEAD);
+        }
+    }
+}
+
+
+module portButtress()
+{
+    POWER_X = 11;
+    POWER_Y = 14.5;
+
+    T = 2;
+    OFFSET_Y = -0.4;
+    OFFSET_X = -1;
+    
+    INNER_X0 = -POWER_X / 2 + OFFSET_X;
+    INNER_Y0 = OFFSET_Y;
+    INNER_Z0 = -POWER_Z / 2; // from port center.
+
+    LED_X = 13;
+    LED_Y = 8;
+    LED_Z = 1.5;    
+    
+    translate([0, 0, M_PORT_CENTER]) {
+        difference() {
+            translate([INNER_X0, INNER_Y0 - T, INNER_Z0 - T]) {
+                cube(size=[POWER_X + T, POWER_Y + T, POWER_Z + T]);
+            }
+            translate([INNER_X0-EPS, INNER_Y0, INNER_Z0]) {
+                cube(size=[POWER_X+EPS, POWER_Y + EPS, POWER_Z + 10]);
+            }
+        }          
+        
+        translate([0, 0, POWER_Z/2]) {
+            difference() {
+                buttress(pcb=7);
+                translate([-LED_X/2, CRYSTAL_Y - LED_Y/2, H_BUTTRESS - LED_Z]) {
+                    cube(size=[LED_X, LED_Y, LED_Z + EPS]);
+                }
+            }
+        }
+    }
+}
+
+module crystalButtress()
+{
+    translate([0, 0, M_CRYSTAL_BUTTRESS]) {
+        buttress(pcb=11, crystal="body", crystalHolder=9);
+    }
+}
+
+//---------------------------//
+
+// Speaker holder.
+difference() {
+    speakerHolder();
+    speakerBolts();
+    aftPowerHoles();
+}
+
+// Aft battery holder.
+difference() {
+	batteryHolder();
+   	battery();
+	mainRod();
+    speakerBolts();
+	aftPowerHoles();
+}
+
+// Aft lock
 difference() {
 	aftLock();
 	display();
 	mainRod();
 	displayConnectors();
+	aftPowerHoles();
 }
 
-difference() {
-	union() {
-		translate([0, 0, M_DISPLAY_BUTTRESS]) buttress(rods=true);
-		displayConnectors();
+// Display holder.
+union() {
+	difference() {
+		union() {
+			translate([0, 0, M_DISPLAY_BUTTRESS]) buttress(rods=true);
+		}
+		display();
+		translate([0, 0, M_DISPLAY_BUTTRESS - EPS]) {
+			D = 17;
+			Y = 5;
+			cylinder(d=D, h=10);
+			translate([-D/2, -20, 0]) cube(size=[D, 20, 10]);
+		}
 	}
-	display();
+	displayConnectors();
 }
+
+portButtress();
+crystalButtress();
 
