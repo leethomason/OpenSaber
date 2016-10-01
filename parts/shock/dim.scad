@@ -23,6 +23,7 @@ D_AFT               = 25.8;
 R_AFT               = D_AFT / 2;
 D_AFT_RING          = 33.5;
 H_AFT_RING          = 6;
+H_AFT_LIP           = 3;
 
 H_SPEAKER = 3.6 + 0.2;  // space for the physical speaker
 X_SPEAKER = 20;
@@ -74,6 +75,14 @@ D_ROD               =  3.4;
 H_BATTERY           = 68;
 D_BATTERY           = 18.50 + 0.5;    // An 1850. Huh. 
 BATTERY_DROP        = 1;
+
+Z_NOTCH             = H_BUTTRESS / 2;
+NOTCH_DEPTH         = 2;
+NOTCH_WIDTH         = 3;
+RAIL_WIDTH          = 4;
+RAIL_EPS            = 0.5;
+NOTCH_ANGLE_0       = 195;
+NOTCH_ANGLE_1       = -20;
 
 OFFSET_EMITTER = -PIN + sqrt(R_INNER * R_INNER - PIN * PIN * X_EMITTER * X_EMITTER / 4);
 

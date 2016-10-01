@@ -13,10 +13,12 @@ POWER_Z         = 10;
 
 M_SPEAKER_FRONT 	= M_SPEAKER_BACK + H_SPEAKER_HOLDER;
 M_BATTERY_BACK 		= M_SPEAKER_FRONT;
-M_AFT_STOP_FRONT	= M_AFT_STOP + H_AFT_RING;
+M_AFT_STOP_FRONT	= M_AFT_STOP + H_AFT_RING + H_AFT_LIP;
 M_DISPLAY_BUTTRESS 	= M_DISPLAY + DISPLAY_L - DISPLAY_INNER_L - H_BUTTRESS / 2;
 M_PORT_BUTTRESS     = M_PORT_CENTER + POWER_Z / 2;
 M_CRYSTAL_BUTTRESS  = M_PORT_BUTTRESS + H_BUTTRESS + H_CRYSTAL_HOLDER;
+M_MID_BUTTRESS      = M_CRYSTAL_BUTTRESS + H_BUTTRESS + H_CRYSTAL_HOLDER;
+M_FRONT_BUTTRESS    = 106.0;
 
 R_DISPLAY_THREAD = 0.8; // M2 bolt
 R_DISPLAY_THREAD_HEAD = 2.0;
@@ -29,8 +31,11 @@ module battery() {
 }
 
 module mainRod() {
-	translate([X_ROD, Y_ROD, M_WAY_BACK]) {
+	translate([X_ROD, Y_ROD, H_AFT_RING - 16]) {
 		cylinder(d=D_ROD, h=H_FAR);
+        translate([0, 0, -10]) {
+            cylinder(d2=D_ROD, d1=0, h=10);
+        }
 	}
 }
 
@@ -96,7 +101,14 @@ module aftLock()
 {
     color("red") {
         difference() {
-            translate([0, 0, M_AFT_STOP]) cylinder(d=D_AFT_RING, h = H_AFT_RING);
+            union() {
+                translate([0, 0, M_AFT_STOP]) {
+                    cylinder(d=D_AFT_RING, h = H_AFT_RING);
+                    translate([0, 0, H_AFT_RING]) {
+                        cylinder(d=D_INNER, h = H_AFT_LIP);
+                    }
+                }
+            }
             battery();
         }
     }
@@ -200,21 +212,69 @@ module portButtress()
 module crystalButtress()
 {
     translate([0, 0, M_CRYSTAL_BUTTRESS]) {
-        buttress(pcb=11, crystal="body", crystalHolder=9);
+        buttress(pcb=11, crystal="body", crystalHolder=9, upperWiring=true,
+        altRod=true);
     }
 }
+
+module midButtress() 
+{
+    translate([0, 0, M_MID_BUTTRESS]) {
+        buttress(pcb=11, crystal="body", upperWiring=true);
+    }
+}    
+
+module frontButtress() 
+{
+    translate([0, 0, M_FRONT_BUTTRESS]) {
+        buttress(pcb=8, crystal="body", altRod=true, upperWiring=true);
+    }
+}    
+
+module rail(angle) 
+{
+    CAP = 2;
+    FRONT = M_FRONT_BUTTRESS + H_BUTTRESS + CAP;
+    BACK = M_DISPLAY_BUTTRESS - CAP;
+    LEN = FRONT - BACK;
+    STOPS = [   M_DISPLAY_BUTTRESS, 
+                M_PORT_BUTTRESS,
+                M_CRYSTAL_BUTTRESS,
+                M_MID_BUTTRESS,
+                M_FRONT_BUTTRESS ];
+    SIDE = (RAIL_WIDTH - NOTCH_WIDTH)/2 + RAIL_EPS;
+    
+    color("green") {
+        rotate([0, 0, angle]) {
+            difference() {
+                translate([-R_INNER + RAIL_EPS, -RAIL_WIDTH/2, BACK]) {
+                    cube(size=[NOTCH_DEPTH - RAIL_EPS, RAIL_WIDTH, LEN]);
+                }
+                for(stop = STOPS) {
+                    translate([-R_INNER, -RAIL_WIDTH/2, stop]) {
+                        cube(size=[NOTCH_DEPTH, SIDE, H_BUTTRESS]);
+                    }
+                    translate([-R_INNER, RAIL_WIDTH/2-SIDE, stop]) {
+                        cube(size=[NOTCH_DEPTH, SIDE, H_BUTTRESS]);
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 //---------------------------//
 
 // Speaker holder.
-difference() {
+*difference() {
     speakerHolder();
     speakerBolts();
     aftPowerHoles();
 }
 
 // Aft battery holder.
-difference() {
+*difference() {
 	batteryHolder();
    	battery();
 	mainRod();
@@ -232,7 +292,7 @@ difference() {
 }
 
 // Display holder.
-union() {
+*union() {
 	difference() {
 		union() {
 			translate([0, 0, M_DISPLAY_BUTTRESS]) buttress(rods=true);
@@ -250,4 +310,8 @@ union() {
 
 portButtress();
 crystalButtress();
+midButtress();
+frontButtress();
 
+rail(NOTCH_ANGLE_0);
+rail(NOTCH_ANGLE_1);
