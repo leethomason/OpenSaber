@@ -18,7 +18,6 @@ M_DISPLAY_BUTTRESS 	= M_DISPLAY + DISPLAY_L - DISPLAY_INNER_L - H_BUTTRESS / 2;
 M_PORT_BUTTRESS     = M_PORT_CENTER + POWER_Z / 2;
 M_CRYSTAL_BUTTRESS  = M_PORT_BUTTRESS + H_BUTTRESS + H_CRYSTAL_HOLDER;
 M_MID_BUTTRESS      = M_CRYSTAL_BUTTRESS + H_BUTTRESS + H_CRYSTAL_HOLDER;
-M_FRONT_BUTTRESS    = 106.0;
 
 R_DISPLAY_THREAD = 0.8; // M2 bolt
 R_DISPLAY_THREAD_HEAD = 2.0;
@@ -99,20 +98,20 @@ module display()
 
 module aftLock()
 {
-    color("red") {
-        difference() {
-            union() {
-                translate([0, 0, M_AFT_STOP]) {
+    difference() {
+        union() {
+            translate([0, 0, M_AFT_STOP]) {
+                color("red") {
                     cylinder(d=D_AFT_RING, h = H_AFT_RING);
-                    translate([0, 0, H_AFT_RING]) {
-                        cylinder(d=D_INNER, h = H_AFT_LIP);
-                    }
+                }
+                translate([0, 0, H_AFT_RING]) {
+                    cylinder(d=D_INNER, h = H_AFT_LIP);
                 }
             }
-            battery();
         }
+        battery();
     }
- }
+}
 
 module aftPowerHoles()
 {
@@ -251,11 +250,11 @@ module rail(angle)
                     cube(size=[NOTCH_DEPTH - RAIL_EPS, RAIL_WIDTH, LEN]);
                 }
                 for(stop = STOPS) {
-                    translate([-R_INNER, -RAIL_WIDTH/2, stop]) {
-                        cube(size=[NOTCH_DEPTH, SIDE, H_BUTTRESS]);
+                    translate([-R_INNER, -RAIL_WIDTH/2, stop - RAIL_EPS/2]) {
+                        cube(size=[NOTCH_DEPTH, SIDE, H_BUTTRESS + RAIL_EPS]);
                     }
                     translate([-R_INNER, RAIL_WIDTH/2-SIDE, stop]) {
-                        cube(size=[NOTCH_DEPTH, SIDE, H_BUTTRESS]);
+                        cube(size=[NOTCH_DEPTH, SIDE, H_BUTTRESS + RAIL_EPS]);
                     }
                 }
             }
@@ -283,7 +282,7 @@ module rail(angle)
 }
 
 // Aft lock
-difference() {
+*difference() {
 	aftLock();
 	display();
 	mainRod();
@@ -308,10 +307,10 @@ difference() {
 	displayConnectors();
 }
 
-portButtress();
-crystalButtress();
-midButtress();
-frontButtress();
+*portButtress();
+*crystalButtress();
+*midButtress();
+*frontButtress();
 
 rail(NOTCH_ANGLE_0);
-rail(NOTCH_ANGLE_1);
+*rail(NOTCH_ANGLE_1);

@@ -9,9 +9,11 @@ M_WAY_BACK          = -40;
 M_POMMEL            = -37.5;    // approximate. hard to measure.
 M_SPEAKER_BACK      = -36.5;
 M_0                 = 0;        // physical back of the lightsaber main body.
-M_AFT_STOP          = 16.6;
-M_DISPLAY           = 18;       // FIXME
+M_AFT_STOP          = 10;
+M_DISPLAY           = 15;       
 M_PORT_CENTER       = 57.8;
+M_FRONT_BUTTRESS    = 106.0;
+
 
 H_FAR               = 200;
 
@@ -23,7 +25,7 @@ D_AFT               = 25.8;
 R_AFT               = D_AFT / 2;
 D_AFT_RING          = 33.5;
 H_AFT_RING          = 6;
-H_AFT_LIP           = 3;
+H_AFT_LIP           = 4;
 
 H_SPEAKER = 3.6 + 0.2;  // space for the physical speaker
 X_SPEAKER = 20;
