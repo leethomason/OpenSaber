@@ -3,9 +3,8 @@ use <vents.scad>
 
 EPS = 0.1;
 EPS2 = EPS * 2;
-CRYSTAL_Y = 8;
 
-module buttress(battery=false, pcb=0, crystal="none", showBolt=false, rods=true, biasRight=false, lowerWiring=false, upperWiring=false, crystalHolder=0) {
+module buttress(battery=false, pcb=0, crystal="none", showBolt=false, rods=true, altRod=false, biasRight=false, lowerWiring=false, upperWiring=false, crystalHolder=0) {
 
     H_C = crystalHolder > 0 ? crystalHolder : H_CRYSTAL;
     
@@ -72,6 +71,21 @@ module buttress(battery=false, pcb=0, crystal="none", showBolt=false, rods=true,
         if (rods) {     
             translate([X_ROD, Y_ROD, 0]) {
                 cylinder(d=D_ROD, h=H_BUTTRESS + EPS2, $fn=FACES);
+            }
+        }
+        if (altRod) {
+            translate([-X_ROD, Y_ROD, 0]) {
+                cylinder(d=D_ROD, h=H_BUTTRESS + EPS2, $fn=FACES);
+            }
+        }
+
+        // Notch.
+        NOTCH_ANGLES = [NOTCH_ANGLE_0, NOTCH_ANGLE_1];
+        for(angle = NOTCH_ANGLES) {
+            rotate([0, 0, angle]) {
+                translate([-R_INNER, -NOTCH_WIDTH/2, -EPS]) {
+                    cube(size=[NOTCH_DEPTH, NOTCH_WIDTH, H_BUTTRESS + EPS2]);
+                }
             }
         }
     }
