@@ -10,8 +10,8 @@ M_POMMEL            = -37.5;    // approximate. hard to measure.
 M_SPEAKER_BACK      = -36.5;
 M_0                 = 0;        // physical back of the lightsaber main body.
 M_AFT_STOP          = 10;
-M_DISPLAY           = 15;       
-M_PORT_CENTER       = 57.8;
+M_DISPLAY           = 14;       // was 15
+M_PORT_CENTER       = 57.5;
 M_FRONT_BUTTRESS    = 106.0;
 
 
@@ -82,7 +82,6 @@ Z_NOTCH             = H_BUTTRESS / 2;
 NOTCH_DEPTH         = 2;
 NOTCH_WIDTH         = 3;
 RAIL_WIDTH          = 4;
-RAIL_EPS            = 0.5;
 NOTCH_ANGLE_0       = 195;
 NOTCH_ANGLE_1       = -20;
 
