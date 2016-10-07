@@ -86,6 +86,9 @@ RAIL_EPS            = 0.5;
 NOTCH_ANGLE_0       = 195;
 NOTCH_ANGLE_1       = -20;
 
+X_DOTSTAR           = 5.0;  // from spec
+Y_DOTSTAR           = 1.4;  // from spec
+
 OFFSET_EMITTER = -PIN + sqrt(R_INNER * R_INNER - PIN * PIN * X_EMITTER * X_EMITTER / 4);
 
 module emitterPin(h, longY)

@@ -23,6 +23,11 @@ R_DISPLAY_THREAD = 0.8; // M2 bolt
 R_DISPLAY_THREAD_HEAD = 2.0;
 DEPTH_DISPLAY_THREAD = 4;
 
+DOTSTAR_HOLDER_TRIM = 2;
+DOTSTAR_HOLDER_T    = 2;    
+DOTSTAR_START       = 2;
+DOTSTAR_SPACE       = 7;
+
 module battery() {
     translate([0, -BATTERY_DROP, M_BATTERY_BACK - EPS]) {
         cylinder(d=D_BATTERY, h = H_BATTERY + EPS2);
@@ -50,6 +55,14 @@ module displayBolt()
     translate([0, -DEPTH_DISPLAY_THREAD, 0]) {
         rotate([-90, 0, 0]) cylinder(r=R_DISPLAY_THREAD, h=20);
     }
+}
+
+module displayBolts()
+{
+    translate([DISPLAY_INNER_W, 0, DISPLAY_INNER_L])                            displayBolt();
+    translate([DISPLAY_W - DISPLAY_INNER_W, 0, DISPLAY_INNER_L])                displayBolt();
+    translate([DISPLAY_W - DISPLAY_INNER_W, 0, DISPLAY_L - DISPLAY_INNER_L])    displayBolt();
+    translate([DISPLAY_INNER_W, 0, DISPLAY_L - DISPLAY_INNER_L])                displayBolt();
 }
 
 module displayConnectors()
@@ -84,11 +97,7 @@ module display()
 	    translate([-EXTRA/2, 0, 0]) {
 	        cube(size=[DISPLAY_W + EXTRA, 10, DISPLAY_L+1.0]);
 	    }
-	    
-	    translate([DISPLAY_INNER_W, 0, DISPLAY_INNER_L])                          	displayBolt();
-	    translate([DISPLAY_W - DISPLAY_INNER_W, 0, DISPLAY_INNER_L]) 				displayBolt();
-	    translate([DISPLAY_W - DISPLAY_INNER_W, 0, DISPLAY_L - DISPLAY_INNER_L])  	displayBolt();
-	    translate([DISPLAY_INNER_W, 0, DISPLAY_L - DISPLAY_INNER_L])              	displayBolt();
+	    displayBolts();
 	    
 	    translate([0, -1, 6]) {
 	        cube(size=[DISPLAY_W, 1, DISPLAY_L - 12]);
@@ -224,6 +233,7 @@ module midButtress()
 }    
 
 module frontButtress() 
+
 {
     translate([0, 0, M_FRONT_BUTTRESS]) {
         buttress(pcb=8, crystal="body", altRod=true, upperWiring=true);
@@ -263,6 +273,56 @@ module rail(angle)
 }
 
 
+module dotstars(y)
+{
+    translate([-X_DOTSTAR/2, Y_DISPLAY + DOTSTAR_HOLDER_T, M_DISPLAY]) {
+        for(i=[0:3]) {
+            translate([0, 0, DOTSTAR_START + DOTSTAR_SPACE * i]) {
+                cube(size=[X_DOTSTAR, y, X_DOTSTAR]);
+            }
+        }
+    }   
+}
+
+module dotstarHolder() {
+    intersection()
+    {
+        innerTube();
+
+        union() {
+            translate([-DISPLAY_W/2, Y_DISPLAY, M_DISPLAY]) {
+                difference() {
+                    translate([0, 0, DOTSTAR_HOLDER_TRIM/2]) {
+                        cube(size=[DISPLAY_W, DOTSTAR_HOLDER_T, DISPLAY_L - DOTSTAR_HOLDER_TRIM]);
+                    }
+                    displayBolts();
+                }        
+            }
+            color("red") dotstars(Y_DOTSTAR);
+        }
+    } 
+}
+
+module dotstarCap()
+{
+    intersection()
+    {
+        innerTube();
+
+        difference() {
+            translate([-DISPLAY_W/2, Y_DISPLAY + DOTSTAR_HOLDER_T + 0.5, M_DISPLAY]) {
+                difference() {
+                    translate([0, 0, DOTSTAR_HOLDER_TRIM/2]) {
+                        cube(size=[DISPLAY_W, 10, DISPLAY_L - DOTSTAR_HOLDER_TRIM]);
+                    }
+                    displayBolts();
+                }
+            }
+            dotstars(20);
+        }
+    } 
+}
+
 //---------------------------//
 
 // Speaker holder.
@@ -282,7 +342,7 @@ module rail(angle)
 }
 
 // Aft lock
-*difference() {
+difference() {
 	aftLock();
 	display();
 	mainRod();
@@ -291,7 +351,7 @@ module rail(angle)
 }
 
 // Display holder.
-*union() {
+union() {
 	difference() {
 		union() {
 			translate([0, 0, M_DISPLAY_BUTTRESS]) buttress(rods=true);
@@ -307,10 +367,13 @@ module rail(angle)
 	displayConnectors();
 }
 
+dotstarHolder();
+dotstarCap();
+
 *portButtress();
 *crystalButtress();
 *midButtress();
 *frontButtress();
 
-rail(NOTCH_ANGLE_0);
+*rail(NOTCH_ANGLE_0);
 *rail(NOTCH_ANGLE_1);
