@@ -28,7 +28,7 @@ SOFTWARE.
 // --- Configuration ---
 // Note: Serial connection should be set to 19200 baud with a newline after commands.
 
-#define SERIAL_DEBUG 0
+#define SERIAL_DEBUG 1
 
 #define SABER_MODEL_TEST			0
 #define SABER_MODEL_GECKO			1	// PCB, Teensy 3, external amp and accel
@@ -109,7 +109,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 	// FIXME TUNE ALL
 	static const int32_t UVOLT_MULT = 6680;
-	#define ID_STR "Golden Knight RGB Cree XPE2"
+	#define ID_STR "Shock / Golden Knight RGB Cree XPE2"
 
 	static const int32_t RED_VF   = 2100;   
 	static const int32_t RED_I    = 350;    

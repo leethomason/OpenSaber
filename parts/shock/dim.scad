@@ -6,8 +6,8 @@ MM_TO_INCHES 		= 1 / INCHES_TO_MM;
 
 // Marks - absolute location.
 M_WAY_BACK          = -40;
-M_POMMEL            = -37.5;    // approximate. hard to measure.
-M_SPEAKER_BACK      = -36.5;
+M_POMMEL            = -32;    // approximate. hard to measure.
+M_SPEAKER_BACK      = -31
 M_0                 = 0;        // physical back of the lightsaber main body.
 M_AFT_STOP          = 10;
 M_DISPLAY           = 14;       // was 15
