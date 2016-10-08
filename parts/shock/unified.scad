@@ -90,7 +90,7 @@ module displayConnectors()
 
 module display()
 {
-    EXTRA = 0.5;
+    EXTRA = 1;
 
     translate([-DISPLAY_W/2, Y_DISPLAY, M_DISPLAY]) {
 
@@ -102,6 +102,29 @@ module display()
 	    translate([0, -1, 6]) {
 	        cube(size=[DISPLAY_W, 1, DISPLAY_L - 12]);
 	    }
+	}
+    translate([0, Y_DISPLAY, M_DISPLAY]) {
+        X_CABLE = 12;
+        Y_CABLE = 2;
+        Z_CABLE = 3;
+        translate([-X_CABLE/2, -Y_CABLE, -Z_CABLE]) {
+            cube(size=[X_CABLE, 10, Z_CABLE + 7]);
+        }
+    }
+}
+
+
+module displayButtress()
+{
+    difference() {
+        translate([0, 0, M_DISPLAY_BUTTRESS]) buttress(rods=true);
+		display();
+		translate([0, 0, M_DISPLAY_BUTTRESS - EPS]) {
+			D = 17; // less that 18
+			Y = 5;
+			cylinder(d=D, h=10);
+			translate([-D/2, -20, 0]) cube(size=[D, 20, 10]);
+		}
 	}
 }
 
@@ -242,7 +265,9 @@ module frontButtress()
 
 module rail(angle) 
 {
-    CAP = 2;
+    RAIL_EPS    = 0.2;
+    CAP         = 2;
+    
     FRONT = M_FRONT_BUTTRESS + H_BUTTRESS + CAP;
     BACK = M_DISPLAY_BUTTRESS - CAP;
     LEN = FRONT - BACK;
@@ -352,18 +377,7 @@ difference() {
 
 // Display holder.
 *union() {
-	difference() {
-		union() {
-			translate([0, 0, M_DISPLAY_BUTTRESS]) buttress(rods=true);
-		}
-		display();
-		translate([0, 0, M_DISPLAY_BUTTRESS - EPS]) {
-			D = 17;
-			Y = 5;
-			cylinder(d=D, h=10);
-			translate([-D/2, -20, 0]) cube(size=[D, 20, 10]);
-		}
-	}
+	displayButtress();
 	displayConnectors();
 }
 
