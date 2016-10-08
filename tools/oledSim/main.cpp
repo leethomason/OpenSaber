@@ -15,14 +15,14 @@ Sketcher sketcher;
 static const int WIDTH = 128;
 static const int HEIGHT = 32;
 
-int main(int, char**){
-	if (SDL_Init(SDL_INIT_VIDEO) != 0){
+int main(int, char**) {
+	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
 		printf("SDL_Init Error: %s\n", SDL_GetError());
 		return 1;
 	}
 
 	SDL_Window *win = SDL_CreateWindow("Hello World!", 100, 100, 800, 400, SDL_WINDOW_SHOWN);
-	if (win == nullptr){
+	if (win == nullptr) {
 		printf("SDL_CreateWindow Error: %s\n", SDL_GetError());
 		SDL_Quit();
 		return 1;
@@ -61,7 +61,7 @@ int main(int, char**){
 
 	while (true) {
 		SDL_PollEvent(&e);
-		if (e.type == SDL_QUIT){
+		if (e.type == SDL_QUIT) {
 			break;
 		}
 		else if (e.type == SDL_KEYDOWN) {
@@ -93,7 +93,7 @@ int main(int, char**){
 			uint8_t value = int(127.8 * (sin(count * 0.2) + 1.0));
 			++count;
 			sketcher.Push(value);
-		sketcher.Draw(&display, 100, mode);
+			sketcher.Draw(&display, 100, mode);
 		}
 
 		oled.Commit();
