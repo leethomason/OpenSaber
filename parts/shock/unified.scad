@@ -326,14 +326,14 @@ module dotstarCap()
 //---------------------------//
 
 // Speaker holder.
-*difference() {
+difference() {
     speakerHolder();
     speakerBolts();
     aftPowerHoles();
 }
 
 // Aft battery holder.
-*difference() {
+difference() {
 	batteryHolder();
    	battery();
 	mainRod();
@@ -342,7 +342,7 @@ module dotstarCap()
 }
 
 // Aft lock
-difference() {
+*difference() {
 	aftLock();
 	display();
 	mainRod();
@@ -351,7 +351,7 @@ difference() {
 }
 
 // Display holder.
-union() {
+*union() {
 	difference() {
 		union() {
 			translate([0, 0, M_DISPLAY_BUTTRESS]) buttress(rods=true);
@@ -367,8 +367,8 @@ union() {
 	displayConnectors();
 }
 
-dotstarHolder();
-dotstarCap();
+*dotstarHolder();
+*dotstarCap();
 
 *portButtress();
 *crystalButtress();
