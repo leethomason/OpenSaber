@@ -12,7 +12,8 @@ M_0                 = 0;        // physical back of the lightsaber main body.
 M_AFT_STOP          = 10;
 M_DISPLAY           = 14;       // was 15
 M_PORT_CENTER       = 57.5;
-M_FRONT_BUTTRESS    = 106.0;
+M_PORT_BUTTRESS     = 63.5;
+M_FRONT_BUTTRESS    = 104.0;
 
 
 H_FAR               = 200;
