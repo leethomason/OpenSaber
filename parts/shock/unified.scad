@@ -23,7 +23,7 @@ DEPTH_DISPLAY_THREAD = 4;
 
 DOTSTAR_HOLDER_TRIM = 2;
 DOTSTAR_HOLDER_T    = 2;    
-DOTSTAR_START       = 2;
+DOTSTAR_START       = 3;
 DOTSTAR_SPACE       = 7;
 
 module battery() {
@@ -179,7 +179,7 @@ module speakerHolder()
             }
             // Sound trough.
             translate([-2, -9, -EPS]) {
-                cube(size=[4, 18, H_SPEAKER + 1]);
+                cube(size=[4, 18, 20]);	//H_SPEAKER + 1]);
             }
         }
     }     
@@ -325,7 +325,7 @@ module dotstarHolder() {
                     displayBolts();
                 }        
             }
-            color("red") dotstars(Y_DOTSTAR);
+            //color("red") dotstars(Y_DOTSTAR);
         }
     } 
 }
@@ -353,7 +353,7 @@ module dotstarCap()
 //---------------------------//
 
 // Speaker holder.
-*difference() {
+difference() {
     speakerHolder();
     speakerBolts();
     aftPowerHoles();
@@ -369,7 +369,7 @@ module dotstarCap()
 }
 
 // Aft lock
-*difference() {
+difference() {
 	aftLock();
 	display();
 	mainRod();
@@ -378,7 +378,7 @@ module dotstarCap()
 }
 
 // Display holder.
-*union() {
+union() {
 	displayButtress();
 	displayConnectors();
 }
@@ -393,4 +393,3 @@ dotstarCap();
 
 *rail(NOTCH_ANGLE_0);
 *rail(NOTCH_ANGLE_1);
-
