@@ -239,7 +239,7 @@ module portButtress()
     }
     translate([0, 0, M_PORT_BUTTRESS]) {
         difference() {
-            buttress(pcb=7);
+            buttress(pcb=7, upperWiring=true);
             translate([-LED_X/2, CRYSTAL_Y - LED_Y/2, H_BUTTRESS - LED_Z]) {
                 cube(size=[LED_X, LED_Y, LED_Z + EPS]);
             }
@@ -376,7 +376,7 @@ module dotstarCap()
 }
 
 // Aft lock
-difference() {
+*difference() {
 	aftLock();
 	display();
 	mainRod();
@@ -385,7 +385,7 @@ difference() {
 }
 
 // Display holder.
-union() {
+*union() {
 	displayButtress();
 	displayConnectors();
 }
@@ -393,7 +393,7 @@ union() {
 *dotstarHolder();
 *dotstarCap();
 
-*portButtress();
+portButtress();
 *crystalButtress();
 *midButtress();
 *frontButtress();
