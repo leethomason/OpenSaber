@@ -1,6 +1,7 @@
-M_LED_HOLDER_FRONT	= 45;
-M_LED_HOLDER_BACK	= 38;
-M_SWITCH_CENTER		= 30;	// FIXME
+M_LED_HOLDER_FRONT	= 55;
+M_LED_HOLDER_BACK	= 48;
+M_SWITCH_CENTER		= 40;	// FIXME
+M_DOTSTAR			= 22;	// center mark of first dotstar
 M_TRANSITION		= 10;
 M_0					= 0;
 M_WAY_BACK			= -20;
@@ -22,3 +23,7 @@ D_SABER_OUTER		= 37.5;
 
 D_PORT_SCREW		= 0.5 * INCHES_TO_MM;
 R_PORT_SCREW 		= D_PORT_SCREW / 2;
+
+X_DOTSTAR           = 5.0;  // from spec
+Y_DOTSTAR           = 1.4;  // from spec
+DOTSTAR_SPACE		= 7;

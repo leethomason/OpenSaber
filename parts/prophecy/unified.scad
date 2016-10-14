@@ -2,6 +2,8 @@ use <../threads.scad>
 use <../shapes.scad>
 include <dim.scad>
 
+M_DOTSTAR_EDGE = M_DOTSTAR - X_DOTSTAR / 2;
+
 INCHES_TO_MM = 25.4;
 MM_TO_INCHES = 1 / 25.4;
 $fn = 90;
@@ -79,6 +81,40 @@ module switchHolder()
     }
 }
 
+module dotstars(y)
+{
+    translate([-X_DOTSTAR/2, -y, 0]) {
+        for(i=[0:3]) {
+            translate([0, 0, DOTSTAR_SPACE * i]) {
+                cube(size=[X_DOTSTAR, y, X_DOTSTAR]);
+            }
+        }
+    }   
+}
+
+
+module dotstarHolder() {
+    intersection()
+    {
+        innerTube();
+
+        M = M_DOTSTAR_EDGE - 2;
+
+        difference()
+        //union()
+        {
+            translate([-10, -20, M]) {
+                cube(size=[20, 10, M_LED_HOLDER_BACK - M]);
+            }
+            translate([0, -10, M_DOTSTAR_EDGE]) {
+                dotstars(10);
+            }
+        }
+    } 
+}
+
+
 ledHolder();
 switch();
 switchHolder();
+dotstarHolder();
