@@ -118,11 +118,18 @@ module displayButtress()
         translate([0, 0, M_DISPLAY_BUTTRESS]) buttress(rods=true);
 		display();
 		translate([0, 0, M_DISPLAY_BUTTRESS - EPS]) {
-			D = 17; // less that 18
+			D0 = 15; // less that 18
+            D1 = 19;
 			Y = 5;
-			cylinder(d=D, h=10);
-			translate([-D/2, -20, 0]) cube(size=[D, 20, 10]);
+			cylinder(d=D0, h=10);
+			translate([-D1/2, -20, 0]) cube(size=[D1, 20, 10]);
 		}
+		translate([12, -0.5, M_DISPLAY_BUTTRESS - EPS]) {
+            cylinder(d=3, h=10);
+        }
+		translate([-12, -0.5, M_DISPLAY_BUTTRESS - EPS]) {
+            cylinder(d=3, h=10);
+        }
 	}
 }
 
@@ -243,7 +250,7 @@ module portButtress()
 module crystalButtress()
 {
     translate([0, 0, M_CRYSTAL_BUTTRESS]) {
-        buttress(pcb=11, crystal="body", crystalHolder=9, upperWiring=true, altRod=true);
+        buttress(pcb=12, crystal="body", crystalHolder=9, upperWiring=true, altRod=true);
     }
 }
 
@@ -353,7 +360,7 @@ module dotstarCap()
 //---------------------------//
 
 // Speaker holder.
-difference() {
+*difference() {
     speakerHolder();
     speakerBolts();
     aftPowerHoles();
@@ -383,8 +390,8 @@ union() {
 	displayConnectors();
 }
 
-dotstarHolder();
-dotstarCap();
+*dotstarHolder();
+*dotstarCap();
 
 *portButtress();
 *crystalButtress();
