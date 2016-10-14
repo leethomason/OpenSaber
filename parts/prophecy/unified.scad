@@ -61,22 +61,38 @@ module ledHolder()
     }    
 }
 
-module switchHolder()
+module switchAndPortHolder()
 {
-    H = (M_LED_HOLDER_BACK - M_SWITCH_CENTER) * 2;
+    POWER_X         = 11;
+    POWER_Y         = 14.5;
+    POWER_Z         = 10;
+    POWER_OFFSET_Y  = 0.2;
+    POWER_OFFSET_X  = -1;
+
+    H = (M_LED_HOLDER_BACK - M_TRANSITION + T_TRANSITION_RING);
     T = 3;
 
     intersection() {
         innerTube();
         difference() {
-            translate([-10, Y_SWITCH - T, M_SWITCH_CENTER - H/2]) {
+            translate([-10, Y_SWITCH - T, M_TRANSITION - T_TRANSITION_RING]) {
                 cube(size=[20, T, H]);
             }
+
+            // switch
             translate([0, 0, M_SWITCH_CENTER]) {
                 rotate([-90, 0, 0]) {
                     cylinder(h=20, d=D_SWITCH);
                 }        
             }
+
+            // Port
+            translate([0, 0, M_PORT_CENTER + PORT_CENTER_OFFSET]) {
+                rotate([-90, 0, 0]) {
+                    cylinder(h=20, d=D_PORT);
+                }
+            }
+
         }
     }
 }
@@ -98,13 +114,13 @@ module dotstarHolder() {
     {
         innerTube();
 
-        M = M_DOTSTAR_EDGE - 2;
+        //M = M_DOTSTAR_EDGE - 2;
+        M = M_TRANSITION - T_TRANSITION_RING;
 
         difference()
-        //union()
         {
-            translate([-10, -20, M]) {
-                cube(size=[20, 10, M_LED_HOLDER_BACK - M]);
+            translate([-10, -R_FORWARD, M]) {
+                cube(size=[20, Y_DOTSTAR + 1, M_LED_HOLDER_BACK - M]);
             }
             translate([0, -10, M_DOTSTAR_EDGE]) {
                 dotstars(10);
@@ -113,8 +129,15 @@ module dotstarHolder() {
     } 
 }
 
+module transitionRing()
+{
+    translate([0, 0, M_TRANSITION - T_TRANSITION_RING]) {
+        tube(T_TRANSITION_RING, D_FORWARD/2, D_AFT/2);
+    }
+}
 
 ledHolder();
 switch();
-switchHolder();
+switchAndPortHolder();
 dotstarHolder();
+transitionRing();
