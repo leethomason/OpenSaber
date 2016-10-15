@@ -159,6 +159,7 @@ module aftPowerHoles()
  module batteryHolder()
  {
  	H = M_AFT_STOP - M_BATTERY_BACK;
+    echo("H battery", H);
 
     translate([0, 0, M_BATTERY_BACK]) {
 	    difference() {
@@ -360,7 +361,7 @@ module dotstarCap()
 //---------------------------//
 
 // Speaker holder.
-*difference() {
+difference() {
     speakerHolder();
     speakerBolts();
     aftPowerHoles();
@@ -393,7 +394,7 @@ module dotstarCap()
 *dotstarHolder();
 *dotstarCap();
 
-portButtress();
+*portButtress();
 *crystalButtress();
 *midButtress();
 *frontButtress();

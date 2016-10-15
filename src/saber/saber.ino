@@ -641,7 +641,7 @@ void loop() {
     #if defined(SABER_CRYSTAL)
         {
             const uint8_t* rgb = saberDB.bladeColor();
-            if (bladeState.state() == BLADE_OFF) {
+            if (bladeState.state() == BLADE_OFF && buttonMode.mode() == BUTTON_MODE_NORMAL) {
                 uint8_t outColor[3];
                 calcCrystalColor(msec, rgb, outColor);
                 leds[0].set(outColor[0], outColor[1], outColor[2]);

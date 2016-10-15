@@ -5,6 +5,7 @@ use <vents.scad>
 // LED holder for Shock LE
 // Designed for Dynamic (LED Supply) heatsink
 
+LOCK_RING = false;
 FACES = 180;
 EPSILON = 0.1;
 
@@ -23,12 +24,15 @@ D_INNER_CAP = 0.5 + 0.800 * INCHES_TO_MM;                       // end cap holds
 H_TEETH = 2;
 
 // Top part (emitter)
-difference() {
+*difference() {
     union() {
         // Top cap
         translate([0, 0, H_OUTER]) {
             difference() {
-                cylinder(h=H_RING, r=D_EMITTER_RING/2, $fn=FACES);
+                if (LOCK_RING)
+                    cylinder(h=H_RING, r=D_EMITTER_RING/2, $fn=FACES);
+                else
+                    cylinder(h=H_RING, r=D_INNER/2, $fn=FACES);
                 cylinder(h=H_RING, r=D_LED/2, $fn=FACES);
             }
         };

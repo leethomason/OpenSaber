@@ -97,7 +97,7 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* i
 
     static const int NLINES = 5;
     static const char* lines[NLINES] = {
-        "THERE IS NO DISCORD, THERE IS ONLY STILLNESS.",
+        "THERE IS NO EMOTION, THERE IS ONLY STILLNESS.",
         "THERE IS NO THOUGHT, THERE IS ONLY SILENCE.",
         "THERE IS NO IGNORANCE, THERE IS ONLY ATTENTION.",
         "THERE IS NO DIVISION, THERE IS ONLY PERCEPTION.",

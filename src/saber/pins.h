@@ -113,7 +113,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 	static const int32_t RED_VF   = 2100;   
 	static const int32_t RED_I    = 350;    
-	static const int32_t RED_R    = 4700;
+	static const int32_t RED_R    = 4300;
 
 	static const int32_t GREEN_VF = 3400;
 	static const int32_t GREEN_I  = 350;
@@ -121,7 +121,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 	static const int32_t BLUE_VF  = 3100;
 	static const int32_t BLUE_I   = 350;
-	static const int32_t BLUE_R   = 1800;
+	static const int32_t BLUE_R   = 1600;
 
 	static const int VOLUME_1 = 15;
 	static const int VOLUME_2 = 50;
