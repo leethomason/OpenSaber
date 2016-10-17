@@ -26,11 +26,12 @@ public:
 	void Draw(Renderer* d, uint32_t time, int mode);
 	void Push(uint8_t value);
 
-	uint8_t power = 0;
 	uint8_t volume = 0;
     uint8_t palette = 0;
 	uint8_t color[3];
 	uint8_t data[DATA_WIDTH];
+	uint8_t power;
+	uint32_t mVolts = 0;
 	const char* fontName = 0;
 
 private:

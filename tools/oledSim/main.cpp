@@ -45,6 +45,7 @@ int main(int, char**) {
 	int mode = 0;
 	sketcher.volume = 2;
 	sketcher.power = 3;
+	sketcher.mVolts = 3219;
 	int count = 0;
 	sketcher.fontName = "Bespin";
 	uint32_t lastUpdate = SDL_GetTicks();
@@ -73,6 +74,7 @@ int main(int, char**) {
 			}
 			else if (e.key.keysym.sym == SDLK_p) {
 				sketcher.power = (sketcher.power + 1) % 5;
+				sketcher.mVolts = 3000 + sketcher.power * 111;
 			}
 			else if (e.key.keysym.sym == SDLK_v) {
 				sketcher.volume = (sketcher.volume + 1) % 5;

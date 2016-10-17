@@ -111,10 +111,22 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode)
 	{
 		const char* label = mode == PALETTE_MODE ? "PAL" : "VOL";
 
-		int wName = d->StrWidth(fontName, getGlypth_calibri8);
 		int wPal = d->StrWidth(label, getGlypth_aurekBesh6);
 
-		d->DrawStr(fontName, WIDTH / 2 - wName / 2, 14, getGlypth_calibri8);
+		if (mode == PALETTE_MODE) {
+			char volts[5] = { 0 };
+			uint32_t v = mVolts;
+			volts[0] = '0' + mVolts / 1000;
+			volts[1] = '0' + (mVolts % 1000) / 100;
+			volts[2] = '0' + (mVolts % 100) / 10;
+			volts[3] = '0' + (mVolts % 10);
+			int wName = d->StrWidth(volts, getGlypth_tomThumb5);
+			d->DrawStr(volts, WIDTH / 2 - wName / 2, 14, getGlypth_tomThumb5);
+		}
+		else {
+			int wName = d->StrWidth(fontName, getGlypth_calibri8);
+			d->DrawStr(fontName, WIDTH / 2 - wName / 2, 14, getGlypth_calibri8);
+		}
 		d->DrawStr(label, WIDTH / 2 - wPal / 2, 23, getGlypth_aurekBesh6);
 	}
 
