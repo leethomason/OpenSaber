@@ -1,7 +1,3 @@
-use <../threads.scad>
-use <../shapes.scad>
-include <dim.scad>
-
 module vent1(w, h, n, extrusion)
 {
     angle = 360 / n;

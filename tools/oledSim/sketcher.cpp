@@ -33,7 +33,7 @@ void Sketcher::Push(uint8_t val)
 	if (pos == DATA_WIDTH) pos = 0;
 }
 
-void Sketcher::Draw(Renderer* d, uint32_t delta, int mode)
+void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* info)
 {
 	d->Fill(0);
 
@@ -168,4 +168,77 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode)
 		buf[i] = i;
 	}
 #endif
+}
+
+
+void DotStarUI::Draw(DotStar::RGB* led, int mode, const UIRenderData* data)
+{
+    static const uint32_t COLOR_AUDIO_ON  = 0x0000FF;
+    static const uint32_t COLOR_AUDIO_OFF = 0xFFD800;
+    static const uint32_t COLOR_POWER_ON  = 0x00FF00;
+    static const uint32_t COLOR_POWER_OFF = 0x800000;
+    static const uint32_t PALETTE_ONE     = 0xFFFFFF;
+    //static const uint32_t PALETTE_ZERO    = 0x202020;
+
+    switch(mode) {
+        case Sketcher::REST_MODE:
+        {
+            led[0].set(data->volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
+            led[1].set(data->volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
+            led[2].set(0);
+            led[3].set(data->color[0], data->color[1], data->color[2]);
+        }
+        break;
+
+        case Sketcher::BLADE_ON_MODE:
+        {
+            int i=0;
+            for(; i<data->power && i < 4; ++i) {
+                led[i].set(COLOR_POWER_ON);
+            }
+            for(; i<4; ++i) {
+                led[i].set(COLOR_POWER_OFF);
+            }
+        }
+        break;
+
+        case Sketcher::PALETTE_MODE:
+        {
+            led[0].set((data->palette & 1) ? PALETTE_ONE : 0);
+            led[1].set((data->palette & 2) ? PALETTE_ONE : 0);
+            led[2].set((data->palette & 4) ? PALETTE_ONE : 0);
+            led[3].set(data->color[0], data->color[1], data->color[2]);            
+        }
+        break;
+
+        case Sketcher::VOLUME_MODE:
+        {
+            int i=0;
+            for(; i<data->volume && i < 4; ++i) {
+                led[i].set(COLOR_AUDIO_ON);
+            }
+            for(; i<4; ++i) {
+                led[i].set(COLOR_AUDIO_OFF);
+            }
+        }
+        break;
+    }
+}
+
+
+void calcCrystalColor(uint32_t t, const uint8_t* base, uint8_t* out)
+{
+    static const int32_t RATIO = 220;
+    static const int32_t RATIO_M1 = 256 - RATIO;
+    static const int32_t DIV = 256;
+
+    uint32_t tc[3] = { t / 53UL, t / 67UL, t / 79UL };
+
+    for (int i = 0; i < 3; ++i) {
+        int32_t s = isin(tc[i]);
+        int32_t scaledColor = int32_t(base[i]) * RATIO + s * RATIO_M1;
+        if (scaledColor < 0) scaledColor = 0;
+
+        out[i] = uint8_t(scaledColor / DIV);
+    }
 }

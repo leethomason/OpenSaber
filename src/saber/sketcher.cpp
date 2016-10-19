@@ -5,6 +5,7 @@
 #include <math.h>
 #include <string.h>
 
+
 Sketcher::Sketcher()
 {
     memset(data, 0, DATA_WIDTH);
@@ -14,18 +15,10 @@ textureData Sketcher::GetDial(int value)
 {
     textureData td = get_dial0;
     switch (value) {
-    case 1:
-        td = get_dial1;
-        break;
-    case 2:
-        td = get_dial2;
-        break;
-    case 3:
-        td = get_dial3;
-        break;
-    case 4:
-        td = get_dial4;
-        break;
+	case 1: td = get_dial1; break;
+	case 2: td = get_dial2; break;
+	case 3: td = get_dial3; break;
+	case 4: td = get_dial4; break;
     default:
         break;
     }
@@ -75,26 +68,12 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* i
 #endif
 
 #if 1
-    d->DrawBitmap(0, 0, GetDial(info->power));
-    d->DrawBitmap(WIDTH - DIAL_WIDTH, 0, GetDial(info->volume), Renderer::FLIP_X);
-    d->DrawStr("P", 23, 12, getGlypth_aurekBesh6);
-    d->DrawStr("V", 97, 12, getGlypth_aurekBesh6);
-
-    /* From Alain Bloch:
-        There is no emotion. There is only stillness.
-        There is no thought. There is only silence.
-        There is no ignorance. There is only attention.
-        There is no division. There is only perception.
-        There is no self. There is only the Force.
-    */
-
-    /*
-        The crystal is the heart of the blade.
-        The heart is the crystal of the Jedi.
-        The Jedi is the crystal of the Force.
-        The Force is the blade of the heart.
-    */
-
+	{
+		d->DrawBitmap(X0, 0, GetDial(info->power));
+		d->DrawBitmap(X1 - DIAL_WIDTH, 0, GetDial(info->volume), Renderer::FLIP_X);
+		d->DrawStr("P", X0 + 23, 12, getGlypth_aurekBesh6);
+		d->DrawStr("V", X1 - 31, 12, getGlypth_aurekBesh6);
+	}
     static const int NLINES = 5;
     static const char* lines[NLINES] = {
         "THERE IS NO EMOTION, THERE IS ONLY STILLNESS.",
@@ -109,8 +88,12 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* i
     if (mode == REST_MODE) {
         // Render the Jedi Creed.
         int dx = animTime / 100;
-        bool render = d->DrawStr(lines[line], WIDTH - DIAL_WIDTH - 1 - dx, 23, getGlypth_aurekBesh6,
-                                 DIAL_WIDTH, WIDTH - DIAL_WIDTH);
+		bool render = d->DrawStr(
+			lines[line], 
+			X1 - DIAL_WIDTH - 1 - dx, 23, 
+			getGlypth_aurekBesh6,
+			X0 + DIAL_WIDTH, 
+			X1 - DIAL_WIDTH);
         if (!render) {
             ++line;
             if (line == NLINES)
@@ -123,11 +106,22 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* i
     {
         const char* label = mode == PALETTE_MODE ? "PAL" : "VOL";
 
-        int wName = d->StrWidth(info->fontName, getGlypth_calibri8);
         int wPal = d->StrWidth(label, getGlypth_aurekBesh6);
 
-        d->DrawStr(info->fontName, WIDTH / 2 - wName / 2, 14, getGlypth_calibri8);
-        d->DrawStr(label, WIDTH / 2 - wPal / 2, 23, getGlypth_aurekBesh6);
+		if (mode == PALETTE_MODE) {
+			char volts[5] = { 0 };
+			volts[0] = '0' + info->mVolts / 1000;
+			volts[1] = '0' + (info->mVolts % 1000) / 100;
+			volts[2] = '0' + (info->mVolts % 100) / 10;
+			volts[3] = '0' + (info->mVolts % 10);
+			int wName = d->StrWidth(volts, getGlypth_calibri8);
+			d->DrawStr(volts, CENTER - wName / 2, 14, getGlypth_calibri8);
+		}
+		else {
+			int wName = d->StrWidth(info->fontName, getGlypth_calibri8);
+			d->DrawStr(info->fontName, CENTER - wName / 2, 14, getGlypth_calibri8);
+		}
+		d->DrawStr(label, CENTER - wPal / 2, 23, getGlypth_aurekBesh6);
     }
 
     if (mode == BLADE_ON_MODE) {
@@ -142,25 +136,28 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* i
             if (point < 64) point = 64;  // 1g
 
             int h = (point + 1 - 64) * H / 192;
-            d->DrawRectangle(i + INNERX, TOP + H - h, 1, h+1);
+			d->DrawRectangle(i + CENTER - DATA_WIDTH / 2, TOP + H - h, 1, h + 1);
             q++;
             if (q == DATA_WIDTH) q = 0;
         }
     }
 
+	{
+		static const int GUTTER = 1;
+
     // Current Palette
-    for (int i = 0; i <= info->palette; ++i) {
+		for (int i = 0; i <= info->palette; ++i) {
         int x = 3 - (i % 4);
         int y = i / 4;
-        d->DrawRectangle(INNERX + x * 6, y * 6, 5, 5);
+			d->DrawRectangle(CENTER - GUTTER - 24 + x * 6, y * 6, 5, 5);
     }
 
     // Current blade color
-    static const int CSTART = WIDTH / 2 + 6;
-    static const int CWIDTH = WIDTH - CSTART - INNERX;
     for (int i = 0; i < 3; ++i) {
-        d->DrawRectangle(CSTART, i * 4, 1 + info->color[i] * CWIDTH / 256, 3);
+			d->DrawRectangle(CENTER + GUTTER, i * 4, 1 + info->color[i] * (DATA_WIDTH/2) / 256, 3);
     }
+	}
+
 #endif
 #if 0
     // Test pattern. dot-space-line

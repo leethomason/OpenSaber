@@ -4,6 +4,25 @@
 #include <stdint.h>
 #include "renderer.h"
 
+struct UIRenderData
+{
+    uint8_t power   = 0;
+    uint8_t volume  = 0;
+    uint8_t palette = 0;
+    uint8_t color[3];
+    const char* fontName = 0;
+
+    UIRenderData() {
+        color[0] = color[1] = color[2] = 0;
+    }
+};
+
+class DotStarUI
+{
+public:
+    void Draw(DotStar::RGB* uiLedStart, int mode, const UIRenderData* data);
+};
+
 class Sketcher
 {
 public:
@@ -29,16 +48,10 @@ public:
 	};
 
 	Sketcher();
-	void Draw(Renderer* d, uint32_t time, int mode);
+    void Draw(Renderer* d, uint32_t time, int mode, const UIRenderData* data);
 	void Push(uint8_t value);
 
-	uint8_t volume = 0;
-    uint8_t palette = 0;
-	uint8_t color[3];
 	uint8_t data[DATA_WIDTH];
-	uint8_t power;
-	uint32_t mVolts = 0;
-	const char* fontName = 0;
 
 private:
 	textureData GetDial(int value);
@@ -47,5 +60,8 @@ private:
 	uint8_t pos = 0;
 	uint32_t animTime = 0;
 };
+
+void calcCrystalColor(uint32_t msec, const uint8_t* base, uint8_t* out);
+
 
 #endif // SKETCHER_INCLUDED
