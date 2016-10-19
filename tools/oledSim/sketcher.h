@@ -8,17 +8,23 @@ class Sketcher
 {
 public:
 	enum {
-		WIDTH = 128,
-		HEIGHT = 32,
-		DATA_WIDTH = 52,
-		DIAL_WIDTH = 28,
-		INNERX = 38,
+		WIDTH		= 128,
+		HEIGHT		= 32,
+
+		TWEAK_X0	= 2,
+		TWEAK_X1    = 0,
+		X0			= 0 + TWEAK_X0,
+		X1			= WIDTH - TWEAK_X1,
+		CENTER		= (X0 + X1) / 2,
+
+		DIAL_WIDTH	= 28,
+		DATA_WIDTH	= WIDTH - DIAL_WIDTH * 2 - 20,
+		BAR_WIDTH   = 38 - TWEAK_X0 - TWEAK_X1,
 
 		REST_MODE = 0,
 		BLADE_ON_MODE,
 		PALETTE_MODE,
 		VOLUME_MODE,
-		//POEM_MODE,
 		NUM_MODES
 	};
 

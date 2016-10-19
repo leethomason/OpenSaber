@@ -5,13 +5,6 @@
 #include <math.h>
 #include <string.h>
 
-/*
-"There is no emotion. There is only stillness.
-There is no thought. There is only silence.
-There is no ignorance. There is only attention.
-There is no division. There is only perception.
-There is no self. There is only the Force."
-*/
 
 Sketcher::Sketcher()
 {
@@ -76,12 +69,11 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode)
 #endif
 
 #if 1
-	//if (mode != POEM_MODE) 
 	{
-		d->DrawBitmap(0, 0, GetDial(power));
-		d->DrawBitmap(WIDTH - DIAL_WIDTH, 0, GetDial(volume), Renderer::FLIP_X);
-		d->DrawStr("P", 23, 12, getGlypth_aurekBesh6);
-		d->DrawStr("V", 97, 12, getGlypth_aurekBesh6);
+		d->DrawBitmap(X0, 0, GetDial(power));
+		d->DrawBitmap(X1 - DIAL_WIDTH, 0, GetDial(volume), Renderer::FLIP_X);
+		d->DrawStr("P", X0 + 23, 12, getGlypth_aurekBesh6);
+		d->DrawStr("V", X1 - 31, 12, getGlypth_aurekBesh6);
 	}
 	static const int NLINES = 5;
 	static const char* lines[NLINES] = {
@@ -97,8 +89,12 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode)
 	if (mode == REST_MODE) {
 		// Render the Jedi Creed.
 		int dx = animTime / 100;
-		bool render = d->DrawStr(lines[line], WIDTH - DIAL_WIDTH - 1 - dx, 23, getGlypth_aurekBesh6,
-			DIAL_WIDTH, WIDTH - DIAL_WIDTH);
+		bool render = d->DrawStr(
+			lines[line], 
+			X1 - DIAL_WIDTH - 1 - dx, 23, 
+			getGlypth_aurekBesh6,
+			X0 + DIAL_WIDTH, 
+			X1 - DIAL_WIDTH);
 		if (!render) {
 			++line;
 			if (line == NLINES)
@@ -120,14 +116,14 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode)
 			volts[1] = '0' + (mVolts % 1000) / 100;
 			volts[2] = '0' + (mVolts % 100) / 10;
 			volts[3] = '0' + (mVolts % 10);
-			int wName = d->StrWidth(volts, getGlypth_tomThumb5);
-			d->DrawStr(volts, WIDTH / 2 - wName / 2, 14, getGlypth_tomThumb5);
+			int wName = d->StrWidth(volts, getGlypth_calibri8);
+			d->DrawStr(volts, CENTER - wName / 2, 14, getGlypth_calibri8);
 		}
 		else {
 			int wName = d->StrWidth(fontName, getGlypth_calibri8);
-			d->DrawStr(fontName, WIDTH / 2 - wName / 2, 14, getGlypth_calibri8);
+			d->DrawStr(fontName, CENTER - wName / 2, 14, getGlypth_calibri8);
 		}
-		d->DrawStr(label, WIDTH / 2 - wPal / 2, 23, getGlypth_aurekBesh6);
+		d->DrawStr(label, CENTER - wPal / 2, 23, getGlypth_aurekBesh6);
 	}
 
 	if (mode == BLADE_ON_MODE) {
@@ -142,34 +138,28 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode)
 			if (point < 64) point = 64;  // 1g
 
 			int h = (point + 1 - 64) * H / 192;
-			d->DrawRectangle(i + INNERX, TOP + H - h, 1, h + 1);
+			d->DrawRectangle(i + CENTER - DATA_WIDTH / 2, TOP + H - h, 1, h + 1);
 			q++;
 			if (q == DATA_WIDTH) q = 0;
 		}
 	}
 
-	/*
-	if (mode == POEM_MODE) {
-		for (int i = 0; i < NLINES; ++i) {
-			d->DrawStr(lines[i], -36, 1 + i*6, getGlypth_tomThumb5);
-		}
-	}
-	else  */
 	{
+		static const int GUTTER = 1;
+
 		// Current Palette
 		for (int i = 0; i <= palette; ++i) {
 			int x = 3 - (i % 4);
 			int y = i / 4;
-			d->DrawRectangle(INNERX + x * 6, y * 6, 5, 5);
+			d->DrawRectangle(CENTER - GUTTER - 24 + x * 6, y * 6, 5, 5);
 		}
 
 		// Current blade color
-		static const int CSTART = WIDTH / 2 + 6;
-		static const int CWIDTH = WIDTH - CSTART - INNERX;
 		for (int i = 0; i < 3; ++i) {
-			d->DrawRectangle(CSTART, i * 4, 1 + color[i] * CWIDTH / 256, 3);
+			d->DrawRectangle(CENTER + GUTTER, i * 4, 1 + color[i] * (DATA_WIDTH/2) / 256, 3);
 		}
 	}
+
 #endif
 #if 0
 	// Test pattern. dot-space-line
