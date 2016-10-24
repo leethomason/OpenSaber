@@ -358,10 +358,49 @@ module dotstarCap()
     } 
 }
 
+module drillGuide()
+{
+    ALIGNMENT = false;
+    D_UI = 2;
+    D_PORT = ALIGNMENT ? 2 : 8;
+    D_CRYSTAL = ALIGNMENT ? 2 : 12;
+            
+    difference() {
+        W = 16;
+        translate([-W/2, 2, 0]) {
+            cube(size=[W, 20, 105]);
+        }
+        cylinder(h=200, d=D_OUTER);
+
+        // Dotstars
+        translate([0, 0, M_DISPLAY]) {
+            for(i=[0:3]) {
+                translate([0, 0, DOTSTAR_START + DOTSTAR_SPACE * i + X_DOTSTAR/2]) {
+                    //cube(size=[X_DOTSTAR, y, X_DOTSTAR]);
+                    rotate([-90, 0, 0]) cylinder(h=30, d=D_UI);
+                }
+            }
+        }
+        translate([0, 0, M_PORT_CENTER]) {
+            rotate([-90, 0, 0]) cylinder(h=30, d=D_PORT);
+        }
+        translate([0, 0, M_CRYSTAL_VIEW_CENTER]) {
+            rotate([-90, 0, 0]) cylinder(h=30, d=D_CRYSTAL);
+        }
+        
+        // COOLING        
+        translate([0, 0, 10]) rotate([-90, 0, 0]) roundedRect(h=30, d=10);
+        translate([0, 0, 47]) rotate([-90, 0, 0]) roundedRect(h=30, d=6);
+        translate([0, 0, 70]) rotate([-90, 0, 0]) roundedRect(h=30, d=12);
+        translate([0, 0, 82]) rotate([-90, 0, 0]) roundedRect(h=30, d=6);
+    }
+    //color("red") dotstars(10);
+}
+
 //---------------------------//
 
 // Speaker holder.
-difference() {
+*difference() {
     speakerHolder();
     speakerBolts();
     aftPowerHoles();
@@ -393,6 +432,7 @@ difference() {
 
 *dotstarHolder();
 *dotstarCap();
+drillGuide();
 
 *portButtress();
 *crystalButtress();

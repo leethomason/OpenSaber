@@ -58,7 +58,7 @@ difference() {
 }
 
 // Bottom part (connects to mainRing)
-*color("gray") {
+color("gray") {
     for(r=[0:(N_TEETH-1)]) {
         rotate([0, 0, r*TEETH_ANGLE]) {
             intersection() {
