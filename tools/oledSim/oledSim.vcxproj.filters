@@ -13,13 +13,13 @@
     <ClCompile Include="oledsim.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sketcher.cpp">
+    <ClCompile Include="..\..\src\saber\assets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="assets.cpp">
+    <ClCompile Include="..\..\src\saber\renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="renderer.cpp">
+    <ClCompile Include="..\..\src\saber\sketcher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -27,13 +27,13 @@
     <ClInclude Include="oledsim.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="sketcher.h">
+    <ClInclude Include="..\..\src\saber\assets.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="assets.h">
+    <ClInclude Include="..\..\src\saber\renderer.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="renderer.h">
+    <ClInclude Include="..\..\src\saber\sketcher.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

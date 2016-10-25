@@ -40,23 +40,25 @@ int main(int, char**) {
 
 	SDL_SetRenderDrawColor(ren, 128, 128, 128, 255);
 
+	UIRenderData data;
+	data.volume = 2;
+	data.power = 3;
+	data.mVolts = 3219;
+	data.fontName = "Bespin";
+
 	SDL_Event e;
 	int scale = 4;
 	int mode = 0;
-	sketcher.volume = 2;
-	sketcher.power = 3;
-	sketcher.mVolts = 3219;
 	int count = 0;
-	sketcher.fontName = "Bespin";
 	uint32_t lastUpdate = SDL_GetTicks();
 
 	const char* FONT_NAMES[8] = {
 		"Bespin", "Vader", "Vader", "ObiAni", "Bespin", "JainaSw", "Maul", "MAUL"
 	};
 	uint8_t COLORS[8] = { 0, 255, 100, 200, 255, 0, 20, 120 };
-	sketcher.color[0] = COLORS[0];
-	sketcher.color[1] = COLORS[1];
-	sketcher.color[2] = COLORS[2];
+	data.color[0] = COLORS[0];
+	data.color[1] = COLORS[1];
+	data.color[2] = COLORS[2];
 
 	int palette = 0;
 
@@ -73,19 +75,19 @@ int main(int, char**) {
 				mode = (mode + 1) % Sketcher::NUM_MODES;
 			}
 			else if (e.key.keysym.sym == SDLK_p) {
-				sketcher.power = (sketcher.power + 1) % 5;
-				sketcher.mVolts = 3000 + sketcher.power * 111;
+				data.power = (data.power + 1) % 5;
+				data.mVolts = 3000 + data.power * 111;
 			}
 			else if (e.key.keysym.sym == SDLK_v) {
-				sketcher.volume = (sketcher.volume + 1) % 5;
+				data.volume = (data.volume + 1) % 5;
 			}
 			else if (e.key.keysym.sym == SDLK_c) {
 				palette = (palette + 1) % 8;
-				sketcher.color[0] = COLORS[(palette * 3 + 0) % 8];
-				sketcher.color[1] = COLORS[(palette * 2 + 1) % 8];
-				sketcher.color[2] = COLORS[(palette * 5 + 2) % 8];
-				sketcher.fontName = FONT_NAMES[palette];
-				sketcher.palette = palette;
+				data.color[0] = COLORS[(palette * 3 + 0) % 8];
+				data.color[1] = COLORS[(palette * 2 + 1) % 8];
+				data.color[2] = COLORS[(palette * 5 + 2) % 8];
+				data.fontName = FONT_NAMES[palette];
+				data.palette = palette;
 			}
 		}
 
@@ -95,7 +97,7 @@ int main(int, char**) {
 			uint8_t value = int(127.8 * (sin(count * 0.2) + 1.0));
 			++count;
 			sketcher.Push(value);
-			sketcher.Draw(&display, 100, mode);
+			sketcher.Draw(&display, 100, mode, &data);
 		}
 
 		oled.Commit();

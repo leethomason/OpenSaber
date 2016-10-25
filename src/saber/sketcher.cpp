@@ -5,6 +5,19 @@
 #include <math.h>
 #include <string.h>
 
+static int16_t gSinTable[256] = { 0 };
+
+int16_t isin(uint16_t x)
+{
+	if (gSinTable[64] == 0) {
+		for (int i = 0; i < 256; ++i) {
+			float x = 2 * 3.14159f * float(i) / 256.0f;
+			gSinTable[i] = int16_t(sin(x) * 256.0f);
+		}
+	}
+	return gSinTable[x & 0xff];
+}
+
 Sketcher::Sketcher()
 {
     memset(data, 0, DATA_WIDTH);
@@ -172,7 +185,7 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* i
 }
 
 
-void DotStarUI::Draw(DotStar::RGB* led, int mode, const UIRenderData* data)
+void DotStarUI::Draw(RGB* led, int mode, const UIRenderData* data)
 {
     static const uint32_t COLOR_AUDIO_ON  = 0x0000FF;
     static const uint32_t COLOR_AUDIO_OFF = 0xFFD800;

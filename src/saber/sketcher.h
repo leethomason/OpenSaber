@@ -2,9 +2,29 @@
 #define SKETCHER_INCLUDED
 
 #include <stdint.h>
-#include <DotStar.h>
-#include <Grinliz_Arduino_Util.h>
 #include "renderer.h"
+
+struct RGB {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+
+	void set(uint8_t _r, uint8_t _g, uint8_t _b) {
+		r = _r; g = _g; b = _b;
+	}
+	void set(uint32_t c) {
+		r = (c & 0xff0000) >> 16;
+		g = (c & 0xff00) >> 8;
+		b = c & 0xff;
+	}
+};
+
+/**
+Sin wave.
+Input: 0-255 (range will be clipped correctly.
+Output:: -256 - 256
+*/
+int16_t isin(uint16_t x);
 
 struct UIRenderData
 {
@@ -12,6 +32,8 @@ struct UIRenderData
     uint8_t volume  = 0;
     uint8_t palette = 0;
     uint8_t color[3];
+
+	uint32_t mVolts = 0;
     const char* fontName = 0;
 
     UIRenderData() {
@@ -22,7 +44,7 @@ struct UIRenderData
 class DotStarUI
 {
 public:
-    void Draw(DotStar::RGB* uiLedStart, int mode, const UIRenderData* data);
+    void Draw(RGB* uiLedStart, int mode, const UIRenderData* data);
 };
 
 class Sketcher

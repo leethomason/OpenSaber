@@ -15,7 +15,6 @@ M_PORT_CENTER       = 57.5;
 M_PORT_BUTTRESS     = 63.5;
 M_FRONT_BUTTRESS    = 104.0;
 
-
 H_FAR               = 200;
 
 // inner diameter of the lightsaber tube.
