@@ -15,6 +15,11 @@ module portPin(h)
 {	
 	translate([-MC_WIDTH/2, MC_OFFSET, 0]) {
 		cube(size=[MC_WIDTH, MC_HEIGHT, h]);
+
+        LIP = 1.5;
+        translate([LIP, -T_PIN_HOLDER_WALL, 0]) {
+            cube(size=[MC_WIDTH - LIP*2, MC_HEIGHT + T_PIN_HOLDER_WALL, h]);
+        }
 	}
 }
 
@@ -59,6 +64,12 @@ intersection()
                     emitterHolder(H_PIN_HOLDER);
                 }
 			}
+            
+            // Rod hard point.
+            //flip(
+            *translate([8, 1, H_RING - H_PIN_HOLDER-2]) {
+                cube(size=[10, 10, H_PIN_HOLDER + 2]);
+            }
 		}
 
 		// Hole drill.
@@ -88,19 +99,12 @@ intersection()
 		rotate([0, 0, 90]) {
             lock(H_LOCK);
 		}
-	}
-}
 
-// Lock
-/*color("gray") {
-	translate([0, 0, -H_LOCK]) {
-		rotate([0, 0, 90]) {
-			difference() 
-			{
-				tube(H_LOCK, D_INNER/2 - T_RING, D_INNER/2);
-				lock(H_LOCK);
-			}
-		}
+        // Remove rod
+        *translate([-X_ROD, Y_ROD, 0]) {
+            cylinder(d=D_ROD, h=20, $fn=FACES);
+        }
+
+        
 	}
 }
-*/

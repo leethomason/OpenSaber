@@ -11,7 +11,9 @@
 AudioPlaySdWav      playWav;
 AudioMixer4         mixer;
 AudioOutputAnalog   dac;
-AudioConnection     patchCord1(playWav, mixer);
+AudioFilterBiquad   biquad;
+AudioConnection     patchCord0(playWav, biquad);
+AudioConnection     patchCord1(biquad, mixer);
 AudioConnection     patchCord2(mixer, 0, dac, 0);
 
 AudioPlayer::AudioPlayer() {
@@ -24,6 +26,8 @@ AudioPlayer::AudioPlayer() {
     digitalWrite(PIN_AMP_EN, LOW);
     pinMode(PIN_AMP_EN, OUTPUT);
     digitalWrite(PIN_AMP_EN, LOW);
+
+    biquad.setLowpass(0, 4000, 0.707);
 }
 
 void AudioPlayer::init() {

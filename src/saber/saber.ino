@@ -257,6 +257,7 @@ void syncToDB()
     }
     uiRenderData.palette = saberDB.paletteIndex();
     uiRenderData.power = vbatToPowerLevel(averagePower.power());
+    uiRenderData.mVolts = averagePower.power();
     #ifdef SABER_SOUND_ON
         uiRenderData.fontName = sfx.currentFontName();
     #endif

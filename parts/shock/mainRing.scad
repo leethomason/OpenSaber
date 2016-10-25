@@ -15,12 +15,7 @@ module portPin(h)
 {	
 	translate([-MC_WIDTH/2, MC_OFFSET, 0]) {
 		cube(size=[MC_WIDTH, MC_HEIGHT, h]);
-        
-        LIP = 1.5;
-        translate([LIP, -T_PIN_HOLDER_WALL, 0]) {
-            cube(size=[MC_WIDTH - LIP*2, MC_HEIGHT + T_PIN_HOLDER_WALL, h]);
-        }
-	}
+  	}
 }
 
 module portHolder(h, longY)

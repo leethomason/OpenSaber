@@ -29,3 +29,23 @@ module pinsAtTube(r, h, nX, nY, longY)
         cube([nX * PIN, Y, h]);
     }	
 }
+
+module roundedRect(h, d)
+{
+	$fn=20;
+
+	D0 = d * 0.8;
+	D1 = d * 0.2;
+	H = h;
+
+	hull()
+	{
+		translate([-D0/2, -D0/2, 0]) {
+			cube([D0, D0, H]);
+		}
+		translate([-D0/2, -D0/2, 0])  cylinder(d=D1, h=H);
+		translate([ D0/2, -D0/2, 0])  cylinder(d=D1, h=H);
+		translate([-D0/2,  D0/2, 0])  cylinder(d=D1, h=H);
+		translate([ D0/2,  D0/2, 0])  cylinder(d=D1, h=H);
+	}
+}

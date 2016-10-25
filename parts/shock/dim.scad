@@ -11,8 +11,14 @@ M_SPEAKER_BACK      = -36;
 M_0                 = 0;        // physical back of the lightsaber main body.
 M_AFT_STOP          = 10;
 M_DISPLAY           = 14;       // was 15
-M_PORT_CENTER       = 57.5;
+
+// GOLD
+//M_PORT_CENTER       = 57.5;
+// SILVER
+M_PORT_CENTER       = 58.0;
+
 M_PORT_BUTTRESS     = 63.5;
+M_CRYSTAL_VIEW_CENTER = 93;
 M_FRONT_BUTTRESS    = 104.0;
 
 H_FAR               = 200;
@@ -21,6 +27,7 @@ H_FAR               = 200;
 // shock is constant, within tolerances
 D_INNER      		= 32.258;    	// 1.225 -> 1.250 -> 1.270
 R_INNER 			= D_INNER / 2;
+D_OUTER             = 37.6;
 D_AFT               = 25.8;
 R_AFT               = D_AFT / 2;
 D_AFT_RING          = 33.5;
