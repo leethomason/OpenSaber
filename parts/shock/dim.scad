@@ -13,7 +13,7 @@ M_AFT_STOP          = 10;
 M_DISPLAY           = 14;       // was 15
 
 // GOLD
-//M_PORT_CENTER       = 57.5;
+// M_PORT_CENTER       = 57.5;
 // SILVER
 M_PORT_CENTER       = 58.0;
 
@@ -34,11 +34,11 @@ D_AFT_RING          = 33.5;
 H_AFT_RING          = 6;
 H_AFT_LIP           = 4;
 
-H_SPEAKER = 3.6 + 0.2;  // space for the physical speaker
+H_SPEAKER = 3.6 + 1.0;  // space for the physical speaker
 X_SPEAKER = 20;
 Y_SPEAKER = 14.2;   
 Y_SPEAKER_INNER = 8.4;  // air channel
-H_SPEAKER_HOLDER = H_SPEAKER + 2;
+H_SPEAKER_HOLDER = H_SPEAKER + 1.2;
 
 // emitter head
 D_EMITTER_RING      = 33.4;
@@ -83,7 +83,7 @@ D_ROD               =  3.4;
 
 H_BATTERY           = 68;
 D_BATTERY           = 18.50 + 0.5;    // An 1850. Huh. 
-BATTERY_DROP        = 1;
+BATTERY_DROP        = 0.5;
 
 Z_NOTCH             = H_BUTTRESS / 2;
 NOTCH_DEPTH         = 2;
