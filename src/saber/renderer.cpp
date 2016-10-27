@@ -1,12 +1,6 @@
 #include "renderer.h"
 #include <string.h>
 
-#if defined(_DEBUG) && defined(_MSC_VER)
-#	define ASSERT( x )		if ( !(x)) { _asm { int 3 } }
-#else
-#	define ASSERT(x)
-#endif
-
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 
@@ -20,6 +14,8 @@ Renderer::Renderer()
 
 void Renderer::Attach(int w, int h, uint8_t* buf)
 {
+	OSASSERT(buf);
+
 	width = w;
 	height = h;
 	buffer = buf;
@@ -68,7 +64,7 @@ bool Renderer::DrawBitmap(int x, int y, const uint8_t* tex, int texW, int texH, 
 		if (r < 0 || r >= nRows) continue;
 
 		uint8_t* dst = buffer + x0 + r * width;
-		ASSERT(dst >= buffer && dst < buffer + nRows * width);
+		OSASSERT(dst >= buffer && dst < buffer + nRows * width);
 		const uint8_t* src = tex + (r - r0) * texW + dx;
 		int bias = 1;
 		if (flags & FLIP_X) {
@@ -80,13 +76,13 @@ bool Renderer::DrawBitmap(int x, int y, const uint8_t* tex, int texW, int texH, 
 
 			*dst = *dst & (~mask[r]);
 			if (src < texEnd) {
-				ASSERT(src >= tex && src < tex + texRows * texW);
-				ASSERT(dst >= buffer && dst < buffer + nRows * width);
+				OSASSERT(src >= tex && src < tex + texRows * texW);
+				OSASSERT(dst >= buffer && dst < buffer + nRows * width);
 				*dst |= *src << shift;
 			}
 			if (r > r0) {
-				ASSERT((src - texW) >= tex && (src - texW) < tex + texRows * texW);
-				ASSERT(dst >= buffer && dst < buffer + nRows * width);
+				OSASSERT((src - texW) >= tex && (src - texW) < tex + texRows * texW);
+				OSASSERT(dst >= buffer && dst < buffer + nRows * width);
 				*dst |= *(src - texW) >> downShift;
 			}
 			dst += bias;
@@ -112,7 +108,7 @@ void Renderer::DrawRectangle(int x, int y, int w, int h)
 
 		uint8_t* dst = buffer + x0 + r * width;
 		for (int x = x0; x < x1; ++x) {
-			ASSERT(dst >= buffer && dst < buffer + nRows * width);
+			OSASSERT(dst >= buffer && dst < buffer + nRows * width);
 			*dst++ |= mask[r];
 		}
 	}

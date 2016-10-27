@@ -32,6 +32,7 @@ textureData Sketcher::GetDial(int value)
 	case 3: td = get_dial3; break;
 	case 4: td = get_dial4; break;
     default:
+		OSASSERT(false);
         break;
     }
     return td;
@@ -100,12 +101,12 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* i
     if (mode == REST_MODE) {
         // Render the Jedi Creed.
         int dx = animTime / 100;
-		bool render = d->DrawStr(
-			lines[line], 
-			X1 - DIAL_WIDTH - 1 - dx, 23, 
+		bool render = d->DrawStr(lines[line],
+			X1 - DIAL_WIDTH - 1 - dx, 23,
 			getGlypth_aurekBesh6,
-			X0 + DIAL_WIDTH, 
+			X0 + DIAL_WIDTH,
 			X1 - DIAL_WIDTH);
+
         if (!render) {
             ++line;
             if (line == NLINES)
@@ -188,7 +189,6 @@ void DotStarUI::Draw(RGB* led, int mode, const UIRenderData* data)
     static const uint32_t COLOR_POWER_ON  = 0x00FF00;
     static const uint32_t COLOR_POWER_OFF = 0x800000;
     static const uint32_t PALETTE_ONE     = 0xFFFFFF;
-    //static const uint32_t PALETTE_ZERO    = 0x202020;
 
     switch(mode) {
         case Sketcher::REST_MODE:

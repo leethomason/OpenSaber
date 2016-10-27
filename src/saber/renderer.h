@@ -3,9 +3,14 @@
 
 #include <stdint.h>
 
+#if defined(_MSC_VER)
+#	define OSASSERT( x )		if ( !(x)) { _asm { int 3 } }
+#else
+#	define OSASSERT( x )
+#endif
+
 typedef const uint8_t* (*glyphMetrics)(int charID, int* advance, int* w, int* rows);
 typedef const uint8_t* (*textureData)(int* w, int* h);
-
 
 class Renderer
 {
