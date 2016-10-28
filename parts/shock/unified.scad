@@ -22,7 +22,7 @@ R_DISPLAY_THREAD_HEAD = 2.0;
 DEPTH_DISPLAY_THREAD = 4;
 
 DOTSTAR_HOLDER_TRIM = 2;
-DOTSTAR_HOLDER_T    = 2;    
+DOTSTAR_HOLDER_T    = 1.5;    
 DOTSTAR_START       = 3;
 DOTSTAR_SPACE       = 7;
 
@@ -308,12 +308,12 @@ module rail(angle)
 }
 
 
-module dotstars(y)
+module dotstars(y, pad)
 {
-    translate([-X_DOTSTAR/2, Y_DISPLAY + DOTSTAR_HOLDER_T, M_DISPLAY]) {
+    translate([-X_DOTSTAR/2 - pad/2, Y_DISPLAY + DOTSTAR_HOLDER_T, M_DISPLAY- pad/2]) {
         for(i=[0:3]) {
             translate([0, 0, DOTSTAR_START + DOTSTAR_SPACE * i]) {
-                cube(size=[X_DOTSTAR, y, X_DOTSTAR]);
+                cube(size=[X_DOTSTAR + pad, y, X_DOTSTAR + pad]);
             }
         }
     }   
@@ -345,7 +345,7 @@ module dotstarCap()
         innerTube();
 
         difference() {
-            translate([-DISPLAY_W/2, Y_DISPLAY + DOTSTAR_HOLDER_T + 0.5, M_DISPLAY]) {
+            translate([-DISPLAY_W/2, Y_DISPLAY + DOTSTAR_HOLDER_T + 1.0, M_DISPLAY]) {
                 difference() {
                     translate([0, 0, DOTSTAR_HOLDER_TRIM/2]) {
                         cube(size=[DISPLAY_W, 10, DISPLAY_L - DOTSTAR_HOLDER_TRIM]);
@@ -353,7 +353,7 @@ module dotstarCap()
                     displayBolts();
                 }
             }
-            dotstars(20);
+            dotstars(20, 0.4);
         }
     } 
 }
@@ -430,7 +430,7 @@ module drillGuide(alignment)
 }
 
 *dotstarHolder();
-*dotstarCap();
+dotstarCap();
 
 *portButtress();
 *crystalButtress();
@@ -439,4 +439,4 @@ module drillGuide(alignment)
 
 *rail(NOTCH_ANGLE_0);
 *rail(NOTCH_ANGLE_1);
-drillGuide(alignment=true);
+*drillGuide(alignment=true);

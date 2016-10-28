@@ -22,6 +22,11 @@ struct RGB {
 		OSASSERT(index < 3);
 		return *(&r + index);
 	}
+    uint8_t& operator[](const int index) {
+        OSASSERT(index >= 0);
+        OSASSERT(index < 3);
+        return *(&r + index);
+    }
 };
 
 /**

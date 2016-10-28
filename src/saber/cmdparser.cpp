@@ -264,6 +264,7 @@ bool CMDParser::processCMD(uint8_t* c) {
         */
     }
     else if (action == LOG) {
+        #ifdef LOGFILE
         CStr<24> path;
         path.append("LOGS/log");
         path.append(value.c_str());
@@ -288,6 +289,7 @@ bool CMDParser::processCMD(uint8_t* c) {
             Serial.print("File open failed: ");
             Serial.println(path.c_str());
         }
+        #endif
     }
     else if (action == TEST) {
         Tester* tester = Tester::instance();

@@ -34,6 +34,7 @@ SOFTWARE.
 #define SABER_MODEL_GECKO			1	// PCB, Teensy 3, external amp and accel
 #define SABER_MODEL_BLACK			2	// PCB, Prop Shield, Teensy 3, Dotstar UI
 #define SABER_MODEL_SHOCK			3	// PCB, Prop Shield, Teensy 3, OLED
+#define SABER_MODEL_SILVER_SHOCK	4	// PCB, Prop Shield, Teensy 3
 
 #define SABER_MODEL 				SABER_MODEL_SHOCK
 
@@ -128,6 +129,34 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int VOLUME_3 = 120;
 	static const int VOLUME_4 = 200;
 
+#elif SABER_MODEL == SABER_MODEL_SILVER_SHOCK
+	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
+	#define SABER_SOUND_ON
+	#define SABER_SOUND_SHUTDOWN
+	#define SABER_VOLTMETER
+	#define SABER_NUM_LEDS 	1
+	#define SABER_CRYSTAL
+
+	static const int32_t UVOLT_MULT = 6680;
+	#define ID_STR "Shock / Silver Knight Custom RGB Cree XPE2"
+
+	static const int32_t RED_VF   = 2100;   
+	static const int32_t RED_I    = 350;    
+	static const int32_t RED_R    = 4300;
+
+	static const int32_t GREEN_VF = 3400;
+	static const int32_t GREEN_I  = 350;
+	static const int32_t GREEN_R  = 1000;
+
+	static const int32_t BLUE_VF  = 3100;
+	static const int32_t BLUE_I   = 350;
+	static const int32_t BLUE_R   = 1600;
+
+	static const int VOLUME_1 = 15;
+	static const int VOLUME_2 = 50;
+	static const int VOLUME_3 = 120;
+	static const int VOLUME_4 = 200;
+
 #endif
 
 #if SABER_MODEL == SABER_MODEL_GECKO
@@ -157,7 +186,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_EMITTER_GREEN 22
 	#define PIN_EMITTER_RED   23
 
-#elif ((SABER_MODEL == SABER_MODEL_BLACK) || (SABER_MODEL == SABER_MODEL_SHOCK))
+#elif ((SABER_MODEL == SABER_MODEL_BLACK) || (SABER_MODEL == SABER_MODEL_SHOCK) || (SABER_MODEL == SABER_MODEL_SILVER_SHOCK))
 	/* Teensy 3.2 with Prop Shield */
 	// Digital
 	#define PIN_RX1           0
