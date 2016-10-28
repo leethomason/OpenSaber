@@ -358,12 +358,11 @@ module dotstarCap()
     } 
 }
 
-module drillGuide()
+module drillGuide(alignment)
 {
-    ALIGNMENT = false;
     D_UI = 2;
-    D_PORT = ALIGNMENT ? 2 : 8;
-    D_CRYSTAL = ALIGNMENT ? 2 : 12;
+    D_PORT = alignment ? 2 : 8;
+    D_CRYSTAL = alignment ? 2 : 12;
             
     difference() {
         W = 16;
@@ -432,7 +431,6 @@ module drillGuide()
 
 *dotstarHolder();
 *dotstarCap();
-drillGuide();
 
 *portButtress();
 *crystalButtress();
@@ -441,3 +439,4 @@ drillGuide();
 
 *rail(NOTCH_ANGLE_0);
 *rail(NOTCH_ANGLE_1);
+drillGuide(alignment=true);
