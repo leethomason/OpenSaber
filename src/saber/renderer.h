@@ -15,8 +15,7 @@ typedef const uint8_t* (*textureData)(int* w, int* h);
 class Renderer
 {
 public:
-	Renderer();
-
+	Renderer() {}
 	void Attach(int w, int h, uint8_t* buffer);
 
 	enum {
@@ -39,10 +38,10 @@ public:
 private:
 	void CalcMask(int y, int h, int* r0, int* r1);
 
-	int width;
-	int height;
-	int nRows;
-	uint8_t* buffer;
+	int width	= 0;
+	int height	= 0;
+	int nRows	= 0;
+	uint8_t* buffer = 0;
 
 	enum { MAX_ROWS = 4};
 	uint8_t mask[MAX_ROWS];

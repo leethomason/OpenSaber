@@ -56,9 +56,7 @@ int main(int, char**) {
 		"Bespin", "Vader", "Vader", "ObiAni", "Bespin", "JainaSw", "Maul", "MAUL"
 	};
 	uint8_t COLORS[8] = { 0, 255, 100, 200, 255, 0, 20, 120 };
-	data.color[0] = COLORS[0];
-	data.color[1] = COLORS[1];
-	data.color[2] = COLORS[2];
+	data.color.set(COLORS[0], COLORS[1], COLORS[2]);
 
 	int palette = 0;
 
@@ -83,9 +81,9 @@ int main(int, char**) {
 			}
 			else if (e.key.keysym.sym == SDLK_c) {
 				palette = (palette + 1) % 8;
-				data.color[0] = COLORS[(palette * 3 + 0) % 8];
-				data.color[1] = COLORS[(palette * 2 + 1) % 8];
-				data.color[2] = COLORS[(palette * 5 + 2) % 8];
+				data.color.set(COLORS[(palette * 3 + 0) % 8],
+					COLORS[(palette * 2 + 1) % 8],
+					COLORS[(palette * 5 + 2) % 8]);
 				data.fontName = FONT_NAMES[palette];
 				data.palette = palette;
 			}

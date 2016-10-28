@@ -4,14 +4,6 @@
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 
-Renderer::Renderer()
-{
-	width = 0;
-	height = 0;
-	buffer = 0;
-	nRows = 0;
-}
-
 void Renderer::Attach(int w, int h, uint8_t* buf)
 {
 	OSASSERT(buf);
@@ -20,6 +12,8 @@ void Renderer::Attach(int w, int h, uint8_t* buf)
 	height = h;
 	buffer = buf;
 	nRows = height / 8;
+
+	OSASSERT(nRows <= MAX_ROWS);
 }
 
 bool Renderer::DrawBitmap(int x, int y, textureData data, int flags, int clip0, int clip1)
@@ -27,12 +21,15 @@ bool Renderer::DrawBitmap(int x, int y, textureData data, int flags, int clip0, 
 	int texW = 0;
 	int texH = 0;
 	const uint8_t* tex = data(&texW, &texH);
+	OSASSERT(tex);
 	return DrawBitmap(x, y, tex, texW, texH, flags, clip0, clip1);
 }
 
 bool Renderer::DrawBitmap(int x, int y, const uint8_t* tex, int texW, int texH, int flags, int clip0, int clip1)
 {
 	if (!tex) return false;
+	OSASSERT(buffer);
+	if (!buffer) return false;
 
 	const int texRows = (texH + 7) / 8;
 
@@ -58,7 +55,7 @@ bool Renderer::DrawBitmap(int x, int y, const uint8_t* tex, int texW, int texH, 
 
 	const uint8_t* src = tex;
 	const uint8_t* texEnd = tex + texRows * texW;
-  (void)src;
+	(void)src;
 
 	for (int r = r0; r < r1; ++r) {
 		if (r < 0 || r >= nRows) continue;
@@ -130,6 +127,7 @@ void Renderer::CalcMask(int y, int h, int* pr0, int* pr1)
 	if (pr0) *pr0 = r0;
 	if (pr1) *pr1 = r1;
 
+	OSASSERT(nRows <= MAX_ROWS);
 	for (int r = MAX(r0, 0); r < MIN(r1, nRows); ++r) {
 		mask[r] = 0xff;
 	}
@@ -178,5 +176,7 @@ int Renderer::StrWidth(const char* str, glyphMetrics metrics)
 
 void Renderer::Fill(int c)
 {
-	memset(buffer, c ? 0xff : 0, nRows * width);
+	if (buffer) {
+		memset(buffer, c ? 0xff : 0, nRows * width);
+	}
 }

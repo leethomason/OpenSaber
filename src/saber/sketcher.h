@@ -5,9 +5,9 @@
 #include "renderer.h"
 
 struct RGB {
-    uint8_t r;
-    uint8_t g;
-    uint8_t b;
+    uint8_t r = 0;
+    uint8_t g = 0;
+    uint8_t b = 0;
 
 	void set(uint8_t _r, uint8_t _g, uint8_t _b) {
 		r = _r; g = _g; b = _b;
@@ -16,6 +16,11 @@ struct RGB {
 		r = (c & 0xff0000) >> 16;
 		g = (c & 0xff00) >> 8;
 		b = c & 0xff;
+	}
+	uint8_t operator[](const int index) const {
+		OSASSERT(index >= 0);
+		OSASSERT(index < 3);
+		return *(&r + index);
 	}
 };
 
@@ -31,13 +36,11 @@ struct UIRenderData
     uint8_t power   = 0;
     uint8_t volume  = 0;
     uint8_t palette = 0;
-	uint8_t color[3];
 	uint32_t mVolts = 0;
     const char* fontName = 0;
+	RGB color;
 
-    UIRenderData() {
-		color[0] = color[1] = color[2] = 0;
-    }
+    UIRenderData() {}
 };
 
 class DotStarUI
@@ -74,14 +77,13 @@ public:
     void Draw(Renderer* d, uint32_t time, int mode, const UIRenderData* data);
     void Push(uint8_t value);
 
-    uint8_t data[DATA_WIDTH];
-
 private:
     textureData GetDial(int value);
 
     uint8_t line = 0;
     uint8_t pos = 0;
     uint32_t animTime = 0;
+	uint8_t data[DATA_WIDTH];
 };
 
 void calcCrystalColor(uint32_t msec, const uint8_t* base, uint8_t* out);
