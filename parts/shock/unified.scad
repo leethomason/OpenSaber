@@ -223,29 +223,33 @@ module portButtress()
     INNER_Z0 = -POWER_Z / 2; // from port center.
 
     LED_X = 13;
-    LED_Y = 8;
+    LED_Y = 10;
     LED_Z = 1.5; 
 
     Z_WITH_FILL = M_PORT_BUTTRESS - (M_PORT_CENTER - POWER_Z/2) + T;
     
-    translate([0, 0, M_PORT_CENTER]) {
-        difference() {
-            translate([INNER_X0, INNER_Y0 - T, INNER_Z0 - T]) {
-                cube(size=[POWER_X + T, POWER_Y + T, Z_WITH_FILL]);
+    difference() {
+        union() {
+            translate([0, 0, M_PORT_CENTER]) {
+                translate([INNER_X0, INNER_Y0 - T, INNER_Z0 - T]) {
+                    cube(size=[POWER_X + T, POWER_Y + T, Z_WITH_FILL]);
+                }
             }
-            translate([INNER_X0-EPS, INNER_Y0, INNER_Z0]) {
-                cube(size=[POWER_X+EPS, POWER_Y + EPS, POWER_Z]);
-            }
-        }          
-    }
-    translate([0, 0, M_PORT_BUTTRESS]) {
-        difference() {
-            buttress(pcb=7, upperWiring=true);
-            translate([-LED_X/2, CRYSTAL_Y - LED_Y/2, H_BUTTRESS - LED_Z]) {
-                cube(size=[LED_X, LED_Y, LED_Z + EPS]);
+            translate([0, 0, M_PORT_BUTTRESS]) {
+                difference() {
+                    buttress(pcb=7, upperWiring=true);
+                    translate([-LED_X/2, CRYSTAL_Y - LED_Y/2, H_BUTTRESS - LED_Z]) {
+                        cube(size=[LED_X, LED_Y, LED_Z + EPS]);
+                    }
+                }
             }
         }
-    }
+        translate([INNER_X0-EPS, INNER_Y0, INNER_Z0 + M_PORT_CENTER]) {
+            cube(size=[POWER_X+EPS, 30, POWER_Z]);
+            translate([-10, 0, 0]) cube(size=[10 + POWER_X+EPS, 5, POWER_Z]);
+        }   
+        
+    }          
 }
 
 module crystalButtress()
@@ -310,13 +314,23 @@ module rail(angle)
 
 module dotstars(y, pad)
 {
-    translate([-X_DOTSTAR/2 - pad/2, Y_DISPLAY + DOTSTAR_HOLDER_T, M_DISPLAY- pad/2]) {
+    /*translate([-X_DOTSTAR/2 - pad/2, Y_DISPLAY + DOTSTAR_HOLDER_T, M_DISPLAY - pad/2]) {
         for(i=[0:3]) {
             translate([0, 0, DOTSTAR_START + DOTSTAR_SPACE * i]) {
                 cube(size=[X_DOTSTAR + pad, y, X_DOTSTAR + pad]);
             }
         }
-    }   
+    }*/
+    translate([0, 0, M_DISPLAY]) {
+        for(i=[0:3]) {
+            translate([ -X_DOTSTAR/2 - pad/2, 
+                        -X_DOTSTAR/2, 
+                        DOTSTAR_START + DOTSTAR_SPACE * i - pad/2]) {
+                cube(size=[X_DOTSTAR + pad, y, X_DOTSTAR + pad]);
+                //rotate([-90, 0, 0]) cylinder(h=30, d=D_UI);
+            }
+        }
+    }
 }
 
 module dotstarHolder() {
@@ -353,7 +367,10 @@ module dotstarCap()
                     displayBolts();
                 }
             }
-            dotstars(20, 0.4);
+            translate([-6, Y_DISPLAY + DOTSTAR_HOLDER_T + 1.0, M_DISPLAY + DISPLAY_L - 6]) {
+                    cube(size=[12, 10, 5]);
+            }
+            dotstars(20, 0.4);            
         }
     } 
 }

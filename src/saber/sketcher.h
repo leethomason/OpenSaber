@@ -3,31 +3,8 @@
 
 #include <stdint.h>
 #include "renderer.h"
+#include <DotStar.h>        // for RGB definition. FIXME.
 
-struct RGB {
-    uint8_t r = 0;
-    uint8_t g = 0;
-    uint8_t b = 0;
-
-	void set(uint8_t _r, uint8_t _g, uint8_t _b) {
-		r = _r; g = _g; b = _b;
-	}
-	void set(uint32_t c) {
-		r = (c & 0xff0000) >> 16;
-		g = (c & 0xff00) >> 8;
-		b = c & 0xff;
-	}
-	uint8_t operator[](const int index) const {
-		OSASSERT(index >= 0);
-		OSASSERT(index < 3);
-		return *(&r + index);
-	}
-    uint8_t& operator[](const int index) {
-        OSASSERT(index >= 0);
-        OSASSERT(index < 3);
-        return *(&r + index);
-    }
-};
 
 /**
 Sin wave.

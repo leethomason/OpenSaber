@@ -15,7 +15,7 @@ M_DISPLAY           = 14;       // was 15
 // GOLD
 // M_PORT_CENTER       = 57.5;
 // SILVER
-M_PORT_CENTER       = 58.0;
+M_PORT_CENTER       = 59.7;
 
 M_PORT_BUTTRESS     = 63.5;
 M_CRYSTAL_VIEW_CENTER = 93;

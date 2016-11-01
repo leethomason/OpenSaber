@@ -87,9 +87,12 @@ SaberDB     saberDB;
 AveragePower averagePower;
 
 #ifdef SABER_NUM_LEDS
-DotStar::RGB leds[SABER_NUM_LEDS];
+RGB leds[SABER_NUM_LEDS];
 DotStar dotstar(PIN_DOTSTAR_EN);
 DotStarUI dotstarUI;
+#endif
+#if (SABER_NUM_LEDS > 1) && !defined(SABER_UI_START)
+#   error SABER_UI_START not defined.
 #endif
 
 Accelerometer accel;
@@ -119,12 +122,9 @@ void setupSD(int logCount)
     SPI.setMOSI(PIN_SABER_MOSI);
     SPI.setSCK(PIN_SABER_CLOCK);
     #ifdef SABER_SOUND_ON
-        if (!(SD.begin(PIN_SDCARD_CS))) {
-            // stop here, but print a message repetitively
-            while (1) {
-                Serial.println("Unable to access the SD card");
-                delay(500);
-            }
+        while (!(SD.begin(PIN_SDCARD_CS))) {
+            Log.p("Unable to access the SD card").eol();
+            delay(500);
         }
         #ifdef LOGFILE
             SD.mkdir("logs");
@@ -212,9 +212,6 @@ void setup() {
     #endif
 
     #if defined(SABER_NUM_LEDS)
-        #if defined(SABER_LEDS)
-            dotstar.setBrightness(4);
-        #endif
         dotstar.attachLEDs(leds, SABER_NUM_LEDS);
         for(int i=0; i<SABER_NUM_LEDS; ++i) {
             leds[i].set(0x010101);
@@ -637,9 +634,8 @@ void loop() {
             sketcher.Draw(&renderer, displayTimer.period(), sketcherMode, &uiRenderData);
             display.display(oledBuffer);
         #endif
-        #ifdef SABER_LEDS
-            dotstarUI.Draw(leds, sketcherMode, &uiRenderData);
-            dotstar.display();
+        #ifdef SABER_UI_START
+            dotstarUI.Draw(leds + SABER_UI_START, sketcherMode, &uiRenderData);
         #endif
     }
 
@@ -652,12 +648,13 @@ void loop() {
                 leds[0].set(outColor[0], outColor[1], outColor[2]);
             }
             else {
-                leds[0].red   = rgb[0];
-                leds[0].green = rgb[1];
-                leds[0].blue  = rgb[2];
+                leds[0].set(rgb[0], rgb[1], rgb[2]);
             }
-            dotstar.display();
         }
+    #endif
+
+    #ifdef SABER_NUM_LEDS
+        dotstar.display();
     #endif
 }
  

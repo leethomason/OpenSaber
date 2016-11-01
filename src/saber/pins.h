@@ -28,7 +28,7 @@ SOFTWARE.
 // --- Configuration ---
 // Note: Serial connection should be set to 19200 baud with a newline after commands.
 
-#define SERIAL_DEBUG 1
+#define SERIAL_DEBUG 0
 
 #define SABER_MODEL_TEST			0
 #define SABER_MODEL_GECKO			1	// PCB, Teensy 3, external amp and accel
@@ -36,7 +36,7 @@ SOFTWARE.
 #define SABER_MODEL_SHOCK			3	// PCB, Prop Shield, Teensy 3, OLED
 #define SABER_MODEL_SILVER_SHOCK	4	// PCB, Prop Shield, Teensy 3
 
-#define SABER_MODEL 				SABER_MODEL_SHOCK
+#define SABER_MODEL 				SABER_MODEL_SILVER_SHOCK
 
 static const int EEPROM_SIZE = 512;
 static const int32_t NOMINAL_VOLTAGE 	= 3700;
@@ -72,7 +72,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 #elif SABER_MODEL == SABER_MODEL_BLACK
 	#define SABER_NUM_LEDS				4
-	#define SABER_LEDS
+	#define SABER_UI_START				0
 	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
 	#define SABER_SOUND_ON
 	#define SABER_SOUND_SHUTDOWN
@@ -134,11 +134,12 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_SOUND_ON
 	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
-	#define SABER_NUM_LEDS 	1
+	#define SABER_NUM_LEDS 	5
+	#define SABER_UI_START  1
 	#define SABER_CRYSTAL
 
-	static const int32_t UVOLT_MULT = 6680;
-	#define ID_STR "Shock / Silver Knight Custom RGB Cree XPE2"
+	static const int32_t UVOLT_MULT = 6750;
+	#define ID_STR "Silver Shock Custom RGB Cree XPE2"
 
 	static const int32_t RED_VF   = 2100;   
 	static const int32_t RED_I    = 350;    
