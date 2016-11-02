@@ -24,6 +24,7 @@ SOFTWARE.
 #define SABER_DB_INCLUDED
 
 #include <stdint.h>
+#include <Grinliz_Arduino_Util.h>
 #include "pins.h"
 
 class SaberDB
@@ -75,7 +76,7 @@ private:
 	struct Palette {
 	  uint8_t bladeColor[NCHANNELS];
 	  uint8_t impactColor[NCHANNELS];
-	  char    soundFont[9]; // include the null terminator.
+    CStr<9> soundFont;
 	};
 
 	struct DataHeader {

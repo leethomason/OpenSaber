@@ -3,8 +3,7 @@
 
 #include <stdint.h>
 #include "renderer.h"
-#include <DotStar.h>        // for RGB definition. FIXME.
-
+#include <DotStar.h>
 
 /**
 Sin wave.

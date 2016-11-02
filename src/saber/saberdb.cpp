@@ -54,7 +54,7 @@ bool SaberDB::writeDefaults() {
 
   for (int i = 0; i < NUM_PALETTES; ++i) {
     Palette p = defPalette[i];
-    strBufCpy(p.soundFont, 9, defNames[i]);
+    p.soundFont = defNames[i];
     EEPROM.put(paletteAddr(i), p);
   }
   readData();

@@ -401,6 +401,9 @@ void Tester::runTests(int count, bool longTest)
 	nPasses = count;
 	useLongTest = longTest;
 
+	Log.p("Unit test: CStr:   ").p(TestCStr() ? "pass" : "fail").eol();
+	Log.p("Unit test: HexDec: ").p(TestHexDec() ? "pass" : "fail").eol();
+
 	if (nPasses < 1) nPasses = 1;
 	running = true;
 

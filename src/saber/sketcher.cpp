@@ -206,10 +206,12 @@ void DotStarUI::Draw(RGB* led, int mode, const UIRenderData* data)
         {
             int i=0;
             for(; i<data->power && i < 4; ++i) {
-                led[i].set(COLOR_POWER_ON);
+                //led[i].set(COLOR_POWER_ON);
+                led[i] = data->color;
             }
             for(; i<4; ++i) {
-                led[i].set(COLOR_POWER_OFF);
+                //led[i].set(COLOR_POWER_OFF);
+                led[i].set(0);
             }
         }
         break;
