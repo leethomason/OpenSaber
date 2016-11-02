@@ -373,6 +373,17 @@ module dotstarCap()
             dotstars(20, 0.4);            
         }
     } 
+    // Dotstars
+    color("red") {
+        translate([0, 0, M_DISPLAY]) {
+            for(i=[0:3]) {
+                translate([0, 10, DOTSTAR_START + DOTSTAR_SPACE * i + X_DOTSTAR/2]) {
+                    //cube(size=[X_DOTSTAR, y, X_DOTSTAR]);
+                    rotate([-90, 0, 0]) cylinder(h=10, d=2);
+                }
+            }
+        }
+    }
 }
 
 module drillGuide(alignment)
@@ -432,7 +443,7 @@ module drillGuide(alignment)
 }
 
 // Aft lock
-*difference() {
+difference() {
 	aftLock();
 	display();
 	mainRod();
@@ -441,7 +452,7 @@ module drillGuide(alignment)
 }
 
 // Display holder.
-*union() {
+union() {
 	displayButtress();
 	displayConnectors();
 }
