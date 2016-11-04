@@ -184,7 +184,7 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* i
 }
 
 
-void DotStarUI::Draw(RGB* led, int mode, const UIRenderData* data)
+void DotStarUI::Draw(RGB* led, int mode, const UIRenderData& data)
 {
     static const uint32_t COLOR_AUDIO_ON  = 0x0000FF;
     static const uint32_t COLOR_AUDIO_OFF = 0xFFD800;
@@ -195,19 +195,19 @@ void DotStarUI::Draw(RGB* led, int mode, const UIRenderData* data)
     switch(mode) {
         case Sketcher::REST_MODE:
         {
-            led[0].set(data->volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
-            led[1].set(data->volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
+            led[0].set(data.volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
+            led[1].set(data.volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
             led[2].set(0);
-            led[3].set(data->color[0], data->color[1], data->color[2]);
+			led[3] = data.color;
         }
         break;
 
         case Sketcher::BLADE_ON_MODE:
         {
             int i=0;
-            for(; i<data->power && i < 4; ++i) {
+            for(; i<data.power && i < 4; ++i) {
                 //led[i].set(COLOR_POWER_ON);
-                led[i] = data->color;
+                led[i] = data.color;
             }
             for(; i<4; ++i) {
                 //led[i].set(COLOR_POWER_OFF);
@@ -218,17 +218,17 @@ void DotStarUI::Draw(RGB* led, int mode, const UIRenderData* data)
 
         case Sketcher::PALETTE_MODE:
         {
-            led[0].set((data->palette & 1) ? PALETTE_ONE : 0);
-            led[1].set((data->palette & 2) ? PALETTE_ONE : 0);
-            led[2].set((data->palette & 4) ? PALETTE_ONE : 0);
-            led[3].set(data->color[0], data->color[1], data->color[2]);            
+            led[0].set((data.palette & 1) ? PALETTE_ONE : 0);
+            led[1].set((data.palette & 2) ? PALETTE_ONE : 0);
+            led[2].set((data.palette & 4) ? PALETTE_ONE : 0);
+			led[3] = data.color;
         }
         break;
 
         case Sketcher::VOLUME_MODE:
         {
             int i=0;
-            for(; i<data->volume && i < 4; ++i) {
+            for(; i<data.volume && i < 4; ++i) {
                 led[i].set(COLOR_AUDIO_ON);
             }
             for(; i<4; ++i) {
@@ -238,24 +238,132 @@ void DotStarUI::Draw(RGB* led, int mode, const UIRenderData* data)
         break;
     }
     for(int i=0; i<4; ++i) {
-    	led[i].scale(8);
+    	led[i].scale(m_brightness);
     }
 }
 
 
-void calcCrystalColor(uint32_t t, const RGB& base, RGB* out)
+bool DotStarUI::Test()
 {
-    static const int32_t RATIO = 220;
-    static const int32_t RATIO_M1 = 256 - RATIO;
-    static const int32_t DIV = 256;
+	RGB leds[6];
 
+	UIRenderData data;
+	data.power = 2;
+	data.mVolts = 3700;
+	data.volume = 1;
+	data.palette = 7;
+	data.fontName = "FontName";
+	data.color.set(0xff, 0, 0);
+
+	OSASSERT(data.color.get() == 0xff0000);
+	{
+		DotStarUI dotstar;
+		
+		dotstar.Draw(&leds[1], Sketcher::REST_MODE, data);
+		OSASSERT(leds[0].get() == 0);			// check memory
+		OSASSERT(leds[1].get() == 0x0000ff);	// sound on
+		OSASSERT(leds[2].get() == 0x0000ff);	// sound on
+		OSASSERT(leds[3].get() == 0);			// off
+		OSASSERT(leds[4].get() == 0xff0000);	// blade color
+		OSASSERT(leds[5].get() == 0);			// memory check
+
+		dotstar.Draw(&leds[1], Sketcher::BLADE_ON_MODE, data);
+		OSASSERT(leds[0].get() == 0);			// check memory
+		OSASSERT(leds[1] == data.color);	
+		OSASSERT(leds[2] == data.color);
+		OSASSERT(leds[3].get() == 0);			
+		OSASSERT(leds[4].get() == 0);			
+		OSASSERT(leds[5].get() == 0);			// memory check
+
+		dotstar.Draw(&leds[1], Sketcher::PALETTE_MODE, data);
+		OSASSERT(leds[0].get() == 0);			// check memory
+		OSASSERT(leds[1].get() == 0xffffff);
+		OSASSERT(leds[2].get() == 0xffffff);
+		OSASSERT(leds[3].get() == 0xffffff);
+		OSASSERT(leds[4] == data.color);
+		OSASSERT(leds[5].get() == 0);			// memory check
+
+		dotstar.Draw(&leds[1], Sketcher::VOLUME_MODE, data);
+		OSASSERT(leds[0].get() == 0);			// check memory
+		OSASSERT(leds[1].get() == 0x0000ff);
+		OSASSERT(leds[2].get() == 0xFFD800);
+		OSASSERT(leds[3].get() == 0xFFD800);
+		OSASSERT(leds[4].get() == 0xFFD800);
+		OSASSERT(leds[5].get() == 0);			// memory check
+	}
+	{
+		DotStarUI dotstar;
+		dotstar.SetBrightness(128);
+		RGB c2 = data.color;
+		c2.scale(128);
+
+		dotstar.Draw(&leds[1], Sketcher::REST_MODE, data);
+		OSASSERT(leds[0].get() == 0);			// check memory
+		OSASSERT(leds[1].get() == 0x00007f);	// sound on
+		OSASSERT(leds[2].get() == 0x00007f);	// sound on
+		OSASSERT(leds[3].get() == 0);			// off
+		OSASSERT(leds[4].get() == 0x7f0000);	// blade color
+		OSASSERT(leds[5].get() == 0);			// memory check
+
+		dotstar.Draw(&leds[1], Sketcher::BLADE_ON_MODE, data);
+		OSASSERT(leds[0].get() == 0);			// check memory
+		OSASSERT(leds[1] == c2);
+		OSASSERT(leds[2] == c2);
+		OSASSERT(leds[3].get() == 0);
+		OSASSERT(leds[4].get() == 0);
+		OSASSERT(leds[5].get() == 0);			// memory check
+
+		dotstar.Draw(&leds[1], Sketcher::PALETTE_MODE, data);
+		OSASSERT(leds[0].get() == 0);			// check memory
+		OSASSERT(leds[1].get() == 0x7f7f7f);
+		OSASSERT(leds[2].get() == 0x7f7f7f);
+		OSASSERT(leds[3].get() == 0x7f7f7f);
+		OSASSERT(leds[4] == c2);
+		OSASSERT(leds[5].get() == 0);			// memory check
+
+		dotstar.Draw(&leds[1], Sketcher::VOLUME_MODE, data);
+		OSASSERT(leds[0].get() == 0);			// check memory
+		OSASSERT(leds[1].get() == 0x00007f);
+		OSASSERT(leds[2].get() == 0x7F6c00);
+		OSASSERT(leds[3].get() == 0x7F6c00);
+		OSASSERT(leds[4].get() == 0x7F6c00);
+		OSASSERT(leds[5].get() == 0);			// memory check
+	}
+	return true;
+}
+
+
+void calcCrystalColor(uint32_t t, int32_t variation, const RGB& base, RGB* out)
+{
     uint32_t tc[3] = { t / 53UL, t / 67UL, t / 79UL };
 
     for (int i = 0; i < 3; ++i) {
         int32_t s = isin(tc[i]);
-        int32_t scaledColor = int32_t(base[i]) * RATIO + s * RATIO_M1;
-        if (scaledColor < 0) scaledColor = 0;
-
-        out[i] = uint8_t(scaledColor / DIV);
+		int32_t scaledColor = base[i] + s * variation / 256;
+		if (scaledColor > 255) scaledColor = 255;
+		if (scaledColor < 0) scaledColor = 0;
+		out->set(i, scaledColor);
     }
 }
+
+bool TestCrystalColor()
+{
+	const RGB base(200, 200, 200);
+	RGB out;
+	
+	for (uint32_t t = 0; t < 2000; ++t) {
+		calcCrystalColor(t, 20, base, &out);
+		for (int i = 0; i < 3; ++i) {
+			OSASSERT(out[i] >= base[i] - 20);
+			OSASSERT(out[i] <= base[i] + 20);
+		}
+	}
+
+	calcCrystalColor(0, 10, base, &out);
+	OSASSERT(base[0] == out[0]);
+	OSASSERT(base[1] == out[1]);
+	OSASSERT(base[2] == out[2]);
+
+	return true;
+}
+

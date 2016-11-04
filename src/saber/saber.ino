@@ -223,6 +223,9 @@ void setup() {
 
     syncToDB();
     ledA.set(true); // "power on" light
+    #ifdef SABER_UI_BRIGHTNESS
+        dotstar.setBrightness(SABER_UI_BRIGHTNESS);
+    #endif
     Log.event("[saber start]");
 }
 
@@ -586,6 +589,8 @@ void loop() {
     if (vbatTimer.tick()) {
         averagePower.push(readVbat());
         blade.setVoltage(averagePower.power());
+        uiRenderData.mVolts = averagePower.power();
+        uiRenderData.power = vbatToPowerLevel(averagePower.power());
     }
 
     if (gforceDataTimer.tick()) {
@@ -610,6 +615,7 @@ void loop() {
     if (displayTimer.tick()) {
         int sketcherMode = Sketcher::BLADE_ON_MODE;
         (void)sketcherMode; // If no display, won't be used, but don't need a warning.
+        uiRenderData.color = saberDB.bladeColor();
 
         #ifdef SABER_TWO_BUTTON
             if (bladeState.state() == BLADE_OFF) {
@@ -635,7 +641,7 @@ void loop() {
             display.display(oledBuffer);
         #endif
         #ifdef SABER_UI_START
-            dotstarUI.Draw(leds + SABER_UI_START, sketcherMode, &uiRenderData);
+            dotstarUI.Draw(leds + SABER_UI_START, sketcherMode, uiRenderData);
         #endif
     }
 

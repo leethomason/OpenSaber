@@ -14,7 +14,7 @@ int16_t isin(uint16_t x);
 
 struct UIRenderData
 {
-    uint8_t power   = 0;
+    uint8_t power	= 0;
     uint8_t volume  = 0;
     uint8_t palette = 0;
 	uint32_t mVolts = 0;
@@ -27,7 +27,15 @@ struct UIRenderData
 class DotStarUI
 {
 public:
-    void Draw(RGB* uiLedStart, int mode, const UIRenderData* data);
+    void Draw(RGB* uiLedStart, int mode, const UIRenderData& data);
+
+	void SetBrightness(uint16_t v) { m_brightness = v; }
+	uint16_t Brightness() const { return m_brightness; }
+
+	static bool Test();
+
+private:
+	uint16_t m_brightness = 256;
 };
 
 class Sketcher
@@ -67,7 +75,8 @@ private:
 	uint8_t data[DATA_WIDTH];
 };
 
-void calcCrystalColor(uint32_t msec, const RGB& base, RGB* out);
+void calcCrystalColor(uint32_t msec, int32_t variation, const RGB& base, RGB* out);
 
+bool TestCrystalColor();
 
 #endif // SKETCHER_INCLUDED

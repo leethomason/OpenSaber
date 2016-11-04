@@ -3,6 +3,7 @@
 #include "sfx.h"
 #include "blade.h"
 #include "saberUtil.h"
+#include "sketcher.h"
 
 #include <Button.h>
 #include <Grinliz_Arduino_Util.h>
@@ -404,7 +405,9 @@ void Tester::runTests(int count, bool longTest)
 
 	Log.p("Unit test: CStr:   ").p(TestCStr() ? "pass" : "fail").eol();
 	Log.p("Unit test: HexDec: ").p(TestHexDec() ? "pass" : "fail").eol();
-	Log.p("Unit test: Event:  ").p(TestEvent() ? "pass" : "fail").eol();
+	//Log.p("Unit test: Event:  ").p(TestEvent() ? "pass" : "fail").eol();
+	Log.p("Test DotStar UI").eol(); DotStarUI::Test();
+	Log.p("Test crystal color.").eol(); TestCrystalColor();
 
 	if (nPasses < 1) nPasses = 1;
 	running = true;
