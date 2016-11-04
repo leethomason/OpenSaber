@@ -51,7 +51,7 @@
 #include "saberUtil.h"
 #include "tester.h"
 
-static const uint8_t  BLADE_BLACK[NCHANNELS]  = {0};
+static const RGB BLADE_BLACK(0);
 static const uint32_t FLASH_TIME              = 120;
 static const uint32_t VBAT_TIME_INTERVAL      = 500;
 
@@ -509,7 +509,7 @@ void processBladeState()
 
 void serialEvent() {
     bool processed = false;
-    uint8_t color[NCHANNELS] = {0};
+    RGB color;
 
     while (Serial.available()) {
         int c = Serial.read();
@@ -518,7 +518,7 @@ void serialEvent() {
             Serial.print("event ");
             Serial.println(cmdParser.getBuffer());
             #endif
-            processed = cmdParser.processCMD(color);
+            processed = cmdParser.processCMD(&color);
         }
         else {
             cmdParser.push(c);
@@ -641,10 +641,10 @@ void loop() {
 
     #if defined(SABER_CRYSTAL)
         {
-            const uint8_t* rgb = saberDB.bladeColor();
+            const RGB rgb = saberDB.bladeColor();
             if (bladeState.state() == BLADE_OFF && buttonMode.mode() == BUTTON_MODE_NORMAL) {
-                uint8_t outColor[3];
-                calcCrystalColor(msec, rgb, outColor);
+                RGB outColor;
+                calcCrystalColor(msec, rgb, &outColor);
                 leds[0].set(outColor[0], outColor[1], outColor[2]);
             }
             else {

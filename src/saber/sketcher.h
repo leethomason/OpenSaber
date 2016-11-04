@@ -67,7 +67,7 @@ private:
 	uint8_t data[DATA_WIDTH];
 };
 
-void calcCrystalColor(uint32_t msec, const uint8_t* base, uint8_t* out);
+void calcCrystalColor(uint32_t msec, const RGB& base, RGB* out);
 
 
 #endif // SKETCHER_INCLUDED

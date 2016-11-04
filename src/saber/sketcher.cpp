@@ -188,8 +188,8 @@ void DotStarUI::Draw(RGB* led, int mode, const UIRenderData* data)
 {
     static const uint32_t COLOR_AUDIO_ON  = 0x0000FF;
     static const uint32_t COLOR_AUDIO_OFF = 0xFFD800;
-    static const uint32_t COLOR_POWER_ON  = 0x00FF00;
-    static const uint32_t COLOR_POWER_OFF = 0x800000;
+    //static const uint32_t COLOR_POWER_ON  = 0x00FF00;
+    //static const uint32_t COLOR_POWER_OFF = 0x800000;
     static const uint32_t PALETTE_ONE     = 0xFFFFFF;
 
     switch(mode) {
@@ -243,7 +243,7 @@ void DotStarUI::Draw(RGB* led, int mode, const UIRenderData* data)
 }
 
 
-void calcCrystalColor(uint32_t t, const uint8_t* base, uint8_t* out)
+void calcCrystalColor(uint32_t t, const RGB& base, RGB* out)
 {
     static const int32_t RATIO = 220;
     static const int32_t RATIO_M1 = 256 - RATIO;

@@ -318,6 +318,7 @@ public:
 	virtual const char* name() const { return "ButtonTest"; }
 	virtual void start(Tester* tester)	
 	{
+		Log.p("#1").eol();
 		Button button(255);
 		button.enableTestMode(true);
 
@@ -403,6 +404,7 @@ void Tester::runTests(int count, bool longTest)
 
 	Log.p("Unit test: CStr:   ").p(TestCStr() ? "pass" : "fail").eol();
 	Log.p("Unit test: HexDec: ").p(TestHexDec() ? "pass" : "fail").eol();
+	Log.p("Unit test: Event:  ").p(TestEvent() ? "pass" : "fail").eol();
 
 	if (nPasses < 1) nPasses = 1;
 	running = true;
