@@ -18,12 +18,24 @@
     <ClCompile Include="..\crystal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\isin.cpp">
+    <ClCompile Include="..\..\..\src\saber\renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\saber\sketcher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\saber\assets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\isin.h">
+    <ClInclude Include="..\..\..\src\saber\renderer.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\saber\sketcher.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\saber\assets.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -6,7 +6,8 @@
 #if defined(_MSC_VER)
 #	define OSASSERT( x )		if ( !(x)) { _asm { int 3 } }
 #else
-#	define OSASSERT( x )
+#   include <Grinliz_Arduino_Util.h>
+#	define OSASSERT( x ) if (!(x)) { Log.p("ASSERT: ").p(#x).p(" ").p(__FILE__).p(" ").p(__LINE__).eol(); }
 #endif
 
 typedef const uint8_t* (*glyphMetrics)(int charID, int* advance, int* w, int* rows);
