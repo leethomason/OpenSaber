@@ -319,7 +319,6 @@ public:
 	virtual const char* name() const { return "ButtonTest"; }
 	virtual void start(Tester* tester)	
 	{
-		Log.p("#1").eol();
 		Button button(255);
 		button.enableTestMode(true);
 
@@ -349,7 +348,7 @@ public:
 		TEST_EQUAL(button.isDown(), false);
 
 		// Fire an event:
-		tester->press(0, 50);
+		Log.event("[dummyEvent]");
 	}
 
 	virtual int process(Tester* tester, const char* event, const char* eventData) 
