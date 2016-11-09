@@ -336,7 +336,11 @@ bool DotStarUI::Test()
 void calcCrystalColor(uint32_t t, int32_t variation, const RGB& base, RGB* out)
 {
     uint32_t tc[3] = { t / 53UL, t / 67UL, t / 79UL };
-
+	/*
+	uint32_t tW = t / 101UL;
+	int32_t sW = isin(tW);
+	sW = (sW > 0) ? (sW * sW * sW / (256 * 256)) : 0;
+	*/
     for (int i = 0; i < 3; ++i) {
         int32_t s = isin(tc[i]);
 		int32_t scaledColor = base[i] + s * variation / 256;
@@ -344,6 +348,13 @@ void calcCrystalColor(uint32_t t, int32_t variation, const RGB& base, RGB* out)
 		if (scaledColor < 0) scaledColor = 0;
 		out->set(i, scaledColor);
     }
+	/*
+	for (int i = 0; i < 3; i++) {
+		uint32_t c = out->get(i);
+		uint32_t cPrime = (255 * sW + c * (256 - sW)) / 256;
+		out->set(i, cPrime);
+	}
+	*/
 }
 
 bool TestCrystalColor()
