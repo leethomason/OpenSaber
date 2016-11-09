@@ -402,12 +402,6 @@ void Tester::runTests(int count, bool longTest)
 	nPasses = count;
 	useLongTest = longTest;
 
-	Log.p("Unit test: CStr:   ").p(TestCStr() ? "pass" : "fail").eol();
-	Log.p("Unit test: HexDec: ").p(TestHexDec() ? "pass" : "fail").eol();
-	//Log.p("Unit test: Event:  ").p(TestEvent() ? "pass" : "fail").eol();
-	Log.p("Test DotStar UI").eol(); DotStarUI::Test();
-	Log.p("Test crystal color.").eol(); TestCrystalColor();
-
 	if (nPasses < 1) nPasses = 1;
 	running = true;
 
@@ -476,6 +470,13 @@ Test* Tester::done()
 		}
 		Log.p("******").eol();
 		Log.p("Test passes run=").p(nPasses).eol();
+
+		Log.p("Unit test: CStr:   ").p(TestCStr() ? "pass" : "fail").eol();
+		Log.p("Unit test: HexDec: ").p(TestHexDec() ? "pass" : "fail").eol();
+		Log.p("Unit test: Event:  ").p(TestEvent() ? "pass" : "fail").eol();
+		Log.p("Test DotStar UI").eol(); DotStarUI::Test();
+		Log.p("Test crystal color.").eol(); TestCrystalColor();
+
 		#if SERIAL_DEBUG == 0
 		Log.attachSerial(0);
 		#endif
