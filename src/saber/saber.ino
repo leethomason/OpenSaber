@@ -657,9 +657,9 @@ void loop() {
             // Use the blade color or the breathing color.
             const RGB bladeColor = saberDB.bladeColor();
             if (bladeState.state() == BLADE_OFF && buttonMode.mode() == BUTTON_MODE_NORMAL) {
-                calcCrystalColor(msec, 16, SABER_CRYSTAL, bladeColor, &leds[0]);
-                OSASSERT(leds[0].get());
-                OSASSERT(dotstar.brightness() == 256);
+                calcCrystalColor(msec, SABER_CRYSTAL_LOW, SABER_CRYSTAL, bladeColor, &leds[0]);
+                //OSASSERT(leds[0].get());
+                //OSASSERT(dotstar.brightness() == 256);
             }
             else {
                 leds[0] = bladeColor;

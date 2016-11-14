@@ -105,8 +105,9 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_SOUND_ON
 	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
-	#define SABER_NUM_LEDS 	1
-	#define SABER_CRYSTAL	40
+	#define SABER_NUM_LEDS 			1
+	#define SABER_CRYSTAL			80
+	#define SABER_CRYSTAL_LOW		24
 	#define SABER_DISPLAY
 
 	// FIXME TUNE ALL
@@ -138,6 +139,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_NUM_LEDS 			5
 	#define SABER_UI_START  		1
 	#define SABER_CRYSTAL			80
+	#define SABER_CRYSTAL_LOW		16
 	#define SABER_UI_BRIGHTNESS		8
 
 	static const int32_t UVOLT_MULT = 6750;
