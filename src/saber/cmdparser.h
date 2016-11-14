@@ -25,6 +25,7 @@ SOFTWARE.
 
 #include <stdint.h>
 #include <Grinliz_Arduino_Util.h>
+#include <DotStar.h>
 
 class SaberDB;
 
@@ -36,7 +37,7 @@ public:
     void push(int c)                  {
         token.append(c);
     }
-    bool processCMD(uint8_t* color);
+    bool processCMD(RGB* color);
     const char* getBuffer() const     {
         return token.c_str();
     }
@@ -46,10 +47,10 @@ public:
 
 private:
     void tokenize();
-    void printHexColor(const uint8_t* color);
-    void parseHexColor(const char* str, uint8_t* c);
+    void printHexColor(const RGB& color);
+    void parseHexColor(const char* str, RGB* c);
     void printLead(const char* str);
-    void printMAmps(const uint8_t* color);
+    void printMAmps(const RGB& color);
 
     SaberDB* database;
     CStr<18> token;

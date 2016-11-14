@@ -49,7 +49,7 @@ uint8_t Blade::lerpU8(uint8_t a, uint8_t b, uint8_t t) const {
 }
 
 
-void Blade::setRGB(const uint8_t* input)
+void Blade::setRGB(const RGB& input)
 {
   static const int32_t DIV = int32_t(255) * int32_t(1000);
   for (int i = 0; i < NCHANNELS; ++i ) {
@@ -73,7 +73,7 @@ void Blade::setRGB(const uint8_t* input)
 }
 
 
-bool Blade::setInterp(uint32_t delta, uint32_t effectTime, const uint8_t* startColor, const uint8_t* endColor)
+bool Blade::setInterp(uint32_t delta, uint32_t effectTime, const RGB& startColor, const RGB& endColor)
 {
   if (delta >= effectTime) {
     setRGB(endColor);
@@ -81,7 +81,7 @@ bool Blade::setInterp(uint32_t delta, uint32_t effectTime, const uint8_t* startC
   }
   else {
     uint8_t t = uint8_t(255 * delta / effectTime);
-    uint8_t color[NCHANNELS];
+    RGB color;
     for (int i = 0; i < NCHANNELS; ++i) {
       color[i] = lerpU8(startColor[i], endColor[i], t);
     }

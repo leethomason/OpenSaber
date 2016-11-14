@@ -89,7 +89,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>c:\src\sdl2\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\Lee\Documents\Arduino\libraries\DotStar;c:\src\sdl2\include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -149,11 +149,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\src\saber\assets.cpp" />
+    <ClCompile Include="..\..\..\src\saber\renderer.cpp" />
+    <ClCompile Include="..\..\..\src\saber\sketcher.cpp" />
     <ClCompile Include="..\crystal.cpp" />
-    <ClCompile Include="..\isin.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\isin.h" />
+    <ClInclude Include="..\..\..\src\saber\assets.h" />
+    <ClInclude Include="..\..\..\src\saber\renderer.h" />
+    <ClInclude Include="..\..\..\src\saber\sketcher.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

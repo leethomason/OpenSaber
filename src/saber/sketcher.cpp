@@ -9,11 +9,21 @@ static int16_t gSinTable[256] = { 0 };
 
 int16_t isin(uint16_t x)
 {
+	// Not sure sin() really works on the microcontroller.
+
 	if (gSinTable[64] == 0) {
 		for (int i = 0; i < 256; ++i) {
 			float x = 2 * 3.14159f * float(i) / 256.0f;
 			gSinTable[i] = int16_t(sin(x) * 256.0f);
 		}
+		/*
+		for(int i=0; i<64; ++i) 
+			gSinTable[i] = 256 * i / 63;
+		for(int i=0; i<128; ++i)
+			gSinTable[i+64] = 256 - 512 * i / 127;
+		for(int i=0; i<64; ++i)
+			gSinTable[i+192] = -256 + 256 * i / 63;
+		*/
 	}
 	return gSinTable[x & 0xff];
 }
@@ -184,49 +194,51 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* i
 }
 
 
-void DotStarUI::Draw(RGB* led, int mode, const UIRenderData* data)
+void DotStarUI::Draw(RGB* led, int mode, const UIRenderData& data)
 {
     static const uint32_t COLOR_AUDIO_ON  = 0x0000FF;
     static const uint32_t COLOR_AUDIO_OFF = 0xFFD800;
-    static const uint32_t COLOR_POWER_ON  = 0x00FF00;
-    static const uint32_t COLOR_POWER_OFF = 0x800000;
+    //static const uint32_t COLOR_POWER_ON  = 0x00FF00;
+    //static const uint32_t COLOR_POWER_OFF = 0x800000;
     static const uint32_t PALETTE_ONE     = 0xFFFFFF;
 
     switch(mode) {
         case Sketcher::REST_MODE:
         {
-            led[0].set(data->volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
-            led[1].set(data->volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
+            led[0].set(data.volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
+            led[1].set(data.volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
             led[2].set(0);
-            led[3].set(data->color[0], data->color[1], data->color[2]);
+			led[3] = data.color;
         }
         break;
 
         case Sketcher::BLADE_ON_MODE:
         {
             int i=0;
-            for(; i<data->power && i < 4; ++i) {
-                led[i].set(COLOR_POWER_ON);
+            for(; i<data.power && i < 4; ++i) {
+                //led[i].set(COLOR_POWER_ON);
+                led[i] = data.color;
             }
             for(; i<4; ++i) {
-                led[i].set(COLOR_POWER_OFF);
+                //led[i].set(COLOR_POWER_OFF);
+                led[i].set(0);
             }
         }
         break;
 
         case Sketcher::PALETTE_MODE:
         {
-            led[0].set((data->palette & 1) ? PALETTE_ONE : 0);
-            led[1].set((data->palette & 2) ? PALETTE_ONE : 0);
-            led[2].set((data->palette & 4) ? PALETTE_ONE : 0);
-            led[3].set(data->color[0], data->color[1], data->color[2]);            
+            led[0].set((data.palette & 1) ? PALETTE_ONE : 0);
+            led[1].set((data.palette & 2) ? PALETTE_ONE : 0);
+            led[2].set((data.palette & 4) ? PALETTE_ONE : 0);
+			led[3] = data.color;
         }
         break;
 
         case Sketcher::VOLUME_MODE:
         {
             int i=0;
-            for(; i<data->volume && i < 4; ++i) {
+            for(; i<data.volume && i < 4; ++i) {
                 led[i].set(COLOR_AUDIO_ON);
             }
             for(; i<4; ++i) {
@@ -236,24 +248,145 @@ void DotStarUI::Draw(RGB* led, int mode, const UIRenderData* data)
         break;
     }
     for(int i=0; i<4; ++i) {
-    	led[i].scale(8);
+    	led[i].scale(m_brightness);
     }
 }
 
 
-void calcCrystalColor(uint32_t t, const uint8_t* base, uint8_t* out)
+bool DotStarUI::Test()
 {
-    static const int32_t RATIO = 220;
-    static const int32_t RATIO_M1 = 256 - RATIO;
-    static const int32_t DIV = 256;
+	RGB leds[6];
 
-    uint32_t tc[3] = { t / 53UL, t / 67UL, t / 79UL };
+	UIRenderData data;
+	data.power = 2;
+	data.mVolts = 3700;
+	data.volume = 1;
+	data.palette = 7;
+	data.fontName = "FontName";
+	data.color.set(0xff, 0, 0);
+
+	OSASSERT(data.color.get() == 0xff0000);
+	{
+		DotStarUI dotstar;
+		
+		dotstar.Draw(&leds[1], Sketcher::REST_MODE, data);
+		OSASSERT(leds[0].get() == 0);			// check memory
+		OSASSERT(leds[1].get() == 0x0000ff);	// sound on
+		OSASSERT(leds[2].get() == 0x0000ff);	// sound on
+		OSASSERT(leds[3].get() == 0);			// off
+		OSASSERT(leds[4].get() == 0xff0000);	// blade color
+		OSASSERT(leds[5].get() == 0);			// memory check
+
+		dotstar.Draw(&leds[1], Sketcher::BLADE_ON_MODE, data);
+		OSASSERT(leds[0].get() == 0);			// check memory
+		OSASSERT(leds[1] == data.color);	
+		OSASSERT(leds[2] == data.color);
+		OSASSERT(leds[3].get() == 0);			
+		OSASSERT(leds[4].get() == 0);			
+		OSASSERT(leds[5].get() == 0);			// memory check
+
+		dotstar.Draw(&leds[1], Sketcher::PALETTE_MODE, data);
+		OSASSERT(leds[0].get() == 0);			// check memory
+		OSASSERT(leds[1].get() == 0xffffff);
+		OSASSERT(leds[2].get() == 0xffffff);
+		OSASSERT(leds[3].get() == 0xffffff);
+		OSASSERT(leds[4] == data.color);
+		OSASSERT(leds[5].get() == 0);			// memory check
+
+		dotstar.Draw(&leds[1], Sketcher::VOLUME_MODE, data);
+		OSASSERT(leds[0].get() == 0);			// check memory
+		OSASSERT(leds[1].get() == 0x0000ff);
+		OSASSERT(leds[2].get() == 0xFFD800);
+		OSASSERT(leds[3].get() == 0xFFD800);
+		OSASSERT(leds[4].get() == 0xFFD800);
+		OSASSERT(leds[5].get() == 0);			// memory check
+	}
+	{
+		DotStarUI dotstar;
+		dotstar.SetBrightness(128);
+		RGB c2 = data.color;
+		c2.scale(128);
+
+		dotstar.Draw(&leds[1], Sketcher::REST_MODE, data);
+		OSASSERT(leds[0].get() == 0);			// check memory
+		OSASSERT(leds[1].get() == 0x00007f);	// sound on
+		OSASSERT(leds[2].get() == 0x00007f);	// sound on
+		OSASSERT(leds[3].get() == 0);			// off
+		OSASSERT(leds[4].get() == 0x7f0000);	// blade color
+		OSASSERT(leds[5].get() == 0);			// memory check
+
+		dotstar.Draw(&leds[1], Sketcher::BLADE_ON_MODE, data);
+		OSASSERT(leds[0].get() == 0);			// check memory
+		OSASSERT(leds[1] == c2);
+		OSASSERT(leds[2] == c2);
+		OSASSERT(leds[3].get() == 0);
+		OSASSERT(leds[4].get() == 0);
+		OSASSERT(leds[5].get() == 0);			// memory check
+
+		dotstar.Draw(&leds[1], Sketcher::PALETTE_MODE, data);
+		OSASSERT(leds[0].get() == 0);			// check memory
+		OSASSERT(leds[1].get() == 0x7f7f7f);
+		OSASSERT(leds[2].get() == 0x7f7f7f);
+		OSASSERT(leds[3].get() == 0x7f7f7f);
+		OSASSERT(leds[4] == c2);
+		OSASSERT(leds[5].get() == 0);			// memory check
+
+		dotstar.Draw(&leds[1], Sketcher::VOLUME_MODE, data);
+		OSASSERT(leds[0].get() == 0);			// check memory
+		OSASSERT(leds[1].get() == 0x00007f);
+		OSASSERT(leds[2].get() == 0x7F6c00);
+		OSASSERT(leds[3].get() == 0x7F6c00);
+		OSASSERT(leds[4].get() == 0x7F6c00);
+		OSASSERT(leds[5].get() == 0);			// memory check
+	}
+	return true;
+}
+
+
+void calcCrystalColor(uint32_t t, int32_t lowVariation, int32_t highVariation, const RGB& base, RGB* out)
+{
+	//uint32_t tc[3] = { t / 53UL, t / 79UL, t / 101UL };
+	uint32_t tc[3] = { t / 79UL, t / 101UL, t / 137UL };
 
     for (int i = 0; i < 3; ++i) {
-        int32_t s = isin(tc[i]);
-        int32_t scaledColor = int32_t(base[i]) * RATIO + s * RATIO_M1;
-        if (scaledColor < 0) scaledColor = 0;
+    	
+    	const int32_t VARIATION = base[i] > 128 ? highVariation : lowVariation;
+		const int32_t INV = 256 - VARIATION;
 
-        out[i] = uint8_t(scaledColor / DIV);
+		int32_t s = isin(tc[i]);
+		int32_t scaledColor = (int32_t(base[i]) * INV + s * VARIATION) / int32_t(256);
+		if (scaledColor > 255) scaledColor = 255;
+		if (scaledColor < 0) scaledColor = 0;
+		out->set(i, uint8_t(scaledColor));
     }
 }
+
+bool TestCrystalColor()
+{
+	{
+		const RGB base(200, 200, 200);
+		RGB out;
+
+		for (uint32_t t = 0; t < 2000; ++t) {
+			calcCrystalColor(t, 20, 20, base, &out);
+			for (int i = 0; i < 3; ++i) {
+				OSASSERT(out[i] >= base[i] - 20);
+				OSASSERT(out[i] <= base[i] + 20);
+			}
+		}
+	}
+	{
+		const RGB base(0, 0, 255);
+		RGB out;
+
+		for (uint32_t t = 0; t < 10*1000; t += 10) {
+			calcCrystalColor(t, 100, 100, base, &out);
+			for (int i = 0; i < 3; ++i) {
+				OSASSERT(out[i] >= base[i] - 100);
+				OSASSERT(out[i] <= 255);
+			}
+		}
+	}
+	return true;
+}
+

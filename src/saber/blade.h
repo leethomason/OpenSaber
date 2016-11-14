@@ -24,6 +24,7 @@
 #define BLADE_INCLUDED
 
 #include <stdint.h>
+#include <DotStar.h>
 #include "pins.h"
 
 class Blade
@@ -39,8 +40,8 @@ class Blade
       return vbat;
     }
 
-    bool setInterp(uint32_t delta, uint32_t effectTime, const uint8_t* startColor, const uint8_t* endColor);
-    void setRGB(const uint8_t* input);
+    bool setInterp(uint32_t delta, uint32_t effectTime, const RGB& startColor, const RGB& endColor);
+    void setRGB(const RGB& input);
 
     // power consumed by the main blade color, in milliAmps
     int32_t power() const;
@@ -53,11 +54,7 @@ class Blade
       return pwm[i];
     }
 
-    void getColor(uint8_t* c) {
-      for(int i=0; i<NCHANNELS; ++i) {
-        c[i] = color[i];
-      }
-    }
+    const RGB& getColor(uint8_t* c) { return color; }
 
   private:
     uint8_t lerpU8(uint8_t a, uint8_t b, uint8_t t) const;
@@ -65,7 +62,7 @@ class Blade
     static const int8_t pinRGB[NCHANNELS];
     static Blade* instance;
 
-    uint8_t color[NCHANNELS];
+    RGB color;
     uint8_t pwm[NCHANNELS];
     int32_t vbat;
     int32_t f1000[NCHANNELS];

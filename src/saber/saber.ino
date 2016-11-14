@@ -25,7 +25,7 @@
 #include <Wire.h>
 #include <SPI.h>
 #include <SD.h>
-#include <SPIFlash.h>
+//#include <SPIFlash.h>
 #include <OLED_SSD1306.h>
 
 #include <Audio.h>
@@ -51,7 +51,7 @@
 #include "saberUtil.h"
 #include "tester.h"
 
-static const uint8_t  BLADE_BLACK[NCHANNELS]  = {0};
+static const RGB BLADE_BLACK(0);
 static const uint32_t FLASH_TIME              = 120;
 static const uint32_t VBAT_TIME_INTERVAL      = 500;
 
@@ -223,6 +223,10 @@ void setup() {
 
     syncToDB();
     ledA.set(true); // "power on" light
+
+    #ifdef SABER_UI_BRIGHTNESS
+        dotstarUI.SetBrightness(SABER_UI_BRIGHTNESS);
+    #endif
     Log.event("[saber start]");
 }
 
@@ -509,7 +513,7 @@ void processBladeState()
 
 void serialEvent() {
     bool processed = false;
-    uint8_t color[NCHANNELS] = {0};
+    RGB color;
 
     while (Serial.available()) {
         int c = Serial.read();
@@ -518,7 +522,7 @@ void serialEvent() {
             Serial.print("event ");
             Serial.println(cmdParser.getBuffer());
             #endif
-            processed = cmdParser.processCMD(color);
+            processed = cmdParser.processCMD(&color);
         }
         else {
             cmdParser.push(c);
@@ -586,6 +590,8 @@ void loop() {
     if (vbatTimer.tick()) {
         averagePower.push(readVbat());
         blade.setVoltage(averagePower.power());
+        uiRenderData.mVolts = averagePower.power();
+        uiRenderData.power = vbatToPowerLevel(averagePower.power());
     }
 
     if (gforceDataTimer.tick()) {
@@ -610,6 +616,7 @@ void loop() {
     if (displayTimer.tick()) {
         int sketcherMode = Sketcher::BLADE_ON_MODE;
         (void)sketcherMode; // If no display, won't be used, but don't need a warning.
+        uiRenderData.color = saberDB.bladeColor();
 
         #ifdef SABER_TWO_BUTTON
             if (bladeState.state() == BLADE_OFF) {
@@ -635,22 +642,30 @@ void loop() {
             display.display(oledBuffer);
         #endif
         #ifdef SABER_UI_START
-            dotstarUI.Draw(leds + SABER_UI_START, sketcherMode, &uiRenderData);
+            dotstarUI.Draw(leds + SABER_UI_START, sketcherMode, uiRenderData);
         #endif
+        //Log.p("crystal: ").p(leds[0].r).p(" ").p(leds[0].g).p(" ").p(leds[0].b).eol();
     }
 
     #if defined(SABER_CRYSTAL)
-        {
-            const uint8_t* rgb = saberDB.bladeColor();
+    {
+        if (saberDB.crystalColor().get()) {
+            // It has been set on the command line for testing.
+            leds[0] = saberDB.crystalColor();
+        }
+        else {
+            // Use the blade color or the breathing color.
+            const RGB bladeColor = saberDB.bladeColor();
             if (bladeState.state() == BLADE_OFF && buttonMode.mode() == BUTTON_MODE_NORMAL) {
-                uint8_t outColor[3];
-                calcCrystalColor(msec, rgb, outColor);
-                leds[0].set(outColor[0], outColor[1], outColor[2]);
+                calcCrystalColor(msec, SABER_CRYSTAL_LOW, SABER_CRYSTAL, bladeColor, &leds[0]);
+                //OSASSERT(leds[0].get());
+                //OSASSERT(dotstar.brightness() == 256);
             }
             else {
-                leds[0].set(rgb[0], rgb[1], rgb[2]);
+                leds[0] = bladeColor;
             }
         }
+    }
     #endif
 
     #ifdef SABER_NUM_LEDS

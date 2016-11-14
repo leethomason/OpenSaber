@@ -46,6 +46,8 @@ int main(int, char**) {
 	data.mVolts = 3219;
 	data.fontName = "Bespin";
 
+	DotStarUI::Test();
+
 	SDL_Event e;
 	int scale = 4;
 	int mode = 0;

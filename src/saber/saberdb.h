@@ -24,6 +24,8 @@ SOFTWARE.
 #define SABER_DB_INCLUDED
 
 #include <stdint.h>
+#include <Grinliz_Arduino_Util.h>
+#include <DotStar.h>
 #include "pins.h"
 
 class SaberDB
@@ -56,16 +58,20 @@ public:
   uint32_t numSetupCalls() const { return dataHeader.nSetup; }
 
   // Palette
-  const uint8_t* bladeColor() const   { return palette.bladeColor; }
-  void setBladeColor(const uint8_t* color);
+  const RGB& bladeColor() const   { return palette.bladeColor; }
+  void setBladeColor(const RGB& color);
 
-  const uint8_t* impactColor() const  { return palette.impactColor; }
-  void setImpactColor(const uint8_t* color);  
+  const RGB& impactColor() const  { return palette.impactColor; }
+  void setImpactColor(const RGB& color);  
 
-  const char* soundFont() const { return palette.soundFont; }
+  const char* soundFont() const { return palette.soundFont.c_str(); }
   void setSoundFont(const char*);
 
   static const int NUM_PALETTES = 8;
+
+  // Testing (not saved)
+  void setCrystalColor(const RGB& color) { m_crystalColor = color; }
+  const RGB& crystalColor() const { return m_crystalColor; }
 
 private:
   void setupInit();
@@ -73,9 +79,9 @@ private:
 	static const int BASE_ADDR    = 20;
 
 	struct Palette {
-	  uint8_t bladeColor[NCHANNELS];
-	  uint8_t impactColor[NCHANNELS];
-	  char    soundFont[9]; // include the null terminator.
+	  RGB bladeColor;
+	  RGB impactColor;
+    CStr<9> soundFont;
 	};
 
 	struct DataHeader {
@@ -99,6 +105,7 @@ private:
   const int headerAddr() const        { return BASE_ADDR; }
   const int paletteAddr(int i) const  { return BASE_ADDR + sizeof(DataHeader) + sizeof(Palette) * i; }
 
+  RGB     m_crystalColor;
 	DataHeader	dataHeader;
 	Palette 		palette;
 };

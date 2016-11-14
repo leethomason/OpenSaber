@@ -33,14 +33,14 @@ SaberDB::SaberDB() {
 
 bool SaberDB::writeDefaults() {
   static Palette defPalette[NUM_PALETTES] = {
-    { 0, 0xff, 0,     0, 0xff, 0xa0,    0 },    // green
-    { 0, 0, 0xff,     0, 0xc8, 0xff,    0 },    // blue
-    { 0, 0xff, 0xff,  0, 0xa0, 0xff,    0 },    // cyan
-    { 0xff, 0, 0,     0xa0, 0x80, 0,    0 },    // red
-    { 0xff, 0x40, 0,  0x80, 0xff, 0,    0 },    // amber
-    { 0xff, 0xc8, 0,  0xff, 0xa0, 0,    0 },    // sand
-    { 0x90, 0, 0xff,  0x90, 0x64, 0xff, 0 },    // purple
-    { 0xff, 0x40, 0xed, 0x50, 0,  0xff,  0 }    // pink
+    { 0x00ff00,  0x00ffa0,    0 },    // green
+    { 0x0000ff,  0x00c8ff,    0 },    // blue
+    { 0x00ffff,  0x00a0ff,    0 },    // cyan
+    { 0xff0000,  0xa08000,    0 },    // red
+    { 0xff4000,  0x80ff00,    0 },    // amber
+    { 0xffc800,  0xffa000,    0 },    // sand
+    { 0x9000ff,  0x9064ff,    0 },    // purple
+    { 0xff40ed,  0x5000ff,    0 }     // pink
   };
   static const char* defNames[NUM_PALETTES] = {
     "BESPIN2", "BESPIN2", "FATES", "VADER",
@@ -54,7 +54,7 @@ bool SaberDB::writeDefaults() {
 
   for (int i = 0; i < NUM_PALETTES; ++i) {
     Palette p = defPalette[i];
-    strBufCpy(p.soundFont, 9, defNames[i]);
+    p.soundFont = defNames[i];
     EEPROM.put(paletteAddr(i), p);
   }
   readData();
@@ -152,22 +152,18 @@ void SaberDB::setImpact(float v) {
   EEPROM.put(headerAddr(), dataHeader);
 }
 
-void SaberDB::setBladeColor(const uint8_t* color) {
-  for (int i = 0; i < NCHANNELS; ++i) {
-    palette.bladeColor[i] = color[i];
-  }
+void SaberDB::setBladeColor(const RGB& color) {
+  palette.bladeColor = color;
   EEPROM.put(paletteAddr(dataHeader.currentPalette), palette);
 }
 
-void SaberDB::setImpactColor(const uint8_t* color) {
-  for (int i = 0; i < NCHANNELS; ++i) {
-    palette.impactColor[i] = color[i];
-  }
+void SaberDB::setImpactColor(const RGB& color) {
+  palette.impactColor = color;
   EEPROM.put(paletteAddr(dataHeader.currentPalette), palette);
 }
 
 void SaberDB::setSoundFont(const char* v) {
-  strBufCpy(palette.soundFont, 9, v ? v : "");
+  palette.soundFont = v;
   EEPROM.put(paletteAddr(dataHeader.currentPalette), palette);
 }
 

@@ -1,5 +1,6 @@
 #include "renderer.h"
 #include <string.h>
+#include <stdint.h>
 
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
@@ -114,10 +115,10 @@ void Renderer::DrawRectangle(int x, int y, int w, int h)
 
 void Renderer::CalcMask(int y, int h, int* pr0, int* pr1)
 {
-	static const uint8_t LOW[8] = {
+	static const uint8_t LOWBYTES[8] = {
 		0xff, 0xfe, 0xfc, 0xf8, 0xf0, 0xe0, 0xc0, 0x80
 	};
-	static const uint8_t HIGH[8] = {
+	static const uint8_t HIGHBYTES[8] = {
 		0xff, 0x7f, 0x3f, 0x1f, 0x0f, 0x7, 0x3, 0x1
 	};
 
@@ -134,11 +135,11 @@ void Renderer::CalcMask(int y, int h, int* pr0, int* pr1)
 
 	if (r0 >= 0) {
 		int trim = y - r0 * 8;
-		mask[r0] &= LOW[trim];
+		mask[r0] &= LOWBYTES[trim];
 	}
 	if (r1 <= nRows)  {
 		int trim = r1 * 8 - (y + h);
-		mask[r1 - 1] &= HIGH[trim];
+		mask[r1 - 1] &= HIGHBYTES[trim];
 	}
 }
 

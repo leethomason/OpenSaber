@@ -59,7 +59,7 @@ void CMDParser::tokenize()
     //  Serial.print("value  "); Serial.println(value.c_str());
 }
 
-void CMDParser::printHexColor(const uint8_t* color) {
+void CMDParser::printHexColor(const RGB& color) {
     Serial.print('#');
     for (int i = 0; i < NCHANNELS; ++i) {
         Serial.print(color[i] / 16, HEX);
@@ -67,15 +67,22 @@ void CMDParser::printHexColor(const uint8_t* color) {
     }
 }
 
-void CMDParser::printMAmps(const uint8_t* c) {
+void CMDParser::printMAmps(const RGB& c) {
     Serial.print("(");
     uint32_t amps = uint32_t(c[0]) * RED_I / uint32_t(255) + uint32_t(c[1]) * GREEN_I / uint32_t(255) + uint32_t(c[2]) * BLUE_I / uint32_t(255);
     Serial.print(amps);
     Serial.print(" mAmps)");
 }
 
-void CMDParser::parseHexColor(const char* str, uint8_t* c) {
-    return parseNHex(str, c, NCHANNELS);
+void CMDParser::parseHexColor(const char* str, RGB* c) {
+    if (str[3] == 0) {
+        CStr<4> cstr = str;
+        parseHex(cstr, &c->r);
+    }
+    else {
+        CStr<7> cstr = str;
+        parseHex(cstr, &c->r);
+    }
 }
 
 void CMDParser::printLead(const char* str) {
@@ -85,10 +92,9 @@ void CMDParser::printLead(const char* str) {
     Serial.print(' ');
 }
 
-bool CMDParser::processCMD(uint8_t* c) {
-    for (int i = 0; i < NCHANNELS; ++i) {
-        c[i] = 0;
-    }
+bool CMDParser::processCMD(RGB* c) 
+{
+    c->set(0);
 
     static const char BC[]      = "bc";
     static const char IC[]      = "ic";
@@ -106,10 +112,9 @@ bool CMDParser::processCMD(uint8_t* c) {
     static const char RESET[]   = "reset";
     static const char ID[]      = "id";
     static const char LIST[]    = "list";
-    static const char PLAY[]    = "play";
-    static const char LOG[]     = "log";
     static const char TEST[]    = "test";
     static const char ACCEL[]   = "accel";
+    static const char CRYSTAL[] = "crys";
 
     static const int DELAY = 20;  // don't saturate the serial line. Too much for SoftwareSerial.
 
@@ -120,10 +125,10 @@ bool CMDParser::processCMD(uint8_t* c) {
     if (action == BC) {
         if (isSet) {
             parseHexColor(value.c_str() + 1, c);
-            database->setBladeColor(c);
+            database->setBladeColor(*c);
         }
         printLead(action.c_str());
-        const uint8_t* c = database->bladeColor();
+        RGB c = database->bladeColor();
         printHexColor(c);
         Serial.print(" ");
         printMAmps(c);
@@ -132,7 +137,7 @@ bool CMDParser::processCMD(uint8_t* c) {
     else if (action == IC) {
         if (isSet) {
             parseHexColor(value.c_str() + 1, c);
-            database->setImpactColor(c);
+            database->setImpactColor(*c);
         }
         printLead(action.c_str());
         printHexColor(database->impactColor());
@@ -253,43 +258,15 @@ bool CMDParser::processCMD(uint8_t* c) {
         Serial.print(" g="); Serial.print(sqrt(g2));
         Serial.print(" gN="); Serial.println(sqrt(g2n));
     }
-    else if (action == PLAY) {
-        /*
-        Would be nice if this worked...
-        #ifdef SABER_SOUND_ON
-                digitalWrite(PIN_AMP_EN, HIGH);
-                SFX* sfx = SFX::instance();
-                sfx->playSound(value.c_str());
-        #endif
-        */
-    }
-    else if (action == LOG) {
-        #ifdef LOGFILE
-        CStr<24> path;
-        path.append("LOGS/log");
-        path.append(value.c_str());
-        path.append(".txt");
-        int flushCount = 16;
-        File file = SD.open(path.c_str());
-        if (file) {
-            while (true) {
-                int c = file.read();
-                if (c < 0) {
-                    file.close();
-                    break;
-                }
-                Serial.write(c);
-                if (--flushCount == 0) {
-                    flushCount = 16;
-                    delay(DELAY);
-                }
-            }
+    else if (action == CRYSTAL) {
+        if (isSet) {
+            parseHexColor(value.c_str() + 1, c);
+            database->setCrystalColor(*c);
         }
-        else {
-            Serial.print("File open failed: ");
-            Serial.println(path.c_str());
-        }
-        #endif
+        printLead(action.c_str());
+        RGB c = database->crystalColor();
+        printHexColor(c);
+        Serial.println("");
     }
     else if (action == TEST) {
         Tester* tester = Tester::instance();
