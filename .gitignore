@@ -6,3 +6,4 @@
 *.zip
 *.stl
 .gitignore
+*.factory

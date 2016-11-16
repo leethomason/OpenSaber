@@ -36,8 +36,9 @@ SOFTWARE.
 #define SABER_MODEL_SHOCK			3	// PCB, Prop Shield, Teensy 3, OLED
 #define SABER_MODEL_SILVER_SHOCK	4	// PCB, Prop Shield, Teensy 3
 #define SABER_MODEL_BO				5	// 2 button prop shield
+#define SABER_MODEL_TANO 			6
 
-#define SABER_MODEL 				SABER_MODEL_BO
+#define SABER_MODEL 				SABER_MODEL_TANO
 
 static const int EEPROM_SIZE = 512;
 static const int32_t NOMINAL_VOLTAGE 	= 3700;
@@ -183,6 +184,35 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int32_t BLUE_VF  = 3150;
 	static const int32_t BLUE_I   = 350;
 	static const int32_t BLUE_R   = 1800;
+
+	static const int VOLUME_1 = 15;
+	static const int VOLUME_2 = 50;
+	static const int VOLUME_3 = 120;
+	static const int VOLUME_4 = 200;
+
+#elif SABER_MODEL == SABER_MODEL_TANO
+	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
+	//#define SABER_SOUND_ON
+	#define SABER_SOUND_SHUTDOWN
+	#define SABER_VOLTMETER
+	//#define SABER_NUM_LEDS 			4
+	//#define SABER_UI_START  		0
+	//#define SABER_UI_BRIGHTNESS		8
+
+	static const int32_t UVOLT_MULT = 6750;
+	#define ID_STR "Tano Cree XPE2 GGB"
+
+	static const int32_t RED_VF   = 2100;   
+	static const int32_t RED_I    = 350;    
+	static const int32_t RED_R    = 4300;
+
+	static const int32_t GREEN_VF = 3400;
+	static const int32_t GREEN_I  = 350;
+	static const int32_t GREEN_R  = 1000;
+
+	static const int32_t BLUE_VF  = 3100;
+	static const int32_t BLUE_I   = 350;
+	static const int32_t BLUE_R   = 1600;
 
 	static const int VOLUME_1 = 15;
 	static const int VOLUME_2 = 50;

@@ -1,49 +1,42 @@
 #include <DotStar.h>
-#define NUM_LEDS 1
-DotStar::RGB leds[NUM_LEDS];
-DotStar dotstar(7);
+#define NUM_LEDS 4
+RGB leds[NUM_LEDS];
+DotStar dotstar;
 
 void setup() 
 {
-/*
+
   Serial.begin(19200);
   while(!Serial) {
     delay(100);
   }
   Serial.println("Hello DotStar!!");
-  */
 
   leds[0].set(0xff0000);
-  //leds[1].set(0x00ff00);
-  //leds[2].set(0x0000ff);
-  //leds[3].set(0x00ffff);
+  leds[1].set(0x00ff00);
+  leds[2].set(0x0000ff);
+  leds[3].set(0x00ffff);
   //leds[4].set(0x0f0f0f);
 
   //leds[0].red = 0xff;
 
   delay(1000);
   
-  dotstar.begin();
+  dotstar.beginSW(6, 5);
   dotstar.setBrightness(10);
   dotstar.attachLEDs(leds, NUM_LEDS);
   dotstar.display();
   delay(1000);
+  dotstar.display();
   dotstar.display();
 }
 
 
 void loop() 
 {
-/*
   uint32_t t = millis();
-  t = t / 1000;
+  leds[3].set((t/20)%255, 0, 0xff);
 
-  for(int i=0; i<NUM_LEDS; ++i) {
-    leds[i].red   = ((i+t) & 1) ? 0xff : 0x10;
-    leds[i].green = ((i+t) & 2) ? 0xff : 0;
-    leds[i].blue  = ((i+t) & 4) ? 0xff : 0;
-  }
-  */
   dotstar.display();
   delay(500);
 }
