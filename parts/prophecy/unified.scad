@@ -1,6 +1,7 @@
 use <../threads.scad>
 use <../shapes.scad>
 include <dim.scad>
+use <buttress.scad>
 
 M_DOTSTAR_EDGE = M_DOTSTAR - X_DOTSTAR / 2;
 
@@ -141,3 +142,8 @@ switch();
 switchAndPortHolder();
 dotstarHolder();
 transitionRing();
+
+
+translate([0, 0, 80]) {
+    buttress();
+}
