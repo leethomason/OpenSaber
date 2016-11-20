@@ -75,7 +75,7 @@ private:
 	uint8_t data[DATA_WIDTH];
 };
 
-void calcCrystalColor(uint32_t msec, int32_t variation, const RGB& base, RGB* out);
+void calcCrystalColor(uint32_t msec, int32_t lowVariation, int32_t highVariation, const RGB& base, RGB* out);
 
 bool TestCrystalColor();
 

@@ -9,11 +9,21 @@ static int16_t gSinTable[256] = { 0 };
 
 int16_t isin(uint16_t x)
 {
+	// Not sure sin() really works on the microcontroller.
+
 	if (gSinTable[64] == 0) {
 		for (int i = 0; i < 256; ++i) {
 			float x = 2 * 3.14159f * float(i) / 256.0f;
 			gSinTable[i] = int16_t(sin(x) * 256.0f);
 		}
+		/*
+		for(int i=0; i<64; ++i) 
+			gSinTable[i] = 256 * i / 63;
+		for(int i=0; i<128; ++i)
+			gSinTable[i+64] = 256 - 512 * i / 127;
+		for(int i=0; i<64; ++i)
+			gSinTable[i+192] = -256 + 256 * i / 63;
+		*/
 	}
 	return gSinTable[x & 0xff];
 }
@@ -333,48 +343,50 @@ bool DotStarUI::Test()
 }
 
 
-void calcCrystalColor(uint32_t t, int32_t variation, const RGB& base, RGB* out)
+void calcCrystalColor(uint32_t t, int32_t lowVariation, int32_t highVariation, const RGB& base, RGB* out)
 {
-    uint32_t tc[3] = { t / 53UL, t / 67UL, t / 79UL };
-	/*
-	uint32_t tW = t / 101UL;
-	int32_t sW = isin(tW);
-	sW = (sW > 0) ? (sW * sW * sW / (256 * 256)) : 0;
-	*/
+	//uint32_t tc[3] = { t / 53UL, t / 79UL, t / 101UL };
+	uint32_t tc[3] = { t / 79UL, t / 101UL, t / 137UL };
+
     for (int i = 0; i < 3; ++i) {
-        int32_t s = isin(tc[i]);
-		int32_t scaledColor = base[i] + s * variation / 256;
+    	
+    	const int32_t VARIATION = base[i] > 128 ? highVariation : lowVariation;
+		const int32_t INV = 256 - VARIATION;
+
+		int32_t s = isin(tc[i]);
+		int32_t scaledColor = (int32_t(base[i]) * INV + s * VARIATION) / int32_t(256);
 		if (scaledColor > 255) scaledColor = 255;
 		if (scaledColor < 0) scaledColor = 0;
-		out->set(i, scaledColor);
+		out->set(i, uint8_t(scaledColor));
     }
-	/*
-	for (int i = 0; i < 3; i++) {
-		uint32_t c = out->get(i);
-		uint32_t cPrime = (255 * sW + c * (256 - sW)) / 256;
-		out->set(i, cPrime);
-	}
-	*/
 }
 
 bool TestCrystalColor()
 {
-	const RGB base(200, 200, 200);
-	RGB out;
-	
-	for (uint32_t t = 0; t < 2000; ++t) {
-		calcCrystalColor(t, 20, base, &out);
-		for (int i = 0; i < 3; ++i) {
-			OSASSERT(out[i] >= base[i] - 20);
-			OSASSERT(out[i] <= base[i] + 20);
+	{
+		const RGB base(200, 200, 200);
+		RGB out;
+
+		for (uint32_t t = 0; t < 2000; ++t) {
+			calcCrystalColor(t, 20, 20, base, &out);
+			for (int i = 0; i < 3; ++i) {
+				OSASSERT(out[i] >= base[i] - 20);
+				OSASSERT(out[i] <= base[i] + 20);
+			}
 		}
 	}
+	{
+		const RGB base(0, 0, 255);
+		RGB out;
 
-	calcCrystalColor(0, 10, base, &out);
-	OSASSERT(base[0] == out[0]);
-	OSASSERT(base[1] == out[1]);
-	OSASSERT(base[2] == out[2]);
-
+		for (uint32_t t = 0; t < 10*1000; t += 10) {
+			calcCrystalColor(t, 100, 100, base, &out);
+			for (int i = 0; i < 3; ++i) {
+				OSASSERT(out[i] >= base[i] - 100);
+				OSASSERT(out[i] <= 255);
+			}
+		}
+	}
 	return true;
 }
 

@@ -69,6 +69,10 @@ public:
 
   static const int NUM_PALETTES = 8;
 
+  // Testing (not saved)
+  void setCrystalColor(const RGB& color) { m_crystalColor = color; }
+  const RGB& crystalColor() const { return m_crystalColor; }
+
 private:
   void setupInit();
 
@@ -101,6 +105,7 @@ private:
   const int headerAddr() const        { return BASE_ADDR; }
   const int paletteAddr(int i) const  { return BASE_ADDR + sizeof(DataHeader) + sizeof(Palette) * i; }
 
+  RGB     m_crystalColor;
 	DataHeader	dataHeader;
 	Palette 		palette;
 };

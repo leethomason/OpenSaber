@@ -68,7 +68,7 @@ int main(int, char**) {
 		};
 		RGB c;
 		RGB base(baseColors[currentBase].r, baseColors[currentBase].g, baseColors[currentBase].b);
-		calcCrystalColor(SDL_GetTicks() - baseTime, 80, base, &c);
+		calcCrystalColor(SDL_GetTicks() - baseTime, 20, 80, base, &c);
 
 		SDL_SetRenderDrawColor(ren, c[0], c[1], c[2], 255);
 		SDL_RenderFillRects(ren, rects, 5);

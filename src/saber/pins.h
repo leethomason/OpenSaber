@@ -35,8 +35,9 @@ SOFTWARE.
 #define SABER_MODEL_BLACK			2	// PCB, Prop Shield, Teensy 3, Dotstar UI
 #define SABER_MODEL_SHOCK			3	// PCB, Prop Shield, Teensy 3, OLED
 #define SABER_MODEL_SILVER_SHOCK	4	// PCB, Prop Shield, Teensy 3
+#define SABER_MODEL_BO				5	// 2 button prop shield
 
-#define SABER_MODEL 				SABER_MODEL_BLACK
+#define SABER_MODEL 				SABER_MODEL_BO
 
 static const int EEPROM_SIZE = 512;
 static const int32_t NOMINAL_VOLTAGE 	= 3700;
@@ -105,8 +106,9 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_SOUND_ON
 	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
-	#define SABER_NUM_LEDS 	1
-	#define SABER_CRYSTAL
+	#define SABER_NUM_LEDS 			1
+	#define SABER_CRYSTAL			80
+	#define SABER_CRYSTAL_LOW		24
 	#define SABER_DISPLAY
 
 	// FIXME TUNE ALL
@@ -135,10 +137,11 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_SOUND_ON
 	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
-	#define SABER_NUM_LEDS 	5
-	#define SABER_UI_START  1
-	#define SABER_CRYSTAL
-	#define SABER_UI_BRIGHTNESS			8
+	#define SABER_NUM_LEDS 			5
+	#define SABER_UI_START  		1
+	#define SABER_CRYSTAL			80
+	#define SABER_CRYSTAL_LOW		16
+	#define SABER_UI_BRIGHTNESS		8
 
 	static const int32_t UVOLT_MULT = 6750;
 	#define ID_STR "Silver Shock Custom RGB Cree XPE2"
@@ -154,6 +157,32 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int32_t BLUE_VF  = 3100;
 	static const int32_t BLUE_I   = 350;
 	static const int32_t BLUE_R   = 1600;
+
+	static const int VOLUME_1 = 15;
+	static const int VOLUME_2 = 50;
+	static const int VOLUME_3 = 120;
+	static const int VOLUME_4 = 200;
+
+#elif SABER_MODEL == SABER_MODEL_BO
+	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
+	#define SABER_SOUND_ON
+	#define SABER_SOUND_SHUTDOWN
+	#define SABER_VOLTMETER
+
+	static const int32_t UVOLT_MULT = 6750;
+	#define ID_STR "Bo Luxeon RGB"
+
+	static const int32_t RED_VF   = 2900;   // milli-volts
+	static const int32_t RED_I    = 350;    // milli-amps
+	static const int32_t RED_R    = 2400;   // milli-ohms
+
+	static const int32_t GREEN_VF = 3150;
+	static const int32_t GREEN_I  = 350;
+	static const int32_t GREEN_R  = 1800;
+
+	static const int32_t BLUE_VF  = 3150;
+	static const int32_t BLUE_I   = 350;
+	static const int32_t BLUE_R   = 1800;
 
 	static const int VOLUME_1 = 15;
 	static const int VOLUME_2 = 50;
@@ -189,7 +218,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_EMITTER_GREEN 22
 	#define PIN_EMITTER_RED   23
 
-#elif ((SABER_MODEL == SABER_MODEL_BLACK) || (SABER_MODEL == SABER_MODEL_SHOCK) || (SABER_MODEL == SABER_MODEL_SILVER_SHOCK))
+#else
 	/* Teensy 3.2 with Prop Shield */
 	// Digital
 	#define PIN_RX1           0

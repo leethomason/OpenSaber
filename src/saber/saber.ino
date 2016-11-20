@@ -25,7 +25,7 @@
 #include <Wire.h>
 #include <SPI.h>
 #include <SD.h>
-#include <SPIFlash.h>
+//#include <SPIFlash.h>
 #include <OLED_SSD1306.h>
 
 #include <Audio.h>
@@ -223,8 +223,9 @@ void setup() {
 
     syncToDB();
     ledA.set(true); // "power on" light
+
     #ifdef SABER_UI_BRIGHTNESS
-        dotstar.setBrightness(SABER_UI_BRIGHTNESS);
+        dotstarUI.SetBrightness(SABER_UI_BRIGHTNESS);
     #endif
     Log.event("[saber start]");
 }
@@ -643,20 +644,28 @@ void loop() {
         #ifdef SABER_UI_START
             dotstarUI.Draw(leds + SABER_UI_START, sketcherMode, uiRenderData);
         #endif
+        //Log.p("crystal: ").p(leds[0].r).p(" ").p(leds[0].g).p(" ").p(leds[0].b).eol();
     }
 
     #if defined(SABER_CRYSTAL)
-        {
-            const RGB rgb = saberDB.bladeColor();
+    {
+        if (saberDB.crystalColor().get()) {
+            // It has been set on the command line for testing.
+            leds[0] = saberDB.crystalColor();
+        }
+        else {
+            // Use the blade color or the breathing color.
+            const RGB bladeColor = saberDB.bladeColor();
             if (bladeState.state() == BLADE_OFF && buttonMode.mode() == BUTTON_MODE_NORMAL) {
-                RGB outColor;
-                calcCrystalColor(msec, rgb, &outColor);
-                leds[0].set(outColor[0], outColor[1], outColor[2]);
+                calcCrystalColor(msec, SABER_CRYSTAL_LOW, SABER_CRYSTAL, bladeColor, &leds[0]);
+                //OSASSERT(leds[0].get());
+                //OSASSERT(dotstar.brightness() == 256);
             }
             else {
-                leds[0].set(rgb[0], rgb[1], rgb[2]);
+                leds[0] = bladeColor;
             }
         }
+    }
     #endif
 
     #ifdef SABER_NUM_LEDS

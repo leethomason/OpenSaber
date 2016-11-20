@@ -112,10 +112,9 @@ bool CMDParser::processCMD(RGB* c)
     static const char RESET[]   = "reset";
     static const char ID[]      = "id";
     static const char LIST[]    = "list";
-    static const char PLAY[]    = "play";
-    static const char LOG[]     = "log";
     static const char TEST[]    = "test";
     static const char ACCEL[]   = "accel";
+    static const char CRYSTAL[] = "crys";
 
     static const int DELAY = 20;  // don't saturate the serial line. Too much for SoftwareSerial.
 
@@ -259,43 +258,15 @@ bool CMDParser::processCMD(RGB* c)
         Serial.print(" g="); Serial.print(sqrt(g2));
         Serial.print(" gN="); Serial.println(sqrt(g2n));
     }
-    else if (action == PLAY) {
-        /*
-        Would be nice if this worked...
-        #ifdef SABER_SOUND_ON
-                digitalWrite(PIN_AMP_EN, HIGH);
-                SFX* sfx = SFX::instance();
-                sfx->playSound(value.c_str());
-        #endif
-        */
-    }
-    else if (action == LOG) {
-        #ifdef LOGFILE
-        CStr<24> path;
-        path.append("LOGS/log");
-        path.append(value.c_str());
-        path.append(".txt");
-        int flushCount = 16;
-        File file = SD.open(path.c_str());
-        if (file) {
-            while (true) {
-                int c = file.read();
-                if (c < 0) {
-                    file.close();
-                    break;
-                }
-                Serial.write(c);
-                if (--flushCount == 0) {
-                    flushCount = 16;
-                    delay(DELAY);
-                }
-            }
+    else if (action == CRYSTAL) {
+        if (isSet) {
+            parseHexColor(value.c_str() + 1, c);
+            database->setCrystalColor(*c);
         }
-        else {
-            Serial.print("File open failed: ");
-            Serial.println(path.c_str());
-        }
-        #endif
+        printLead(action.c_str());
+        RGB c = database->crystalColor();
+        printHexColor(c);
+        Serial.println("");
     }
     else if (action == TEST) {
         Tester* tester = Tester::instance();
