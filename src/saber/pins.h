@@ -191,7 +191,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int VOLUME_4 = 200;
 
 #elif SABER_MODEL == SABER_MODEL_TANO
-	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
+	//#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
 	//#define SABER_SOUND_ON
 	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
@@ -221,7 +221,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 #endif
 
-#if SABER_MODEL == SABER_MODEL_GECKO
+#if ((SABER_MODEL == SABER_MODEL_GECKO) || (SABER_MODEL == SABER_MODEL_TANO))
 	/* Teensy 3.2 */
 	#define PIN_RX1           0
 	#define PIN_TX1           1
