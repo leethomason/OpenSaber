@@ -1,6 +1,7 @@
 use <../threads.scad>
 use <../shapes.scad>
 include <dim.scad>
+use <buttress.scad>
 
 M_DOTSTAR_EDGE = M_DOTSTAR - X_DOTSTAR / 2;
 
@@ -48,17 +49,46 @@ module switch()
     }
 }
 
-module ledHolder()
+module dotstars(y, strip)
 {
-    translate([0, 0, M_LED_HOLDER_BACK]) {
-        H = M_LED_HOLDER_FRONT - M_LED_HOLDER_BACK;
-        difference() {
-            cylinder(h=H, d=D_FORWARD);
-            translate([0, 0, -0.1]) {
-                cylinder(h=H_HEAT_SINK_THREAD + 0.2, r = 0.8 * INCHES_TO_MM / 2);
+    translate([-X_DOTSTAR/2, -y, 0]) {
+        for(i=[0:3]) {
+            translate([0, 0, DOTSTAR_SPACE * i]) {
+                cube(size=[X_DOTSTAR, y, X_DOTSTAR]);
             }
         }
+    }   
+    if (strip) {
+        X_PAD = 2;
+        X_STRIP = X_DOTSTAR + X_PAD;
+        Z_STRIP = DOTSTAR_SPACE * 4 + X_DOTSTAR;
+        T = 3;
+
+        translate([-X_DOTSTAR/2 - X_PAD/2, 0, 0]) {
+            cube(size=[X_STRIP, T, Z_STRIP]);
+        }
+    }
+}
+
+module dotstarsPositioned(y, strip)
+{
+    rotate([0, 0, -90]) {
+        translate([0, -10, M_DOTSTAR_EDGE]) {
+            dotstars(y, strip);
+        }
     }    
+}
+
+module ledHolder()
+{
+    H = M_LED_HOLDER_FRONT - M_LED_HOLDER_BACK;
+    difference() {
+        translate([0, 0, M_LED_HOLDER_BACK]) cylinder(h=H, d=D_FORWARD);
+        translate([0, 0, M_LED_HOLDER_BACK-0.1]) {
+            cylinder(h=H_HEAT_SINK_THREAD + 0.2, r = 0.8 * INCHES_TO_MM / 2);
+        }
+        dotstarsPositioned(20, true);
+    }
 }
 
 module switchAndPortHolder()
@@ -92,20 +122,9 @@ module switchAndPortHolder()
                     cylinder(h=20, d=D_PORT);
                 }
             }
-
+            transitionRing();
         }
     }
-}
-
-module dotstars(y)
-{
-    translate([-X_DOTSTAR/2, -y, 0]) {
-        for(i=[0:3]) {
-            translate([0, 0, DOTSTAR_SPACE * i]) {
-                cube(size=[X_DOTSTAR, y, X_DOTSTAR]);
-            }
-        }
-    }   
 }
 
 
@@ -114,16 +133,16 @@ module dotstarHolder() {
     {
         innerTube();
 
-        //M = M_DOTSTAR_EDGE - 2;
-        M = M_TRANSITION - T_TRANSITION_RING;
-
-        difference()
+        rotate([0, 0, -90]) 
         {
-            translate([-10, -R_FORWARD, M]) {
-                cube(size=[20, Y_DOTSTAR + 1, M_LED_HOLDER_BACK - M]);
-            }
-            translate([0, -10, M_DOTSTAR_EDGE]) {
-                dotstars(10);
+            difference()
+            {
+                translate([-10, -R_FORWARD, M_TRANSITION]) {
+                    cube(size=[20, Y_DOTSTAR + 1, M_LED_HOLDER_BACK - M_TRANSITION]);
+                }
+                translate([0, -10, M_DOTSTAR_EDGE]) {
+                    dotstars(10);
+               }
             }
         }
     } 
@@ -137,7 +156,12 @@ module transitionRing()
 }
 
 ledHolder();
-switch();
+*switch();
 switchAndPortHolder();
 dotstarHolder();
 transitionRing();
+
+
+translate([0, 0, 80]) {
+    buttress();
+}
