@@ -221,7 +221,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 #endif
 
-#if ((SABER_MODEL == SABER_MODEL_GECKO) || (SABER_MODEL == SABER_MODEL_TANO))
+#if ((SABER_MODEL == SABER_MODEL_GECKO) || (SABER_MODEL == SABER_MODEL_TANO))	
 	/* Teensy 3.2 */
 	#define PIN_RX1           0
 	#define PIN_TX1           1

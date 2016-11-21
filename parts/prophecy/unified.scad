@@ -1,5 +1,6 @@
 use <../threads.scad>
 use <../shapes.scad>
+use <../vents.scad>
 include <dim.scad>
 use <buttress.scad>
 
@@ -11,8 +12,11 @@ $fn = 90;
 EPS = 0.01;
 EPS2 = EPS * 2;
 
-H_HEAT_SINK_THREAD = 0.37 * INCHES_TO_MM;
+H_HEAT_SINK_THREAD = 10.0;
+D_HEAT_SINK_THREAD = 20.0;
 H_VOL			   = 16;
+
+DOTSTAR_WALL       = Y_DOTSTAR + 1;
 
 module innerTube()
 {
@@ -22,6 +26,22 @@ module innerTube()
     translate([0, 0, M_TRANSITION]) {
         cylinder(d=D_FORWARD, h = H_FAR);
     }
+}
+
+module heatSink()
+{
+    translate([0, 0, M_LED_HOLDER_FRONT - H_HEAT_SINK_THREAD]) {
+        cylinder(h=H_HEAT_SINK_THREAD + 0.2, d=D_HEAT_SINK_THREAD);
+    }
+}
+
+module dotstarWiring()
+{
+    rotate([0, 0, 180]) {
+    translate([0, -7, M_TRANSITION - T_TRANSITION_RING]) {
+        cube(size=[R_FORWARD - DOTSTAR_WALL, 14, M_LED_HOLDER_BACK - M_TRANSITION + T_TRANSITION_RING + 10]);
+    }
+}
 }
 
 // LED / button positive (above axis)
@@ -53,8 +73,9 @@ module dotstars(y, strip)
 {
     translate([-X_DOTSTAR/2, -y, 0]) {
         for(i=[0:3]) {
-            translate([0, 0, DOTSTAR_SPACE * i]) {
-                cube(size=[X_DOTSTAR, y, X_DOTSTAR]);
+            PAD = 0.4;
+            translate([-PAD/2, 0, DOTSTAR_SPACE * i - PAD/2]) {
+                cube(size=[X_DOTSTAR + PAD, y, X_DOTSTAR + PAD]);
             }
         }
     }   
@@ -84,10 +105,9 @@ module ledHolder()
     H = M_LED_HOLDER_FRONT - M_LED_HOLDER_BACK;
     difference() {
         translate([0, 0, M_LED_HOLDER_BACK]) cylinder(h=H, d=D_FORWARD);
-        translate([0, 0, M_LED_HOLDER_BACK-0.1]) {
-            cylinder(h=H_HEAT_SINK_THREAD + 0.2, r = 0.8 * INCHES_TO_MM / 2);
-        }
+        heatSink();
         dotstarsPositioned(20, true);
+        dotstarWiring();
     }
 }
 
@@ -137,12 +157,14 @@ module dotstarHolder() {
         {
             difference()
             {
-                translate([-10, -R_FORWARD, M_TRANSITION]) {
-                    cube(size=[20, Y_DOTSTAR + 1, M_LED_HOLDER_BACK - M_TRANSITION]);
+                OFFSET = 34;
+                translate([-10, -R_FORWARD, M_TRANSITION - T_TRANSITION_RING + OFFSET]) {
+                    cube(size=[20, DOTSTAR_WALL, M_LED_HOLDER_BACK - M_TRANSITION + T_TRANSITION_RING - OFFSET]);
                 }
                 translate([0, -10, M_DOTSTAR_EDGE]) {
                     dotstars(10);
                }
+               //transitionRing();
             }
         }
     } 
@@ -155,13 +177,37 @@ module transitionRing()
     }
 }
 
-ledHolder();
+*ledHolder();
 *switch();
-switchAndPortHolder();
-dotstarHolder();
+*switchAndPortHolder();
+*dotstarHolder();
 transitionRing();
 
+*intersection()
+{
+    translate([0, 0, M_TRANSITION - T_TRANSITION_RING]) {
+        cylinder(d=D_FORWARD, h=M_LED_HOLDER_BACK - M_TRANSITION + T_TRANSITION_RING);
+    }
+    translate([-4, -R_FORWARD, M_TRANSITION - T_TRANSITION_RING]) {
+        cube(size=[8, 2.5, 100]);
+    }
+}
 
-translate([0, 0, 80]) {
+*translate([0, 0, M_TRANSITION - T_TRANSITION_RING]) {
+    difference() {
+        cylinder(h=M_LED_HOLDER_BACK - M_TRANSITION + T_TRANSITION_RING, d=D_FORWARD);
+        cylinder(h=M_LED_HOLDER_BACK - M_TRANSITION + T_TRANSITION_RING, d=D_HEAT_SINK_THREAD);
+        rotate([0, 0, 0])   lowerVent1(14, M_LED_HOLDER_BACK - M_TRANSITION, 20);
+        rotate([0, 0, 90])  lowerVent1(14, 100, 20);
+        rotate([0, 0, 180]) lowerVent1(14, 100, 20);
+        rotate([0, 0, 270]) lowerVent1(14, M_LED_HOLDER_BACK - M_TRANSITION, 20);
+    }
+}
+
+*color("yellow") heatSink();
+*color("yellow") dotstarWiring();
+
+
+*translate([0, 0, 80]) {
     buttress();
 }

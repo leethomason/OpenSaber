@@ -1,16 +1,22 @@
+module lowerVent1(w, h, extrusion)
+{
+    h1 = h - w * 1.2;
+    h2 = h;
+    rotate([90, 0, 90]) {
+        linear_extrude(height=extrusion) {
+            polygon([[-w/2,0], [w/2,0], [w/2,h1], [0,h2], [-w/2,h1]]);
+        }
+    }    
+}
+
+
 module vent1(w, h, n, extrusion)
 {
     angle = 360 / n;
-    h1 = h - w * 1.2;
-    h2 = h;
     
 	for(r=[0:n-1]) {
 		rotate([0, 0, angle*r]) {
-            rotate([90, 0, 90]) {
-                linear_extrude(height=extrusion) {
-                    polygon([[-w/2,0], [w/2,0], [w/2,h1], [0,h2], [-w/2,h1]]);
-                }
-            }
+            lowerVent1(w, h, extrusion);
         }
     }
 }
