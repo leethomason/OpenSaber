@@ -14,7 +14,6 @@ EPS2 = EPS * 2;
 
 H_HEAT_SINK_THREAD = 10.0;
 D_HEAT_SINK_THREAD = 20.4;
-H_VOL			   = 16;
 R_DOTSTAR          = 90;
 
 DOTSTAR_WALL       = Y_DOTSTAR + 0.5;
@@ -236,12 +235,10 @@ union() {
     dotstarHolder();
     forwardRail();
 }
-*transitionRing();
-
+transitionRing();
+*translate([0, 0, 80]) buttress();
+*translate([0, 0, 40]) buttress();
 
 *color("yellow") heatSink();
 
 
-*translate([0, 0, 80]) {
-    buttress();
-}

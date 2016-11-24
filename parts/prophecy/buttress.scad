@@ -20,10 +20,18 @@ module buttress()
 		}
 
 		// Board
-		W = 0.7 * 25.4;
-		H = 6;
-		translate([-W/2, -12, -EPS]) {
-			cube(size=[W, H, H_BUTTRESS + EPS2]);
+		W = 18; //0.7 * 25.4;
+		W_INNER = 15; 
+		H = 4;
+		H_INNER = 7;
+
+		OFFSET = 20;
+
+		translate([-W/2, -12 - OFFSET, -EPS]) {
+			cube(size=[W, H + OFFSET, H_BUTTRESS + EPS2]);
+		}
+		translate([-W_INNER/2, -12 - OFFSET, -EPS]) {
+			cube(size=[W_INNER, H_INNER + OFFSET, H_BUTTRESS + EPS2]);
 		}
 	}
 }
