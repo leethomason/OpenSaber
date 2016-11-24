@@ -72,7 +72,7 @@ module dotstars(y, strip)
     }   
     if (strip) {
         X_PAD = 7;  // min 7
-        END_PAD = 3;
+        END_PAD = 2.5;
         X_STRIP = X_DOTSTAR + X_PAD;
         Z_STRIP = DOTSTAR_SPACE * 3 + X_DOTSTAR + END_PAD;
         T = 3;
@@ -102,6 +102,42 @@ module ledHolder()
     }
 }
 
+module speaker()
+{
+    cylinder(h=H_SPKR_PLASTIC, d=D_SPKR_PLASTIC);
+    translate([0, 0, H_SPKR_PLASTIC]) cylinder(h=H_SPKR_METAL, d=D_SPKR_METAL);
+}
+
+module speakerHolder()
+{
+    FORWARD_SPACE = 2;
+    AFT_SPACE = 2;
+    H = H_SPKR_METAL + H_SPKR_PLASTIC + FORWARD_SPACE + AFT_SPACE;
+    T = 2;
+
+    translate([0, 0, -H]) {
+        intersection() {
+            cylinder(h=H, d=D_POMMEL);
+            difference() {
+                union() {
+                    translate([-T/2, -20, 0]) cube(size=[T, 40, H]);
+                    translate([-20, -T/2, 0]) cube(size=[40, T, H]);
+                }
+                translate([0, 0, T]) {
+                    speaker();
+                }
+                cylinder(h=T*2, d=D_SPKR_METAL);
+            }
+        }
+        translate([0, 0, H - T]) {
+            difference() {
+                cylinder(h=T, d=D_POMMEL);
+                cylinder(h=T, d=D_SPKR_PLASTIC - 4);
+            }
+        }    
+    }
+}
+
 module switchAndPortHolder()
 {
     POWER_X         = 11;
@@ -109,8 +145,6 @@ module switchAndPortHolder()
     POWER_Z         = 10;
     POWER_OFFSET_Y  = 0.2;
     POWER_OFFSET_X  = -1;
-
-    USE_LARGE_PORT = false;
 
     H = (M_LED_HOLDER_BACK - M_TRANSITION + T_TRANSITION_RING);
     T = 3;
@@ -121,46 +155,36 @@ module switchAndPortHolder()
         difference() {
             union() {
                 translate([-10, Y_SWITCH - T, M_TRANSITION - T_TRANSITION_RING]) {
-                    cube(size=[20, T, H]);
+                    cube(size=[20, T+1.5, H]);
                 }
-                if (USE_LARGE_PORT == false) {
-                    W = 2 * (M_PORT_CENTER - M_TRANSITION); // fancy; snaps into ring.
-                    difference() 
-                    {
-                        translate([-W/2, Y_SWITCH, M_PORT_CENTER - W/2]) {
-                            cube(size=[W, 6 - T, W]);
-                        }
-                        // Slope the front.
-                        translate([-W/2, Y_SWITCH, M_PORT_CENTER + W/2]) {
-                            rotate([-45, 0, 0]) {
-                                cube(size=[W, W, W]);
-                            }
+                
+                W = 2 * (M_PORT_CENTER - M_TRANSITION); // fancy; snaps into ring.
+                difference() 
+                {
+                    translate([-W/2, Y_SWITCH, M_PORT_CENTER - W/2]) {
+                        cube(size=[W, 6 - T, W]);
+                    }
+                    // Slope the front.
+                    translate([-W/2, Y_SWITCH, M_PORT_CENTER + W/2]) {
+                        rotate([-45, 0, 0]) {
+                            cube(size=[W, W, W]);
                         }
                     }
                 }
-
+                
             }
             // switch
             translate([0, 0, M_SWITCH_CENTER]) {
                 rotate([-90, 0, 0]) {
                     cylinder(h=20, d=D_SWITCH);
+                    translate([0, 0, Y_SWITCH]) cylinder(h=20, d=D_SWITCH_TOP);
                 }        
             }
 
-            // Port (larger)
-            if (USE_LARGE_PORT) {
-                translate([0, 0, M_PORT_CENTER + PORT_CENTER_OFFSET]) {
-                    rotate([-90, 0, 0]) {
-                        cylinder(h=20, d=D_PORT);
-                    }
-                }
-            }
-            else {
-                // Port (std)
-                translate([0, 0, M_PORT_CENTER + PORT_CENTER_OFFSET]) {
-                    rotate([-90, 0, 0]) {
-                        cylinder(h=20, d=D_SMALL_PORT);
-                    }
+            // Port (std)
+            translate([0, 0, M_PORT_CENTER]) {
+                rotate([-90, 0, 0]) {
+                    cylinder(h=20, d=D_SMALL_PORT);
                 }
             }
             transitionRing();
@@ -228,17 +252,44 @@ module transitionRing()
     }    
 }
 
+module rail(r)
+{
+    intersection() {
+        H = M_TRANSITION - T_TRANSITION_RING - M_SPKR;
+
+        innerTube();
+        M = [M_BUTTRESS_0, M_BUTTRESS_1, M_BUTTRESS_2];
+
+        rotate([0, 0, r]) {
+            difference() {
+                translate([-W_RAIL/2, R_AFT - RAIL_OUTER_NOTCH, M_SPKR]) {
+                   cube(size=[W_RAIL, 10, H]);
+                }
+                for(m=M) {
+                    translate([-W_RAIL/2, R_AFT - RAIL_OUTER_NOTCH, m]) {
+                       cube(size=[W_RAIL, RAIL_INNER_NOTCH, W_RAIL]);
+                    }
+                }
+            }
+        }
+    }    
+}
+
 *switch();
-union() {
+*union() {
     ledHolder();
     switchAndPortHolder();
     dotstarHolder();
     forwardRail();
 }
-transitionRing();
-*translate([0, 0, 80]) buttress();
-*translate([0, 0, 40]) buttress();
+*transitionRing();
+translate([0, 0, M_SPKR]) speakerHolder();
+rail(RAIL_ANGLE_0);
+rail(RAIL_ANGLE_1);
+translate([0, 0, M_BUTTRESS_2]) buttress();
+translate([0, 0, M_BUTTRESS_1]) buttress();
+translate([0, 0, M_BUTTRESS_0]) buttress();
 
 *color("yellow") heatSink();
-
-
+*color("yellow") speaker();
+*color("yellow") speakerHolder();

@@ -4,6 +4,10 @@ M_SWITCH_CENTER		= 147;
 M_DOTSTAR			= 135;	// FIXME center mark of first dotstar
 M_PORT_CENTER       = 114;	// FIXME
 M_TRANSITION		= 102;
+M_BUTTRESS_2		= 80;
+M_BUTTRESS_1		= 60;
+M_BUTTRESS_0		= 40;
+M_SPKR				= 8;
 M_0					= 0;
 M_WAY_BACK			= -20;
 
@@ -20,10 +24,9 @@ T_TRANSITION_RING	= 2;
 
 Y_SWITCH			= 9.6;
 D_SWITCH			= 12.5;
-D_SWITCH_TOP		= 14.0;
+D_SWITCH_TOP		= 14.5;
 D_PORT 				= 0.5 * INCHES_TO_MM;
 D_SMALL_PORT		= 7.6;	// 7.7 tight
-PORT_CENTER_OFFSET	= 1;	/// FIXME
 
 D_SABER_OUTER		= 37.5;
 
@@ -36,3 +39,15 @@ H_BUTTRESS			= 3;
 H_BATTERY           = 68;
 D_BATTERY           = 18.50 + 0.5;    // An 1850. Huh. 
 R_BATTERY			= D_BATTERY / 2;
+
+H_SPKR_METAL   		= 8;
+D_SPKR_METAL   		= 23.6;	
+H_SPKR_PLASTIC 		= 2.7;
+D_SPKR_PLASTIC 		= 28;
+D_POMMEL			= 30;
+
+RAIL_ANGLE_0		= 90;
+RAIL_ANGLE_1		= -90;
+W_RAIL				= 3;
+RAIL_OUTER_NOTCH	= 2;
+RAIL_INNER_NOTCH	= 1;
