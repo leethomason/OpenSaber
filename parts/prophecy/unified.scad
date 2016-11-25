@@ -112,18 +112,27 @@ module speakerHolder()
 {
     FORWARD_SPACE = 2;
     AFT_SPACE = 2;
-    H = H_SPKR_METAL + H_SPKR_PLASTIC + FORWARD_SPACE + AFT_SPACE;
     T = 2;
+    TH = 6;
+    H = M_POMMEL_FRONT - M_POMMEL_BACK;
+    H_SPKR = H_SPKR_PLASTIC + H_SPKR_METAL;
 
-    translate([0, 0, -H]) {
+    translate([0, 0, M_POMMEL_FRONT]) {
+        difference() {
+            cylinder(h=M_SPKR_RING - M_POMMEL_FRONT, d=D_AFT);
+            cylinder(h=M_SPKR_RING - M_POMMEL_FRONT, d=D_SPKR_PLASTIC - 4);
+        }
+    }
+
+    translate([0, 0, M_POMMEL_BACK]) {
         intersection() {
             cylinder(h=H, d=D_POMMEL);
             difference() {
                 union() {
-                    translate([-T/2, -20, 0]) cube(size=[T, 40, H]);
-                    translate([-20, -T/2, 0]) cube(size=[40, T, H]);
+                    translate([-TH/2, -20, 0]) cube(size=[TH, 40, H]);
+                    translate([-20, -TH/2, 0]) cube(size=[40, TH, H]);
                 }
-                translate([0, 0, T]) {
+                translate([0, 0, FORWARD_SPACE]) {
                     speaker();
                 }
                 cylinder(h=T*2, d=D_SPKR_METAL);
@@ -255,14 +264,14 @@ module transitionRing()
 module rail(r)
 {
     intersection() {
-        H = M_TRANSITION - T_TRANSITION_RING - M_SPKR;
+        H = M_TRANSITION - T_TRANSITION_RING - M_SPKR_RING;
 
         innerTube();
         M = [M_BUTTRESS_0, M_BUTTRESS_1, M_BUTTRESS_2];
 
         rotate([0, 0, r]) {
             difference() {
-                translate([-W_RAIL/2, R_AFT - RAIL_OUTER_NOTCH, M_SPKR]) {
+                translate([-W_RAIL/2, R_AFT - RAIL_OUTER_NOTCH, M_SPKR_RING]) {
                    cube(size=[W_RAIL, 10, H]);
                 }
                 for(m=M) {
@@ -282,8 +291,8 @@ module rail(r)
     dotstarHolder();
     forwardRail();
 }
-*transitionRing();
-translate([0, 0, M_SPKR]) speakerHolder();
+transitionRing();
+speakerHolder();
 rail(RAIL_ANGLE_0);
 rail(RAIL_ANGLE_1);
 translate([0, 0, M_BUTTRESS_2]) buttress();

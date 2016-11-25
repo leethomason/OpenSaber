@@ -34,15 +34,22 @@ module buttress()
 			cube(size=[W_INNER, H_INNER + OFFSET, H_BUTTRESS + EPS2]);
 		}
 
+		// Rail notches
 	    R = [RAIL_ANGLE_0, RAIL_ANGLE_1];
 
 	    for(r=R) {
 	        rotate([0, 0, r]) {
                 translate([-W_RAIL/2, R_AFT - RAIL_INNER_NOTCH, 0]) {
-                   cube(size=[W_RAIL, RAIL_INNER_NOTCH, H_BUTTRESS]);
+                   cube(size=[W_RAIL, 20, H_BUTTRESS]);
                 }
 	        }
 	    }
+
+	    // Wiring holes
+	    translate([ 11.5, 0, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=5);
+	    translate([-11.5, 0, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=5);
+	    translate([ 11.5, -5.5, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=4);
+	    translate([-11.5, -5.5, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=4);
 	}
 }
 

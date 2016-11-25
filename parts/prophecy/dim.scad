@@ -5,9 +5,11 @@ M_DOTSTAR			= 135;	// FIXME center mark of first dotstar
 M_PORT_CENTER       = 114;	// FIXME
 M_TRANSITION		= 102;
 M_BUTTRESS_2		= 80;
-M_BUTTRESS_1		= 60;
-M_BUTTRESS_0		= 40;
-M_SPKR				= 8;
+M_BUTTRESS_1		= 50;
+M_BUTTRESS_0		= 30;
+M_SPKR_RING			= 12;	// Front of the speaker ring.
+M_POMMEL_FRONT		= 8;	// Where the pommel becomes aft
+M_POMMEL_BACK		= -10;	// Back of the pommel
 M_0					= 0;
 M_WAY_BACK			= -20;
 
