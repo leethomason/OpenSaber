@@ -6,6 +6,8 @@ DotStar dotstar;
 void setup() 
 {
 
+
+
   Serial.begin(19200);
   while(!Serial) {
     delay(100);
@@ -20,23 +22,28 @@ void setup()
 
   //leds[0].red = 0xff;
 
-  delay(1000);
-  
-  dotstar.beginSW(6, 5);
+  //delay(1000);
+
+  dotstar.beginSW(5, 4);
+  digitalWrite(dotstar.swClockPin(), HIGH);
+  digitalWrite(dotstar.swDataPin(), HIGH);
+/*
   dotstar.setBrightness(10);
   dotstar.attachLEDs(leds, NUM_LEDS);
   dotstar.display();
   delay(1000);
   dotstar.display();
-  dotstar.display();
+  dotstar.display();*/
 }
 
 
 void loop() 
 {
+  /*
   uint32_t t = millis();
   leds[3].set((t/20)%255, 0, 0xff);
 
   dotstar.display();
   delay(500);
+  */
 }

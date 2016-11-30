@@ -24,8 +24,8 @@ SOFTWARE.
 #define SABER_DB_INCLUDED
 
 #include <stdint.h>
-#include <Grinliz_Arduino_Util.h>
-#include <DotStar.h>
+#include "Grinliz_Arduino_Util.h"
+#include "DotStar.h"
 #include "pins.h"
 
 class SaberDB

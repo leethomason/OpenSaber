@@ -6,7 +6,8 @@
 #include <SD.h>
 #include <SerialFlash.h>
 #include <Audio.h>
-#include <Grinliz_Arduino_Util.h>
+
+#include "Grinliz_Arduino_Util.h"
 
 AudioPlaySdWav      playWav;
 AudioMixer4         mixer;

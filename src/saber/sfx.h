@@ -24,8 +24,9 @@ SOFTWARE.
 #define SFX_HEADER
 
 #include <Arduino.h>
-#include <Grinliz_Arduino_Util.h>
 #include <SD.h>
+
+#include "Grinliz_Arduino_Util.h"
 
 // SFX in priority order!
 enum {            //  Max

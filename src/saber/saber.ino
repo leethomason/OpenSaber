@@ -29,11 +29,12 @@
 #include <OLED_SSD1306.h>
 
 #include <Audio.h>
-#include <Button.h>
 #include <Adafruit_LIS3DH.h>
 #include <NXPMotionSense.h>
-#include <Grinliz_Arduino_Util.h>
-#include <DotStar.h>
+
+#include "Button.h"
+#include "Grinliz_Arduino_Util.h"
+#include "DotStar.h"
 
 // Includes
 // -- Must be first. Has configuration. -- //
@@ -116,6 +117,16 @@ File logFile;
 
 Tester tester;
 uint32_t unlocked = 0;
+
+int32_t readVbat() {
+    #ifdef SABER_VOLTMETER
+        int32_t analog = analogRead(PIN_VMETER);
+        int32_t mV = analog * UVOLT_MULT / int32_t(1000);
+        return mV;
+    #else
+        return NOMINAL_VOLTAGE;
+    #endif
+}
 
 void setupSD(int logCount)
 {
@@ -673,14 +684,3 @@ void loop() {
     #endif
 }
  
-
-int32_t readVbat() {
-    #ifdef SABER_VOLTMETER
-        int32_t analog = analogRead(PIN_VMETER);
-        int32_t mV = analog * UVOLT_MULT / int32_t(1000);
-        return mV;
-    #else
-        return NOMINAL_VOLTAGE;
-    #endif
-}
-

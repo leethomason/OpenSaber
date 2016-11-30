@@ -6,7 +6,7 @@
 #if defined(_MSC_VER)
 #	define OSASSERT( x )		if ( !(x)) { _asm { int 3 } }
 #else
-#   include <Grinliz_Arduino_Util.h>
+#   include "Grinliz_Arduino_Util.h"
 #	define OSASSERT( x ) if (!(x)) { Log.p("ASSERT: ").p(#x).p(" ").p(__FILE__).p(" ").p(__LINE__).eol(); }
 #endif
 

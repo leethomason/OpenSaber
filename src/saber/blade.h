@@ -24,7 +24,7 @@
 #define BLADE_INCLUDED
 
 #include <stdint.h>
-#include <DotStar.h>
+#include "DotStar.h"
 #include "pins.h"
 
 class Blade

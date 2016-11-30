@@ -22,15 +22,15 @@ module buttress()
 		// Board
 		W = 18; //0.7 * 25.4;
 		W_INNER = 15; 
-		H = 4;
+		H = 10.5; //4;
 		H_INNER = 7;
 
-		OFFSET = 20;
+		OFFSET = 10;
 
-		translate([-W/2, -12 - OFFSET, -EPS]) {
+		translate([-W/2, -14.5 - OFFSET, -EPS]) {
 			cube(size=[W, H + OFFSET, H_BUTTRESS + EPS2]);
 		}
-		translate([-W_INNER/2, -12 - OFFSET, -EPS]) {
+		*translate([-W_INNER/2, -12 - OFFSET, -EPS]) {
 			cube(size=[W_INNER, H_INNER + OFFSET, H_BUTTRESS + EPS2]);
 		}
 
