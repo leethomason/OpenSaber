@@ -1,9 +1,9 @@
-#include "pins.h"
-#include "saberUtil.h"
-
-#include <Grinliz_Arduino_Util.h>
 #include <Adafruit_LIS3DH.h>
 #include <NXPMotionSense.h>
+
+#include "pins.h"
+#include "saberUtil.h"
+#include "Grinliz_Arduino_Util.h"
 
 void BladeState::change(uint8_t state)
 {

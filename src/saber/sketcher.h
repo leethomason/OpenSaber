@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include "renderer.h"
-#include <DotStar.h>
+#include "DotStar.h"
 
 /**
 Sin wave.

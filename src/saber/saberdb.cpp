@@ -21,8 +21,8 @@ SOFTWARE.
 */
 
 #include <Arduino.h>
-#include <Grinliz_Arduino_Util.h>
 #include <EEPROM.h>
+#include "Grinliz_Arduino_Util.h"
 #include "saberdb.h"
 #include "sfx.h"  // bug fix; generally don't want a dependency on sfx
 

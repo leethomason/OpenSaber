@@ -374,14 +374,6 @@ all available on the github pages. I regret having to fork - it adds
 complexity and overhead - but there are issues I haven't otherwise been able 
 to work around.
 
-#### Button
-
-The button library provides debounce and hold detection. It's a solid, 
-general purpose button library. I wish Button (or something similar) would
-become part of the standard Arduino distribution.
-
-https://github.com/leethomason/Button
-
 #### Accelerometer
 
 The current design uses the (really great) LIS3DH unmodified.
@@ -393,18 +385,6 @@ The OLED display is required to compile, although it isn't supported
 as part of OpenSaber yet.
 
 https://github.com/leethomason/OLED_SSD1306
-
-### General Utility
-
-Just some (simple) code to streamline Arduino programming.
-
-https://github.com/leethomason/Grinliz_Arduino_Util
-
-### DotStar
-
-I couldn't find a dotstar library that wasn't needlessly complex.
-
-https://github.com/leethomason/DotStar
 
 ### Config Files
 

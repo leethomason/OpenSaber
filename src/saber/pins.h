@@ -38,7 +38,7 @@ SOFTWARE.
 #define SABER_MODEL_BO				5	// 2 button prop shield
 #define SABER_MODEL_TANO 			6
 
-#define SABER_MODEL 				SABER_MODEL_TANO
+#define SABER_MODEL 				SABER_MODEL_BO
 
 static const int EEPROM_SIZE = 512;
 static const int32_t NOMINAL_VOLTAGE 	= 3700;

@@ -24,8 +24,8 @@ SOFTWARE.
 #define SABER_CMD_PARSER
 
 #include <stdint.h>
-#include <Grinliz_Arduino_Util.h>
-#include <DotStar.h>
+#include "Grinliz_Arduino_Util.h"
+#include "DotStar.h"
 
 class SaberDB;
 
