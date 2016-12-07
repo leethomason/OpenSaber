@@ -43,11 +43,12 @@ H_BATTERY           = 68;
 D_BATTERY           = 18.50 + 0.5;    // An 1850. Huh. 
 R_BATTERY			= D_BATTERY / 2;
 
-H_SPKR_METAL   		= 8;
+H_SPKR_METAL   		= 8 + 0.5;
 D_SPKR_METAL   		= 23.6;	
 H_SPKR_PLASTIC 		= 2.7;
 D_SPKR_PLASTIC 		= 28;
 D_POMMEL			= 31.5;
+R_POMMEL 			= D_POMMEL / 2;
 D_AFT_RING			= 33.5;
 
 RAIL_ANGLE_0		= 90;
