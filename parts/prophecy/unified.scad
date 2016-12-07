@@ -18,6 +18,7 @@ EPS2 = EPS * 2;
 H_HEAT_SINK_THREAD = 10.0;
 D_HEAT_SINK_THREAD = 20.1;  // 20.4 is loose
 R_DOTSTAR          = 90;
+SPKR_OFFSET         = 7;    // distance from back of pommel to speaker
 
 DOTSTAR_WALL       = Y_DOTSTAR + 0.5;
 
@@ -113,13 +114,7 @@ module speaker(pad=0)
 
 module speakerHolder()
 {
-    FORWARD_SPACE = 2;
-    AFT_SPACE = 2;
-    T = 2;
-    TH = 5;
-    H = M_POMMEL_FRONT - M_POMMEL_BACK;
-    H_SPKR = H_SPKR_PLASTIC + H_SPKR_METAL;
-
+    // Locking ring.
     difference() {
         translate([0, 0, M_POMMEL_FRONT]) {
             difference() {
@@ -139,27 +134,42 @@ module speakerHolder()
         }
     }
 
+    // Pillars.
+    H_POMMEL = M_POMMEL_FRONT - M_POMMEL_BACK;
+    H_LONG = M_SPKR_RING - M_POMMEL_BACK;
+    T_PILLAR = 6;
+    W_PILLAR = 5;
+
     translate([0, 0, M_POMMEL_BACK]) {
-        intersection() {
-            cylinder(h=H, d=D_POMMEL);
-            difference() {
-                union() {
-                    translate([-TH/2, -20, 0]) cube(size=[TH, 20, H]);
-                    translate([-TH/2, 0, 0])   cube(size=[TH, 11, H]);
-                    translate([-20, -TH/2, 0]) cube(size=[40, TH, H]);
+        difference() {
+            intersection() 
+            {
+                cylinder(h=H_LONG, d=D_POMMEL);
+                for(r=[0:2]) 
+                {
+                    rotate([0, 0, -r*90]) {
+                        translate([R_POMMEL - T_PILLAR, -W_PILLAR/2, 0]) {
+                            cube(size=[T_PILLAR, W_PILLAR, H_LONG]);        
+                        }
+                    }
                 }
-                translate([0, 0, FORWARD_SPACE]) {
-                    speaker(0.6);
-                }
-                cylinder(h=T*2, d=D_SPKR_METAL);
+            }
+            translate([0, 0, SPKR_OFFSET]) {
+                speaker(0.6);
             }
         }
-        translate([0, 0, H - T]) {
-            difference() {
-                cylinder(h=T, d=D_POMMEL);
-                cylinder(h=T, d=D_SPKR_PLASTIC - 4);
-            }
-        }    
+    }
+}
+
+module speakerRing()
+{
+    PAD = 1;    // space for foam, etc.
+
+    translate([0, 0, M_POMMEL_BACK]) {
+        difference() {
+            cylinder(h=SPKR_OFFSET - PAD, d=D_POMMEL);
+            cylinder(h=SPKR_OFFSET - PAD, d=D_SPKR_PLASTIC - 2);
+        }
     }
 }
 
@@ -320,6 +330,7 @@ module rail(r)
 *translate([0, 0, M_BUTTRESS_1]) buttress();
 *translate([0, 0, M_BUTTRESS_0]) buttress();
 speakerHolder();
+//speakerRing();
 
 
 *switch();
