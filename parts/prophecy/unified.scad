@@ -313,12 +313,12 @@ module rail(r)
     dotstarHolder();
     forwardRail();
 }
-transitionRing();
-rail(RAIL_ANGLE_0);
-rail(RAIL_ANGLE_1);
-translate([0, 0, M_BUTTRESS_2]) buttress();
-translate([0, 0, M_BUTTRESS_1]) buttress();
-translate([0, 0, M_BUTTRESS_0]) buttress();
+*transitionRing();
+*rail(RAIL_ANGLE_0);
+*rail(RAIL_ANGLE_1);
+*translate([0, 0, M_BUTTRESS_2]) buttress();
+*translate([0, 0, M_BUTTRESS_1]) buttress();
+*translate([0, 0, M_BUTTRESS_0]) buttress();
 speakerHolder();
 
 

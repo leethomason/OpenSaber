@@ -3,11 +3,11 @@ $fn = 90;
 
 D_OUTER = 37;
 D_INNER = 32;
-D = D_INNER;
+D = D_OUTER;
 
-L = 35;
+L = 84;
 W = D_OUTER + 20;
-T = 2;
+T = 1;
 H = D_OUTER + 20;
 
 

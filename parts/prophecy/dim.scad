@@ -21,7 +21,7 @@ INCHES_TO_MM = 25.4;
 
 D_FORWARD			= 25.4;
 R_FORWARD 			= D_FORWARD / 2;
-D_AFT				= 31.8;
+D_AFT				= 32.5;
 R_AFT 				= D_AFT / 2;
 T_TRANSITION_RING	= 2;
 

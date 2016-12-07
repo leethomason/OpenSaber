@@ -20,18 +20,15 @@ module buttress()
 		}
 
 		// Board
-		W = 18; //0.7 * 25.4;
+		W = 18 + 1; //0.7 * 25.4;
 		W_INNER = 15; 
 		H = 10.5; //4;
 		H_INNER = 7;
 
 		OFFSET = 10;
 
-		translate([-W/2, -14.5 - OFFSET, -EPS]) {
+		translate([-W/2, -14 - OFFSET, -EPS]) {
 			cube(size=[W, H + OFFSET, H_BUTTRESS + EPS2]);
-		}
-		*translate([-W_INNER/2, -12 - OFFSET, -EPS]) {
-			cube(size=[W_INNER, H_INNER + OFFSET, H_BUTTRESS + EPS2]);
 		}
 
 		// Rail notches
@@ -39,8 +36,8 @@ module buttress()
 
 	    for(r=R) {
 	        rotate([0, 0, r]) {
-                translate([-W_RAIL/2, R_AFT - RAIL_INNER_NOTCH, 0]) {
-                   cube(size=[W_RAIL, 20, H_BUTTRESS]);
+                translate([-W_RAIL/2, R_AFT - RAIL_INNER_NOTCH, -EPS]) {
+                   cube(size=[W_RAIL, 20, H_BUTTRESS + EPS2]);
                 }
 	        }
 	    }
@@ -48,8 +45,8 @@ module buttress()
 	    // Wiring holes
 	    translate([ 11.5, 0, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=5);
 	    translate([-11.5, 0, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=5);
-	    translate([ 11.5, -5.5, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=4);
-	    translate([-11.5, -5.5, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=4);
+	    translate([ 12.5, -5.5, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=3.5);
+	    translate([-12.5, -5.5, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=3.5);
 	}
 }
 
