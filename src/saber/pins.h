@@ -226,9 +226,9 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	//#define PIN_RX1           0
 	//#define PIN_TX1           1
 	#define PIN_AMP_EN  	  2
-	#define PIN_CRYSTAL_R     3
-	#define PIN_CRYSTAL_G     4
-	#define PIN_CRYSTAL_B     5
+	//#define PIN_CRYSTAL_R     3
+	//#define PIN_CRYSTAL_G     4
+	//#define PIN_CRYSTAL_B     5
 	#define PIN_LED_A         6
 	#define PIN_LED_B         7
 	#define PIN_SWITCH_A      8
@@ -237,10 +237,10 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_SABER_MOSI    11
 	#define PIN_SABER_MISO    12
 	#define PIN_SABER_CLOCK   13
-	#define PIN_OLED_DC       14
+	//#define PIN_OLED_DC       14
 	// 15 open
-	#define PIN_OLED_RESET    16 
-	#define PIN_OLED_CS       17
+	//#define PIN_OLED_RESET    16 
+	//#define PIN_OLED_CS       17
 	#define PIN_SDA           18
 	#define PIN_SCL           19
 	#define PIN_VMETER        20
