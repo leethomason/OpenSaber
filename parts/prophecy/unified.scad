@@ -16,7 +16,7 @@ EPS = 0.01;
 EPS2 = EPS * 2;
 
 H_HEAT_SINK_THREAD = 10.0;
-D_HEAT_SINK_THREAD = 20.1;  // 20.4 is loose
+D_HEAT_SINK_THREAD = 20.2;  // 20.4 is loose (PHA), 20.1 tight (PLA)
 R_DOTSTAR          = 90;
 SPKR_OFFSET         = 7;    // distance from back of pommel to speaker
 
@@ -330,8 +330,6 @@ module rail(r)
 *translate([0, 0, M_BUTTRESS_1]) buttress();
 *translate([0, 0, M_BUTTRESS_0]) buttress();
 speakerHolder();
-//speakerRing();
-
 
 *switch();
 *color("yellow") heatSink();
