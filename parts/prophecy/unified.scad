@@ -183,16 +183,19 @@ module switchAndPortHolder()
 
     H = (M_LED_HOLDER_BACK - M_TRANSITION + T_TRANSITION_RING);
     T = 3;
+    T_ACCEL = 2;
 
     intersection() {
         innerTube();
 
         difference() {
             union() {
-                translate([-10, Y_SWITCH - T, M_TRANSITION - T_TRANSITION_RING]) {
-                    cube(size=[20, T+1.5, H]);
+                translate([-20, Y_SWITCH - T, M_TRANSITION - T_TRANSITION_RING]) {
+                    cube(size=[40, T+1.5, H]);
                 }
                 
+                // Build up port holder for standard power port.
+                // (Never get to use that kind.)
                 W = 2 * (M_PORT_CENTER - M_TRANSITION); // fancy; snaps into ring.
                 difference() 
                 {
@@ -204,6 +207,17 @@ module switchAndPortHolder()
                         rotate([-45, 0, 0]) {
                             cube(size=[W, W, W]);
                         }
+                    }
+                }
+
+                // Slight build up for accelerometer mount.
+                ACCEL_BACK = M_TRANSITION - T_TRANSITION_RING;
+                ACCEL_FRONT = M_PORT_CENTER - 6;
+                translate([-W/2, Y_SWITCH - T - T_ACCEL, ACCEL_BACK]) {
+                    difference() 
+                    {
+                        cube(size=[W, T_ACCEL, ACCEL_FRONT - ACCEL_BACK]);
+                        translate([0, 0, ACCEL_FRONT - ACCEL_BACK - T_ACCEL]) rotate([45, 0, 0]) cube(size=[W, W, W]);
                     }
                 }
                 
@@ -222,6 +236,16 @@ module switchAndPortHolder()
                     cylinder(h=20, d=D_SMALL_PORT);
                 }
             }
+
+            // Screw holes for accelerometer
+            translate([0, 0, M_TRANSITION + 4.5]) {
+                W = 21;
+                OFFSET = 2.5;
+                D = 2.5;
+                translate([W/2 - OFFSET, 0, 0]) rotate([-90, 0, 0]) cylinder(h=20, d=D);
+                translate([-W/2 + OFFSET, 0, 0]) rotate([-90, 0, 0]) cylinder(h=20, d=D);
+            }
+
             transitionRing();
             heatSink();
         }
@@ -281,7 +305,7 @@ module transitionRing()
                         cube(size=[8, 2.5, T_TRANSITION_RING]);
                     }
                 }
-                translate([-20, Y_SWITCH - 5, M_TRANSITION - T_TRANSITION_RING]) {
+                translate([-20, Y_SWITCH - 3, M_TRANSITION - T_TRANSITION_RING]) {
                     cube(size=[40, 2, T_TRANSITION_RING]);
                 }            
             }
@@ -317,7 +341,7 @@ module rail(r)
     }
 }
 
-*union() {
+union() {
     ledHolder();
     switchAndPortHolder();
     dotstarHolder();
@@ -329,7 +353,7 @@ module rail(r)
 *translate([0, 0, M_BUTTRESS_2]) buttress();
 *translate([0, 0, M_BUTTRESS_1]) buttress();
 *translate([0, 0, M_BUTTRESS_0]) buttress();
-speakerHolder();
+*speakerHolder();
 //speakerRing();
 
 
