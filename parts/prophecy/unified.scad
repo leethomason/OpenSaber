@@ -122,6 +122,8 @@ module speakerHolder()
                 cylinder(h=M_SPKR_RING - M_POMMEL_FRONT, d=D_SPKR_PLASTIC - 4);
             }
         }
+
+        // End rail joints
         R = [RAIL_ANGLE_0, RAIL_ANGLE_1];
         for(r=R) {
             rotate([0, 0, r]) {
@@ -132,12 +134,20 @@ module speakerHolder()
                 }
             }
         }
+
+        // Amplifier mount
+        W = 15.2;
+        OFFSET = 2.5;
+        D = 2.5;
+        Y = 13;
+        translate([ W/2 - OFFSET, Y, M_POMMEL_FRONT]) cylinder(h=4, d=D);
+        translate([-W/2 + OFFSET, Y, M_POMMEL_FRONT]) cylinder(h=4, d=D);
     }
 
     // Pillars.
     H_POMMEL = M_POMMEL_FRONT - M_POMMEL_BACK;
     H_LONG = M_SPKR_RING - M_POMMEL_BACK;
-    T_PILLAR = 6;
+    T_PILLAR = 5;
     W_PILLAR = 5;
 
     translate([0, 0, M_POMMEL_BACK]) {
@@ -157,6 +167,7 @@ module speakerHolder()
             translate([0, 0, SPKR_OFFSET]) {
                 speaker(0.6);
             }
+            cylinder(h=8, d=D_SPKR_METAL);
         }
     }
 }
@@ -314,8 +325,8 @@ module transitionRing()
         R = [RAIL_ANGLE_0, RAIL_ANGLE_1];
         for(r=R) {
             rotate([0, 0, r]) {
-                translate([-W_RAIL/2, R_AFT - RAIL_INNER_NOTCH, M_TRANSITION - T_TRANSITION_RING - EPS]) {
-                   cube(size=[W_RAIL, 20, H_BUTTRESS + EPS2]);
+                translate([-W_RAIL/2 - RAIL_PAD/2, R_AFT - RAIL_INNER_NOTCH, M_TRANSITION - T_TRANSITION_RING - EPS]) {
+                   cube(size=[W_RAIL + RAIL_PAD, 20, H_BUTTRESS + EPS2]);
                 }
             }
         }
@@ -333,28 +344,32 @@ module rail(r)
                cube(size=[W_RAIL, RAIL_OUTER_NOTCH - 0.1, H]);
             }
             for(m=M) {
-                translate([-W_RAIL/2 - EPS, R_AFT - RAIL_OUTER_NOTCH, m]) {
-                   cube(size=[W_RAIL + EPS2, RAIL_INNER_NOTCH, H_BUTTRESS]);
+                translate([-W_RAIL/2 - EPS, R_AFT - RAIL_OUTER_NOTCH, m - RAIL_PAD/2]) {
+                   cube(size=[W_RAIL + EPS2, RAIL_INNER_NOTCH, H_BUTTRESS + RAIL_PAD]);
                 }
             }
         }
     }
 }
 
-union() {
+*union() {
     ledHolder();
     switchAndPortHolder();
     dotstarHolder();
     forwardRail();
 }
-*transitionRing();
+transitionRing();
 *rail(RAIL_ANGLE_0);
 *rail(RAIL_ANGLE_1);
-*translate([0, 0, M_BUTTRESS_2]) buttress();
-*translate([0, 0, M_BUTTRESS_1]) buttress();
-*translate([0, 0, M_BUTTRESS_0]) buttress();
-*speakerHolder();
-//speakerRing();
+translate([0, 0, M_BUTTRESS_2]) buttress();
+translate([0, 0, M_BUTTRESS_1]) buttress();
+translate([0, 0, M_BUTTRESS_0]) {
+    difference() {
+        buttress();
+        translate([11.5, -9, 0]) cube(size=[1, 18 + 10, 1.5]);
+    }
+}
+speakerHolder();
 
 
 *switch();
