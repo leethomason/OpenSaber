@@ -36,8 +36,8 @@ module buttress()
 
 	    for(r=R) {
 	        rotate([0, 0, r]) {
-                translate([-W_RAIL/2, R_AFT - RAIL_INNER_NOTCH, -EPS]) {
-                   cube(size=[W_RAIL, 20, H_BUTTRESS + EPS2]);
+                translate([-W_RAIL/2 - RAIL_PAD/2, R_AFT - RAIL_INNER_NOTCH, 0]) {
+                   cube(size=[W_RAIL + RAIL_PAD, 20, H_BUTTRESS]);
                 }
 	        }
 	    }

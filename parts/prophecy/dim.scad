@@ -6,12 +6,12 @@ M_PORT_CENTER       = 116;
 M_TRANSITION		= 102;
 M_BUTTRESS_2		= 74;
 M_BUTTRESS_1		= 51;
-M_BUTTRESS_0		= 33;
+M_BUTTRESS_0		= 34.5;
 M_SPKR_RING			= 15.5;		// Front of the speaker ring.
 M_RAIL_START		= 11;
 M_POMMEL_FRONT		= 10;		// Where the pommel becomes aft
-M_POMMEL_BACK		= -12.5;	// Back of the pommel
 M_0					= 0;
+M_POMMEL_BACK		= -12.5;	// Back of the pommel
 M_WAY_BACK			= -20;
 
 H_FAR				= 200;
@@ -28,7 +28,7 @@ T_TRANSITION_RING	= 2;
 Y_SWITCH			= 9.6;
 D_SWITCH			= 12.5;
 D_SWITCH_TOP		= 14.5;
-D_PORT 				= 0.5 * INCHES_TO_MM;
+D_PORT 				= 12.4; // 0.5 * INCHES_TO_MM  = 12.7 too tight
 D_SMALL_PORT		= 7.6;	// 7.7 tight
 
 D_SABER_OUTER		= 37.5;
@@ -47,7 +47,7 @@ H_SPKR_METAL   		= 8 + 0.5;
 D_SPKR_METAL   		= 23.6;	
 H_SPKR_PLASTIC 		= 2.7;
 D_SPKR_PLASTIC 		= 28;
-D_POMMEL			= 31.5;
+D_POMMEL			= 31.0; // 31.5 is correct, but snug
 R_POMMEL 			= D_POMMEL / 2;
 D_AFT_RING			= 33.5;
 
@@ -56,3 +56,4 @@ RAIL_ANGLE_1		= -90;
 W_RAIL				= 3;
 RAIL_OUTER_NOTCH	= 2;
 RAIL_INNER_NOTCH	= 1;
+RAIL_PAD 			= 0.2;	// in z direction, pad is on rail, on axial, buttress
