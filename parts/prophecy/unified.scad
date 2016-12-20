@@ -114,12 +114,14 @@ module speaker(pad=0, dpad=0)
 
 module speakerHolder()
 {
+    D_SPKR_INNER = D_SPKR_PLASTIC - 4;
+
     // Locking ring.
     difference() {
         translate([0, 0, M_POMMEL_FRONT]) {
             difference() {
                 cylinder(h=M_SPKR_RING - M_POMMEL_FRONT, d=D_AFT_RING);
-                cylinder(h=M_SPKR_RING - M_POMMEL_FRONT, d=D_SPKR_PLASTIC - 4);
+                cylinder(h=M_SPKR_RING - M_POMMEL_FRONT, d=D_SPKR_INNER);
             }
         }
 
@@ -143,8 +145,20 @@ module speakerHolder()
         translate([-W/2, Y, M_POMMEL_FRONT]) cylinder(h=4, d=D);
     }
 
-    // Pillars.
     H_POMMEL = M_POMMEL_FRONT - M_POMMEL_BACK;
+    translate([0, 0, M_POMMEL_BACK]) {
+        difference() {
+            tube(H_POMMEL, D_SPKR_INNER/2, D_POMMEL/2);
+            translate([-20, 2, 0]) cube(size=[40, 40, 40]);
+            translate([0, 0, SPKR_OFFSET]) {
+                speaker(0.8, 0.6);
+            }
+            translate([0, 0, 2]) vent2(6, 20, 8, 20, 8);
+        }
+    }    
+
+    /*
+    // Pillars.
     H_LONG = M_SPKR_RING - M_POMMEL_BACK;
     T_PILLAR = 5;
     W_PILLAR = 5;
@@ -168,7 +182,7 @@ module speakerHolder()
             }
             cylinder(h=8, d=D_SPKR_METAL + 0.6);
         }
-    }
+    }*/
 }
 
 module speakerRing()

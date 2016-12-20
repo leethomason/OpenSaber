@@ -10,21 +10,24 @@ module lowerVent1(w, h, extrusion)
 }
 
 
-module vent1(w, h, n, extrusion)
+module vent1(w, h, n, extrusion, stop=100)
 {
     angle = 360 / n;
-    
-	for(r=[0:n-1]) {
+    N = stop < n ? stop : n;
+
+	for(r=[0:N-1]) {
 		rotate([0, 0, angle*r]) {
             lowerVent1(w, h, extrusion);
         }
     }
 }
 
-module vent2(w, h, n, extrusion)
+module vent2(w, h, n, extrusion, stop=100)
 {
     angle = 360 / n;
-	for(r=[0:n-1]) {
+    N = stop < n ? stop : n;
+
+	for(r=[0:N-1]) {
 		rotate([0, 0, angle*r]) {
 
             rotate([90, 0, 90]) {
