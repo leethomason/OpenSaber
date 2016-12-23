@@ -28,7 +28,7 @@ T_TRANSITION_RING	= 2;
 Y_SWITCH			= 9.6;
 D_SWITCH			= 12.5;
 D_SWITCH_TOP		= 14.5;
-D_PORT 				= 12.4; // 0.5 * INCHES_TO_MM  = 12.7 too tight
+D_PORT 				= 13.2; // 0.5 * INCHES_TO_MM  = 12.7 too tight, 12.9 still tight
 D_SMALL_PORT		= 7.6;	// 7.7 tight
 
 D_SABER_OUTER		= 37.5;
@@ -57,3 +57,4 @@ W_RAIL				= 3;
 RAIL_OUTER_NOTCH	= 2;
 RAIL_INNER_NOTCH	= 1;
 RAIL_PAD 			= 0.2;	// in z direction, pad is on rail, on axial, buttress
+RAIL_TRANSITION		= 5;
