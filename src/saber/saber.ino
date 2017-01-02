@@ -61,10 +61,11 @@ static const uint32_t INDICATOR_CYCLE         = INDICATOR_TIME * 2;
 static const float    GFORCE_RANGE            = 4.0f;
 static const float    GFORCE_RANGE_INV        = 1.0f / GFORCE_RANGE;
 
-bool     paletteChange  = false; // used to prevent sound fx on palette changes
+bool     paletteChange  = false;    // used to prevent sound fx on palette changes
 uint32_t reflashTime    = 0;
 bool     flashOnClash   = false;
 float    maxGForce2     = 0.0f;
+uint32_t lastMotionTime = 0;      
 
 #ifdef SABER_SOUND_ON
 // First things first: disable that audio to avoid clicking.
@@ -566,24 +567,35 @@ void loop() {
         float motion = saberDB.motion();
         float impact = saberDB.impact();
 
+        // The extra check here for the motion time is because some
+        // motion loops are tacked on to the beginning of the idle
+        // loop...which makes sense. (Sortof). But leads to super-long
+        // motion. So if time is above a threshold, allow replay.
+        // Actual motion / impact sounds are usually less that 1 second.
+        bool sfxOverDue = ((msec - lastMotionTime) > 1500) &&
+                          ((sfx.lastSFX() == SFX_MOTION) || (sfx.lastSFX() == SFX_IMPACT));
+
+
         if ((g2Normal >= impact * impact)) {
             bool sound = false;
             #ifdef SABER_SOUND_ON
-                sound = sfx.playSound(SFX_IMPACT, SFX_GREATER_OR_EQUAL);
+                sound = sfx.playSound(SFX_IMPACT, sfxOverDue ? SFX_OVERRIDE : SFX_GREATER_OR_EQUAL);
             #endif
 
             if (sound) {
                 Log.p("Impact. g=").p(sqrt(g2)).eol();
                 bladeState.change(BLADE_FLASH);
+                lastMotionTime = msec;
             }
         }
         else if ( g2 >= motion * motion) {
             bool sound = false;
             #ifdef SABER_SOUND_ON
-                sound = sfx.playSound(SFX_MOTION, SFX_GREATER);
+                sound = sfx.playSound(SFX_MOTION, sfxOverDue ? SFX_OVERRIDE : SFX_GREATER);
             #endif
             if (sound) {
                 Log.p("Motion. g=").p(sqrt(g2)).eol();
+                lastMotionTime = msec;
             }
         }
     }

@@ -42,6 +42,7 @@ SFX::SFX(AudioPlayer* audioPlayer)
   m_currentFont = -1;
   m_igniteTime = 1000;
   m_retractTime = 1000;
+  m_lastSFX = SFX_NONE;
 
   memset(m_location, 255, sizeof(SFXLocation)*NUM_SFX_TYPES);
 }
@@ -151,13 +152,36 @@ void SFX::scanFiles(uint8_t index)
     addFile(m_filename[i].c_str(), i);
   }
 
-  Log.p("IDLE      ").p(m_location[SFX_IDLE].start).p(" ").p(m_location[SFX_IDLE].count).eol();
-  Log.p("MOTION    ").p(m_location[SFX_MOTION].start).p(" ").p(m_location[SFX_MOTION].count).eol();
-  Log.p("IMPACT    ").p(m_location[SFX_IMPACT].start).p(" ").p(m_location[SFX_IMPACT].count).eol();
-  Log.p("USER_TAP  ").p(m_location[SFX_USER_TAP].start).p(" ").p(m_location[SFX_USER_TAP].count).eol();
-  Log.p("USER_HOLD ").p(m_location[SFX_USER_HOLD].start).p(" ").p(m_location[SFX_USER_HOLD].count).eol();
-  Log.p("POWER_ON  ").p(m_location[SFX_POWER_ON].start).p(" ").p(m_location[SFX_POWER_ON].count).eol();
-  Log.p("POWER_OFF ").p(m_location[SFX_POWER_OFF].start).p(" ").p(m_location[SFX_POWER_OFF].count).eol();
+  static const int N = 7;
+  static const char* NAMES[N] = {"Idle        ", "Motion      ", "Impact      ", "User_Tap    ", "User_Hold   ", "Power_On    ", "Power_Off   " };
+  const int ID[N] = {SFX_IDLE, SFX_MOTION, SFX_IMPACT, SFX_USER_TAP, SFX_USER_HOLD, SFX_POWER_ON, SFX_POWER_OFF };
+
+  for(int i=0; i<N; ++i) {
+    Log.p(NAMES[i]).p("start=").p(m_location[ID[i]].start).p(" count=").p(m_location[ID[i]].count).eol();
+
+    /* really good debug code: move to command window??
+    Log.p("  ");
+    for(int j=0; j<m_location[ID[i]].count; ++j) {
+
+        uint8_t nChannels = 0;
+        uint32_t nSamplesPerSec = 0;
+        uint32_t length = 0;
+
+        int track = m_location[ID[i]].start + j;
+        ASSERT(track >= 0);
+        ASSERT(track < m_numFilenames);
+
+        CStr<25> path;
+        filePath(&path, track);
+
+        readHeader(path.c_str(), &nChannels, &nSamplesPerSec, &length, false);
+        Log.p(m_filename[track].c_str()).p(":").p(nChannels).p(":").p(nSamplesPerSec).p(":").p(length).p(" ");
+        ASSERT(nChannels == 1);
+        ASSERT(nSamplesPerSec == 44100);
+    }
+    Log.eol();
+    */
+  }
   readIgniteRetract();
 }
 
@@ -251,6 +275,7 @@ bool SFX::playSound(int sound, int mode)
     }
     m_player->play(path.c_str());
     m_currentSound = sound;
+    m_lastSFX = sound;
     return true;
   }
   return false;
@@ -292,7 +317,7 @@ uint32_t SFX::readU32(File& file, int n) {
   return v;
 }
 
-bool SFX::readHeader(const char* filename, uint8_t* nChannels, uint32_t* nSamplesPerSec, uint32_t* lengthMillis)
+bool SFX::readHeader(const char* filename, uint8_t* nChannels, uint32_t* nSamplesPerSec, uint32_t* lengthMillis, bool logToConsole)
 {
   File file = SD.open(filename);
   if (file) {
@@ -300,15 +325,16 @@ bool SFX::readHeader(const char* filename, uint8_t* nChannels, uint32_t* nSample
 
     file.seek(22);
     *nChannels = readU32(file, 2);
-    Log.p("channels:        ").p(*nChannels).eol();
+    if (logToConsole) Log.p("channels:        ").p(*nChannels).eol();
     *nSamplesPerSec = readU32(file, 4);
-    Log.p("nSamplesPerSec:  ").p(*nSamplesPerSec).eol();
+    if (logToConsole) Log.p("nSamplesPerSec:  ").p(*nSamplesPerSec).eol();
     uint32_t nAvgBytesPerSec = readU32(file, 4);
     //Serial.print("nAvgBytesPerSec: "); Serial.println(nAvgBytesPerSec);
     //Serial.print("nBlockAlign:     "); Serial.println(readU32(file, 2));
     //Serial.print("wBitsPerSample:  "); Serial.println(readU32(file, 2));
     *lengthMillis = (file.size() - 44u) * 1000u / (nAvgBytesPerSec);
-    Log.p("length millis:   ").p(*lengthMillis).eol();
+
+    if (logToConsole) Log.p("length millis:   ").p(*lengthMillis).eol();
     file.close();
     return true;
   }
@@ -328,11 +354,11 @@ void SFX::readIgniteRetract()
 
   if (m_location[SFX_POWER_ON].InUse()) {
     filePath(&path, m_location[SFX_POWER_ON].start);
-    readHeader(path.c_str(), &nChannels, &samples, &m_igniteTime);
+    readHeader(path.c_str(), &nChannels, &samples, &m_igniteTime, true);
   }
   if (m_location[SFX_POWER_OFF].InUse())
     filePath(&path, m_location[SFX_POWER_OFF].start);
-  readHeader(path.c_str(), &nChannels, &samples, &m_retractTime);
+  readHeader(path.c_str(), &nChannels, &samples, &m_retractTime, true);
 }
 
 

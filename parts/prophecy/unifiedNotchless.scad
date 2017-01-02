@@ -39,6 +39,11 @@ module heatSink()
     }
 }
 
+module SDNotch()
+{
+    translate([11.5, -8.5, 0]) cube(size=[1 + 0.2, 40, H_BUTTRESS + EPS]);
+}
+
 // LED / button positive (above axis)
 // thread negative (below axis)
 //
@@ -112,25 +117,6 @@ module speaker(pad=0, dpad=0)
     translate([0, 0, H_SPKR_PLASTIC]) cylinder(h=H_SPKR_METAL, d=D_SPKR_METAL + dpad);
 }
 
-module speakerRailJoints()
-{
-    // End rail joints
-    R = [RAIL_ANGLE_0, RAIL_ANGLE_1];
-    for(r=R) {
-        rotate([0, 0, r]) {
-            difference() {
-                *translate([-W_RAIL/2 - RAIL_PAD/2, R_AFT - RAIL_OUTER_NOTCH, M_RAIL_START]) {
-                   cube(size=[W_RAIL + RAIL_PAD, 10 - 0.1, 10]);
-                }
-                translate([-W_RAIL/2 - RAIL_PAD/2, R_AFT - RAIL_OUTER_NOTCH, M_WAY_BACK]) {
-                   cube(size=[W_RAIL + RAIL_PAD, 10 - 0.1, H_FAR]);
-                }
-            }
-        }
-    }
-
-}
-
 module speakerHolder()
 {
     D_SPKR_INNER = D_SPKR_PLASTIC - 4;
@@ -150,8 +136,6 @@ module speakerHolder()
         Y = 12.2;
         translate([ W/2, Y, M_POMMEL_FRONT]) cylinder(h=4, d=D);
         translate([-W/2, Y, M_POMMEL_FRONT]) cylinder(h=4, d=D);
-        
-        speakerRailJoints();
     }
 
     // Actual holder.
@@ -159,13 +143,17 @@ module speakerHolder()
     translate([0, 0, M_POMMEL_BACK]) {
         difference() {
             tube(H_POMMEL, D_SPKR_INNER/2, D_POMMEL/2);
-            translate([-20, 3, 0]) cube(size=[40, 40, 40]);
+            translate([-20, 4, 0]) cube(size=[40, 40, 40]);
+
+            //translate([0, 0, 14]) cube(size=[8, 40, 40]);
+            //translate([-20, 3, 0]) cube(size=[20, 40, 40]);
+            
             translate([0, 0, SPKR_OFFSET]) {
                 speaker(0.8, 0.6);
             }
-            translate([0, 0, 2]) rotate([0, 0, 224]) vent2(6, 20, 8, 20, 3);
-            // HACK remove translation
-            translate([0, 0, -M_POMMEL_BACK]) speakerRailJoints();
+            translate([-20, -20, 3]) cube(size=[16, 15, 22]);
+            mirror([-1, 0, 0]) translate([-20, -20, 3]) cube(size=[16, 15, 22]);
+            mirror([-1, -1, 0]) translate([-20, -20, 3]) cube(size=[16, 15, 22]);
         }
     }    
 }
@@ -195,7 +183,8 @@ module switchAndPortHolder()
     T_ACCEL = 2;
 
     intersection() {
-        innerTube();
+        //innerTube();
+        translate([0, 0, M_WAY_BACK]) cylinder(h=H_FAR, d=D_FORWARD);
 
         difference() {
             union() {
@@ -319,53 +308,43 @@ module transitionRing()
                 }
                 translate([-20, Y_SWITCH - 3, M_TRANSITION - T_TRANSITION_RING]) {
                     cube(size=[40, 2, T_TRANSITION_RING]);
-                }   
-
-                W_SUPPORT = 8;
-                H_SUPPORT = 7;
-
-                difference() {
-                    union() {
-                        for(r=[0,1]) {
-                            rotate([0, 0, 180*r]) translate([R_INNER, -W_SUPPORT/2, M_TRANSITION - T_TRANSITION_RING - H_SUPPORT]) {
-                                cube(size=[20, W_SUPPORT, H_SUPPORT]);
-                            }
-                        }
-                    }                
-                    rail(RAIL_ANGLE_0, 20, false);
-                    rail(RAIL_ANGLE_1, 20, false);
                 }  
-            }
-        }    
-    }
-}
-
-module rail(r, extend=0, notch=true)
-{
-    H = M_TRANSITION - M_RAIL_START - T_TRANSITION_RING;
-    M = [M_BUTTRESS_0, M_BUTTRESS_1, M_BUTTRESS_2];
-
-    rotate([0, 0, r]) {
-        difference() {
-            translate([-W_RAIL/2, R_AFT - RAIL_OUTER_NOTCH, M_RAIL_START]) {
-               cube(size=[W_RAIL, RAIL_OUTER_NOTCH - 0.1 + extend, H]);
-            }
-            for(m=M) {
-                translate([-W_RAIL/2 - EPS, R_AFT - RAIL_OUTER_NOTCH, m - RAIL_PAD/2]) {
-                   cube(size=[W_RAIL + EPS2, RAIL_INNER_NOTCH, H_BUTTRESS + RAIL_PAD]);
+                color("green") translate([-20, 2.5, M_TRANSITION - T_TRANSITION_RING]) {
+                    difference() {
+                        cube(size=[40, 2, T_TRANSITION_RING]);
+                        // Carve out space for the accelerometer.
+                        W = 21.5;
+                        translate([20 - W/2, 0, 0]) cube(size=[W, 2, T_TRANSITION_RING]);
+                    }
                 }
             }
-            // Notch front so I can orient it:
-            if (notch) {
-                translate([-0.5, 0, M_RAIL_START + H - 2]) cube(size=[1, 20, 2.1]);
-            }
         }
+        // Remove battery so in can be inserted.
+        translate([0, 0, M_TRANSITION - T_TRANSITION_RING - EPS]) battery(T_TRANSITION_RING + EPS2);
     }
 }
 
-module SDcard() {
-    // oriented 
+module rail(r)
+{
+    H = M_TRANSITION - M_RAIL_START - T_TRANSITION_RING;
+
+    difference() {
+        intersection()
+        {
+            innerTube();
+            rotate([0, 0, r]) {
+                translate([-W_RAIL/2, R_AFT - RAIL_OUTER_NOTCH, M_RAIL_START]) {
+                   cube(size=[W_RAIL, 20, H]);
+                }            
+            }        
+        }
+        translate([0, 0, M_WAY_BACK]) battery(H_FAR);
+        translate([0, 0, M_WAY_BACK]) circuitry(H_FAR);
+        // flip circuitry so support doesn't have to be generated between rails
+        rotate([0, 0, 180]) translate([0, 0, M_WAY_BACK]) circuitry(H_FAR);
+    }
 }
+
 
 *union() {
     ledHolder();
@@ -373,18 +352,31 @@ module SDcard() {
     dotstarHolder();
     forwardRail();
 }
-transitionRing();
-rail(RAIL_ANGLE_0);
-rail(RAIL_ANGLE_1);
-translate([0, 0, M_BUTTRESS_2]) buttress();
-translate([0, 0, M_BUTTRESS_1]) buttress();
-translate([0, 0, M_BUTTRESS_0]) {
-    difference() {
-        buttress();
-        translate([11.5, -9.2, 0]) cube(size=[1 + 0.2, 18 + 0.5, 2.5]);   // 1.5 partial
+
+difference() {
+    union() {
+        transitionRing();
+        rail(RAIL_ANGLE_0);
+        rail(RAIL_ANGLE_1);
+        rail(RAIL_ANGLE_2);
+        difference() {
+            rail(RAIL_ANGLE_3);
+            translate([0, 0, M_BUTTRESS_0]) SDNotch();
+        }
+        translate([0, 0, M_BUTTRESS_2]) buttress(notch=false);
+        translate([0, 0, M_BUTTRESS_1]) buttress(notch=false);
+        translate([0, 0, M_BUTTRESS_0]) {
+            difference() {
+                buttress(leftWiring=false, notch=false);
+                //translate([11.5, -9.2, 0]) cube(size=[1 + 0.2, 18 + 0.5, 2.5]);   // 1.5 partial
+                SDNotch();
+            }
+        }
+        speakerHolder();
     }
-}
-speakerHolder();
+    // Flatten the bottom for printing.
+    translate([-20, -D_AFT_RING/2, M_WAY_BACK]) cube(size=[40, 1.8, H_FAR]);
+}    
 *switch();
 *color("yellow") heatSink();
 *color("yellow") speaker();

@@ -64,6 +64,9 @@ public:
   bool playSound(int sfx, int mode);
   bool playSound(const char* sfx);
   void stopSound();
+
+  // The class of SFX (MOTION, IMPACT, etc) last successfully played.
+  int lastSFX() const                     { return m_lastSFX; }
   
   bool bladeOn() const                    { return m_bladeOn; }
   void process();
@@ -94,7 +97,7 @@ private:
   void addFile(const char* filename, int index);
   int calcSlot(const char* filename); // -1 if not a supported file
   void readIgniteRetract();
-  bool readHeader(const char* filename, uint8_t* nChannels, uint32_t* nSamplesPerSec, uint32_t* lengthMillis);
+  bool readHeader(const char* filename, uint8_t* nChannels, uint32_t* nSamplesPerSec, uint32_t* lengthMillis, bool logToConsole);
   uint32_t readU32(File& file, int n);
 
   // note: initialize to 255
@@ -111,6 +114,7 @@ private:
   uint8_t      m_numFonts;
   int8_t       m_numFilenames;
   int8_t       m_currentSound;
+  int8_t       m_lastSFX;
   uint8_t      m_currentFont;
   uint32_t     m_igniteTime;
   uint32_t     m_retractTime;

@@ -1,9 +1,10 @@
-M_LED_HOLDER_FRONT	= 164;
+M_TRANSITION		= 101;
+M_LED_HOLDER_FRONT	= M_TRANSITION + 62;
 M_LED_HOLDER_BACK	= M_LED_HOLDER_FRONT - 10;
-M_SWITCH_CENTER		= 147;
-M_DOTSTAR			= 135;	// FIXME center mark of first dotstar
-M_PORT_CENTER       = 116;
-M_TRANSITION		= 102;
+M_SWITCH_CENTER		= M_TRANSITION + 45;
+M_DOTSTAR			= M_TRANSITION + 33;	// FIXME center mark of first dotstar
+M_PORT_CENTER       = M_TRANSITION + 14;
+
 M_BUTTRESS_2		= 74;
 M_BUTTRESS_1		= 51;
 M_BUTTRESS_0		= 34.5;
@@ -23,13 +24,13 @@ D_FORWARD			= 25.4;
 R_FORWARD 			= D_FORWARD / 2;
 D_AFT				= 32.5;
 R_AFT 				= D_AFT / 2;
-T_TRANSITION_RING	= 2;
+T_TRANSITION_RING	= 3;
 
 Y_SWITCH			= 9.6;
 D_SWITCH			= 12.5;
 D_SWITCH_TOP		= 14.5;
-D_PORT 				= 13.2; // 0.5 * INCHES_TO_MM  = 12.7 too tight, 12.9 still tight
-D_SMALL_PORT		= 7.6;	// 7.7 tight
+D_PORT 				= 12.7;		// FIXME
+D_SMALL_PORT		= 7.9;
 
 D_SABER_OUTER		= 37.5;
 
@@ -51,9 +52,12 @@ D_POMMEL			= 31.0; // 31.5 is correct, but snug
 R_POMMEL 			= D_POMMEL / 2;
 D_AFT_RING			= 33.5;
 
-RAIL_ANGLE_0		= 90;
-RAIL_ANGLE_1		= -90;
-W_RAIL				= 3;
+RAIL_ANGLE_0		=  138;
+RAIL_ANGLE_1		= -138;
+RAIL_ANGLE_2		=  180 - RAIL_ANGLE_0;
+RAIL_ANGLE_3		= -180 - RAIL_ANGLE_1;
+
+W_RAIL				= 4;
 RAIL_OUTER_NOTCH	= 2;
 RAIL_INNER_NOTCH	= 1;
 RAIL_PAD 			= 0.2;	// in z direction, pad is on rail, on axial, buttress

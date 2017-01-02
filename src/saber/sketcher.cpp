@@ -27,12 +27,14 @@ textureData Sketcher::GetDial(int value)
 {
     textureData td = get_dial0;
     switch (value) {
+    case 0: break;	// already set to default.
 	case 1: td = get_dial1; break;
 	case 2: td = get_dial2; break;
 	case 3: td = get_dial3; break;
 	case 4: td = get_dial4; break;
     default:
 		OSASSERT(false);
+		//Log.p("value=").p(value).eol();
         break;
     }
     return td;
