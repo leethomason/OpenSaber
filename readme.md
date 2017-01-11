@@ -36,19 +36,23 @@ here: https://youtu.be/9_-Rfe4UBJM.
 
 ## Status & Direction
 
-There are 2 working sabers on the OpenSaber design. A SaberZ case
-and an UltraSabers case. Version numbers don't help much - I'm
-just trying to keep master current - but where it comes up, this
-is the V3 platform which uses the V5 circuits. (It's an incosistent
-versioning scheme.)
+There are over 5 working sabers on the OpenSaber design with cases
+by SaberZ and UltraSabers. (With TCSS V1 cases and SaberForge ASP
+in the works.)
+
+The version number - as much as it is consistent - references
+the PCB board. The PCB board determines the electrical architecture
+and features.
 
 - Based on Teensy 3.2 microcontroller.
-- Optionally uses a PJRC Prop Shield. The prop shield condenses
+- The V5 optionally uses a PJRC Prop Shield. The prop shield condenses
   a bunch of the electronics into one board, which is very 
   handy. (Although sometimes it's useful to spread components out, to
   be able to utilize space in the saber.)
   The PCB design contains both a prop shield version and a 
   breakout version.
+- The V7 version will require the PJRC Prop Shield. (Although the V5 still
+  works, of course.)
 
 Note that many commits to the github repo are parts for a 3D
 printer. While you are welcome to use them, the focus of 
@@ -63,6 +67,9 @@ you use a standard case, of course.)
 - http://www.rocket-props.com/the-open-source-saber-project uses some 
   interesting ideas, including SMD componends and using buck-pucks.
   Nice approach, very different from this one.
+- The Teensy Based Lightsaber http://fredrik.hubbe.net/lightsaber/
+  has a similar electrical design, some innovative features, and
+  doesn't use a PCB. (Which has pros and cons.)
 
 ## Resources
 
@@ -122,7 +129,10 @@ In roughly front to back order, an saber is:
     TCSS provides them as well. LEDs are kept to 350ma each (although you
     can change this.) Many LED's, if cooled correctly, can take considerably
     more power, but I haven't tested the actual cooling ability of the
-    various heat sinks I use.
+    various heat sinks I use. The trend is to 12W (3-4 LEDs at 3-4 Watts
+    each) which is super bright...but takes a lot of power and generates
+    lots of heat. I'm experimenting with more powerful LEDs, but nothing
+    to post here yet.
 5.  **Power and Auxillary** switches (momentary on, typically 12mm). The
     code supports both a one button version and a two button version. Both
     versions support the same features except "clash sound" which is only
@@ -135,7 +145,8 @@ In roughly front to back order, an saber is:
 8.  **SD Card**. Gecko uses a simple SD card breakout board. This is where
     the sound fonts are stored.
 9. **Accelerometer**. Gecko uses an "Adafruit LIS3DH Triple-Axis 
-    Accelerometer."
+    Accelerometer" but the new designs all use the accelerometer on the 
+    Prop shield.  
 10. 3.7v Li-Ion **battery**. TCSS and Adafruit both sell good, small, long 
     lasting batteries. Need something rated 2000mAh or better.
 11. **Speaker**. TCSS and Adafruit carry them, as well as Mouser and Digikey. 
@@ -263,29 +274,21 @@ to be careful with a metal port, or use a insulated plastic one. (I went with
 an insulated plastic one.)
 
 #### 3V or 7V
-Why a 3.7v supply? I assume you want rechargable batteries. 4 AAA may be 
-workable for a single LED (1 watt) but even then, traditional batteries
-have low power lifetimes.
 
-Given Li-Ion rechargable battery packs, the question is then 3.7v or 7.4v?
+Sabers run off 4 AAA, 3.7 Li-Ion, or 7.4 Li-Ion. OpenSaber is designed 
+around a 3.7 Li-Ion.
+
+Why?
 
 3.7v
-- Smaller
+- Rechargable 
+- Smaller than 7.4, competitive with AAA
 - Efficient for resistors on LEDs. A typical LED forward voltage is 2-3 volts,
   so overall efficiency is about 80%.
+- Buck/Boost converters make the 7.4 supply less interesting for the
+  microcontroller and DotStars. 
 
-7.4v
-- Efficient for buck-puck drivers. A PWM buck needs a 7V power supply.
-  Generally 90% efficient.
-- 5V logic is sometimes a little easier to work with if you are stating out
-  on a proto/dev board. (Although this is changing, and I find myself 
-  prototyping on 3V systems.)
-
-In the end, 3.7v wins primarily for size. (I'd like to try a 7.4V circuit
-with bucks, but haven't yet. Sparkfun makes some nice, affordable, low profile 
-converters.)
-
-Note that in either case, the actual battery voltage varies significantly, 
+Note that the actual battery voltage varies significantly, 
 and the control circuit has to account for that.
 
 ### Electronics
@@ -299,7 +302,8 @@ The prop shield "collects" 1) an audio amplifier, 2) a DotStar LED controller,
 and 3) an accelerometer onto one board. The PCB with and without the Prop
 Shield are functionally equivalent. But without the Prop Shield, you need
 to add the amp and accelerometer yourself. Depending on space contraints,
-one or the other is more appealing. (Which is why I maintain both versions.)
+one or the other is more appealing. (Which is why I maintain both versions,
+but the V7 will move to Prop Shield exclusively.)
 
 - A **microcontroller**, the Teensy 3.2, is the micro-computer
   that runs the softare. It controls the blade state, the color
@@ -362,17 +366,12 @@ sound font will confuse the sound output.
 ## Code
 
 The code is really the heart of this project. The code
-is set up to compile in the Arduino IDE, using teh Teensyduino extension.
+is set up to compile in the Arduino IDE, using the Teensyduino extension.
 
 First you will need to set up libraries. Then you need to configure
 you particular saber in "pins.h".
 
 ### Libraries
-
-Regrettably, the 'saber' source code uses some forked libraries. They are
-all available on the github pages. I regret having to fork - it adds 
-complexity and overhead - but there are issues I haven't otherwise been able 
-to work around.
 
 #### Accelerometer
 
@@ -382,7 +381,7 @@ https://github.com/adafruit/Adafruit_LIS3DH
 #### OLED
 
 The OLED display is required to compile, although it isn't supported
-as part of OpenSaber yet.
+as part of OpenSaber yet. (I use it in a personal saber.)
 
 https://github.com/leethomason/OLED_SSD1306
 
@@ -481,17 +480,8 @@ The saber has 8 palettes. The palette is a combination of:
 ## Future Direction
 
 In general direction, cleaning up the existing solution and adding support
-for more chipsets is desirable. Specificially some ideas that are interesting:
-
-- 4 channel LED support. Some LEDs are RGBW, which would be nice to support.
-  This is pretty straightforward, just need to adjust the code.
-- 1 channel LED support. A more efficient saber - by a lot - only has one
-  bright, single color, efficient LED.
-- Double blade support. Again, straightforward. Minor code adjustments.
-- Twirl detection. The saber can detect motion and impact, but it would be
-  great to also be able to detect the twirl / spin motion.
-- UI guestures. Some sabers detect particular motions for changing palettes,
-  going into UI modes, etc. Would be nice to support one-button sabers with
-  all the features.
+for more chipsets is desirable. As I add features to sabers I build, I'll
+add them here. There is now at least one other contributor, and that
+feedback is being incorporated as well.
 
 ![Image of Saber](img/BladeTeal.jpg)
