@@ -337,7 +337,6 @@ bool DotStarUI::Test()
 
 void calcCrystalColor(uint32_t t, int32_t lowVariation, int32_t highVariation, const RGB& base, RGB* out)
 {
-	//uint32_t tc[3] = { t / 53UL, t / 79UL, t / 101UL };
 	uint32_t tc[3] = { t / 79UL, t / 101UL, t / 137UL };
 
     for (int i = 0; i < 3; ++i) {
