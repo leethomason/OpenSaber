@@ -18,6 +18,7 @@ struct UIRenderData
     uint8_t volume  = 0;
     uint8_t palette = 0;
 	uint32_t mVolts = 0;
+	uint32_t meditationTimeRemain = 0;
     const char* fontName = 0;
 	RGB color;
 
@@ -59,6 +60,7 @@ public:
         BLADE_ON_MODE,
         PALETTE_MODE,
         VOLUME_MODE,
+		MEDITATION_MODE,
         NUM_MODES
     };
 
@@ -72,6 +74,7 @@ private:
 	void DrawBladeMode(Renderer* d, uint32_t time, int mode, const UIRenderData* data);
 	void DrawPaletteMode(Renderer* d, uint32_t time, int mode, const UIRenderData* data);
 	void DrawVolumeMode(Renderer* d, uint32_t time, int mode, const UIRenderData* data);
+	void DrawMeditationMode(Renderer* d, uint32_t time, int mode, const UIRenderData* data);
 
 	void DrawDials(Renderer* d, const UIRenderData* data);
 	void DrawStateDisplay(Renderer* d, const UIRenderData* data);

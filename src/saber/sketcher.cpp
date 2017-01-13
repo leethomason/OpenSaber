@@ -97,6 +97,9 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* i
 	case VOLUME_MODE:
 		DrawVolumeMode(d, delta, mode, info);
 		break;
+	case MEDITATION_MODE:
+		DrawMeditationMode(d, delta, mode, info);
+		break;
 	default:
 		OSASSERT(false);
 		break;
@@ -226,6 +229,13 @@ void Sketcher::DrawVolumeMode(Renderer* d, uint32_t time, int mode, const UIRend
 	d->DrawStr(data->fontName, CENTER - wName / 2, 14, getGlypth_calibri8);
 
 	d->DrawStr(label, CENTER - wVol / 2, 23, getGlypth_aurekBesh6);
+	DrawStateDisplay(d, data);
+}
+
+
+void Sketcher::DrawMeditationMode(Renderer* d, uint32_t time, int mode, const UIRenderData* data)
+{
+	DrawDials(d, data);
 	DrawStateDisplay(d, data);
 }
 
