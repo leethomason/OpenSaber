@@ -355,23 +355,16 @@ module rail(r)
 
 difference() {
     union() {
-        transitionRing();
-        rail(RAIL_ANGLE_0);
-        rail(RAIL_ANGLE_1);
-        rail(RAIL_ANGLE_2);
-        difference() {
-            rail(RAIL_ANGLE_3);
-            translate([0, 0, M_BUTTRESS_0]) SDNotch();
-        }
+        //transitionRing();
+        //rail(RAIL_ANGLE_0);
+        //rail(RAIL_ANGLE_1);
+        //rail(RAIL_ANGLE_2);
+        //rail(RAIL_ANGLE_3);
+
         translate([0, 0, M_BUTTRESS_2]) buttress(notch=false);
-        translate([0, 0, M_BUTTRESS_1]) buttress(notch=false);
-        translate([0, 0, M_BUTTRESS_0]) {
-            difference() {
-                buttress(leftWiring=false, notch=false);
-                //translate([11.5, -9.2, 0]) cube(size=[1 + 0.2, 18 + 0.5, 2.5]);   // 1.5 partial
-                SDNotch();
-            }
-        }
+        //translate([0, 0, M_BUTTRESS_1]) buttress(notch=false);
+        //translate([0, 0, M_BUTTRESS_0]) buttress(leftWiring=false, notch=false);
+
         speakerHolder();
     }
     // Flatten the bottom for printing.
