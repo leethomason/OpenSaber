@@ -20,34 +20,15 @@ module battery(h)
 
 module circuitry(h)
 {
-	W_MC 	= 18 + 1;
-	H_MC    = 9;
-	Y_MC    = -13;
+	W_MC 	= 18;
+	H_MC    = 10;
+	Y_MC    = -12;
 
-	W_JOINT = 4;
-	H_JOINT = 4;
-	X_JOINT = 7;
-	Y_JOINT = -5;
-
-	W_WING  = 5;
-	H_WING  = 8;
-	X_WING  = 9.5;
-	Y_WING  = -2;
+	W_WING  = 25;
+	H_WING  = 10.5;	// higher over power converter
 
 	translate([-W_MC/2, Y_MC, 0]) cube(size=[W_MC, H_MC, h]);
-
-	hull() {
-		translate([X_JOINT, Y_JOINT, 0]) cube(size=[W_JOINT, H_JOINT, h]);
-		mirror([1, 0, 0]) translate([X_JOINT, Y_JOINT, 0]) cube(size=[W_JOINT, H_JOINT, h]);
-	}
-	hull() {
-		translate([X_WING, Y_WING, 0]) cube(size=[W_WING, H_WING, h]);
-		mirror([1, 0, 0]) translate([X_WING, Y_WING, 0]) cube(size=[W_WING, H_WING, h]);
-		}
-//	translate([-W/2, -14 - OFFSET, 0]) {
-//		cube(size=[W, H + OFFSET, h]);
-//	}
-//	translate([])
+	translate([-W_WING/2, Y_MC + H_MC, 0]) cube(size=[W_WING, H_WING, h]);
 }
 
 module buttress(leftWiring=true, rightWiring=true)

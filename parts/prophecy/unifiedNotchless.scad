@@ -369,7 +369,12 @@ difference() {
     }
     // Flatten the bottom for printing.
     translate([-20, -D_AFT_RING/2, M_WAY_BACK]) cube(size=[40, 1.8, H_FAR]);
-}    
+}
+translate([0, 0, 70]) {
+    color("yellow") battery(12);
+    //circuitry(10);
+}
+
 *switch();
 *color("yellow") heatSink();
 *color("yellow") speaker();
