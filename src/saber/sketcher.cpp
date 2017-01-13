@@ -3,7 +3,6 @@
 #include "assets.h"
 
 #include <math.h>
-#include <string.h>
 
 static int16_t gSinTable[256] = { 0 };
 
@@ -18,10 +17,14 @@ int16_t isin(uint16_t x)
 	return gSinTable[x & 0xff];
 }
 
+
 Sketcher::Sketcher()
 {
-    memset(data, 0, DATA_WIDTH);
+	for (int i = 0; i < DATA_WIDTH; ++i) {
+		accelData[i] = 0;
+	}
 }
+
 
 textureData Sketcher::GetDial(int value)
 {
@@ -42,16 +45,16 @@ textureData Sketcher::GetDial(int value)
 
 void Sketcher::Push(uint8_t val)
 {
-    data[pos] = val;
+    accelData[pos] = val;
     pos++;
     if (pos == DATA_WIDTH) pos = 0;
 }
+
 
 void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* info)
 {
 	d->Fill(0);
 
-	//#define TEST5
 #ifdef TEST1
 	for (int i = 0; i < 11; ++i) {
 		d->DrawStr("U", -5 + 127 * i / 10, -5 + 34 * i / 10, getGlypth_aurekBesh6); // , 10, 100);
@@ -83,12 +86,64 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* i
 #endif
 
 #if 1
-	{
-		d->DrawBitmap(X0, 0, GetDial(info->power));
-		d->DrawBitmap(X1 - DIAL_WIDTH, 0, GetDial(info->volume), Renderer::FLIP_X);
-		d->DrawStr("P", X0 + 23, 12, getGlypth_aurekBesh6);
-		d->DrawStr("V", X1 - 31, 12, getGlypth_aurekBesh6);
+	switch (mode) {
+	case REST_MODE:
+	case BLADE_ON_MODE:
+		DrawBladeMode(d, delta, mode, info);
+		break;
+	case PALETTE_MODE:
+		DrawPaletteMode(d, delta, mode, info);
+		break;
+	case VOLUME_MODE:
+		DrawVolumeMode(d, delta, mode, info);
+		break;
+	default:
+		OSASSERT(false);
+		break;
 	}
+#endif
+
+#if 0
+	// Test pattern. dot-space-line
+	uint8_t* buf = d->Buffer();
+	for (int i = 0; i < 130; ++i) {
+		buf[i] = i;
+	}
+#endif
+}
+
+
+void Sketcher::DrawDials(Renderer* d, const UIRenderData* data)
+{
+	d->DrawBitmap(X0, 0, GetDial(data->power));
+	d->DrawBitmap(X1 - DIAL_WIDTH, 0, GetDial(data->volume), Renderer::FLIP_X);
+	d->DrawStr("P", X0 + 23, 12, getGlypth_aurekBesh6);
+	d->DrawStr("V", X1 - 31, 12, getGlypth_aurekBesh6);
+}
+
+
+void Sketcher::DrawStateDisplay(Renderer* d, const UIRenderData* data)
+{
+	static const int GUTTER = 1;
+
+	// Current Palette
+	for (int i = 0; i <= data->palette; ++i) {
+		int x = 3 - (i % 4);
+		int y = i / 4;
+		d->DrawRectangle(CENTER - GUTTER - 24 + x * 6, y * 6, 5, 5);
+	}
+
+	// Current blade color
+	for (int i = 0; i < 3; ++i) {
+		d->DrawRectangle(CENTER + GUTTER, i * 4, 1 + data->color[i] * (DATA_WIDTH / 2) / 256, 3);
+	}
+}
+
+
+void Sketcher::DrawBladeMode(Renderer* d, uint32_t time, int mode, const UIRenderData* data)
+{
+	DrawDials(d, data);
+
 	static const int NLINES = 5;
 	static const char* lines[NLINES] = {
 		"THERE IS NO EMOTION, THERE IS ONLY STILLNESS.",
@@ -98,7 +153,7 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* i
 		"THERE IS NO SELF, THERE IS ONLY THE FORCE.",
 	};
 
-	animTime += delta;
+	animTime += time;
 
 	if (mode == REST_MODE) {
 		// Render the Jedi Creed.
@@ -116,30 +171,7 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* i
 			animTime = 0;
 		}
 	}
-
-	if (mode == PALETTE_MODE || mode == VOLUME_MODE)
-	{
-		const char* label = mode == PALETTE_MODE ? "PAL" : "VOL";
-
-		int wPal = d->StrWidth(label, getGlypth_aurekBesh6);
-
-		if (mode == PALETTE_MODE) {
-			char volts[5] = { 0 };
-			volts[0] = '0' + info->mVolts / 1000;
-			volts[1] = '0' + (info->mVolts % 1000) / 100;
-			volts[2] = '0' + (info->mVolts % 100) / 10;
-			volts[3] = '0' + (info->mVolts % 10);
-			int wName = d->StrWidth(volts, getGlypth_calibri8);
-			d->DrawStr(volts, CENTER - wName / 2, 14, getGlypth_calibri8);
-		}
-		else {
-			int wName = d->StrWidth(info->fontName, getGlypth_calibri8);
-			d->DrawStr(info->fontName, CENTER - wName / 2, 14, getGlypth_calibri8);
-		}
-		d->DrawStr(label, CENTER - wPal / 2, 23, getGlypth_aurekBesh6);
-	}
-
-	if (mode == BLADE_ON_MODE) {
+	else if (mode == BLADE_ON_MODE) {
 		// Render accelerometer data.
 		static const int TOP = 15;
 		static const int H = 16;
@@ -149,7 +181,7 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* i
 			int index = (pos - 1 - i + DATA_WIDTH * 2) % DATA_WIDTH;
 			OSASSERT(index >= 0 && index < DATA_WIDTH);
 			OSASSERT((i != 0) || (index == ((pos - 1 + DATA_WIDTH) % DATA_WIDTH)));
-			int point = data[index];
+			int point = accelData[index];
 			// Values less than one (u8 64) aren't currently graphed.
 			if (point < 64) point = 64;  // 1g
 
@@ -158,31 +190,43 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* i
 			d->DrawRectangle(CENTER + DATA_WIDTH / 2 - i, TOP + H - h, 1, h + 1);
 		}
 	}
+	DrawStateDisplay(d, data);
+}
 
-	{
-		static const int GUTTER = 1;
 
-		// Current Palette
-		for (int i = 0; i <= info->palette; ++i) {
-			int x = 3 - (i % 4);
-			int y = i / 4;
-			d->DrawRectangle(CENTER - GUTTER - 24 + x * 6, y * 6, 5, 5);
-		}
+void Sketcher::DrawPaletteMode(Renderer* d, uint32_t time, int mode, const UIRenderData* data)
+{
+	DrawDials(d, data);
 
-		// Current blade color
-		for (int i = 0; i < 3; ++i) {
-			d->DrawRectangle(CENTER + GUTTER, i * 4, 1 + info->color[i] * (DATA_WIDTH / 2) / 256, 3);
-		}
-	}
+	static const char* label = "PAL";
+	const int wPal = d->StrWidth(label, getGlypth_aurekBesh6);
 
-#endif
-#if 0
-	// Test pattern. dot-space-line
-	uint8_t* buf = d->Buffer();
-	for (int i = 0; i < 130; ++i) {
-		buf[i] = i;
-	}
-#endif
+	char volts[5] = { 0 };
+	volts[0] = '0' + data->mVolts / 1000;
+	volts[1] = '0' + (data->mVolts % 1000) / 100;
+	volts[2] = '0' + (data->mVolts % 100) / 10;
+	volts[3] = '0' + (data->mVolts % 10);
+	int wName = d->StrWidth(volts, getGlypth_calibri8);
+	d->DrawStr(volts, CENTER - wName / 2, 14, getGlypth_calibri8);
+
+	d->DrawStr(label, CENTER - wPal / 2, 23, getGlypth_aurekBesh6);
+
+	DrawStateDisplay(d, data);
+}
+
+
+void Sketcher::DrawVolumeMode(Renderer* d, uint32_t time, int mode, const UIRenderData* data)
+{
+	DrawDials(d, data);
+
+	static const char* label = "VOL";
+	int wVol = d->StrWidth(label, getGlypth_aurekBesh6);
+
+	int wName = d->StrWidth(data->fontName, getGlypth_calibri8);
+	d->DrawStr(data->fontName, CENTER - wName / 2, 14, getGlypth_calibri8);
+
+	d->DrawStr(label, CENTER - wVol / 2, 23, getGlypth_aurekBesh6);
+	DrawStateDisplay(d, data);
 }
 
 

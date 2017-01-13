@@ -69,10 +69,17 @@ public:
 private:
     textureData GetDial(int value);
 
-    uint8_t line = 0;
-    uint8_t pos = 0;
+	void DrawBladeMode(Renderer* d, uint32_t time, int mode, const UIRenderData* data);
+	void DrawPaletteMode(Renderer* d, uint32_t time, int mode, const UIRenderData* data);
+	void DrawVolumeMode(Renderer* d, uint32_t time, int mode, const UIRenderData* data);
+
+	void DrawDials(Renderer* d, const UIRenderData* data);
+	void DrawStateDisplay(Renderer* d, const UIRenderData* data);
+
+    uint8_t  line = 0;
+    uint8_t  pos = 0;
     uint32_t animTime = 0;
-	uint8_t data[DATA_WIDTH];
+	uint8_t  accelData[DATA_WIDTH];
 };
 
 void calcCrystalColor(uint32_t msec, int32_t lowVariation, int32_t highVariation, const RGB& base, RGB* out);

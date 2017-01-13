@@ -1,5 +1,4 @@
 #include "renderer.h"
-#include <string.h>
 #include <stdint.h>
 
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
@@ -178,6 +177,11 @@ int Renderer::StrWidth(const char* str, glyphMetrics metrics)
 void Renderer::Fill(int c)
 {
 	if (buffer) {
-		memset(buffer, c ? 0xff : 0, nRows * width);
+		const int size = nRows * width;
+		const uint8_t val = c ? 0xff : 0;
+
+		for (int i = 0; i < size; ++i) {
+			buffer[i] = val;
+		}
 	}
 }
