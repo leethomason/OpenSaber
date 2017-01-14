@@ -572,9 +572,10 @@ void loop() {
         // loop...which makes sense. (Sortof). But leads to super-long
         // motion. So if time is above a threshold, allow replay.
         // Actual motion / impact sounds are usually less that 1 second.
+        #ifdef SABER_SOUND_ON
         bool sfxOverDue = ((msec - lastMotionTime) > 1500) &&
                           ((sfx.lastSFX() == SFX_MOTION) || (sfx.lastSFX() == SFX_IMPACT));
-
+        #endif
 
         if ((g2Normal >= impact * impact)) {
             bool sound = false;

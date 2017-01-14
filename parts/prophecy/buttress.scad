@@ -11,45 +11,52 @@ module battery(h)
 	translate([0, BATTERY_Y, 0]) {
 	    cylinder(h=h, d=D_BATTERY);
 
-	    CUTOUT = 12;
-	    translate([-CUTOUT/2, 0, 0]) {
-	        cube(size=[CUTOUT, 40, h]);
+	    translate([-BATTERY_CUTOUT/2, 0, 0]) {
+	        cube(size=[BATTERY_CUTOUT, 40, h]);
 	    }
 	}
 }
 
-module circuitry(h)
+module circuitry(h, deltaY)
 {
 	W_MC 	= 18;
 	H_MC    = 10;
 	Y_MC    = -12;
 
-	W_WING  = 25;
-	H_WING  = 10.5;	// higher over power converter
-
 	translate([-W_MC/2, Y_MC, 0]) cube(size=[W_MC, H_MC, h]);
-	translate([-W_WING/2, Y_MC + H_MC, 0]) cube(size=[W_WING, H_WING, h]);
+	translate([-W_WING/2, Y_MC + H_MC, 0]) cube(size=[W_WING, H_WING + deltaY, h]);
 }
 
-module buttress(leftWiring=true, rightWiring=true)
+module buttress(leftWiring=true, rightWiring=true, battery=true, mc=true, mcDeltaY=0, trough=false)
 {
 	difference() {
 		cylinder(h=H_BUTTRESS, d=D_AFT);	
 
 		// Battery
-		translate([0, 0, -EPS]) battery(H_BUTTRESS + EPS2);
+		if (battery) {
+			translate([0, 0, -EPS]) battery(H_BUTTRESS + EPS2);
+		}
 
 		// Board
-		translate([0, 0, -EPS]) circuitry(H_BUTTRESS + EPS2);
+		if (mc) {
+			translate([0, 0, -EPS]) circuitry(H_BUTTRESS + EPS2, mcDeltaY);
+		}
+
+		if (trough) {
+            translate([-BATTERY_CUTOUT/2, -20, -EPS]) {
+                cube(size=[BATTERY_CUTOUT, 40, H_BUTTRESS + EPS2]);
+            }
+		}
 
 	    // Wiring holes
+	    X_WIRING = 11.5;
+	    Y_WIRING = -5.5;
+
 	    if (leftWiring) {
-		    //translate([ 11.5, 0, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=5);
-		    translate([ 12.5, -5.5, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=3.5);
+		    translate([ X_WIRING, Y_WIRING, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=3.5);
 	    }
 	    if (rightWiring) {
-		    //translate([-11.5, 0, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=5);
-		    translate([-12.5, -5.5, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=3.5);
+		    translate([-X_WIRING, Y_WIRING, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=3.5);
 	    }
 	}
 }
