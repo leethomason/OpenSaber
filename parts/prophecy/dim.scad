@@ -5,9 +5,10 @@ M_SWITCH_CENTER		= M_TRANSITION + 45;
 M_DOTSTAR			= M_TRANSITION + 33;	// FIXME center mark of first dotstar
 M_PORT_CENTER       = M_TRANSITION + 14;
 
-M_BUTTRESS_3		= 55;
+M_BUTTRESS_4		= 71;
+M_BUTTRESS_3		= 60;
 M_BUTTRESS_2		= 46;
-M_BUTTRESS_1		= 30;
+M_BUTTRESS_1		= 32;
 M_BUTTRESS_0		= 15.5;
 M_SPKR_RING			= 15.5;		// Front of the speaker ring.
 M_RAIL_START		= 11;
@@ -40,7 +41,6 @@ Y_DOTSTAR           = 1.4;  // from spec
 DOTSTAR_SPACE		= 7;
 
 H_BUTTRESS			= 3;
-BATTERY_CUTOUT		= 12;
 
 H_BATTERY           = 68;
 D_BATTERY           = 18.50 + 0.5;    // An 1850. Huh. 
