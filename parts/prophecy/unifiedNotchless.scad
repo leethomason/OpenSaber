@@ -366,12 +366,12 @@ difference() {
             rail(RAIL_ANGLE_2);
             rail(RAIL_ANGLE_3);
         }
-        translate([0, 0, M_BUTTRESS_0]) buttress(trough=true);
+        translate([0, 0, M_BUTTRESS_0]) buttress(mc=false, trough = 8);
         translate([0, 0, M_BUTTRESS_1]) buttress(mcDeltaY=20
         );
-        translate([0, 0, M_BUTTRESS_2]) buttress();
-        translate([0, 0, M_BUTTRESS_3]) buttress(mc=false, trough=true);
-        translate([0, 0, M_BUTTRESS_4]) buttress(battery=false, trough=true, mc=false);
+        translate([0, 0, M_BUTTRESS_2]) buttress(mcDeltaY=20);
+        translate([0, 0, M_BUTTRESS_3]) buttress(mc=false, trough=8);
+        translate([0, 0, M_BUTTRESS_4]) buttress(battery=false, trough=12, mc=false);
 
         speakerHolder();
     }

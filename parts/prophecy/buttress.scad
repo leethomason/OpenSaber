@@ -35,7 +35,7 @@ module buttress(	leftWiring=true,
 					battery=true, 
 					mc=true, 
 					mcDeltaY=0, 
-					trough=false, 
+					trough=0, 
 					wing=true)
 {
 	difference() {
@@ -51,21 +51,31 @@ module buttress(	leftWiring=true,
 			translate([0, 0, -EPS]) circuitry(H_BUTTRESS + EPS2, mcDeltaY, wing);
 		}
 
-		if (trough) {
-            translate([-TROUGH/2, -20, -EPS]) {
-                cube(size=[TROUGH, 40, H_BUTTRESS + EPS2]);
+		if (trough != 0) {
+			T = trough < 0 ? TROUGH : trough;
+            translate([-T/2, -20, -EPS]) {
+                cube(size=[T, 40, H_BUTTRESS + EPS2]);
             }
 		}
 
 	    // Wiring holes
-	    X_WIRING = 11.5;
+	    X_WIRING =  11.5;
 	    Y_WIRING = -5.5;
+	    D 		 =  3;
+
+	    Y_WIRING_B = -8.0;
 
 	    if (leftWiring) {
-		    translate([ X_WIRING, Y_WIRING, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=3.5);
+	    	hull() {
+			    translate([ X_WIRING, Y_WIRING, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=D);
+			    translate([ X_WIRING, Y_WIRING_B, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=D);	    	
+	    	}
 	    }
 	    if (rightWiring) {
-		    translate([-X_WIRING, Y_WIRING, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=3.5);
+	    	hull() {
+			    translate([-X_WIRING, Y_WIRING, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=D);
+			    translate([-X_WIRING, Y_WIRING_B, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=D);
+	    	}
 	    }
 	}
 }
