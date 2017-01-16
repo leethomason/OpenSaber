@@ -360,11 +360,12 @@ difference() {
     union() {
         transitionRing();
         
-        rail(RAIL_ANGLE_0);
-        rail(RAIL_ANGLE_1);
-        rail(RAIL_ANGLE_2);
-        rail(RAIL_ANGLE_3);
-        
+        union() {
+            rail(RAIL_ANGLE_0);
+            rail(RAIL_ANGLE_1);
+            rail(RAIL_ANGLE_2);
+            rail(RAIL_ANGLE_3);
+        }
         translate([0, 0, M_BUTTRESS_0]) buttress(trough=true);
         translate([0, 0, M_BUTTRESS_1]) buttress(mcDeltaY=20
         );

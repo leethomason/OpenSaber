@@ -5,18 +5,19 @@ M_SWITCH_CENTER		= M_TRANSITION + 45;
 M_DOTSTAR			= M_TRANSITION + 33;	// FIXME center mark of first dotstar
 M_PORT_CENTER       = M_TRANSITION + 14;
 
-M_BUTTRESS_4		= 71;
-M_BUTTRESS_3		= 60;
-M_BUTTRESS_2		= 46;
-M_BUTTRESS_1		= 32;
-M_BUTTRESS_0		= 15.5;
-M_SPKR_RING			= 15.5;		// Front of the speaker ring.
-M_RAIL_START		= 11;
-M_POMMEL_FRONT		= 10;		// Where the pommel becomes aft
-M_0					= 0;
 M_POMMEL_BACK		= -12.5;	// Back of the pommel
-M_WAY_BACK			= -20;
+M_0					= 0;
+M_POMMEL_FRONT		= 10;		// Where the pommel becomes aft
+M_RAIL_START		= 12;
+M_SPKR_RING			= 15.5;		// Front of the speaker ring.
 
+M_BUTTRESS_0		= M_SPKR_RING;			// speaker holder, behind wings
+M_BUTTRESS_1		= M_SPKR_RING + 16;
+M_BUTTRESS_2		= M_SPKR_RING + 30;
+M_BUTTRESS_3		= M_SPKR_RING + 50;
+M_BUTTRESS_4		= M_SPKR_RING + 70;		// holds speaker in place
+
+M_WAY_BACK			= -20;
 H_FAR				= 200;
 
 MM_TO_INCHES = 1 / 25.4;
