@@ -360,7 +360,7 @@ difference() {
     union() {
         transitionRing();
         
-        union() {
+        *union() {
             rail(RAIL_ANGLE_0);
             rail(RAIL_ANGLE_1);
             rail(RAIL_ANGLE_2);
@@ -377,6 +377,11 @@ difference() {
     }
     // Flatten the bottom for printing.
     translate([-20, -D_AFT_RING/2, M_WAY_BACK]) cube(size=[40, 1.8, H_FAR]);
+    // Take out a chunk for access to the USB port.
+    X_USB = 11; // 10 to tight fit
+    Y_USB = 6;
+    Z_USB = 20;
+    translate([-X_USB/2, -R_AFT, M_0]) cube(size=[X_USB, Y_USB, Z_USB]);
 }
 translate([0, 0, 70]) {
     //color("yellow") battery(12);
