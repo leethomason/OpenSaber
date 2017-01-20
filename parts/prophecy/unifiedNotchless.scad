@@ -1,6 +1,3 @@
-// FIXME: pad speaker holder
-// FIXME: way to insert speaker
-
 use <../threads.scad>
 use <../shapes.scad>
 use <../vents.scad>
@@ -19,6 +16,8 @@ H_HEAT_SINK_THREAD = 10.0;
 D_HEAT_SINK_THREAD = 20.2;  // 20.4 is loose (PHA), 20.1 tight (PLA)
 R_DOTSTAR          = 90;
 SPKR_OFFSET         = 7;    // distance from back of pommel to speaker
+D_SPKR_INNER = D_SPKR_PLASTIC - 4;
+
 
 DOTSTAR_WALL       = Y_DOTSTAR + 0.5;
 
@@ -39,10 +38,11 @@ module heatSink()
     }
 }
 
-module SDNotch()
+/*module SDNotch()
 {
     translate([11.5, -8.5, 0]) cube(size=[1 + 0.2, 40, H_BUTTRESS + EPS]);
 }
+*/
 
 // LED / button positive (above axis)
 // thread negative (below axis)
@@ -119,8 +119,6 @@ module speaker(pad=0, dpad=0)
 
 module speakerHolder()
 {
-    D_SPKR_INNER = D_SPKR_PLASTIC - 4;
-
     // Locking ring.
     difference() {
         translate([0, 0, M_POMMEL_FRONT]) {
@@ -129,13 +127,14 @@ module speakerHolder()
                 cylinder(h=M_SPKR_RING - M_POMMEL_FRONT, d=D_SPKR_INNER);
             }
         }
-
+/*
         // Amplifier mounting holes.
         W = 11;
         D = 2 - 0.1;
         Y = 12.2;
         translate([ W/2, Y, M_POMMEL_FRONT]) cylinder(h=4, d=D);
         translate([-W/2, Y, M_POMMEL_FRONT]) cylinder(h=4, d=D);
+*/        
     }
 
     // Actual holder.
@@ -320,7 +319,9 @@ module transitionRing()
             }
         }
         // Remove battery so in can be inserted.
+        /*
         translate([0, 0, M_TRANSITION - T_TRANSITION_RING - EPS]) battery(T_TRANSITION_RING + EPS2);
+        */
     }
 }
 
@@ -333,15 +334,17 @@ module rail(r)
         {
             innerTube();
             rotate([0, 0, r]) {
-                translate([-W_RAIL/2, R_AFT - RAIL_OUTER_NOTCH, M_RAIL_START]) {
-                   cube(size=[W_RAIL, 20, H]);
+                translate([R_AFT - X_RAIL/2, 0, M_RAIL_START + H/2]) {
+                    rotate([0, 0, -r]) {
+                        cube(size=[20, Y_RAIL, H], center=true);
+                    }
                 }            
             }        
         }
-        translate([0, 0, M_WAY_BACK]) battery(H_FAR);
-        translate([0, 0, M_WAY_BACK]) circuitry(H_FAR);
-        // flip circuitry so support doesn't have to be generated between rails
-        rotate([0, 0, 180]) translate([0, 0, M_WAY_BACK]) circuitry(H_FAR);
+        W = W_WING + 1;
+   	    translate([-W/2, -40, M_WAY_BACK]) {
+	        cube(size=[W, 120, H_FAR]);
+	    }
     }
 }
 
@@ -355,22 +358,39 @@ module rail(r)
 
 difference() {
     union() {
-        //transitionRing();
-        //rail(RAIL_ANGLE_0);
-        //rail(RAIL_ANGLE_1);
-        //rail(RAIL_ANGLE_2);
-        //rail(RAIL_ANGLE_3);
-
-        translate([0, 0, M_BUTTRESS_2]) buttress(notch=false);
-        //translate([0, 0, M_BUTTRESS_1]) buttress(notch=false);
-        //translate([0, 0, M_BUTTRESS_0]) buttress(leftWiring=false, notch=false);
+        transitionRing();
+        
+        *union() {
+            rail(RAIL_ANGLE_0);
+            rail(RAIL_ANGLE_1);
+            rail(RAIL_ANGLE_2);
+            rail(RAIL_ANGLE_3);
+        }
+        translate([0, 0, M_BUTTRESS_0]) buttress(mc=false, trough = 8);
+        translate([0, 0, M_BUTTRESS_1]) buttress(mcDeltaY=20
+        );
+        translate([0, 0, M_BUTTRESS_2]) buttress(mcDeltaY=20);
+        translate([0, 0, M_BUTTRESS_3]) buttress(mc=false, trough=8);
+        translate([0, 0, M_BUTTRESS_4]) buttress(battery=false, trough=12, mc=false);
 
         speakerHolder();
     }
     // Flatten the bottom for printing.
     translate([-20, -D_AFT_RING/2, M_WAY_BACK]) cube(size=[40, 1.8, H_FAR]);
-}    
+    // Take out a chunk for access to the USB port.
+    X_USB = 11; // 10 to tight fit
+    Y_USB = 6;
+    Z_USB = 20;
+    translate([-X_USB/2, -R_AFT, M_0]) cube(size=[X_USB, Y_USB, Z_USB]);
+}
+translate([0, 0, 70]) {
+    //color("yellow") battery(12);
+    //circuitry(10);
+}
+
 *switch();
 *color("yellow") heatSink();
 *color("yellow") speaker();
 *color("yellow") speakerHolder();
+
+*buttress();

@@ -5,16 +5,19 @@ M_SWITCH_CENTER		= M_TRANSITION + 45;
 M_DOTSTAR			= M_TRANSITION + 33;	// FIXME center mark of first dotstar
 M_PORT_CENTER       = M_TRANSITION + 14;
 
-M_BUTTRESS_2		= 74;
-M_BUTTRESS_1		= 51;
-M_BUTTRESS_0		= 34.5;
-M_SPKR_RING			= 15.5;		// Front of the speaker ring.
-M_RAIL_START		= 11;
-M_POMMEL_FRONT		= 10;		// Where the pommel becomes aft
-M_0					= 0;
 M_POMMEL_BACK		= -12.5;	// Back of the pommel
-M_WAY_BACK			= -20;
+M_0					= 0;
+M_POMMEL_FRONT		= 10;		// Where the pommel becomes aft
+M_RAIL_START		= 12;
+M_SPKR_RING			= 15.5;		// Front of the speaker ring.
 
+M_BUTTRESS_0		= M_SPKR_RING;			// speaker holder, behind wings
+M_BUTTRESS_1		= M_SPKR_RING + 16;
+M_BUTTRESS_2		= M_SPKR_RING + 30;
+M_BUTTRESS_3		= M_SPKR_RING + 50;
+M_BUTTRESS_4		= M_SPKR_RING + 70;		// holds speaker in place
+
+M_WAY_BACK			= -20;
 H_FAR				= 200;
 
 MM_TO_INCHES = 1 / 25.4;
@@ -52,13 +55,14 @@ D_POMMEL			= 31.0; // 31.5 is correct, but snug
 R_POMMEL 			= D_POMMEL / 2;
 D_AFT_RING			= 33.5;
 
-RAIL_ANGLE_0		=  138;
-RAIL_ANGLE_1		= -138;
+RAIL_ANGLE_0		=  25; //38;
+RAIL_ANGLE_1		= -25; //-38;
 RAIL_ANGLE_2		=  180 - RAIL_ANGLE_0;
 RAIL_ANGLE_3		= -180 - RAIL_ANGLE_1;
 
-W_RAIL				= 4;
-RAIL_OUTER_NOTCH	= 2;
-RAIL_INNER_NOTCH	= 1;
-RAIL_PAD 			= 0.2;	// in z direction, pad is on rail, on axial, buttress
-RAIL_TRANSITION		= 5;
+X_RAIL				= 3;
+Y_RAIL				= 4;
+
+W_WING  			= 25;
+H_WING  			= 10.5;	// higher over power converter
+
