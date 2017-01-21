@@ -50,7 +50,7 @@ int main(int, char**) {
 
 	SDL_Event e;
 	int scale = 4;
-	int mode = 0;
+	int mode = Sketcher::MEDITATION_MODE;
 	int count = 0;
 	uint32_t lastUpdate = SDL_GetTicks();
 

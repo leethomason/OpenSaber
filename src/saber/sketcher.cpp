@@ -116,12 +116,14 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* i
 }
 
 
-void Sketcher::DrawDials(Renderer* d, const UIRenderData* data)
+void Sketcher::DrawDials(Renderer* d, const UIRenderData* data, bool labels)
 {
 	d->DrawBitmap(X0, 0, GetDial(data->power));
 	d->DrawBitmap(X1 - DIAL_WIDTH, 0, GetDial(data->volume), Renderer::FLIP_X);
-	d->DrawStr("P", X0 + 23, 12, getGlypth_aurekBesh6);
-	d->DrawStr("V", X1 - 31, 12, getGlypth_aurekBesh6);
+	if (labels) {
+		d->DrawStr("P", X0 + 23, 12, getGlypth_aurekBesh6);
+		d->DrawStr("V", X1 - 31, 12, getGlypth_aurekBesh6);
+	}
 }
 
 
@@ -235,8 +237,24 @@ void Sketcher::DrawVolumeMode(Renderer* d, uint32_t time, int mode, const UIRend
 
 void Sketcher::DrawMeditationMode(Renderer* d, uint32_t time, int mode, const UIRenderData* data)
 {
-	DrawDials(d, data);
-	DrawStateDisplay(d, data);
+	DrawDials(d, data, false);
+	d->DrawBitmap(WIDTH / 2 - 16, 0, get_jBird);
+
+	uint32_t seconds = data->meditationTimeRemain / 1000;
+	uint32_t minutes = seconds / 60;
+	uint32_t secondsRemain = seconds - minutes * 60;
+
+	char secStr[3] = "22";
+	char minStr[3] = "22";
+	if (minutes >= 10) {
+		minStr[0] = '0' + minutes / 10;
+	}
+	minStr[1] = '0' + minutes % 10;
+	secStr[0] = '0' + seconds / 10;
+	secStr[1] = '0' + seconds % 10;
+
+	d->DrawStr(minStr, WIDTH / 2 - 31, HEIGHT / 2 - 2, getGlypth_calibri8);
+	d->DrawStr(secStr, WIDTH / 2 + 20, HEIGHT / 2 - 2, getGlypth_calibri8);
 }
 
 

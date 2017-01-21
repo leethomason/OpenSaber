@@ -76,7 +76,7 @@ private:
 	void DrawVolumeMode(Renderer* d, uint32_t time, int mode, const UIRenderData* data);
 	void DrawMeditationMode(Renderer* d, uint32_t time, int mode, const UIRenderData* data);
 
-	void DrawDials(Renderer* d, const UIRenderData* data);
+	void DrawDials(Renderer* d, const UIRenderData* data, bool labels=true);
 	void DrawStateDisplay(Renderer* d, const UIRenderData* data);
 
     uint8_t  line = 0;
