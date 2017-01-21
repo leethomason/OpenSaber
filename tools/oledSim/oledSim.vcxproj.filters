@@ -22,6 +22,9 @@
     <ClCompile Include="..\..\src\saber\sketcher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\saber\Grinliz_Util.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="oledsim.h">
@@ -34,6 +37,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\saber\sketcher.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\saber\Grinliz_Util.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -47,6 +47,8 @@ int main(int, char**) {
 	data.fontName = "Bespin";
 
 	DotStarUI::Test();
+	TestCStr();
+	TestHex();
 
 	SDL_Event e;
 	int scale = 4;

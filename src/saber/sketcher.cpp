@@ -4,20 +4,6 @@
 
 #include <math.h>
 
-static int16_t gSinTable[256] = { 0 };
-
-int16_t isin(uint16_t x)
-{
-	if (gSinTable[64] == 0) {
-		for (int i = 0; i < 256; ++i) {
-			float x = 2 * 3.14159f * float(i) / 256.0f;
-			gSinTable[i] = int16_t(sin(x) * 256.0f);
-		}
-	}
-	return gSinTable[x & 0xff];
-}
-
-
 Sketcher::Sketcher()
 {
 	for (int i = 0; i < DATA_WIDTH; ++i) {
@@ -36,7 +22,7 @@ textureData Sketcher::GetDial(int value)
 	case 3: td = get_dial3; break;
 	case 4: td = get_dial4; break;
     default:
-		OSASSERT(false);
+		ASSERT(false);
 		//Log.p("value=").p(value).eol();
         break;
     }
@@ -101,7 +87,7 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* i
 		DrawMeditationMode(d, delta, mode, info);
 		break;
 	default:
-		OSASSERT(false);
+		ASSERT(false);
 		break;
 	}
 #endif
@@ -184,8 +170,8 @@ void Sketcher::DrawBladeMode(Renderer* d, uint32_t time, int mode, const UIRende
 		// Draw most to least recent.
 		for (int i = 0; i < DATA_WIDTH; ++i) {
 			int index = (pos - 1 - i + DATA_WIDTH * 2) % DATA_WIDTH;
-			OSASSERT(index >= 0 && index < DATA_WIDTH);
-			OSASSERT((i != 0) || (index == ((pos - 1 + DATA_WIDTH) % DATA_WIDTH)));
+			ASSERT(index >= 0 && index < DATA_WIDTH);
+			ASSERT((i != 0) || (index == ((pos - 1 + DATA_WIDTH) % DATA_WIDTH)));
 			int point = accelData[index];
 			// Values less than one (u8 64) aren't currently graphed.
 			if (point < 64) point = 64;  // 1g
@@ -325,41 +311,41 @@ bool DotStarUI::Test()
 	data.fontName = "FontName";
 	data.color.set(0xff, 0, 0);
 
-	OSASSERT(data.color.get() == 0xff0000);
+	ASSERT(data.color.get() == 0xff0000);
 	{
 		DotStarUI dotstar;
 		
 		dotstar.Draw(&leds[1], Sketcher::REST_MODE, data);
-		OSASSERT(leds[0].get() == 0);			// check memory
-		OSASSERT(leds[1].get() == 0x0000ff);	// sound on
-		OSASSERT(leds[2].get() == 0x0000ff);	// sound on
-		OSASSERT(leds[3].get() == 0);			// off
-		OSASSERT(leds[4].get() == 0xff0000);	// blade color
-		OSASSERT(leds[5].get() == 0);			// memory check
+		ASSERT(leds[0].get() == 0);			// check memory
+		ASSERT(leds[1].get() == 0x0000ff);	// sound on
+		ASSERT(leds[2].get() == 0x0000ff);	// sound on
+		ASSERT(leds[3].get() == 0);			// off
+		ASSERT(leds[4].get() == 0xff0000);	// blade color
+		ASSERT(leds[5].get() == 0);			// memory check
 
 		dotstar.Draw(&leds[1], Sketcher::BLADE_ON_MODE, data);
-		OSASSERT(leds[0].get() == 0);			// check memory
-		OSASSERT(leds[1] == data.color);	
-		OSASSERT(leds[2] == data.color);
-		OSASSERT(leds[3].get() == 0);			
-		OSASSERT(leds[4].get() == 0);			
-		OSASSERT(leds[5].get() == 0);			// memory check
+		ASSERT(leds[0].get() == 0);			// check memory
+		ASSERT(leds[1] == data.color);	
+		ASSERT(leds[2] == data.color);
+		ASSERT(leds[3].get() == 0);			
+		ASSERT(leds[4].get() == 0);			
+		ASSERT(leds[5].get() == 0);			// memory check
 
 		dotstar.Draw(&leds[1], Sketcher::PALETTE_MODE, data);
-		OSASSERT(leds[0].get() == 0);			// check memory
-		OSASSERT(leds[1].get() == 0xffffff);
-		OSASSERT(leds[2].get() == 0xffffff);
-		OSASSERT(leds[3].get() == 0xffffff);
-		OSASSERT(leds[4] == data.color);
-		OSASSERT(leds[5].get() == 0);			// memory check
+		ASSERT(leds[0].get() == 0);			// check memory
+		ASSERT(leds[1].get() == 0xffffff);
+		ASSERT(leds[2].get() == 0xffffff);
+		ASSERT(leds[3].get() == 0xffffff);
+		ASSERT(leds[4] == data.color);
+		ASSERT(leds[5].get() == 0);			// memory check
 
 		dotstar.Draw(&leds[1], Sketcher::VOLUME_MODE, data);
-		OSASSERT(leds[0].get() == 0);			// check memory
-		OSASSERT(leds[1].get() == 0x0000ff);
-		OSASSERT(leds[2].get() == 0xFFD800);
-		OSASSERT(leds[3].get() == 0xFFD800);
-		OSASSERT(leds[4].get() == 0xFFD800);
-		OSASSERT(leds[5].get() == 0);			// memory check
+		ASSERT(leds[0].get() == 0);			// check memory
+		ASSERT(leds[1].get() == 0x0000ff);
+		ASSERT(leds[2].get() == 0xFFD800);
+		ASSERT(leds[3].get() == 0xFFD800);
+		ASSERT(leds[4].get() == 0xFFD800);
+		ASSERT(leds[5].get() == 0);			// memory check
 	}
 	{
 		DotStarUI dotstar;
@@ -368,36 +354,36 @@ bool DotStarUI::Test()
 		c2.scale(128);
 
 		dotstar.Draw(&leds[1], Sketcher::REST_MODE, data);
-		OSASSERT(leds[0].get() == 0);			// check memory
-		OSASSERT(leds[1].get() == 0x00007f);	// sound on
-		OSASSERT(leds[2].get() == 0x00007f);	// sound on
-		OSASSERT(leds[3].get() == 0);			// off
-		OSASSERT(leds[4].get() == 0x7f0000);	// blade color
-		OSASSERT(leds[5].get() == 0);			// memory check
+		ASSERT(leds[0].get() == 0);			// check memory
+		ASSERT(leds[1].get() == 0x00007f);	// sound on
+		ASSERT(leds[2].get() == 0x00007f);	// sound on
+		ASSERT(leds[3].get() == 0);			// off
+		ASSERT(leds[4].get() == 0x7f0000);	// blade color
+		ASSERT(leds[5].get() == 0);			// memory check
 
 		dotstar.Draw(&leds[1], Sketcher::BLADE_ON_MODE, data);
-		OSASSERT(leds[0].get() == 0);			// check memory
-		OSASSERT(leds[1] == c2);
-		OSASSERT(leds[2] == c2);
-		OSASSERT(leds[3].get() == 0);
-		OSASSERT(leds[4].get() == 0);
-		OSASSERT(leds[5].get() == 0);			// memory check
+		ASSERT(leds[0].get() == 0);			// check memory
+		ASSERT(leds[1] == c2);
+		ASSERT(leds[2] == c2);
+		ASSERT(leds[3].get() == 0);
+		ASSERT(leds[4].get() == 0);
+		ASSERT(leds[5].get() == 0);			// memory check
 
 		dotstar.Draw(&leds[1], Sketcher::PALETTE_MODE, data);
-		OSASSERT(leds[0].get() == 0);			// check memory
-		OSASSERT(leds[1].get() == 0x7f7f7f);
-		OSASSERT(leds[2].get() == 0x7f7f7f);
-		OSASSERT(leds[3].get() == 0x7f7f7f);
-		OSASSERT(leds[4] == c2);
-		OSASSERT(leds[5].get() == 0);			// memory check
+		ASSERT(leds[0].get() == 0);			// check memory
+		ASSERT(leds[1].get() == 0x7f7f7f);
+		ASSERT(leds[2].get() == 0x7f7f7f);
+		ASSERT(leds[3].get() == 0x7f7f7f);
+		ASSERT(leds[4] == c2);
+		ASSERT(leds[5].get() == 0);			// memory check
 
 		dotstar.Draw(&leds[1], Sketcher::VOLUME_MODE, data);
-		OSASSERT(leds[0].get() == 0);			// check memory
-		OSASSERT(leds[1].get() == 0x00007f);
-		OSASSERT(leds[2].get() == 0x7F6c00);
-		OSASSERT(leds[3].get() == 0x7F6c00);
-		OSASSERT(leds[4].get() == 0x7F6c00);
-		OSASSERT(leds[5].get() == 0);			// memory check
+		ASSERT(leds[0].get() == 0);			// check memory
+		ASSERT(leds[1].get() == 0x00007f);
+		ASSERT(leds[2].get() == 0x7F6c00);
+		ASSERT(leds[3].get() == 0x7F6c00);
+		ASSERT(leds[4].get() == 0x7F6c00);
+		ASSERT(leds[5].get() == 0);			// memory check
 	}
 	return true;
 }
@@ -429,8 +415,8 @@ bool TestCrystalColor()
 		for (uint32_t t = 0; t < 2000; ++t) {
 			calcCrystalColor(t, 20, 20, base, &out);
 			for (int i = 0; i < 3; ++i) {
-				OSASSERT(out[i] >= base[i] - 20);
-				OSASSERT(out[i] <= base[i] + 20);
+				ASSERT(out[i] >= base[i] - 20);
+				ASSERT(out[i] <= base[i] + 20);
 			}
 		}
 	}
@@ -441,8 +427,8 @@ bool TestCrystalColor()
 		for (uint32_t t = 0; t < 10*1000; t += 10) {
 			calcCrystalColor(t, 100, 100, base, &out);
 			for (int i = 0; i < 3; ++i) {
-				OSASSERT(out[i] >= base[i] - 100);
-				OSASSERT(out[i] <= 255);
+				ASSERT(out[i] >= base[i] - 100);
+				ASSERT(out[i] <= 255);
 			}
 		}
 	}
