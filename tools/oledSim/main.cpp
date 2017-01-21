@@ -59,6 +59,7 @@ int main(int, char**) {
 	};
 	uint8_t COLORS[8] = { 0, 255, 100, 200, 255, 0, 20, 120 };
 	data.color.set(COLORS[0], COLORS[1], COLORS[2]);
+	data.meditationTimeRemain = 73000;
 
 	int palette = 0;
 

@@ -244,16 +244,16 @@ void Sketcher::DrawMeditationMode(Renderer* d, uint32_t time, int mode, const UI
 	uint32_t minutes = seconds / 60;
 	uint32_t secondsRemain = seconds - minutes * 60;
 
-	char secStr[3] = "22";
-	char minStr[3] = "22";
+	char secStr[3] = "00";
+	char minStr[3] = "  ";
 	if (minutes >= 10) {
 		minStr[0] = '0' + minutes / 10;
 	}
 	minStr[1] = '0' + minutes % 10;
-	secStr[0] = '0' + seconds / 10;
-	secStr[1] = '0' + seconds % 10;
+	secStr[0] = '0' + secondsRemain / 10;
+	secStr[1] = '0' + secondsRemain % 10;
 
-	d->DrawStr(minStr, WIDTH / 2 - 31, HEIGHT / 2 - 2, getGlypth_calibri8);
+	d->DrawStr(minStr, WIDTH / 2 - 30, HEIGHT / 2 - 2, getGlypth_calibri8);
 	d->DrawStr(secStr, WIDTH / 2 + 20, HEIGHT / 2 - 2, getGlypth_calibri8);
 }
 
