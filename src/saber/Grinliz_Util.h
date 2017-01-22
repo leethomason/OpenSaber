@@ -135,6 +135,27 @@ public:
 		}
 	}
 
+	void setFromNum(uint32_t value, bool writeZero) {
+		clear();
+
+		uint32_t range = 1;
+		for (int i = 1; i < ALLOCATE - 1; ++i)
+			range *= 10;
+		for (int i = 0; i < ALLOCATE - 1; ++i) {
+			uint32_t digit = value / range;
+			if (digit >= 0 && digit < 10) {
+				buf[i] = ' ';
+				if (digit || (i == ALLOCATE - 2) || writeZero) {
+					buf[i] = '0' + digit;
+					writeZero = true;
+				}
+				value -= range * digit;
+				range = range / 10;
+			}
+		}
+		len = ALLOCATE - 1;
+	}
+
 private:
 	int len;
 	char buf[ALLOCATE];

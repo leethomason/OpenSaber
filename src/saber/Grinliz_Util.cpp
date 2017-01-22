@@ -81,7 +81,27 @@ bool TestCStr()
         s.append("our");
         TEST_IS_TRUE(s == "Four");
     }
-    return true;
+	{
+		static const uint32_t values[] = {
+			0, 1, 12, 123,
+			0, 1, 12, 123
+		};
+		static const bool zeroFill[] = {
+			false, false, false, false,
+			true, true, true, true
+		};
+		static const char* answer[] = {
+			" 0", " 1", "12", "",
+			"00", "01", "12", ""
+		};
+
+		for (int i = 0; i < 8; ++i) {
+			CStr<3> s = "999";
+			s.setFromNum(values[i], zeroFill[i]);
+			TEST_IS_EQ(s, answer[i]);
+		}
+	}
+	return true;
 }
 
 

@@ -192,13 +192,11 @@ void Sketcher::DrawPaletteMode(Renderer* d, uint32_t time, int mode, const UIRen
 	static const char* label = "PAL";
 	const int wPal = d->StrWidth(label, getGlypth_aurekBesh6);
 
-	char volts[5] = { 0 };
-	volts[0] = '0' + data->mVolts / 1000;
-	volts[1] = '0' + (data->mVolts % 1000) / 100;
-	volts[2] = '0' + (data->mVolts % 100) / 10;
-	volts[3] = '0' + (data->mVolts % 10);
-	int wName = d->StrWidth(volts, getGlypth_calibri8);
-	d->DrawStr(volts, CENTER - wName / 2, 14, getGlypth_calibri8);
+	CStr<5> volts;
+	volts.setFromNum(data->mVolts, true);
+
+	int wName = d->StrWidth(volts.c_str(), getGlypth_calibri8);
+	d->DrawStr(volts.c_str(), CENTER - wName / 2, 14, getGlypth_calibri8);
 
 	d->DrawStr(label, CENTER - wPal / 2, 23, getGlypth_aurekBesh6);
 
@@ -230,17 +228,14 @@ void Sketcher::DrawMeditationMode(Renderer* d, uint32_t time, int mode, const UI
 	uint32_t minutes = seconds / 60;
 	uint32_t secondsRemain = seconds - minutes * 60;
 
-	char secStr[3] = "00";
-	char minStr[3] = "  ";
-	if (minutes >= 10) {
-		minStr[0] = '0' + minutes / 10;
-	}
-	minStr[1] = '0' + minutes % 10;
-	secStr[0] = '0' + secondsRemain / 10;
-	secStr[1] = '0' + secondsRemain % 10;
+	CStr<3> secStr;
+	CStr<3> minStr;
 
-	d->DrawStr(minStr, WIDTH / 2 - 30, HEIGHT / 2 - 2, getGlypth_calibri8);
-	d->DrawStr(secStr, WIDTH / 2 + 20, HEIGHT / 2 - 2, getGlypth_calibri8);
+	secStr.setFromNum(secondsRemain, true);
+	minStr.setFromNum(minutes, false);
+
+	d->DrawStr(minStr.c_str(), WIDTH / 2 - 30, HEIGHT / 2 - 2, getGlypth_calibri8);
+	d->DrawStr(secStr.c_str(), WIDTH / 2 + 20, HEIGHT / 2 - 2, getGlypth_calibri8);
 }
 
 
