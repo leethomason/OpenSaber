@@ -37,11 +37,11 @@ private:
 class Sketcher
 {
 public:
-    enum {
-        WIDTH = 128,
-        HEIGHT = 32,
+	enum {
+		WIDTH = 128,
+		HEIGHT = 32,
 
-		TWEAK_X0	= 2,
+		TWEAK_X0    = 0, //2,
 		TWEAK_X1    = 0,
 		X0			= 0 + TWEAK_X0,
 		X1			= WIDTH - TWEAK_X1,
