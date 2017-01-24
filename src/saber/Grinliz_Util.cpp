@@ -168,24 +168,24 @@ void writeHex(const uint8_t* c, CStr<7>* str)
 
 bool TestHex()
 {
-    CStr<7> inLong("a1b2c3");
-    CStr<4> inShort("abc");
-    CStr<7> out;
+	CStr<7> inLong("a1b2c3");
+	CStr<4> inShort("abc");
+	CStr<7> out;
 
-    uint8_t rgb[3];
+	uint8_t rgb[3];
 
-    parseHex(inLong, rgb);
-    TEST_IS_TRUE(rgb[0] == 0xa1);    
-    TEST_IS_TRUE(rgb[1] == 0xb2);    
-    TEST_IS_TRUE(rgb[2] == 0xc3);
+	parseHex(inLong, rgb);
+	TEST_IS_TRUE(rgb[0] == 0xa1);
+	TEST_IS_TRUE(rgb[1] == 0xb2);
+	TEST_IS_TRUE(rgb[2] == 0xc3);
 
-    parseHex(inShort, rgb);
-    TEST_IS_TRUE(rgb[0] == 0xaa);    
-    TEST_IS_TRUE(rgb[1] == 0xbb);    
-    TEST_IS_TRUE(rgb[2] == 0xcc);    
+	parseHex(inShort, rgb);
+	TEST_IS_TRUE(rgb[0] == 0xaa);
+	TEST_IS_TRUE(rgb[1] == 0xbb);
+	TEST_IS_TRUE(rgb[2] == 0xcc);
 
-    writeHex(rgb, &out);
-    TEST_IS_TRUE(out == "aabbcc");
-    
-    return true;
+	writeHex(rgb, &out);
+	TEST_IS_TRUE(out == "aabbcc");
+
+	return true;
 }

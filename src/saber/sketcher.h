@@ -5,6 +5,7 @@
 #include "renderer.h"
 #include "DotStar.h"
 #include "Grinliz_Util.h"
+#include "saberUtil.h"
 
 struct UIRenderData
 {
@@ -22,7 +23,7 @@ struct UIRenderData
 class DotStarUI
 {
 public:
-    void Draw(RGB* uiLedStart, int mode, const UIRenderData& data);
+    void Draw(RGB* uiLedStart, UIMode mode, bool bladeIgnited, const UIRenderData& data);
 
 	void SetBrightness(uint16_t v) { m_brightness = v; }
 	uint16_t Brightness() const { return m_brightness; }
@@ -49,26 +50,19 @@ public:
         DIAL_WIDTH = 28,
 		DATA_WIDTH	= WIDTH - DIAL_WIDTH * 2 - 20,
 		BAR_WIDTH   = 38 - TWEAK_X0 - TWEAK_X1,
-
-        REST_MODE = 0,
-        BLADE_ON_MODE,
-        PALETTE_MODE,
-        VOLUME_MODE,
-		MEDITATION_MODE,
-        NUM_MODES
     };
 
     Sketcher();
-    void Draw(Renderer* d, uint32_t time, int mode, const UIRenderData* data);
+    void Draw(Renderer* d, uint32_t time, UIMode mode, bool bladeIgnited, const UIRenderData* data);
     void Push(uint8_t value);
 
 private:
     textureData GetDial(int value);
 
-	void DrawBladeMode(Renderer* d, uint32_t time, int mode, const UIRenderData* data);
-	void DrawPaletteMode(Renderer* d, uint32_t time, int mode, const UIRenderData* data);
-	void DrawVolumeMode(Renderer* d, uint32_t time, int mode, const UIRenderData* data);
-	void DrawMeditationMode(Renderer* d, uint32_t time, int mode, const UIRenderData* data);
+	void DrawBladeMode(Renderer* d, uint32_t time, bool ignited, const UIRenderData* data);
+	void DrawPaletteMode(Renderer* d, uint32_t time, const UIRenderData* data);
+	void DrawVolumeMode(Renderer* d, uint32_t time, const UIRenderData* data);
+	void DrawMeditationMode(Renderer* d, uint32_t time, const UIRenderData* data);
 
 	void DrawDials(Renderer* d, const UIRenderData* data, bool labels=true);
 	void DrawStateDisplay(Renderer* d, const UIRenderData* data);

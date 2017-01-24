@@ -37,7 +37,7 @@ void Sketcher::Push(uint8_t val)
 }
 
 
-void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* info)
+void Sketcher::Draw(Renderer* d, uint32_t delta, UIMode mode, bool ignited, const UIRenderData* info)
 {
 	d->Fill(0);
 
@@ -73,18 +73,17 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* i
 
 #if 1
 	switch (mode) {
-	case REST_MODE:
-	case BLADE_ON_MODE:
-		DrawBladeMode(d, delta, mode, info);
+	case UIMode::NORMAL:
+		DrawBladeMode(d, delta, ignited, info);
 		break;
-	case PALETTE_MODE:
-		DrawPaletteMode(d, delta, mode, info);
+	case UIMode::PALETTE:
+		DrawPaletteMode(d, delta, info);
 		break;
-	case VOLUME_MODE:
-		DrawVolumeMode(d, delta, mode, info);
+	case UIMode::VOLUME:
+		DrawVolumeMode(d, delta, info);
 		break;
-	case MEDITATION_MODE:
-		DrawMeditationMode(d, delta, mode, info);
+	case UIMode::MEDITATION:
+		DrawMeditationMode(d, delta, info);
 		break;
 	default:
 		ASSERT(false);
@@ -131,7 +130,7 @@ void Sketcher::DrawStateDisplay(Renderer* d, const UIRenderData* data)
 }
 
 
-void Sketcher::DrawBladeMode(Renderer* d, uint32_t time, int mode, const UIRenderData* data)
+void Sketcher::DrawBladeMode(Renderer* d, uint32_t time, bool ignited, const UIRenderData* data)
 {
 	DrawDials(d, data);
 
@@ -146,7 +145,7 @@ void Sketcher::DrawBladeMode(Renderer* d, uint32_t time, int mode, const UIRende
 
 	animTime += time;
 
-	if (mode == REST_MODE) {
+	if (!ignited) {
 		// Render the Jedi Creed.
 		int dx = animTime / 100;
 		bool render = d->DrawStr(lines[line],
@@ -162,7 +161,7 @@ void Sketcher::DrawBladeMode(Renderer* d, uint32_t time, int mode, const UIRende
 			animTime = 0;
 		}
 	}
-	else if (mode == BLADE_ON_MODE) {
+	else {
 		// Render accelerometer data.
 		static const int TOP = 15;
 		static const int H = 16;
@@ -185,7 +184,7 @@ void Sketcher::DrawBladeMode(Renderer* d, uint32_t time, int mode, const UIRende
 }
 
 
-void Sketcher::DrawPaletteMode(Renderer* d, uint32_t time, int mode, const UIRenderData* data)
+void Sketcher::DrawPaletteMode(Renderer* d, uint32_t time, const UIRenderData* data)
 {
 	DrawDials(d, data);
 
@@ -197,14 +196,13 @@ void Sketcher::DrawPaletteMode(Renderer* d, uint32_t time, int mode, const UIRen
 
 	int wName = d->StrWidth(volts.c_str(), getGlypth_calibri8);
 	d->DrawStr(volts.c_str(), CENTER - wName / 2, 14, getGlypth_calibri8);
-
 	d->DrawStr(label, CENTER - wPal / 2, 23, getGlypth_aurekBesh6);
 
 	DrawStateDisplay(d, data);
 }
 
 
-void Sketcher::DrawVolumeMode(Renderer* d, uint32_t time, int mode, const UIRenderData* data)
+void Sketcher::DrawVolumeMode(Renderer* d, uint32_t time, const UIRenderData* data)
 {
 	DrawDials(d, data);
 
@@ -219,7 +217,7 @@ void Sketcher::DrawVolumeMode(Renderer* d, uint32_t time, int mode, const UIRend
 }
 
 
-void Sketcher::DrawMeditationMode(Renderer* d, uint32_t time, int mode, const UIRenderData* data)
+void Sketcher::DrawMeditationMode(Renderer* d, uint32_t time, const UIRenderData* data)
 {
 	DrawDials(d, data, false);
 	d->DrawBitmap(WIDTH / 2 - 16, 0, get_jBird);
@@ -239,58 +237,56 @@ void Sketcher::DrawMeditationMode(Renderer* d, uint32_t time, int mode, const UI
 }
 
 
-void DotStarUI::Draw(RGB* led, int mode, const UIRenderData& data)
+void DotStarUI::Draw(RGB* led, UIMode mode, bool ignited, const UIRenderData& data)
 {
-    static const uint32_t COLOR_AUDIO_ON  = 0x0000FF;
-    static const uint32_t COLOR_AUDIO_OFF = 0xFFD800;
-    static const uint32_t PALETTE_ONE     = 0xFFFFFF;
+	static const uint32_t COLOR_AUDIO_ON = 0x0000FF;
+	static const uint32_t COLOR_AUDIO_OFF = 0xFFD800;
+	static const uint32_t PALETTE_ONE = 0xFFFFFF;
 
-    switch(mode) {
-        case Sketcher::REST_MODE:
-        {
-            led[0].set(data.volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
-            led[1].set(data.volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
-            led[2].set(0);
+	switch (mode) {
+	case UIMode::NORMAL:
+		if (!ignited)
+		{
+			led[0].set(data.volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
+			led[1].set(data.volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
+			led[2].set(0);
 			led[3] = data.color;
-        }
-        break;
+		}
+		else {
+			int i = 0;
+			for (; i < data.power && i < 4; ++i) {
+				led[i] = data.color;
+			}
+			for (; i < 4; ++i) {
+				led[i].set(0);
+			}
+		}
+		break;
 
-        case Sketcher::BLADE_ON_MODE:
-        {
-            int i=0;
-            for(; i<data.power && i < 4; ++i) {
-                led[i] = data.color;
-            }
-            for(; i<4; ++i) {
-                led[i].set(0);
-            }
-        }
-        break;
+	case UIMode::PALETTE:
+	{
+		led[0].set((data.palette & 1) ? PALETTE_ONE : 0);
+		led[1].set((data.palette & 2) ? PALETTE_ONE : 0);
+		led[2].set((data.palette & 4) ? PALETTE_ONE : 0);
+		led[3] = data.color;
+	}
+	break;
 
-        case Sketcher::PALETTE_MODE:
-        {
-            led[0].set((data.palette & 1) ? PALETTE_ONE : 0);
-            led[1].set((data.palette & 2) ? PALETTE_ONE : 0);
-            led[2].set((data.palette & 4) ? PALETTE_ONE : 0);
-			led[3] = data.color;
-        }
-        break;
-
-        case Sketcher::VOLUME_MODE:
-        {
-            int i=0;
-            for(; i<data.volume && i < 4; ++i) {
-                led[i].set(COLOR_AUDIO_ON);
-            }
-            for(; i<4; ++i) {
-                led[i].set(COLOR_AUDIO_OFF);
-            }
-        }
-        break;
-    }
-    for(int i=0; i<4; ++i) {
-    	led[i].scale(m_brightness);
-    }
+	case UIMode::VOLUME:
+	{
+		int i = 0;
+		for (; i < data.volume && i < 4; ++i) {
+			led[i].set(COLOR_AUDIO_ON);
+		}
+		for (; i < 4; ++i) {
+			led[i].set(COLOR_AUDIO_OFF);
+		}
+	}
+	break;
+	}
+	for (int i = 0; i < 4; ++i) {
+		led[i].scale(m_brightness);
+	}
 }
 
 
@@ -310,7 +306,7 @@ bool DotStarUI::Test()
 	{
 		DotStarUI dotstar;
 		
-		dotstar.Draw(&leds[1], Sketcher::REST_MODE, data);
+		dotstar.Draw(&leds[1], UIMode::NORMAL, false, data);
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1].get() == 0x0000ff);	// sound on
 		ASSERT(leds[2].get() == 0x0000ff);	// sound on
@@ -318,7 +314,7 @@ bool DotStarUI::Test()
 		ASSERT(leds[4].get() == 0xff0000);	// blade color
 		ASSERT(leds[5].get() == 0);			// memory check
 
-		dotstar.Draw(&leds[1], Sketcher::BLADE_ON_MODE, data);
+		dotstar.Draw(&leds[1], UIMode::NORMAL, true, data);
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1] == data.color);	
 		ASSERT(leds[2] == data.color);
@@ -326,7 +322,7 @@ bool DotStarUI::Test()
 		ASSERT(leds[4].get() == 0);			
 		ASSERT(leds[5].get() == 0);			// memory check
 
-		dotstar.Draw(&leds[1], Sketcher::PALETTE_MODE, data);
+		dotstar.Draw(&leds[1], UIMode::PALETTE, false, data);
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1].get() == 0xffffff);
 		ASSERT(leds[2].get() == 0xffffff);
@@ -334,7 +330,7 @@ bool DotStarUI::Test()
 		ASSERT(leds[4] == data.color);
 		ASSERT(leds[5].get() == 0);			// memory check
 
-		dotstar.Draw(&leds[1], Sketcher::VOLUME_MODE, data);
+		dotstar.Draw(&leds[1], UIMode::VOLUME, false, data);
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1].get() == 0x0000ff);
 		ASSERT(leds[2].get() == 0xFFD800);
@@ -348,7 +344,7 @@ bool DotStarUI::Test()
 		RGB c2 = data.color;
 		c2.scale(128);
 
-		dotstar.Draw(&leds[1], Sketcher::REST_MODE, data);
+		dotstar.Draw(&leds[1], UIMode::NORMAL, false, data);
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1].get() == 0x00007f);	// sound on
 		ASSERT(leds[2].get() == 0x00007f);	// sound on
@@ -356,7 +352,7 @@ bool DotStarUI::Test()
 		ASSERT(leds[4].get() == 0x7f0000);	// blade color
 		ASSERT(leds[5].get() == 0);			// memory check
 
-		dotstar.Draw(&leds[1], Sketcher::BLADE_ON_MODE, data);
+		dotstar.Draw(&leds[1], UIMode::NORMAL, true, data);
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1] == c2);
 		ASSERT(leds[2] == c2);
@@ -364,7 +360,7 @@ bool DotStarUI::Test()
 		ASSERT(leds[4].get() == 0);
 		ASSERT(leds[5].get() == 0);			// memory check
 
-		dotstar.Draw(&leds[1], Sketcher::PALETTE_MODE, data);
+		dotstar.Draw(&leds[1], UIMode::PALETTE, false, data);
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1].get() == 0x7f7f7f);
 		ASSERT(leds[2].get() == 0x7f7f7f);
@@ -372,7 +368,7 @@ bool DotStarUI::Test()
 		ASSERT(leds[4] == c2);
 		ASSERT(leds[5].get() == 0);			// memory check
 
-		dotstar.Draw(&leds[1], Sketcher::VOLUME_MODE, data);
+		dotstar.Draw(&leds[1], UIMode::VOLUME, false, data);
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1].get() == 0x00007f);
 		ASSERT(leds[2].get() == 0x7F6c00);

@@ -55,7 +55,7 @@ inline bool strEqual(const char* a, const char* b) {
 bool strStarts(const char* str, const char* prefix);
 
 /**
-*	The CStr class is a "c string": a simple array of
+* The CStr class is a "c string": a simple array of
 * char and an int size bound in a class. It allocates
 * no memory, and is very efficient.
 */
@@ -66,6 +66,7 @@ public:
 	CStr() {
 		clear();
 	}
+
 	CStr(const char* src) {
 		clear();
 		append(src);
@@ -85,12 +86,15 @@ public:
 	int size() const {
 		return len;
 	}
+
 	bool empty() const {
 		return buf[0] == 0;
 	}
+	
 	int capacity() const {
 		return ALLOCATE - 1;
 	}
+	
 	void clear() {
 		buf[0] = 0;
 		len = 0;
@@ -99,15 +103,19 @@ public:
 	bool operator==(const char* str) const {
 		return strEqual(buf, str);
 	}
+	
 	bool operator!=(const char* str) const {
 		return !strEqual(buf, str);
 	}
+	
 	char operator[](int i) const {
 		return buf[i];
 	}
+	
 	template < class T > bool operator==(const T& str) const {
 		return strEqual(buf, str.buf);
 	}
+	
 	bool operator<(const CStr<ALLOCATE>& str) const {
 		return strcmp(buf, str.buf) < 0;
 	}
@@ -154,6 +162,7 @@ public:
 			}
 		}
 		len = ALLOCATE - 1;
+		buf[len] = 0;
 	}
 
 private:
@@ -186,15 +195,14 @@ bool TestHex();
 
 // --- Range / Min / Max --- //
 template<class T>
-bool inRange(T a, T b, T c) {
+bool inRange(const T& a, const T& b, const T& c) {
 	return a >= b && a <= c;
 }
 
 // --- Algorithm --- //
 
 template <class T> inline void	Swap(T* a, T* b) {
-	T temp;
-	temp = *a;
+	T temp = *a;
 	*a = *b;
 	*b = temp;
 };
@@ -250,7 +258,7 @@ private:
 
 /**
 Sin wave.
-Input: 0-255 (range will be clipped correctly.
+Input: 0-255 (range will be clipped correctly.)
 Output:: -256 - 256
 */
 int16_t isin(uint16_t x);

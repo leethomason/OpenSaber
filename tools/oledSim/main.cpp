@@ -15,6 +15,12 @@ Sketcher sketcher;
 static const int WIDTH = 128;
 static const int HEIGHT = 32;
 
+void UIModeUtil::nextMode()
+{
+	m_mode = (UIMode)((int(m_mode) + 1) % int(UIMode::NUM));
+}
+
+
 int main(int, char**) {
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
 		printf("SDL_Init Error: %s\n", SDL_GetError());
@@ -52,7 +58,9 @@ int main(int, char**) {
 
 	SDL_Event e;
 	int scale = 4;
-	int mode = Sketcher::MEDITATION_MODE;
+	UIModeUtil mode;
+	mode.set(UIMode::MEDITATION);
+	bool bladeOn = false;
 	int count = 0;
 	uint32_t lastUpdate = SDL_GetTicks();
 
@@ -75,7 +83,13 @@ int main(int, char**) {
 				scale = e.key.keysym.sym - SDLK_0;
 			}
 			else if (e.key.keysym.sym == SDLK_SPACE) {
-				mode = (mode + 1) % Sketcher::NUM_MODES;
+				if (mode.mode() == UIMode::NORMAL && !bladeOn) {
+					bladeOn = true;
+				}
+				else {
+					bladeOn = false;
+					mode.nextMode();
+				}
 			}
 			else if (e.key.keysym.sym == SDLK_p) {
 				data.power = (data.power + 1) % 5;
@@ -100,7 +114,7 @@ int main(int, char**) {
 			uint8_t value = int(127.8 * (sin(count * 0.2) + 1.0));
 			++count;
 			sketcher.Push(value);
-			sketcher.Draw(&display, 100, mode, &data);
+			sketcher.Draw(&display, 100, mode.mode(), bladeOn, &data);
 		}
 
 		oled.Commit();
