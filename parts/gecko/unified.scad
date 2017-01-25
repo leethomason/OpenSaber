@@ -36,24 +36,25 @@ module rail(r)
 
 difference() {
     union() {
-        *union() {
-            rail(RAIL_ANGLE_0);
-            rail(RAIL_ANGLE_1);
-            rail(RAIL_ANGLE_2);
-            rail(RAIL_ANGLE_3);
-        }
+        translate([0, 0, -H_BUTTRESS]) buttress(mc=false, battery=false, trough=8);
         translate([0, 0, M_BUTTRESS_0]) buttress(mc=false, trough = 8);
-        translate([0, 0, M_BUTTRESS_1]) buttress(mcDeltaY=20
-        );
-        translate([0, 0, M_BUTTRESS_2]) buttress(mcDeltaY=20);
+
+        //translate([0, 0, M_BUTTRESS_1]) buttress();
+        //translate([0, 0, M_BUTTRESS_2]) buttress();
         translate([0, 0, M_BUTTRESS_3]) buttress(mc=false, trough=8);
         translate([0, 0, M_BUTTRESS_4]) buttress(battery=false, trough=12, mc=false);
+
+        wingRail(M_BUTTRESS_4);
     }
     // Flatten the bottom for printing.
     translate([-20, -D_INNER/2, M_WAY_BACK]) cube(size=[40, 1.8, H_FAR]);
+
     // Take out a chunk for access to the USB port.
     X_USB = 11; // 10 to tight fit
     Y_USB = 6;
     Z_USB = 20;
-    translate([-X_USB/2, -R_INNER, M_0]) cube(size=[X_USB, Y_USB, Z_USB]);
+    translate([-X_USB/2, -R_INNER, -H_BUTTRESS]) cube(size=[X_USB, Y_USB, Z_USB]);
 }
+
+//color("yellow") battery(40);
+//color("yellow") wingRail(40);

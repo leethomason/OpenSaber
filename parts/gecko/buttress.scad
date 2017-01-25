@@ -18,15 +18,27 @@ module battery(h)
 	}
 }
 
+W_MC 	= 18;
+H_MC    = 10;
+Y_MC    = -14;
+
 module circuitry(h, deltaY, wing)
 {
-	W_MC 	= 18;
-	H_MC    = 10;
-	Y_MC    = -12;
-
 	translate([-W_MC/2, Y_MC, 0]) cube(size=[W_MC, H_MC, h]);
 	if (wing) {
 		translate([-W_WING/2, Y_MC + H_MC, 0]) cube(size=[W_WING, H_WING + deltaY, h]);
+	}
+}
+
+module wingRail(h)
+{
+	T = 4;
+	intersection() {
+		cylinder(h=h, d=D_INNER);
+		union() {
+			translate([W_MC/2, Y_MC + H_MC - T, 0]) cube(size=[T, T, h]);	
+			mirror([1, 0, 0]) translate([W_MC/2, Y_MC + H_MC - T, 0]) cube(size=[T, T, h]);	
+		}
 	}
 }
 

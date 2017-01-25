@@ -1,7 +1,7 @@
 M_0					= 0;
 M_RAIL_START		= 12;
 
-M_BUTTRESS_0		= M_0;			// speaker holder, behind wings
+M_BUTTRESS_0		= M_0;
 M_BUTTRESS_1		= M_0 + 16;
 M_BUTTRESS_2		= M_0 + 30;
 M_BUTTRESS_3		= M_0 + 50;
