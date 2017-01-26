@@ -321,6 +321,14 @@ difference() {
 
             translate([0, 0, M_BUTTRESS_0]) shelfRail(M_BUTTRESS_4 + EPS - M_BUTTRESS_0);
             translate([0, 0, M_BUTTRESS_0]) shelfRail(M_BUTTRESS_4 + EPS - M_BUTTRESS_0, false, t=5);
+
+            intersection() {
+                innerTube();        
+                translate([0, -7, 0]) {
+                    translate([0, 0, M_BUTTRESS_0]) shelfRail(M_BUTTRESS_4 + EPS - M_BUTTRESS_0);
+                    translate([0, 0, M_BUTTRESS_0]) shelfRail(M_BUTTRESS_4 + EPS - M_BUTTRESS_0, false, t=5);
+                }
+            }
         }
         intersection() {
             innerTube();

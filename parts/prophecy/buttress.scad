@@ -21,11 +21,11 @@ module battery(h)
 
 W_MC 	= 18;
 H_MC    = 10;
-Y_MC    = -12;
+Y_MC    = -13.5;
 
 module circuitry(h, deltaY, wideWing)
 {
-	OFFSET  = 0;
+	OFFSET  = 10;
 
 	translate([-W_MC/2, Y_MC-OFFSET, 0]) cube(size=[W_MC, H_MC+OFFSET, h]);
 	if(wideWing >= 0) {
