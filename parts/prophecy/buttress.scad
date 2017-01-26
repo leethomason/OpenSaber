@@ -18,64 +18,91 @@ module battery(h)
 	}
 }
 
-module circuitry(h, deltaY, wing)
-{
-	W_MC 	= 18;
-	H_MC    = 10;
-	Y_MC    = -12;
 
-	translate([-W_MC/2, Y_MC, 0]) cube(size=[W_MC, H_MC, h]);
-	if (wing) {
-		translate([-W_WING/2, Y_MC + H_MC, 0]) cube(size=[W_WING, H_WING + deltaY, h]);
+W_MC 	= 18;
+H_MC    = 10;
+Y_MC    = -12;
+
+module circuitry(h, deltaY, wideWing)
+{
+	OFFSET  = 0;
+
+	translate([-W_MC/2, Y_MC-OFFSET, 0]) cube(size=[W_MC, H_MC+OFFSET, h]);
+	if(wideWing >= 0) {
+		translate([-(W_WING + wideWing)/2, Y_MC + H_MC, 0]) cube(size=[W_WING + wideWing, H_WING + deltaY, h]);
 	}
 }
 
-module buttress(	leftWiring=true, 
+module shelfRail(h, right=true, t=3)
+{
+	T = 3;
+	intersection() {
+		cylinder(h=h, d=D_AFT);
+		if (right)
+			mirror([1, 0, 0]) translate([W_MC/2, Y_MC + H_MC - T, 0]) cube(size=[t, T, h]);
+		else
+			translate([W_MC/2, Y_MC + H_MC - T, 0]) cube(size=[t, T, h]);
+	}
+}
+
+module buttress(	h=H_BUTTRESS,
+					leftWiring=true, 
 					rightWiring=true, 
 					battery=true, 
 					mc=true, 
 					mcDeltaY=0, 
 					trough=0, 
-					wing=true)
+					wideWing=0,
+					highHoles=false)
 {
 	difference() {
-		cylinder(h=H_BUTTRESS, d=D_AFT);	
+		cylinder(h=h, d=D_AFT);	
 
 		// Battery
 		if (battery) {
-			translate([0, 0, -EPS]) battery(H_BUTTRESS + EPS2);
+			translate([0, 0, -EPS]) battery(h + EPS2);
 		}
 
 		// Board
 		if (mc) {
-			translate([0, 0, -EPS]) circuitry(H_BUTTRESS + EPS2, mcDeltaY, wing);
+			translate([0, 0, -EPS]) circuitry(h + EPS2, mcDeltaY, wideWing);
 		}
 
 		if (trough != 0) {
 			T = trough < 0 ? TROUGH : trough;
-            translate([-T/2, -20, -EPS]) {
-                cube(size=[T, 40, H_BUTTRESS + EPS2]);
+            translate([-T/2, -12, -EPS]) {
+                cube(size=[T, 40, h + EPS2]);
             }
 		}
 
 	    // Wiring holes
 	    X_WIRING =  11.5;
-	    Y_WIRING = -5.5;
-	    D 		 =  3;
+	    Y_WIRING = -6.5;
+	    D 		 =  2;
 
 	    Y_WIRING_B = -8.0;
 
 	    if (leftWiring) {
 	    	hull() {
-			    translate([ X_WIRING, Y_WIRING, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=D);
-			    translate([ X_WIRING, Y_WIRING_B, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=D);	    	
+			    translate([ X_WIRING, Y_WIRING, -EPS]) cylinder(h=h + EPS2, d=D);
+			    translate([ X_WIRING, Y_WIRING_B, -EPS]) cylinder(h=h + EPS2, d=D);	    	
 	    	}
 	    }
 	    if (rightWiring) {
 	    	hull() {
-			    translate([-X_WIRING, Y_WIRING, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=D);
-			    translate([-X_WIRING, Y_WIRING_B, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=D);
+			    translate([-X_WIRING, Y_WIRING, -EPS]) cylinder(h=h + EPS2, d=D);
+			    translate([-X_WIRING, Y_WIRING_B, -EPS]) cylinder(h=h + EPS2, d=D);
 	    	}
+	    }
+	    if (highHoles) {
+		    hull() {
+			    translate([13, 3, -EPS]) cylinder(h=h + EPS2, d=3);
+			    translate([13, 0, -EPS]) cylinder(h=h + EPS2, d=3);
+		    }
+		    hull() {
+			    translate([-13, 3, -EPS]) cylinder(h=h + EPS2, d=3);
+			    translate([-13, 0, -EPS]) cylinder(h=h + EPS2, d=3);
+		    }
 	    }
 	}
 }

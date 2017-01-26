@@ -111,6 +111,9 @@ void Blade::setVoltage(int milliVolts) {
         f1000[i] = 1000;
       }
     }
+  #elif (LED_TOPOLOGY == LED_TOPOLOGY_DRIVER)
+    vbat = int32_t(milliVolts);  // used for reporting on the command line, but f1000 isn't change,
+                                // so therefore the blade power doesn't change.
   #endif
   setRGB(color);
 }

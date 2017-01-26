@@ -13,9 +13,9 @@ M_SPKR_RING			= 15.5;		// Front of the speaker ring.
 
 M_BUTTRESS_0		= M_SPKR_RING;			// speaker holder, behind wings
 M_BUTTRESS_1		= M_SPKR_RING + 16;
-M_BUTTRESS_2		= M_SPKR_RING + 30;
-M_BUTTRESS_3		= M_SPKR_RING + 50;
-M_BUTTRESS_4		= M_SPKR_RING + 70;		// holds speaker in place
+M_BUTTRESS_2		= M_SPKR_RING + 32;
+M_BUTTRESS_3		= M_SPKR_RING + 52;
+M_BUTTRESS_4		= M_SPKR_RING + 70;		// holds speaker in place, space for foam
 
 M_WAY_BACK			= -20;
 H_FAR				= 200;
@@ -56,7 +56,7 @@ R_POMMEL 			= D_POMMEL / 2;
 D_AFT_RING			= 33.5;
 
 RAIL_ANGLE_0		=  25; //38;
-RAIL_ANGLE_1		= -25; //-38;
+RAIL_ANGLE_1		= -18; //-38;
 RAIL_ANGLE_2		=  180 - RAIL_ANGLE_0;
 RAIL_ANGLE_3		= -180 - RAIL_ANGLE_1;
 
