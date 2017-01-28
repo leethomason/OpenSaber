@@ -345,10 +345,10 @@ difference() {
             }
         }
         translate([0, 0, M_BUTTRESS_0]) buttress(mc=false, trough = 8, leftWiring=false, rightWiring=false);
-        translate([0, 0, M_BUTTRESS_1]) buttress(h=H3, mcDeltaY=20);
-        translate([0, 0, M_BUTTRESS_2]) buttress(h=H3, mcDeltaY=20);
-        translate([0, 0, M_BUTTRESS_3]) buttress(h=H3, mc=false, highHoles=false);
-        translate([0, 0, M_BUTTRESS_4]) buttress(battery=false, trough=10, mc=false, highHoles=true);
+        translate([0, 0, M_BUTTRESS_1]) buttress(h=H3, mcDeltaY=20, leftWiring=false, rightWiring=false);
+        translate([0, 0, M_BUTTRESS_2]) buttress(h=H3, mcDeltaY=20, leftWiring=false, rightWiring=false);
+        translate([0, 0, M_BUTTRESS_3]) buttress(h=H3, mc=false, highHoles=false, leftWiring=false, rightWiring=false);
+        translate([0, 0, M_BUTTRESS_4]) buttress(battery=false, trough=10, mc=false, highHoles=true, leftWiring=false, rightWiring=false);
 
         speakerHolder();
     }
