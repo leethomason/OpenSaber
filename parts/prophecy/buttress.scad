@@ -1,4 +1,5 @@
 include <dim.scad>
+use <beam.scad>
 
 EPS = 0.01;
 EPS2 = EPS * 2;
@@ -42,6 +43,29 @@ module shelfRail(h, right=true, t=3)
 			mirror([1, 0, 0]) translate([W_MC/2, Y_MC + H_MC - T, 0]) cube(size=[t, T, h]);
 		else
 			translate([W_MC/2, Y_MC + H_MC - T, 0]) cube(size=[t, T, h]);
+	}
+}
+
+module oneShelfBeam(h, fill, lenHex)
+{
+	W = 4;
+	H = 8;
+	translate([W_MC/2, Y_MC + H_MC - H, 0]) {
+		if (fill)
+			cube(size=[W, H, h]);
+		else
+			beam(W, H, h, lenHex);
+	}
+	translate([W_MC/2, Y_MC + H_MC - H - 10, 0]) cube(size=[W, 10, h]);
+}
+
+module shelfBeam(h, right=true, fill=false, lenHex=true) {
+	intersection() {
+		cylinder(h=h, d=D_AFT);
+		if (right) 
+			mirror([1, 0, 0]) oneShelfBeam(h, fill, lenHex);
+		else
+			oneShelfBeam(h, fill, lenHex);
 	}
 }
 

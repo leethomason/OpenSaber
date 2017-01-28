@@ -6,6 +6,7 @@ use <../shapes.scad>
 use <../vents.scad>
 include <dim.scad>
 use <buttress.scad>
+use <beam.scad>
 
 M_DOTSTAR_EDGE = M_DOTSTAR - X_DOTSTAR / 2;
 

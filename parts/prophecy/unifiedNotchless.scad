@@ -306,6 +306,8 @@ module rail(r, m=0, h=0)
     forwardRail();
 }
 
+M_B0_FRONT = M_BUTTRESS_0 + H_BUTTRESS;
+
 difference() {
     FLATTEN = 1.8;
     H3 = H_BUTTRESS * 1.5;
@@ -319,6 +321,11 @@ difference() {
             rail(RAIL_ANGLE_2, m=M_BUTTRESS_4, h=M_TRANSITION - M_BUTTRESS_4);
             rail(RAIL_ANGLE_3, m=M_BUTTRESS_4, h=M_TRANSITION - M_BUTTRESS_4);
 
+            translate([0, 0, M_B0_FRONT]) shelfBeam(M_BUTTRESS_4 + EPS - M_B0_FRONT,
+            true, false, false);
+            translate([0, 0, M_B0_FRONT]) shelfBeam(M_BUTTRESS_4 + EPS - M_B0_FRONT, false, false, false);
+
+            /*
             translate([0, 0, M_BUTTRESS_0]) shelfRail(M_BUTTRESS_4 + EPS - M_BUTTRESS_0);
             translate([0, 0, M_BUTTRESS_0]) shelfRail(M_BUTTRESS_4 + EPS - M_BUTTRESS_0, false, t=5);
 
@@ -329,6 +336,7 @@ difference() {
                     translate([0, 0, M_BUTTRESS_0]) shelfRail(M_BUTTRESS_4 + EPS - M_BUTTRESS_0, false, t=5);
                 }
             }
+            */
         }
         intersection() {
             innerTube();
@@ -359,11 +367,17 @@ difference() {
     translate([-SD_X/2, -12, M_BUTTRESS_3]) cube(size=[SD_X, SD_Y, M_BUTTRESS_4 - M_BUTTRESS_3 + H_BUTTRESS]);
 
     // Take out right side for wiring.
-    translate([-20, 0, M_BUTTRESS_0 + H_BUTTRESS]) cube(size=[20, 20, M_BUTTRESS_3 - ( M_BUTTRESS_0 + H_BUTTRESS)]);
+    //translate([-20, 0, M_BUTTRESS_0 + H_BUTTRESS]) cube(size=[20, 20, M_BUTTRESS_3 - ( M_BUTTRESS_0 + H_BUTTRESS)]);
+    translate([-20, -1, M_BUTTRESS_0 + H_BUTTRESS]) cube(size=[40, 20, M_BUTTRESS_3 - ( M_BUTTRESS_0 + H_BUTTRESS)]);
+    
     translate([-20, -1, M_BUTTRESS_3 - EPS]) cube(size=[7.5, 20, H3 + EPS2]);
-
     // Take out left side for wiring.
     translate([12.5, -1, M_BUTTRESS_3 - EPS]) cube(size=[20, 14, H3 + EPS2]);
+
+    /*
+    translate([0, 0, M_B0_FRONT]) shelfBeam(M_BUTTRESS_4 + EPS - M_B0_FRONT, true, true);
+    translate([0, 0, M_B0_FRONT]) shelfBeam(M_BUTTRESS_4 + EPS - M_B0_FRONT, false, true);
+    */
 }
 
 translate([0, 0, 70]) {
