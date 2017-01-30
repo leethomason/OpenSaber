@@ -245,37 +245,9 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_EMITTER_GREEN 22
 	#define PIN_EMITTER_RED   23
 
-#elif(SABER_MODEL != SABER_MODEL_TANO)
-	// vB design
-	/* Teensy 3.2 with Prop Shield */
-	// Digital
-	#define PIN_RX1           0
-	#define PIN_TX1           1
-	#define PIN_ACCEL_IRQ	  2	// fixed
-	#define PIN_EMITTER_RED	  3	//PIN_SWITCH_B      3
-	#define PIN_EMITTER_GREEN 4 //PIN_LED_B         4
-	#define PIN_AMP_EN        5 // fixed
-	#define PIN_MEMORY_CS	  6	// fixed
-	#define PIN_DOTSTAR_EN    7 // fixed
-	// 8
-	#define PIN_EMITTER_BLUE   9
-	#define PIN_OLED_RESET    10
-	#define PIN_SABER_MOSI    11
-	#define PIN_SABER_MISO    12
-
-	// Analog
-	#define PIN_SABER_CLOCK   13
-	#define PIN_SDCARD_CS     14
-	//#define PIN_SDCARD_CS     15
-	#define PIN_LED_A         16
-	#define PIN_SWITCH_A      17
-	#define PIN_SDA           18 // fixed
-	#define PIN_SCL           19 // fixed
-	#define PIN_VMETER        20
-	#define PIN_EMITTER_BLUE  21
-	#define PIN_EMITTER_GREEN 22
-	#define PIN_EMITTER_RED   23
-#else
+#elif(    SABER_MODEL == SABER_MODEL_BLACK	
+	   || SABER_MODEL == SABER_MODEL_SHOCK
+	   || SABER_MODEL == SABER_MODEL_SILVER_SHOCK )
 	/* Teensy 3.2 with Prop Shield */
 	// Digital
 	#define PIN_RX1           0
@@ -304,6 +276,36 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_EMITTER_BLUE  21
 	#define PIN_EMITTER_GREEN 22
 	#define PIN_EMITTER_RED   23
+#elif (SABER_MODEL == SABER_MODEL_TANO)
+	/* Teensy 3.2 with Prop Shield */
+	/* Wrap around battery design. */
+	#define PIN_RX1           0
+	#define PIN_TX1           1
+	#define PIN_ACCEL_IRQ	  2	// fixed
+	#define PIN_EMITTER_RED	  3
+	#define PIN_EMITTER_GREEN 4
+	#define PIN_AMP_EN        5 // fixed
+	#define PIN_MEMORY_CS	  6	// fixed
+	#define PIN_DOTSTAR_EN    7 // fixed
+	// 8
+	#define PIN_EMITTER_BLUE   9
+	// 10
+	#define PIN_SABER_MOSI    11
+	#define PIN_SABER_MISO    12
+
+	#define PIN_SABER_CLOCK   13
+	#define PIN_SDCARD_CS     14
+	// 15
+	#define PIN_LED_A         16
+	#define PIN_SWITCH_A      17
+	#define PIN_SDA           18 // fixed
+	#define PIN_SCL           19 // fixed
+	#define PIN_VMETER        20
+	// 21
+	// 22
+	// 23
+#else
+	#error Pins not defined.
 #endif
 
 enum {
