@@ -244,6 +244,15 @@ module forwardRail()
             cube(size=[8, 2.5, 100]);
         }
     }
+    // Add a ridge for positioning.
+    intersection() {
+        translate([0, 0, M_TRANSITION]) {
+            cylinder(d=D_FORWARD, h=M_LED_HOLDER_BACK - M_TRANSITION);
+        }
+        translate([-4, -R_FORWARD, M_TRANSITION - T_TRANSITION_RING]) rotate([10, 0, 0]) {
+            cube(size=[8, 5, 100]);
+        }
+    }
 }
 
 module transitionRing()
@@ -310,7 +319,6 @@ M_B0_FRONT = M_BUTTRESS_0 + H_BUTTRESS;
 
 difference() {
     FLATTEN = 1.8;
-    H3 = H_BUTTRESS * 1.5;
     
     union() {
         transitionRing();
@@ -324,19 +332,6 @@ difference() {
             translate([0, 0, M_B0_FRONT]) shelfBeam(M_BUTTRESS_4 + EPS - M_B0_FRONT,
             true, false, false);
             translate([0, 0, M_B0_FRONT]) shelfBeam(M_BUTTRESS_4 + EPS - M_B0_FRONT, false, false, false);
-
-            /*
-            translate([0, 0, M_BUTTRESS_0]) shelfRail(M_BUTTRESS_4 + EPS - M_BUTTRESS_0);
-            translate([0, 0, M_BUTTRESS_0]) shelfRail(M_BUTTRESS_4 + EPS - M_BUTTRESS_0, false, t=5);
-
-            intersection() {
-                innerTube();        
-                translate([0, -7, 0]) {
-                    translate([0, 0, M_BUTTRESS_0]) shelfRail(M_BUTTRESS_4 + EPS - M_BUTTRESS_0);
-                    translate([0, 0, M_BUTTRESS_0]) shelfRail(M_BUTTRESS_4 + EPS - M_BUTTRESS_0, false, t=5);
-                }
-            }
-            */
         }
         intersection() {
             innerTube();
@@ -345,9 +340,9 @@ difference() {
             }
         }
         translate([0, 0, M_BUTTRESS_0]) buttress(mc=false, trough = 8, leftWiring=false, rightWiring=false);
-        translate([0, 0, M_BUTTRESS_1]) buttress(h=H3, mcDeltaY=20, leftWiring=false, rightWiring=false);
-        translate([0, 0, M_BUTTRESS_2]) buttress(h=H3, mcDeltaY=20, leftWiring=false, rightWiring=false);
-        translate([0, 0, M_BUTTRESS_3]) buttress(h=H3, mc=false, highHoles=false, leftWiring=false, rightWiring=false);
+        translate([0, 0, M_BUTTRESS_1]) buttress(mcDeltaY=20, leftWiring=false, rightWiring=false);
+        translate([0, 0, M_BUTTRESS_2]) buttress(mcDeltaY=20, leftWiring=false, rightWiring=false);
+        translate([0, 0, M_BUTTRESS_3]) buttress(mc=false, highHoles=false, leftWiring=false, rightWiring=false);
         translate([0, 0, M_BUTTRESS_4]) buttress(battery=false, trough=10, mc=false, highHoles=true, leftWiring=false, rightWiring=false);
 
         speakerHolder();
@@ -370,14 +365,10 @@ difference() {
     //translate([-20, 0, M_BUTTRESS_0 + H_BUTTRESS]) cube(size=[20, 20, M_BUTTRESS_3 - ( M_BUTTRESS_0 + H_BUTTRESS)]);
     translate([-20, -1, M_BUTTRESS_0 + H_BUTTRESS]) cube(size=[40, 20, M_BUTTRESS_3 - ( M_BUTTRESS_0 + H_BUTTRESS)]);
     
-    translate([-20, -1, M_BUTTRESS_3 - EPS]) cube(size=[7.5, 20, H3 + EPS2]);
+    translate([-20, -10, M_BUTTRESS_3 - EPS]) cube(size=[ 7, 24, H_BUTTRESS + EPS2]);
     // Take out left side for wiring.
-    translate([12.5, -1, M_BUTTRESS_3 - EPS]) cube(size=[20, 14, H3 + EPS2]);
+    translate([ 13, -10, M_BUTTRESS_3 - EPS]) cube(size=[20, 24, H_BUTTRESS + EPS2]);
 
-    /*
-    translate([0, 0, M_B0_FRONT]) shelfBeam(M_BUTTRESS_4 + EPS - M_B0_FRONT, true, true);
-    translate([0, 0, M_B0_FRONT]) shelfBeam(M_BUTTRESS_4 + EPS - M_B0_FRONT, false, true);
-    */
 }
 
 translate([0, 0, 70]) {

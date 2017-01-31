@@ -41,7 +41,7 @@ X_DOTSTAR           = 5.0;  // from spec
 Y_DOTSTAR           = 1.4;  // from spec
 DOTSTAR_SPACE		= 7;
 
-H_BUTTRESS			= 3;
+H_BUTTRESS			= 4;
 
 H_BATTERY           = 68;
 D_BATTERY           = 18.50 + 0.5;    // An 1850. Huh. 
