@@ -95,10 +95,10 @@ void Blade::setVoltage(int milliVolts) {
   // If a driver is in use, just use straight PWM, and 
   // leave f1000 = 1000. If a resistor is in use,
   // account for the voltage being above design voltage.
-  static const int32_t f = 256;   // 256 is "use new value"
-  static const int32_t m = 256 - f;
 
   #if (LED_TOPOLOGY == LED_TOPOLOGY_RESISTOR) 
+    static const int32_t f = 256;   // 256 is "use new value"
+    static const int32_t m = 256 - f;
     int32_t vF[NCHANNELS]   = { RED_VF, GREEN_VF, BLUE_VF };
     int32_t amps[NCHANNELS] = { RED_I,  GREEN_I,  BLUE_I };
     int32_t res[NCHANNELS]  = { RED_R,  GREEN_R,  BLUE_R };
@@ -111,6 +111,9 @@ void Blade::setVoltage(int milliVolts) {
         f1000[i] = 1000;
       }
     }
+  #elif (LED_TOPOLOGY == LED_TOPOLOGY_DRIVER)
+    vbat = int32_t(milliVolts);  // used for reporting on the command line, but f1000 isn't change,
+                                // so therefore the blade power doesn't change.
   #endif
   setRGB(color);
 }
