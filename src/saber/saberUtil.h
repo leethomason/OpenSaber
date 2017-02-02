@@ -45,8 +45,7 @@ enum class UIMode {
     NORMAL,
     PALETTE,
     VOLUME,
-	MEDITATION,
-	NUM
+	MEDITATION
 };
 
 class UIModeUtil

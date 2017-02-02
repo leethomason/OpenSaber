@@ -199,7 +199,9 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_SOUND_ON
 	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
-	#define LED_TOPOLOGY 			LED_TOPOLOGY_DRIVER
+	#define LED_TOPOLOGY 				LED_TOPOLOGY_DRIVER
+	#define MEDITATION_MODE				1
+	
 	//#define SABER_NUM_LEDS 			4
 	//#define SABER_UI_START  		0
 	//#define SABER_UI_BRIGHTNESS		8

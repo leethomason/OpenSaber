@@ -39,9 +39,23 @@ bool BladeState::bladeOn() const
     return m_currentState >= BLADE_ON && m_currentState < BLADE_RETRACT;
 }
 
-void ButtonMode::nextMode()
+void UIModeUtil::nextMode()
 {
-    m_mode = (m_mode + 1) % NUM_BUTTON_MODES;
+    switch(m_mode) {
+        case UIMode::NORMAL:        m_mode = UIMode::PALETTE;       break;
+        case UIMode::PALETTE:       m_mode = UIMode::VOLUME;        break;
+
+#if (MEDITATION_MODE)
+        case UIMode::VOLUME:        m_mode = UIMode::MEDITATION;    break;
+        case UIMode::MEDITATION:    m_mode = UIMode::NORMAL;        break;
+#else
+        case UIMode::VOLUME:        m_mode = UIMode::NORMAL;        break;
+#endif
+        default:
+            ASSERT(false);
+            m_mode = UIMode::NORMAL;
+            break;
+    }
 }
 
 AveragePower::AveragePower()

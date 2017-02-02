@@ -17,7 +17,8 @@ static const int HEIGHT = 32;
 
 void UIModeUtil::nextMode()
 {
-	m_mode = (UIMode)((int(m_mode) + 1) % int(UIMode::NUM));
+	static const int NUM = (int)UIMode::MEDITATION + 1;
+	m_mode = (UIMode)((int(m_mode) + 1) % NUM);
 }
 
 
