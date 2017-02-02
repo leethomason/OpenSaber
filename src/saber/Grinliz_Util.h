@@ -9,9 +9,10 @@ template<> struct CompileTimeAssert <true> {};
 #define STATIC_ASSERT(e) (CompileTimeAssert <(e) != 0>())
 
 #if defined(_MSC_VER)
-#	define ASSERT( x )		if ( !(x)) { _asm { int 3 } }
+#	define ASSERT( x )	if ( !(x)) { _asm { int 3 } }
 #else
-#	define ASSERT( x ) if (!(x)) { Log.p("ASSERT: ").p(#x).p(" ").p(__FILE__).p(" ").p(__LINE__).eol(); }
+	void AssertOut(const char* message, const char* file, int line);
+	#	define ASSERT( x ) 	if (!(x)) { AssertOut(#x, __FILE__, __LINE__); }
 #endif
 
 #define TEST_IS_TRUE(x) {         \
