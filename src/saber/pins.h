@@ -199,7 +199,9 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_SOUND_ON
 	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
-	#define LED_TOPOLOGY 			LED_TOPOLOGY_DRIVER
+	#define LED_TOPOLOGY 				LED_TOPOLOGY_DRIVER
+	#define MEDITATION_MODE				1
+	
 	//#define SABER_NUM_LEDS 			4
 	//#define SABER_UI_START  		0
 	//#define SABER_UI_BRIGHTNESS		8
@@ -245,8 +247,8 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_EMITTER_GREEN 22
 	#define PIN_EMITTER_RED   23
 
-#elif(    SABER_MODEL == SABER_MODEL_BLACK	
-	   || SABER_MODEL == SABER_MODEL_SHOCK
+#elif(    SABER_MODEL == SABER_MODEL_BLACK				\
+	   || SABER_MODEL == SABER_MODEL_SHOCK 				\
 	   || SABER_MODEL == SABER_MODEL_SILVER_SHOCK )
 	/* Teensy 3.2 with Prop Shield */
 	// Digital
@@ -301,8 +303,8 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_SDA           18 // fixed
 	#define PIN_SCL           19 // fixed
 	#define PIN_VMETER        20
-	// 21
-	// 22
+	#define PIN_SWITCH_B	  21
+	#define PIN_LED_B		  22
 	// 23
 #else
 	#error Pins not defined.

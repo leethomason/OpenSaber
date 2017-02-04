@@ -239,9 +239,13 @@ void Sketcher::DrawMeditationMode(Renderer* d, uint32_t time, const UIRenderData
 
 void DotStarUI::Draw(RGB* led, UIMode mode, bool ignited, const UIRenderData& data)
 {
-	static const uint32_t COLOR_AUDIO_ON = 0x0000FF;
-	static const uint32_t COLOR_AUDIO_OFF = 0xFFD800;
-	static const uint32_t PALETTE_ONE = 0xFFFFFF;
+	static const uint32_t COLOR_AUDIO_ON 	= 0x0000FF;
+	static const uint32_t COLOR_AUDIO_OFF 	= 0xFFD800;
+	static const uint32_t PALETTE_ONE 		= 0xFFFFFF;
+	static const uint32_t MED_0				= 0x0000FF;
+	static const uint32_t MED_1				= 0x0050a0;
+	static const uint32_t MED_2				= 0x00a05F;
+	static const uint32_t MED_3				= 0x00FF00;
 
 	switch (mode) {
 	case UIMode::NORMAL:
@@ -283,6 +287,16 @@ void DotStarUI::Draw(RGB* led, UIMode mode, bool ignited, const UIRenderData& da
 		}
 	}
 	break;
+
+	case UIMode::MEDITATION:
+	{
+		led[0].set(MED_0);
+		led[1].set(MED_1);
+		led[2].set(MED_2);
+		led[3].set(MED_3);
+	}
+	break;
+
 	}
 	for (int i = 0; i < 4; ++i) {
 		led[i].scale(m_brightness);

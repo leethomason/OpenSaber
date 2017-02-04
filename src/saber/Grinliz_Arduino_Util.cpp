@@ -239,6 +239,12 @@ const char* SPLog::popEvent(const char** n, const char** d, int* di)
 
 SPLog Log;
 
+void AssertOut(const char* message, const char* file, int line)
+{
+  Log.p("ASSERT: ").p(message).p(" ").p(file).p(" ").p(line).eol();
+}
+
+
 bool TestEvent()
 {
     const char* name = 0;
