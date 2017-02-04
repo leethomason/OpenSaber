@@ -321,7 +321,7 @@ difference() {
     FLATTEN = 1.8;
     
     union() {
-        *transitionRing();
+        transitionRing();
         
         union() {
             rail(RAIL_ANGLE_0, m=M_BUTTRESS_4, h=M_TRANSITION - M_BUTTRESS_4);
