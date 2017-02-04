@@ -185,6 +185,7 @@ void setup() {
             delay(10);
             averagePower.push(readVbat());
         }
+        Log.p("Vbat: ").p(readVbat()).p(" Ave:").p(averagePower.power()).eol();
         Log.p("Voltmeter initialized.").eol();
     #endif
 
@@ -613,6 +614,7 @@ void loop() {
 
     if (vbatTimer.tick()) {
         averagePower.push(readVbat());
+        //Log.p("power ").p(averagePower.power()).eol();
         blade.setVoltage(averagePower.power());
         uiRenderData.mVolts = averagePower.power();
         uiRenderData.power = vbatToPowerLevel(averagePower.power());
