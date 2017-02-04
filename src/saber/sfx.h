@@ -32,6 +32,7 @@ SOFTWARE.
 enum {            //  Max
   SFX_IDLE,       //  1
   SFX_MOTION,     //  16
+  SFX_SPIN,       //  4  although not currently used
   SFX_IMPACT,     //  16
   SFX_USER_TAP,   //  4
   SFX_USER_HOLD,  //  1
@@ -39,7 +40,7 @@ enum {            //  Max
   SFX_POWER_OFF,  //  4
 
   NUM_SFX_TYPES,
-  MAX_SFX_FILES = 48,
+  MAX_SFX_FILES = 64,
   MAX_FONTS = 10,
   SFX_NONE = 255
 };

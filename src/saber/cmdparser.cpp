@@ -115,6 +115,7 @@ bool CMDParser::processCMD(RGB* c)
     static const char TEST[]    = "test";
     static const char ACCEL[]   = "accel";
     static const char CRYSTAL[] = "crys";
+    static const char PLAY[]    = "play";
 
     static const int DELAY = 20;  // don't saturate the serial line. Too much for SoftwareSerial.
 
@@ -267,6 +268,11 @@ bool CMDParser::processCMD(RGB* c)
         RGB c = database->crystalColor();
         printHexColor(c);
         Serial.println("");
+    }
+    else if (action == PLAY) {
+        printLead(action.c_str());
+        SFX* sfx = SFX::instance();
+        sfx->playSound(value.c_str());
     }
     else if (action == TEST) {
         Tester* tester = Tester::instance();

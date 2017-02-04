@@ -55,7 +55,7 @@ private:
     SaberDB* database;
     CStr<18> token;
     CStr<6>  action;
-    CStr<10> value;
+    CStr<20> value;
 };
 
 

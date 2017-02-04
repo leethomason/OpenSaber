@@ -152,12 +152,19 @@ void SFX::scanFiles(uint8_t index)
     addFile(m_filename[i].c_str(), i);
   }
 
-  static const int N = 7;
-  static const char* NAMES[N] = {"Idle        ", "Motion      ", "Impact      ", "User_Tap    ", "User_Hold   ", "Power_On    ", "Power_Off   " };
-  const int ID[N] = {SFX_IDLE, SFX_MOTION, SFX_IMPACT, SFX_USER_TAP, SFX_USER_HOLD, SFX_POWER_ON, SFX_POWER_OFF };
-
-  for(int i=0; i<N; ++i) {
-    Log.p(NAMES[i]).p("start=").p(m_location[ID[i]].start).p(" count=").p(m_location[ID[i]].count).eol();
+  static const char* NAMES[NUM_SFX_TYPES] = {
+    "Idle        ", 
+    "Motion      ", 
+    "Spin        ",
+    "Impact      ", 
+    "User_Tap    ", 
+    "User_Hold   ", 
+    "Power_On    ", 
+    "Power_Off   " 
+  };
+  for(int i=0; i<NUM_SFX_TYPES; ++i) {
+    const int id = SFX_IDLE + i;
+    Log.p(NAMES[i]).p("start=").p(m_location[id].start).p(" count=").p(m_location[id].count).eol();
 
     /* really good debug code: move to command window??
     Log.p("  ");
@@ -198,6 +205,7 @@ int SFX::calcSlot(const char* name )
   else if (strStarts(name, "MOTION")  || strStarts(name, "SWING"))      slot = SFX_MOTION;
   else if (strStarts(name, "USRHOLD") || strStarts(name, "LOCKUP"))     slot = SFX_USER_HOLD;
   else if (strStarts(name, "USRTAP")  || strStarts(name, "BLASTER"))    slot = SFX_USER_TAP;
+  else if (strStarts(name, "SPIN"))                                     slot = SFX_SPIN;
 
   return slot;
 }
@@ -283,6 +291,7 @@ bool SFX::playSound(int sound, int mode)
 
 bool SFX::playSound(const char* sfx)
 {
+  m_player->mute(false);
   m_player->play(sfx);
   return true;
 }
@@ -371,7 +380,7 @@ void SFX::mute(bool muted)
   // this->m_muted is more the "traditional" use of mute. No
   //   sound is being output, but the audio system otherwise
   //   runs and responds normally.
-  Log.p("SFX::mute ").p(muted ? "true" : "false").eol();
+  Log.p("SFX::mute: ").p(muted ? "true" : "false").eol();
 
   m_muted = muted;
   if (m_player && m_muted) {
