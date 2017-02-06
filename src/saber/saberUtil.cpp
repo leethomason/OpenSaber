@@ -4,6 +4,9 @@
 #include "pins.h"
 #include "saberUtil.h"
 #include "Grinliz_Arduino_Util.h"
+#include "blade.h"
+#include "saberDB.h"
+#include "sfx.h"
 
 void BladeState::change(uint8_t state)
 {
@@ -38,6 +41,68 @@ bool BladeState::bladeOn() const
     ASSERT(m_currentState >= BLADE_OFF && m_currentState <= BLADE_RETRACT);
     return m_currentState >= BLADE_ON && m_currentState < BLADE_RETRACT;
 }
+
+
+void BladeState::process(Blade* blade, const SaberDB& saberDB, uint32_t time)
+{
+    static const uint32_t FLASH_TIME = 120;
+    SFX* sfx = SFX::instance();
+
+    switch (state()) {
+    case BLADE_OFF:
+        break;
+
+    case BLADE_ON:
+        blade->setRGB(saberDB.bladeColor());
+        break;
+
+    case BLADE_IGNITE:
+    {
+        uint32_t igniteTime = 1000;
+        #ifdef SABER_SOUND_ON
+        igniteTime = sfx->getIgniteTime();
+        #endif
+
+        bool done = blade->setInterp(millis() - startTime(), igniteTime, RGB(RGB::BLACK), saberDB.bladeColor());
+        if (done) {
+            change(BLADE_ON);
+        }
+    }
+    break;
+
+    case BLADE_RETRACT:
+    {
+        uint32_t retractTime = 1000;
+        #ifdef SABER_SOUND_ON
+            retractTime = sfx->getRetractTime();
+        #endif
+        bool done = blade->setInterp(millis() - startTime(), retractTime, saberDB.bladeColor(), RGB(RGB::BLACK));
+        if (done) {
+            change(BLADE_OFF);
+        }
+    }
+    break;
+
+    case BLADE_FLASH:
+        // interpolate?
+    {
+        uint32_t delta = time - startTime();
+        if (delta > FLASH_TIME) {
+            blade->setRGB(saberDB.bladeColor());
+            change(BLADE_ON);
+        }
+        else {
+            blade->setRGB(saberDB.impactColor());
+        }
+    }
+    break;
+
+    default:
+        ASSERT(false);
+        break;
+    }
+}
+
 
 void ButtonMode::nextMode()
 {
