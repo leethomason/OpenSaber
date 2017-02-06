@@ -245,8 +245,8 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_EMITTER_GREEN 22
 	#define PIN_EMITTER_RED   23
 
-#elif(    SABER_MODEL == SABER_MODEL_BLACK	
-	   || SABER_MODEL == SABER_MODEL_SHOCK
+#elif(    SABER_MODEL == SABER_MODEL_BLACK				\
+	   || SABER_MODEL == SABER_MODEL_SHOCK 				\
 	   || SABER_MODEL == SABER_MODEL_SILVER_SHOCK )
 	/* Teensy 3.2 with Prop Shield */
 	// Digital
@@ -301,8 +301,8 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_SDA           18 // fixed
 	#define PIN_SCL           19 // fixed
 	#define PIN_VMETER        20
-	// 21
-	// 22
+	#define PIN_SWITCH_B	  21
+	#define PIN_LED_B		  22
 	// 23
 #else
 	#error Pins not defined.
