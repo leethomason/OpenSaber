@@ -62,7 +62,7 @@ public:
   bool init();
   void scanFiles(uint8_t font);
 
-  bool playSound(int sfx, int mode);
+  bool playSound(int sfx, int mode, bool playIfOff=false);
   bool playSound(const char* sfx);
   void stopSound();
 

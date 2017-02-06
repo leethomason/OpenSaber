@@ -59,7 +59,7 @@ class IgniteRetractTest : public Test
 
 		if (strEqual(event, "[BLADE_IGNITE]")) {
 			TEST_ORDER(0);
-			tester->checkAudio("ignite", 500, 2000);	
+			tester->checkAudio("ignite", 500, 2500);	
 		}
 		else if (strEqual(event, "[BLADE_ON]")) {
 			TEST_ORDER(1);

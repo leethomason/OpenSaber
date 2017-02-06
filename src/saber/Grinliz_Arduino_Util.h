@@ -111,6 +111,7 @@ public:
     uint32_t period() const {
         return trigger;
     }
+    void setPeriod(uint32_t t) { trigger = t; }
 
 private:
     uint32_t time, trigger;

@@ -27,6 +27,8 @@
 #include "AudioPlayer.h"
 #include "tester.h"
 
+#define DEBUG_DEEP
+
 SFX* SFX::m_instance = 0;
 
 SFX::SFX(AudioPlayer* audioPlayer)
@@ -224,41 +226,44 @@ void SFX::addFile(const char* name, int index)
   }
 }
 
-bool SFX::playSound(int sound, int mode)
+bool SFX::playSound(int sound, int mode, bool playIfOff)
 {
   // Flush out tests before switching sounds:
   Tester::instance()->process();
   
   ASSERT(sound >= 0);
   ASSERT(sound < NUM_SFX_TYPES);
+  ASSERT(m_player);
+
+  if (!m_player) return false;
 
 #if SERIAL_DEBUG == 1
 #ifdef DEBUG_DEEP
-  Serial.print(F("SFX playSound() sound:")); Serial.println(sound);
-  Serial.print(F("SFX bladeOn:")); Serial.println(bladeOn);
-  Serial.print(F("SFX currentSound:")); Serial.println(currentSound);
+  Log.p("SFX playSound() sound: ").p(sound).eol();
+  Log.p("SFX m_bladeOn: ").p(m_bladeOn).eol();
+  Log.p("SFX m_currentSound: ").p(m_currentSound).eol();
+  Log.p("m_muted: ").p(m_muted).eol();
 #endif
 #endif
 
-  if (!m_bladeOn && (sound != SFX_POWER_ON)) {
-    return false ; // don't play sound with blade off
+  if (!playIfOff) {
+    if (!m_bladeOn && (sound != SFX_POWER_ON)) {
+      return false ; // don't play sound with blade off
+    }
   }
 
-  if (sound == SFX_POWER_ON) {
+  if (!playIfOff && sound == SFX_POWER_ON) {
     if (m_bladeOn)
       return false;  // defensive error check.
-    if (m_player) {
-      m_player->mute(m_muted);
-    }
     m_bladeOn = true;
   }
-  else if (sound == SFX_POWER_OFF) {
+  else if (!playIfOff && sound == SFX_POWER_OFF) {
     if (!m_bladeOn)
-      return false;  // defensive error check.
+      return false;  // defensive error check. BUT gets in the way of meditation playback.
     m_bladeOn = false;
   }
 
-  if (m_player && !m_player->isPlaying()) {
+  if (!m_player->isPlaying()) {
     m_currentSound = SFX_NONE;
   }
 
@@ -281,6 +286,7 @@ bool SFX::playSound(int sound, int mode)
     else {
       path = m_filename[track].c_str();
     }
+    m_player->mute(m_muted);
     m_player->play(path.c_str());
     m_currentSound = sound;
     m_lastSFX = sound;
@@ -291,7 +297,7 @@ bool SFX::playSound(int sound, int mode)
 
 bool SFX::playSound(const char* sfx)
 {
-  m_player->mute(false);
+  m_player->mute(m_muted);
   m_player->play(sfx);
   return true;
 }

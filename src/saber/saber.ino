@@ -65,7 +65,9 @@ bool     paletteChange  = false;    // used to prevent sound fx on palette chang
 uint32_t reflashTime    = 0;
 bool     flashOnClash   = false;
 float    maxGForce2     = 0.0f;
-uint32_t lastMotionTime = 0;      
+uint32_t lastMotionTime = 0;    
+uint32_t meditationTimer = 0;  
+uint32_t lastLoopTime   = 0;
 
 #ifdef SABER_SOUND_ON
 // First things first: disable that audio to avoid clicking.
@@ -288,6 +290,7 @@ void syncToDB()
 void buttonAReleaseHandler(const Button& b)
 {
     ledA.blink(0, 0);
+
     #ifdef SABER_LOCK
         if (bladeState.bladeOn()) {
             uint32_t holdTime = millis() - b.pressedTime();
@@ -298,6 +301,11 @@ void buttonAReleaseHandler(const Button& b)
             }
         }
     #endif
+
+    if (uiMode.mode() == UIMode::MEDITATION && meditationTimer) {
+        Log.p("med start").eol();
+        sfx.playSound(SFX_SPIN, SFX_OVERRIDE, true);
+    }
 }
 
 #ifdef SABER_TWO_BUTTON
@@ -422,6 +430,16 @@ void blinkPaletteHandler(const LEDManager& manager)
     syncToDB();
 }
 
+void meditationTimeHandler(const LEDManager& manager)
+{
+    switch(manager.numBlinks()) {
+        case 1: meditationTimer = 1000 * 60 * 1; break;
+        case 2: meditationTimer = 1000 * 60 * 2; break;
+        case 3: meditationTimer = 1000 * 60 * 5; break;
+        case 4: meditationTimer = 1000 * 60 * 10; break;
+    }
+}
+
 // One button case.
 void buttonAClickHandler(const Button&)
 {
@@ -435,11 +453,13 @@ void buttonAClickHandler(const Button&)
             sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
         #endif
     }
+    meditationTimer = 0;
 }
 
 void buttonAHoldHandler(const Button&)
 {
     Log.p("buttonAHoldHandler").eol();
+    meditationTimer = 0;
     if (bladeState.state() == BLADE_OFF) {
 
         if (uiMode.mode() == UIMode::NORMAL) {
@@ -455,6 +475,9 @@ void buttonAHoldHandler(const Button&)
         else if (uiMode.mode() == UIMode::VOLUME) {
             ledA.blink(5, INDICATOR_CYCLE, blinkVolumeHandler);
         }
+        else if (uiMode.mode() == UIMode::MEDITATION) {
+            ledA.blink(4, INDICATOR_CYCLE, meditationTimeHandler);
+        }
 
     }
     else if (bladeState.state() != BLADE_RETRACT) {
@@ -467,6 +490,15 @@ void buttonAHoldHandler(const Button&)
 
 
 #endif
+
+bool buttonsReleased()
+{
+    #ifdef SABER_TWO_BUTTON
+        return !buttonA.isDown() && !buttonB.isDown();
+    #else
+        return !buttonA.isDown();
+    #endif
+}
 
 void processBladeState()
 {
@@ -557,6 +589,17 @@ void loop() {
         ledB.process();
     #endif
 
+    if (meditationTimer && buttonsReleased()) {
+        uint32_t delta = msec - lastLoopTime;
+        if (delta >= meditationTimer) {
+            meditationTimer = 0;
+            sfx.playSound(SFX_SPIN, SFX_OVERRIDE, true);            
+        }
+        else {
+            meditationTimer -= delta;
+        }
+    }
+
     tester.process();
     if (bladeState.state() == BLADE_ON) {
         float g2Normal = 1.0f;
@@ -641,9 +684,10 @@ void loop() {
 
     if (displayTimer.tick()) {
         uiRenderData.color = saberDB.bladeColor();
+        uiRenderData.meditationTimeRemain = meditationTimer;
 
         #ifdef SABER_DISPLAY
-            sketcher.Draw(&renderer, displayTimer.period(), uiMode.mode(), bladeState.bladeOn(), &uiRenderData);
+            sketcher.Draw(&renderer, displayTimer.period(), uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
             display.display(oledBuffer);
         #endif
         #ifdef SABER_UI_START
@@ -661,7 +705,7 @@ void loop() {
         else {
             // Use the blade color or the breathing color.
             const RGB bladeColor = saberDB.bladeColor();
-            if (bladeState.state() == BLADE_OFF && uiMode.mode() == UIMode::NORMAL) {
+            if (bladeState.state() == BLADE_OFF && (uiMode.mode() == UIMode::NORMAL || uiMode.mode() == UIMode::MEDITATION)) {
                 calcCrystalColor(msec, SABER_CRYSTAL_LOW, SABER_CRYSTAL, bladeColor, &leds[0]);
                 //OSASSERT(leds[0].get());
                 //OSASSERT(dotstar.brightness() == 256);
@@ -676,5 +720,6 @@ void loop() {
     #ifdef SABER_NUM_LEDS
         dotstar.display();
     #endif
+    lastLoopTime = msec;
 }
  
