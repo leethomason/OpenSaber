@@ -92,10 +92,8 @@ void CMDParser::printLead(const char* str) {
     Serial.print(' ');
 }
 
-bool CMDParser::processCMD(RGB* c) 
+bool CMDParser::processCMD() 
 {
-    c->set(0);
-
     static const char BC[]      = "bc";
     static const char IC[]      = "ic";
     static const char PAL[]     = "pal";
@@ -118,14 +116,16 @@ bool CMDParser::processCMD(RGB* c)
 
     static const int DELAY = 20;  // don't saturate the serial line. Too much for SoftwareSerial.
 
+    RGB c(0);
+
     tokenize();
     //Serial.print("CMD:"); Serial.print(action.c_str()); Serial.print(":"); Serial.println(value.c_str());
     bool isSet = !value.empty();
 
     if (action == BC) {
         if (isSet) {
-            parseHexColor(value.c_str() + 1, c);
-            database->setBladeColor(*c);
+            parseHexColor(value.c_str() + 1, &c);
+            database->setBladeColor(c);
         }
         printLead(action.c_str());
         RGB c = database->bladeColor();
@@ -136,8 +136,8 @@ bool CMDParser::processCMD(RGB* c)
     }
     else if (action == IC) {
         if (isSet) {
-            parseHexColor(value.c_str() + 1, c);
-            database->setImpactColor(*c);
+            parseHexColor(value.c_str() + 1, &c);
+            database->setImpactColor(c);
         }
         printLead(action.c_str());
         printHexColor(database->impactColor());
@@ -260,8 +260,8 @@ bool CMDParser::processCMD(RGB* c)
     }
     else if (action == CRYSTAL) {
         if (isSet) {
-            parseHexColor(value.c_str() + 1, c);
-            database->setCrystalColor(*c);
+            parseHexColor(value.c_str() + 1, &c);
+            database->setCrystalColor(c);
         }
         printLead(action.c_str());
         RGB c = database->crystalColor();
