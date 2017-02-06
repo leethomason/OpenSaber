@@ -558,7 +558,6 @@ void processBladeState()
 
 void serialEvent() {
     bool processed = false;
-    RGB color;
 
     while (Serial.available()) {
         int c = Serial.read();
@@ -567,7 +566,7 @@ void serialEvent() {
             Serial.print("event ");
             Serial.println(cmdParser.getBuffer());
             #endif
-            processed = cmdParser.processCMD(&color);
+            processed = cmdParser.processCMD();
         }
         else {
             cmdParser.push(c);

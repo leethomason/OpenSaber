@@ -37,7 +37,8 @@ public:
     void push(int c)                  {
         token.append(c);
     }
-    bool processCMD(RGB* color);
+    bool processCMD();
+    
     const char* getBuffer() const     {
         return token.c_str();
     }
