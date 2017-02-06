@@ -112,7 +112,6 @@ CMDParser cmdParser(&saberDB);
 Blade blade;
 Timer vbatTimer(VBAT_TIME_INTERVAL);
 Timer gforceDataTimer(110);
-File logFile;
 
 Tester tester;
 uint32_t unlocked = 0;
@@ -136,15 +135,6 @@ void setupSD(int logCount)
             Log.p("Unable to access the SD card").eol();
             delay(500);
         }
-        #ifdef LOGFILE
-            SD.mkdir("logs");
-            char path[] = "logs/log00.txt";
-            path[8] = ((logCount / 10) % 10) + '0';
-            path[9] = (logCount % 10) + '0';
-            logFile = SD.open(path, FILE_WRITE);
-            logFile.print("Log open. Instance=");
-            logFile.println(logCount);
-        #endif
     #endif
 }
 
@@ -165,9 +155,6 @@ void setup() {
     #endif
     #ifdef SABER_SOUND_ON
         setupSD(saberDB.numSetupCalls());
-        #ifdef LOGFILE
-            Log.attachLog(&logFile);
-        #endif
     #endif
 
     Log.p("setup()").eol();
