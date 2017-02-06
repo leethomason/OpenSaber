@@ -12,9 +12,9 @@ M_RAIL_START		= 12;
 M_SPKR_RING			= 15.5;		// Front of the speaker ring.
 
 M_BUTTRESS_0		= M_SPKR_RING;			// speaker holder, behind wings
-M_BUTTRESS_1		= M_SPKR_RING + 16;
-M_BUTTRESS_2		= M_SPKR_RING + 32;
-M_BUTTRESS_3		= M_SPKR_RING + 52;
+M_BUTTRESS_1		= M_SPKR_RING + 17;
+M_BUTTRESS_2		= M_SPKR_RING + 36;
+M_BUTTRESS_3		= M_SPKR_RING + 55;
 M_BUTTRESS_4		= M_SPKR_RING + 70;		// holds speaker in place, space for foam
 
 M_WAY_BACK			= -20;
