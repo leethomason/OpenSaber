@@ -52,8 +52,6 @@
 #include "saberUtil.h"
 #include "tester.h"
 
-static const RGB BLADE_BLACK(0);
-static const uint32_t FLASH_TIME              = 120;
 static const uint32_t VBAT_TIME_INTERVAL      = 500;
 
 static const uint32_t INDICATOR_TIME          = 500;
@@ -116,7 +114,6 @@ CMDParser cmdParser(&saberDB);
 Blade blade;
 Timer vbatTimer(VBAT_TIME_INTERVAL);
 Timer gforceDataTimer(110);
-File logFile;
 
 Tester tester;
 uint32_t unlocked = 0;
@@ -140,15 +137,6 @@ void setupSD(int logCount)
             Log.p("Unable to access the SD card").eol();
             delay(500);
         }
-        #ifdef LOGFILE
-            SD.mkdir("logs");
-            char path[] = "logs/log00.txt";
-            path[8] = ((logCount / 10) % 10) + '0';
-            path[9] = (logCount % 10) + '0';
-            logFile = SD.open(path, FILE_WRITE);
-            logFile.print("Log open. Instance=");
-            logFile.println(logCount);
-        #endif
     #endif
 }
 
@@ -169,9 +157,6 @@ void setup() {
     #endif
     #ifdef SABER_SOUND_ON
         setupSD(saberDB.numSetupCalls());
-        #ifdef LOGFILE
-            Log.attachLog(&logFile);
-        #endif
     #endif
 
     Log.p("setup()").eol();
@@ -191,7 +176,7 @@ void setup() {
         Log.p("Voltmeter initialized.").eol();
     #endif
 
-    blade.setRGB(BLADE_BLACK);
+    blade.setRGB(RGB::BLACK);
 
     buttonA.holdHandler(buttonAHoldHandler);
     buttonA.clickHandler(buttonAClickHandler);
@@ -488,7 +473,6 @@ void buttonAHoldHandler(const Button&)
     }
 }
 
-
 #endif
 
 bool buttonsReleased()
@@ -498,62 +482,6 @@ bool buttonsReleased()
     #else
         return !buttonA.isDown();
     #endif
-}
-
-void processBladeState()
-{
-    switch (bladeState.state()) {
-    case BLADE_OFF:
-        break;
-
-    case BLADE_ON:
-        blade.setRGB(saberDB.bladeColor());
-        break;
-
-    case BLADE_IGNITE:
-    {
-        uint32_t igniteTime = 1000;
-        #ifdef SABER_SOUND_ON
-            igniteTime = sfx.getIgniteTime();
-        #endif
-        bool done = blade.setInterp(millis() - bladeState.startTime(), igniteTime, BLADE_BLACK, saberDB.bladeColor());
-        if (done) {
-            bladeState.change(BLADE_ON);
-        }
-    }
-    break;
-
-    case BLADE_RETRACT:
-    {
-        uint32_t retractTime = 1000;
-        #ifdef SABER_SOUND_ON
-            retractTime = sfx.getRetractTime();
-        #endif
-        bool done = blade.setInterp(millis() - bladeState.startTime(), retractTime, saberDB.bladeColor(), BLADE_BLACK);
-        if (done) {
-            bladeState.change(BLADE_OFF);
-        }
-    }
-    break;
-
-    case BLADE_FLASH:
-        // interpolate?
-    {
-        uint32_t delta = millis() - bladeState.startTime();
-        if (delta > FLASH_TIME) {
-            blade.setRGB(saberDB.bladeColor());
-            bladeState.change(BLADE_ON);
-        }
-        else {
-            blade.setRGB(saberDB.impactColor());
-        }
-    }
-    break;
-
-    default:
-        ASSERT(false);
-        break;
-    }
 }
 
 void serialEvent() {
@@ -647,7 +575,7 @@ void loop() {
         maxGForce2 = 1;
     }
 
-    processBladeState();
+    bladeState.process(&blade, saberDB, millis());
     tester.process();
     #ifdef SABER_SOUND_ON
         sfx.process();

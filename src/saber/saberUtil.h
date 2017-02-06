@@ -8,6 +8,9 @@
 */
 //#include "pins.h" 
 
+class Blade;
+class SaberDB;
+
 enum {
     BLADE_OFF,
     BLADE_IGNITE,
@@ -35,6 +38,8 @@ public:
     const uint32_t startTime() const {
         return m_startTime;
     }
+
+    void process(Blade* blade, const SaberDB& saberDB, uint32_t time);
 
 private:
     uint8_t  m_currentState = BLADE_OFF;

@@ -4,6 +4,9 @@
 #include <stdint.h>
 
 struct RGB {
+	enum {
+		BLACK = 0
+	};
 
 	RGB() {}
 	RGB(uint32_t c) { set(c); }
