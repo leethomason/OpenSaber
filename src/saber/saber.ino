@@ -27,6 +27,7 @@
 #include <SD.h>
 //#include <SPIFlash.h>
 #include <OLED_SSD1306.h>
+#include <SerialFlash.h>
 
 #include <Audio.h>
 #include <Adafruit_LIS3DH.h>
