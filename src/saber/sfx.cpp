@@ -64,18 +64,22 @@ bool SFX::init()
 void SFX::filePath(CStr<25>* path, const char* dir, const char* file)
 {
     path->clear();
+#if SABER_SOUND_ON == SABER_SOUND_SD    
     *path = dir;
     path->append('/');
+#endif    
     path->append(file);
 }
 
 void SFX::filePath(CStr<25>* path, int index)
 {
     path->clear();
+#if SABER_SOUND_ON == SABER_SOUND_SD    
     if (m_numFonts > 0 && m_currentFont >= 0) {
         *path = m_dirName[m_currentFont].c_str();
         path->append('/');
     }
+#endif
     path->append(m_filename[index].c_str());
 }
 
@@ -114,7 +118,7 @@ void SFX::scanFonts()
     root.close();
 #elif (SABER_SOUND_ON == SABER_SOUND_FLASH)
     m_numFonts = 1;
-    m_dirName[0] = "";
+    m_dirName[0] = "<flash>";
 #endif
 
     combSort(m_dirName, m_numFonts);
@@ -355,9 +359,9 @@ uint32_t SFX::readU32(File& file, int n) {
 uint32_t SFX::readU32(SerialFlashFile& file, int n) {
     uint32_t v = 0;
     for (int i = 0; i < n; ++i) {
-        uint8_t data;
-        int b = file.read(&data, 1);
-        v += b << (i * 8);
+        uint8_t b = 0;
+        file.read(&b, 1);
+        v += uint32_t(b) << (i * 8);
     }
     return v;
 }
@@ -457,6 +461,10 @@ uint8_t SFX::getVolume204() const
 uint8_t SFX::setFont(uint8_t font)
 {
     //Serial.print("setFont "); Serial.println(font);
+#if SABER_SOUND_ON == SABER_SOUND_FLASH
+    font = 0;
+#endif
+
     if (m_numFonts) {
         if (font != m_currentFont) {
             m_currentFont = font % m_numFonts;
@@ -472,11 +480,13 @@ uint8_t SFX::setFont(uint8_t font)
 uint8_t SFX::setFont(const char* name)
 {
     int i=0;
+#if SABER_SOUND_ON == SABER_SOUND_SD
     for(; i<m_numFonts; ++i) {
         if (strEqual(name, fontName(i))) {
             break;
         }
     }
+#endif
     return setFont(i);
 }
 
