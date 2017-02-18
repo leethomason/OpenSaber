@@ -54,6 +54,7 @@ inline bool strEqual(const char* a, const char* b) {
 * Returns 'true' if 'str' strarts with 'prefix'
 */
 bool strStarts(const char* str, const char* prefix);
+bool istrStarts(const char* str, const char* prefix);
 
 /**
 * The CStr class is a "c string": a simple array of

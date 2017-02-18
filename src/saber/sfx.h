@@ -52,6 +52,7 @@ enum {
 };
 
 class AudioPlayer;
+class SerialFlashFile;
 
 class SFX
 {
@@ -100,6 +101,7 @@ private:
   void readIgniteRetract();
   bool readHeader(const char* filename, uint8_t* nChannels, uint32_t* nSamplesPerSec, uint32_t* lengthMillis, bool logToConsole);
   uint32_t readU32(File& file, int n);
+  uint32_t readU32(SerialFlashFile& file, int n);
 
   // note: initialize to 255
   struct SFXLocation {

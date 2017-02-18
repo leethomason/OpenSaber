@@ -9,7 +9,12 @@
 
 #include "Grinliz_Arduino_Util.h"
 
+#if (SABER_SOUND_ON == SABER_SOUND_SD)
 AudioPlaySdWav      playWav;
+#elif (SABER_SOUND_ON == SABER_SOUND_FLASH)
+AudioPlaySerialflashRaw playWav;
+#endif
+
 AudioMixer4         mixer;
 AudioOutputAnalog   dac;
 AudioFilterBiquad   biquad;
@@ -41,7 +46,11 @@ void AudioPlayer::init() {
 
 void AudioPlayer::play(const char* filename)
 {
+#if (SABER_SOUND_ON == SABER_SOUND_SD)
     bool okay = playWav.play(filename);
+#elif (SABER_SOUND_ON == SABER_SOUND_FLASH)
+    bool okay = playWav.play(filename, 44);
+#endif
     if (!okay) {
         ASSERT(okay);
         Log.p("Error playing:").p(filename).eol();

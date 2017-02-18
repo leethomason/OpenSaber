@@ -27,6 +27,7 @@
 #include <SD.h>
 //#include <SPIFlash.h>
 #include <OLED_SSD1306.h>
+#include <SerialFlash.h>
 
 #include <Audio.h>
 #include <Adafruit_LIS3DH.h>
@@ -132,9 +133,14 @@ void setupSD(int logCount)
 {
     SPI.setMOSI(PIN_SABER_MOSI);
     SPI.setSCK(PIN_SABER_CLOCK);
-    #ifdef SABER_SOUND_ON
+    #if (SABER_SOUND_ON == SABER_SOUND_SD)
         while (!(SD.begin(PIN_SDCARD_CS))) {
             Log.p("Unable to access the SD card").eol();
+            delay(500);
+        }
+    #elif (SABER_SOUND_ON == SABER_SOUND_FLASH)
+        while(!(SerialFlash.begin(PIN_MEMORY_CS))) {
+            Log.p("Unable to access SerialFlash memory.").eol();
             delay(500);
         }
     #endif

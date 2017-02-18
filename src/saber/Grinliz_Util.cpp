@@ -27,6 +27,25 @@ bool strStarts(const char* str, const char* prefix)
     return true;
 }
 
+char ToLower(char c) {
+    if (c >= 'A' && c <= 'Z')
+        return (c - 'A') + 'a';
+    return c;
+}
+
+bool istrStarts(const char* str, const char* prefix)
+{
+    if (!str || !prefix)
+        return false;
+
+    while(*prefix) {
+        if (ToLower(*prefix++) != ToLower(*str++))
+            return false;
+    }
+    return true;
+}
+
+
 bool TestCStr()
 {
     TEST_IS_TRUE(strStarts("FooBar", "Foo"));

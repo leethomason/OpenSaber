@@ -28,7 +28,7 @@ SOFTWARE.
 // --- Configuration ---
 // Note: Serial connection should be set to 19200 baud with a newline after commands.
 
-#define SERIAL_DEBUG 0
+#define SERIAL_DEBUG 1
 
 #define SABER_MODEL_TEST			0
 #define SABER_MODEL_GECKO			1	// PCB, Teensy 3, external amp and accel
@@ -38,10 +38,13 @@ SOFTWARE.
 #define SABER_MODEL_BO				5	// 2 button prop shield
 #define SABER_MODEL_TANO 			6
 
-#define SABER_MODEL 				SABER_MODEL_SHOCK
+#define SABER_MODEL 				SABER_MODEL_TANO
 
 #define LED_TOPOLOGY_RESISTOR		1
 #define LED_TOPOLOGY_DRIVER			2
+
+#define SABER_SOUND_SD 				1
+#define SABER_SOUND_FLASH 			2
 
 static const int EEPROM_SIZE = 512;
 
@@ -198,11 +201,11 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 #elif SABER_MODEL == SABER_MODEL_TANO
 	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
-	#define SABER_SOUND_ON
+	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
 	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
 	#define LED_TOPOLOGY 				LED_TOPOLOGY_DRIVER
-	
+
 	//#define SABER_NUM_LEDS 			4
 	//#define SABER_UI_START  		0
 	//#define SABER_UI_BRIGHTNESS		8
