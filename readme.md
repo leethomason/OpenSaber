@@ -106,6 +106,7 @@ I am not affiliated with any of these, but have found them all useful.
 - Mouser. http://www.mouser.com/ A huge selection of everything electronic.
 - DigiKey. http://www.digikey.com/ A huge selection of everything electronic.
   I tend to have more success with DigiKey's search engine.
+- Amazon has a surprisingly good selection of components.
 
 ## Architecture
 
@@ -143,12 +144,15 @@ In roughly front to back order, an saber is:
     charges the battery (and disconnects the microcontroller). If a kill key
     is inserted, turns off the saber.
 8.  **SD Card**. Gecko uses a simple SD card breakout board. This is where
-    the sound fonts are stored.
+    the sound fonts are stored. Note that the saber code WILL NOT work without 
+    sound fonts stored and named properly on the MicroSD card.
 9. **Accelerometer**. Gecko uses an "Adafruit LIS3DH Triple-Axis 
     Accelerometer" but the new designs all use the accelerometer on the 
     Prop shield.  
 10. 3.7v Li-Ion **battery**. TCSS and Adafruit both sell good, small, long 
-    lasting batteries. Need something rated 2000mAh or better.
+    lasting batteries. Need something rated 2000mAh or better. Amazon as well
+    carries protected Li-Ion batteries. (The Panasonic NCR18650B 18650 has 
+    been recommended.)
 11. **Speaker**. TCSS and Adafruit carry them, as well as Mouser and Digikey. 
     (I've had a lot of inexpensive speakers arrived damaged from China, so I 
     do recommend a reputable supplier.)
@@ -167,33 +171,35 @@ In roughly front to back order, an saber is:
 
 ## Wiring
 
-Wiring diagram for Prop Shield version of saber (sorry for the terrible art): 
-[wiring v5 with prop shield](img/v5prop.png). 
+Wiring diagram for Prop Shield version of saber: 
+[wiring v5 with prop shield](img/v5prop.png)
 (Github isn't keen on image preview. You may need to clone the source and view
-locally.) Not shown: the speaker connection (connects to the prop shield) and
-the DotStar connection (also connects to prop shield.)
+locally.) Shown without the optional DotStar LED User Interface.
 
 An actual photo of a V5 circuit. "Front" is
 the direction of the pin header.
 
 ![v% with Prop Shield](img/v5propShield.jpg)
 
-- The Teensy Microcontroller is the top board. (The reset button and USB have 
-  been removed in this build.) The microcontroller sits on top of the Prop 
-  Shield.
-- The Prop Shield is in the middle.
-  - front: 2 white wires are speaker out
+- The Teensy Microcontroller is the top board. The microcontroller sits on 
+  top of the Prop Shield.
+- The Prop Shield is in the middle. Note that the Teensy microcontroller 
+  needs to be securely soldered onto the Prop Shield, just plugging 
+  it in is not enough.
+  - front: 2 wires are speaker out.
   - front: a blue and yellow wire that connect the USB on the Teensy 
     above to the USB on the PCB below. (This is to set up an alternate USB 
     connection since the standard port is removed. If you don't remove the
     standard USB port, you don't need these wires.)
-  - rear: black, yellow, green, and red wires are the connection
-    to a DotStar LED chain. The DotStars can be used for User Indicators
-    (power, volume, color) or driving an internal crystal.
-- The OpenSaber PCB is on the bottom.
-  - front: A 10 pin header connects to the switch and blade LED.
+- The OpenSaber PCB is on the bottom. The top 2 boards (Teensy microcontroller 
+  and Prop Shield needs to be soldered securely onto the PCB.
+  - front: 10 solder connections to the switch and blade LED.
   - front: A 5V power booster and capacitor is nestled in between 2 MOSFETs. 
-    The placement is a little over engineered, honestly.
+    The placement is a little over engineered, honestly. You only need the power
+    booster if using the DotStar LEDs. However, it is generally useful for
+    keeping consistent power to the MicroController, so it is a good to have
+    even without them. Polulu has a great buck/boost converter: 
+    https://www.pololu.com/product/2119
   - front: red, black, and black lines are for ground and power in from
     the battery.
   - front: yellow, blue, and black lines are for connecting a (non-standard)
@@ -228,7 +234,7 @@ Specific LED usage:
   will use PWM to keep the power at the specified level (or less.)
   This means you can sometimes round down on the resistor values:
   for example, if the `perfect` resistor is 1.6 ohms, and the 
-  calculator recomends 1.8 ohms, you might use a 1.5ohm to give
+  calculator recommends 1.8 ohms, you might use a 1.5ohm to give
   the microcontroller a little more "range" to work with.
 
 - LED indicator lights, usually on the buttons. Powered at Vcc,
@@ -238,6 +244,7 @@ Specific LED usage:
 
 - DotStar smart LEDs. Used for user indicators. (Power meter,
   volume, etc.) Driven by the prop shield, requires no resistors.
+  (The provided wiring diagram does not include this.)
 
 ### Power Bus
 The saber uses a common ground. There are 4 positive power voltages. Please
@@ -265,13 +272,14 @@ Convention, and the current design, uses a 2.1mm recharge jack. Wiring of the
 jack is such that:
 1. the battery charges when the charger is plugged in
 2. the circuit is dead when there is a non-conductive kill key plugged in
-3. the circuit is live when nothing is plugged in
+3. the circuit is live when nothing is plugged in, which is also
+   indicated by the ring LED if you use that type of momentary switch.
 
 This is useful, and convention for almost all saber designs, but a little 
 weird. For it to work (safely) for case #1, the grounded sleeve of the recharge 
 port should be isolated from "true ground" and the case of the saber. You need 
-to be careful with a metal port, or use a insulated plastic one. (I went with
-an insulated plastic one.)
+to be careful with a metal port, or use an insulated plastic one. (I went with
+an insulated plastic one. For example: https://www.amazon.com/gp/product/B0147XFIQ6)
 
 #### 3V or 7V
 
@@ -301,12 +309,12 @@ thusfar with the service.
 The prop shield "collects" 1) an audio amplifier, 2) a DotStar LED controller,
 and 3) an accelerometer onto one board. The PCB with and without the Prop
 Shield are functionally equivalent. But without the Prop Shield, you need
-to add the amp and accelerometer yourself. Depending on space contraints,
+to add the amp and accelerometer yourself. Depending on space constraints,
 one or the other is more appealing. (Which is why I maintain both versions,
 but the V7 will move to Prop Shield exclusively.)
 
 - A **microcontroller**, the Teensy 3.2, is the micro-computer
-  that runs the softare. It controls the blade state, the color
+  that runs the software. It controls the blade state, the color
   of the LEDs, the color of the blade, and does audio processing.
 
   It is soldered to a PCB and (optionally) a prop shield. The microcontroller
@@ -315,7 +323,7 @@ but the V7 will move to Prop Shield exclusively.)
 
 - **LED amplifier** The LED uses a 3 channel, 350ma (average) controller.
   The microcrontroller uses an amplifier bridge made of 3 MOSFETS, 
-  resistors, and a copacitor. Note the LED resistors
+  resistors, and a capacitor. Note the LED resistors
   are on the PCB and not off-board, as is conventional.
 
 - **LED** a 1 WATT Cree or Luxeon LED in a star configuration is typical.
@@ -327,7 +335,7 @@ but the V7 will move to Prop Shield exclusively.)
 
 The code assumes 1 or 2 switches.
 - A: the main switch. Hold for power, tap for battery level indicator.
-- B: the auxillary switch. When the blade is on, tap for "blaster effect",
+- B: the auxiliary switch. When the blade is on, tap for "blaster effect",
   hold for "lockup effect". When the blade is off, hold to toggle sound.
   When the sound turns on, hold for 1-4 flashes to set volume.
 
@@ -337,13 +345,15 @@ color / sound palettes.
 
 In a 1 switch configuration, a tap mode switches between "blade", "palette",
 and "volume". Long press either turns the blade on/off, or selects the 
-palette or valume.
+palette or volume.
 
 ### Audio
 
 Audio playback is integrated into the main micro controller. It takes
-44.1kHz in; you will need to convert files to 44.1k. (They are typically
-*not* 44.1kHz when provided, so you will need to convert.)
+44.1kHz in; you will need to convert files to 44.1k. They are typically
+*not* 44.1kHz when provided, so you will need to convert.
+- http://www.foobar2000.org/
+- http://www.huelix.com/audio-converter/
 
 You can have up to 10 sound "fonts" or sound banks. Each font
 needs to be in its own sub-directory, which will be the name of the font.
@@ -441,8 +451,10 @@ be close, but doesn't need to be exact.
 
 ### Command line
 
-If you connect vias USB, you can open the COM port to the saber and
-issue commands. This works irrespective of SERIAL_DEBUG.
+If you connect via USB, you can open the COM port to the saber and
+issue commands. Do this by opening the Serial Monitor and entering
+comminds in the terminal that appears. This works irrespective of 
+SERIAL_DEBUG.
 
 The saber has 8 palettes. The palette is a combination of:
 - blade color
