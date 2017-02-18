@@ -27,6 +27,9 @@
     <ClCompile Include="..\..\..\src\saber\assets.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\saber\Grinliz_Util.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\saber\renderer.h">
@@ -36,6 +39,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\saber\assets.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\saber\Grinliz_Util.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
