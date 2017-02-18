@@ -2,7 +2,14 @@
 #define SABER_UTIL_INCLUDED
 
 #include <stdint.h>
-#include "pins.h"
+/* Don't include pins.h, etc. Keep this header (but not cpp)
+   cross platform so that it can be included with test / debug
+   code.
+*/
+//#include "pins.h" 
+
+class Blade;
+class SaberDB;
 
 enum {
     BLADE_OFF,
@@ -32,30 +39,34 @@ public:
         return m_startTime;
     }
 
+    void process(Blade* blade, const SaberDB& saberDB, uint32_t time);
+
 private:
     uint8_t  m_currentState = BLADE_OFF;
     uint32_t m_startTime = 0;
 };
 
-enum {
-    BUTTON_MODE_NORMAL,
-    BUTTON_MODE_PALETTE,
-    BUTTON_MODE_VOLUME,
-    NUM_BUTTON_MODES
+enum class UIMode {
+    NORMAL,
+    PALETTE,
+    VOLUME,
+	MEDITATION
 };
 
-class ButtonMode
+class UIModeUtil
 {
 public:
-    ButtonMode() {}
+	UIModeUtil() {}
 
+	void set(UIMode mode) { m_mode = mode; }
     void nextMode();
-    const int mode() const {
+    
+    const UIMode mode() const {
         return m_mode;
     }
 
 private:
-    uint8_t m_mode = BUTTON_MODE_NORMAL;
+    UIMode m_mode = UIMode::NORMAL;
 };
 
 /**

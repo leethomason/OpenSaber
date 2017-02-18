@@ -111,6 +111,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 #elif SABER_MODEL == SABER_MODEL_SHOCK
 	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
+	#define LED_TOPOLOGY 				LED_TOPOLOGY_RESISTOR
 	#define SABER_SOUND_ON
 	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
@@ -118,6 +119,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_CRYSTAL			80
 	#define SABER_CRYSTAL_LOW		24
 	#define SABER_DISPLAY
+	#define MEDITATION_MODE			1
 
 	// FIXME TUNE ALL
 	static const int32_t UVOLT_MULT = 6680;
@@ -203,6 +205,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
 	#define LED_TOPOLOGY 				LED_TOPOLOGY_DRIVER
+
 	//#define SABER_NUM_LEDS 			4
 	//#define SABER_UI_START  		0
 	//#define SABER_UI_BRIGHTNESS		8

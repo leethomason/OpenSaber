@@ -37,7 +37,8 @@ public:
     void push(int c)                  {
         token.append(c);
     }
-    bool processCMD(RGB* color);
+    bool processCMD();
+    
     const char* getBuffer() const     {
         return token.c_str();
     }
@@ -55,7 +56,7 @@ private:
     SaberDB* database;
     CStr<18> token;
     CStr<6>  action;
-    CStr<10> value;
+    CStr<20> value;
 };
 
 

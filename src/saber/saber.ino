@@ -53,8 +53,6 @@
 #include "saberUtil.h"
 #include "tester.h"
 
-static const RGB BLADE_BLACK(0);
-static const uint32_t FLASH_TIME              = 120;
 static const uint32_t VBAT_TIME_INTERVAL      = 500;
 
 static const uint32_t INDICATOR_TIME          = 500;
@@ -66,7 +64,9 @@ bool     paletteChange  = false;    // used to prevent sound fx on palette chang
 uint32_t reflashTime    = 0;
 bool     flashOnClash   = false;
 float    maxGForce2     = 0.0f;
-uint32_t lastMotionTime = 0;      
+uint32_t lastMotionTime = 0;    
+uint32_t meditationTimer = 0;  
+uint32_t lastLoopTime   = 0;
 
 #ifdef SABER_SOUND_ON
 // First things first: disable that audio to avoid clicking.
@@ -84,7 +84,7 @@ UIRenderData uiRenderData;
 #ifdef SABER_TWO_BUTTON
 ButtonCB    buttonB(PIN_SWITCH_B, Button::PULL_UP);
 #else
-ButtonMode  buttonMode;
+UIModeUtil  uiMode;
 #endif
 SaberDB     saberDB;
 AveragePower averagePower;
@@ -115,7 +115,6 @@ CMDParser cmdParser(&saberDB);
 Blade blade;
 Timer vbatTimer(VBAT_TIME_INTERVAL);
 Timer gforceDataTimer(110);
-File logFile;
 
 Tester tester;
 uint32_t unlocked = 0;
@@ -134,20 +133,16 @@ void setupSD(int logCount)
 {
     SPI.setMOSI(PIN_SABER_MOSI);
     SPI.setSCK(PIN_SABER_CLOCK);
-    #ifdef SABER_SOUND_ON
+    #if (SABER_SOUND_ON == SABER_SOUND_SD)
         while (!(SD.begin(PIN_SDCARD_CS))) {
             Log.p("Unable to access the SD card").eol();
             delay(500);
         }
-        #ifdef LOGFILE
-            SD.mkdir("logs");
-            char path[] = "logs/log00.txt";
-            path[8] = ((logCount / 10) % 10) + '0';
-            path[9] = (logCount % 10) + '0';
-            logFile = SD.open(path, FILE_WRITE);
-            logFile.print("Log open. Instance=");
-            logFile.println(logCount);
-        #endif
+    #elif (SABER_SOUND_ON == SABER_SOUND_FLASH)
+        while(!(SerialFlash.begin(PIN_MEMORY_CS))) {
+            Log.p("Unable to access SerialFlash memory.").eol();
+            delay(500);
+        }
     #endif
 }
 
@@ -168,9 +163,6 @@ void setup() {
     #endif
     #ifdef SABER_SOUND_ON
         setupSD(saberDB.numSetupCalls());
-        #ifdef LOGFILE
-            Log.attachLog(&logFile);
-        #endif
     #endif
 
     Log.p("setup()").eol();
@@ -190,7 +182,7 @@ void setup() {
         Log.p("Voltmeter initialized.").eol();
     #endif
 
-    blade.setRGB(BLADE_BLACK);
+    blade.setRGB(RGB::BLACK);
 
     buttonA.holdHandler(buttonAHoldHandler);
     buttonA.clickHandler(buttonAClickHandler);
@@ -289,6 +281,7 @@ void syncToDB()
 void buttonAReleaseHandler(const Button& b)
 {
     ledA.blink(0, 0);
+
     #ifdef SABER_LOCK
         if (bladeState.bladeOn()) {
             uint32_t holdTime = millis() - b.pressedTime();
@@ -299,6 +292,11 @@ void buttonAReleaseHandler(const Button& b)
             }
         }
     #endif
+
+    if (uiMode.mode() == UIMode::MEDITATION && meditationTimer) {
+        Log.p("med start").eol();
+        sfx.playSound(SFX_SPIN, SFX_OVERRIDE, true);
+    }
 }
 
 #ifdef SABER_TWO_BUTTON
@@ -423,12 +421,22 @@ void blinkPaletteHandler(const LEDManager& manager)
     syncToDB();
 }
 
+void meditationTimeHandler(const LEDManager& manager)
+{
+    switch(manager.numBlinks()) {
+        case 1: meditationTimer = 1000 * 60 * 1; break;
+        case 2: meditationTimer = 1000 * 60 * 2; break;
+        case 3: meditationTimer = 1000 * 60 * 5; break;
+        case 4: meditationTimer = 1000 * 60 * 10; break;
+    }
+}
+
 // One button case.
 void buttonAClickHandler(const Button&)
 {
     Log.p("buttonAClickHandler").eol();
     if (bladeState.bladeOff()) {
-        buttonMode.nextMode();
+        uiMode.nextMode();
     }
     else if (bladeState.state() == BLADE_ON) {
         bladeState.change(BLADE_FLASH);
@@ -436,25 +444,30 @@ void buttonAClickHandler(const Button&)
             sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
         #endif
     }
+    meditationTimer = 0;
 }
 
 void buttonAHoldHandler(const Button&)
 {
     Log.p("buttonAHoldHandler").eol();
+    meditationTimer = 0;
     if (bladeState.state() == BLADE_OFF) {
 
-        if (buttonMode.mode() == BUTTON_MODE_NORMAL) {
+        if (uiMode.mode() == UIMode::NORMAL) {
             bladeState.change(BLADE_IGNITE);
             #ifdef SABER_SOUND_ON
                 sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
             #endif
         }
-        else if (buttonMode.mode() == BUTTON_MODE_PALETTE) {
+        else if (uiMode.mode() == UIMode::PALETTE) {
             saberDB.setPalette(0);
             ledA.blink(SaberDB::NUM_PALETTES, INDICATOR_CYCLE, blinkPaletteHandler);
         }
-        else if (buttonMode.mode() == BUTTON_MODE_VOLUME) {
+        else if (uiMode.mode() == UIMode::VOLUME) {
             ledA.blink(5, INDICATOR_CYCLE, blinkVolumeHandler);
+        }
+        else if (uiMode.mode() == UIMode::MEDITATION) {
+            ledA.blink(4, INDICATOR_CYCLE, meditationTimeHandler);
         }
 
     }
@@ -466,68 +479,19 @@ void buttonAHoldHandler(const Button&)
     }
 }
 
-
 #endif
 
-void processBladeState()
+bool buttonsReleased()
 {
-    switch (bladeState.state()) {
-    case BLADE_OFF:
-        break;
-
-    case BLADE_ON:
-        blade.setRGB(saberDB.bladeColor());
-        break;
-
-    case BLADE_IGNITE:
-    {
-        uint32_t igniteTime = 1000;
-        #ifdef SABER_SOUND_ON
-            igniteTime = sfx.getIgniteTime();
-        #endif
-        bool done = blade.setInterp(millis() - bladeState.startTime(), igniteTime, BLADE_BLACK, saberDB.bladeColor());
-        if (done) {
-            bladeState.change(BLADE_ON);
-        }
-    }
-    break;
-
-    case BLADE_RETRACT:
-    {
-        uint32_t retractTime = 1000;
-        #ifdef SABER_SOUND_ON
-            retractTime = sfx.getRetractTime();
-        #endif
-        bool done = blade.setInterp(millis() - bladeState.startTime(), retractTime, saberDB.bladeColor(), BLADE_BLACK);
-        if (done) {
-            bladeState.change(BLADE_OFF);
-        }
-    }
-    break;
-
-    case BLADE_FLASH:
-        // interpolate?
-    {
-        uint32_t delta = millis() - bladeState.startTime();
-        if (delta > FLASH_TIME) {
-            blade.setRGB(saberDB.bladeColor());
-            bladeState.change(BLADE_ON);
-        }
-        else {
-            blade.setRGB(saberDB.impactColor());
-        }
-    }
-    break;
-
-    default:
-        ASSERT(false);
-        break;
-    }
+    #ifdef SABER_TWO_BUTTON
+        return !buttonA.isDown() && !buttonB.isDown();
+    #else
+        return !buttonA.isDown();
+    #endif
 }
 
 void serialEvent() {
     bool processed = false;
-    RGB color;
 
     while (Serial.available()) {
         int c = Serial.read();
@@ -536,7 +500,7 @@ void serialEvent() {
             Serial.print("event ");
             Serial.println(cmdParser.getBuffer());
             #endif
-            processed = cmdParser.processCMD(&color);
+            processed = cmdParser.processCMD();
         }
         else {
             cmdParser.push(c);
@@ -557,6 +521,17 @@ void loop() {
         buttonB.process();
         ledB.process();
     #endif
+
+    if (meditationTimer && buttonsReleased()) {
+        uint32_t delta = msec - lastLoopTime;
+        if (delta >= meditationTimer) {
+            meditationTimer = 0;
+            sfx.playSound(SFX_SPIN, SFX_OVERRIDE, true);            
+        }
+        else {
+            meditationTimer -= delta;
+        }
+    }
 
     tester.process();
     if (bladeState.state() == BLADE_ON) {
@@ -606,7 +581,7 @@ void loop() {
         maxGForce2 = 1;
     }
 
-    processBladeState();
+    bladeState.process(&blade, saberDB, millis());
     tester.process();
     #ifdef SABER_SOUND_ON
         sfx.process();
@@ -641,35 +616,15 @@ void loop() {
     }
 
     if (displayTimer.tick()) {
-        int sketcherMode = Sketcher::BLADE_ON_MODE;
-        (void)sketcherMode; // If no display, won't be used, but don't need a warning.
         uiRenderData.color = saberDB.bladeColor();
+        uiRenderData.meditationTimeRemain = meditationTimer;
 
-        #ifdef SABER_TWO_BUTTON
-            if (bladeState.state() == BLADE_OFF) {
-                sketcherMode = Sketcher::REST_MODE;
-            }
-        #else
-            if (bladeState.state() == BLADE_OFF) {
-                switch (buttonMode.mode()) {
-                case BUTTON_MODE_PALETTE:
-                    sketcherMode = Sketcher::PALETTE_MODE;
-                    break;
-                case BUTTON_MODE_VOLUME:
-                    sketcherMode = Sketcher::VOLUME_MODE;
-                    break;
-                default:
-                    sketcherMode = Sketcher::REST_MODE;
-                    break;
-                }
-            }
-        #endif
         #ifdef SABER_DISPLAY
-            sketcher.Draw(&renderer, displayTimer.period(), sketcherMode, &uiRenderData);
+            sketcher.Draw(&renderer, displayTimer.period(), uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
             display.display(oledBuffer);
         #endif
         #ifdef SABER_UI_START
-            dotstarUI.Draw(leds + SABER_UI_START, sketcherMode, uiRenderData);
+            dotstarUI.Draw(leds + SABER_UI_START, uiMode.mode(), bladeState.bladeOn(), uiRenderData);
         #endif
         //Log.p("crystal: ").p(leds[0].r).p(" ").p(leds[0].g).p(" ").p(leds[0].b).eol();
     }
@@ -683,7 +638,7 @@ void loop() {
         else {
             // Use the blade color or the breathing color.
             const RGB bladeColor = saberDB.bladeColor();
-            if (bladeState.state() == BLADE_OFF && buttonMode.mode() == BUTTON_MODE_NORMAL) {
+            if (bladeState.state() == BLADE_OFF && (uiMode.mode() == UIMode::NORMAL || uiMode.mode() == UIMode::MEDITATION)) {
                 calcCrystalColor(msec, SABER_CRYSTAL_LOW, SABER_CRYSTAL, bladeColor, &leds[0]);
                 //OSASSERT(leds[0].get());
                 //OSASSERT(dotstar.brightness() == 256);
@@ -698,5 +653,6 @@ void loop() {
     #ifdef SABER_NUM_LEDS
         dotstar.display();
     #endif
+    lastLoopTime = msec;
 }
  

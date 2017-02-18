@@ -69,6 +69,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\saber\assets.cpp" />
+    <ClCompile Include="..\..\src\saber\Grinliz_Util.cpp" />
     <ClCompile Include="..\..\src\saber\renderer.cpp" />
     <ClCompile Include="..\..\src\saber\sketcher.cpp" />
     <ClCompile Include="main.cpp" />
@@ -76,6 +77,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\saber\assets.h" />
+    <ClInclude Include="..\..\src\saber\Grinliz_Util.h" />
     <ClInclude Include="..\..\src\saber\renderer.h" />
     <ClInclude Include="..\..\src\saber\sketcher.h" />
     <ClInclude Include="oledsim.h" />

@@ -32,6 +32,7 @@ SOFTWARE.
 enum {            //  Max
   SFX_IDLE,       //  1
   SFX_MOTION,     //  16
+  SFX_SPIN,       //  4  although not currently used
   SFX_IMPACT,     //  16
   SFX_USER_TAP,   //  4
   SFX_USER_HOLD,  //  1
@@ -39,7 +40,7 @@ enum {            //  Max
   SFX_POWER_OFF,  //  4
 
   NUM_SFX_TYPES,
-  MAX_SFX_FILES = 48,
+  MAX_SFX_FILES = 64,
   MAX_FONTS = 10,
   SFX_NONE = 255
 };
@@ -51,6 +52,7 @@ enum {
 };
 
 class AudioPlayer;
+class SerialFlashFile;
 
 class SFX
 {
@@ -61,7 +63,7 @@ public:
   bool init();
   void scanFiles(uint8_t font);
 
-  bool playSound(int sfx, int mode);
+  bool playSound(int sfx, int mode, bool playIfOff=false);
   bool playSound(const char* sfx);
   void stopSound();
 
@@ -99,6 +101,7 @@ private:
   void readIgniteRetract();
   bool readHeader(const char* filename, uint8_t* nChannels, uint32_t* nSamplesPerSec, uint32_t* lengthMillis, bool logToConsole);
   uint32_t readU32(File& file, int n);
+  uint32_t readU32(SerialFlashFile& file, int n);
 
   // note: initialize to 255
   struct SFXLocation {
