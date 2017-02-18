@@ -28,7 +28,9 @@
 #include "AudioPlayer.h"
 #include "tester.h"
 
+#if SERIAL_DEBUG == 1
 #define DEBUG_DEEP
+#endif
 
 SFX* SFX::m_instance = 0;
 
