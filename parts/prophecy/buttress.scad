@@ -77,7 +77,8 @@ module buttress(	h=H_BUTTRESS,
 					mcDeltaY=0, 
 					trough=0, 
 					wideWing=0,
-					highHoles=false)
+					highHoles=0,
+					highBoost=[])
 {
 	difference() {
 		cylinder(h=h, d=D_AFT);	
@@ -122,10 +123,14 @@ module buttress(	h=H_BUTTRESS,
 		    hull() {
 			    translate([13, 3, -EPS]) cylinder(h=h + EPS2, d=3);
 			    translate([13, 0, -EPS]) cylinder(h=h + EPS2, d=3);
+			    translate([13-highHoles, 3 + highBoost, -EPS]) cylinder(h=h + EPS2, d=3);
+			    translate([13-highHoles, 0, -EPS]) cylinder(h=h + EPS2, d=3);
 		    }
 		    hull() {
 			    translate([-13, 3, -EPS]) cylinder(h=h + EPS2, d=3);
 			    translate([-13, 0, -EPS]) cylinder(h=h + EPS2, d=3);
+			    translate([-13+highHoles, 3 + highBoost, -EPS]) cylinder(h=h + EPS2, d=3);
+			    translate([-13+highHoles, 0, -EPS]) cylinder(h=h + EPS2, d=3);
 		    }
 	    }
 	}
