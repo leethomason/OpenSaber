@@ -295,7 +295,9 @@ void buttonAReleaseHandler(const Button& b)
 
     if (uiMode.mode() == UIMode::MEDITATION && meditationTimer) {
         Log.p("med start").eol();
+        #ifdef SABER_SOUND_ON
         sfx.playSound(SFX_SPIN, SFX_OVERRIDE, true);
+        #endif
     }
 }
 
@@ -526,7 +528,9 @@ void loop() {
         uint32_t delta = msec - lastLoopTime;
         if (delta >= meditationTimer) {
             meditationTimer = 0;
+            #ifdef SABER_SOUND_ON
             sfx.playSound(SFX_SPIN, SFX_OVERRIDE, true);            
+            #endif
         }
         else {
             meditationTimer -= delta;

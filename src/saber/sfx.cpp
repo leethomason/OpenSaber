@@ -374,6 +374,8 @@ bool SFX::readHeader(const char* filename, uint8_t* nChannels, uint32_t* nSample
     File file = SD.open(filename);
 #elif (SABER_SOUND_ON == SABER_SOUND_FLASH)
     SerialFlashFile file = SerialFlash.open(filename);
+#else
+    File file;
 #endif    
     if (file) {
         Log.p(filename).eol();
