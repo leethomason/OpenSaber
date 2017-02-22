@@ -1,5 +1,5 @@
 #include "renderer.h"
-#include <string.h>
+#include "Grinliz_Util.h"
 #include <stdint.h>
 
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
@@ -7,14 +7,14 @@
 
 void Renderer::Attach(int w, int h, uint8_t* buf)
 {
-	OSASSERT(buf);
+	ASSERT(buf);
 
 	width = w;
 	height = h;
 	buffer = buf;
 	nRows = height / 8;
 
-	OSASSERT(nRows <= MAX_ROWS);
+	ASSERT(nRows <= MAX_ROWS);
 }
 
 bool Renderer::DrawBitmap(int x, int y, textureData data, int flags, int clip0, int clip1)
@@ -22,14 +22,14 @@ bool Renderer::DrawBitmap(int x, int y, textureData data, int flags, int clip0, 
 	int texW = 0;
 	int texH = 0;
 	const uint8_t* tex = data(&texW, &texH);
-	OSASSERT(tex);
+	ASSERT(tex);
 	return DrawBitmap(x, y, tex, texW, texH, flags, clip0, clip1);
 }
 
 bool Renderer::DrawBitmap(int x, int y, const uint8_t* tex, int texW, int texH, int flags, int clip0, int clip1)
 {
 	if (!tex) return false;
-	OSASSERT(buffer);
+	ASSERT(buffer);
 	if (!buffer) return false;
 
 	const int texRows = (texH + 7) / 8;
@@ -62,7 +62,7 @@ bool Renderer::DrawBitmap(int x, int y, const uint8_t* tex, int texW, int texH, 
 		if (r < 0 || r >= nRows) continue;
 
 		uint8_t* dst = buffer + x0 + r * width;
-		OSASSERT(dst >= buffer && dst < buffer + nRows * width);
+		ASSERT(dst >= buffer && dst < buffer + nRows * width);
 		const uint8_t* src = tex + (r - r0) * texW + dx;
 		int bias = 1;
 		if (flags & FLIP_X) {
@@ -74,13 +74,13 @@ bool Renderer::DrawBitmap(int x, int y, const uint8_t* tex, int texW, int texH, 
 
 			*dst = *dst & (~mask[r]);
 			if (src < texEnd) {
-				OSASSERT(src >= tex && src < tex + texRows * texW);
-				OSASSERT(dst >= buffer && dst < buffer + nRows * width);
+				ASSERT(src >= tex && src < tex + texRows * texW);
+				ASSERT(dst >= buffer && dst < buffer + nRows * width);
 				*dst |= *src << shift;
 			}
 			if (r > r0) {
-				OSASSERT((src - texW) >= tex && (src - texW) < tex + texRows * texW);
-				OSASSERT(dst >= buffer && dst < buffer + nRows * width);
+				ASSERT((src - texW) >= tex && (src - texW) < tex + texRows * texW);
+				ASSERT(dst >= buffer && dst < buffer + nRows * width);
 				*dst |= *(src - texW) >> downShift;
 			}
 			dst += bias;
@@ -106,7 +106,7 @@ void Renderer::DrawRectangle(int x, int y, int w, int h)
 
 		uint8_t* dst = buffer + x0 + r * width;
 		for (int x = x0; x < x1; ++x) {
-			OSASSERT(dst >= buffer && dst < buffer + nRows * width);
+			ASSERT(dst >= buffer && dst < buffer + nRows * width);
 			*dst++ |= mask[r];
 		}
 	}
@@ -128,7 +128,7 @@ void Renderer::CalcMask(int y, int h, int* pr0, int* pr1)
 	if (pr0) *pr0 = r0;
 	if (pr1) *pr1 = r1;
 
-	OSASSERT(nRows <= MAX_ROWS);
+	ASSERT(nRows <= MAX_ROWS);
 	for (int r = MAX(r0, 0); r < MIN(r1, nRows); ++r) {
 		mask[r] = 0xff;
 	}
@@ -178,6 +178,11 @@ int Renderer::StrWidth(const char* str, glyphMetrics metrics)
 void Renderer::Fill(int c)
 {
 	if (buffer) {
-		memset(buffer, c ? 0xff : 0, nRows * width);
+		const int size = nRows * width;
+		const uint8_t val = c ? 0xff : 0;
+
+		for (int i = 0; i < size; ++i) {
+			buffer[i] = val;
+		}
 	}
 }

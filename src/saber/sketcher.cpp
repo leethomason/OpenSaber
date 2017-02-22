@@ -3,25 +3,14 @@
 #include "assets.h"
 
 #include <math.h>
-#include <string.h>
-
-static int16_t gSinTable[256] = { 0 };
-
-int16_t isin(uint16_t x)
-{
-	if (gSinTable[64] == 0) {
-		for (int i = 0; i < 256; ++i) {
-			float x = 2 * 3.14159f * float(i) / 256.0f;
-			gSinTable[i] = int16_t(sin(x) * 256.0f);
-		}
-	}
-	return gSinTable[x & 0xff];
-}
 
 Sketcher::Sketcher()
 {
-    memset(data, 0, DATA_WIDTH);
+	for (int i = 0; i < DATA_WIDTH; ++i) {
+		accelData[i] = 0;
+	}
 }
+
 
 textureData Sketcher::GetDial(int value)
 {
@@ -33,7 +22,7 @@ textureData Sketcher::GetDial(int value)
 	case 3: td = get_dial3; break;
 	case 4: td = get_dial4; break;
     default:
-		OSASSERT(false);
+		ASSERT(false);
 		//Log.p("value=").p(value).eol();
         break;
     }
@@ -42,16 +31,16 @@ textureData Sketcher::GetDial(int value)
 
 void Sketcher::Push(uint8_t val)
 {
-    data[pos] = val;
+    accelData[pos] = val;
     pos++;
     if (pos == DATA_WIDTH) pos = 0;
 }
 
-void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* info)
+
+void Sketcher::Draw(Renderer* d, uint32_t delta, UIMode mode, bool ignited, const UIRenderData* info)
 {
 	d->Fill(0);
 
-	//#define TEST5
 #ifdef TEST1
 	for (int i = 0; i < 11; ++i) {
 		d->DrawStr("U", -5 + 127 * i / 10, -5 + 34 * i / 10, getGlypth_aurekBesh6); // , 10, 100);
@@ -83,12 +72,68 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* i
 #endif
 
 #if 1
-	{
-		d->DrawBitmap(X0, 0, GetDial(info->power));
-		d->DrawBitmap(X1 - DIAL_WIDTH, 0, GetDial(info->volume), Renderer::FLIP_X);
+	switch (mode) {
+	case UIMode::NORMAL:
+		DrawBladeMode(d, delta, ignited, info);
+		break;
+	case UIMode::PALETTE:
+		DrawPaletteMode(d, delta, info);
+		break;
+	case UIMode::VOLUME:
+		DrawVolumeMode(d, delta, info);
+		break;
+	case UIMode::MEDITATION:
+		DrawMeditationMode(d, delta, info);
+		break;
+	default:
+		ASSERT(false);
+		break;
+	}
+#endif
+
+#if 0
+	// Test pattern. dot-space-line
+	uint8_t* buf = d->Buffer();
+	for (int i = 0; i < 130; ++i) {
+		buf[i] = i;
+	}
+#endif
+}
+
+
+void Sketcher::DrawDials(Renderer* d, const UIRenderData* data, bool labels)
+{
+	d->DrawBitmap(X0, 0, GetDial(data->power));
+	d->DrawBitmap(X1 - DIAL_WIDTH, 0, GetDial(data->volume), Renderer::FLIP_X);
+	if (labels) {
 		d->DrawStr("P", X0 + 23, 12, getGlypth_aurekBesh6);
 		d->DrawStr("V", X1 - 31, 12, getGlypth_aurekBesh6);
 	}
+}
+
+
+void Sketcher::DrawStateDisplay(Renderer* d, const UIRenderData* data)
+{
+	static const int GUTTER = 1;
+
+	// Current Palette
+	for (int i = 0; i <= data->palette; ++i) {
+		int x = 3 - (i % 4);
+		int y = i / 4;
+		d->DrawRectangle(CENTER - GUTTER - 24 + x * 6, y * 6, 5, 5);
+	}
+
+	// Current blade color
+	for (int i = 0; i < 3; ++i) {
+		d->DrawRectangle(CENTER + GUTTER, i * 4, 1 + data->color[i] * (DATA_WIDTH / 2) / 256, 3);
+	}
+}
+
+
+void Sketcher::DrawBladeMode(Renderer* d, uint32_t time, bool ignited, const UIRenderData* data)
+{
+	DrawDials(d, data);
+
 	static const int NLINES = 5;
 	static const char* lines[NLINES] = {
 		"THERE IS NO EMOTION, THERE IS ONLY STILLNESS.",
@@ -98,9 +143,9 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* i
 		"THERE IS NO SELF, THERE IS ONLY THE FORCE.",
 	};
 
-	animTime += delta;
+	animTime += time;
 
-	if (mode == REST_MODE) {
+	if (!ignited) {
 		// Render the Jedi Creed.
 		int dx = animTime / 100;
 		bool render = d->DrawStr(lines[line],
@@ -116,30 +161,7 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* i
 			animTime = 0;
 		}
 	}
-
-	if (mode == PALETTE_MODE || mode == VOLUME_MODE)
-	{
-		const char* label = mode == PALETTE_MODE ? "PAL" : "VOL";
-
-		int wPal = d->StrWidth(label, getGlypth_aurekBesh6);
-
-		if (mode == PALETTE_MODE) {
-			char volts[5] = { 0 };
-			volts[0] = '0' + info->mVolts / 1000;
-			volts[1] = '0' + (info->mVolts % 1000) / 100;
-			volts[2] = '0' + (info->mVolts % 100) / 10;
-			volts[3] = '0' + (info->mVolts % 10);
-			int wName = d->StrWidth(volts, getGlypth_calibri8);
-			d->DrawStr(volts, CENTER - wName / 2, 14, getGlypth_calibri8);
-		}
-		else {
-			int wName = d->StrWidth(info->fontName, getGlypth_calibri8);
-			d->DrawStr(info->fontName, CENTER - wName / 2, 14, getGlypth_calibri8);
-		}
-		d->DrawStr(label, CENTER - wPal / 2, 23, getGlypth_aurekBesh6);
-	}
-
-	if (mode == BLADE_ON_MODE) {
+	else {
 		// Render accelerometer data.
 		static const int TOP = 15;
 		static const int H = 16;
@@ -147,9 +169,9 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* i
 		// Draw most to least recent.
 		for (int i = 0; i < DATA_WIDTH; ++i) {
 			int index = (pos - 1 - i + DATA_WIDTH * 2) % DATA_WIDTH;
-			OSASSERT(index >= 0 && index < DATA_WIDTH);
-			OSASSERT((i != 0) || (index == ((pos - 1 + DATA_WIDTH) % DATA_WIDTH)));
-			int point = data[index];
+			ASSERT(index >= 0 && index < DATA_WIDTH);
+			ASSERT((i != 0) || (index == ((pos - 1 + DATA_WIDTH) % DATA_WIDTH)));
+			int point = accelData[index];
 			// Values less than one (u8 64) aren't currently graphed.
 			if (point < 64) point = 64;  // 1g
 
@@ -158,90 +180,127 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, int mode, const UIRenderData* i
 			d->DrawRectangle(CENTER + DATA_WIDTH / 2 - i, TOP + H - h, 1, h + 1);
 		}
 	}
-
-	{
-		static const int GUTTER = 1;
-
-		// Current Palette
-		for (int i = 0; i <= info->palette; ++i) {
-			int x = 3 - (i % 4);
-			int y = i / 4;
-			d->DrawRectangle(CENTER - GUTTER - 24 + x * 6, y * 6, 5, 5);
-		}
-
-		// Current blade color
-		for (int i = 0; i < 3; ++i) {
-			d->DrawRectangle(CENTER + GUTTER, i * 4, 1 + info->color[i] * (DATA_WIDTH / 2) / 256, 3);
-		}
-	}
-
-#endif
-#if 0
-	// Test pattern. dot-space-line
-	uint8_t* buf = d->Buffer();
-	for (int i = 0; i < 130; ++i) {
-		buf[i] = i;
-	}
-#endif
+	DrawStateDisplay(d, data);
 }
 
 
-void DotStarUI::Draw(RGB* led, int mode, const UIRenderData& data)
+void Sketcher::DrawPaletteMode(Renderer* d, uint32_t time, const UIRenderData* data)
 {
-    static const uint32_t COLOR_AUDIO_ON  = 0x0000FF;
-    static const uint32_t COLOR_AUDIO_OFF = 0xFFD800;
-    //static const uint32_t COLOR_POWER_ON  = 0x00FF00;
-    //static const uint32_t COLOR_POWER_OFF = 0x800000;
-    static const uint32_t PALETTE_ONE     = 0xFFFFFF;
+	DrawDials(d, data);
 
-    switch(mode) {
-        case Sketcher::REST_MODE:
-        {
-            led[0].set(data.volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
-            led[1].set(data.volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
-            led[2].set(0);
+	static const char* label = "PAL";
+	const int wPal = d->StrWidth(label, getGlypth_aurekBesh6);
+
+	CStr<5> volts;
+	volts.setFromNum(data->mVolts, true);
+
+	int wName = d->StrWidth(volts.c_str(), getGlypth_calibri8);
+	d->DrawStr(volts.c_str(), CENTER - wName / 2, 14, getGlypth_calibri8);
+	d->DrawStr(label, CENTER - wPal / 2, 23, getGlypth_aurekBesh6);
+
+	DrawStateDisplay(d, data);
+}
+
+
+void Sketcher::DrawVolumeMode(Renderer* d, uint32_t time, const UIRenderData* data)
+{
+	DrawDials(d, data);
+
+	static const char* label = "VOL";
+	int wVol = d->StrWidth(label, getGlypth_aurekBesh6);
+
+	int wName = d->StrWidth(data->fontName, getGlypth_calibri8);
+	d->DrawStr(data->fontName, CENTER - wName / 2, 14, getGlypth_calibri8);
+
+	d->DrawStr(label, CENTER - wVol / 2, 23, getGlypth_aurekBesh6);
+	DrawStateDisplay(d, data);
+}
+
+
+void Sketcher::DrawMeditationMode(Renderer* d, uint32_t time, const UIRenderData* data)
+{
+	DrawDials(d, data, false);
+	d->DrawBitmap(WIDTH / 2 - 16, 0, get_jBird);
+
+	uint32_t seconds = data->meditationTimeRemain / 1000;
+	uint32_t minutes = seconds / 60;
+	uint32_t secondsRemain = seconds - minutes * 60;
+
+	CStr<3> secStr;
+	CStr<3> minStr;
+
+	secStr.setFromNum(secondsRemain, true);
+	minStr.setFromNum(minutes, false);
+
+	d->DrawStr(minStr.c_str(), WIDTH / 2 - 30, HEIGHT / 2 - 2, getGlypth_calibri8);
+	d->DrawStr(secStr.c_str(), WIDTH / 2 + 20, HEIGHT / 2 - 2, getGlypth_calibri8);
+}
+
+
+void DotStarUI::Draw(RGB* led, UIMode mode, bool ignited, const UIRenderData& data)
+{
+	static const uint32_t COLOR_AUDIO_ON 	= 0x0000FF;
+	static const uint32_t COLOR_AUDIO_OFF 	= 0xFFD800;
+	static const uint32_t PALETTE_ONE 		= 0xFFFFFF;
+	static const uint32_t MED_0				= 0x0000FF;
+	static const uint32_t MED_1				= 0x0050a0;
+	static const uint32_t MED_2				= 0x00a05F;
+	static const uint32_t MED_3				= 0x00FF00;
+
+	switch (mode) {
+	case UIMode::NORMAL:
+		if (!ignited)
+		{
+			led[0].set(data.volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
+			led[1].set(data.volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
+			led[2].set(0);
 			led[3] = data.color;
-        }
-        break;
+		}
+		else {
+			int i = 0;
+			for (; i < data.power && i < 4; ++i) {
+				led[i] = data.color;
+			}
+			for (; i < 4; ++i) {
+				led[i].set(0);
+			}
+		}
+		break;
 
-        case Sketcher::BLADE_ON_MODE:
-        {
-            int i=0;
-            for(; i<data.power && i < 4; ++i) {
-                //led[i].set(COLOR_POWER_ON);
-                led[i] = data.color;
-            }
-            for(; i<4; ++i) {
-                //led[i].set(COLOR_POWER_OFF);
-                led[i].set(0);
-            }
-        }
-        break;
+	case UIMode::PALETTE:
+	{
+		led[0].set((data.palette & 1) ? PALETTE_ONE : 0);
+		led[1].set((data.palette & 2) ? PALETTE_ONE : 0);
+		led[2].set((data.palette & 4) ? PALETTE_ONE : 0);
+		led[3] = data.color;
+	}
+	break;
 
-        case Sketcher::PALETTE_MODE:
-        {
-            led[0].set((data.palette & 1) ? PALETTE_ONE : 0);
-            led[1].set((data.palette & 2) ? PALETTE_ONE : 0);
-            led[2].set((data.palette & 4) ? PALETTE_ONE : 0);
-			led[3] = data.color;
-        }
-        break;
+	case UIMode::VOLUME:
+	{
+		int i = 0;
+		for (; i < data.volume && i < 4; ++i) {
+			led[i].set(COLOR_AUDIO_ON);
+		}
+		for (; i < 4; ++i) {
+			led[i].set(COLOR_AUDIO_OFF);
+		}
+	}
+	break;
 
-        case Sketcher::VOLUME_MODE:
-        {
-            int i=0;
-            for(; i<data.volume && i < 4; ++i) {
-                led[i].set(COLOR_AUDIO_ON);
-            }
-            for(; i<4; ++i) {
-                led[i].set(COLOR_AUDIO_OFF);
-            }
-        }
-        break;
-    }
-    for(int i=0; i<4; ++i) {
-    	led[i].scale(m_brightness);
-    }
+	case UIMode::MEDITATION:
+	{
+		led[0].set(MED_0);
+		led[1].set(MED_1);
+		led[2].set(MED_2);
+		led[3].set(MED_3);
+	}
+	break;
+
+	}
+	for (int i = 0; i < 4; ++i) {
+		led[i].scale(m_brightness);
+	}
 }
 
 
@@ -257,41 +316,41 @@ bool DotStarUI::Test()
 	data.fontName = "FontName";
 	data.color.set(0xff, 0, 0);
 
-	OSASSERT(data.color.get() == 0xff0000);
+	ASSERT(data.color.get() == 0xff0000);
 	{
 		DotStarUI dotstar;
 		
-		dotstar.Draw(&leds[1], Sketcher::REST_MODE, data);
-		OSASSERT(leds[0].get() == 0);			// check memory
-		OSASSERT(leds[1].get() == 0x0000ff);	// sound on
-		OSASSERT(leds[2].get() == 0x0000ff);	// sound on
-		OSASSERT(leds[3].get() == 0);			// off
-		OSASSERT(leds[4].get() == 0xff0000);	// blade color
-		OSASSERT(leds[5].get() == 0);			// memory check
+		dotstar.Draw(&leds[1], UIMode::NORMAL, false, data);
+		ASSERT(leds[0].get() == 0);			// check memory
+		ASSERT(leds[1].get() == 0x0000ff);	// sound on
+		ASSERT(leds[2].get() == 0x0000ff);	// sound on
+		ASSERT(leds[3].get() == 0);			// off
+		ASSERT(leds[4].get() == 0xff0000);	// blade color
+		ASSERT(leds[5].get() == 0);			// memory check
 
-		dotstar.Draw(&leds[1], Sketcher::BLADE_ON_MODE, data);
-		OSASSERT(leds[0].get() == 0);			// check memory
-		OSASSERT(leds[1] == data.color);	
-		OSASSERT(leds[2] == data.color);
-		OSASSERT(leds[3].get() == 0);			
-		OSASSERT(leds[4].get() == 0);			
-		OSASSERT(leds[5].get() == 0);			// memory check
+		dotstar.Draw(&leds[1], UIMode::NORMAL, true, data);
+		ASSERT(leds[0].get() == 0);			// check memory
+		ASSERT(leds[1] == data.color);	
+		ASSERT(leds[2] == data.color);
+		ASSERT(leds[3].get() == 0);			
+		ASSERT(leds[4].get() == 0);			
+		ASSERT(leds[5].get() == 0);			// memory check
 
-		dotstar.Draw(&leds[1], Sketcher::PALETTE_MODE, data);
-		OSASSERT(leds[0].get() == 0);			// check memory
-		OSASSERT(leds[1].get() == 0xffffff);
-		OSASSERT(leds[2].get() == 0xffffff);
-		OSASSERT(leds[3].get() == 0xffffff);
-		OSASSERT(leds[4] == data.color);
-		OSASSERT(leds[5].get() == 0);			// memory check
+		dotstar.Draw(&leds[1], UIMode::PALETTE, false, data);
+		ASSERT(leds[0].get() == 0);			// check memory
+		ASSERT(leds[1].get() == 0xffffff);
+		ASSERT(leds[2].get() == 0xffffff);
+		ASSERT(leds[3].get() == 0xffffff);
+		ASSERT(leds[4] == data.color);
+		ASSERT(leds[5].get() == 0);			// memory check
 
-		dotstar.Draw(&leds[1], Sketcher::VOLUME_MODE, data);
-		OSASSERT(leds[0].get() == 0);			// check memory
-		OSASSERT(leds[1].get() == 0x0000ff);
-		OSASSERT(leds[2].get() == 0xFFD800);
-		OSASSERT(leds[3].get() == 0xFFD800);
-		OSASSERT(leds[4].get() == 0xFFD800);
-		OSASSERT(leds[5].get() == 0);			// memory check
+		dotstar.Draw(&leds[1], UIMode::VOLUME, false, data);
+		ASSERT(leds[0].get() == 0);			// check memory
+		ASSERT(leds[1].get() == 0x0000ff);
+		ASSERT(leds[2].get() == 0xFFD800);
+		ASSERT(leds[3].get() == 0xFFD800);
+		ASSERT(leds[4].get() == 0xFFD800);
+		ASSERT(leds[5].get() == 0);			// memory check
 	}
 	{
 		DotStarUI dotstar;
@@ -299,37 +358,37 @@ bool DotStarUI::Test()
 		RGB c2 = data.color;
 		c2.scale(128);
 
-		dotstar.Draw(&leds[1], Sketcher::REST_MODE, data);
-		OSASSERT(leds[0].get() == 0);			// check memory
-		OSASSERT(leds[1].get() == 0x00007f);	// sound on
-		OSASSERT(leds[2].get() == 0x00007f);	// sound on
-		OSASSERT(leds[3].get() == 0);			// off
-		OSASSERT(leds[4].get() == 0x7f0000);	// blade color
-		OSASSERT(leds[5].get() == 0);			// memory check
+		dotstar.Draw(&leds[1], UIMode::NORMAL, false, data);
+		ASSERT(leds[0].get() == 0);			// check memory
+		ASSERT(leds[1].get() == 0x00007f);	// sound on
+		ASSERT(leds[2].get() == 0x00007f);	// sound on
+		ASSERT(leds[3].get() == 0);			// off
+		ASSERT(leds[4].get() == 0x7f0000);	// blade color
+		ASSERT(leds[5].get() == 0);			// memory check
 
-		dotstar.Draw(&leds[1], Sketcher::BLADE_ON_MODE, data);
-		OSASSERT(leds[0].get() == 0);			// check memory
-		OSASSERT(leds[1] == c2);
-		OSASSERT(leds[2] == c2);
-		OSASSERT(leds[3].get() == 0);
-		OSASSERT(leds[4].get() == 0);
-		OSASSERT(leds[5].get() == 0);			// memory check
+		dotstar.Draw(&leds[1], UIMode::NORMAL, true, data);
+		ASSERT(leds[0].get() == 0);			// check memory
+		ASSERT(leds[1] == c2);
+		ASSERT(leds[2] == c2);
+		ASSERT(leds[3].get() == 0);
+		ASSERT(leds[4].get() == 0);
+		ASSERT(leds[5].get() == 0);			// memory check
 
-		dotstar.Draw(&leds[1], Sketcher::PALETTE_MODE, data);
-		OSASSERT(leds[0].get() == 0);			// check memory
-		OSASSERT(leds[1].get() == 0x7f7f7f);
-		OSASSERT(leds[2].get() == 0x7f7f7f);
-		OSASSERT(leds[3].get() == 0x7f7f7f);
-		OSASSERT(leds[4] == c2);
-		OSASSERT(leds[5].get() == 0);			// memory check
+		dotstar.Draw(&leds[1], UIMode::PALETTE, false, data);
+		ASSERT(leds[0].get() == 0);			// check memory
+		ASSERT(leds[1].get() == 0x7f7f7f);
+		ASSERT(leds[2].get() == 0x7f7f7f);
+		ASSERT(leds[3].get() == 0x7f7f7f);
+		ASSERT(leds[4] == c2);
+		ASSERT(leds[5].get() == 0);			// memory check
 
-		dotstar.Draw(&leds[1], Sketcher::VOLUME_MODE, data);
-		OSASSERT(leds[0].get() == 0);			// check memory
-		OSASSERT(leds[1].get() == 0x00007f);
-		OSASSERT(leds[2].get() == 0x7F6c00);
-		OSASSERT(leds[3].get() == 0x7F6c00);
-		OSASSERT(leds[4].get() == 0x7F6c00);
-		OSASSERT(leds[5].get() == 0);			// memory check
+		dotstar.Draw(&leds[1], UIMode::VOLUME, false, data);
+		ASSERT(leds[0].get() == 0);			// check memory
+		ASSERT(leds[1].get() == 0x00007f);
+		ASSERT(leds[2].get() == 0x7F6c00);
+		ASSERT(leds[3].get() == 0x7F6c00);
+		ASSERT(leds[4].get() == 0x7F6c00);
+		ASSERT(leds[5].get() == 0);			// memory check
 	}
 	return true;
 }
@@ -361,8 +420,8 @@ bool TestCrystalColor()
 		for (uint32_t t = 0; t < 2000; ++t) {
 			calcCrystalColor(t, 20, 20, base, &out);
 			for (int i = 0; i < 3; ++i) {
-				OSASSERT(out[i] >= base[i] - 20);
-				OSASSERT(out[i] <= base[i] + 20);
+				ASSERT(out[i] >= base[i] - 20);
+				ASSERT(out[i] <= base[i] + 20);
 			}
 		}
 	}
@@ -373,8 +432,8 @@ bool TestCrystalColor()
 		for (uint32_t t = 0; t < 10*1000; t += 10) {
 			calcCrystalColor(t, 100, 100, base, &out);
 			for (int i = 0; i < 3; ++i) {
-				OSASSERT(out[i] >= base[i] - 100);
-				OSASSERT(out[i] <= 255);
+				ASSERT(out[i] >= base[i] - 100);
+				ASSERT(out[i] <= 255);
 			}
 		}
 	}

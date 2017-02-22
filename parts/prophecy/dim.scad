@@ -11,10 +11,12 @@ M_POMMEL_FRONT		= 10;		// Where the pommel becomes aft
 M_RAIL_START		= 12;
 M_SPKR_RING			= 15.5;		// Front of the speaker ring.
 
+H_BUTTRESS			= 4;
+
 M_BUTTRESS_0		= M_SPKR_RING;			// speaker holder, behind wings
-M_BUTTRESS_1		= M_SPKR_RING + 17;
-M_BUTTRESS_2		= M_SPKR_RING + 36;
-M_BUTTRESS_3		= M_SPKR_RING + 55;
+M_BUTTRESS_1		= M_SPKR_RING + 18;
+M_BUTTRESS_2		= M_SPKR_RING + 37;
+M_BUTTRESS_3		= M_BUTTRESS_0 + H_BUTTRESS + 52;
 M_BUTTRESS_4		= M_SPKR_RING + 70;		// holds speaker in place, space for foam
 
 M_WAY_BACK			= -20;
@@ -40,8 +42,6 @@ D_SABER_OUTER		= 37.5;
 X_DOTSTAR           = 5.0;  // from spec
 Y_DOTSTAR           = 1.4;  // from spec
 DOTSTAR_SPACE		= 7;
-
-H_BUTTRESS			= 4;
 
 H_BATTERY           = 68;
 D_BATTERY           = 18.50 + 0.5;    // An 1850. Huh. 

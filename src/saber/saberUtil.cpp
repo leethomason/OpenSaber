@@ -4,6 +4,9 @@
 #include "pins.h"
 #include "saberUtil.h"
 #include "Grinliz_Arduino_Util.h"
+#include "blade.h"
+#include "saberDB.h"
+#include "sfx.h"
 
 void BladeState::change(uint8_t state)
 {
@@ -39,9 +42,84 @@ bool BladeState::bladeOn() const
     return m_currentState >= BLADE_ON && m_currentState < BLADE_RETRACT;
 }
 
-void ButtonMode::nextMode()
+void BladeState::process(Blade* blade, const SaberDB& saberDB, uint32_t time)
 {
-    m_mode = (m_mode + 1) % NUM_BUTTON_MODES;
+    static const uint32_t FLASH_TIME = 120;
+    SFX* sfx = SFX::instance();
+
+    switch (state()) {
+    case BLADE_OFF:
+        break;
+
+    case BLADE_ON:
+        blade->setRGB(saberDB.bladeColor());
+        break;
+
+    case BLADE_IGNITE:
+    {
+        uint32_t igniteTime = 1000;
+        #ifdef SABER_SOUND_ON
+        igniteTime = sfx->getIgniteTime();
+        #endif
+
+        bool done = blade->setInterp(millis() - startTime(), igniteTime, RGB(RGB::BLACK), saberDB.bladeColor());
+        if (done) {
+            change(BLADE_ON);
+        }
+    }
+    break;
+
+    case BLADE_RETRACT:
+    {
+        uint32_t retractTime = 1000;
+        #ifdef SABER_SOUND_ON
+            retractTime = sfx->getRetractTime();
+        #endif
+        bool done = blade->setInterp(millis() - startTime(), retractTime, saberDB.bladeColor(), RGB(RGB::BLACK));
+        if (done) {
+            change(BLADE_OFF);
+        }
+    }
+    break;
+
+    case BLADE_FLASH:
+        // interpolate?
+    {
+        uint32_t delta = time - startTime();
+        if (delta > FLASH_TIME) {
+            blade->setRGB(saberDB.bladeColor());
+            change(BLADE_ON);
+        }
+        else {
+            blade->setRGB(saberDB.impactColor());
+        }
+    }
+    break;
+
+    default:
+        ASSERT(false);
+        break;
+    }
+}
+
+
+void UIModeUtil::nextMode()
+{
+    switch(m_mode) {
+        case UIMode::NORMAL:        m_mode = UIMode::PALETTE;       break;
+        case UIMode::PALETTE:       m_mode = UIMode::VOLUME;        break;
+
+#if (MEDITATION_MODE)
+        case UIMode::VOLUME:        m_mode = UIMode::MEDITATION;    break;
+        case UIMode::MEDITATION:    m_mode = UIMode::NORMAL;        break;
+#else
+        case UIMode::VOLUME:        m_mode = UIMode::NORMAL;        break;
+#endif
+        default:
+            ASSERT(false);
+            m_mode = UIMode::NORMAL;
+            break;
+    }
 }
 
 AveragePower::AveragePower()
