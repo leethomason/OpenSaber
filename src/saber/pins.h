@@ -28,7 +28,7 @@ SOFTWARE.
 // --- Configuration ---
 // Note: Serial connection should be set to 19200 baud with a newline after commands.
 
-#define SERIAL_DEBUG 0
+#define SERIAL_DEBUG 1
 
 #define SABER_MODEL_TEST			0
 #define SABER_MODEL_GECKO			1	// PCB, Teensy 3, external amp and accel
@@ -225,7 +225,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	//#define SABER_UI_BRIGHTNESS		8
 
 	static const int32_t UVOLT_MULT = 6750;
-	#define ID_STR "Tano Cree XPE2 GGB"
+	#define ID_STR "Tano Cree XPE2 RGB"
 
 	static const int32_t RED_I    = 415;    
 	static const int32_t GREEN_I  = 415;

@@ -60,6 +60,20 @@ static const uint32_t INDICATOR_CYCLE         = INDICATOR_TIME * 2;
 static const float    GFORCE_RANGE            = 4.0f;
 static const float    GFORCE_RANGE_INV        = 1.0f / GFORCE_RANGE;
 
+class Pins {
+public:
+    Pins() {
+        //PORTA &= ~(1<<3);
+        //PORTA &= ~(1<<4);
+        //PORTB &= ~(1<<1);
+        digitalWrite(PIN_EMITTER_RED, LOW);
+        digitalWrite(PIN_EMITTER_GREEN, LOW);
+        digitalWrite(PIN_EMITTER_BLUE, LOW);
+    }
+};
+
+Pins pins;
+
 bool     paletteChange  = false;    // used to prevent sound fx on palette changes
 uint32_t reflashTime    = 0;
 bool     flashOnClash   = false;

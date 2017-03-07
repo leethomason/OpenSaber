@@ -30,7 +30,9 @@ static const int32_t LED_RANGE = 255;
 
 Blade::Blade() {
   for (int i = 0; i < NCHANNELS; ++i) {
+//    digitalWrite(pinRGB[i], LOW);
     pinMode(pinRGB[i], OUTPUT);
+    digitalWrite(pinRGB[i], LOW);
     pwm[i] = 0;
   }
 

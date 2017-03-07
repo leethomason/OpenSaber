@@ -340,8 +340,8 @@ difference() {
             }
         }
         translate([0, 0, M_BUTTRESS_0]) buttress(mc=false, trough = 8, leftWiring=false, rightWiring=false);
-        translate([0, 0, M_BUTTRESS_1]) buttress(mcDeltaY=20, leftWiring=false, rightWiring=false);
-        translate([0, 0, M_BUTTRESS_2]) buttress(mcDeltaY=20, leftWiring=false, rightWiring=false);
+        //translate([0, 0, M_BUTTRESS_1]) buttress(mcDeltaY=20, leftWiring=false, rightWiring=false);
+        //translate([0, 0, M_BUTTRESS_2]) buttress(mcDeltaY=20, leftWiring=false, rightWiring=false);
         translate([0, 0, M_BUTTRESS_3]) buttress(mc=false, highHoles=false, leftWiring=false, rightWiring=false);
         translate([0, 0, M_BUTTRESS_4]) buttress(battery=false, trough=10, mc=false, highHoles=4.5, highBoost = 3, leftWiring=false, rightWiring=false);
 
@@ -363,7 +363,7 @@ difference() {
 
     // Take out right side for wiring.
     //translate([-20, 0, M_BUTTRESS_0 + H_BUTTRESS]) cube(size=[20, 20, M_BUTTRESS_3 - ( M_BUTTRESS_0 + H_BUTTRESS)]);
-    translate([-20, -2.5, M_BUTTRESS_0 + H_BUTTRESS]) cube(size=[40, 20, M_BUTTRESS_3 - ( M_BUTTRESS_0 + H_BUTTRESS)]);
+    //translate([-20, -2.5, M_BUTTRESS_0 + H_BUTTRESS]) cube(size=[40, 20, M_BUTTRESS_3 - ( M_BUTTRESS_0 + H_BUTTRESS)]);
     
     translate([-20, -10, M_BUTTRESS_3 - EPS]) cube(size=[ 7, 24, H_BUTTRESS + EPS2]);
     // Take out left side for wiring.
