@@ -9,7 +9,7 @@ module hexShape(w, h, d)
 	translate([w/2, 0, 0]) rotate([-90, -90, 0]) lowerVent2(w, h, d);
 }
 
-module beam(w, h, d, lenHex=true)
+module beam(w, h, d)
 {
     
     innerW = w * 0.75;
@@ -17,19 +17,17 @@ module beam(w, h, d, lenHex=true)
     deltaW = w - innerW;
     deltaH = h - innerH;
 
-    endPad = w / 4;
-    nSide = floor((d - endPad*2) / w);
+    W = h / 2;
+    endPad = W / 4;
+    nSide = floor((d - endPad*2) / W);
     space = (d - endPad*2) / nSide;
 
     difference() {
         cube(size=[w, h, d]);
-        if (lenHex) {
-        	translate([deltaW/2, deltaH/2, -EPS]) hexShape(innerW, innerH, d + EPS2);
-       }
         for(i=[0:nSide-1]) 
     	{
         	//echo(i);
-        	translate([w + EPS, deltaH/2, endPad + deltaW/2 + space*i]) rotate([0, -90, 0]) hexShape(innerW, innerH, w + EPS2);
+        	translate([w + EPS, deltaH/2, space/2 + space*i]) rotate([0, -90, 0]) hexShape(innerW, innerH, w + EPS2);
         }
     }
 }

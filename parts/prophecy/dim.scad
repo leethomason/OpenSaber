@@ -66,3 +66,10 @@ Y_RAIL				= 4;
 W_WING  			= 25;
 H_WING  			= 10.5;	// higher over power converter
 
+// Battery
+// 68mm
+//   - 4 front holder
+//   - 4 rear holder
+//   - 2 slop
+// 58mm, 2.28in
+

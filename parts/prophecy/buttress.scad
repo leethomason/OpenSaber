@@ -46,26 +46,25 @@ module shelfRail(h, right=true, t=3)
 	}
 }
 
-module oneShelfBeam(h, fill, lenHex)
+module oneShelfBeam(h, fill, width)
 {
-	W = 4;
 	H = 8;
 	translate([W_MC/2, Y_MC + H_MC - H, 0]) {
 		if (fill)
-			cube(size=[W, H, h]);
+			cube(size=[width, H, h]);
 		else
-			beam(W, H, h, lenHex);
+			beam(width, H, h);
 	}
-	translate([W_MC/2, Y_MC + H_MC - H - 10, 0]) cube(size=[W, 10, h]);
+	translate([W_MC/2, Y_MC + H_MC - H - 10, 0]) cube(size=[width, 10, h]);
 }
 
-module shelfBeam(h, right=true, fill=false, lenHex=true) {
+module shelfBeam(h, right=true, width=4) {
 	intersection() {
 		cylinder(h=h, d=D_AFT);
 		if (right) 
-			mirror([1, 0, 0]) oneShelfBeam(h, fill, lenHex);
+			mirror([1, 0, 0]) oneShelfBeam(h, false, width);
 		else
-			oneShelfBeam(h, fill, lenHex);
+			oneShelfBeam(h, false, width);
 	}
 }
 

@@ -3,6 +3,7 @@ use <../shapes.scad>
 use <../vents.scad>
 include <dim.scad>
 use <buttress.scad>
+use <beam.scad>
 
 M_DOTSTAR_EDGE = M_DOTSTAR - X_DOTSTAR / 2;
 
@@ -316,6 +317,10 @@ module rail(r, m=0, h=0)
 }
 
 M_B0_FRONT = M_BUTTRESS_0 + H_BUTTRESS;
+M_B3_FRONT = M_BUTTRESS_3 + H_BUTTRESS;
+M_B4_FRONT = M_BUTTRESS_4 + H_BUTTRESS;
+Z_B3 = M_BUTTRESS_4 + EPS - M_B3_FRONT;
+Z_B4 = M_TRANSITION + EPS - T_TRANSITION_RING - M_B4_FRONT;
 
 difference() {
     FLATTEN = 1.8;
@@ -324,26 +329,34 @@ difference() {
         transitionRing();
         
         union() {
-            rail(RAIL_ANGLE_0, m=M_BUTTRESS_4, h=M_TRANSITION - M_BUTTRESS_4);
-            rail(RAIL_ANGLE_1, m=M_BUTTRESS_4, h=M_TRANSITION - M_BUTTRESS_4);
-            rail(RAIL_ANGLE_2, m=M_BUTTRESS_4, h=M_TRANSITION - M_BUTTRESS_4);
-            rail(RAIL_ANGLE_3, m=M_BUTTRESS_4, h=M_TRANSITION - M_BUTTRESS_4);
+            translate([0, 0, M_B0_FRONT]) shelfBeam(M_BUTTRESS_3 + EPS - M_B0_FRONT,
+            true, 4);
+            translate([0, 0, M_B0_FRONT]) shelfBeam(M_BUTTRESS_3 + EPS - M_B0_FRONT, false, 4);
 
-            translate([0, 0, M_B0_FRONT]) shelfBeam(M_BUTTRESS_4 + EPS - M_B0_FRONT,
-            true, false, false);
-            translate([0, 0, M_B0_FRONT]) shelfBeam(M_BUTTRESS_4 + EPS - M_B0_FRONT, false, false, false);
         }
         intersection() {
             innerTube();
-            translate([-6, -D_AFT_RING/2 + FLATTEN, M_BUTTRESS_3]) {
-                cube(size=[12, 2, M_TRANSITION - M_BUTTRESS_3]);
+            union() {
+                translate([1, 0, M_B3_FRONT]) shelfBeam(Z_B3, false, 3);
+                translate([-1, 0, M_B3_FRONT]) shelfBeam(Z_B3, true, 3);
+                translate([1, 0, M_B4_FRONT]) shelfBeam(Z_B4, false, 3);
+                translate([-1, 0, M_B4_FRONT]) shelfBeam(Z_B4, true, 3);
+
+                translate([0, 4, 0 ]) {
+                    translate([6, 0, M_B3_FRONT])  beam(3, 8, Z_B3);
+                    translate([-6, 0, M_B3_FRONT]) beam(3, 8, Z_B3);
+                    translate([6, 0, M_B4_FRONT])  beam(3, 8, Z_B3);
+                    translate([-6, 0, M_B4_FRONT]) beam(3, 8, Z_B3);
+                }                
+
+                translate([-6, -D_AFT_RING/2 + FLATTEN, M_BUTTRESS_3]) {
+                    cube(size=[12, 2, M_TRANSITION - M_BUTTRESS_3]);
+                }
             }
         }
         translate([0, 0, M_BUTTRESS_0]) buttress(mc=false, trough = 8, leftWiring=false, rightWiring=false);
-        //translate([0, 0, M_BUTTRESS_1]) buttress(mcDeltaY=20, leftWiring=false, rightWiring=false);
-        //translate([0, 0, M_BUTTRESS_2]) buttress(mcDeltaY=20, leftWiring=false, rightWiring=false);
         translate([0, 0, M_BUTTRESS_3]) buttress(mc=false, highHoles=false, leftWiring=false, rightWiring=false);
-        translate([0, 0, M_BUTTRESS_4]) buttress(battery=false, trough=10, mc=false, highHoles=4.5, highBoost = 3, leftWiring=false, rightWiring=false);
+        translate([0, 0, M_BUTTRESS_4]) buttress(battery=false, trough=10, mc=false, leftWiring=false, rightWiring=false);
 
         speakerHolder();
     }
@@ -357,7 +370,7 @@ difference() {
     translate([-X_USB/2, -R_AFT, M_POMMEL_BACK]) cube(size=[X_USB, Y_USB, 35]);
     
     // space for sdcard
-    SD_X = 18;
+    SD_X = 20;
     SD_Y = 6;
     translate([-SD_X/2, -12, M_BUTTRESS_3]) cube(size=[SD_X, SD_Y, M_BUTTRESS_4 - M_BUTTRESS_3 + H_BUTTRESS]);
 
@@ -365,9 +378,10 @@ difference() {
     //translate([-20, 0, M_BUTTRESS_0 + H_BUTTRESS]) cube(size=[20, 20, M_BUTTRESS_3 - ( M_BUTTRESS_0 + H_BUTTRESS)]);
     //translate([-20, -2.5, M_BUTTRESS_0 + H_BUTTRESS]) cube(size=[40, 20, M_BUTTRESS_3 - ( M_BUTTRESS_0 + H_BUTTRESS)]);
     
-    translate([-20, -10, M_BUTTRESS_3 - EPS]) cube(size=[ 7, 24, H_BUTTRESS + EPS2]);
+    H_REM = M_BUTTRESS_4 + H_BUTTRESS + EPS - M_BUTTRESS_3;
+    translate([-20, -10, M_BUTTRESS_3 - EPS]) cube(size=[ 7, 24, H_REM]);
     // Take out left side for wiring.
-    translate([ 13, -10, M_BUTTRESS_3 - EPS]) cube(size=[20, 24, H_BUTTRESS + EPS2]);
+    translate([ 13, -10, M_BUTTRESS_3 - EPS]) cube(size=[20, 24, H_REM]);
 
 }
 
