@@ -41,8 +41,23 @@ void setup()
 void loop() 
 {
   uint32_t t = millis();
-  leds[3].set((t/20)%255, 0, 0xff);
+
+  static const RGB rgb[7] = {
+      RGB::RED,
+      RGB::ORANGE,
+      RGB::YELLOW,
+      RGB::GREEN,
+      RGB::BLUE,
+      RGB::INDIGO,
+      RGB::VIOLET
+  };
+
+  uint32_t index = (t/uint32_t(500)) % 7;
+  if (leds[3] != rgb[index]) {
+      Serial.println(index);
+      leds[3] = rgb[index];
+  }
 
   dotstar.display();
-  delay(500);
+  delay(10);
 }
