@@ -320,7 +320,7 @@ M_B0_FRONT = M_BUTTRESS_0 + H_BUTTRESS;
 M_B3_FRONT = M_BUTTRESS_3 + H_BUTTRESS;
 M_B4_FRONT = M_BUTTRESS_4 + H_BUTTRESS;
 Z_B3 = M_BUTTRESS_4 + EPS - M_B3_FRONT;
-Z_B4 = M_TRANSITION + EPS - T_TRANSITION_RING - M_B4_FRONT;
+Z_B4 = M_TRANSITION + EPS - M_B4_FRONT - T_TRANSITION_RING;
 
 difference() {
     FLATTEN = 1.8;
@@ -342,11 +342,12 @@ difference() {
                 translate([1, 0, M_B4_FRONT]) shelfBeam(Z_B4, false, 3);
                 translate([-1, 0, M_B4_FRONT]) shelfBeam(Z_B4, true, 3);
 
-                translate([0, 4, 0 ]) {
-                    translate([6, 0, M_B3_FRONT])  beam(3, 8, Z_B3);
-                    translate([-6, 0, M_B3_FRONT]) beam(3, 8, Z_B3);
-                    translate([6, 0, M_B4_FRONT])  beam(3, 8, Z_B3);
-                    translate([-6, 0, M_B4_FRONT]) beam(3, 8, Z_B3);
+                translate([0, 3, 0 ]) {
+                    X = 9;
+                    translate([X, 0, M_B3_FRONT])  beam(3, 8, Z_B3);
+                    translate([-X-4, 0, M_B3_FRONT]) beam(3, 8, Z_B3);
+                    translate([X, 0, M_B4_FRONT])  beam(3, 8, Z_B4);
+                    translate([-X-4, 0, M_B4_FRONT]) beam(3, 8, Z_B4);
                 }                
 
                 translate([-6, -D_AFT_RING/2 + FLATTEN, M_BUTTRESS_3]) {

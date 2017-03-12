@@ -216,13 +216,13 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PCB_VERSION 				PCB_VERSION_7
 	#define LED_TOPOLOGY 				LED_TOPOLOGY_DRIVER
 	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
-	//#define SABER_SOUND_ON 				SABER_SOUND_SD
+	#define SABER_SOUND_ON 				SABER_SOUND_SD
 	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
 
-	//#define SABER_NUM_LEDS 			4
-	//#define SABER_UI_START  		0
-	//#define SABER_UI_BRIGHTNESS		8
+	#define SABER_NUM_LEDS 			4
+	#define SABER_UI_START  		0
+	#define SABER_UI_BRIGHTNESS		8
 
 	static const int32_t UVOLT_MULT = 6750;
 	#define ID_STR "Tano Cree XPE2 RGB"
