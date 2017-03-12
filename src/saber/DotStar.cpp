@@ -6,15 +6,15 @@
 // With a level shifter, about 1 MHz is needed. (Possibly faster with testing.)
 static const SPISettings dotstarSettings(8000000, MSBFIRST, SPI_MODE0);
 
-DotStar::DotStar(uint8_t enable)
+DotStar::DotStar()
+{
+}
+
+void DotStar::beginSPI(uint8_t enable)
 {
 	m_enable = enable;
 	pinMode(m_enable, OUTPUT);
 	digitalWrite(m_enable, LOW);
-}
-
-void DotStar::beginSPI()
-{
 	SPI.begin();
 }
 

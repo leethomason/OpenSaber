@@ -60,6 +60,7 @@ static const uint32_t INDICATOR_CYCLE         = INDICATOR_TIME * 2;
 static const float    GFORCE_RANGE            = 4.0f;
 static const float    GFORCE_RANGE_INV        = 1.0f / GFORCE_RANGE;
 
+/*
 class Pins {
 public:
     Pins() {
@@ -73,7 +74,7 @@ public:
 };
 
 Pins pins;
-
+*/
 bool     paletteChange  = false;    // used to prevent sound fx on palette changes
 uint32_t reflashTime    = 0;
 bool     flashOnClash   = false;
@@ -105,7 +106,7 @@ AveragePower averagePower;
 
 #ifdef SABER_NUM_LEDS
 RGB leds[SABER_NUM_LEDS];
-DotStar dotstar(PIN_DOTSTAR_EN);
+DotStar dotstar;
 DotStarUI dotstarUI;
 #endif
 #if (SABER_NUM_LEDS > 1) && !defined(SABER_UI_START)
@@ -232,6 +233,7 @@ void setup() {
     #endif
 
     #if defined(SABER_NUM_LEDS)
+        dotstar.beginSPI(PIN_DOTSTAR_EN);
         dotstar.attachLEDs(leds, SABER_NUM_LEDS);
         for(int i=0; i<SABER_NUM_LEDS; ++i) {
             leds[i].set(0x010101);

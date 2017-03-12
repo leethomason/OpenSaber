@@ -60,9 +60,9 @@ struct RGB {
 class DotStar
 {
 public:
-	DotStar(uint8_t enablePin=255);
+	DotStar();
 
-	void beginSPI();
+	void beginSPI(uint8_t enablePin);
 	void beginSW(uint8_t clockPin, uint8_t dataPin);
 
 	void attachLEDs(const RGB* leds, int nLEDs) {
