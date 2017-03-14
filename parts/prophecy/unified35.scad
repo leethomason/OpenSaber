@@ -337,20 +337,22 @@ difference() {
         intersection() {
             innerTube();
             union() {
-                translate([1, 0, M_B3_FRONT]) shelfBeam(Z_B3, false, 3);
-                translate([-1, 0, M_B3_FRONT]) shelfBeam(Z_B3, true, 3);
-                translate([1, 0, M_B4_FRONT]) shelfBeam(Z_B4, false, 3);
-                translate([-1, 0, M_B4_FRONT]) shelfBeam(Z_B4, true, 3);
+                echo("FIXME: correctly position beams");
+                translate([0, 0, M_B3_FRONT]) shelfBeam(Z_B3, false, 4);
+                translate([0, 0, M_B3_FRONT]) shelfBeam(Z_B3, true, 4);
+                translate([0, 0, M_B4_FRONT]) shelfBeam(Z_B4, false, 4);
+                translate([0, 0, M_B4_FRONT]) shelfBeam(Z_B4, true, 4);
 
                 translate([0, 3, 0 ]) {
-                    X = 9;
-                    translate([X, 0, M_B3_FRONT])  beam(3, 8, Z_B3);
-                    translate([-X-4, 0, M_B3_FRONT]) beam(3, 8, Z_B3);
-                    translate([X, 0, M_B4_FRONT])  beam(3, 8, Z_B4);
-                    translate([-X-4, 0, M_B4_FRONT]) beam(3, 8, Z_B4);
+                    BW = 4;
+                    W_MC = 18;
+                    translate([W_MC/2, 0, M_B3_FRONT])          beam(4, 8, Z_B3);
+                    translate([-W_MC/2 - BW, 0, M_B3_FRONT])    beam(4, 8, Z_B3);
+                    translate([W_MC/2, 0, M_B4_FRONT])          beam(4, 8, Z_B4);
+                    translate([-W_MC/2 - BW, 0, M_B4_FRONT])    beam(4, 8, Z_B4);
                 }                
 
-                translate([-6, -D_AFT_RING/2 + FLATTEN, M_BUTTRESS_3]) {
+                *translate([-6, -D_AFT_RING/2 + FLATTEN, M_BUTTRESS_3]) {
                     cube(size=[12, 2, M_TRANSITION - M_BUTTRESS_3]);
                 }
             }
