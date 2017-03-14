@@ -129,6 +129,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_CRYSTAL_LOW		24
 	#define SABER_DISPLAY
 	#define MEDITATION_MODE			1
+	#define SABER_LOWPASS_FILTER	1
 
 	// FIXME TUNE ALL
 	static const int32_t UVOLT_MULT = 6680;
@@ -163,6 +164,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_CRYSTAL			80
 	#define SABER_CRYSTAL_LOW		16
 	#define SABER_UI_BRIGHTNESS		8
+	#define SABER_LOWPASS_FILTER	1
 
 	static const int32_t UVOLT_MULT = 6750;
 	#define ID_STR "Silver Shock Custom RGB Cree XPE2"
