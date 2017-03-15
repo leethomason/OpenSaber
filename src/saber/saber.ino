@@ -149,7 +149,14 @@ void setupSD(int logCount)
     SPI.setMOSI(PIN_SABER_MOSI);
     SPI.setSCK(PIN_SABER_CLOCK);
     #if (SABER_SOUND_ON == SABER_SOUND_SD)
-        while (!(SD.begin(PIN_SDCARD_CS))) {
+        while (!(
+            #ifdef SABER_INTEGRATED_SD
+                SD.begin(BUILTIN_SDCARD)
+            #else
+                SD.begin(PIN_SDCARD_CS)
+            #endif
+            )) 
+        {
             Log.p("Unable to access the SD card").eol();
             delay(500);
         }

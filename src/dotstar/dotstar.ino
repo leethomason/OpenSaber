@@ -5,12 +5,13 @@ DotStar dotstar;
 
 void setup() 
 {
+    /*
   Serial.begin(19200);
   while(!Serial) {
     delay(100);
   }
   Serial.println("Hello DotStar!!");
-
+*/
   leds[0].set(0xff0000);
   #if NUM_LEDS > 1
     leds[1].set(0x00ff00);
@@ -54,7 +55,7 @@ void loop()
 
   uint32_t index = (t/uint32_t(500)) % 7;
   if (leds[3] != rgb[index]) {
-      Serial.println(index);
+      //Serial.println(index);
       leds[3] = rgb[index];
   }
 
