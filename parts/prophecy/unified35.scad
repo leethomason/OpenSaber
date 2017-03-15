@@ -316,6 +316,20 @@ module rail(r, m=0, h=0)
     forwardRail();
 }
 
+module teensy35()
+{
+    OFFSET = 20;
+
+    difference() {
+        translate([-W_MC/2, Y_MC - OFFSET, M_BUTTRESS_0 + H_BUTTRESS]) {
+            cube(size=[W_MC, H_MC + OFFSET, Z_MC_35]);
+        }
+        translate([-W_MC/2, Y_MC + H_MC - 2, M_BUTTRESS_0 + H_BUTTRESS + 50]) {
+            cube(size=[W_MC, 50, 50]);
+        }
+    }
+}
+
 M_B0_FRONT = M_BUTTRESS_0 + H_BUTTRESS;
 M_B3_FRONT = M_BUTTRESS_3 + H_BUTTRESS;
 M_B4_FRONT = M_BUTTRESS_4 + H_BUTTRESS;
@@ -337,7 +351,6 @@ difference() {
         intersection() {
             innerTube();
             union() {
-                echo("FIXME: correctly position beams");
                 translate([0, 0, M_B3_FRONT]) shelfBeam(Z_B3, false, 4);
                 translate([0, 0, M_B3_FRONT]) shelfBeam(Z_B3, true, 4);
                 translate([0, 0, M_B4_FRONT]) shelfBeam(Z_B4, false, 4);
@@ -355,6 +368,7 @@ difference() {
                 *translate([-6, -D_AFT_RING/2 + FLATTEN, M_BUTTRESS_3]) {
                     cube(size=[12, 2, M_TRANSITION - M_BUTTRESS_3]);
                 }
+                translate([-W_MC/2, -R_AFT, M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35]) cube(size=[W_MC, 7.5, M_TRANSITION - T_TRANSITION_RING - (M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35)]);
             }
         }
         translate([0, 0, M_BUTTRESS_0]) buttress(mc=false, trough = 8, leftWiring=false, rightWiring=false);
@@ -362,6 +376,7 @@ difference() {
         translate([0, 0, M_BUTTRESS_4]) buttress(battery=false, trough=10, mc=false, leftWiring=false, rightWiring=false);
 
         speakerHolder();
+
     }
     // Flatten the bottom for printing.
     translate([-20, -D_AFT_RING/2, M_WAY_BACK]) cube(size=[40, FLATTEN, H_FAR]);
@@ -372,20 +387,12 @@ difference() {
     Z_USB = 20;
     translate([-X_USB/2, -R_AFT, M_POMMEL_BACK]) cube(size=[X_USB, Y_USB, 35]);
     
-    // space for sdcard
-    SD_X = 20;
-    SD_Y = 6;
-    translate([-SD_X/2, -12, M_BUTTRESS_3]) cube(size=[SD_X, SD_Y, M_BUTTRESS_4 - M_BUTTRESS_3 + H_BUTTRESS]);
-
-    // Take out right side for wiring.
-    //translate([-20, 0, M_BUTTRESS_0 + H_BUTTRESS]) cube(size=[20, 20, M_BUTTRESS_3 - ( M_BUTTRESS_0 + H_BUTTRESS)]);
-    //translate([-20, -2.5, M_BUTTRESS_0 + H_BUTTRESS]) cube(size=[40, 20, M_BUTTRESS_3 - ( M_BUTTRESS_0 + H_BUTTRESS)]);
-    
     H_REM = M_BUTTRESS_4 + H_BUTTRESS + EPS - M_BUTTRESS_3;
     translate([-20, -10, M_BUTTRESS_3 - EPS]) cube(size=[ 7, 24, H_REM]);
     // Take out left side for wiring.
     translate([ 13, -10, M_BUTTRESS_3 - EPS]) cube(size=[20, 24, H_REM]);
 
+    teensy35();
 }
 
 translate([0, 0, 70]) {
@@ -397,5 +404,6 @@ translate([0, 0, 70]) {
 *color("yellow") heatSink();
 *color("yellow") speaker();
 *color("yellow") speakerHolder();
+*color("yellow") teensy35();
 
 *buttress();

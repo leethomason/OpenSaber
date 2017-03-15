@@ -19,11 +19,6 @@ module battery(h)
 	}
 }
 
-
-W_MC 	= 18;
-H_MC    = 10;
-Y_MC    = -13.5;
-
 module circuitry(h, deltaY, wideWing)
 {
 	OFFSET  = 10;

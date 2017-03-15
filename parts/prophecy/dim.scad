@@ -66,6 +66,11 @@ Y_RAIL				= 4;
 W_WING  			= 25;
 H_WING  			= 10.5;	// higher over power converter
 
+W_MC 				= 18;
+H_MC    			= 10;
+Y_MC    			= -13.5;
+Z_MC_35 			= 71.2;		// includes SD
+
 // Battery
 // 68mm
 //   - 4 front holder
