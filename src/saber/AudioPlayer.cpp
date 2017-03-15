@@ -17,9 +17,13 @@ AudioPlaySdWav      playWav;
 
 AudioMixer4         mixer;
 AudioOutputAnalog   dac;
+#ifdef SABER_LOWPASS_FILTER
 AudioFilterBiquad   biquad;
 AudioConnection     patchCord0(playWav, biquad);
 AudioConnection     patchCord1(biquad, mixer);
+#else
+AudioConnection     patchCord1(playWav, mixer);
+#endif
 AudioConnection     patchCord2(mixer, 0, dac, 0);
 
 AudioPlayer::AudioPlayer() {
@@ -33,7 +37,9 @@ AudioPlayer::AudioPlayer() {
     pinMode(PIN_AMP_EN, OUTPUT);
     digitalWrite(PIN_AMP_EN, LOW);
 
+#ifdef SABER_LOWPASS_FILTER
     biquad.setLowpass(0, 4000, 0.707);
+#endif
 }
 
 void AudioPlayer::init() {
