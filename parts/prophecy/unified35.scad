@@ -220,9 +220,9 @@ module dotstarHolder() {
         {
             difference()
             {
-                OFFSET = 34;
-                rotate([0, 0, R_DOTSTAR]) translate([-10, -R_FORWARD - 1, M_TRANSITION - T_TRANSITION_RING + OFFSET]) {
-                    cube(size=[20, DOTSTAR_WALL + 2, M_LED_HOLDER_BACK - M_TRANSITION + T_TRANSITION_RING - OFFSET]);
+                OFFSET = 31;
+                rotate([0, 0, R_DOTSTAR]) translate([-10, -R_FORWARD - 1, M_TRANSITION + OFFSET]) {
+                    cube(size=[20, DOTSTAR_WALL + 2, M_LED_HOLDER_BACK - M_TRANSITION - OFFSET]);
                 }
                 color("yellow") dotstarsPositioned(20, true);
                 /*
@@ -308,14 +308,6 @@ module rail(r, m=0, h=0)
     }
 }
 
-
-*union() {
-    ledHolder();
-    switchAndPortHolder();
-    dotstarHolder();
-    forwardRail();
-}
-
 module teensy35()
 {
     OFFSET = 20;
@@ -330,50 +322,76 @@ module teensy35()
     }
 }
 
+FLATTEN = 1.8;
 M_B0_FRONT = M_BUTTRESS_0 + H_BUTTRESS;
 M_B3_FRONT = M_BUTTRESS_3 + H_BUTTRESS;
 M_B4_FRONT = M_BUTTRESS_4 + H_BUTTRESS;
 Z_B3 = M_BUTTRESS_4 + EPS - M_B3_FRONT;
 Z_B4 = M_TRANSITION + EPS - M_B4_FRONT - T_TRANSITION_RING;
 
+// front
+*union() {
+    ledHolder();
+    switchAndPortHolder();
+    dotstarHolder();
+    forwardRail();
+}
+
+// Back battery holder
+*difference() {
+    intersection() {
+        innerTube();
+        union() {
+            translate([0, 0, M_BUTTRESS_3]) buttress(mc=false, highHoles=false, leftWiring=false, rightWiring=false);
+            translate([0, 0, M_BUTTRESS_4]) buttress(battery=false, trough=10, mc=false, leftWiring=false, rightWiring=false);
+
+            translate([0, 3, 0 ]) {
+                BW = 4;
+                W_MC = 18;
+                translate([W_MC/2, 0, M_B3_FRONT])          beam(4, 8, Z_B3);
+                translate([-W_MC/2 - BW, 0, M_B3_FRONT])    beam(4, 8, Z_B3);
+                translate([W_MC/2, 0, M_B4_FRONT])          beam(4, 8, Z_B4);
+                translate([-W_MC/2 - BW, 0, M_B4_FRONT])    beam(4, 8, Z_B4);
+            }                
+        }
+    }
+    H_REM = M_BUTTRESS_4 + H_BUTTRESS + EPS - M_BUTTRESS_3;
+    translate([-20, -10, M_BUTTRESS_3 - EPS]) cube(size=[ 7, 24, H_REM]);
+    // Take out left side for wiring.
+    translate([ 13, -10, M_BUTTRESS_3 - EPS]) cube(size=[20, 24, H_REM]);
+
+    // Flatten the bottom for printing.
+    translate([-20, -D_AFT_RING/2, M_WAY_BACK]) cube(size=[40, FLATTEN, H_FAR]);
+
+    teensy35();
+
+    translate([0, 0, M_B0_FRONT]) shelfBeam(M_TRANSITION - T_TRANSITION_RING + EPS - M_B0_FRONT,
+    true, 4, true);
+    translate([0, 0, M_B0_FRONT]) shelfBeam(M_TRANSITION - T_TRANSITION_RING + EPS - M_B0_FRONT, false, 4, true);
+
+}
+
+// Back body
 difference() {
-    FLATTEN = 1.8;
     
     union() {
         transitionRing();
         
         union() {
-            translate([0, 0, M_B0_FRONT]) shelfBeam(M_BUTTRESS_3 + EPS - M_B0_FRONT,
+            translate([0, 0, M_B0_FRONT]) shelfBeam(M_TRANSITION - T_TRANSITION_RING + EPS - M_B0_FRONT,
             true, 4);
-            translate([0, 0, M_B0_FRONT]) shelfBeam(M_BUTTRESS_3 + EPS - M_B0_FRONT, false, 4);
+            translate([0, 0, M_B0_FRONT]) shelfBeam(M_TRANSITION - T_TRANSITION_RING + EPS - M_B0_FRONT, false, 4);
 
         }
         intersection() {
             innerTube();
             union() {
-                translate([0, 0, M_B3_FRONT]) shelfBeam(Z_B3, false, 4);
-                translate([0, 0, M_B3_FRONT]) shelfBeam(Z_B3, true, 4);
-                translate([0, 0, M_B4_FRONT]) shelfBeam(Z_B4, false, 4);
-                translate([0, 0, M_B4_FRONT]) shelfBeam(Z_B4, true, 4);
-
-                translate([0, 3, 0 ]) {
-                    BW = 4;
-                    W_MC = 18;
-                    translate([W_MC/2, 0, M_B3_FRONT])          beam(4, 8, Z_B3);
-                    translate([-W_MC/2 - BW, 0, M_B3_FRONT])    beam(4, 8, Z_B3);
-                    translate([W_MC/2, 0, M_B4_FRONT])          beam(4, 8, Z_B4);
-                    translate([-W_MC/2 - BW, 0, M_B4_FRONT])    beam(4, 8, Z_B4);
-                }                
-
-                *translate([-6, -D_AFT_RING/2 + FLATTEN, M_BUTTRESS_3]) {
-                    cube(size=[12, 2, M_TRANSITION - M_BUTTRESS_3]);
+                translate([-W_MC/2, -R_AFT, M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35]) {
+                    cube(size=[W_MC, 7.5, M_TRANSITION - T_TRANSITION_RING - (M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35)]);
                 }
-                translate([-W_MC/2, -R_AFT, M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35]) cube(size=[W_MC, 7.5, M_TRANSITION - T_TRANSITION_RING - (M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35)]);
             }
         }
         translate([0, 0, M_BUTTRESS_0]) buttress(mc=false, trough = 8, leftWiring=false, rightWiring=false);
-        translate([0, 0, M_BUTTRESS_3]) buttress(mc=false, highHoles=false, leftWiring=false, rightWiring=false);
-        translate([0, 0, M_BUTTRESS_4]) buttress(battery=false, trough=10, mc=false, leftWiring=false, rightWiring=false);
 
         speakerHolder();
 
@@ -387,10 +405,6 @@ difference() {
     Z_USB = 20;
     translate([-X_USB/2, -R_AFT, M_POMMEL_BACK]) cube(size=[X_USB, Y_USB, 35]);
     
-    H_REM = M_BUTTRESS_4 + H_BUTTRESS + EPS - M_BUTTRESS_3;
-    translate([-20, -10, M_BUTTRESS_3 - EPS]) cube(size=[ 7, 24, H_REM]);
-    // Take out left side for wiring.
-    translate([ 13, -10, M_BUTTRESS_3 - EPS]) cube(size=[20, 24, H_REM]);
 
     teensy35();
 }

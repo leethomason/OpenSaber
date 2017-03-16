@@ -53,13 +53,13 @@ module oneShelfBeam(h, fill, width)
 	translate([W_MC/2, Y_MC + H_MC - H - 10, 0]) cube(size=[width, 10, h]);
 }
 
-module shelfBeam(h, right=true, width=4) {
+module shelfBeam(h, right=true, width=4, fill=false) {
 	intersection() {
 		cylinder(h=h, d=D_AFT);
 		if (right) 
-			mirror([1, 0, 0]) oneShelfBeam(h, false, width);
+			mirror([1, 0, 0]) oneShelfBeam(h, fill, width);
 		else
-			oneShelfBeam(h, false, width);
+			oneShelfBeam(h, fill, width);
 	}
 }
 
