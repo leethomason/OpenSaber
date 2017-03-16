@@ -387,7 +387,11 @@ difference() {
             innerTube();
             union() {
                 translate([-W_MC/2, -R_AFT, M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35]) {
-                    cube(size=[W_MC, 7.5, M_TRANSITION - T_TRANSITION_RING - (M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35)]);
+                    cube(size=[W_MC, 7.5, 2]);
+                }
+                W = 2;
+                translate([-W/2, -R_AFT, M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35]) {
+                    cube(size=[W, 7.5, EPS + M_TRANSITION - T_TRANSITION_RING - (M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35)]);
                 }
             }
         }
