@@ -16,7 +16,7 @@ H_BUTTRESS			= 4;
 M_BUTTRESS_0		= M_SPKR_RING;			// speaker holder, behind wings
 M_BUTTRESS_1		= M_SPKR_RING + 18;
 M_BUTTRESS_2		= M_SPKR_RING + 37;
-M_BUTTRESS_3		= M_BUTTRESS_0 + H_BUTTRESS + 52;
+M_BUTTRESS_3		= M_BUTTRESS_0 + H_BUTTRESS + 55;
 M_BUTTRESS_4		= M_SPKR_RING + 70;		// holds speaker in place, space for foam
 
 M_WAY_BACK			= -20;
