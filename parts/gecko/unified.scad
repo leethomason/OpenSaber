@@ -37,11 +37,8 @@ module rail(r)
 difference() {
     union() {
         translate([0, 0, -H_BUTTRESS]) buttress(mc=false, battery=false, trough=8);
-        translate([0, 0, M_BUTTRESS_0]) buttress(mc=false, trough = 8);
+        translate([0, 0, M_BUTTRESS_0]) buttress(mc=true, trough = 8);
 
-        //translate([0, 0, M_BUTTRESS_1]) buttress();
-        //translate([0, 0, M_BUTTRESS_2]) buttress();
-        translate([0, 0, M_BUTTRESS_3]) buttress(mc=false, trough=8);
         translate([0, 0, M_BUTTRESS_4]) buttress(battery=false, trough=12, mc=false);
 
         wingRail(M_BUTTRESS_4);
@@ -56,5 +53,6 @@ difference() {
     translate([-X_USB/2, -R_INNER, -H_BUTTRESS]) cube(size=[X_USB, Y_USB, Z_USB]);
 }
 
+//color("yellow") circuitry(40, 0, 0);
 //color("yellow") battery(40);
 //color("yellow") wingRail(40);

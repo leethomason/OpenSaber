@@ -2,9 +2,6 @@ M_0					= 0;
 M_RAIL_START		= 12;
 
 M_BUTTRESS_0		= M_0;
-M_BUTTRESS_1		= M_0 + 16;
-M_BUTTRESS_2		= M_0 + 30;
-M_BUTTRESS_3		= M_0 + 50;
 M_BUTTRESS_4		= M_0 + 70;		// holds speaker in place
 
 M_WAY_BACK			= -20;
@@ -13,7 +10,7 @@ H_FAR				= 200;
 MM_TO_INCHES = 1 / 25.4;
 INCHES_TO_MM = 25.4;
 
-D_INNER				= 28;
+D_INNER				= 27;		// 28? but need space for insulator
 R_INNER     		= D_INNER / 2;
 D_SABER_OUTER		= 37.5;
 
@@ -34,3 +31,6 @@ Y_RAIL				= 4;
 W_WING  			= 25;
 H_WING  			= 10.5;	// higher over power converter
 
+W_MC 	= 18;
+H_MC    = 10;
+Y_MC    = -12;

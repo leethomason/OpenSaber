@@ -91,6 +91,8 @@ public:
   int numFonts() const { return m_numFonts; }
   const char* currentFontName() const;
 
+  void setEnabled(bool enabled) { m_enabled = enabled; }
+
 private:
   void filePath(CStr<25>* str, int id);
   void filePath(CStr<25>* str, const char* dir, const char* file);
@@ -121,6 +123,7 @@ private:
   uint8_t      m_currentFont;
   uint32_t     m_igniteTime;
   uint32_t     m_retractTime;
+  bool         m_enabled;
 
   SFXLocation  m_location[NUM_SFX_TYPES];
   CStr<13>     m_filename[MAX_SFX_FILES];

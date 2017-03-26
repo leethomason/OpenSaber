@@ -12,15 +12,11 @@ module battery(h)
 	translate([0, BATTERY_Y, 0]) {
 	    cylinder(h=h, d=D_BATTERY);
 
-	    translate([-BATTERY_CUTOUT/2, 0, 0]) {
+	    *translate([-BATTERY_CUTOUT/2, 0, 0]) {
 	        cube(size=[BATTERY_CUTOUT, 40, h]);
 	    }
 	}
 }
-
-W_MC 	= 18;
-H_MC    = 10;
-Y_MC    = -14;
 
 module circuitry(h, deltaY, wing)
 {
@@ -44,7 +40,6 @@ module wingRail(h)
 
 module buttress(	battery=true, 
 					mc=true, 
-					mcDeltaY=0, 
 					trough=0, 
 					wing=true)
 {
@@ -58,7 +53,7 @@ module buttress(	battery=true,
 
 		// Board
 		if (mc) {
-			translate([0, 0, -EPS]) circuitry(H_BUTTRESS + EPS2, mcDeltaY, wing);
+			translate([0, 0, -EPS]) circuitry(H_BUTTRESS + EPS2, 0, wing);
 		}
 
 		if (trough != 0) {

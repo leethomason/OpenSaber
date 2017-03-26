@@ -48,6 +48,7 @@ SFX::SFX(AudioPlayer* audioPlayer)
     m_igniteTime = 1000;
     m_retractTime = 1000;
     m_lastSFX = SFX_NONE;
+    m_enabled = true;
 
     memset(m_location, 255, sizeof(SFXLocation)*NUM_SFX_TYPES);
 }
@@ -257,6 +258,10 @@ bool SFX::playSound(int sound, int mode, bool playIfOff)
     // Flush out tests before switching sounds:
     Tester::instance()->process();
 
+    if (!m_enabled) {
+        return false;
+    }
+
     ASSERT(sound >= 0);
     ASSERT(sound < NUM_SFX_TYPES);
     ASSERT(m_player);
@@ -323,6 +328,9 @@ bool SFX::playSound(int sound, int mode, bool playIfOff)
 
 bool SFX::playSound(const char* sfx)
 {
+    if (!m_enabled) {
+        return false;
+    }
     m_player->mute(m_muted);
     m_player->play(sfx);
     return true;
@@ -330,6 +338,9 @@ bool SFX::playSound(const char* sfx)
 
 void SFX::stopSound()
 {
+    if (!m_enabled) {
+        return;
+    }
     m_player->stop();
     m_currentSound = SFX_NONE;
 }
@@ -337,6 +348,7 @@ void SFX::stopSound()
 void SFX::process()
 {
     if (!m_player) return;
+    if (!m_enabled) return;
 
     // Play the idle sound if the blade is on.
     if (m_bladeOn && !m_player->isPlaying()) {

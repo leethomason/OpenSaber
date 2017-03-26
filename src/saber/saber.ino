@@ -25,7 +25,6 @@
 #include <Wire.h>
 #include <SPI.h>
 #include <SD.h>
-//#include <SPIFlash.h>
 #include <OLED_SSD1306.h>
 #include <SerialFlash.h>
 
@@ -60,21 +59,6 @@ static const uint32_t INDICATOR_CYCLE         = INDICATOR_TIME * 2;
 static const float    GFORCE_RANGE            = 4.0f;
 static const float    GFORCE_RANGE_INV        = 1.0f / GFORCE_RANGE;
 
-/*
-class Pins {
-public:
-    Pins() {
-        //PORTA &= ~(1<<3);
-        //PORTA &= ~(1<<4);
-        //PORTB &= ~(1<<1);
-        digitalWrite(PIN_EMITTER_RED, LOW);
-        digitalWrite(PIN_EMITTER_GREEN, LOW);
-        digitalWrite(PIN_EMITTER_BLUE, LOW);
-    }
-};
-
-Pins pins;
-*/
 bool     paletteChange  = false;    // used to prevent sound fx on palette changes
 uint32_t reflashTime    = 0;
 bool     flashOnClash   = false;
@@ -133,6 +117,7 @@ Timer gforceDataTimer(110);
 
 Tester tester;
 uint32_t unlocked = 0;
+bool soundOk = false;
 
 int32_t readVbat() {
     #ifdef SABER_VOLTMETER
@@ -149,22 +134,20 @@ void setupSD(int logCount)
     SPI.setMOSI(PIN_SABER_MOSI);
     SPI.setSCK(PIN_SABER_CLOCK);
     #if (SABER_SOUND_ON == SABER_SOUND_SD)
-        while (!(
-            #ifdef SABER_INTEGRATED_SD
-                SD.begin(BUILTIN_SDCARD)
-            #else
-                SD.begin(PIN_SDCARD_CS)
-            #endif
-            )) 
-        {
+        #ifdef SABER_INTEGRATED_SD
+            soundOk = SD.begin(BUILTIN_SDCARD);
+        #else
+            soundOk = SD.begin(PIN_SDCARD_CS);
+        #endif
+        if (!soundOk) {
             Log.p("Unable to access the SD card").eol();
-            delay(500);
         }
     #elif (SABER_SOUND_ON == SABER_SOUND_FLASH)
         while(!(SerialFlash.begin(PIN_MEMORY_CS))) {
             Log.p("Unable to access SerialFlash memory.").eol();
             delay(500);
         }
+        soundOk = true;
     #endif
 }
 
@@ -224,8 +207,11 @@ void setup() {
     #endif
 
     #ifdef SABER_SOUND_ON
-        sfx.init();
-        Log.p("sfx initialized.").eol();
+        if (soundOk) {
+            sfx.init();
+            Log.p("sfx initialized.").eol();
+        }
+        sfx.setEnabled(soundOk);
     #endif
 
     blade.setVoltage(averagePower.power());
