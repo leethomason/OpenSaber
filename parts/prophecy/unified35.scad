@@ -241,8 +241,19 @@ module forwardRail()
         translate([0, 0, M_TRANSITION - T_TRANSITION_RING]) {
             cylinder(d=D_FORWARD, h=M_LED_HOLDER_BACK - M_TRANSITION + T_TRANSITION_RING);
         }
-        translate([-4, -R_FORWARD, M_TRANSITION - T_TRANSITION_RING]) {
-            cube(size=[8, 2.5, 100]);
+        union() {
+            W = 8;
+            H = 2.5;
+            SPACE = 0.4;
+
+            // join
+            translate([-W/2 + SPACE, -R_FORWARD + SPACE, M_TRANSITION - T_TRANSITION_RING]) {
+               cube(size=[W - SPACE*2, H - SPACE*2, T_TRANSITION_RING + EPS]);
+            }
+            // main
+            translate([-W/2, -R_FORWARD, M_TRANSITION]) {
+                cube(size=[W, H, 100]);
+            }
         }
     }
     // Add a ridge for positioning.
@@ -330,7 +341,7 @@ Z_B3 = M_BUTTRESS_4 + EPS - M_B3_FRONT;
 Z_B4 = M_TRANSITION + EPS - M_B4_FRONT - T_TRANSITION_RING;
 
 // front
-*union() {
+union() {
     ledHolder();
     switchAndPortHolder();
     dotstarHolder();
@@ -338,7 +349,7 @@ Z_B4 = M_TRANSITION + EPS - M_B4_FRONT - T_TRANSITION_RING;
 }
 
 // Back battery holder
-difference() {
+*difference() {
     intersection() {
         innerTube();
         union() {
