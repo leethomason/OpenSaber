@@ -15,7 +15,7 @@ EPS2 = EPS * 2;
 
 H_HEAT_SINK_THREAD = 10.0;
 D_HEAT_SINK_THREAD = 20.2;  // 20.4 is loose (PHA), 20.1 tight (PLA)
-R_DOTSTAR          = 90;
+R_DOTSTAR          = 90 + 180 * (TANO_VERSION - 1);
 SPKR_OFFSET         = 7;    // distance from back of pommel to speaker
 D_SPKR_INNER = D_SPKR_PLASTIC - 4;
 
