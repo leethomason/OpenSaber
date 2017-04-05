@@ -52,6 +52,8 @@
 #include "saberUtil.h"
 #include "tester.h"
 
+void buttonAHoldHandler(const Button&);
+
 static const uint32_t VBAT_TIME_INTERVAL      = 500;
 
 static const uint32_t INDICATOR_TIME          = 500;
@@ -189,15 +191,15 @@ void setup() {
 
     blade.setRGB(RGB::BLACK);
 
-    buttonA.holdHandler(buttonAHoldHandler);
-    buttonA.clickHandler(buttonAClickHandler);
-    buttonA.releaseHandler(buttonAReleaseHandler);
+    buttonA.setHoldHandler(buttonAHoldHandler);
+    buttonA.setClickHandler(buttonAClickHandler);
+    buttonA.setReleaseHandler(buttonAReleaseHandler);
 
     #ifdef SABER_TWO_BUTTON
-        buttonB.clickHandler(buttonBClickHandler);
-        buttonB.releaseHandler(buttonBReleaseHandler);
-        buttonB.holdHandler(buttonBHoldHandler);
-        buttonB.pressHandler(buttonBPressHandler);
+        buttonB.setClickHandler(buttonBClickHandler);
+        buttonB.setReleaseHandler(buttonBReleaseHandler);
+        buttonB.setHoldHandler(buttonBHoldHandler);
+        buttonB.setPaletteressHandler(buttonBPressHandler);
     #endif
 
     #ifdef SABER_TWO_BUTTON
@@ -260,7 +262,7 @@ int vbatToPowerLevel(int32_t vbat)
 }
 
 /*
-   The saberDB is the source of true. (The Model.)
+   The saberDB is the source of truth. (The Model.)
    Bring other things in sync when it changes.
 */
 void syncToDB()
