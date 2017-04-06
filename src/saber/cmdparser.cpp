@@ -35,28 +35,20 @@ CMDParser::CMDParser(SaberDB* _db) {
 
 void CMDParser::tokenize()
 {
-    //  sprint("token ");  Serial.println(token.c_str());
     action.clear();
     value.clear();
     if (token.empty()) return;
 
-    //  Serial.println("not empty");
-
     int i = 0;
-    //Serial.println(i);
     for ( ; token[i] && token[i] != ' '; i++) {
         action.append(token[i]);
     }
-    //Serial.println(i);
     if (token[i] == ' ') {
         i++;
         for ( ; token[i]; i++) {
             value.append(token[i]);
         }
     }
-    //  Serial.println(i);
-    //  Serial.print("action "); Serial.println(action.c_str());
-    //  Serial.print("value  "); Serial.println(value.c_str());
 }
 
 void CMDParser::printHexColor(const RGB& color) {
