@@ -86,6 +86,16 @@ public:
         return m_nHolds;
     }
 
+    int cycle(bool* on = 0) const {
+        if (on) *on = false;            
+
+        if (held()) {
+            if (on) *on = (m_nHolds & 1) ? true : false;
+            return (m_nHolds + 1) / 2;
+        }
+        return 0;
+    }
+
     // For testing - do not call in normal use.
     const ButtonCBHandlers* queryHandlers() const {
         return m_handlers;

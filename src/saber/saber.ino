@@ -52,8 +52,6 @@
 #include "saberUtil.h"
 #include "tester.h"
 
-void buttonAHoldHandler(const Button&);
-
 static const uint32_t VBAT_TIME_INTERVAL      = 500;
 
 static const uint32_t INDICATOR_TIME          = 500;
@@ -284,7 +282,8 @@ void syncToDB()
         uiRenderData.fontName = sfx.currentFontName();
     #endif
 
-    if (!ledB.blinking()) {   // If blinking, then the LED is being used as UI.
+    // Only set ledB if not being used as UI
+    if (buttonsReleased()) {
         ledB.set(saberDB.soundOn());
     }
 }
@@ -313,11 +312,13 @@ void buttonAReleaseHandler(const Button& b)
 }
 
 #ifdef SABER_TWO_BUTTON
+/*
 void blinkVolumeHandler(const LEDManager& manager)
 {
     saberDB.setVolume4(manager.numBlinks());
     syncToDB();
 }
+*/
 
 void buttonAClickHandler(const Button&)
 {
@@ -422,27 +423,33 @@ void buttonBClickHandler(const Button&) {
 
 #else
 
-void blinkVolumeHandler(const LEDManager& manager)
+
+bool setVolumeFromHoldCount(int count)
 {
-    saberDB.setVolume4(manager.numBlinks() - 1);
+    saberDB.setVolume4(count - 1);
     syncToDB();
+    return count >= 0 && count <= 5;
 }
 
-void blinkPaletteHandler(const LEDManager& manager)
+bool setPaletteFromHoldCount(int count)
 {
-    saberDB.setPalette(manager.numBlinks() - 1);
+    saberDB.setPalette(count - 1);
     syncToDB();
+    return count <= SaberDB::NUM_PALETTES;
 }
 
-void meditationTimeHandler(const LEDManager& manager)
+bool setMeditationFromHoldCount(int count)
 {
-    switch(manager.numBlinks()) {
+    switch(count) {
         case 1: meditationTimer = 1000 * 60 * 1; break;
         case 2: meditationTimer = 1000 * 60 * 2; break;
         case 3: meditationTimer = 1000 * 60 * 5; break;
         case 4: meditationTimer = 1000 * 60 * 10; break;
     }
+    syncToDB();
+    return count >= 1 && count <= 4;
 }
+
 
 // One button case.
 void buttonAClickHandler(const Button&)
@@ -460,11 +467,14 @@ void buttonAClickHandler(const Button&)
     meditationTimer = 0;
 }
 
-void buttonAHoldHandler(const Button&)
+void buttonAHoldHandler(const Button& button)
 {
     Log.p("buttonAHoldHandler").eol();
     meditationTimer = 0;
+
     if (bladeState.state() == BLADE_OFF) {
+        bool buttonOn = false;
+        button.cycle(&buttonOn);
 
         if (uiMode.mode() == UIMode::NORMAL) {
             bladeState.change(BLADE_IGNITE);
@@ -473,16 +483,18 @@ void buttonAHoldHandler(const Button&)
             #endif
         }
         else if (uiMode.mode() == UIMode::PALETTE) {
-            saberDB.setPalette(0);
-            ledA.blink(SaberDB::NUM_PALETTES, INDICATOR_CYCLE, blinkPaletteHandler);
+            if (!setPaletteFromHoldCount(button.nHolds()))
+                buttonOn = false;
         }
         else if (uiMode.mode() == UIMode::VOLUME) {
-            ledA.blink(5, INDICATOR_CYCLE, blinkVolumeHandler);
+            if (!setVolumeFromHoldCount(button.nHolds()))
+                buttonOn = false;
         }
         else if (uiMode.mode() == UIMode::MEDITATION) {
-            ledA.blink(4, INDICATOR_CYCLE, meditationTimeHandler);
+            if (!setMeditationFromHoldCount(button.nHolds()))
+                buttonOn = false;
         }
-
+        ledA.set(buttonOn);
     }
     else if (bladeState.state() != BLADE_RETRACT) {
         bladeState.change(BLADE_RETRACT);
