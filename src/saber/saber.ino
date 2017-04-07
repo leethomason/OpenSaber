@@ -197,7 +197,7 @@ void setup() {
         buttonB.setClickHandler(buttonBClickHandler);
         buttonB.setReleaseHandler(buttonBReleaseHandler);
         buttonB.setHoldHandler(buttonBHoldHandler);
-        buttonB.setPaletteressHandler(buttonBPressHandler);
+        buttonB.setPressHandler(buttonBPressHandler);
     #endif
 
     #ifdef SABER_TWO_BUTTON
@@ -238,6 +238,12 @@ void setup() {
 
     syncToDB();
     ledA.set(true); // "power on" light
+
+    #ifdef SABER_TWO_BUTTON
+    buttonB.setHoldRepeats(true);  // volume repeats
+    #else
+    buttonA.setHoldRepeats(true);  // everything repeats!!
+    #endif
 
     #ifdef SABER_UI_BRIGHTNESS
         dotstarUI.SetBrightness(SABER_UI_BRIGHTNESS);
@@ -303,22 +309,24 @@ void buttonAReleaseHandler(const Button& b)
         }
     #endif
 
+#ifdef MEDITATION_MODE
     if (uiMode.mode() == UIMode::MEDITATION && meditationTimer) {
         Log.p("med start").eol();
         #ifdef SABER_SOUND_ON
         sfx.playSound(SFX_SPIN, SFX_OVERRIDE, true);
         #endif
     }
+#endif
+}
+
+bool setVolumeFromHoldCount(int count)
+{
+    saberDB.setVolume4(count - 1);
+    syncToDB();
+    return count >= 0 && count <= 5;
 }
 
 #ifdef SABER_TWO_BUTTON
-/*
-void blinkVolumeHandler(const LEDManager& manager)
-{
-    saberDB.setVolume4(manager.numBlinks());
-    syncToDB();
-}
-*/
 
 void buttonAClickHandler(const Button&)
 {
@@ -373,7 +381,7 @@ void buttonBPressHandler(const Button&) {
     paletteChange = false;
 }
 
-void buttonBHoldHandler(const Button&) {
+void buttonBHoldHandler(const Button& button) {
     Log.p("buttonBHoldHandler").eol();
     if (bladeState.state() != BLADE_OFF) {
         if (!paletteChange) {
@@ -386,13 +394,8 @@ void buttonBHoldHandler(const Button&) {
         }
     }
     else if (bladeState.state() == BLADE_OFF) {
-        if (saberDB.soundOn()) {
-            saberDB.setSoundOn(false);
-            syncToDB();
-        }
-        else {
-            ledB.blink(4, INDICATOR_CYCLE, blinkVolumeHandler);
-        }
+        bool on = setVolumeFromHoldCount(button.nHolds());
+        ledB.set(on);
     }
 }
 
@@ -422,14 +425,6 @@ void buttonBClickHandler(const Button&) {
 }
 
 #else
-
-
-bool setVolumeFromHoldCount(int count)
-{
-    saberDB.setVolume4(count - 1);
-    syncToDB();
-    return count >= 0 && count <= 5;
-}
 
 bool setPaletteFromHoldCount(int count)
 {

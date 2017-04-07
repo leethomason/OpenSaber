@@ -38,7 +38,7 @@ SOFTWARE.
 #define SABER_MODEL_BO				5	// 2 button prop shield
 #define SABER_MODEL_TANO 			6
 
-#define SABER_MODEL 				SABER_MODEL_SHOCK
+#define SABER_MODEL 				SABER_MODEL_GECKO
 
 #define LED_TOPOLOGY_RESISTOR		1
 #define LED_TOPOLOGY_DRIVER			2
@@ -85,6 +85,11 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int32_t BLUE_I   = 350;
 	static const int32_t BLUE_R   = 1800;
 
+	static const int VOLUME_1 = 15;
+	static const int VOLUME_2 = 50;
+	static const int VOLUME_3 = 120;
+	static const int VOLUME_4 = 200;	
+
 #elif SABER_MODEL == SABER_MODEL_BLACK
 	#define LED_TOPOLOGY 				LED_TOPOLOGY_RESISTOR
 	#define PCB_VERSION 				PCB_VERSION_5
@@ -115,7 +120,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int VOLUME_2 = 50;
 	static const int VOLUME_3 = 120;
 	static const int VOLUME_4 = 200;
-
 
 #elif SABER_MODEL == SABER_MODEL_SHOCK
 	#define PCB_VERSION 				PCB_VERSION_5
