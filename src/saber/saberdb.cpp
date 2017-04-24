@@ -31,20 +31,28 @@ SaberDB::SaberDB() {
   STATIC_ASSERT(BASE_ADDR + NUM_PALETTES * sizeof(Palette) + sizeof(DataHeader) < EEPROM_SIZE);
 }
 
-bool SaberDB::writeDefaults() {
+bool SaberDB::writeDefaults() 
+{
   static Palette defPalette[NUM_PALETTES] = {
     { 0x00ff00,  0x00ffa0,    0 },    // green
     { 0x0000ff,  0x00c8ff,    0 },    // blue
     { 0x00ffff,  0x00a0ff,    0 },    // cyan
     { 0xff0000,  0xa08000,    0 },    // red
-    { 0xff4000,  0x80ff00,    0 },    // amber
-    { 0xffc800,  0xffa000,    0 },    // sand
-    { 0x9000ff,  0x9064ff,    0 },    // purple
-    { 0xff40ed,  0x5000ff,    0 }     // pink
+    { 0xff4000,  0x80ff00,    0 },
+    { 0x0044ff,  0x00ccff,    0 },
+    { 0x9000ff,  0x9064ff,    0 },
+    { 0x00ff44,  0x00ffaa,    0 } 
   };
+
   static const char* defNames[NUM_PALETTES] = {
-    "BESPIN2", "BESPIN2", "FATES", "VADER",
-    "ROGUE", "ROGUE", "JAINA", "ROGUE"
+    "BESPIN2", 
+    "OBIWAN", 
+    "FATES", 
+    "VADER",
+    "ROGUE", 
+    "GRAFLEX", 
+    "JAINA", 
+    "ROGUE"
   };
 
   Log.p("Writing EEPROM default.").eol();

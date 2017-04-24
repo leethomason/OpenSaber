@@ -28,7 +28,7 @@ SOFTWARE.
 // --- Configuration ---
 // Note: Serial connection should be set to 19200 baud with a newline after commands.
 
-#define SERIAL_DEBUG 1
+#define SERIAL_DEBUG 0
 
 #define SABER_MODEL_TEST			0
 #define SABER_MODEL_GECKO			1	// PCB, Teensy 3, external amp and accel
@@ -379,57 +379,6 @@ enum {
 
 static const float DEFAULT_G_FORCE_MOTION = 1.3f;
 static const float DEFAULT_G_FORCE_IMPACT = 2.2f;
-
-/*
-Connections
-	SaberZ
-		Battery
-			Bat+
-			Bat-
-		Audio
-			VBat
-			Aground x 2
-			DAC
-		Accel (LIS3DH)
-			Vcc
-			SCL
-			SDA
-			Ground
-		Crystal
-			R
-			G
-			B
-			Ground
-
-	Stack
-		Power
-			Bat+
-			V5
-			Ground (V5)
-			Ground (Bat-)
-
-		Oled
-			Vcc
-			MOSI
-			CLCK
-			CS
-			RST
-			D/C
-			Ground
-
-	Both
-		SD
-			Vcc
-			MOSI
-			MISO
-			CLCK
-			CS
-			Ground
-		USB
-			D+
-			D-
-			Ground
-*/
 
 #endif // PINS_HEADER
 
