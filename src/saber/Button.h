@@ -87,10 +87,11 @@ public:
     }
 
     int cycle(bool* on = 0) const {
-        if (on) *on = false;            
-
+        if (on) 
+            *on = false;            
         if (held()) {
-            if (on) *on = (m_nHolds & 1) ? true : false;
+            if (on) 
+                *on = (m_nHolds & 1) ? true : false;
             return (m_nHolds + 1) / 2;
         }
         return 0;

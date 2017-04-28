@@ -469,25 +469,28 @@ void buttonAHoldHandler(const Button& button)
 
     if (bladeState.state() == BLADE_OFF) {
         bool buttonOn = false;
-        button.cycle(&buttonOn);
+        bool newEvent = button.nHolds() & 1;
+        int cycle = button.cycle(&buttonOn);
 
-        if (uiMode.mode() == UIMode::NORMAL) {
-            bladeState.change(BLADE_IGNITE);
-            #ifdef SABER_SOUND_ON
-                sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
-            #endif
-        }
-        else if (uiMode.mode() == UIMode::PALETTE) {
-            if (!setPaletteFromHoldCount(button.nHolds()))
-                buttonOn = false;
-        }
-        else if (uiMode.mode() == UIMode::VOLUME) {
-            if (!setVolumeFromHoldCount(button.nHolds()))
-                buttonOn = false;
-        }
-        else if (uiMode.mode() == UIMode::MEDITATION) {
-            if (!setMeditationFromHoldCount(button.nHolds()))
-                buttonOn = false;
+        if (newEvent) {
+            if (uiMode.mode() == UIMode::NORMAL) {
+                bladeState.change(BLADE_IGNITE);
+                #ifdef SABER_SOUND_ON
+                    sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
+                #endif
+            }
+            else if (uiMode.mode() == UIMode::PALETTE) {
+                if (!setPaletteFromHoldCount(cycle))
+                    buttonOn = false;
+            }
+            else if (uiMode.mode() == UIMode::VOLUME) {
+                if (!setVolumeFromHoldCount(cycle))
+                    buttonOn = false;
+            }
+            else if (uiMode.mode() == UIMode::MEDITATION) {
+                if (!setMeditationFromHoldCount(cycle))
+                    buttonOn = false;
+            }
         }
         ledA.set(buttonOn);
     }

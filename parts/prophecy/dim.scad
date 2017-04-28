@@ -51,7 +51,7 @@ R_BATTERY			= D_BATTERY / 2;
 
 H_SPKR_METAL   		= 8 + 0.5;
 D_SPKR_METAL   		= 23.6;	
-H_SPKR_PLASTIC 		= 2.7;
+H_SPKR_PLASTIC 		= 2.4;
 D_SPKR_PLASTIC 		= 28;
 D_POMMEL			= 31.0; // 31.5 is correct, but snug
 R_POMMEL 			= D_POMMEL / 2;
