@@ -472,10 +472,12 @@ void buttonAHoldHandler(const Button& button)
         button.cycle(&buttonOn);
 
         if (uiMode.mode() == UIMode::NORMAL) {
-            bladeState.change(BLADE_IGNITE);
-            #ifdef SABER_SOUND_ON
-                sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
-            #endif
+            if (button.nHolds() == 1) {
+                bladeState.change(BLADE_IGNITE);
+                #ifdef SABER_SOUND_ON
+                    sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
+                #endif
+            }
         }
         else if (uiMode.mode() == UIMode::PALETTE) {
             if (!setPaletteFromHoldCount(button.nHolds()))
@@ -492,10 +494,12 @@ void buttonAHoldHandler(const Button& button)
         ledA.set(buttonOn);
     }
     else if (bladeState.state() != BLADE_RETRACT) {
-        bladeState.change(BLADE_RETRACT);
-        #ifdef SABER_SOUND_ON
-            sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
-        #endif
+        if (button.nHolds() == 1) {
+            bladeState.change(BLADE_RETRACT);
+            #ifdef SABER_SOUND_ON
+                sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
+            #endif
+        }
     }
 }
 

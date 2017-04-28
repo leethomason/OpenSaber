@@ -247,56 +247,58 @@ void DotStarUI::Draw(RGB* led, UIMode mode, bool ignited, const UIRenderData& da
 	static const uint32_t MED_2				= 0x00a05F;
 	static const uint32_t MED_3				= 0x00FF00;
 
-	switch (mode) {
-	case UIMode::NORMAL:
-		if (!ignited)
+	if (ignited) {
+		// Set the power level.
+		int i = 0;
+		for (; i < data.power && i < 4; ++i) {
+			led[i] = data.color;
+		}
+		for (; i < 4; ++i) {
+			led[i].set(0);
+		}
+	}
+	else {
+		switch (mode) {
+		case UIMode::NORMAL:
 		{
 			led[0].set(data.volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
 			led[1].set(data.volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
 			led[2].set(0);
 			led[3] = data.color;
 		}
-		else {
+		break;
+
+		case UIMode::PALETTE:
+		{
+			led[0].set((data.palette & 1) ? PALETTE_ONE : 0);
+			led[1].set((data.palette & 2) ? PALETTE_ONE : 0);
+			led[2].set((data.palette & 4) ? PALETTE_ONE : 0);
+			led[3] = data.color;
+		}
+		break;
+
+		case UIMode::VOLUME:
+		{
 			int i = 0;
-			for (; i < data.power && i < 4; ++i) {
-				led[i] = data.color;
+			for (; i < data.volume && i < 4; ++i) {
+				led[i].set(COLOR_AUDIO_ON);
 			}
 			for (; i < 4; ++i) {
-				led[i].set(0);
+				led[i].set(COLOR_AUDIO_OFF);
 			}
 		}
 		break;
 
-	case UIMode::PALETTE:
-	{
-		led[0].set((data.palette & 1) ? PALETTE_ONE : 0);
-		led[1].set((data.palette & 2) ? PALETTE_ONE : 0);
-		led[2].set((data.palette & 4) ? PALETTE_ONE : 0);
-		led[3] = data.color;
-	}
-	break;
-
-	case UIMode::VOLUME:
-	{
-		int i = 0;
-		for (; i < data.volume && i < 4; ++i) {
-			led[i].set(COLOR_AUDIO_ON);
+		case UIMode::MEDITATION:
+		{
+			led[0].set(MED_0);
+			led[1].set(MED_1);
+			led[2].set(MED_2);
+			led[3].set(MED_3);
 		}
-		for (; i < 4; ++i) {
-			led[i].set(COLOR_AUDIO_OFF);
+		break;
+
 		}
-	}
-	break;
-
-	case UIMode::MEDITATION:
-	{
-		led[0].set(MED_0);
-		led[1].set(MED_1);
-		led[2].set(MED_2);
-		led[3].set(MED_3);
-	}
-	break;
-
 	}
 	for (int i = 0; i < 4; ++i) {
 		led[i].scale(m_brightness);
