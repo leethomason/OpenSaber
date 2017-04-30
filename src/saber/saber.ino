@@ -465,6 +465,7 @@ void buttonAClickHandler(const Button&)
 void buttonAHoldHandler(const Button& button)
 {
     Log.p("buttonAHoldHandler").eol();
+    
     meditationTimer = 0;
 
     if (bladeState.state() == BLADE_OFF) {
