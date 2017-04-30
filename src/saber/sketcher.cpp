@@ -300,9 +300,14 @@ void DotStarUI::Draw(RGB* led, UIMode mode, bool ignited, const UIRenderData& da
 
 		}
 	}
+	bool black = true;
 	for (int i = 0; i < 4; ++i) {
 		led[i].scale(m_brightness);
+		if (led[i].get()) {
+			black = false;
+		}
 	}
+	ASSERT(!black);
 }
 
 
