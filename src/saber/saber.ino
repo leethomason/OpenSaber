@@ -464,26 +464,25 @@ void buttonAClickHandler(const Button&)
 
 void buttonAHoldHandler(const Button& button)
 {
-    Log.p("buttonAHoldHandler").eol();
+    Log.p("buttonAHoldHandler nHolds=").p(button.nHolds()).eol();
     
     meditationTimer = 0;
 
     if (bladeState.state() == BLADE_OFF) {
         bool buttonOn = false;
-        bool newEvent = button.nHolds() & 1;
         int cycle = button.cycle(&buttonOn);
 
         if (uiMode.mode() == UIMode::NORMAL) {
             if (button.nHolds() == 1) {
                 bladeState.change(BLADE_IGNITE);
-            #ifdef SABER_SOUND_ON
-                sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
-            #endif
+                #ifdef SABER_SOUND_ON
+                    sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
+                #endif
             }
         }
         else 
         {
-            else if (uiMode.mode() == UIMode::PALETTE) {
+            if (uiMode.mode() == UIMode::PALETTE) {
                 if (!setPaletteFromHoldCount(cycle))
                     buttonOn = false;
             }
@@ -655,7 +654,7 @@ void loop() {
             display.display(oledBuffer);
         #endif
         #ifdef SABER_UI_START
-            dotstarUI.Draw(leds + SABER_UI_START, uiMode.mode(), bladeState.bladeOn(), uiRenderData);
+            dotstarUI.Draw(leds + SABER_UI_START, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
         #endif
         //Log.p("crystal: ").p(leds[0].r).p(" ").p(leds[0].g).p(" ").p(leds[0].b).eol();
     }

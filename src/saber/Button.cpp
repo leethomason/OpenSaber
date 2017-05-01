@@ -108,17 +108,17 @@ void Button::process(void)
         bitWrite(m_state, BIT_CHANGED, false);
 
         // should we trigger an onHold event? If so - trigger once unless hold repeating.
-        if (isDown()) {
+       if (isDown()) {
             uint32_t count = (currentMillis - m_pressedStartTime) / uint32_t(m_holdEventThreshold);
             if (count > m_nHolds) {
-                int wasHoldTriggered = bitRead(m_state, BIT_HOLD_TRIGGERED);
                 m_nHolds = count;
 
-                bitWrite(m_state, BIT_HOLD_TRIGGERED, true);
-                bitWrite(m_state, BIT_HOLD_NOW, true);
-
-                if (m_handlers && m_handlers->cb_onHold && (!wasHoldTriggered || m_holdRepeats)) {
-                    m_handlers->cb_onHold(*this);
+                if (!bitRead(m_state, BIT_HOLD_TRIGGERED) || m_holdRepeats) {
+                    bitWrite(m_state, BIT_HOLD_TRIGGERED, true);
+                    bitWrite(m_state, BIT_HOLD_NOW, true);
+                    if (m_handlers && m_handlers->cb_onHold) {
+                        m_handlers->cb_onHold(*this);
+                    }
                 }
             }
         }
