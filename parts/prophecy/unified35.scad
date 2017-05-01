@@ -341,7 +341,7 @@ Z_B3 = M_BUTTRESS_4 + EPS - M_B3_FRONT;
 Z_B4 = M_TRANSITION + EPS - M_B4_FRONT - T_TRANSITION_RING;
 
 // front
-*union() {
+union() {
     ledHolder();
     switchAndPortHolder();
     dotstarHolder();
@@ -383,7 +383,7 @@ Z_B4 = M_TRANSITION + EPS - M_B4_FRONT - T_TRANSITION_RING;
 }
 
 // Back body
-difference() {
+*difference() {
     
     union() {
         transitionRing();

@@ -5,7 +5,7 @@ M_LED_HOLDER_FRONT	= M_TRANSITION + 62;
 M_LED_HOLDER_BACK	= M_LED_HOLDER_FRONT - 10;
 M_SWITCH_CENTER		= M_TRANSITION + 45;
 M_DOTSTAR			= M_TRANSITION + 33;	// FIXME center mark of first dotstar
-M_PORT_CENTER       = M_TRANSITION + 14;
+M_PORT_CENTER       = M_TRANSITION + 14.5;	// was 14 for TANO-1	
 
 M_POMMEL_BACK		= -12.5;	// Back of the pommel
 M_0					= 0;
