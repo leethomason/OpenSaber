@@ -100,6 +100,28 @@ public:
 
 private:
     static Accelerometer* _instance;
+
+
+
+};
+
+class Voltmeter
+{
+public:
+    Voltmeter() {}
+
+    void begin();
+
+    /// Instantaneous power. (Noisy).
+    uint32_t readVBat();
+    /// Average power.
+    uint32_t averagePower() { return m_averagePower.power(); }
+
+    /// Add a sample to the average power.
+    void takeSample();
+
+private:
+    AveragePower m_averagePower;
 };
 
 

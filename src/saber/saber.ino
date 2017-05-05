@@ -86,7 +86,7 @@ ButtonCB    buttonB(PIN_SWITCH_B);
 UIModeUtil  uiMode;
 #endif
 SaberDB     saberDB;
-AveragePower averagePower;
+Voltmeter voltmeter;
 
 #ifdef SABER_NUM_LEDS
 RGB leds[SABER_NUM_LEDS];
@@ -118,16 +118,6 @@ Timer gforceDataTimer(110);
 Tester tester;
 uint32_t unlocked = 0;
 bool soundOk = false;
-
-int32_t readVbat() {
-    #ifdef SABER_VOLTMETER
-        int32_t analog = analogRead(PIN_VMETER);
-        int32_t mV = analog * UVOLT_MULT / int32_t(1000);
-        return mV;
-    #else
-        return NOMINAL_VOLTAGE;
-    #endif
-}
 
 void setupSD(int logCount)
 {
@@ -174,18 +164,7 @@ void setup() {
 
     accel.begin();
 
-    #ifdef SABER_VOLTMETER
-        analogReference(INTERNAL);  // 1.1 volts
-        analogRead(PIN_VMETER);     // warm up the ADC to avoid spurious initial value.
-        Log.p("Voltmeter open.").eol();
-        delay(50);
-        for(int i=0; i<AveragePower::NUM_SAMPLES; ++i) {
-            delay(10);
-            averagePower.push(readVbat());
-        }
-        Log.p("Vbat: ").p(readVbat()).p(" Ave:").p(averagePower.power()).eol();
-        Log.p("Voltmeter initialized.").eol();
-    #endif
+    voltmeter.begin();
 
     blade.setRGB(RGB::BLACK);
 
@@ -214,7 +193,7 @@ void setup() {
         sfx.setEnabled(soundOk);
     #endif
 
-    blade.setVoltage(averagePower.power());
+    blade.setVoltage(voltmeter.averagePower());
 
     #ifdef SABER_DISPLAY
         display.begin(OLED_WIDTH, OLED_HEIGHT, SSD1306_SWITCHCAPVCC);
@@ -282,8 +261,8 @@ void syncToDB()
         uiRenderData.color[i] = saberDB.bladeColor()[i];
     }
     uiRenderData.palette = saberDB.paletteIndex();
-    uiRenderData.power = vbatToPowerLevel(averagePower.power());
-    uiRenderData.mVolts = averagePower.power();
+    uiRenderData.power = vbatToPowerLevel(voltmeter.averagePower());
+    uiRenderData.mVolts = voltmeter.averagePower();
     #ifdef SABER_SOUND_ON
         uiRenderData.fontName = sfx.currentFontName();
     #endif
@@ -619,11 +598,11 @@ void loop() {
     tester.process();
 
     if (vbatTimer.tick()) {
-        averagePower.push(readVbat());
+        voltmeter.takeSample();
         //Log.p("power ").p(averagePower.power()).eol();
-        blade.setVoltage(averagePower.power());
-        uiRenderData.mVolts = averagePower.power();
-        uiRenderData.power = vbatToPowerLevel(averagePower.power());
+        blade.setVoltage(voltmeter.averagePower());
+        uiRenderData.mVolts = voltmeter.averagePower();
+        uiRenderData.power = vbatToPowerLevel(voltmeter.averagePower());
     }
 
     if (gforceDataTimer.tick()) {
