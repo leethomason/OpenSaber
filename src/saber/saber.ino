@@ -64,8 +64,9 @@ uint32_t reflashTime    = 0;
 bool     flashOnClash   = false;
 float    maxGForce2     = 0.0f;
 uint32_t lastMotionTime = 0;    
-uint32_t meditationTimer = 0;  
 uint32_t lastLoopTime   = 0;
+
+Timer2 meditationTimer(1000, false, false);
 
 #ifdef SABER_SOUND_ON
 // First things first: disable that audio to avoid clicking.
@@ -99,7 +100,7 @@ DotStarUI dotstarUI;
 
 Accelerometer accel;
 
-Timer displayTimer(100);
+Timer2 displayTimer(100);
 #ifdef SABER_DISPLAY
 static const int OLED_WIDTH = 128;
 static const int OLED_HEIGHT = 32;
@@ -112,8 +113,8 @@ Renderer renderer;
 
 CMDParser cmdParser(&saberDB);
 Blade blade;
-Timer vbatTimer(VBAT_TIME_INTERVAL);
-Timer gforceDataTimer(110);
+Timer2 vbatTimer(VBAT_TIME_INTERVAL);
+Timer2 gforceDataTimer(110);
 
 Tester tester;
 uint32_t unlocked = 0;
@@ -228,6 +229,7 @@ void setup() {
         dotstarUI.SetBrightness(SABER_UI_BRIGHTNESS);
     #endif
     Log.event("[saber start]");
+    lastLoopTime = millis();    // so we don't get a big jump on the first loop()
 }
 
 uint32_t calcReflashTime() {
@@ -289,7 +291,7 @@ void buttonAReleaseHandler(const Button& b)
     #endif
 
 #ifdef MEDITATION_MODE
-    if (uiMode.mode() == UIMode::MEDITATION && meditationTimer) {
+    if (uiMode.mode() == UIMode::MEDITATION && meditationTimer.enabled()) {
         Log.p("med start").eol();
         #ifdef SABER_SOUND_ON
         sfx.playSound(SFX_SPIN, SFX_OVERRIDE, true);
@@ -415,11 +417,12 @@ bool setPaletteFromHoldCount(int count)
 bool setMeditationFromHoldCount(int count)
 {
     switch(count) {
-        case 1: meditationTimer = 1000 * 60 * 1; break;
-        case 2: meditationTimer = 1000 * 60 * 2; break;
-        case 3: meditationTimer = 1000 * 60 * 5; break;
-        case 4: meditationTimer = 1000 * 60 * 10; break;
+        case 1: meditationTimer.setPeriod(1000 * 60 * 1);  break;
+        case 2: meditationTimer.setPeriod(1000 * 60 * 2);  break;
+        case 3: meditationTimer.setPeriod(1000 * 60 * 5);  break;
+        case 4: meditationTimer.setPeriod(1000 * 60 * 10); break;
     }
+    meditationTimer.setEnabled(true);
     syncToDB();
     return count >= 1 && count <= 4;
 }
@@ -438,14 +441,14 @@ void buttonAClickHandler(const Button&)
             sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
         #endif
     }
-    meditationTimer = 0;
+    meditationTimer.setEnabled(false);
 }
 
 void buttonAHoldHandler(const Button& button)
 {
     Log.p("buttonAHoldHandler nHolds=").p(button.nHolds()).eol();
     
-    meditationTimer = 0;
+    meditationTimer.setEnabled(false);
 
     if (bladeState.state() == BLADE_OFF) {
         bool buttonOn = false;
@@ -520,6 +523,9 @@ void serialEvent() {
 
 void loop() {
     const uint32_t msec = millis();
+    uint32_t delta = msec - lastLoopTime;
+    lastLoopTime = msec;
+
     tester.process();
 
     buttonA.process();
@@ -529,16 +535,11 @@ void loop() {
         ledB.process();
     #endif
 
-    if (meditationTimer && buttonsReleased()) {
-        uint32_t delta = msec - lastLoopTime;
-        if (delta >= meditationTimer) {
-            meditationTimer = 0;
+    if (meditationTimer.enabled() && buttonsReleased()) {
+        if (meditationTimer.tick(delta)) {
             #ifdef SABER_SOUND_ON
             sfx.playSound(SFX_SPIN, SFX_OVERRIDE, true);            
             #endif
-        }
-        else {
-            meditationTimer -= delta;
         }
     }
 
@@ -597,7 +598,7 @@ void loop() {
     #endif
     tester.process();
 
-    if (vbatTimer.tick()) {
+    if (vbatTimer.tick(delta)) {
         voltmeter.takeSample();
         //Log.p("power ").p(averagePower.power()).eol();
         blade.setVoltage(voltmeter.averagePower());
@@ -605,7 +606,7 @@ void loop() {
         uiRenderData.power = vbatToPowerLevel(voltmeter.averagePower());
     }
 
-    if (gforceDataTimer.tick()) {
+    if (gforceDataTimer.tick(delta)) {
         #ifdef SABER_DISPLAY
             maxGForce2 = constrain(maxGForce2, 0.1, 16);
             static const float MULT = 256.0f / GFORCE_RANGE;  // g=1 translates to uint8 64
@@ -624,9 +625,9 @@ void loop() {
         }
     }
 
-    if (displayTimer.tick()) {
+    if (displayTimer.tick(delta)) {
         uiRenderData.color = saberDB.bladeColor();
-        uiRenderData.meditationTimeRemain = meditationTimer;
+        uiRenderData.meditationTimeRemain = meditationTimer.remaining();
 
         #ifdef SABER_DISPLAY
             sketcher.Draw(&renderer, displayTimer.period(), uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
@@ -662,6 +663,5 @@ void loop() {
     #ifdef SABER_NUM_LEDS
         dotstar.display();
     #endif
-    lastLoopTime = msec;
 }
  

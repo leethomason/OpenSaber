@@ -208,3 +208,43 @@ bool TestHex()
 
 	return true;
 }
+
+int Timer2::tick(uint32_t delta)
+{
+	int fires = 0;
+	m_accum += delta;
+	if (m_enable && delta && m_period && (m_accum >= m_period)) {
+		fires = m_accum / m_period;
+		if (m_repeating) {
+			m_accum -= fires * m_period;
+		}
+		else {
+			m_enable = false;
+			fires = 1;
+		}
+	}
+	return fires;
+}
+
+/*static*/ bool Timer2::Test()
+{
+	Timer2 t2;
+	TEST_IS_EQ(t2.tick(900), 0);
+	TEST_IS_EQ(t2.tick(100), 1);
+	TEST_IS_EQ(t2.tick(2000), 2);
+
+	t2.reset();
+	t2.setRepeating(false);
+	t2.setPeriod(500);
+	TEST_IS_EQ(t2.tick(100), 0);
+	TEST_IS_EQ(t2.tick(2000), 1);
+	TEST_IS_FALSE(t2.enabled());
+	TEST_IS_EQ(t2.tick(1200), 0);
+
+	t2.setEnabled(true);
+	TEST_IS_EQ(t2.tick(400), 0);
+	TEST_IS_EQ(t2.tick(100), 1);
+	TEST_IS_FALSE(t2.enabled());
+	return true;
+}
+

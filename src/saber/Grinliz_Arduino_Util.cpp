@@ -74,23 +74,6 @@ int LEDManager::numBlinks() const
     return n + 1;
 }
 
-
-bool Timer::tick()
-{
-    if (time == 0) {
-        time = millis();  // start it up.
-    }
-    else {
-        uint32_t delta = millis() - time;
-        if (delta >= trigger) {
-            time = millis();
-            return true;
-        }
-    }
-    return false;
-}
-
-
 void SPLog::attachSerial(Stream* stream) 
 {
     serialStream = stream;
