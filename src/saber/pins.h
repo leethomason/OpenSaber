@@ -221,7 +221,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int VOLUME_3 = 120;
 	static const int VOLUME_4 = 200;
 
-#elif ((SABER_MODEL == SABER_MODEL_TANO) || (SABER_MODEL == SABER_MODEL_TANO_2))
+#elif (SABER_MODEL == SABER_MODEL_TANO)
 	#define PCB_VERSION 				PCB_VERSION_7
 	#define LED_TOPOLOGY 				LED_TOPOLOGY_RESISTOR
 	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
@@ -229,11 +229,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
-
-	#if (SABER_MODEL == SABER_MODEL_TANO_2)
-		#undef SABER_BUTTON
-		#define SABER_BUTTON Button::INTERNAL_PULLUP
-	#endif
 
 	#define SABER_NUM_LEDS 			4
 	#define SABER_UI_START  		0
@@ -245,6 +240,43 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int32_t RED_VF   = 2100;   // milli-volts
 	static const int32_t RED_I    = 350;    // milli-amps
 	static const int32_t RED_R    = 4300;   // milli-ohms
+
+	static const int32_t GREEN_VF = 3400;
+	static const int32_t GREEN_I  = 350;
+	static const int32_t GREEN_R  = 1000;
+
+	static const int32_t BLUE_VF  = 3100;
+	static const int32_t BLUE_I   = 350;
+	static const int32_t BLUE_R   = 1800;
+
+	static const int VOLUME_1 = 15;
+	static const int VOLUME_2 = 50;
+	static const int VOLUME_3 = 120;
+	static const int VOLUME_4 = 200;
+
+#elif (SABER_MODEL == SABER_MODEL_TANO_2)
+	#define PCB_VERSION 				PCB_VERSION_7
+	#define LED_TOPOLOGY 				LED_TOPOLOGY_RESISTOR
+	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
+	#define SABER_SOUND_ON 				SABER_SOUND_SD
+	#define SABER_SOUND_SHUTDOWN
+	#define SABER_VOLTMETER
+	#define SABER_INTEGRATED_SD
+
+	#undef SABER_BUTTON
+	#define SABER_BUTTON Button::INTERNAL_PULLUP
+
+	#define SABER_NUM_LEDS 			4
+	#define SABER_UI_START  		0
+	#define SABER_UI_BRIGHTNESS		8
+
+	static const int32_t UVOLT_MULT = 6750;
+	#define ID_STR "Tano-2 Cree XPE2 GGB"
+
+	// Actually GREEN
+	static const int32_t RED_VF   = 3400;   // milli-volts
+	static const int32_t RED_I    = 350;    // milli-amps
+	static const int32_t RED_R    = 1000;   // milli-ohms
 
 	static const int32_t GREEN_VF = 3400;
 	static const int32_t GREEN_I  = 350;
