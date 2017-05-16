@@ -75,7 +75,7 @@ SFX sfx(&audioPlayer);
 #endif
 
 BladeState  bladeState;
-ButtonCB    buttonA(PIN_SWITCH_A);
+ButtonCB    buttonA(PIN_SWITCH_A, SABER_BUTTON);
 LEDManager  ledA(PIN_LED_A, false);
 LEDManager  ledB(PIN_LED_B, false);  // Still have LEDB support, even if 1 button.
 
@@ -126,8 +126,10 @@ void setupSD(int logCount)
     SPI.setSCK(PIN_SABER_CLOCK);
     #if (SABER_SOUND_ON == SABER_SOUND_SD)
         #ifdef SABER_INTEGRATED_SD
+            Log.p("Connecting to built in SD...").eol();
             soundOk = SD.begin(BUILTIN_SDCARD);
         #else
+            Log.p("Connecting to SPI SD...").eol();
             soundOk = SD.begin(PIN_SDCARD_CS);
         #endif
         if (!soundOk) {
