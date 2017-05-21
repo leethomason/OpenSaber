@@ -8,6 +8,7 @@ class SPISettings;
 
 class LEDManager;
 typedef void (*BlinkHandler)(const LEDManager&);
+struct RGB;
 
 class LEDManager
 {
@@ -49,22 +50,6 @@ private:
     uint8_t cs;
 };
 
-class SPClass
-{
-public:
-	const SPClass& p(const char v[]) const 					{ Serial.print(v);    return *this; }
-    const SPClass& p(char v) const							{ Serial.print(v);    return *this; }
-    const SPClass& p(unsigned char v, int p = DEC) const	{ Serial.print(v, p); return *this; }
-    const SPClass& p(int v, int p = DEC) const				{ Serial.print(v, p); return *this; }
-    const SPClass& p(unsigned int v, int p = DEC) const		{ Serial.print(v, p); return *this; }
-    const SPClass& p(long v, int p = DEC) const				{ Serial.print(v, p); return *this; }
-    const SPClass& p(unsigned long v, int p = DEC) const	{ Serial.print(v, p); return *this; }
-    const SPClass& p(double v, int p = 2) const				{ Serial.print(v, p); return *this; }
-    void eol() const 										{ Serial.println(""); }
-};
-
-extern SPClass SPrint;
-
 class SPLog
 {
 public:
@@ -79,6 +64,7 @@ public:
     const SPLog& p(long v, int p = DEC) const;
     const SPLog& p(unsigned long v, int p = DEC) const;
     const SPLog& p(double v, int p = 2) const;
+    const SPLog& p(const RGB& rgb) const;
     void eol() const;
 
     void event(const char* event);

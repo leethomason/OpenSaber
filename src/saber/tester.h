@@ -7,6 +7,7 @@
 class Button;
 struct ButtonCBHandlers;
 class Tester;
+struct RGB;
 
 class Test
 {
@@ -20,6 +21,7 @@ public:
 	virtual const char* name() const = 0;
 	virtual void start(Tester* tester)	{}
 	virtual int process(Tester* tester, const char* event, const char* eventData) = 0;
+	virtual bool buttonRelease(Tester* tester, int sequence) { return false; }
 
 	int finalResult = 0;
 
@@ -32,6 +34,7 @@ class Tester
 public:
 	Tester();
 	void attach(Button* buttonA, Button* buttonB);
+	void attachUI(const RGB* uiLEDs) { leds = uiLEDs; }
 
 	void runTests(int count = 1, bool longTestTime=false);
 	void process();
@@ -45,6 +48,7 @@ public:
 	void checkAudio(const char* name, uint32_t low, uint32_t high);
 	uint32_t getRandom() { return r.rand16(); }
 	bool longTest() const { return useLongTest; }
+	const RGB* getLEDs() const { return leds; }
 
 	int order = 0;
 
@@ -66,6 +70,8 @@ private:
 	int passCount = 0;
 	int nPasses = 1;
 	bool useLongTest;
+	int nButtonCalls = 0;
+	const RGB* leds = 0;
 
 	uint32_t testAudio = 0;
 	const char* audioName = 0;

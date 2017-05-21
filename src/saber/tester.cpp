@@ -4,6 +4,7 @@
 #include "blade.h"
 #include "saberUtil.h"
 #include "sketcher.h"
+#include "rgb.h"
 
 #include "Button.h"
 #include "Grinliz_Arduino_Util.h"
@@ -226,6 +227,56 @@ public:
 };
 
 
+class LEDUI4Test : public Test
+{
+public:
+	virtual const char* name() const { return "LEDUI4Test"; }
+
+	virtual int process(Tester*, const char*, const char*) {
+		return result;
+	}
+
+	virtual void start(Tester* tester) {
+		tester->press(0, PRESS_TIME);
+	}
+
+	virtual bool buttonRelease(Tester* tester, int sequence) {
+		// 0 Normal
+		// 1 Palette
+		// 2 Volume
+		// 3 Normal
+		// 4 Palette
+		// -> Pal 0
+		// -> Pal 0
+		//
+
+		Log.p("bRel=").p(sequence).eol();
+		const RGB* leds = tester->getLEDs();
+		ASSERT(leds != 0);
+
+		switch (sequence) {
+			case 1:
+			case 2:
+				tester->press(0, PRESS_TIME);
+				break;
+
+			case 3:
+				TEST_EQUAL(leds[1], RGB::BLACK);	// canonical start state.
+				result = TEST_SUCCESS;
+				break;
+
+			default:
+				ASSERT(false);
+				result = TEST_ERROR;
+				break;
+		}
+		return true;
+	}	
+
+private:
+	int result = TEST_CONTINUE;
+};
+
 class AveragePowerTest : public Test
 {
 public:
@@ -361,20 +412,28 @@ public:
 ButtonTest buttonTest;
 IgniteRetractTest igniteRetractTest;
 BlasterTest blasterTest;
+#ifdef SABER_UI_START
+LEDUI4Test ledUI4Test;
+#endif
 ClashTest clashTest;
 PaletteTest paletteTest;
 AveragePowerTest averagePowerTest;
 InstantPowerTest instantPowerTest;
 
 Test* gTests[] = {
-	&buttonTest,
+/*	&buttonTest,
 	&igniteRetractTest,
-	&blasterTest,
+	&blasterTest,*/
+#	ifdef SABER_UI_START
+	&ledUI4Test,
+#	endif	
+	/*
 #	ifdef SABER_TWO_BUTTON
 	&clashTest,
 	&paletteTest,
 	&averagePowerTest,
 #	endif	
+*/
 	&instantPowerTest,
 	0
 };
@@ -411,7 +470,7 @@ void Tester::runTests(int count, bool longTest)
 	for(int i=0; gTests[i]; i++) {
 		gTests[i]->finalResult = 0;
 	}
-	currentTest = 0;
+	currentTest = 0;	
 	start();
 }
 
@@ -421,6 +480,7 @@ void Tester::start()
 	ASSERT(test);
 
 	order = 0;
+	nButtonCalls = 0;
 	TEST_EXISTS(button[0] != 0);
 #	ifdef SABER_TWO_BUTTON
 	TEST_EXISTS(button[1] != 0);
@@ -500,6 +560,7 @@ void Tester::process()
 	ASSERT(test);
 
 	uint32_t m = millis();
+	bool processButton = false;
 
 	for(int i=0; i<2; ++i) {
 		if (pressState[i].start && pressState[i].start <= m) {
@@ -509,6 +570,7 @@ void Tester::process()
 		if (pressState[i].end && pressState[i].end <= m) {
 			button[i]->testRelease();
 			pressState[i].end = 0;
+			processButton = test->buttonRelease(this, ++nButtonCalls);
 		}
 	}
 
@@ -527,7 +589,7 @@ void Tester::process()
 	}
 	e = Log.popEvent(&d);
 
-	if (e) {
+	if (e || processButton) {
 		int result = test->process(this, e, d);
 
 		if (result == Test::TEST_ERROR) {

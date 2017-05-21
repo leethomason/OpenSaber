@@ -93,9 +93,6 @@ RGB leds[SABER_NUM_LEDS];
 DotStar dotstar;
 DotStarUI dotstarUI;
 #endif
-#if (SABER_NUM_LEDS > 1) && !defined(SABER_UI_START)
-#   error SABER_UI_START not defined.
-#endif
 
 Accelerometer accel;
 
@@ -185,6 +182,9 @@ void setup() {
         tester.attach(&buttonA, &buttonB);
     #else
         tester.attach(&buttonA, 0);
+    #endif
+    #ifdef SABER_UI_START
+        tester.attachUI(leds + SABER_UI_START);
     #endif
 
     #ifdef SABER_SOUND_ON

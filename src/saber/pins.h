@@ -28,7 +28,7 @@ SOFTWARE.
 // --- Configuration ---
 // Note: Serial connection should be set to 19200 baud with a newline after commands.
 
-#define SERIAL_DEBUG 0
+#define SERIAL_DEBUG 1
 
 #define SABER_MODEL_TEST			0
 #define SABER_MODEL_GECKO			1	// PCB, Teensy 3, external amp and accel
@@ -39,7 +39,7 @@ SOFTWARE.
 #define SABER_MODEL_TANO 			6
 #define SABER_MODEL_TANO_2 			7
 
-#define SABER_MODEL 				SABER_MODEL_TANO_2
+#define SABER_MODEL 				SABER_MODEL_TANO
 
 #define LED_TOPOLOGY_RESISTOR		1
 #define LED_TOPOLOGY_DRIVER			2
