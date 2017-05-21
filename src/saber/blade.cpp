@@ -30,7 +30,6 @@ static const int32_t LED_RANGE = 255;
 
 Blade::Blade() {
     for (int i = 0; i < NCHANNELS; ++i) {
-//    digitalWrite(pinRGB[i], LOW);
         pinMode(pinRGB[i], OUTPUT);
         digitalWrite(pinRGB[i], LOW);
         pwm[i] = 0;
@@ -42,12 +41,6 @@ Blade::Blade() {
         color[i] = 0;
     }
     instance = this;
-}
-
-
-uint8_t Blade::lerpU8(uint8_t a, uint8_t b, uint8_t t) const {
-    int32_t r = int32_t(a) + (int32_t(b) - int32_t(a)) * int32_t(t) / 255;
-    return uint8_t(constrain(r, 0, 255));
 }
 
 
@@ -109,10 +102,8 @@ void Blade::setVoltage(int milliVolts) {
 
     for (int i = 0; i < NCHANNELS; ++i) {
         f1000[i] = amps[i] * res[i] / (vbat - vF[i]);
-        if (f1000[i] > 1000) {
-            f1000[i] = 1000;
-        }
-    }
+        f1000[i] = clamp(f1000[i], 0, 1000);
+  }
 #elif (LED_TOPOLOGY == LED_TOPOLOGY_DRIVER)
     vbat = int32_t(milliVolts);  // used for reporting on the command line, but f1000 isn't change,
     // so therefore the blade power doesn't change.
@@ -153,8 +144,10 @@ int32_t Blade::power() const {
         RGB rgb;
         #if (LED_TYPE == BBG)
             rgb.r = 0;
-            rgb.g = (raw.r + raw.g) / 2;
-            rgb.b = raw.b;
+            // Fancy +1 and clamp so that color=255 is halfed to 128 (not 127). Scaling
+            // routines later tend to just use the high bit.
+            rgb.g = (uint8_t) clamp((uint32_t(raw.r) + 1)/2 + (uint32_t(raw.g) + 1)/2, 0, 255);
+            rgb.b = (raw.b + 1) / 2;
         #else
             #error LED_TYPE not defined.
         #endif

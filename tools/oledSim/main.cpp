@@ -57,6 +57,7 @@ int main(int, char**) {
 	DotStarUI::Test();
 	TestCStr();
 	TestHex();
+	TestUtil();
 
 	SDL_Event e;
 	int scale = 4;

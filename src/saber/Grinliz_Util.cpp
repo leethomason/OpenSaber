@@ -3,6 +3,31 @@
 
 static int16_t gSinTable[256] = { 0 };
 
+uint8_t lerpU8(uint8_t a, uint8_t b, uint8_t t) 
+{
+    int32_t r = int32_t(a) + (int32_t(b) - int32_t(a)) * int32_t(t) / 255;
+    return uint8_t(clamp(r, 0, 255));
+}
+
+bool TestUtil()
+{
+    //clamp()
+    TEST_IS_EQ(clamp(-10, 0, 100), 0);
+    TEST_IS_EQ(clamp(10,  0, 100), 10);
+    TEST_IS_EQ(clamp(110, 0, 100), 100);
+
+    // lerpU8()
+	TEST_IS_EQ(lerpU8(0, 128, 128), 64);
+	TEST_IS_EQ(lerpU8(0, 128, 0), 0);
+	TEST_IS_EQ(lerpU8(0, 128, 255), 128);
+
+	TEST_IS_EQ(lerpU8(0, 255, 128), 128);
+	TEST_IS_EQ(lerpU8(0, 255, 0), 0);
+	TEST_IS_EQ(lerpU8(0, 255, 255), 255);
+
+	return true;
+}
+
 int16_t isin(uint16_t x)
 {
 	if (gSinTable[64] == 0) {

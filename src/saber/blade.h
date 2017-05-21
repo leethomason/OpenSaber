@@ -61,8 +61,6 @@ public:
     static RGB convertRawToPerceived(const RGB& raw);
 
 private:
-    uint8_t lerpU8(uint8_t a, uint8_t b, uint8_t t) const;
-
     static const int8_t pinRGB[NCHANNELS];
     static Blade* instance;
 

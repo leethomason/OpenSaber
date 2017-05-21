@@ -42,6 +42,17 @@ template<> struct CompileTimeAssert <true> {};
     }                             \
 }
 
+template<class T>
+T clamp(T value, T lower, T upper) {
+	if (value < lower) return lower;
+	if (value > upper) return upper;
+	return value;
+}
+
+uint8_t lerpU8(uint8_t a, uint8_t b, uint8_t t);
+
+bool TestUtil();
+
 /**
 * Returns 'true' if 2 strings are equal.
 * If one or both are null, they are never equal.

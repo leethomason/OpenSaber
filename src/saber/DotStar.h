@@ -55,7 +55,7 @@ struct RGB {
 		return (r == rhs.r) && (g == rhs.g) && (b == rhs.b);
 	}
 };
-
+	
 
 class DotStar
 {
