@@ -142,7 +142,7 @@ int32_t Blade::power() const {
 {
     #ifdef LED_TYPE 
         RGB rgb;
-        #if (LED_TYPE == BBG)
+        #if (LED_TYPE == LED_TYPE_BBG)
             rgb.r = 0;
             // Fancy +1 and clamp so that color=255 is halfed to 128 (not 127). Scaling
             // routines later tend to just use the high bit.

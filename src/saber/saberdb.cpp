@@ -33,27 +33,52 @@ SaberDB::SaberDB() {
 
 bool SaberDB::writeDefaults()
 {
-    static Palette defPalette[NUM_PALETTES] = {
-        { 0x00ff00,  0x00ffa0,    0 },    // green
-        { 0x0000ff,  0x00c8ff,    0 },    // blue
-        { 0x00ffff,  0x00a0ff,    0 },    // cyan
-        { 0xff0000,  0xa08000,    0 },    // red
-        { 0xff4000,  0x80ff00,    0 },
-        { 0x0044ff,  0x00ccff,    0 },
-        { 0x9000ff,  0x9064ff,    0 },
-        { 0x00ff44,  0x00ffaa,    0 }
-    };
+    #if (defined(LED_TYPE) && (LED_TYPE == LED_TYPE_BBG))
+        static Palette defPalette[NUM_PALETTES] = {
+            { 0x00ff00,  0x00ffa0,    0 },    // green
+            { 0x0000ff,  0x00c8ff,    0 },    // blue
+            { 0x00ffff,  0x00a0ff,    0 },    // cyan
+            { 0x00ff44,  0x00ffaa,    0 },    // off-green
 
-    static const char* defNames[NUM_PALETTES] = {
-        "BESPIN2",
-        "OBIWAN",
-        "FATES",
-        "VADER",
-        "ROGUE",
-        "GRAFLEX",
-        "JAINA",
-        "ROGUE"
-    };
+            { 0xa0a000,  0x44ffa0,    0 },    // green-green
+            { 0xffff00,  0x44ffa0,    0 },    // green-green
+            { 0x8080ff,  0x00a0ff,    0 },    // cyan
+            { 0x808044,  0x00ffaa,    0 },    // off-green
+        };
+
+        static const char* defNames[NUM_PALETTES] = {
+            "BESPIN2",
+            "OBIWAN",
+            "FATES",
+            "JAINA",
+            "BESPIN2",
+            "BESPIN2",
+            "JAINA",
+            "JAINA",
+        };
+    #else
+        static Palette defPalette[NUM_PALETTES] = {
+            { 0x00ff00,  0x00ffa0,    0 },    // green
+            { 0x0000ff,  0x00c8ff,    0 },    // blue
+            { 0x00ffff,  0x00a0ff,    0 },    // cyan
+            { 0xff0000,  0xa08000,    0 },    // red
+            { 0xff4000,  0x80ff00,    0 },
+            { 0x0044ff,  0x00ccff,    0 },
+            { 0x9000ff,  0x9064ff,    0 },
+            { 0x00ff44,  0x00ffaa,    0 }
+        };
+
+        static const char* defNames[NUM_PALETTES] = {
+            "BESPIN2",
+            "OBIWAN",
+            "FATES",
+            "VADER",
+            "ROGUE",
+            "GRAFLEX",
+            "JAINA",
+            "ROGUE"
+        };
+    #endif
 
     Log.p("Writing EEPROM default.").eol();
 

@@ -44,6 +44,9 @@ SOFTWARE.
 #define LED_TOPOLOGY_RESISTOR		1
 #define LED_TOPOLOGY_DRIVER			2
 
+#define LED_TYPE_RGB				1
+#define LED_TYPE_BBG				2
+
 #define SABER_SOUND_SD 				1
 #define SABER_SOUND_FLASH 			2
 
