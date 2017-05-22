@@ -87,21 +87,4 @@ private:
 extern SPLog Log;
 bool TestEvent();
 
-class Timer
-{
-public:
-    Timer() : time(0), trigger(1000) {}
-    Timer(uint32_t triggerTime) : time(0), trigger(triggerTime) {}
-
-    bool tick();
-    uint32_t period() const {
-        return trigger;
-    }
-    void setPeriod(uint32_t t) { trigger = t; }
-
-private:
-    uint32_t time, trigger;
-};
-
-
 #endif // CSTR_INCLUDED

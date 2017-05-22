@@ -258,6 +258,40 @@ private:
 };
 
 
+class Timer2
+{
+public:
+	Timer2(uint32_t period = 1000, bool repeating = true, bool enable = true) {
+		m_period = period;
+		m_repeating = repeating;
+		m_enable = enable;
+	}
+	
+	uint32_t remaining() const { return m_period - m_accum; }
+	uint32_t period() const { return m_period; }
+	void setPeriod(uint32_t period) { m_period = period; }
+	bool repeating() const { return m_repeating; }
+	void setRepeating(bool repeating) { m_repeating = repeating; }
+	bool enabled() const { return m_enable; }
+	void setEnabled(bool enable) { 
+		if (!m_enable && enable) {
+			reset();
+		}
+		m_enable = enable; 
+	}
+	void reset() { m_accum = 0; }
+
+	int tick(uint32_t delta);
+
+	static bool Test();
+
+private:
+	uint32_t m_accum = 0;
+	uint32_t m_period;
+	bool m_repeating;
+	bool m_enable;
+};
+
 /**
 Sin wave.
 Input: 0-255 (range will be clipped correctly.)
