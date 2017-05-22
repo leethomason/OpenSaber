@@ -232,23 +232,13 @@ class LEDUI4Test : public Test
 public:
 	virtual const char* name() const { return "LEDUI4Test"; }
 
-	virtual int process(Tester*, const char*, const char*) {
-		return result;
-	}
+	virtual int process(Tester* tester, const char* event, const char* eventData) {
 
-	virtual void start(Tester* tester) {
-		tester->press(0, PRESS_TIME);
-	}
+		if (!strEqual(event, "[UIChange]"))
+			return TEST_CONTINUE;
 
-	virtual bool buttonRelease(Tester* tester, int sequence) {
-		// 0 Normal
-		// 1 Palette
-		// 2 Volume
-		// 3 Normal
-		// 4 Palette
-		// -> Pal 0
-		// -> Pal 0
-		//
+		int result = TEST_CONTINUE;
+		++sequence;
 
 		Log.p("bRel=").p(sequence).eol();
 		const RGB* leds = tester->getLEDs();
@@ -256,12 +246,45 @@ public:
 
 		switch (sequence) {
 			case 1:
+				// Palette
+				tester->delayedPress(0, DELAY, PRESS_TIME);
+				break;
+
 			case 2:
-				tester->press(0, PRESS_TIME);
+				// volume
+				tester->delayedPress(0, DELAY, PRESS_TIME);
 				break;
 
 			case 3:
-				TEST_EQUAL(leds[1], RGB::BLACK);	// canonical start state.
+				// normal
+				TEST_EQUAL(RGB(RGB::BLACK), leds[2]);	// canonical start state.
+				tester->delayedPress(0, DELAY, PRESS_TIME);
+				break;
+
+			case 4:
+				// palette
+				// ->reset to 1
+				tester->delayedPress(0, DELAY, 2200);
+				break;
+
+			case 5:
+				// 800 should do nothing.
+				TEST_EQUAL(RGB(RGB::BLACK), leds[1]);
+				TEST_EQUAL(RGB(RGB::BLACK), leds[2]);
+				tester->delayedPress(0, DELAY, 800);
+				break;
+
+			case 6:
+				// But 1200 reset
+				TEST_EQUAL(RGB(RGB::BLACK), leds[1]);
+				TEST_EQUAL(RGB(RGB::BLACK), leds[2]);
+				tester->delayedPress(0, DELAY, 1200);
+				break;
+
+			case 7:
+				TEST_EQUAL(RGB(RGB::BLACK), leds[0]);
+				TEST_EQUAL(RGB(RGB::BLACK), leds[1]);
+				TEST_EQUAL(RGB(RGB::BLACK), leds[2]);
 				result = TEST_SUCCESS;
 				break;
 
@@ -270,11 +293,18 @@ public:
 				result = TEST_ERROR;
 				break;
 		}
-		return true;
+		return result;
 	}	
 
+	virtual void start(Tester* tester) {
+		sequence = 0;
+		Log.p("Start").eol();
+		tester->delayedPress(0, DELAY, PRESS_TIME);
+	}
+
 private:
-	int result = TEST_CONTINUE;
+	const int DELAY = 200;
+	int sequence = 0;
 };
 
 class AveragePowerTest : public Test
@@ -433,8 +463,8 @@ Test* gTests[] = {
 	&paletteTest,
 	&averagePowerTest,
 #	endif	
-*/
 	&instantPowerTest,
+*/
 	0
 };
 
@@ -480,7 +510,6 @@ void Tester::start()
 	ASSERT(test);
 
 	order = 0;
-	nButtonCalls = 0;
 	TEST_EXISTS(button[0] != 0);
 #	ifdef SABER_TWO_BUTTON
 	TEST_EXISTS(button[1] != 0);
@@ -488,6 +517,10 @@ void Tester::start()
 	r.setSeed(0);
 
 	Log.p("Test start: '").p(test->name()).p("'").eol();
+	while(Log.hasEvent()) {
+		const char* dummy = 0;
+		Log.popEvent(&dummy);
+	}
 	test->start(this);
 }
 
@@ -560,7 +593,6 @@ void Tester::process()
 	ASSERT(test);
 
 	uint32_t m = millis();
-	bool processButton = false;
 
 	for(int i=0; i<2; ++i) {
 		if (pressState[i].start && pressState[i].start <= m) {
@@ -570,7 +602,6 @@ void Tester::process()
 		if (pressState[i].end && pressState[i].end <= m) {
 			button[i]->testRelease();
 			pressState[i].end = 0;
-			processButton = test->buttonRelease(this, ++nButtonCalls);
 		}
 	}
 
@@ -589,7 +620,7 @@ void Tester::process()
 	}
 	e = Log.popEvent(&d);
 
-	if (e || processButton) {
+	if (e) {
 		int result = test->process(this, e, d);
 
 		if (result == Test::TEST_ERROR) {

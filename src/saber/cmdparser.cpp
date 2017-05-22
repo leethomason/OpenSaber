@@ -244,6 +244,9 @@ bool CMDParser::processCMD()
     }
     else if (action == ACCEL) {
         float ax, ay, az, g2, g2n;
+        // 0 value sometimes. Flush.
+        Accelerometer::instance().read(&ax, &ay, &az, &g2, &g2n);        
+        delay(20);
         Accelerometer::instance().read(&ax, &ay, &az, &g2, &g2n);
         Serial.print( "x="); Serial.print(ax);
         Serial.print(" y="); Serial.print(ay);

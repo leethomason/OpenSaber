@@ -635,7 +635,11 @@ void loop() {
             display.display(oledBuffer);
         #endif
         #ifdef SABER_UI_START
-            dotstarUI.Draw(leds + SABER_UI_START, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
+            bool changed = dotstarUI.Draw(leds + SABER_UI_START, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
+            if (changed) {
+                Log.event("[UIChange]");
+                //Log.p("LED ").p(leds[0]).p(leds[1]).p(leds[2]).p(leds[3]).eol();
+            }
         #endif
         //Log.p("crystal: ").p(leds[0].r).p(" ").p(leds[0].g).p(" ").p(leds[0].b).eol();
     }
@@ -664,6 +668,8 @@ void loop() {
     #ifdef SABER_NUM_LEDS
         dotstar.display();
     #endif
+
+    tester.process();
     lastLoopTime = msec;
 }
  

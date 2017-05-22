@@ -21,7 +21,6 @@ public:
 	virtual const char* name() const = 0;
 	virtual void start(Tester* tester)	{}
 	virtual int process(Tester* tester, const char* event, const char* eventData) = 0;
-	virtual bool buttonRelease(Tester* tester, int sequence) { return false; }
 
 	int finalResult = 0;
 
@@ -70,7 +69,6 @@ private:
 	int passCount = 0;
 	int nPasses = 1;
 	bool useLongTest;
-	int nButtonCalls = 0;
 	const RGB* leds = 0;
 
 	uint32_t testAudio = 0;

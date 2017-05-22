@@ -106,14 +106,14 @@ void BladeState::process(Blade* blade, const SaberDB& saberDB, uint32_t time)
 void UIModeUtil::nextMode()
 {
     switch(m_mode) {
-        case UIMode::NORMAL:        m_mode = UIMode::PALETTE;       break;
-        case UIMode::PALETTE:       m_mode = UIMode::VOLUME;        break;
+        case UIMode::NORMAL:        m_mode = UIMode::PALETTE;       Log.p("mode: palette").eol();    break;
+        case UIMode::PALETTE:       m_mode = UIMode::VOLUME;        Log.p("mode: volume").eol();     break;
 
 #if (MEDITATION_MODE)
-        case UIMode::VOLUME:        m_mode = UIMode::MEDITATION;    break;
-        case UIMode::MEDITATION:    m_mode = UIMode::NORMAL;        break;
+        case UIMode::VOLUME:        m_mode = UIMode::MEDITATION;    Log.p("mode: meditation").eol(); break;
+        case UIMode::MEDITATION:    m_mode = UIMode::NORMAL;        Log.p("mode: normal").eol();     break;
 #else
-        case UIMode::VOLUME:        m_mode = UIMode::NORMAL;        break;
+        case UIMode::VOLUME:        m_mode = UIMode::NORMAL;        Log.p("mode: normal").eol();     break;
 #endif
         default:
             ASSERT(false);
@@ -198,6 +198,8 @@ void Accelerometer::read(float* ax, float* ay, float* az, float* g2, float* g2No
         localAccel.readMotionSensor(*ax, *ay, *az, gx, gy, gz);
         *g2Normal = (*ay) * (*ay) + (*az) * (*az);
         *g2 = *g2Normal + (*ax) * (*ax);
+
+//        Log.p("read ").p(*ax).p(" ").p(*ax).p(" ").p(*az).eol();
     #else
         *ax = 0;
         *ay = 0;
