@@ -1,8 +1,9 @@
 #include "Grinliz_Arduino_Util.h"
 #include <Arduino.h>
 #include <SPI.h>
+#include "rgb.h"
 
-SPClass SPrint;
+//SPClass SPrint;
 
 LEDManager::LEDManager(uint8_t pin, bool on)
 {
@@ -84,6 +85,7 @@ void SPLog::attachLog(Stream* stream)
     logStream = stream;
 }
 
+
 const SPLog& SPLog::p(const char v[]) const
 {
   if (serialStream)
@@ -155,6 +157,31 @@ const SPLog& SPLog::p(double v, int p) const
       logStream->print(v, p);
   return *this;  
 }
+
+const SPLog& SPLog::p(const RGB& rgb) const
+{
+  if (serialStream) {
+    serialStream->print("[");
+    serialStream->print(rgb.r); 
+    serialStream->print(",");
+    serialStream->print(rgb.g); 
+    serialStream->print(",");
+    serialStream->print(rgb.b); 
+    serialStream->print("]");
+  }
+  if (logStream) {
+    logStream->print("[");
+    logStream->print(rgb.r); 
+    logStream->print(",");
+    logStream->print(rgb.g); 
+    logStream->print(",");
+    logStream->print(rgb.b); 
+    logStream->print("]");
+  }
+  return *this;
+}
+
+
 
 void SPLog::eol() const
 {

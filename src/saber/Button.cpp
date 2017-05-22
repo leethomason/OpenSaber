@@ -48,6 +48,8 @@ void Button::init(uint8_t buttonPin, uint8_t buttonMode, uint16_t _debounceDurat
         else {
             pinMode(m_myPin, INPUT);
         }
+        // Needs settle time. 1ms enough?
+        delay(1);
         bitWrite(m_state, BIT_CURRENT, queryButtonDown());
     }
 }

@@ -4,6 +4,7 @@
 #include "blade.h"
 #include "saberUtil.h"
 #include "sketcher.h"
+#include "rgb.h"
 
 #include "Button.h"
 #include "Grinliz_Arduino_Util.h"
@@ -226,6 +227,86 @@ public:
 };
 
 
+class LEDUI4Test : public Test
+{
+public:
+	virtual const char* name() const { return "LEDUI4Test"; }
+
+	virtual int process(Tester* tester, const char* event, const char* eventData) {
+
+		if (!strEqual(event, "[UIChange]"))
+			return TEST_CONTINUE;
+
+		int result = TEST_CONTINUE;
+		++sequence;
+
+		Log.p("bRel=").p(sequence).eol();
+		const RGB* leds = tester->getLEDs();
+		ASSERT(leds != 0);
+
+		switch (sequence) {
+			case 1:
+				// Palette
+				tester->delayedPress(0, DELAY, PRESS_TIME);
+				break;
+
+			case 2:
+				// volume
+				tester->delayedPress(0, DELAY, PRESS_TIME);
+				break;
+
+			case 3:
+				// normal
+				TEST_EQUAL(RGB(RGB::BLACK), leds[2]);	// canonical start state.
+				tester->delayedPress(0, DELAY, PRESS_TIME);
+				break;
+
+			case 4:
+				// palette
+				// ->reset to 1
+				tester->delayedPress(0, DELAY, 2200);
+				break;
+
+			case 5:
+				// 800 should do nothing.
+				TEST_EQUAL(RGB(RGB::BLACK), leds[1]);
+				TEST_EQUAL(RGB(RGB::BLACK), leds[2]);
+				tester->delayedPress(0, DELAY, 800);
+				break;
+
+			case 6:
+				// But 1200 reset
+				TEST_EQUAL(RGB(RGB::BLACK), leds[1]);
+				TEST_EQUAL(RGB(RGB::BLACK), leds[2]);
+				tester->delayedPress(0, DELAY, 1200);
+				break;
+
+			case 7:
+				TEST_EQUAL(RGB(RGB::BLACK), leds[0]);
+				TEST_EQUAL(RGB(RGB::BLACK), leds[1]);
+				TEST_EQUAL(RGB(RGB::BLACK), leds[2]);
+				result = TEST_SUCCESS;
+				break;
+
+			default:
+				ASSERT(false);
+				result = TEST_ERROR;
+				break;
+		}
+		return result;
+	}	
+
+	virtual void start(Tester* tester) {
+		sequence = 0;
+		Log.p("Start").eol();
+		tester->delayedPress(0, DELAY, PRESS_TIME);
+	}
+
+private:
+	const int DELAY = 200;
+	int sequence = 0;
+};
+
 class AveragePowerTest : public Test
 {
 public:
@@ -361,21 +442,29 @@ public:
 ButtonTest buttonTest;
 IgniteRetractTest igniteRetractTest;
 BlasterTest blasterTest;
+#ifdef SABER_UI_START
+LEDUI4Test ledUI4Test;
+#endif
 ClashTest clashTest;
 PaletteTest paletteTest;
 AveragePowerTest averagePowerTest;
 InstantPowerTest instantPowerTest;
 
 Test* gTests[] = {
-	&buttonTest,
+/*	&buttonTest,
 	&igniteRetractTest,
-	&blasterTest,
+	&blasterTest,*/
+#	ifdef SABER_UI_START
+	&ledUI4Test,
+#	endif	
+	/*
 #	ifdef SABER_TWO_BUTTON
 	&clashTest,
 	&paletteTest,
 	&averagePowerTest,
 #	endif	
 	&instantPowerTest,
+*/
 	0
 };
 
@@ -411,7 +500,7 @@ void Tester::runTests(int count, bool longTest)
 	for(int i=0; gTests[i]; i++) {
 		gTests[i]->finalResult = 0;
 	}
-	currentTest = 0;
+	currentTest = 0;	
 	start();
 }
 
@@ -428,6 +517,10 @@ void Tester::start()
 	r.setSeed(0);
 
 	Log.p("Test start: '").p(test->name()).p("'").eol();
+	while(Log.hasEvent()) {
+		const char* dummy = 0;
+		Log.popEvent(&dummy);
+	}
 	test->start(this);
 }
 

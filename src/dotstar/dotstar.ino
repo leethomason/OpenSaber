@@ -5,13 +5,13 @@ DotStar dotstar;
 
 void setup() 
 {
-    /*
+    
   Serial.begin(19200);
   while(!Serial) {
     delay(100);
   }
   Serial.println("Hello DotStar!!");
-*/
+
   leds[0].set(0xff0000);
   #if NUM_LEDS > 1
     leds[1].set(0x00ff00);
