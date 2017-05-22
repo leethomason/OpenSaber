@@ -1,8 +1,8 @@
 Issues:
-- start system with audio shutdown
-- doesn't start with correct font
 
 Fixed
+x start system with audio shutdown
+x doesn't start with correct font
 x test full circuit
 x check alt grnd, vcc, etc. on battery circuit
 x switch to battery version
@@ -34,12 +34,3 @@ x sound priorities
 x motion sensing
 x EEPROM writer sketch
 x way to reset EEPROM
-
-
-0123456789012345
-----------------
-0a   100 000 050
-Bld	 100 000 050
-
-SFX 1 Vol 140
-Cfg
