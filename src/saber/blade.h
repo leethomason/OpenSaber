@@ -29,15 +29,15 @@
 
 class Blade
 {
-  public:
+public:
     Blade();
     static Blade& blade() {
-      return *instance;
+        return *instance;
     }
 
     void setVoltage(int milliVolts);
     int voltage() const {
-      return vbat;
+        return vbat;
     }
 
     bool setInterp(uint32_t delta, uint32_t effectTime, const RGB& startColor, const RGB& endColor);
@@ -47,18 +47,20 @@ class Blade
     int32_t power() const;
     // power utilization, from 0-100 for a channel
     int util(int i) const   {
-      return (f1000[i] + 5) / 10;
+        return (f1000[i] + 5) / 10;
     }
     // The actual PWM setting, per channel.
     uint8_t pwmVal(int i) const {
-      return pwm[i];
+        return pwm[i];
     }
 
-    const RGB& getColor(uint8_t* c) { return color; }
+    const RGB& getColor(uint8_t* c) {
+        return color;
+    }
 
-  private:
-    uint8_t lerpU8(uint8_t a, uint8_t b, uint8_t t) const;
+    static RGB convertRawToPerceived(const RGB& raw);
 
+private:
     static const int8_t pinRGB[NCHANNELS];
     static Blade* instance;
 

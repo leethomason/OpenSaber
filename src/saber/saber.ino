@@ -261,9 +261,7 @@ void syncToDB()
     #endif
 
     uiRenderData.volume = saberDB.volume4();
-    for (int i = 0; i < 3; ++i) {
-        uiRenderData.color[i] = saberDB.bladeColor()[i];
-    }
+    uiRenderData.color = Blade::convertRawToPerceived(saberDB.bladeColor());
     uiRenderData.palette = saberDB.paletteIndex();
     uiRenderData.power = vbatToPowerLevel(voltmeter.averagePower());
     uiRenderData.mVolts = voltmeter.averagePower();
@@ -628,7 +626,7 @@ void loop() {
     }
 
     if (displayTimer.tick(delta)) {
-        uiRenderData.color = saberDB.bladeColor();
+        uiRenderData.color = Blade::convertRawToPerceived(saberDB.bladeColor());
         uiRenderData.meditationTimeRemain = meditationTimer.remaining();
 
         #ifdef SABER_DISPLAY

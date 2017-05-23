@@ -451,20 +451,18 @@ AveragePowerTest averagePowerTest;
 InstantPowerTest instantPowerTest;
 
 Test* gTests[] = {
-/*	&buttonTest,
+	&buttonTest,
 	&igniteRetractTest,
-	&blasterTest,*/
+	&blasterTest,
 #	ifdef SABER_UI_START
 	&ledUI4Test,
 #	endif	
-	/*
 #	ifdef SABER_TWO_BUTTON
 	&clashTest,
 	&paletteTest,
 	&averagePowerTest,
 #	endif	
 	&instantPowerTest,
-*/
 	0
 };
 
