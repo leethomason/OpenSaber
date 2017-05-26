@@ -22,6 +22,7 @@
 
 #include "blade.h"
 #include "pins.h"
+#include "Grinliz_Util.h"
 #include <Arduino.h>
 
 const int8_t Blade::pinRGB[NCHANNELS] = { PIN_EMITTER_RED, PIN_EMITTER_GREEN, PIN_EMITTER_BLUE };
@@ -102,7 +103,7 @@ void Blade::setVoltage(int milliVolts) {
 
     for (int i = 0; i < NCHANNELS; ++i) {
         f1000[i] = amps[i] * res[i] / (vbat - vF[i]);
-        f1000[i] = clamp(f1000[i], 0, 1000);
+        f1000[i] = clamp(f1000[i], int32_t(0), int32_t(1000));
   }
 #elif (LED_TOPOLOGY == LED_TOPOLOGY_DRIVER)
     vbat = int32_t(milliVolts);  // used for reporting on the command line, but f1000 isn't change,
@@ -146,7 +147,7 @@ int32_t Blade::power() const {
             rgb.r = 0;
             // Fancy +1 and clamp so that color=255 is halfed to 128 (not 127). Scaling
             // routines later tend to just use the high bit.
-            rgb.g = (uint8_t) clamp((uint32_t(raw.r) + 1)/2 + (uint32_t(raw.g) + 1)/2, 0, 255);
+            rgb.g = (uint8_t) clamp((uint32_t(raw.r) + 1)/2 + (uint32_t(raw.g) + 1)/2, uint32_t(0), uint32_t(255));
             rgb.b = (raw.b + 1) / 2;
         #else
             #error LED_TYPE not defined.

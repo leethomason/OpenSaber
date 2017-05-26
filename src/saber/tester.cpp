@@ -219,7 +219,8 @@ public:
 			tester->delayedPress(0, 100, 100);
 		}
 		else if (strEqual(event, "[BLADE_OFF]")) {
-			TEST_RANGE(3, 40, nFlash);
+			TEST_RANGE
+			(3, 40, nFlash);
 			result = TEST_SUCCESS;
 		}		
 		return result;
@@ -227,6 +228,8 @@ public:
 };
 
 
+// Needs to be redone with timers?
+// The event / timing / dependency very hard to get right.
 class LEDUI4Test : public Test
 {
 public:
@@ -234,6 +237,8 @@ public:
 
 	virtual int process(Tester* tester, const char* event, const char* eventData) {
 
+		if (millis() < startTime)
+			return TEST_CONTINUE;
 		if (!strEqual(event, "[UIChange]"))
 			return TEST_CONTINUE;
 
@@ -299,12 +304,14 @@ public:
 	virtual void start(Tester* tester) {
 		sequence = 0;
 		Log.p("Start").eol();
-		tester->delayedPress(0, DELAY, PRESS_TIME);
+		startTime = millis() + 500;
+		tester->delayedPress(0, 500 , PRESS_TIME);
 	}
 
 private:
 	const int DELAY = 200;
 	int sequence = 0;
+	uint32_t startTime = 0;
 };
 
 class AveragePowerTest : public Test
@@ -455,7 +462,7 @@ Test* gTests[] = {
 	&igniteRetractTest,
 	&blasterTest,
 #	ifdef SABER_UI_START
-	&ledUI4Test,
+	//&ledUI4Test,
 #	endif	
 #	ifdef SABER_TWO_BUTTON
 	&clashTest,

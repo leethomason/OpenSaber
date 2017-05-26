@@ -41,8 +41,8 @@ bool SaberDB::writeDefaults()
             { 0x00ffff,  0x00a0ff,    0 },    // cyan          800
             { 0x00ff44,  0x00ffaa,    0 },    // off-green     500
 
-            { 0xa0a000,  0x44ffa0,    0 },    // green-green   500
             { 0xffff00,  0x44ffa0,    0 },    // green-green   800
+            { 0xa0a000,  0x44ffa0,    0 },    // green-green   500
             { 0x8080ff,  0x00a0ff,    0 },    // cyan          800
             { 0xffff44,  0xaaffaa,    0 },    // off-green     900
         };
