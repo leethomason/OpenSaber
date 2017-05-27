@@ -2,6 +2,7 @@
 #define GRINLIZ_DOTSTAR_INCLUDED
 
 #include <stdint.h>
+
 #include "rgb.h"
 
 class DotStar

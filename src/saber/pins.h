@@ -44,6 +44,9 @@ SOFTWARE.
 #define LED_TOPOLOGY_RESISTOR		1
 #define LED_TOPOLOGY_DRIVER			2
 
+#define LED_TYPE_RGB				1
+#define LED_TYPE_BBG				2
+
 #define SABER_SOUND_SD 				1
 #define SABER_SOUND_FLASH 			2
 
@@ -262,6 +265,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
+	#define LED_TYPE 					LED_TYPE_BBG
 
 	#undef SABER_BUTTON
 	#define SABER_BUTTON Button::INTERNAL_PULLUP
