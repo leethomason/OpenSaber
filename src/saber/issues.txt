@@ -1,4 +1,10 @@
 Issues:
+PCB:
+- switch to new version
+- PWM for LED
+- select pin move/test (CSN is select)
+- enable pin move/test (why are the names so bad???)
+- initial role pin?
 
 Fixed
 x start system with audio shutdown
