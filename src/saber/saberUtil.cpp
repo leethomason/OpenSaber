@@ -7,6 +7,9 @@
 #include "blade.h"
 #include "saberDB.h"
 #include "sfx.h"
+#include <Adafruit_FXOS8700.h>
+
+//#define USE_PS_NXP
 
 void BladeState::change(uint8_t state)
 {
@@ -144,7 +147,11 @@ void AveragePower::push(uint32_t milliVolts)
 #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH
 Adafruit_LIS3DH localAccel;
 #elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
-NXPMotionSense localAccel;
+    #ifdef USE_PS_NXP
+    NXPMotionSense localAccel;
+    #else
+    Adafruit_FXOS8700 localAccel;
+    #endif
 #endif
 
 Accelerometer* Accelerometer::_instance = 0;
@@ -167,6 +174,7 @@ void Accelerometer::begin()
             localAccel.setDataRate(LIS3DH_DATARATE_100_HZ);
         }
     #elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
+        #ifdef USE_PS_NXP
         Log.p("NXP Accelerometer starting.").eol();
         if (localAccel.begin()) {
             Log.p("Accelerometer open.").eol();
@@ -174,6 +182,13 @@ void Accelerometer::begin()
         else {
             Log.p("Accelerometer ERROR.").eol();
         }
+        #else
+        Log.p("Ada NXP starting").eol();
+        if (localAccel.begin(ACCEL_RANGE_8G)) 
+            Log.p("Accel open").eol();
+        else
+            Log.p("accel error.").eol();
+        #endif
     #endif
 }
 
@@ -194,12 +209,24 @@ void Accelerometer::read(float* ax, float* ay, float* az, float* g2, float* g2No
         // Using the prop shield: x is in the blade direction,
         // y & z are normal.
 
+        *ax = 1;
+        *ay = 0;
+        *az = 0;
+        #ifdef USE_PS_NXP
         float gx=0, gy=0, gz=0;
         localAccel.readMotionSensor(*ax, *ay, *az, gx, gy, gz);
+
+//        Log.p("read ").p(*ax).p(" ").p(*ax).p(" ").p(*az).eol();
+        #else
+        sensors_event_t s;
+        localAccel.getEvent(&s);
+        *ax = s.acceleration.x / 10.0f;
+        *ay = s.acceleration.y / 10.0f;
+        *az = s.acceleration.z / 10.0f;
+        #endif
         *g2Normal = (*ay) * (*ay) + (*az) * (*az);
         *g2 = *g2Normal + (*ax) * (*ax);
 
-//        Log.p("read ").p(*ax).p(" ").p(*ax).p(" ").p(*az).eol();
     #else
         *ax = 0;
         *ay = 0;
