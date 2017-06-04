@@ -31,7 +31,6 @@
 
 #include <Audio.h>
 #include <Adafruit_LIS3DH.h>
-#include <NXPMotionSense.h>
 
 #include "Button.h"
 #include "Grinliz_Arduino_Util.h"
