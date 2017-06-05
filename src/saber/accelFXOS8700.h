@@ -15,6 +15,12 @@ public:
 		ERROR_CONNECTION
 	};
 
+	enum Range {
+		RANGE_2G,
+		RANGE_4G,
+		RANGE_8G
+	};
+
 	AccelFXOS8700() {}
 
 	enum {
@@ -27,13 +33,15 @@ public:
 		@param deviceAddress the IC address of the device. 
 			   0x1f for Adafruit (?) and 0x01e for the Teensy Prop Shield.
 	*/
-	ErrorCode begin(uint8_t range = 2, uint8_t deviceAddress = ADDRESS_ADAFRUIT);
+	ErrorCode begin(Range range = Range::RANGE_4G, uint8_t deviceAddress = ADDRESS_ADAFRUIT);
 
 	/**
 		Read the accelerometer.
-		@param v 				A vector of 3 floats, for the x, y, z result.
+		@param v 				A vector of 3 floats for the x, y, z result.
 		@param gravitySquared 	The gravity value squared. Fast to calculate.
-		@param gravity 			Gravity (in m/s^2)
+		@param gravity 			Gravity (in m/s^2) a little slower to calculate. However,
+								in practice, most of the time goes to waiting for
+								the relatively slow I2C interface.
 	*/
 	ErrorCode read(float* v, float* gravitySquared = 0, float* gravity = 0);
 

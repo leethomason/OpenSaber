@@ -28,7 +28,7 @@
 #include <OLED_SSD1306.h>
 #include <SerialFlash.h>
 #include <Audio.h>
-#include <Adafruit_LIS3DH.h>
+//#include <Adafruit_LIS3DH.h> // turn back on if needed. causes compile warnings.
 
 #include "Button.h"
 #include "Grinliz_Arduino_Util.h"

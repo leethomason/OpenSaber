@@ -1,4 +1,4 @@
-#include <Adafruit_LIS3DH.h>
+//#include <Adafruit_LIS3DH.h>
 
 #include "pins.h"
 #include "saberUtil.h"
@@ -170,7 +170,7 @@ void Accelerometer::begin()
         }
     #elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
         Log.p("Accelerometer starting.").eol();
-        AccelFXOS8700::ErrorCode rc = localAccel.begin(8, AccelFXOS8700::ADDRESS_PROP_SHIELD);
+        AccelFXOS8700::ErrorCode rc = localAccel.begin(AccelFXOS8700::RANGE_8G, AccelFXOS8700::ADDRESS_PROP_SHIELD);
         if (rc != AccelFXOS8700::SUCCESS) {
             Log.p("Accelerometer ERROR. rc=").p(int(rc)).eol();
         }

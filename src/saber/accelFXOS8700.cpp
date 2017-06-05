@@ -30,24 +30,23 @@ enum
 	FXOS8700_REGISTER_MCTRL_REG3      = 0x5D,   // 00000000   r/w
 };
 
-AccelFXOS8700::ErrorCode AccelFXOS8700::begin(uint8_t range, uint8_t deviceAddress)
+AccelFXOS8700::ErrorCode AccelFXOS8700::begin(Range range, uint8_t deviceAddress)
 {
 	Wire.begin();
 
 	switch (range) {
-		case 2:
+		case RANGE_2G:
 			write8(FXOS8700_REGISTER_XYZ_DATA_CFG, 0x00);
 			m_range = 2;
 			break;
-		case 4:
+		case RANGE_4G:
 			write8(FXOS8700_REGISTER_XYZ_DATA_CFG, 0x01);
 			m_range = 4;
 			break;
-		case 8:
+		case RANGE_8G:
 			write8(FXOS8700_REGISTER_XYZ_DATA_CFG, 0x02);
 			m_range = 8;
 			break;
-
 		default:
 			return ERROR_RANGE_INVALID;
 	}
