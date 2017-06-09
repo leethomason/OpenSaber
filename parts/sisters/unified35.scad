@@ -16,8 +16,6 @@ EPS2 = EPS * 2;
 
 H_HEAT_SINK_THREAD = 10.0;
 D_HEAT_SINK_THREAD = 20.2;  // 20.4 is loose (PHA), 20.1 tight (PLA)
-SPKR_OFFSET         = 7;    // distance from back of pommel to speaker
-D_SPKR_INNER = D_SPKR_PLASTIC - 4;
 
 module innerTube()
 {
@@ -73,7 +71,6 @@ module ledHolder()
 module speaker(pad=0, dpad=0)
 {
     translate([0, 0, -pad/2]) cylinder(h=H_SPKR_PLASTIC + pad, d=D_SPKR_PLASTIC + dpad);
-    translate([0, 0, H_SPKR_PLASTIC]) cylinder(h=H_SPKR_METAL, d=D_SPKR_METAL + dpad);
 }
 
 module speakerHolder()
@@ -93,7 +90,7 @@ module speakerHolder()
     translate([0, 0, M_POMMEL_BACK]) {
         difference() {
             tube(H_POMMEL, D_SPKR_INNER/2, D_POMMEL/2);
-            translate([-20, 4, 0]) cube(size=[40, 40, 40]);
+            translate([-20, 5, 0]) cube(size=[40, 40, 40]);
 
             translate([0, 0, SPKR_OFFSET]) {
                 speaker(0.8, 0.6);
@@ -269,6 +266,7 @@ module teensy35()
         translate([-W_MC/2, Y_MC + H_MC - 2, M_BUTTRESS_0 + H_BUTTRESS + 50]) {
             cube(size=[W_MC, 50, 50]);
         }
+        shoulderBars();
     }
 }
 
@@ -280,7 +278,7 @@ Z_B3 = M_BUTTRESS_4 + EPS - M_B3_FRONT;
 Z_B4 = M_TRANSITION + EPS - M_B4_FRONT - T_TRANSITION_RING;
 
 // front
-union() {
+*union() {
     ledHolder();
     switchAndPortHolder();
     forwardRail();
@@ -320,8 +318,27 @@ union() {
 
 }
 
+module frontBar(w, dx)
+{
+    translate([-w/2 + dx, -R_AFT, M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35]) {
+        cube(size=[w, 7.5, EPS + M_TRANSITION - T_TRANSITION_RING - (M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35)]);
+    }
+}
+
+module shoulderBars()
+{
+    translate([-W_MC/2, -R_AFT, M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35 - SHOULDER_DZ]) {
+        cube(size=[SHOULDER_DX, 7.5, SHOULDER_DZ]);
+    }    
+    translate([W_MC/2 - SHOULDER_DX, -R_AFT, M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35 - SHOULDER_DZ]) {
+        cube(size=[SHOULDER_DX, 7.5, SHOULDER_DZ]);
+    }    
+}
+
+
 // Back body
-*difference() {
+
+difference() {
     
     union() {
         transitionRing();
@@ -335,13 +352,11 @@ union() {
         intersection() {
             innerTube();
             union() {
-                translate([-W_MC/2, -R_AFT, M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35]) {
-                    cube(size=[W_MC, 7.5, 2]);
+                translate([-W_MC/2, -R_AFT, M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35 - SHOULDER_DZ]) {
+                    cube(size=[W_MC, 7.5, 2 + SHOULDER_DZ]);
                 }
-                W = 2;
-                translate([-W/2, -R_AFT, M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35]) {
-                    cube(size=[W, 7.5, EPS + M_TRANSITION - T_TRANSITION_RING - (M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35)]);
-                }
+                frontBar(2, -4);
+                frontBar(2, 5);
             }
         }
         translate([0, 0, M_BUTTRESS_0]) buttress(mc=false, trough = 8, leftWiring=false, rightWiring=false);
