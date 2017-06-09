@@ -12,14 +12,20 @@ public:
 
 		// The following should be hardware failures.
 		// Not wired correctly, likely.
-		ERROR_CONNECTION
+		ERROR_CONNECTION,
+		RANGE_INCORRECT
 	};
 
+	/* For now, always runs at 4G.
+	   Other ranges possible, but really need
+	   to understand the conversion and how
+	   high resolution effects range.
 	enum Range {
 		RANGE_2G,
 		RANGE_4G,
 		RANGE_8G
 	};
+	*/
 
 	AccelFXOS8700() {}
 
@@ -33,7 +39,7 @@ public:
 		@param deviceAddress the IC address of the device. 
 			   0x1f for Adafruit (?) and 0x01e for the Teensy Prop Shield.
 	*/
-	ErrorCode begin(Range range = Range::RANGE_4G, uint8_t deviceAddress = ADDRESS_ADAFRUIT);
+	ErrorCode begin(uint8_t deviceAddress = ADDRESS_ADAFRUIT);
 
 	/**
 		Read the accelerometer.

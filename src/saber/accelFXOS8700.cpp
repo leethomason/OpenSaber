@@ -30,43 +30,50 @@ enum
 	FXOS8700_REGISTER_MCTRL_REG3      = 0x5D,   // 00000000   r/w
 };
 
-AccelFXOS8700::ErrorCode AccelFXOS8700::begin(Range range, uint8_t deviceAddress)
+AccelFXOS8700::ErrorCode AccelFXOS8700::begin(uint8_t deviceAddress)
 {
 	Wire.begin();
 
-	switch (range) {
-		case RANGE_2G:
-			write8(FXOS8700_REGISTER_XYZ_DATA_CFG, 0x00);
-			m_range = 2;
-			break;
-		case RANGE_4G:
-			write8(FXOS8700_REGISTER_XYZ_DATA_CFG, 0x01);
-			m_range = 4;
-			break;
-		case RANGE_8G:
-			write8(FXOS8700_REGISTER_XYZ_DATA_CFG, 0x02);
-			m_range = 8;
-			break;
-		default:
-			return ERROR_RANGE_INVALID;
-	}
-
+	m_range = 4;
 	m_address = deviceAddress;
 
 	uint8_t id = 0;
 	AccelFXOS8700::ErrorCode e = SUCCESS;	
 
 	read8(FXOS8700_REGISTER_WHO_AM_I, &id);
-  	if (id != 0xC7) return ERROR_CONNECTION;
+  	if (id != 0xC7) {
+		#ifdef SERIAL_DEBUG
+			Serial.println("FXOS8700_REGISTER_WHO_AM_I failed. line: ");
+		#endif
+  		return ERROR_CONNECTION;
+  	}
+
+  	// standby
+  	write8(FXOS8700_REGISTER_CTRL_REG1, 0);
 
 	// High resolution
 	write8(FXOS8700_REGISTER_CTRL_REG2, 0x02);
-	// Active, Normal Mode, Low Noise, 100Hz in Hybrid Mode
-  	write8(FXOS8700_REGISTER_CTRL_REG1, 0x15);
-	// Hybrid Mode, Over Sampling Rate = 16
-  	write8(FXOS8700_REGISTER_MCTRL_REG1, 0x1F);
-  	// Jump to reg 0x33 after reading 0x06
-	e = write8(FXOS8700_REGISTER_MCTRL_REG2, 0x20);
+
+	write8(FXOS8700_REGISTER_XYZ_DATA_CFG, 0x01);
+
+	delay(20);
+
+  	// 							bits
+  	// 100hz 					3-5
+  	// reduced noise 			2
+  	// full read8 				1
+  	// active 					0
+	write8(FXOS8700_REGISTER_CTRL_REG1, 0x15);
+
+	// Make sure we got 4g
+	uint8_t r = 255;
+	read8(FXOS8700_REGISTER_XYZ_DATA_CFG, &r);
+	if (r != 1) {
+		#ifdef SERIAL_DEBUG
+			Serial.println("FXOS8700_REGISTER_XYZ_DATA_CFG failed. line: ");
+		#endif
+		return RANGE_INCORRECT;
+	}
 
   	return e;
 }
@@ -109,8 +116,12 @@ AccelFXOS8700::ErrorCode AccelFXOS8700::read(float* v, float* gravitySquared, fl
 
   	static const int N = 7;
   	int n = Wire.requestFrom(int(m_address), N);
-  	if (n != N)
+  	if (n != N) {
+		#ifdef SERIAL_DEBUG
+			Serial.println("request data failed. line: ");
+		#endif
   		return ERROR_CONNECTION;
+  	}
 
     uint8_t status = Wire.read();
     (void) status;
@@ -120,6 +131,35 @@ AccelFXOS8700::ErrorCode AccelFXOS8700::read(float* v, float* gravitySquared, fl
     uint8_t aylo = Wire.read();
     uint8_t azhi = Wire.read();
     uint8_t azlo = Wire.read();
+
+    // The stupid z-axis sticks.
+    // https://community.nxp.com/thread/315538
+    // I've seen the z axis sticking (stiction) in at least 2 PJRC prop shields.
+    // Raw values I've seen off the accelerometer:
+	// 		az hi=127 low=252
+	// WHAT TO DO ABOUT THIS??
+	// 		Filter out: freefall on z axis.
+	// 		Use another channel? 
+	//		Set to one?
+	// Also, it's possible to knock it free again. I just smacked the circuit
+	// on the desk and now it's working fine. Scary.
+	// "if the Z-axis output is reporting exactly 0x7FFC or 0x8000 (+/-full scale)..."
+	if (    (azhi == 0x7f && azlo == 0xfc)
+	     || (azhi == 0x80 && azlo == 0x00)) 
+	{
+		// It's stuck.
+		azhi = azlo = 0;
+	}
+
+/*
+    Serial.print(axhi); Serial.print(" ");
+    Serial.print(axlo); Serial.print(" ");
+    Serial.print(ayhi); Serial.print(" ");
+    Serial.print(aylo); Serial.print(" ");
+    Serial.print(azhi); Serial.print(" ");
+    Serial.print(azlo); Serial.println(" ");
+*/
+
 //    for(int i=0; i<6; ++i) {
 //    	Wire.read();
 //    }
@@ -134,7 +174,7 @@ AccelFXOS8700::ErrorCode AccelFXOS8700::read(float* v, float* gravitySquared, fl
   	int16_t accelY = (int16_t)((ayhi << 8) | aylo) >> 2;
   	int16_t accelZ = (int16_t)((azhi << 8) | azlo) >> 2;
  
-	static const float convert = 1.0f / 4096.f;
+	static const float convert = 1.0f / 2048.f;
 	v[0] = float(accelX) * convert;
 	v[1] = float(accelY) * convert;
 	v[2] = float(accelZ) * convert;

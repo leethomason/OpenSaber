@@ -601,10 +601,12 @@ void Tester::process()
 
 	for(int i=0; i<2; ++i) {
 		if (pressState[i].start && pressState[i].start <= m) {
+			Log.p("Firing press button=").p(i).eol();
 			button[i]->testPress();
 			pressState[i].start = 0;
 		}
 		if (pressState[i].end && pressState[i].end <= m) {
+			Log.p("Firing release button=").p(i).eol();
 			button[i]->testRelease();
 			pressState[i].end = 0;
 		}
