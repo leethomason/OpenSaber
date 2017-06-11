@@ -77,28 +77,42 @@ module speakerHolder()
 {
     // Locking ring.
     difference() {
-        translate([0, 0, M_POMMEL_FRONT]) {
-            difference() {
+        difference() {
+            translate([0, 0, M_POMMEL_FRONT]) {
                 cylinder(h=M_SPKR_RING - M_POMMEL_FRONT, d=D_AFT_RING);
-                cylinder(h=M_SPKR_RING - M_POMMEL_FRONT, d=D_SPKR_INNER);
             }
-        } 
+            translate([0, 0, M_POMMEL_FRONT]) {
+                cylinder(h=M_SPKR_RING - M_POMMEL_FRONT, d=D_SPKR_PLASTIC);
+            }
+            W_CUT = 28;
+            Y_CUT = 5;
+            translate([-W_CUT/2, Y_CUT, M_POMMEL_BACK + SPKR_OFFSET]) {
+                cube(size=[W_CUT, 20, H_SPKR_PLASTIC]);
+            }
+        }
     }
 
     // Actual holder.
-    H_POMMEL = M_POMMEL_FRONT - M_POMMEL_BACK;
+    H_POMMEL = M_POMMEL_FRONT - M_POMMEL_BACK + 3;
     translate([0, 0, M_POMMEL_BACK]) {
         difference() {
             tube(H_POMMEL, D_SPKR_INNER/2, D_POMMEL/2);
             translate([-20, 5, 0]) cube(size=[40, 40, 40]);
 
             translate([0, 0, SPKR_OFFSET]) {
-                speaker(0.8, 0.6);
+                speaker(0, 0);
             }
             translate([-20, -20, 12]) cube(size=[16, 15, 22]);
             mirror([-1, 0, 0]) translate([-20, -20, 12]) cube(size=[16, 15, 22]);
         }
     }    
+    *color("yellow") {
+        W_CUT = 26;
+        Y_CUT = 5;
+        translate([-W_CUT/2, Y_CUT, M_POMMEL_BACK + SPKR_OFFSET]) {
+            cube(size=[W_CUT, 20, H_SPKR_PLASTIC]);
+        }
+    }
 }
 
 module speakerRing()
@@ -270,6 +284,51 @@ module teensy35()
     }
 }
 
+
+M_BAR_STOP = M_TRANSITION - 15;
+
+module frontBar(w, dx, dz)
+{
+    translate([-w/2 + dx, -R_AFT, M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35]) {
+        cube(size=[w, 7.5, EPS + M_BAR_STOP - (M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35)]);
+    }
+}
+
+module shoulderBars()
+{
+    translate([-W_MC/2, -R_AFT, M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35 - SHOULDER_DZ]) {
+        cube(size=[SHOULDER_DX, 7.5, SHOULDER_DZ]);
+    }    
+    translate([W_MC/2 - SHOULDER_DX, -R_AFT, M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35 - SHOULDER_DZ]) {
+        cube(size=[SHOULDER_DX, 7.5, SHOULDER_DZ]);
+    }    
+}
+
+module horn()
+{
+    translate([0, 0, M_TRANSITION]) {
+        intersection() {
+            cylinder(h=10, d=D_AFT);
+            difference() {
+                translate([-HORN_WIDTH/2, Y_SWITCH, 0]) {
+                    cube(size=[HORN_WIDTH, 20, 2]);
+                }    
+                translate([-HORN_WIDTH/2, R_FORWARD, 0]) {
+                    rotate([45, 0, 0]) {
+                        cube(size=[HORN_WIDTH, 20, 10]);
+                    }    
+                }
+                translate([0, 0, M_PORT_CENTER - M_TRANSITION]) {
+                    rotate([-90, 0, 0]) {
+                        cylinder(h=20, d=10.5);
+                    }
+                }
+                translate([0, 0, -10]) cylinder(h=20, d=D_FORWARD);
+            }
+        }
+    }    
+}
+
 FLATTEN = 1.8;
 M_B0_FRONT = M_BUTTRESS_0 + H_BUTTRESS;
 M_B3_FRONT = M_BUTTRESS_3 + H_BUTTRESS;
@@ -285,7 +344,7 @@ Z_B4 = M_TRANSITION + EPS - M_B4_FRONT - T_TRANSITION_RING;
 }
 
 // Back battery holder
-*difference() {
+difference() {
     intersection() {
         innerTube();
         union() {
@@ -299,7 +358,7 @@ Z_B4 = M_TRANSITION + EPS - M_B4_FRONT - T_TRANSITION_RING;
                 translate([-W_MC/2 - BW, 0, M_B3_FRONT])    beam(4, 8, Z_B3);
                 translate([W_MC/2, 0, M_B4_FRONT])          beam(4, 8, Z_B4);
                 translate([-W_MC/2 - BW, 0, M_B4_FRONT])    beam(4, 8, Z_B4);
-            }                
+            }      
         }
     }
     H_REM = M_BUTTRESS_4 + H_BUTTRESS + EPS - M_BUTTRESS_3;
@@ -317,24 +376,6 @@ Z_B4 = M_TRANSITION + EPS - M_B4_FRONT - T_TRANSITION_RING;
     translate([0, 0, M_B0_FRONT]) shelfBeam(M_TRANSITION - T_TRANSITION_RING + EPS - M_B0_FRONT, false, 4, true);
 
 }
-
-module frontBar(w, dx)
-{
-    translate([-w/2 + dx, -R_AFT, M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35]) {
-        cube(size=[w, 7.5, EPS + M_TRANSITION - T_TRANSITION_RING - (M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35)]);
-    }
-}
-
-module shoulderBars()
-{
-    translate([-W_MC/2, -R_AFT, M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35 - SHOULDER_DZ]) {
-        cube(size=[SHOULDER_DX, 7.5, SHOULDER_DZ]);
-    }    
-    translate([W_MC/2 - SHOULDER_DX, -R_AFT, M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35 - SHOULDER_DZ]) {
-        cube(size=[SHOULDER_DX, 7.5, SHOULDER_DZ]);
-    }    
-}
-
 
 // Back body
 
@@ -355,6 +396,9 @@ difference() {
                 translate([-W_MC/2, -R_AFT, M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35 - SHOULDER_DZ]) {
                     cube(size=[W_MC, 7.5, 2 + SHOULDER_DZ]);
                 }
+                translate([-W_MC/2, -R_AFT, M_BAR_STOP]) {
+                    cube(size=[W_MC, 7.5, 2]);
+                }
                 frontBar(2, -4);
                 frontBar(2, 5);
             }
@@ -363,6 +407,7 @@ difference() {
 
         speakerHolder();
 
+        horn();
     }
     // Flatten the bottom for printing.
     translate([-20, -D_AFT_RING/2, M_WAY_BACK]) cube(size=[40, FLATTEN, H_FAR]);

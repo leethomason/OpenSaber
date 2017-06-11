@@ -7,8 +7,8 @@ M_SWITCH_CENTER		= M_TRANSITION + 25;
 M_DOTSTAR			= M_TRANSITION + 13;
 M_PORT_CENTER       = M_TRANSITION + 6;
 
-M_POMMEL_BACK		= 2.0;	// Back of the pommel, leaving (in this case)
-							// enough space for the various pommels.
+M_POMMEL_BACK		= 9.0;		// Back of the pommel, leaving (in this case)
+								// enough space for the various pommels.
 M_0					= 0;
 M_POMMEL_FRONT		= 10;		// Where the pommel becomes aft
 M_RAIL_START		= 12;
@@ -50,10 +50,10 @@ H_BATTERY           = 68;
 D_BATTERY           = 18.50 + 0.5;    // An 1850. Huh. 
 R_BATTERY			= D_BATTERY / 2;
 
-H_SPKR_PLASTIC 		= 2.4;
+H_SPKR_PLASTIC 		= 2.3;
 D_SPKR_PLASTIC 		= 28;
-SPKR_OFFSET         = 3;    // distance from FRONT of pommel to speaker
-D_SPKR_INNER 		= D_SPKR_PLASTIC - 4;
+SPKR_OFFSET         = 1;    // distance from FRONT of pommel to speaker
+D_SPKR_INNER 		= D_SPKR_PLASTIC - 1.5;
 
 D_POMMEL			= 31.0; // 31.5 is correct, but snug
 R_POMMEL 			= D_POMMEL / 2;
@@ -74,8 +74,10 @@ W_MC 				= 18;
 H_MC    			= 10;
 Y_MC    			= -13.5;
 Z_MC_35 			= 71.2;		// includes SD
-SHOULDER_DX			= 4;
+SHOULDER_DX			= 2.5;
 SHOULDER_DZ			= 5;
+
+HORN_WIDTH			= 5;
 
 // Battery
 // 68mm
