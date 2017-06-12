@@ -28,7 +28,7 @@ SOFTWARE.
 // --- Configuration ---
 // Note: Serial connection should be set to 19200 baud with a newline after commands.
 
-#define SERIAL_DEBUG 0
+#define SERIAL_DEBUG 1
 
 #define SABER_MODEL_TEST			0
 #define SABER_MODEL_GECKO			1	// PCB, Teensy 3, external amp and accel
@@ -38,8 +38,9 @@ SOFTWARE.
 #define SABER_MODEL_BO				5	// 2 button prop shield
 #define SABER_MODEL_TANO 			6
 #define SABER_MODEL_TANO_2 			7
+#define SABER_MODEL_SISTER 			8
 
-#define SABER_MODEL 				SABER_MODEL_TANO_2
+#define SABER_MODEL 				SABER_MODEL_SISTER
 
 #define LED_TOPOLOGY_RESISTOR		1
 #define LED_TOPOLOGY_DRIVER			2
@@ -50,9 +51,10 @@ SOFTWARE.
 #define SABER_SOUND_SD 				1
 #define SABER_SOUND_FLASH 			2
 
-#define PCB_VERSION_1				1
-#define PCB_VERSION_5				5
-#define PCB_VERSION_7				7
+#define PCB_VERSION_1				1   // PCB, Teensy 3.2, external amp and accel
+#define PCB_VERSION_5				5   // PCB, Prop Shield, Teensy 3.2, OLED (VERIFY)
+#define PCB_VERSION_7				7	// Split PCB. Prop shield. Teensy 3.5.
+#define PCB_VERSION_9				9   // Split PCB. Prop shield. Teensy 3.5.
 
 static const int EEPROM_SIZE = 512;
 
@@ -295,6 +297,39 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int VOLUME_3 = 120;
 	static const int VOLUME_4 = 200;
 
+#elif (SABER_MODEL == SABER_MODEL_SISTER)
+	#define PCB_VERSION 				PCB_VERSION_9
+	#define LED_TOPOLOGY 				LED_TOPOLOGY_RESISTOR
+	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
+	#define SABER_SOUND_ON 				SABER_SOUND_SD
+	#define SABER_SOUND_SHUTDOWN
+	#define SABER_VOLTMETER
+	#define SABER_INTEGRATED_SD
+
+	#undef SABER_BUTTON
+	#define SABER_BUTTON Button::INTERNAL_PULLUP
+
+	static const int32_t UVOLT_MULT = 6750;
+	#define ID_STR "Sisters Cree XPE2 RGB"
+
+	// Thermal paste heat sinking.
+	static const int32_t RED_VF   = 2100;   // milli-volts
+	static const int32_t RED_I    = 400;    // milli-amps
+	static const int32_t RED_R    = 4300;   // milli-ohms
+
+	static const int32_t GREEN_VF = 3400;
+	static const int32_t GREEN_I  = 400;
+	static const int32_t GREEN_R  = 1000;
+
+	static const int32_t BLUE_VF  = 3100;
+	static const int32_t BLUE_I   = 400;
+	static const int32_t BLUE_R   = 1600;
+
+	static const int VOLUME_1 = 15;
+	static const int VOLUME_2 = 50;
+	static const int VOLUME_3 = 120;
+	static const int VOLUME_4 = 200;
+
 #endif
 
 #if (PCB_VERSION == PCB_VERSION_1)	
@@ -377,7 +412,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	 * Wrap around PCB.
 	 * Teensy on prop shield.
      *
-     * Teensy 3.2
+     * Teensy 3.2 / 3.5
 	 * Prop Shield
 	 * SD Card
 	 * Optional: DotStar UI
@@ -401,6 +436,40 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 	#define PIN_SABER_CLOCK   13
 	#define PIN_SDCARD_CS     14
+	// 15
+	#define PIN_LED_A         16
+	#define PIN_SWITCH_A      17
+	#define PIN_SDA           18 // fixed
+	#define PIN_SCL           19 // fixed
+	#define PIN_VMETER        20
+	#define PIN_SWITCH_B	  21
+	#define PIN_LED_B		  22
+	// 23
+#elif (PCB_VERSION == PCB_VERSION_9)
+	/* V7 Design
+	 * Wrap around PCB.
+	 * Teensy on prop shield.
+     *
+     * Teensy 3.5
+	 * Prop Shield
+	 * Optional: DotStar UI
+	 */
+	#define PIN_RX1           0
+	#define PIN_TX1           1
+	#define PIN_ACCEL_IRQ	  2	// fixed
+	#define PIN_EMITTER_RED	  3
+	#define PIN_EMITTER_GREEN 4
+	#define PIN_AMP_EN        5 // fixed
+	#define PIN_MEMORY_CS	  6	// fixed
+	#define PIN_DOTSTAR_EN    7 // fixed
+	// 8
+	#define PIN_EMITTER_BLUE   9
+	// 10
+	#define PIN_SABER_MOSI    11
+	#define PIN_SABER_MISO    12
+
+	#define PIN_SABER_CLOCK   13
+	// 14
 	// 15
 	#define PIN_LED_A         16
 	#define PIN_SWITCH_A      17
