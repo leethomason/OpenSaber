@@ -26,8 +26,15 @@ module beam(w, h, d)
         cube(size=[w, h, d]);
         for(i=[0:nSide-1]) 
     	{
-        	//echo(i);
-        	translate([w + EPS, deltaH/2, space/2 + space*i]) rotate([0, -90, 0]) hexShape(innerW, innerH, w + EPS2);
+            N = 4;
+            VAR_H = [1.0, 0.8, 1.0, 0.8]; //, 0.9, 0.6, 1.0, 0.8];
+            VAR_Y = [0.0, 0.2, 0.0, 0.0]; // 0.2, 0.1, 0.0, 0.0];
+
+            y = deltaH / 2 + innerH * VAR_Y[i%N];
+
+        	translate([w + EPS, y, space/2 + space*i]) 
+                rotate([0, -90, 0])
+                    hexShape(innerW, innerH * VAR_H[i%N], w + EPS2);
         }
     }
 }

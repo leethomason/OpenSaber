@@ -1,11 +1,13 @@
 TANO_VERSION		= 2;
 
-M_TRANSITION		= 113;
-M_LED_HOLDER_FRONT	= M_TRANSITION + 45;
+M_TRANSITION		= 114;
+M_FRONT 			= M_TRANSITION;	// allow shifting the front 
+									// if it shouldn't be the transition
+M_LED_HOLDER_FRONT	= M_FRONT + 44;
 M_LED_HOLDER_BACK	= M_LED_HOLDER_FRONT - 10;
-M_SWITCH_CENTER		= M_TRANSITION + 25;
-M_DOTSTAR			= M_TRANSITION + 13;
-M_PORT_CENTER       = M_TRANSITION + 6;
+M_SWITCH_CENTER		= M_FRONT + 24;
+M_DOTSTAR			= M_FRONT + 12;
+M_PORT_CENTER       = M_FRONT + 5;
 
 M_POMMEL_BACK		= 9.0;		// Back of the pommel, leaving (in this case)
 								// enough space for the various pommels.
