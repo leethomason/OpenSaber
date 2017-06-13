@@ -82,30 +82,14 @@ module speakerHolder()
                 cylinder(h=M_SPKR_RING - M_POMMEL_FRONT, d=D_AFT_RING);
             }
             translate([0, 0, M_POMMEL_FRONT]) {
-                cylinder(h=M_SPKR_RING - M_POMMEL_FRONT, d=D_SPKR_PLASTIC);
+                cylinder(h=M_SPKR_RING - M_POMMEL_FRONT, d=D_SPKR_INNER);
             }
-            W_CUT = 28;
-            Y_CUT = 5;
-            translate([-W_CUT/2, Y_CUT, M_POMMEL_BACK + SPKR_OFFSET]) {
-                cube(size=[W_CUT, 20, H_SPKR_PLASTIC]);
+            translate([0, 0, M_POMMEL_BACK + SPKR_OFFSET]) {
+                speaker(0, 0);
             }
         }
     }
-
-    // Actual holder.
-    H_POMMEL = M_POMMEL_FRONT - M_POMMEL_BACK + 3;
-    translate([0, 0, M_POMMEL_BACK]) {
-        difference() {
-            tube(H_POMMEL, D_SPKR_INNER/2, D_POMMEL/2);
-            translate([-20, 5, 0]) cube(size=[40, 40, 40]);
-
-            translate([0, 0, SPKR_OFFSET]) {
-                speaker(0, 0);
-            }
-            translate([-20, -20, 12]) cube(size=[16, 15, 22]);
-            mirror([-1, 0, 0]) translate([-20, -20, 12]) cube(size=[16, 15, 22]);
-        }
-    }    
+    
     *color("yellow") {
         W_CUT = 26;
         Y_CUT = 5;
@@ -286,21 +270,22 @@ module teensy35()
 
 
 M_BAR_STOP = M_TRANSITION - 15;
+BAR_HEIGHT = 10;    // was 7.5
 
 module frontBar(w, dx, dz)
 {
     translate([-w/2 + dx, -R_AFT, M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35]) {
-        cube(size=[w, 7.5, EPS + M_BAR_STOP - (M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35)]);
+        cube(size=[w, BAR_HEIGHT, EPS + M_BAR_STOP - (M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35)]);
     }
 }
 
 module shoulderBars()
 {
     translate([-W_MC/2, -R_AFT, M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35 - SHOULDER_DZ]) {
-        cube(size=[SHOULDER_DX, 7.5, SHOULDER_DZ]);
+        cube(size=[SHOULDER_DX, BAR_HEIGHT, SHOULDER_DZ]);
     }    
     translate([W_MC/2 - SHOULDER_DX, -R_AFT, M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35 - SHOULDER_DZ]) {
-        cube(size=[SHOULDER_DX, 7.5, SHOULDER_DZ]);
+        cube(size=[SHOULDER_DX, BAR_HEIGHT, SHOULDER_DZ]);
     }    
 }
 
@@ -344,7 +329,7 @@ Z_B4 = M_TRANSITION + EPS - M_B4_FRONT - T_TRANSITION_RING;
 }
 
 // Back battery holder
-difference() {
+*difference() {
     intersection() {
         innerTube();
         union() {
@@ -394,10 +379,10 @@ difference() {
             innerTube();
             union() {
                 translate([-W_MC/2, -R_AFT, M_BUTTRESS_0 + H_BUTTRESS + Z_MC_35 - SHOULDER_DZ]) {
-                    cube(size=[W_MC, 7.5, 2 + SHOULDER_DZ]);
+                    cube(size=[W_MC, BAR_HEIGHT, 2 + SHOULDER_DZ]);
                 }
                 translate([-W_MC/2, -R_AFT, M_BAR_STOP]) {
-                    cube(size=[W_MC, 7.5, 2]);
+                    cube(size=[W_MC, BAR_HEIGHT, 2]);
                 }
                 frontBar(2, -4);
                 frontBar(2, 5);
@@ -414,7 +399,7 @@ difference() {
     
     // Take out a chunk for access to the USB port.
     X_USB = 11; // 10 to tight fit
-    Y_USB = 9;
+    Y_USB = 10;
     Z_USB = 20;
     translate([-X_USB/2, -R_AFT, M_POMMEL_BACK]) cube(size=[X_USB, Y_USB, 35]);
     

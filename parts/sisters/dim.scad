@@ -51,8 +51,8 @@ D_BATTERY           = 18.50 + 0.5;    // An 1850. Huh.
 R_BATTERY			= D_BATTERY / 2;
 
 H_SPKR_PLASTIC 		= 2.3;
-D_SPKR_PLASTIC 		= 28;
-SPKR_OFFSET         = 1;    // distance from FRONT of pommel to speaker
+D_SPKR_PLASTIC 		= 28 + 1;
+SPKR_OFFSET         = 1.5;    // distance from FRONT of pommel to speaker
 D_SPKR_INNER 		= D_SPKR_PLASTIC - 1.5;
 
 D_POMMEL			= 31.0; // 31.5 is correct, but snug
