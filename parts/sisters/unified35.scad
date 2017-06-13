@@ -344,7 +344,7 @@ Z_B4 = M_TRANSITION + EPS - M_B4_FRONT - T_TRANSITION_RING;
 }
 
 // Back battery holder
-difference() {
+*difference() {
     intersection() {
         innerTube();
         union() {
