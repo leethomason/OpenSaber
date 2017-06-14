@@ -46,6 +46,8 @@ void AudioPlayer::init() {
     // Audio connections require memory to work.  For more
     // detailed information, see the MemoryAndCpuUsage example
     AudioMemory(8);
+    // This is much louder, but started causing distortion.
+    // Bug in the system? Better value to use?
     //dac.analogReference(EXTERNAL); // much louder!
     delay(50);  //stabalize
 }

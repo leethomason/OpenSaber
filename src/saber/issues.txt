@@ -1,12 +1,17 @@
 Issues:
-PCB:
+High
+- Sound based UI ("palette", "audio", "ready", 0-7)
+- Connect RF24
+
+Low
+- Fix analogReference()
+
+Fixed
 x switch to new version
 x PWM for LED
 x select pin move/test (CSN is select)
 x enable pin move/test (why are the names so bad???)
 x initial role pin?
-
-Fixed
 x start system with audio shutdown
 x doesn't start with correct font
 x test full circuit

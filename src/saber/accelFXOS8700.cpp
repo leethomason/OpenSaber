@@ -123,8 +123,7 @@ AccelFXOS8700::ErrorCode AccelFXOS8700::read(float* v, float* gravitySquared, fl
   		return ERROR_CONNECTION;
   	}
 
-    uint8_t status = Wire.read();
-    (void) status;
+    Wire.read();	// status
     uint8_t axhi = Wire.read();
     uint8_t axlo = Wire.read();
     uint8_t ayhi = Wire.read();
@@ -144,10 +143,20 @@ AccelFXOS8700::ErrorCode AccelFXOS8700::read(float* v, float* gravitySquared, fl
 	// Also, it's possible to knock it free again. I just smacked the circuit
 	// on the desk and now it's working fine. Scary.
 	// "if the Z-axis output is reporting exactly 0x7FFC or 0x8000 (+/-full scale)..."
+	// Not sure x/y get stuck, but check just in case.
+	if (    (axhi == 0x7f && axlo == 0xfc)
+	     || (axhi == 0x80 && axlo == 0x00)) 
+	{
+		axhi = axlo = 0;
+	}
+	if (    (ayhi == 0x7f && aylo == 0xfc)
+	     || (ayhi == 0x80 && aylo == 0x00)) 
+	{
+		ayhi = aylo = 0;
+	}
 	if (    (azhi == 0x7f && azlo == 0xfc)
 	     || (azhi == 0x80 && azlo == 0x00)) 
 	{
-		// It's stuck.
 		azhi = azlo = 0;
 	}
 

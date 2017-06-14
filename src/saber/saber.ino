@@ -75,7 +75,7 @@ SFX sfx(&audioPlayer);
 BladeState  bladeState;
 ButtonCB    buttonA(PIN_SWITCH_A, SABER_BUTTON);
 LEDManager  ledA(PIN_LED_A, false);
-LEDManager  ledB(PIN_LED_B, false);  // Still have LEDB support, even if 1 button.
+LEDManager  ledB(PIN_LED_B, false);
 
 UIRenderData uiRenderData;
 
