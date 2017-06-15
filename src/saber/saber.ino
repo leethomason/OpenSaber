@@ -106,6 +106,10 @@ Sketcher sketcher;
 Renderer renderer;
 #endif
 
+#ifdef SABER_SISTERS
+ComRF24 comRF24(RF24_CE, RF24_CS);
+#endif
+
 CMDParser cmdParser(&saberDB);
 Blade blade;
 Timer2 vbatTimer(VBAT_TIME_INTERVAL);
@@ -214,6 +218,15 @@ void setup() {
         dotstar.display();
         dotstar.display();
         Log.p("Crystal Dotstart initialized.").eol();
+    #endif
+
+    #ifdef SABER_SISTERS
+        if(comrf24.begin()) {
+            Log.p("RF24 initialized.").eol();
+        }
+        else {
+            Log.p("RF24 error.").eol();
+        }
     #endif
 
     syncToDB();
@@ -457,6 +470,9 @@ void buttonAHoldHandler(const Button& button)
                 bladeState.change(BLADE_IGNITE);
                 #ifdef SABER_SOUND_ON
                     sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
+                #endif
+                #ifdef 
+                    comRF24.send("ignite");
                 #endif
             }
         }

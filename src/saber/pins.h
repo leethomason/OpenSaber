@@ -305,6 +305,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
+	#define SABER_SISTERS
 
 	#undef SABER_BUTTON
 	#define SABER_BUTTON Button::INTERNAL_PULLUP
@@ -367,6 +368,8 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_EMITTER_BLUE  21
 	#define PIN_EMITTER_GREEN 22
 	#define PIN_EMITTER_RED   23
+	#define PIN_RF24_CE
+	#define PIN_RF24_CS
 
 #elif(PCB_VERSION == PCB_VERSION_5)
 
