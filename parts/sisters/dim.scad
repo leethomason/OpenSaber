@@ -1,13 +1,11 @@
 TANO_VERSION		= 2;
 
 M_TRANSITION		= 114;
-M_FRONT 			= M_TRANSITION;	// allow shifting the front 
-									// if it shouldn't be the transition
-M_LED_HOLDER_FRONT	= M_FRONT + 44;
+M_LED_HOLDER_FRONT	= M_TRANSITION + 44.5;
 M_LED_HOLDER_BACK	= M_LED_HOLDER_FRONT - 10;
-M_SWITCH_CENTER		= M_FRONT + 24;
-M_DOTSTAR			= M_FRONT + 12;
-M_PORT_CENTER       = M_FRONT + 5;
+M_SWITCH_CENTER		= M_TRANSITION + 25.5;
+M_DOTSTAR			= M_TRANSITION + 12;
+M_PORT_CENTER       = M_TRANSITION + 6;
 
 M_POMMEL_BACK		= 9.0;		// Back of the pommel, leaving (in this case)
 								// enough space for the various pommels.
@@ -74,10 +72,10 @@ H_WING  			= 10.5;	// higher over power converter
 
 W_MC 				= 18;
 H_MC    			= 10;
-Y_MC    			= -13.5;
-Z_MC_35 			= 71.2;		// includes SD
+Y_MC    			= -15.5;	// low config -13.5, this value in flat config
+Z_MC_35 			= 71.5;		// includes SD
 SHOULDER_DX			= 2.5;
-SHOULDER_DZ			= 5;
+SHOULDER_DZ			= 3.5;
 
 HORN_WIDTH			= 5;
 
