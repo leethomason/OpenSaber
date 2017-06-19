@@ -12,7 +12,7 @@ module hexShape(w, h, d)
 module beam(w, h, d)
 {
 
-    hexH = h * 0.75;
+    hexH = h * 0.70;
     hexW = hexH / 2;
 
     proposedStep = hexW * 1.4;
