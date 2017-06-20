@@ -270,7 +270,7 @@ module teensy35()
 
 
 M_BAR_STOP = M_TRANSITION - 15;
-BAR_HEIGHT = 10;    // was 7.5
+BAR_HEIGHT = 9.5;    // was 7.5
 
 module frontBar(w, dx, dz)
 {
@@ -329,24 +329,30 @@ Z_B4 = M_TRANSITION + EPS - M_B4_FRONT - T_TRANSITION_RING;
 }
 
 // Back battery holder
-*difference() {
+difference() {
     intersection() {
         innerTube();
         union() {
             translate([0, 0, M_BUTTRESS_3]) buttress(mc=false, highHoles=false, leftWiring=false, rightWiring=false);
             translate([0, 0, M_BUTTRESS_4]) buttress(battery=false, trough=10, mc=false, leftWiring=false, rightWiring=false);
 
+            //translate([W_MC/2, -4, M_TRANSITION - T_TRANSITION_RING - H_BUTTRESS])
+            //    cube(size=[10, 8, H_BUTTRESS]);
+
+            translate([-W_MC/2 - 10, -6, M_TRANSITION - T_TRANSITION_RING - H_BUTTRESS])
+                cube(size=[10, 10, H_BUTTRESS]);
+
             translate([0, 3, 0 ]) {
                 BW = 4;
                 W_MC = 18;
                 translate([W_MC/2, 0, M_B3_FRONT])          beam(4, 8, Z_B3);
                 translate([-W_MC/2 - BW, 0, M_B3_FRONT])    beam(4, 8, Z_B3);
-                translate([W_MC/2, 0, M_B4_FRONT])          beam(4, 8, Z_B4);
+                //translate([W_MC/2, 0, M_B4_FRONT])          beam(4, 8, Z_B4);
                 translate([-W_MC/2 - BW, 0, M_B4_FRONT])    beam(4, 8, Z_B4);
             }      
         }
     }
-    H_REM = M_BUTTRESS_4 + H_BUTTRESS + EPS - M_BUTTRESS_3;
+    H_REM = M_TRANSITION - T_TRANSITION_RING - M_BUTTRESS_3 + EPS;
     translate([-20, -10, M_BUTTRESS_3 - EPS]) cube(size=[ 7, 24, H_REM]);
     // Take out left side for wiring.
     translate([ 13, -10, M_BUTTRESS_3 - EPS]) cube(size=[20, 24, H_REM]);
@@ -354,7 +360,11 @@ Z_B4 = M_TRANSITION + EPS - M_B4_FRONT - T_TRANSITION_RING;
     // Flatten the bottom for printing.
     translate([-20, -D_AFT_RING/2, M_WAY_BACK]) cube(size=[40, FLATTEN, H_FAR]);
 
-    teensy35();
+    //teensy35();
+    OFFSET = 20;
+    translate([-W_MC/2, Y_MC - OFFSET, M_BUTTRESS_0 + H_BUTTRESS]) {
+        cube(size=[W_MC, H_MC + OFFSET - 1, 100]);
+    }
 
     translate([0, 0, M_B0_FRONT]) shelfBeam(M_TRANSITION - T_TRANSITION_RING + EPS - M_B0_FRONT,
     true, 4, true);
@@ -363,16 +373,16 @@ Z_B4 = M_TRANSITION + EPS - M_B4_FRONT - T_TRANSITION_RING;
 }
 
 // Back body
-
-difference() {
-    
-    union() {
+*difference() {
+     union() {
         transitionRing();
         
         union() {
-            translate([0, 0, M_B0_FRONT]) shelfBeam(M_TRANSITION - T_TRANSITION_RING + EPS - M_B0_FRONT,
-            true, 4);
-            translate([0, 0, M_B0_FRONT]) shelfBeam(M_TRANSITION - T_TRANSITION_RING + EPS - M_B0_FRONT, false, 4);
+            translate([0, 0, M_B0_FRONT]) 
+                shelfBeam(M_TRANSITION - T_TRANSITION_RING + EPS - M_B0_FRONT,
+            true, 5);
+            translate([0, 0, M_B0_FRONT]) 
+                shelfBeam(M_TRANSITION - T_TRANSITION_RING + EPS - M_B0_FRONT, false, 5);
 
         }
         intersection() {
@@ -398,13 +408,13 @@ difference() {
     translate([-20, -D_AFT_RING/2, M_WAY_BACK]) cube(size=[40, FLATTEN, H_FAR]);
     
     // Take out a chunk for access to the USB port.
-    X_USB = 11; // 10 to tight fit
+    X_USB = 14; // 10 to tight fit
     Y_USB = 10;
     Z_USB = 20;
     translate([-X_USB/2, -R_AFT, M_POMMEL_BACK]) cube(size=[X_USB, Y_USB, 35]);
     
 
-    teensy35();
+    translate([0, 2, 0]) teensy35();
 }
 
 translate([0, 0, 70]) {

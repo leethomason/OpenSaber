@@ -11,30 +11,30 @@ module hexShape(w, h, d)
 
 module beam(w, h, d)
 {
-    
-    innerW = w * 0.75;
-    innerH = h * 0.75;
-    deltaW = w - innerW;
-    deltaH = h - innerH;
 
-    W = h / 2;
-    endPad = W / 4;
-    nSide = floor((d - endPad*2) / W);
-    space = (d - endPad*2) / nSide;
+    hexH = h * 0.70;
+    hexW = hexH / 2;
+
+    proposedStep = hexW * 1.4;
+
+    // subract out space for the ends.
+    nHex = floor(d / proposedStep);
+    step = d / nHex;
+    space = step - hexW;
+
+    //echo("w", w, "h", h, "d", d, "nHex", nHex, "step", step);
 
     difference() {
         cube(size=[w, h, d]);
-        for(i=[0:nSide-1]) 
+        for(i=[0:nHex-1]) 
     	{
-            N = 4;
-            VAR_H = [1.0, 0.8, 1.0, 0.8]; //, 0.9, 0.6, 1.0, 0.8];
-            VAR_Y = [0.0, 0.2, 0.0, 0.0]; // 0.2, 0.1, 0.0, 0.0];
+            x = w + EPS;
+            y = (h - hexH) / 2;
+            z = space / 2 + step * i;
 
-            y = deltaH / 2 + innerH * VAR_Y[i%N];
-
-        	translate([w + EPS, y, space/2 + space*i]) 
+        	translate([x, y, z]) 
                 rotate([0, -90, 0])
-                    hexShape(innerW, innerH * VAR_H[i%N], w + EPS2);
+                    hexShape(hexW, hexH, w + EPS2);
         }
     }
 }
