@@ -4,11 +4,13 @@
 #include <stdint.h>
 #include "Grinliz_Util.h"
 
+class RF24;
+
 class ComRF24
 {
 public:
-	ComRF24(uint8_t cePin, uint8_t csPin);
-	bool begin(int role, const char* addr0, const char* addr1);
+	ComRF24(RF24* rf24);
+	bool begin(int role);
 
 	void write(const char* str);
 	void process(CStr<16>* str);
@@ -16,8 +18,8 @@ public:
 	void test();
 
 private:
-
-
+	int m_role = 0;
+	RF24* m_rf24 = 0;
 };
 
 #endif // GRINLIZ_RF24_INCLUDED
