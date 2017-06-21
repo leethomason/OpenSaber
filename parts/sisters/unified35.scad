@@ -47,14 +47,12 @@ module switch()
 
     color("yellow") {
         translate([0, 0, M_SWITCH_CENTER]) {
-            //rotate([R_DOTSTAR, 0, 0]) {
-                translate([0, 0, Y_SWITCH]) {
-                    cylinder(h = H_TOP, r1 = D_OUTER_TOP / 2, r2 = D_INNER_TOP / 2);
-                    translate([0, 0, -H_BODY]) {
-                        cylinder(h = H_BODY, d=D_SWITCH);
-                    }            
-                }
-            //}
+            translate([0, 0, Y_SWITCH]) {
+                cylinder(h = H_TOP, r1 = D_OUTER_TOP / 2, r2 = D_INNER_TOP / 2);
+                translate([0, 0, -H_BODY]) {
+                    cylinder(h = H_BODY, d=D_SWITCH);
+                }            
+            }
         }
     }
 }
@@ -149,7 +147,7 @@ module switchAndPortHolder()
                 }
             }
             // switch
-            translate([0, 0, M_SWITCH_CENTER]) {
+            translate([X_SWITCH, 0, M_SWITCH_CENTER]) {
                 rotate([-90, 0, 0]) {
                     cylinder(h=20, d=D_SWITCH);
                     translate([0, 0, Y_SWITCH]) cylinder(h=20, d=D_SWITCH_TOP);
@@ -293,14 +291,19 @@ module horn()
 {
     translate([0, 0, M_TRANSITION]) {
         intersection() {
-            cylinder(h=10, d=D_AFT);
+            cylinder(h=10, d=D_AFT); 
             difference() {
-                translate([-HORN_WIDTH/2, Y_SWITCH, 0]) {
-                    cube(size=[HORN_WIDTH, 20, 2]);
-                }    
-                translate([-HORN_WIDTH/2, R_FORWARD, 0]) {
+                hull() {
+                    translate([-HORN_WIDTH/2, Y_SWITCH, 0]) {
+                        cube(size=[HORN_WIDTH, 7, 2]);
+                    }    
+                    translate([-HORN_BASE_WIDTH/2, Y_SWITCH, 0]) {
+                        cube(size=[HORN_BASE_WIDTH, 0.1, 2]);
+                    }    
+                }
+                translate([-HORN_BASE_WIDTH/2, R_FORWARD, 0]) {
                     rotate([45, 0, 0]) {
-                        cube(size=[HORN_WIDTH, 20, 10]);
+                        cube(size=[HORN_BASE_WIDTH, 20, 10]);
                     }    
                 }
                 translate([0, 0, M_PORT_CENTER - M_TRANSITION]) {
@@ -322,14 +325,14 @@ Z_B3 = M_BUTTRESS_4 + EPS - M_B3_FRONT;
 Z_B4 = M_TRANSITION + EPS - M_B4_FRONT - T_TRANSITION_RING;
 
 // front
-*union() {
+union() {
     ledHolder();
     switchAndPortHolder();
     forwardRail();
 }
 
 // Back battery holder
-difference() {
+*difference() {
     intersection() {
         innerTube();
         union() {
