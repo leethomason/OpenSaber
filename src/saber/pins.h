@@ -358,8 +358,8 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_SABER_MOSI    11
 	#define PIN_SABER_MISO    12
 	#define PIN_SABER_CLOCK   13
-	//#define PIN_OLED_DC       14
-	// 15 open
+	#define PIN_RF24_CS       14
+	#define PIN_RF24_CE		  15
 	//#define PIN_OLED_RESET    16 
 	//#define PIN_OLED_CS       17
 	#define PIN_SDA           18
@@ -368,8 +368,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_EMITTER_BLUE  21
 	#define PIN_EMITTER_GREEN 22
 	#define PIN_EMITTER_RED   23
-	#define PIN_RF24_CE
-	#define PIN_RF24_CS
 
 #elif(PCB_VERSION == PCB_VERSION_5)
 

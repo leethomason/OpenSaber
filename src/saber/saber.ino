@@ -42,12 +42,15 @@
 #include "sfx.h"
 #include "AudioPlayer.h"
 #endif
+
 #include "saberdb.h"
 #include "cmdparser.h"
 #include "blade.h"
 #include "sketcher.h"
 #include "renderer.h"
 #include "saberUtil.h"
+#include "RF24.h"
+#include "comrf24.h"
 #include "tester.h"
 
 static const uint32_t VBAT_TIME_INTERVAL      = 500;
@@ -73,7 +76,15 @@ SFX sfx(&audioPlayer);
 #endif
 
 BladeState  bladeState;
+
+#ifdef SABER_SISTERS
+ButtonCB    buttonA(PIN_SWITCH_B, SABER_BUTTON);
+    #ifdef SABER_TWO_BUTTON
+    #error Button switch only set up for one button.
+    #endif
+#else
 ButtonCB    buttonA(PIN_SWITCH_A, SABER_BUTTON);
+#endif
 LEDManager  ledA(PIN_LED_A, false);
 LEDManager  ledB(PIN_LED_B, false);
 
@@ -107,7 +118,10 @@ Renderer renderer;
 #endif
 
 #ifdef SABER_SISTERS
-ComRF24 comRF24(RF24_CE, RF24_CS);
+RF24 rf24(PIN_RF24_CE, PIN_RF24_CS);
+ComRF24 comRF24(&rf24);
+#else
+ComRF24 comRF24(0);
 #endif
 
 CMDParser cmdParser(&saberDB);
@@ -221,7 +235,7 @@ void setup() {
     #endif
 
     #ifdef SABER_SISTERS
-        if(comrf24.begin()) {
+        if(comRF24.begin()) {
             Log.p("RF24 initialized.").eol();
         }
         else {
@@ -241,6 +255,13 @@ void setup() {
     #ifdef SABER_UI_BRIGHTNESS
         dotstarUI.SetBrightness(SABER_UI_BRIGHTNESS);
     #endif
+
+    #ifdef SABER_SISTERS
+    pinMode(PIN_SWITCH_A, INPUT);
+    int rolePin = digitalRead(PIN_SWITCH_A);
+    comRF24.begin(rolePin == HIGH ? 1 : 0);
+    #endif
+
     Log.event("[saber start]");
     lastLoopTime = millis();    // so we don't get a big jump on the first loop()
 }
@@ -318,6 +339,26 @@ bool setVolumeFromHoldCount(int count)
     return count >= 0 && count <= 5;
 }
 
+void igniteBlade()
+{
+    if (bladeState.state() == BLADE_OFF) {
+        bladeState.change(BLADE_IGNITE);
+        #ifdef SABER_SOUND_ON
+            sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
+        #endif
+    }
+}
+
+void retractBlade()
+{
+    if (bladeState.state() != BLADE_OFF && bladeState.state != BLADE_RETRACT) {
+        bladeState.change(BLADE_RETRACT);
+        #ifdef SABER_SOUND_ON
+            sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
+        #endif
+    }
+}
+
 #ifdef SABER_TWO_BUTTON
 
 void buttonAClickHandler(const Button&)
@@ -333,10 +374,7 @@ void buttonAClickHandler(const Button&)
     else {
         #ifdef SABER_LOCK
             if (millis() - unlocked <= Button::DEFAULT_HOLD_TIME) {
-                bladeState.change(BLADE_RETRACT);
-                #ifdef SABER_SOUND_ON
-                    sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
-                #endif
+                retractBlade();
             }
             else 
         #endif
@@ -352,19 +390,13 @@ void buttonAClickHandler(const Button&)
 void buttonAHoldHandler(const Button&) {
     Log.p("buttonAHoldHandler").eol();
     if (bladeState.state() == BLADE_OFF) {
-        bladeState.change(BLADE_IGNITE);
-        #ifdef SABER_SOUND_ON
-            sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
-        #endif
+        igniteBlade();
     }
     else if (bladeState.state() != BLADE_RETRACT) {
         #ifdef SABER_LOCK
             // see buttonAReleaseHandler
         #else
-            bladeState.change(BLADE_RETRACT);
-            #ifdef SABER_SOUND_ON
-                sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
-            #endif
+            retractBlade();
         #endif
     }
 }
@@ -467,13 +499,8 @@ void buttonAHoldHandler(const Button& button)
 
         if (uiMode.mode() == UIMode::NORMAL) {
             if (button.nHolds() == 1) {
-                bladeState.change(BLADE_IGNITE);
-                #ifdef SABER_SOUND_ON
-                    sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
-                #endif
-                #ifdef 
-                    comRF24.send("ignite");
-                #endif
+                igniteBlade();
+                comRF24.send("ignite");
             }
         }
         else 
@@ -495,10 +522,8 @@ void buttonAHoldHandler(const Button& button)
     }
     else if (bladeState.state() != BLADE_RETRACT) {
         if (button.nHolds() == 1) {
-            bladeState.change(BLADE_RETRACT);
-            #ifdef SABER_SOUND_ON
-                sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
-            #endif
+            retractBlade();
+            comRF24.send("retract");
         }
     }
 }
@@ -548,6 +573,17 @@ void loop() {
         buttonB.process();
         ledB.process();
     #endif
+
+    CStr<16> comStr;
+    comRF24.process(&comStr);
+    if (!comStr.empty()) {
+        if (comStr == "ignite") {
+            igniteBlade();
+        }
+        else if (comStr == "retract") {
+            retractBlade();
+        }
+    }
 
     if (meditationTimer.enabled() && buttonsReleased()) {
         if (meditationTimer.tick(delta)) {
