@@ -35,6 +35,7 @@ R_AFT 				= D_AFT / 2;
 T_TRANSITION_RING	= 4;
 
 Y_SWITCH			= 9.6;
+X_SWITCH			= 0.3;
 D_SWITCH			= 12.5;
 D_SWITCH_TOP		= 14.5;
 D_PORT 				= 12.7;		// FIXME
@@ -78,6 +79,7 @@ SHOULDER_DX			= 2.5;
 SHOULDER_DZ			= 3.5;
 
 HORN_WIDTH			= 5;
+HORN_BASE_WIDTH		= 6.5;
 
 // Battery
 // 68mm
