@@ -40,7 +40,7 @@ SOFTWARE.
 #define SABER_MODEL_TANO 			7
 #define SABER_MODEL_SISTER 			8
 
-#define SABER_MODEL 				SABER_MODEL_TANO
+#define SABER_MODEL 				SABER_MODEL_SISTER
 
 #define LED_TOPOLOGY_RESISTOR		1
 #define LED_TOPOLOGY_DRIVER			2
@@ -326,7 +326,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_SABER_MISO    12
 	#define PIN_SABER_CLOCK   13
 	#define PIN_RF24_CS       14
-	#define PIN_RF24_CE		  15
+	#define PIN_RF24_CE		  15// fixme
 	//#define PIN_OLED_RESET    16 
 	//#define PIN_OLED_CS       17
 	#define PIN_SDA           18
@@ -437,8 +437,8 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_SABER_MISO    12
 
 	#define PIN_SABER_CLOCK   13
-	// 14
-	// 15
+	#define PIN_RF24_CS       14
+	#define PIN_RF24_CE		  15
 	#define PIN_LED_A         16
 	#define PIN_SWITCH_A      17
 	#define PIN_SDA           18 // fixed

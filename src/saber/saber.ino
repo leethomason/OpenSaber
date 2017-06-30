@@ -235,7 +235,13 @@ void setup() {
     #endif
 
     #ifdef SABER_SISTERS
-        if(comRF24.begin()) {
+/*    #ifdef SABER_SISTERS
+    pinMode(PIN_SWITCH_A, INPUT);
+    int rolePin = digitalRead(PIN_SWITCH_A);
+    comRF24.begin(rolePin == HIGH ? 1 : 0);
+    #endif
+*/
+        if(comRF24.begin(0)) {
             Log.p("RF24 initialized.").eol();
         }
         else {
@@ -256,11 +262,6 @@ void setup() {
         dotstarUI.SetBrightness(SABER_UI_BRIGHTNESS);
     #endif
 
-    #ifdef SABER_SISTERS
-    pinMode(PIN_SWITCH_A, INPUT);
-    int rolePin = digitalRead(PIN_SWITCH_A);
-    comRF24.begin(rolePin == HIGH ? 1 : 0);
-    #endif
 
     Log.event("[saber start]");
     lastLoopTime = millis();    // so we don't get a big jump on the first loop()
@@ -351,7 +352,7 @@ void igniteBlade()
 
 void retractBlade()
 {
-    if (bladeState.state() != BLADE_OFF && bladeState.state != BLADE_RETRACT) {
+    if (bladeState.state() != BLADE_OFF && bladeState.state() != BLADE_RETRACT) {
         bladeState.change(BLADE_RETRACT);
         #ifdef SABER_SOUND_ON
             sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);

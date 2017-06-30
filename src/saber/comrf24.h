@@ -12,7 +12,7 @@ public:
 	ComRF24(RF24* rf24);
 	bool begin(int role);
 
-	void write(const char* str);
+	void send(const char* str);
 	void process(CStr<16>* str);
 
 	void test();
