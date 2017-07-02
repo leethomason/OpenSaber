@@ -276,7 +276,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#undef SABER_BUTTON
 	#define SABER_BUTTON Button::INTERNAL_PULLUP
 
-	static const int32_t UVOLT_MULT = 6750;
+	static const int32_t UVOLT_MULT = 6691;		// calibrated
 	#define ID_STR "Sisters Cree XPE2 RGB"
 
 	// Thermal paste heat sinking.
