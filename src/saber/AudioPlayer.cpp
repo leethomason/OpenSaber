@@ -27,8 +27,7 @@ AudioConnection     patchCord1(playWav, mixer);
 AudioConnection     patchCord2(mixer, 0, dac, 0);
 
 AudioPlayer::AudioPlayer() {
-    m_muted = false;
-    m_shutdown = false;
+    m_enabled = false;
     m_startPlayingTime = 0;
     m_volume = 1.0f;
 
@@ -65,6 +64,7 @@ void AudioPlayer::play(const char* filename)
         Log.p("Error playing:").p(filename).eol();
     }
 
+    setShutdown();
     //Serial.print("AudioPlayer::play: "); Serial.println(filename);// Serial.print(" len(ms)="); Serial.println(playWav.lengthMillis());
     // remember, about a 5ms warmup for header to be loaded and start playing.
     m_startPlayingTime = millis();
@@ -74,6 +74,7 @@ void AudioPlayer::stop() {
     playWav.stop();
     // Cool the data xfer
     delay(10);
+    setShutdown();
 }
 
 bool AudioPlayer::isPlaying() const {
@@ -85,24 +86,31 @@ bool AudioPlayer::isPlaying() const {
     return true;
 }
 
-void AudioPlayer::mute(bool m) {
-    m_muted = m;
+void AudioPlayer::process()
+{
+    setShutdown();
+}
 
-    if (m_muted && !m_shutdown) {
-        Log.p("AudioPlayer: amp shutdown.").eol();
-        digitalWrite(PIN_AMP_EN, LOW);
-    }
-    else if (!m_muted && m_shutdown) {
-        Log.p(" AudioPlayer: amp enable.").eol();
+void AudioPlayer::setShutdown() {
+    bool shouldEnable = (m_volume > 0) && isPlaying();
+
+    if (shouldEnable && !m_enabled) {
+        Log.p("AudioPlayer: amp enabled.").eol();
         digitalWrite(PIN_AMP_EN, HIGH);
         delay(10);  // warm up the amp.
+        m_enabled = true;
     }
-    m_shutdown = m_muted;
+    else if (!shouldEnable && m_enabled) {
+        Log.p(" AudioPlayer: amp shutdown.").eol();
+        digitalWrite(PIN_AMP_EN, LOW);
+        m_enabled = false;
+    }
 }
 
 void AudioPlayer::setVolume(float v) {
     m_volume = v;
     mixer.gain(0, m_volume);
+    setShutdown();
 }
 
 

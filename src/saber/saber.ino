@@ -254,7 +254,6 @@ void syncToDB()
 {
     #ifdef SABER_SOUND_ON
         sfx.setFont(saberDB.soundFont());
-        sfx.mute(!saberDB.soundOn());
         sfx.setVolume204(saberDB.volume());
     #endif
 
