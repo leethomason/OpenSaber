@@ -160,18 +160,20 @@ void setupSD(int logCount)
 void setup() {
     Serial.begin(19200);  // still need to turn it on in case a command line is connected.
     #if SERIAL_DEBUG == 1
+        int tries = 0;
+        Log.attachSerial(&Serial);
         while (!Serial) {
-            delay(100);
+            delay(200);
+            ++tries;
+            ledB.set((tries & 1) ? true : false);
         }
+        ledB.set(false);
     #endif
     //TCNT1 = 0x7FFF; // set blue & green channels out of phase
     // Database is the "source of truth".
     // Set it up first.
     saberDB.readData();
 
-    #if SERIAL_DEBUG == 1
-        Log.attachSerial(&Serial);
-    #endif
     #ifdef SABER_SOUND_ON
         setupSD(saberDB.numSetupCalls());
     #endif
@@ -234,15 +236,11 @@ void setup() {
         Log.p("Crystal Dotstart initialized.").eol();
     #endif
 
-    #ifdef SABER_SISTERS
-/*    #ifdef SABER_SISTERS
-    pinMode(PIN_SWITCH_A, INPUT);
-    int rolePin = digitalRead(PIN_SWITCH_A);
-    comRF24.begin(rolePin == HIGH ? 1 : 0);
-    #endif
-*/
-        if(comRF24.begin(0)) {
-            Log.p("RF24 initialized.").eol();
+    #ifdef SABER_SISTERS 
+        pinMode(PIN_SWITCH_A, INPUT);
+        int rolePin = digitalRead(PIN_SWITCH_A);
+        if(comRF24.begin(rolePin == HIGH ? 1 : 0)) {
+            Log.p("RF24 initialized. Role=").p(comRF24.role()).eol();
         }
         else {
             Log.p("RF24 error.").eol();

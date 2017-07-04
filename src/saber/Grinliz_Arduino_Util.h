@@ -20,6 +20,8 @@ public:
     LEDManager(uint8_t pin, bool on=true);
 
     void set(bool on);
+    bool isOn() const;
+
     void blink(uint8_t n, uint32_t cycle, BlinkHandler handler = 0, uint8_t leadOrTrail = BLINK_LEADING);
     void process();
     int  numBlinks() const;

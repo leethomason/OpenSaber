@@ -21,6 +21,14 @@ void LEDManager::set(bool on)
     m_nBlink = 0;
 }
 
+
+bool LEDManager::isOn() const
+{
+    int value = digitalRead(m_pin);
+    return (value == HIGH) ? true : false;
+}
+
+
 void LEDManager::blink(uint8_t n, uint32_t cycle, BlinkHandler h, uint8_t bias)
 {
     //SPrint.p("blink n=").p(n).p(" cycle=").p(cycle).eol();
