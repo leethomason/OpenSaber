@@ -48,6 +48,9 @@ static const int EFFECT_BUTTON = 1;
 
 class IgniteRetractTest : public Test
 {
+	uint16_t startEn = 0;
+	uint16_t startDs = 0;
+
 	virtual const char* name() const { return "IgniteRetractTest"; }
 	virtual void start(Tester* tester) 
 	{
@@ -60,6 +63,9 @@ class IgniteRetractTest : public Test
 
 		if (strEqual(event, "[BLADE_IGNITE]")) {
 			TEST_ORDER(0);
+			Log.p("en=").p(SFX::instance()->nEnabled()).p(" ds=").p(SFX::instance()->nDisabled()).eol();
+			startEn = SFX::instance()->nEnabled();
+			startDs = SFX::instance()->nDisabled();
 			tester->checkAudio("ignite", 500, 2500);	
 		}
 		else if (strEqual(event, "[BLADE_ON]")) {
@@ -80,6 +86,9 @@ class IgniteRetractTest : public Test
 		}
 		else if (strEqual(event, "[BLADE_OFF]")) {
 			TEST_ORDER(3);
+			Log.p("en=").p(SFX::instance()->nEnabled()).p(" ds=").p(SFX::instance()->nDisabled()).eol();
+			TEST_EQUAL(startEn + 1, SFX::instance()->nEnabled());
+			TEST_EQUAL(startDs, SFX::instance()->nDisabled());
 			result = TEST_SUCCESS;
 		}		
 		return result;

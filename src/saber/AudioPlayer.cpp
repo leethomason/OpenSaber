@@ -30,6 +30,8 @@ AudioPlayer::AudioPlayer() {
     m_enabled = false;
     m_startPlayingTime = 0;
     m_volume = 1.0f;
+    m_nEnabled = 0;
+    m_nDisabled = 0;
 
     // Start disabled.
     digitalWrite(PIN_AMP_EN, LOW);
@@ -104,11 +106,13 @@ void AudioPlayer::setShutdown() {
         digitalWrite(PIN_AMP_EN, HIGH);
         delay(10);  // warm up the amp.
         m_enabled = true;
+        ++m_nEnabled;
     }
     else if (!shouldEnable && m_enabled) {
         Log.p(" AudioPlayer: amp shutdown.").eol();
         digitalWrite(PIN_AMP_EN, LOW);
         m_enabled = false;
+        ++m_nDisabled;
     }
 }
 

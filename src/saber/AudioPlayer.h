@@ -25,11 +25,17 @@ public:
 
     void process();
 
+    // for testing
+    uint16_t nEnabled() const { return m_nEnabled; }
+    uint16_t nDisabled() const { return m_nDisabled; }
+
 private:
     void setShutdown();
 
     bool     m_enabled;
-    uint32_t m_startPlayingTime;
+    uint16_t m_nEnabled;
+    uint16_t m_nDisabled;
+    uint32_t m_startPlayingTime;    
     float    m_volume;
 };
 

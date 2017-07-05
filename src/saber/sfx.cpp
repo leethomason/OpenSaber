@@ -488,3 +488,6 @@ const char* SFX::fontName(uint8_t font) const
     return m_dirName[font % m_numFonts].c_str();
 }
 
+
+uint16_t SFX::nEnabled() const { return m_player ? m_player->nEnabled() : 0; }
+uint16_t SFX::nDisabled() const { return m_player ? m_player->nDisabled() : 0; }

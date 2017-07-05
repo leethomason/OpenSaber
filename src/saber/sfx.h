@@ -90,6 +90,11 @@ public:
 
   void setEnabled(bool enabled) { m_enabled = enabled; }
 
+  // testing
+  uint16_t nEnabled() const;
+  uint16_t nDisabled() const;
+
+
 private:
   void filePath(CStr<25>* str, int id);
   void filePath(CStr<25>* str, const char* dir, const char* file);
