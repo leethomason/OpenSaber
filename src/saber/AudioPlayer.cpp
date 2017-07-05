@@ -64,10 +64,10 @@ void AudioPlayer::play(const char* filename)
         Log.p("Error playing:").p(filename).eol();
     }
 
-    setShutdown();
     //Serial.print("AudioPlayer::play: "); Serial.println(filename);// Serial.print(" len(ms)="); Serial.println(playWav.lengthMillis());
     // remember, about a 5ms warmup for header to be loaded and start playing.
     m_startPlayingTime = millis();
+    setShutdown();
 }
 
 void AudioPlayer::stop() {
@@ -80,10 +80,15 @@ void AudioPlayer::stop() {
 bool AudioPlayer::isPlaying() const {
     uint32_t currentTime = millis();
     uint32_t warmTime = m_startPlayingTime + 20u;  // PJRC uses a 5ms time. Can be generous; no reason to support sub-second samples.
-    if (m_startPlayingTime && currentTime > warmTime) {
-        return playWav.isPlaying();
-    }
-    return true;
+
+    if (!m_startPlayingTime)
+        return false;
+
+    // Special case: did we just start up? Because isPlaying() will be false during warm-up.
+    if (m_startPlayingTime && currentTime < warmTime) 
+        return true;
+
+    return playWav.isPlaying();
 }
 
 void AudioPlayer::process()

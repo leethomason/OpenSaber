@@ -44,9 +44,8 @@ public:
     void setPalette(int n);
 
     bool soundOn() const          {
-        return dataHeader.soundOn != 0;
+        return dataHeader.volume > 0;
     }
-    bool setSoundOn(bool on);
 
     uint8_t volume()              {
         return dataHeader.volume;
@@ -117,7 +116,7 @@ private:
         {}
 
         uint8_t currentPalette;
-        uint8_t soundOn;
+        uint8_t soundOn;            // NOT USED (only volume)
         uint8_t volume;
         float   motion;
         float   impact;

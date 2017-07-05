@@ -142,14 +142,6 @@ void SaberDB::setupInit()
     EEPROM.put(headerAddr(), dataHeader);
 }
 
-bool SaberDB::setSoundOn(bool on) {
-    dataHeader.soundOn = on;
-    Log.p("setSoundOn sound: ").p(dataHeader.soundOn).eol();
-
-    EEPROM.put(headerAddr(), dataHeader);
-    return true;
-}
-
 void SaberDB::setVolume(int v) {
     v = constrain(v, 0, 204);
     dataHeader.volume = v;
@@ -160,23 +152,19 @@ void SaberDB::setVolume4(int v)
 {
     switch (v) {
     case 0:
-        setSoundOn(false);
+        setVolume(0);
         break;
     case 1:
         setVolume(VOLUME_1);
-        setSoundOn(true);
         break;
     case 2:
         setVolume(VOLUME_2);
-        setSoundOn(true);
         break;
     case 3:
         setVolume(VOLUME_3);
-        setSoundOn(true);
         break;
     case 4:
         setVolume(VOLUME_4);
-        setSoundOn(true);
         break;
     }
 }

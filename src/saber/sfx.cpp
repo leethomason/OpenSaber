@@ -58,8 +58,6 @@ bool SFX::init()
     if (m_player)
         m_player->init();
     scanFonts();
-    if (m_player)
-        m_player->mute(true); // nothing is happening; connect shutdown pin.
     return true;
 }
 
@@ -315,7 +313,6 @@ bool SFX::playSound(int sound, int mode, bool playIfOff)
         else {
             path = m_filename[track].c_str();
         }
-        m_player->mute(m_muted);
         m_player->play(path.c_str());
         m_currentSound = sound;
         m_lastSFX = sound;
@@ -329,7 +326,6 @@ bool SFX::playSound(const char* sfx)
     if (!m_enabled) {
         return false;
     }
-    m_player->mute(m_muted);
     m_player->play(sfx);
     return true;
 }

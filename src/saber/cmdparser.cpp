@@ -155,14 +155,6 @@ bool CMDParser::processCMD()
         printLead(action.c_str());
         Serial.println(database->soundFont());
     }
-    else if (action == AUDIO) {
-        if (isSet) {
-            int onOff = atoi(value.c_str());
-            database->setSoundOn(onOff ? true : false);
-        }
-        printLead(action.c_str());
-        Serial.println(database->soundOn());
-    }
     else if (action == VOL) {
         if (isSet) {
             int volume = constrain(atoi(value.c_str()), 0, 204);
