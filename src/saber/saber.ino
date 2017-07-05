@@ -142,9 +142,14 @@ void setupSD(int logCount)
 void setup() {
     Serial.begin(19200);  // still need to turn it on in case a command line is connected.
     #if SERIAL_DEBUG == 1
+    {
+        int nTries = 0;
         while (!Serial) {
-            delay(100);
+            delay(200);
+            ++nTries;
+            ledA.set((nTries & 1) ? true : false);
         }
+    }
     #endif
     //TCNT1 = 0x7FFF; // set blue & green channels out of phase
     // Database is the "source of truth".

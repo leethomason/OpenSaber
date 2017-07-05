@@ -28,7 +28,7 @@ SOFTWARE.
 // --- Configuration ---
 // Note: Serial connection should be set to 19200 baud with a newline after commands.
 
-#define SERIAL_DEBUG 1
+#define SERIAL_DEBUG 0
 
 #define SABER_MODEL_TEST			0
 #define SABER_MODEL_GECKO			1	// PCB, Teensy 3, external amp and accel
@@ -40,7 +40,7 @@ SOFTWARE.
 #define SABER_MODEL_TANO 			7
 #define SABER_MODEL_SISTER 			8
 
-#define SABER_MODEL 				SABER_MODEL_TANO
+#define SABER_MODEL 				SABER_MODEL_SHOCK
 
 #define LED_TOPOLOGY_RESISTOR		1
 #define LED_TOPOLOGY_DRIVER			2
@@ -140,8 +140,9 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_CRYSTAL			80
 	#define SABER_CRYSTAL_LOW		24
 	#define SABER_DISPLAY
-	#define MEDITATION_MODE			1
+	//#define MEDITATION_MODE			1
 	#define SABER_LOWPASS_FILTER	1
+	#define SABER_AUDIO_EXTERNAL_REF
 
 	// FIXME TUNE ALL
 	static const int32_t UVOLT_MULT = 6680;

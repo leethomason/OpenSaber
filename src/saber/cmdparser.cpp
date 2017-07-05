@@ -91,7 +91,6 @@ bool CMDParser::processCMD()
     static const char PAL[]     = "pal";
     static const char FONT[]    = "font";
     static const char FONTS[]   = "fonts";
-    static const char AUDIO[]   = "aud";
     static const char VOL[]     = "vol";
     static const char VOLTS[]   = "vbat";
     static const char UTIL[]    = "util";
@@ -292,11 +291,10 @@ bool CMDParser::processCMD()
         printLead(FONT);
         Serial.println(database->soundFont());
         delay(DELAY);
-        printLead(AUDIO);
-        Serial.println(database->soundOn());
-        delay(DELAY);
         printLead(VOL);
-        Serial.println(database->volume());
+        Serial.print(database->volume());
+        Serial.print(" audioOn=");
+        Serial.println(database->soundOn());
         delay(DELAY);
         printLead(MOTION);
         Serial.println(database->motion());
