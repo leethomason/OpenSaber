@@ -57,6 +57,7 @@ private:
     CStr<18> token;
     CStr<6>  action;
     CStr<20> value;
+    CStr<20> value2;
 };
 
 

@@ -37,6 +37,8 @@ void CMDParser::tokenize()
 {
     action.clear();
     value.clear();
+    value2.clear();
+
     if (token.empty()) return;
 
     int i = 0;
@@ -45,8 +47,14 @@ void CMDParser::tokenize()
     }
     if (token[i] == ' ') {
         i++;
-        for ( ; token[i]; i++) {
+        for ( ; token[i] && token[i] != ' '; i++) {
             value.append(token[i]);
+        }
+    }
+    if (token[i] == ' ') {
+        i++;
+        for ( ; token[i] && token[i] != ' '; i++) {
+            value2.append(token[i]);
         }
     }
 }
@@ -105,6 +113,7 @@ bool CMDParser::processCMD()
     static const char ACCEL[]   = "accel";
     static const char CRYSTAL[] = "crys";
     static const char PLAY[]    = "play";
+    static const char UPLOAD[]  = "up";
 
     static const int DELAY = 20;  // don't saturate the serial line. Too much for SoftwareSerial.
 
@@ -275,6 +284,14 @@ bool CMDParser::processCMD()
             }
         }
         tester->runTests(count, longTest);
+    }
+    else if (action == UPLOAD) {
+        // up ui/foo.wav 1182
+        uint32_t size = atoi(value2.c_str());
+        Serial.print("Upload path='");
+        Serial.print(value.c_str());
+        Serial.print("' size=");
+        Serial.println(size);
     }
     else if (action == STATUS) {
         static const char* space = "-----------";
