@@ -29,6 +29,8 @@
 #include "Tester.h"
 #include "saberUtil.h"
 
+File streamFile;
+
 CMDParser::CMDParser(SaberDB* _db) {
     database = _db;
 }
@@ -90,6 +92,49 @@ void CMDParser::printLead(const char* str) {
     Serial.print(PREFIX);
     Serial.print(str);
     Serial.print(' ');
+}
+
+bool CMDParser::push(int c)
+{
+    if (m_streamBytes) {
+        --m_streamBytes;
+        streamFile.write(c);
+        if (m_streamBytes == 0) {
+            Serial.print("Streaming complete. Size=");
+            Serial.println(streamFile.size());
+            streamFile.close();
+        }
+        return false;
+    }
+    else {
+        bool processed = false;
+        if (c == '\n') {
+            #if 0
+            Serial.print("event ");
+            Serial.println(cmdParser.getBuffer());
+            #endif
+            processed = processCMD();
+        }
+        else {
+            token.append(c);
+        }
+        return processed;
+    }
+}
+
+void CMDParser::upload(const char* path, uint32_t size)
+{
+    Serial.print("Upload. path='");
+    Serial.print(path);
+    Serial.println("'");
+
+    streamFile = SD.open(path, FILE_WRITE);
+    if (!streamFile) {
+        Serial.println("Path could not be opened.");
+        return;
+    }
+    Serial.println("Upload Ready.");
+    m_streamBytes = size;
 }
 
 bool CMDParser::processCMD() 
@@ -292,6 +337,7 @@ bool CMDParser::processCMD()
         Serial.print(value.c_str());
         Serial.print("' size=");
         Serial.println(size);
+        upload(value.c_str(), size);
     }
     else if (action == STATUS) {
         static const char* space = "-----------";

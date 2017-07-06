@@ -503,23 +503,11 @@ bool buttonsReleased()
 }
 
 void serialEvent() {
-    bool processed = false;
-
     while (Serial.available()) {
         int c = Serial.read();
-        if (c == '\n') {
-            #if 0
-            Serial.print("event ");
-            Serial.println(cmdParser.getBuffer());
-            #endif
-            processed = cmdParser.processCMD();
+        if (cmdParser.push(c)) {
+            syncToDB();
         }
-        else {
-            cmdParser.push(c);
-        }
-    }
-    if (processed) {
-        syncToDB();
     }
 }
 
