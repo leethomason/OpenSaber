@@ -77,14 +77,7 @@ SFX sfx(&audioPlayer);
 
 BladeState  bladeState;
 
-#ifdef SABER_SISTERS
-ButtonCB    buttonA(PIN_SWITCH_B, SABER_BUTTON);
-    #ifdef SABER_TWO_BUTTON
-    #error Button switch only set up for one button.
-    #endif
-#else
 ButtonCB    buttonA(PIN_SWITCH_A, SABER_BUTTON);
-#endif
 LEDManager  ledA(PIN_LED_A, false);
 LEDManager  ledB(PIN_LED_B, false);
 
@@ -160,14 +153,15 @@ void setupSD(int logCount)
 void setup() {
     Serial.begin(19200);  // still need to turn it on in case a command line is connected.
     #if SERIAL_DEBUG == 1
-        int tries = 0;
-        Log.attachSerial(&Serial);
+    {
+        int nTries = 0;
         while (!Serial) {
             delay(200);
-            ++tries;
-            ledB.set((tries & 1) ? true : false);
+            ++nTries;
+            ledA.set((nTries & 1) ? true : false);
         }
-        ledB.set(false);
+        Log.attachSerial(&Serial);
+    }
     #endif
     //TCNT1 = 0x7FFF; // set blue & green channels out of phase
     // Database is the "source of truth".
@@ -237,7 +231,7 @@ void setup() {
     #endif
 
     #ifdef SABER_SISTERS 
-        pinMode(PIN_SWITCH_A, INPUT);
+        pinMode(PIN_SWITCH_B, INPUT);
         int rolePin = digitalRead(PIN_SWITCH_A);
         if(comRF24.begin(rolePin == HIGH ? 1 : 0)) {
             Log.p("RF24 initialized. Role=").p(comRF24.role()).eol();
@@ -287,7 +281,6 @@ void syncToDB()
 {
     #ifdef SABER_SOUND_ON
         sfx.setFont(saberDB.soundFont());
-        sfx.mute(!saberDB.soundOn());
         sfx.setVolume204(saberDB.volume());
     #endif
 

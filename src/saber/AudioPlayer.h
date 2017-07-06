@@ -3,6 +3,11 @@
 
 #include <stdint.h>
 
+
+/*
+   Lower level audio classe.
+   Called from SFX, not directly.
+*/
 class AudioPlayer
 {
 public:
@@ -15,22 +20,22 @@ public:
     bool isPlaying() const;
     uint32_t lengthMillis() const;  // only valid if header read; else 0.
 
-    void mute(bool m);
-    bool isMuted() const {
-        return m_muted;
-    }
-
     void setVolume(float v);
-    float volume() const {
-        return m_volume;
-    }
+    float volume() const { return m_volume; }
+
+    void process();
+
+    // for testing
+    uint16_t nEnabled() const { return m_nEnabled; }
+    uint16_t nDisabled() const { return m_nDisabled; }
 
 private:
     void setShutdown();
 
-    bool     m_muted;
-    bool     m_shutdown;
-    uint32_t m_startPlayingTime;
+    bool     m_enabled;
+    uint16_t m_nEnabled;
+    uint16_t m_nDisabled;
+    uint32_t m_startPlayingTime;    
     float    m_volume;
 };
 

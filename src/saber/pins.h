@@ -140,8 +140,9 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_CRYSTAL			80
 	#define SABER_CRYSTAL_LOW		24
 	#define SABER_DISPLAY
-	#define MEDITATION_MODE			1
+	//#define MEDITATION_MODE			1
 	#define SABER_LOWPASS_FILTER	1
+	#define SABER_AUDIO_EXTERNAL_REF
 
 	// FIXME TUNE ALL
 	static const int32_t UVOLT_MULT = 6680;
@@ -447,6 +448,21 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_SWITCH_B	  21
 	#define PIN_LED_B		  22
 	// 23
+
+	// "Sister" switches A/B.
+	// Primarily so that the main button can be PWM.
+	#if (SABER_MODEL == SABER_MODEL_SISTER)
+		#undef PIN_LED_A
+		#undef PIN_LED_B
+		#undef PIN_SWITCH_A
+		#undef PIN_SWITCH_B
+		#define PIN_LED_B         16
+		#define PIN_SWITCH_B      17
+		#define PIN_SWITCH_A	  21
+		#define PIN_LED_A		  22
+	#endif
+
+
 #else
 	#error Pins not defined.
 #endif

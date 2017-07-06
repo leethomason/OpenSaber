@@ -27,10 +27,11 @@ AudioConnection     patchCord1(playWav, mixer);
 AudioConnection     patchCord2(mixer, 0, dac, 0);
 
 AudioPlayer::AudioPlayer() {
-    m_muted = false;
-    m_shutdown = false;
+    m_enabled = false;
     m_startPlayingTime = 0;
     m_volume = 1.0f;
+    m_nEnabled = 0;
+    m_nDisabled = 0;
 
     // Start disabled.
     digitalWrite(PIN_AMP_EN, LOW);
@@ -48,7 +49,9 @@ void AudioPlayer::init() {
     AudioMemory(8);
     // This is much louder, but started causing distortion.
     // Bug in the system? Better value to use?
-    //dac.analogReference(EXTERNAL); // much louder!
+    #ifdef SABER_AUDIO_EXTERNAL_REF
+    dac.analogReference(EXTERNAL); // much louder!
+    #endif
     delay(50);  //stabalize
 }
 
@@ -68,41 +71,57 @@ void AudioPlayer::play(const char* filename)
     //Serial.print("AudioPlayer::play: "); Serial.println(filename);// Serial.print(" len(ms)="); Serial.println(playWav.lengthMillis());
     // remember, about a 5ms warmup for header to be loaded and start playing.
     m_startPlayingTime = millis();
+    setShutdown();
 }
 
 void AudioPlayer::stop() {
     playWav.stop();
     // Cool the data xfer
     delay(10);
+    setShutdown();
 }
 
 bool AudioPlayer::isPlaying() const {
     uint32_t currentTime = millis();
     uint32_t warmTime = m_startPlayingTime + 20u;  // PJRC uses a 5ms time. Can be generous; no reason to support sub-second samples.
-    if (m_startPlayingTime && currentTime > warmTime) {
-        return playWav.isPlaying();
-    }
-    return true;
+
+    if (!m_startPlayingTime)
+        return false;
+
+    // Special case: did we just start up? Because isPlaying() will be false during warm-up.
+    if (m_startPlayingTime && currentTime < warmTime) 
+        return true;
+
+    return playWav.isPlaying();
 }
 
-void AudioPlayer::mute(bool m) {
-    m_muted = m;
+void AudioPlayer::process()
+{
+    setShutdown();
+}
 
-    if (m_muted && !m_shutdown) {
-        Log.p("AudioPlayer: amp shutdown.").eol();
-        digitalWrite(PIN_AMP_EN, LOW);
-    }
-    else if (!m_muted && m_shutdown) {
-        Log.p(" AudioPlayer: amp enable.").eol();
+void AudioPlayer::setShutdown() {
+    bool shouldEnable = (m_volume > 0) && isPlaying();
+
+    if (shouldEnable && !m_enabled) {
+        Log.p("AudioPlayer: amp enabled.").eol();
         digitalWrite(PIN_AMP_EN, HIGH);
         delay(10);  // warm up the amp.
+        m_enabled = true;
+        ++m_nEnabled;
     }
-    m_shutdown = m_muted;
+    else if (!shouldEnable && m_enabled) {
+        Log.p(" AudioPlayer: amp shutdown.").eol();
+        digitalWrite(PIN_AMP_EN, LOW);
+        m_enabled = false;
+        ++m_nDisabled;
+    }
 }
 
 void AudioPlayer::setVolume(float v) {
     m_volume = v;
     mixer.gain(0, m_volume);
+    setShutdown();
 }
 
 

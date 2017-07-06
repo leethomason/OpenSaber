@@ -40,7 +40,6 @@ SFX::SFX(AudioPlayer* audioPlayer)
 
     m_player = audioPlayer;
     m_bladeOn = false;
-    m_muted = false;
     m_numFonts = 0;
     m_numFilenames = 0;
     m_currentSound = SFX_NONE;
@@ -59,8 +58,6 @@ bool SFX::init()
     if (m_player)
         m_player->init();
     scanFonts();
-    if (m_player)
-        m_player->mute(true); // nothing is happening; connect shutdown pin.
     return true;
 }
 
@@ -273,7 +270,6 @@ bool SFX::playSound(int sound, int mode, bool playIfOff)
     Log.p("SFX playSound() sound: ").p(sound).eol();
     Log.p("SFX m_bladeOn: ").p(m_bladeOn).eol();
     Log.p("SFX m_currentSound: ").p(m_currentSound).eol();
-    Log.p("m_muted: ").p(m_muted).eol();
 #endif
 #endif
 
@@ -317,7 +313,6 @@ bool SFX::playSound(int sound, int mode, bool playIfOff)
         else {
             path = m_filename[track].c_str();
         }
-        m_player->mute(m_muted);
         m_player->play(path.c_str());
         m_currentSound = sound;
         m_lastSFX = sound;
@@ -331,7 +326,6 @@ bool SFX::playSound(const char* sfx)
     if (!m_enabled) {
         return false;
     }
-    m_player->mute(m_muted);
     m_player->play(sfx);
     return true;
 }
@@ -354,11 +348,7 @@ void SFX::process()
     if (m_bladeOn && !m_player->isPlaying()) {
         playSound(SFX_IDLE, SFX_OVERRIDE);
     }
-    if (!m_bladeOn && !m_player->isPlaying()) {
-#ifdef SABER_SOUND_SHUTDOWN
-        m_player->mute(true);
-#endif
-    }
+    m_player->process();
 }
 
 uint32_t SFX::readU32(File& file, int n) {
@@ -427,28 +417,6 @@ void SFX::readIgniteRetract()
     readHeader(path.c_str(), &nChannels, &samples, &m_retractTime, true);
 }
 
-
-void SFX::mute(bool muted)
-{
-    // this->m_muted is a little different from m_player->mute()
-    // m_player->mute() controls the shutdown pin. We shutdown the
-    //   amp for sound quality reasons and power draw when not in
-    //   use.
-    // this->m_muted is more the "traditional" use of mute. No
-    //   sound is being output, but the audio system otherwise
-    //   runs and responds normally.
-    Log.p("SFX::mute: ").p(muted ? "true" : "false").eol();
-
-    m_muted = muted;
-    if (m_player && m_muted) {
-        m_player->mute(m_muted);
-    }
-}
-
-bool SFX::isMuted() const
-{
-    return m_muted;
-}
 
 void SFX::setVolume204(int vol)
 {
@@ -520,3 +488,6 @@ const char* SFX::fontName(uint8_t font) const
     return m_dirName[font % m_numFonts].c_str();
 }
 
+
+uint16_t SFX::nEnabled() const { return m_player ? m_player->nEnabled() : 0; }
+uint16_t SFX::nDisabled() const { return m_player ? m_player->nDisabled() : 0; }

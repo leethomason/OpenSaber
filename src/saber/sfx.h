@@ -79,9 +79,6 @@ public:
   // return 0 if the file header isn't read yet.
   const uint32_t lengthMillis() const;
 
-  void mute(bool muted);
-  bool isMuted() const;
-  
   void setVolume204(int vol);
   uint8_t getVolume204() const;
 
@@ -92,6 +89,11 @@ public:
   const char* currentFontName() const;
 
   void setEnabled(bool enabled) { m_enabled = enabled; }
+
+  // testing
+  uint16_t nEnabled() const;
+  uint16_t nDisabled() const;
+
 
 private:
   void filePath(CStr<25>* str, int id);
@@ -115,7 +117,6 @@ private:
 
   AudioPlayer* m_player;
   bool         m_bladeOn;
-  bool         m_muted;
   uint8_t      m_numFonts;
   int8_t       m_numFilenames;
   int8_t       m_currentSound;
