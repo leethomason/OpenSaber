@@ -316,6 +316,23 @@ bool SFX::playSound(int sound, int mode, bool playIfOff)
     return false;
 }
 
+bool SFX::playUISound(int n)
+{
+    CStr<10> str;
+    switch(n) {
+        case 0: str = "zero"; break;
+        case 1: str = "one"; break;
+        case 2: str = "two"; break;
+        case 3: str = "three"; break;
+        case 4: str = "four"; break;
+        case 5: str = "five"; break;
+        case 6: str = "six"; break;
+        case 7: str = "seven"; break;
+        default: ASSERT(false); break;
+    }
+    return playUISound(str.c_str());
+}
+
 bool SFX::playUISound(const char* name)
 {
     if (!m_player) return false;
@@ -326,6 +343,8 @@ bool SFX::playUISound(const char* name)
     m_currentSound = SFX_UI;
     CStr<24> path("ui/");
     path.append(name);
+    path.append(".wav");
+
     m_player->setVolume(0.5);
     return m_player->play(path.c_str());
 }

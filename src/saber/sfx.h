@@ -67,6 +67,7 @@ public:
   bool playSound(int sfx, int mode, bool playIfOff=false);
   bool playSound(const char* sfx);
   bool playUISound(const char* name);
+  bool playUISound(int n);
   void stopSound();
 
   // The class of SFX (MOTION, IMPACT, etc) last successfully played.

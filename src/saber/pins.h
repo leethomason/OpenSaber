@@ -273,6 +273,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
 	#define SABER_SISTERS
+	#define SABER_AUDIO_UI
 
 	#undef SABER_BUTTON
 	#define SABER_BUTTON Button::INTERNAL_PULLUP

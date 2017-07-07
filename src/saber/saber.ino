@@ -316,6 +316,9 @@ bool setVolumeFromHoldCount(int count)
 {
     saberDB.setVolume4(count - 1);
     syncToDB();
+    #ifdef SABER_AUDIO_UI
+    SFX::instance()->playUISound(saberDB.volume4());
+    #endif
     return count >= 0 && count <= 5;
 }
 
@@ -434,6 +437,9 @@ bool setPaletteFromHoldCount(int count)
 {
     saberDB.setPalette(count - 1);
     syncToDB();
+    #ifdef SABER_AUDIO_UI
+    SFX::instance()->playUISound(saberDB.paletteIndex());
+    #endif
     return count <= SaberDB::NUM_PALETTES;
 }
 
@@ -459,6 +465,7 @@ void buttonAHoldHandler(const Button& button)
     if (bladeState.state() == BLADE_OFF) {
         bool buttonOn = false;
         int cycle = button.cycle(&buttonOn);
+        Log.p("button nHolds=").p(button.nHolds()).p(" cycle=").p(cycle).p(" on=").p(buttonOn).eol();
 
         if (uiMode.mode() == UIMode::NORMAL) {
             if (button.nHolds() == 1) {
