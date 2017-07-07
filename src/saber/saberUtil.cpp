@@ -110,13 +110,7 @@ void UIModeUtil::nextMode()
     switch(m_mode) {
         case UIMode::NORMAL:        m_mode = UIMode::PALETTE;       Log.p("mode: palette").eol();    break;
         case UIMode::PALETTE:       m_mode = UIMode::VOLUME;        Log.p("mode: volume").eol();     break;
-
-#if (MEDITATION_MODE)
-        case UIMode::VOLUME:        m_mode = UIMode::MEDITATION;    Log.p("mode: meditation").eol(); break;
-        case UIMode::MEDITATION:    m_mode = UIMode::NORMAL;        Log.p("mode: normal").eol();     break;
-#else
         case UIMode::VOLUME:        m_mode = UIMode::NORMAL;        Log.p("mode: normal").eol();     break;
-#endif
         default:
             ASSERT(false);
             m_mode = UIMode::NORMAL;

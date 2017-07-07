@@ -67,8 +67,6 @@ float    maxGForce2     = 0.0f;
 uint32_t lastMotionTime = 0;    
 uint32_t lastLoopTime   = 0;
 
-Timer2 meditationTimer(1000, false, false);
-
 #ifdef SABER_SOUND_ON
 // First things first: disable that audio to avoid clicking.
 AudioPlayer audioPlayer;
@@ -313,15 +311,6 @@ void buttonAReleaseHandler(const Button& b)
             }
         }
     #endif
-
-#ifdef MEDITATION_MODE
-    if (uiMode.mode() == UIMode::MEDITATION && meditationTimer.enabled()) {
-        Log.p("med start").eol();
-        #ifdef SABER_SOUND_ON
-        sfx.playSound(SFX_SPIN, SFX_OVERRIDE, true);
-        #endif
-    }
-#endif
 }
 
 bool setVolumeFromHoldCount(int count)
@@ -449,20 +438,6 @@ bool setPaletteFromHoldCount(int count)
     return count <= SaberDB::NUM_PALETTES;
 }
 
-bool setMeditationFromHoldCount(int count)
-{
-    switch(count) {
-        case 1: meditationTimer.setPeriod(1000 * 60 * 1);  break;
-        case 2: meditationTimer.setPeriod(1000 * 60 * 2);  break;
-        case 3: meditationTimer.setPeriod(1000 * 60 * 5);  break;
-        case 4: meditationTimer.setPeriod(1000 * 60 * 10); break;
-    }
-    meditationTimer.setEnabled(true);
-    syncToDB();
-    return count >= 1 && count <= 4;
-}
-
-
 // One button case.
 void buttonAClickHandler(const Button&)
 {
@@ -476,15 +451,12 @@ void buttonAClickHandler(const Button&)
             sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
         #endif
     }
-    meditationTimer.setEnabled(false);
 }
 
 void buttonAHoldHandler(const Button& button)
 {
     Log.p("buttonAHoldHandler nHolds=").p(button.nHolds()).eol();
     
-    meditationTimer.setEnabled(false);
-
     if (bladeState.state() == BLADE_OFF) {
         bool buttonOn = false;
         int cycle = button.cycle(&buttonOn);
@@ -503,10 +475,6 @@ void buttonAHoldHandler(const Button& button)
             }
             else if (uiMode.mode() == UIMode::VOLUME) {
                 if (!setVolumeFromHoldCount(cycle))
-                    buttonOn = false;
-            }
-            else if (uiMode.mode() == UIMode::MEDITATION) {
-                if (!setMeditationFromHoldCount(cycle))
                     buttonOn = false;
             }
         }
@@ -562,14 +530,6 @@ void loop() {
         }
         else if (comStr == "retract") {
             retractBlade();
-        }
-    }
-
-    if (meditationTimer.enabled() && buttonsReleased()) {
-        if (meditationTimer.tick(delta)) {
-            #ifdef SABER_SOUND_ON
-            sfx.playSound(SFX_SPIN, SFX_OVERRIDE, true);            
-            #endif
         }
     }
 
@@ -657,7 +617,6 @@ void loop() {
 
     if (displayTimer.tick(delta)) {
         uiRenderData.color = Blade::convertRawToPerceived(saberDB.bladeColor());
-        uiRenderData.meditationTimeRemain = meditationTimer.remaining();
 
         #ifdef SABER_DISPLAY
             sketcher.Draw(&renderer, displayTimer.period(), uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
@@ -682,7 +641,7 @@ void loop() {
         else {
             // Use the blade color or the breathing color.
             const RGB bladeColor = saberDB.bladeColor();
-            if (bladeState.state() == BLADE_OFF && (uiMode.mode() == UIMode::NORMAL || uiMode.mode() == UIMode::MEDITATION)) {
+            if (bladeState.state() == BLADE_OFF && (uiMode.mode() == UIMode::NORMAL)) {
                 calcCrystalColor(msec, SABER_CRYSTAL_LOW, SABER_CRYSTAL, bladeColor, &leds[0]);
                 //OSASSERT(leds[0].get());
                 //OSASSERT(dotstar.brightness() == 256);

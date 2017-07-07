@@ -140,7 +140,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_CRYSTAL			80
 	#define SABER_CRYSTAL_LOW		24
 	#define SABER_DISPLAY
-	//#define MEDITATION_MODE			1
 	#define SABER_LOWPASS_FILTER	1
 	#define SABER_AUDIO_EXTERNAL_REF
 
