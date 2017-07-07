@@ -109,10 +109,6 @@ bool CMDParser::push(int c)
     else {
         bool processed = false;
         if (c == '\n') {
-            #if 0
-            Serial.print("event ");
-            Serial.println(cmdParser.getBuffer());
-            #endif
             processed = processCMD();
         }
         else {
