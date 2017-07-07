@@ -42,6 +42,7 @@ enum {            //  Max
   NUM_SFX_TYPES,
   MAX_SFX_FILES = 64,
   MAX_FONTS = 10,
+  SFX_UI   = 254,
   SFX_NONE = 255
 };
 
@@ -65,6 +66,7 @@ public:
 
   bool playSound(int sfx, int mode, bool playIfOff=false);
   bool playSound(const char* sfx);
+  bool playUISound(const char* name);
   void stopSound();
 
   // The class of SFX (MOTION, IMPACT, etc) last successfully played.
@@ -88,7 +90,6 @@ public:
   int numFonts() const { return m_numFonts; }
   const char* currentFontName() const;
 
-  void setEnabled(bool enabled) { m_enabled = enabled; }
   bool readHeader(const char* filename, uint8_t* nChannels, uint32_t* nSamplesPerSec, uint32_t* lengthMillis, bool logToConsole);
 
   // testing
@@ -124,7 +125,7 @@ private:
   uint8_t      m_currentFont;
   uint32_t     m_igniteTime;
   uint32_t     m_retractTime;
-  bool         m_enabled;
+  float        m_savedVolume = 0.5f;
 
   SFXLocation  m_location[NUM_SFX_TYPES];
   CStr<13>     m_filename[MAX_SFX_FILES];

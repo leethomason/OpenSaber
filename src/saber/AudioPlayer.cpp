@@ -55,7 +55,7 @@ void AudioPlayer::init() {
     delay(50);  //stabalize
 }
 
-void AudioPlayer::play(const char* filename)
+bool AudioPlayer::play(const char* filename)
 {
     bool okay = true;
 #if (SABER_SOUND_ON == SABER_SOUND_SD)
@@ -72,6 +72,7 @@ void AudioPlayer::play(const char* filename)
     // remember, about a 5ms warmup for header to be loaded and start playing.
     m_startPlayingTime = millis();
     setShutdown();
+    return okay;
 }
 
 void AudioPlayer::stop() {

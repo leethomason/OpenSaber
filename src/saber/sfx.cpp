@@ -47,7 +47,6 @@ SFX::SFX(AudioPlayer* audioPlayer)
     m_igniteTime = 1000;
     m_retractTime = 1000;
     m_lastSFX = SFX_NONE;
-    m_enabled = true;
 
     memset(m_location, 255, sizeof(SFXLocation)*NUM_SFX_TYPES);
 }
@@ -255,10 +254,6 @@ bool SFX::playSound(int sound, int mode, bool playIfOff)
     // Flush out tests before switching sounds:
     Tester::instance()->process();
 
-    if (!m_enabled) {
-        return false;
-    }
-
     ASSERT(sound >= 0);
     ASSERT(sound < NUM_SFX_TYPES);
     ASSERT(m_player);
@@ -321,9 +316,23 @@ bool SFX::playSound(int sound, int mode, bool playIfOff)
     return false;
 }
 
+bool SFX::playUISound(const char* name)
+{
+    if (!m_player) return false;
+
+    // Overrides the volume so the UI is at
+    // a consistent volume. Volume will be restored
+    // when the sound playing is done.
+    m_currentSound = SFX_UI;
+    CStr<24> path("ui/");
+    path.append(name);
+    m_player->setVolume(0.5);
+    return m_player->play(path.c_str());
+}
+
 bool SFX::playSound(const char* sfx)
 {
-    if (!m_enabled) {
+    if (!m_player) {
         return false;
     }
     m_player->play(sfx);
@@ -332,9 +341,6 @@ bool SFX::playSound(const char* sfx)
 
 void SFX::stopSound()
 {
-    if (!m_enabled) {
-        return;
-    }
     m_player->stop();
     m_currentSound = SFX_NONE;
 }
@@ -342,11 +348,16 @@ void SFX::stopSound()
 void SFX::process()
 {
     if (!m_player) return;
-    if (!m_enabled) return;
 
-    // Play the idle sound if the blade is on.
-    if (m_bladeOn && !m_player->isPlaying()) {
-        playSound(SFX_IDLE, SFX_OVERRIDE);
+    if (!m_player->isPlaying()) {
+        if (m_currentSound == SFX_UI) {
+            m_player->setVolume(m_savedVolume);
+            m_currentSound = SFX_NONE;
+        }
+        // Play the idle sound if the blade is on.
+        if (m_bladeOn) {
+            playSound(SFX_IDLE, SFX_OVERRIDE);
+        }
     }
     m_player->process();
 }
@@ -431,6 +442,7 @@ void SFX::setVolume204(int vol)
         if (m_player)
             m_player->setVolume(v);
     }
+    m_savedVolume = m_player->volume();
 }
 
 

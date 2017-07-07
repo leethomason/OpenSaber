@@ -203,7 +203,6 @@ void setup() {
             sfx.init();
             Log.p("sfx initialized.").eol();
         }
-        sfx.setEnabled(soundOk);
     #endif
 
     blade.setVoltage(voltmeter.averagePower());
