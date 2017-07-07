@@ -124,12 +124,14 @@ void CMDParser::upload(const char* path, uint32_t size)
     Serial.print(path);
     Serial.println("'");
 
+    SD.remove(path);
     streamFile = SD.open(path, FILE_WRITE);
     if (!streamFile) {
         Serial.println("Path could not be opened.");
         return;
     }
-    Serial.println("Upload Ready.");
+    Serial.print("Upload Ready. size=");
+    Serial.println(size);
     m_streamBytes = size;
 }
 
@@ -306,8 +308,12 @@ bool CMDParser::processCMD()
         Serial.println("");
     }
     else if (action == PLAY) {
-        printLead(action.c_str());
+        printLead(action.c_str());        
         SFX* sfx = SFX::instance();
+        uint8_t nChannels = 0;
+        uint32_t samples = 0;
+        uint32_t length = 0;
+        sfx->readHeader(value.c_str(), &nChannels, &samples, &length, true);
         sfx->playSound(value.c_str());
     }
     else if (action == TEST) {
@@ -331,7 +337,9 @@ bool CMDParser::processCMD()
         uint32_t size = atoi(value2.c_str());
         Serial.print("Upload path='");
         Serial.print(value.c_str());
-        Serial.print("' size=");
+        Serial.print("' value2=");
+        Serial.print(value2.c_str());
+        Serial.print(" size=");
         Serial.println(size);
         upload(value.c_str(), size);
     }

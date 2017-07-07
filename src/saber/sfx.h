@@ -89,6 +89,7 @@ public:
   const char* currentFontName() const;
 
   void setEnabled(bool enabled) { m_enabled = enabled; }
+  bool readHeader(const char* filename, uint8_t* nChannels, uint32_t* nSamplesPerSec, uint32_t* lengthMillis, bool logToConsole);
 
   // testing
   uint16_t nEnabled() const;
@@ -103,7 +104,6 @@ private:
   void addFile(const char* filename, int index);
   int calcSlot(const char* filename); // -1 if not a supported file
   void readIgniteRetract();
-  bool readHeader(const char* filename, uint8_t* nChannels, uint32_t* nSamplesPerSec, uint32_t* lengthMillis, bool logToConsole);
   uint32_t readU32(File& file, int n);
   uint32_t readU32(SerialFlashFile& file, int n);
 
