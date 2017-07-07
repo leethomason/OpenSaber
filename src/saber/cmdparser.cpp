@@ -29,6 +29,8 @@
 #include "Tester.h"
 #include "saberUtil.h"
 
+File streamFile;
+
 CMDParser::CMDParser(SaberDB* _db) {
     database = _db;
 }
@@ -37,6 +39,8 @@ void CMDParser::tokenize()
 {
     action.clear();
     value.clear();
+    value2.clear();
+
     if (token.empty()) return;
 
     int i = 0;
@@ -45,8 +49,14 @@ void CMDParser::tokenize()
     }
     if (token[i] == ' ') {
         i++;
-        for ( ; token[i]; i++) {
+        for ( ; token[i] && token[i] != ' '; i++) {
             value.append(token[i]);
+        }
+    }
+    if (token[i] == ' ') {
+        i++;
+        for ( ; token[i] && token[i] != ' '; i++) {
+            value2.append(token[i]);
         }
     }
 }
@@ -84,6 +94,45 @@ void CMDParser::printLead(const char* str) {
     Serial.print(' ');
 }
 
+bool CMDParser::push(int c)
+{
+    if (m_streamBytes) {
+        --m_streamBytes;
+        streamFile.write(c);
+        if (m_streamBytes == 0) {
+            Serial.print("Streaming complete. Size=");
+            Serial.println(streamFile.size());
+            streamFile.close();
+        }
+        return false;
+    }
+    else {
+        bool processed = false;
+        if (c == '\n') {
+            processed = processCMD();
+        }
+        else {
+            token.append(c);
+        }
+        return processed;
+    }
+}
+
+void CMDParser::upload(const char* path, uint32_t size)
+{
+    Serial.print("Upload. path='");
+    Serial.print(path);
+    Serial.println("'");
+
+    streamFile = SD.open(path, FILE_WRITE);
+    if (!streamFile) {
+        Serial.println("Path could not be opened.");
+        return;
+    }
+    Serial.println("Upload Ready.");
+    m_streamBytes = size;
+}
+
 bool CMDParser::processCMD() 
 {
     static const char BC[]      = "bc";
@@ -105,6 +154,7 @@ bool CMDParser::processCMD()
     static const char ACCEL[]   = "accel";
     static const char CRYSTAL[] = "crys";
     static const char PLAY[]    = "play";
+    static const char UPLOAD[]  = "up";
 
     static const int DELAY = 20;  // don't saturate the serial line. Too much for SoftwareSerial.
 
@@ -275,6 +325,15 @@ bool CMDParser::processCMD()
             }
         }
         tester->runTests(count, longTest);
+    }
+    else if (action == UPLOAD) {
+        // up ui/foo.wav 1182
+        uint32_t size = atoi(value2.c_str());
+        Serial.print("Upload path='");
+        Serial.print(value.c_str());
+        Serial.print("' size=");
+        Serial.println(size);
+        upload(value.c_str(), size);
     }
     else if (action == STATUS) {
         static const char* space = "-----------";
