@@ -105,14 +105,14 @@ void AudioPlayer::setShutdown() {
     bool shouldEnable = (m_volume > 0) && isPlaying();
 
     if (shouldEnable && !m_enabled) {
-        Log.p("AudioPlayer: amp enabled.").eol();
+        //Log.p("AudioPlayer: amp enabled.").eol();
         digitalWrite(PIN_AMP_EN, HIGH);
         delay(10);  // warm up the amp.
         m_enabled = true;
         ++m_nEnabled;
     }
     else if (!shouldEnable && m_enabled) {
-        Log.p(" AudioPlayer: amp shutdown.").eol();
+        //Log.p(" AudioPlayer: amp shutdown.").eol();
         digitalWrite(PIN_AMP_EN, LOW);
         m_enabled = false;
         ++m_nDisabled;

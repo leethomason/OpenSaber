@@ -340,10 +340,13 @@ bool SFX::playUISound(const char* name)
     // Overrides the volume so the UI is at
     // a consistent volume. Volume will be restored
     // when the sound playing is done.
-    m_currentSound = SFX_UI;
     CStr<24> path("ui/");
     path.append(name);
     path.append(".wav");
+
+    if (m_savedVolume < 0) {
+        m_savedVolume = m_player->volume();
+    }
 
     m_player->setVolume(0.5);
     return m_player->play(path.c_str());
@@ -369,15 +372,18 @@ void SFX::process()
     if (!m_player) return;
 
     if (!m_player->isPlaying()) {
-        if (m_currentSound == SFX_UI) {
+        if (m_savedVolume >= 0) {
+            Log.p("restoring volume=").p(m_savedVolume).eol();
             m_player->setVolume(m_savedVolume);
-            m_currentSound = SFX_NONE;
+            m_savedVolume = -1;
         }
         // Play the idle sound if the blade is on.
         if (m_bladeOn) {
             playSound(SFX_IDLE, SFX_OVERRIDE);
         }
     }
+    // Basically sets the enable line; do this 
+    // last so enable isn't cycled without need.
     m_player->process();
 }
 
@@ -461,7 +467,6 @@ void SFX::setVolume204(int vol)
         if (m_player)
             m_player->setVolume(v);
     }
-    m_savedVolume = m_player->volume();
 }
 
 

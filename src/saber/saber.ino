@@ -229,7 +229,7 @@ void setup() {
 
     #ifdef SABER_SISTERS 
         pinMode(PIN_SWITCH_B, INPUT);
-        int rolePin = digitalRead(PIN_SWITCH_A);
+        int rolePin = digitalRead(PIN_SWITCH_B);    // they are switched; labelled "A"
         if(comRF24.begin(rolePin == HIGH ? 1 : 0)) {
             Log.p("RF24 initialized. Role=").p(comRF24.role()).eol();
         }
@@ -299,6 +299,7 @@ void syncToDB()
 void buttonAReleaseHandler(const Button& b)
 {
     ledA.blink(0, 0);
+    ledA.set(true); // power is on.
 
     #ifdef SABER_LOCK
         if (bladeState.bladeOn()) {
@@ -465,23 +466,29 @@ void buttonAHoldHandler(const Button& button)
     if (bladeState.state() == BLADE_OFF) {
         bool buttonOn = false;
         int cycle = button.cycle(&buttonOn);
-        Log.p("button nHolds=").p(button.nHolds()).p(" cycle=").p(cycle).p(" on=").p(buttonOn).eol();
+        //Log.p("button nHolds=").p(button.nHolds()).p(" cycle=").p(cycle).p(" on=").p(buttonOn).eol();
 
         if (uiMode.mode() == UIMode::NORMAL) {
             if (button.nHolds() == 1) {
                 igniteBlade();
-                comRF24.send("ignite");
+                int pal = saberDB.paletteIndex();
+                char buf[] = "ignite0";
+                buf[6] = '0' + pal;
+                comRF24.send(buf);
             }
         }
         else 
         {
-            if (uiMode.mode() == UIMode::PALETTE) {
-                if (!setPaletteFromHoldCount(cycle))
-                    buttonOn = false;
-            }
-            else if (uiMode.mode() == UIMode::VOLUME) {
-                if (!setVolumeFromHoldCount(cycle))
-                    buttonOn = false;
+            // Only respond to the rising edge:
+            if (buttonOn) {
+                if (uiMode.mode() == UIMode::PALETTE) {
+                    if (!setPaletteFromHoldCount(cycle))
+                        buttonOn = false;
+                }
+                else if (uiMode.mode() == UIMode::VOLUME) {
+                    if (!setVolumeFromHoldCount(cycle))
+                        buttonOn = false;
+                }
             }
         }
         ledA.set(buttonOn);
@@ -531,7 +538,11 @@ void loop() {
     CStr<16> comStr;
     comRF24.process(&comStr);
     if (!comStr.empty()) {
-        if (comStr == "ignite") {
+        if (comStr.beginsWith("ignite")) {
+            char c = comStr[6]; // may be null
+            if (c >= '0' && c <= '7') {
+                saberDB.setPalette(c - '0');
+            }
             igniteBlade();
         }
         else if (comStr == "retract") {

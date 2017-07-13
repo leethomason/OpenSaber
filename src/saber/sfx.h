@@ -42,7 +42,6 @@ enum {            //  Max
   NUM_SFX_TYPES,
   MAX_SFX_FILES = 64,
   MAX_FONTS = 10,
-  SFX_UI   = 254,
   SFX_NONE = 255
 };
 
@@ -126,7 +125,7 @@ private:
   uint8_t      m_currentFont;
   uint32_t     m_igniteTime;
   uint32_t     m_retractTime;
-  float        m_savedVolume = 0.5f;
+  float        m_savedVolume = -1.f;  // negative means not in use.
 
   SFXLocation  m_location[NUM_SFX_TYPES];
   CStr<13>     m_filename[MAX_SFX_FILES];

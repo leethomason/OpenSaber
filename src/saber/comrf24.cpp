@@ -47,15 +47,19 @@ void ComRF24::process(CStr<16>* str)
 {
 	if (!m_rf24) return;
 
-	str->clear();
+	static const int BUF = 16;
+	char buf[BUF];
+
 	if (m_rf24->available()) {
-		char c = 255;
-		while(c) {
-			m_rf24->read(&c, 1);
-			str->append(c);
-		}
-	}
-	if (!str->empty()) {
+		uint8_t s = m_rf24->getPayloadSize();
+		if ( s > BUF) s = BUF;
+
+		m_rf24->read(&buf, s);
+		if (s < BUF)
+			buf[s] = 0;
+		else
+			buf[BUF-1] = 0;
+		*str = buf;
 		Log.p("ComRF24 read:").p(str->c_str()).eol();
 	}
 }
@@ -74,7 +78,7 @@ void ComRF24::send(const char* str)
     	Log.p("ComRF24 write failed.").eol();
     }
     else {
-    	Log.p("ComRF24 write:").p(str).eol();
+    	Log.p("ComRF24 write:").p(str).p(" len=").p(len).eol();
     }
     m_rf24->startListening();
 }

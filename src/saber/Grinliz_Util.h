@@ -113,6 +113,17 @@ public:
 		len = 0;
 	}
 
+	bool beginsWith(const char* str) const {
+		if (!str || empty()) return false;
+
+		const char* key = str;
+		const char* p = buf;
+		for(; *key && *p && (*key == *p); ++key, ++p) {
+			// do nothing.
+		}
+		return *key == 0;
+	}
+
 	bool operator==(const char* str) const {
 		return strEqual(buf, str);
 	}

@@ -3,8 +3,16 @@ M_LED_HOLDER_FRONT	= M_TRANSITION + 44.5;
 M_LED_HOLDER_BACK	= M_LED_HOLDER_FRONT - 10;
 M_SWITCH_CENTER		= M_TRANSITION + 25.5;
 M_DOTSTAR			= M_TRANSITION + 12;
-//M_PORT_CENTER       = M_TRANSITION + 6; // Celestia
+
+// Celestia
+M_PORT_CENTER       = M_TRANSITION + 6;
+X_SWITCH			= 0.3;
+
+/*
+// Luna
 M_PORT_CENTER       = M_TRANSITION + 5.5; // Luna
+X_SWITCH			= 0.0;
+*/
 
 M_POMMEL_BACK		= 9.0;		// Back of the pommel, leaving (in this case)
 								// enough space for the various pommels.
@@ -34,7 +42,6 @@ R_AFT 				= D_AFT / 2;
 T_TRANSITION_RING	= 4;
 
 Y_SWITCH			= 9.6;
-X_SWITCH			= 0.0;
 D_SWITCH			= 12.5;
 D_SWITCH_TOP		= 14.5;
 D_PORT 				= 12.7;		// FIXME
