@@ -317,7 +317,7 @@ private:
 /**
 Sin wave.
 Input: 0-255 (range will be clipped correctly.)
-Output:: -256 - 256
+Output:: [-256, 256]
 */
 int16_t isin(uint16_t x);
 

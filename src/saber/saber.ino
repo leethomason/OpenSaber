@@ -59,6 +59,8 @@ static const uint32_t INDICATOR_TIME          = 500;
 static const uint32_t INDICATOR_CYCLE         = INDICATOR_TIME * 2;
 static const float    GFORCE_RANGE            = 4.0f;
 static const float    GFORCE_RANGE_INV        = 1.0f / GFORCE_RANGE;
+static const uint32_t PING_PONG_INTERVAL      = 1000;
+static const uint32_t BREATH_TIME             = 800;
 
 bool     paletteChange  = false;    // used to prevent sound fx on palette changes
 uint32_t reflashTime    = 0;
@@ -114,6 +116,7 @@ ComRF24 comRF24(&rf24);
 #else
 ComRF24 comRF24(0);
 #endif
+Timer2 pingPongTimer(PING_PONG_INTERVAL);
 
 CMDParser cmdParser(&saberDB);
 Blade blade;
@@ -547,6 +550,21 @@ void loop() {
         }
         else if (comStr == "retract") {
             retractBlade();
+        }
+        else if (comStr == "ping") {
+            comRF24.send("pong");
+        }
+        else if (comStr == "pong") {
+            // Low priority event. Only do the breathing
+            // if the LED isn't being used to display something else.
+            if (!ledA.blinking()) {
+                ledA.blink(1, BREATH_TIME, 0, LEDManager::BLINK_BREATH);
+            }
+        }
+    }
+    if (comRF24.role() == 1) {
+        if (pingPongTimer.tick(delta)) {
+            comRF24.send("ping");
         }
     }
 

@@ -15,8 +15,8 @@ bool ComRF24::begin(int role)
 {
 	if (!m_rf24) return false;
 
-	static const uint8_t* ADDR0 = (const uint8_t*) "1Sist";
-	static const uint8_t* ADDR1 = (const uint8_t*) "2Sist";
+	static const uint8_t* ADDR0 = (const uint8_t*) SABER_ADDR_0;
+	static const uint8_t* ADDR1 = (const uint8_t*) SABER_ADDR_1;
 
 	m_role = role;
 

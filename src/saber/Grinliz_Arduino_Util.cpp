@@ -29,13 +29,13 @@ bool LEDManager::isOn() const
 }
 
 
-void LEDManager::blink(uint8_t n, uint32_t cycle, BlinkHandler h, uint8_t bias)
+void LEDManager::blink(uint8_t n, uint32_t cycle, BlinkHandler h, uint8_t style)
 {
     //SPrint.p("blink n=").p(n).p(" cycle=").p(cycle).eol();
 
     m_handler = 0;
     m_nCallbacks = 0;
-    m_bias = bias;
+    m_style = style;
     if (n == 0 || cycle == 0) {
         m_nBlink = 0;
         m_cycle = 1;
@@ -53,16 +53,28 @@ void LEDManager::blink(uint8_t n, uint32_t cycle, BlinkHandler h, uint8_t bias)
 void LEDManager::process()
 {
     if (m_nBlink) {
-        uint32_t n = (millis() - m_startTime) / m_cycle;
+        uint32_t mill = millis();
+        uint32_t n = (mill - m_startTime) / m_cycle;
         const uint32_t half = m_cycle / 2;
-        uint32_t p = (millis() - m_startTime) / half;
+        uint32_t p = (mill - m_startTime) / half;
 
         if (n >= m_nBlink) {
             m_nBlink = 0;
             digitalWrite(m_pin, m_on ? HIGH : LOW );
         }
         else {
-            digitalWrite(m_pin, ((p & 1) == m_bias) ? LOW : HIGH );
+            if (m_style == BLINK_BREATH) {
+                uint32_t dt = mill - (n * m_cycle);
+                uint32_t normal128 = 128 * dt / m_cycle;  // [0, 128)
+                int16_t sinVal = isin(128 + normal128);   // [0, -256]
+                int16_t val = 255 + sinVal;
+                if (val < 0) val = 0;
+                if (val > 255) val = 255;
+                analogWrite(m_pin, (uint8_t)val);
+            }
+            else {
+                digitalWrite(m_pin, ((p & 1) == m_style) ? LOW : HIGH );
+            }
 
             if (n >= m_nCallbacks) {
                 if (m_handler) {

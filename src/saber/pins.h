@@ -275,6 +275,9 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_SISTERS
 	#define SABER_AUDIO_UI
 
+	#define SABER_ADDR_0 "1Sist"
+	#define SABER_ADDR_1 "2Sist"
+
 	#undef SABER_BUTTON
 	#define SABER_BUTTON Button::INTERNAL_PULLUP
 
