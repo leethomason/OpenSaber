@@ -454,6 +454,8 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 	// "Sister" switches A/B.
 	// Primarily so that the main button can be PWM.
+	// This is to work around a bug in V9 that
+	// LED A isn't analog; LED B is.
 	#if (SABER_MODEL == SABER_MODEL_SISTER)
 		#undef PIN_LED_A
 		#undef PIN_LED_B
