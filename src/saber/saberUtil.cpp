@@ -1,12 +1,14 @@
-//#include <Adafruit_LIS3DH.h>
-
 #include "pins.h"
+#if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH
+#   include <Adafruit_LIS3DH.h>
+#elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
+#   include "accelFXOS8700.h"
+#endif
 #include "saberUtil.h"
 #include "Grinliz_Arduino_Util.h"
 #include "blade.h"
 #include "saberDB.h"
 #include "sfx.h"
-#include "accelFXOS8700.h"
 
 //#define USE_PS_NXP
 
@@ -158,6 +160,8 @@ void AveragePower::push(uint32_t milliVolts)
 Adafruit_LIS3DH localAccel;
 #elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
 AccelFXOS8700 localAccel;
+#else
+    #error Accelerometer not defined.
 #endif
 
 Accelerometer* Accelerometer::_instance = 0;

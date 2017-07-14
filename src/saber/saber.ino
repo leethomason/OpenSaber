@@ -366,7 +366,7 @@ void buttonAClickHandler(const Button&)
             else 
         #endif
             {
-                int32_t vbat = averagePower.power();
+                int32_t vbat = voltmeter.averagePower();
                 Log.event("[Vbat]", vbat);
                 ledA.blink(vbatToPowerLevel(vbat), INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
             }
