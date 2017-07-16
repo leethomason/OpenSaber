@@ -119,6 +119,7 @@ void SaberDB::nextPalette() {
     setPalette(dataHeader.currentPalette + 1);
 }
 
+
 void SaberDB::setPalette(int n)
 {
 #ifdef SABER_SOUND_ON
@@ -135,6 +136,13 @@ void SaberDB::setPalette(int n)
     EEPROM.put(headerAddr(), dataHeader);
     EEPROM.get(paletteAddr(dataHeader.currentPalette), palette);
 }
+
+
+void SaberDB::getPalette(int i, Palette* pal)
+{
+    EEPROM.get(paletteAddr(i), *pal);
+}
+
 
 void SaberDB::setupInit()
 {

@@ -457,7 +457,7 @@ void buttonAClickHandler(const Button&)
         // the modes are cycled. But haven't yet
         // figured out a better option.
         if (uiMode.mode() == UIMode::NORMAL) {
-            int power = vbatToPowerLevel(averagePower.power());
+            int power = vbatToPowerLevel(voltmeter.averagePower());
             ledA.blink(power, INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
         }
     }

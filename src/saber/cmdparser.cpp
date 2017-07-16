@@ -139,6 +139,7 @@ bool CMDParser::processCMD()
 {
     static const char BC[]      = "bc";
     static const char IC[]      = "ic";
+    static const char LSPAL[]   = "lspal";
     static const char PAL[]     = "pal";
     static const char FONT[]    = "font";
     static const char FONTS[]   = "fonts";
@@ -151,7 +152,7 @@ bool CMDParser::processCMD()
     static const char STATUS[]  = "stat";
     static const char RESET[]   = "reset";
     static const char ID[]      = "id";
-    static const char LIST[]    = "list";
+    static const char LIST[]    = "ls"; 
     static const char TEST[]    = "test";
     static const char ACCEL[]   = "accel";
     static const char CRYSTAL[] = "crys";
@@ -188,6 +189,19 @@ bool CMDParser::processCMD()
         Serial.print(" ");
         printMAmps(database->impactColor());
         Serial.print('\n');
+    }
+    else if (action == LSPAL) {
+        for(int i=0; i<SaberDB::NUM_PALETTES; ++i) {
+            SaberDB::Palette pal;
+            database->getPalette(i, &pal);
+            Log.p(i).p(": ")
+               .p(pal.soundFont.c_str())
+               .p(" ")
+               .p(pal.bladeColor)
+               .p(" ")
+               .p(pal.impactColor)
+               .eol();
+        }
     }
     else if (action == PAL) {
         if (isSet) {
