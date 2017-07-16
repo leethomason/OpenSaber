@@ -453,6 +453,13 @@ void buttonAClickHandler(const Button&)
     Log.p("buttonAClickHandler").eol();
     if (bladeState.bladeOff()) {
         uiMode.nextMode();
+        // Not the best indication: show power if
+        // the modes are cycled. But haven't yet
+        // figured out a better option.
+        if (uiMode.mode() == UIMode::NORMAL) {
+            int power = vbatToPowerLevel(averagePower.power());
+            ledA.blink(power, INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
+        }
     }
     else if (bladeState.state() == BLADE_ON) {
         bladeState.change(BLADE_FLASH);
@@ -542,7 +549,7 @@ void loop() {
     comRF24.process(&comStr);
     if (!comStr.empty()) {
         if (comStr.beginsWith("ignite")) {
-            char c = comStr[6]; // may be null
+            char c = comStr[6];
             if (c >= '0' && c <= '7') {
                 saberDB.setPalette(c - '0');
             }
