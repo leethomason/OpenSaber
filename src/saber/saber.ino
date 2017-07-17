@@ -38,11 +38,8 @@
 // -- Must be first. Has configuration. -- //
 #include "pins.h"
 
-#ifdef SABER_SOUND_ON
 #include "sfx.h"
 #include "AudioPlayer.h"
-#endif
-
 #include "saberdb.h"
 #include "cmdparser.h"
 #include "blade.h"
@@ -127,7 +124,7 @@ Tester tester;
 uint32_t unlocked = 0;
 bool soundOk = false;
 
-void setupSD(int logCount)
+void setupSD()
 {
     SPI.setMOSI(PIN_SABER_MOSI);
     SPI.setSCK(PIN_SABER_CLOCK);
@@ -168,17 +165,11 @@ void setup() {
     // Database is the "source of truth".
     // Set it up first.
     saberDB.readData();
-
-    #ifdef SABER_SOUND_ON
-        setupSD(saberDB.numSetupCalls());
-    #endif
-
-    Log.p("setup()").eol();
+    setupSD();
+    Log.p("setup()").eol(); 
 
     accel.begin();
-
     voltmeter.begin();
-
     blade.setRGB(RGB::BLACK);
 
     buttonA.setHoldHandler(buttonAHoldHandler);
@@ -280,8 +271,8 @@ int vbatToPowerLevel(int32_t vbat)
 void syncToDB()
 {
     #ifdef SABER_SOUND_ON
-        sfx.setFont(saberDB.soundFont());
-        sfx.setVolume204(saberDB.volume());
+    sfx.setFont(saberDB.soundFont());
+    sfx.setVolume204(saberDB.volume());
     #endif
 
     uiRenderData.volume = saberDB.volume4();
@@ -290,7 +281,7 @@ void syncToDB()
     uiRenderData.power = vbatToPowerLevel(voltmeter.averagePower());
     uiRenderData.mVolts = voltmeter.averagePower();
     #ifdef SABER_SOUND_ON
-        uiRenderData.fontName = sfx.currentFontName();
+    uiRenderData.fontName = sfx.currentFontName();
     #endif
 
     // Only set ledB if not being used as UI
@@ -531,20 +522,8 @@ void serialEvent() {
     }
 }
 
-void loop() {
-    const uint32_t msec = millis();
-    uint32_t delta = msec - lastLoopTime;
-    lastLoopTime = msec;
-
-    tester.process();
-
-    buttonA.process();
-    ledA.process();
-    #ifdef SABER_TWO_BUTTON
-        buttonB.process();
-        ledB.process();
-    #endif
-
+void processCom(uint32_t delta)
+{
     CStr<16> comStr;
     comRF24.process(&comStr);
     if (!comStr.empty()) {
@@ -574,8 +553,10 @@ void loop() {
             comRF24.send("ping");
         }
     }
+}
 
-    tester.process();
+void processAccel(uint32_t msec)
+{
     if (bladeState.state() == BLADE_ON) {
         float g2Normal = 1.0f;
         float g2 = 1.0f;
@@ -622,11 +603,28 @@ void loop() {
     else {
         maxGForce2 = 1;
     }
+}
+
+void loop() {
+    const uint32_t msec = millis();
+    uint32_t delta = msec - lastLoopTime;
+    lastLoopTime = msec;
+
+    tester.process();
+    buttonA.process();
+    ledA.process();
+    #ifdef SABER_TWO_BUTTON
+    buttonB.process();
+    ledB.process();
+    #endif
+    processCom(delta);
+    tester.process();
+    processAccel(msec);
 
     bladeState.process(&blade, saberDB, millis());
     tester.process();
     #ifdef SABER_SOUND_ON
-        sfx.process();
+    sfx.process();
     #endif
     tester.process();
 
