@@ -59,7 +59,7 @@ static const float    GFORCE_RANGE_INV        = 1.0f / GFORCE_RANGE;
 static const uint32_t PING_PONG_INTERVAL      = 1000;
 static const uint32_t BREATH_TIME             = 800;
 
-bool     paletteChange  = false;    // used to prevent sound fx on palette changes
+bool     paletteChange  = false;    // used to prevent sound fx on palette changes when in 2 button mode.
 uint32_t reflashTime    = 0;
 bool     flashOnClash   = false;
 float    maxGForce2     = 0.0f;
@@ -86,7 +86,7 @@ ButtonCB    buttonB(PIN_SWITCH_B);
 UIModeUtil  uiMode;
 #endif
 SaberDB     saberDB;
-Voltmeter voltmeter;
+Voltmeter   voltmeter;
 
 #ifdef SABER_NUM_LEDS
 RGB leds[SABER_NUM_LEDS];
