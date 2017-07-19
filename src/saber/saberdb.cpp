@@ -58,6 +58,7 @@ bool SaberDB::writeDefaults()
             "JAINA",
         };
     #else
+        // STANDARD
         static Palette defPalette[NUM_PALETTES] = {
             { 0x00ff00,  0x00ffa0,    0 },    // green
             { 0x0000ff,  0x00c8ff,    0 },    // blue

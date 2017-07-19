@@ -5,9 +5,13 @@
 #include "pins.h"
 
 
+ComRF24* ComRF24::m_instance = 0;
+
 ComRF24::ComRF24(RF24* rf24)
 {
 	m_rf24 = rf24;
+	ASSERT(!m_instance);
+	m_instance = this;
 }
 
 
@@ -26,13 +30,10 @@ bool ComRF24::begin(int role)
 	m_role = role;
 
 	m_rf24->begin();
-	m_rf24->setPALevel(RF24_PA_LOW);
-	#if (SERIAL_DEBUG == 1) 
-	//m_rf24->printDetails();
+	m_rf24->setPALevel(RF24_PA_HIGH);
 	Log.p("PA Level (0-3) : ").p(m_rf24->getPALevel()).eol();
 	Log.p("Data rate (0-2): ").p((int)m_rf24->getDataRate()).eol();
 	Log.p("isConnected    : ").p(m_rf24->isChipConnected() ? "true" : "false").eol();
-	#endif
 
 	if(m_role){
 		m_rf24->openWritingPipe(ADDR1);
@@ -48,10 +49,28 @@ bool ComRF24::begin(int role)
 }
 
 
+bool ComRF24::isConnected() const
+{
+	if (!m_rf24) return false;
+	return m_rf24->isChipConnected();
+}
+
+
 void ComRF24::process(CStr<16>* str)
 {
 	if (!m_rf24) return;
 
+	/*
+	if (m_tries > 0 && !m_resend.empty()) {
+		int saved = m_tries;
+    	if (m_log) {
+			Log.p("ComRF24 resend").p(str->c_str()).eol();
+		}
+		if (!send(m_resend.c_str())) {
+			m_tries = saved - 1;
+		}
+	}
+	*/
 	static const int BUF = 16;
 	char buf[BUF];
 
@@ -65,31 +84,40 @@ void ComRF24::process(CStr<16>* str)
 		else
 			buf[BUF-1] = 0;
 		*str = buf;
-		Log.p("ComRF24 read:").p(str->c_str()).eol();
+    	if (m_log) {
+			Log.p("ComRF24 read:").p(str->c_str()).eol();
+		}
 	}
 }
 
 
-void ComRF24::send(const char* str)
+bool ComRF24::send(const char* str)
 {
-	if (!m_rf24) return;
-	if (!str || !*str) return;
+	if (!m_rf24) return false;
+	if (!str || !*str) return false;
 
 	int len = 0;
 	for(const char* p = str; *p; ++p, ++len) {}
+	bool success = true;
 
     m_rf24->stopListening();
     if (!m_rf24->write(str, len + 1)) {
-    	Log.p("ComRF24 write failed.").eol();
+    	if (m_log) {
+	    	Log.p("ComRF24 write failed.").eol();
+    	}
+    	//ASSERT(len < m_resend.capacity());
+    	//m_resend = str;
+    	//m_tries = 3;
+    	success = false;
     }
     else {
-    	Log.p("ComRF24 write:").p(str).p(" len=").p(len).eol();
+    	if (m_log) {
+	    	Log.p("ComRF24 write:").p(str).p(" len=").p(len).eol();
+    	}
+    	//m_resend.clear();
+    	//m_tries = 0;
     }
     m_rf24->startListening();
+    return success;
 }
 
-
-void ComRF24::test()
-{
-
-}

@@ -28,6 +28,7 @@
 #include "SFX.h"
 #include "Tester.h"
 #include "saberUtil.h"
+#include "comrf24.h"
 
 File streamFile;
 
@@ -158,6 +159,7 @@ bool CMDParser::processCMD()
     static const char CRYSTAL[] = "crys";
     static const char PLAY[]    = "play";
     static const char UPLOAD[]  = "up";
+    static const char COMLOG[]  = "comlog";
 
     static const int DELAY = 20;  // don't saturate the serial line. Too much for SoftwareSerial.
 
@@ -357,6 +359,12 @@ bool CMDParser::processCMD()
         Serial.println(size);
         upload(value.c_str(), size);
     }
+    else if (action == COMLOG) {
+        ComRF24* com = ComRF24::instance();
+        com->setComLog(!com->isComLogging());
+        Serial.print("Com logging=");
+        Serial.println(com->isComLogging());
+    }
     else if (action == STATUS) {
         static const char* space = "-----------";
         delay(DELAY);
@@ -365,52 +373,70 @@ bool CMDParser::processCMD()
         Serial.println(F(ID_STR));
         Serial.print("# setup() ");
         Serial.println(database->numSetupCalls());
+        
         delay(DELAY);
         printLead(PAL);
         Serial.println(database->paletteIndex());
+        
         delay(DELAY);
         printLead(FONT);
         Serial.println(database->soundFont());
+        
         delay(DELAY);
         printLead(VOL);
         Serial.print(database->volume());
         Serial.print(" audioOn=");
         Serial.println(database->soundOn());
+        
         delay(DELAY);
         printLead(MOTION);
         Serial.println(database->motion());
+        
         delay(DELAY);
         printLead(IMPACT);
         Serial.println(database->impact());
+
         delay(DELAY);
         printLead(VOLTS);
         Serial.println(Blade::blade().voltage());
+
+        delay(DELAY);
+        ComRF24* com = ComRF24::instance();
+        printLead("RF24");
+        Serial.print("inUse="); 
+        Serial.print(com->inUse());
+        Serial.print(" isConnected=");
+        Serial.print(com->isConnected());
+        Serial.print(" role=");
+        Serial.println(com->role());
+        
         delay(DELAY);
         printLead(UTIL);
+        
         delay(DELAY);
         for (int i = 0; i < NCHANNELS; ++i) {
             Serial.print(Blade::blade().util(i));
             Serial.print(' ');
         }
         Serial.print('\n');
+        
         delay(DELAY);
-
         printLead(PWM);
         for (int i = 0; i < NCHANNELS; ++i) {
             Serial.print(Blade::blade().pwmVal(i));
             Serial.print(' ');
         }
         Serial.print('\n');
+        
         delay(DELAY);
-
         // font
         printLead(BC);
         printHexColor(database->bladeColor());
         Serial.print(" ");
         printMAmps(database->bladeColor());
         Serial.print('\n');
-        delay(DELAY);
 
+        delay(DELAY);
         printLead(IC);
         printHexColor(database->impactColor());
         Serial.print(" ");

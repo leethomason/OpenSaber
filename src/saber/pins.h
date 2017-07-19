@@ -28,7 +28,7 @@ SOFTWARE.
 // --- Configuration ---
 // Note: Serial connection should be set to 19200 baud with a newline after commands.
 
-#define SERIAL_DEBUG 1
+#define SERIAL_DEBUG 0
 
 #define SABER_MODEL_TEST			0
 #define SABER_MODEL_GECKO			1	// PCB, Teensy 3, external amp and accel

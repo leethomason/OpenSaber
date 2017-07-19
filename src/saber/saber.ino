@@ -559,6 +559,11 @@ void loop() {
             retractBlade();
         }
         else if (comStr == "ping") {
+            // Low priority event. Only do the breathing
+            // if the LED isn't being used to display something else.
+            if (!ledA.blinking()) {
+                ledA.blink(1, BREATH_TIME, 0, LEDManager::BLINK_BREATH);
+            }
             comRF24.send("pong");
         }
         else if (comStr == "pong") {
