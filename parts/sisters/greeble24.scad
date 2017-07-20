@@ -9,22 +9,23 @@ RF24_Z = 29;
 RF24_Y = 3.2;
 RF24_X = 16;
 
-RF24_CRYSTAL_Z = 4.5;
+RF24_CRYSTAL_Z  = 4.5;
 RF24_CRYSTAL_DZ = 12.5;
 RF24_CRYSTAL_DX = 5;
+RF24_DECO       = 5;
 
-RF24_ANT_Z = 20;
-RF24_ANT_DZ = RF24_Z - RF24_ANT_Z;
+RF24_ANT_Z      = 20;
+RF24_ANT_DZ     = RF24_Z - RF24_ANT_Z;
 
-WALL_T = 1;
+WALL_T          = 1;
 
-BOLT_HEAD_D = 6;                        // fixme
+BOLT_HEAD_D     = 6;                // fixme
 BOLT_HEAD_SPACE = BOLT_HEAD_D + 2;
-BOLT_D = 4;                             // fixme
-BOLT_INSET = 2;
-BOLT_Z0 = 4;
-BOLT_Z1 = BOLT_Z0 + 37.2;   // only specific intervals work
-                            // due to grip spacing
+BOLT_D          = 4;                // fixme
+BOLT_INSET      = 2;
+BOLT_Z0         = 4;
+BOLT_Z1         = BOLT_Z0 + 37.2;   // only specific intervals work
+                                    // due to grip spacing
 BOLT_DZ = BOLT_Z1 - BOLT_Z0;
 
 BOX_DZ = BOLT_HEAD_SPACE*2 + RF24_Z;
@@ -58,8 +59,6 @@ module roundCube(size, rad)
     }
 }
 
-echo("Bolt dz", BOLT_DZ);
-
 difference() {
     translate([-BOX_DX/2, 0, 0]) {
         roundCube(size=[BOX_DX,
@@ -76,6 +75,12 @@ difference() {
     translate([-RF24_X/2, 0, RF24_START_Z + RF24_CRYSTAL_Z])
         roundCube(size=[RF24_CRYSTAL_DX, 100, RF24_CRYSTAL_DZ], rad=RAD);
     
+    translate([RF24_X/2 - RF24_DECO, 0, RF24_START_Z + RF24_CRYSTAL_Z])
+        roundCube(size=[RF24_DECO, 100, RF24_DECO], rad=RAD);
+    
+    translate([RF24_X/2 - RF24_DECO, 0, RF24_START_Z + RF24_CRYSTAL_Z + RF24_CRYSTAL_DZ - RF24_DECO])
+        roundCube(size=[RF24_DECO, 100, RF24_DECO], rad=RAD);
+
     // Antenna
     translate([-RF24_X/2, 0, RF24_START_Z + RF24_ANT_Z])
         cube(size=[RF24_X, R_SABER_OUTER + RF24_Y, RF24_ANT_DZ]);
