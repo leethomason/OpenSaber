@@ -22,14 +22,35 @@ var chartData = [0, 1, 2, 3, 4];
 	var item = d3.select("svg").selectAll("circle").data(chartData).enter();
 
 	item.append("circle")
-		.attr("cx", 42)
+		.attr("cx", 10)
+		.attr("cy", function(d,i) {return 50 + i*100; })
+		.attr("r", 10)
+		.attr("fill", function(d, i) { return (i & 4) ? "rgb(255,255,255)" : "rgb(0,0,0)"; })
+		.attr("stroke", "rgb(0,0,0)");
+
+	item.append("circle")
+		.attr("cx", 32)
+		.attr("cy", function(d,i) {return 50 + i*100; })
+		.attr("r", 10)
+		.attr("fill", function(d, i) { return (i & 2) ? "rgb(255,255,255)" : "rgb(0,0,0)"; })
+		.attr("stroke", "rgb(0,0,0)");
+
+	item.append("circle")
+		.attr("cx", 54)
+		.attr("cy", function(d,i) {return 50 + i*100; })
+		.attr("r", 10)
+		.attr("fill", function(d, i) { return (i & 1) ? "rgb(255,255,255)" : "rgb(0,0,0)"; })
+		.attr("stroke", "rgb(0,0,0)");
+
+	item.append("circle")
+		.attr("cx", 112)
 		.attr("cy", function(d, i) { return 50 + i * 100; })
 		.attr("r", 40)
 		.attr("fill", "rgb(0, 255, 128)")
 		.attr("stroke", "rgb(0, 0, 0)");
 
 	item.append("rect")
-		.attr("x", 110)
+		.attr("x", 180)
 		.attr("y", function(d, i) { return 15 + 100 * i; })
 		.attr("width", 100)
 		.attr("height", 20)
@@ -37,7 +58,7 @@ var chartData = [0, 1, 2, 3, 4];
 		.attr("stroke", "rgb(0,0,0)");
 
 	item.append("rect")
-		.attr("x", 110)
+		.attr("x", 180)
 		.attr("y", function(d, i) { return 40 + 100 * i; })
 		.attr("width", 100)
 		.attr("height", 20)
@@ -45,7 +66,7 @@ var chartData = [0, 1, 2, 3, 4];
 		.attr("stroke", "rgb(0,0,0)");
 
 	item.append("rect")
-		.attr("x", 110)
+		.attr("x", 180)
 		.attr("y", function(d, i) { return 65 + 100 * i; })
 		.attr("width", 100)
 		.attr("height", 20)
@@ -53,14 +74,14 @@ var chartData = [0, 1, 2, 3, 4];
 		.attr("stroke", "rgb(0,0,0)");
 
 	item.append("text")
-		.attr("x", 240)
+		.attr("x", 310)
 		.attr("y", function(d, i) { return 30 + i * 100; })
 		.attr("font-size", 24)
 		.attr("font-family", "Verdana")
 		.text(function(d, i) { return "Jaina"});
 
 	item.append("text")
-		.attr("x", 240)
+		.attr("x", 310)
 		.attr("y", function(d, i) { return 60 + i * 100; })
 		.attr("font-size", 24)
 		.attr("font-family", "Verdana")
