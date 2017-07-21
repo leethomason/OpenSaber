@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<script type="text/javascript" src="d3.js"></script>
+
+<body>
+
+
+<svg width="720" height="800">
+<!--
+  <circle cx="50" cy="50" r="48" fill="rgb(0,255,128)" stroke="rgb(0,0,0)"></circle>
+  <rect   x="120" y="10" width="100" height="20" fill="rgb(255,0,0)" stroke="rgb(0,0,0)"/>
+  <rect   x="120" y="40" width="100" height="20" fill="rgb(0,255,0)" stroke="rgb(0,0,0)"/>
+  <rect   x="120" y="70" width="100" height="20" fill="rgb(0,0,255)" stroke="rgb(0,0,0)"/>
+  <text   x="250" y="30" font-size="24" font-family="Verdana">Jaina</text>
+  <text   x="250" y="80" font-size="24" font-family="Verdana">400mA</text>
+  -->
+</svg>
+
+<script type="text/javascript">
+var chartData = [0, 1, 2, 3, 4];
+
+	var item = d3.select("svg").selectAll("circle").data(chartData).enter();
+
+	item.append("circle")
+		.attr("cx", 42)
+		.attr("cy", function(d, i) { return 50 + i * 100; })
+		.attr("r", 40)
+		.attr("fill", "rgb(0, 255, 128)")
+		.attr("stroke", "rgb(0, 0, 0)");
+
+	item.append("rect")
+		.attr("x", 110)
+		.attr("y", function(d, i) { return 15 + 100 * i; })
+		.attr("width", 100)
+		.attr("height", 20)
+		.attr("fill", "rgb(255,0,0")
+		.attr("stroke", "rgb(0,0,0)");
+
+	item.append("rect")
+		.attr("x", 110)
+		.attr("y", function(d, i) { return 40 + 100 * i; })
+		.attr("width", 100)
+		.attr("height", 20)
+		.attr("fill", "rgb(0,255,0")
+		.attr("stroke", "rgb(0,0,0)");
+
+	item.append("rect")
+		.attr("x", 110)
+		.attr("y", function(d, i) { return 65 + 100 * i; })
+		.attr("width", 100)
+		.attr("height", 20)
+		.attr("fill", "rgb(0,0,255")
+		.attr("stroke", "rgb(0,0,0)");
+
+	item.append("text")
+		.attr("x", 240)
+		.attr("y", function(d, i) { return 30 + i * 100; })
+		.attr("font-size", 24)
+		.attr("font-family", "Verdana")
+		.text(function(d, i) { return "Jaina"});
+
+	item.append("text")
+		.attr("x", 240)
+		.attr("y", function(d, i) { return 60 + i * 100; })
+		.attr("font-size", 24)
+		.attr("font-family", "Verdana")
+		.text(function(d, i) { return "400mA"});
+
+</script>
+
+</body>
+</html>
