@@ -4,16 +4,9 @@
 
 <body>
 
+<h1>Name</h1>
 
 <svg width="720" height="800">
-<!--
-  <circle cx="50" cy="50" r="48" fill="rgb(0,255,128)" stroke="rgb(0,0,0)"></circle>
-  <rect   x="120" y="10" width="100" height="20" fill="rgb(255,0,0)" stroke="rgb(0,0,0)"/>
-  <rect   x="120" y="40" width="100" height="20" fill="rgb(0,255,0)" stroke="rgb(0,0,0)"/>
-  <rect   x="120" y="70" width="100" height="20" fill="rgb(0,0,255)" stroke="rgb(0,0,0)"/>
-  <text   x="250" y="30" font-size="24" font-family="Verdana">Jaina</text>
-  <text   x="250" y="80" font-size="24" font-family="Verdana">400mA</text>
-  -->
 </svg>
 
 <script type="text/javascript">
@@ -45,7 +38,9 @@
 	}
 
 	function render(data) {
-		var chartData = [0, 1, 2, 3, 4];
+		d3.selectAll("h1")
+			.style("font-family", "Verdana")
+			.text(data.name);
 
 		var item = d3.select("svg").selectAll("circle").data(data.palette).enter();
 
@@ -115,7 +110,7 @@
 
 		item.append("text")
 			.attr("x", 300)
-			.attr("y", function(d, i) { return 30 + i * 100; })
+			.attr("y", function(d, i) { return 25 + i * 100; })
 			.attr("font-size", 24)
 			.attr("font-family", "Verdana")
 			.text(function(d, i) { return d.font});
