@@ -317,6 +317,35 @@ module horn()
     }    
 }
 
+module rf24Pillar()
+{
+    // Bottom: -RAFT + BAR_HEIGHT
+    // Right:  -9 - 4 = -13, w=4 -> -9
+
+    color("yellow") intersection() {
+        innerTube();
+        difference() {
+            BAR_X = 4;
+            BAR_W = 18;
+            PILLAR_H = 18;
+            DZ = (RF24_OUTER_T - RF24_T) / 2;
+
+            translate([-9, -R_AFT + BAR_HEIGHT, M_RF24 - DZ]) {
+                cube(size=[BAR_W, PILLAR_H, RF24_OUTER_T]);
+            }
+
+            translate([-RF24_PUNCH_X0/2, -R_AFT + BAR_HEIGHT + RF24_T, M_RF24 - DZ - EPS]) {
+                cube(size=[RF24_PUNCH_X0, PILLAR_H, RF24_OUTER_T + EPS2]);
+            }
+            translate([-RF24_PUNCH_X1/2, RF24_PUNCH_Y, M_RF24 - EPS]) {
+                cube(size=[RF24_PUNCH_X1, RF24_PUNCH_DY, RF24_T + EPS2]);
+            }
+
+        }
+    }
+}
+
+
 FLATTEN = 1.8;
 M_B0_FRONT = M_BUTTRESS_0 + H_BUTTRESS;
 M_B3_FRONT = M_BUTTRESS_3 + H_BUTTRESS;
@@ -325,14 +354,16 @@ Z_B3 = M_BUTTRESS_4 + EPS - M_B3_FRONT;
 Z_B4 = M_TRANSITION + EPS - M_B4_FRONT - T_TRANSITION_RING;
 
 // front
-union() {
+*union() {
     ledHolder();
     switchAndPortHolder();
     forwardRail();
 }
 
+rf24Pillar();
+
 // Back battery holder
-*difference() {
+difference() {
     intersection() {
         innerTube();
         union() {
@@ -350,7 +381,7 @@ union() {
                 W_MC = 18;
                 translate([W_MC/2, 0, M_B3_FRONT])          beam(4, 8, Z_B3);
                 translate([-W_MC/2 - BW, 0, M_B3_FRONT])    beam(4, 8, Z_B3);
-                //translate([W_MC/2, 0, M_B4_FRONT])          beam(4, 8, Z_B4);
+                //translate([W_MC/2, 0, M_B4_FRONT])        beam(4, 8, Z_B4);
                 translate([-W_MC/2 - BW, 0, M_B4_FRONT])    beam(4, 8, Z_B4);
             }      
         }

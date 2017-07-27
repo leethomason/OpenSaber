@@ -87,6 +87,14 @@ SHOULDER_DZ			= 3.5;
 HORN_WIDTH			= 5;
 HORN_BASE_WIDTH		= 6.5;
 
+M_RF24				= 95;	// fixme
+RF24_PUNCH_X0		= 10;	// fixme
+RF24_PUNCH_X1		= 14;	// fixme
+RF24_PUNCH_Y		= 1;	// fixme
+RF24_PUNCH_DY		= 5;	// fixme
+RF24_T				= 3;	// fixme
+RF24_OUTER_T		= 5;
+
 // Battery
 // 68mm
 //   - 4 front holder
