@@ -327,15 +327,15 @@ module rf24Pillar()
         difference() {
             BAR_X = 4;
             BAR_W = 18;
-            PILLAR_H = 18;
+            PILLAR_H = 19;
             DZ = (RF24_OUTER_T - RF24_T) / 2;
 
-            translate([-9, -R_AFT + BAR_HEIGHT, M_RF24 - DZ]) {
-                cube(size=[BAR_W, PILLAR_H, RF24_OUTER_T]);
+            translate([-9, -R_AFT + BAR_HEIGHT, M_RF24]) {
+                cube(size=[BAR_W, PILLAR_H, RF24_T]);
             }
 
-            translate([-RF24_PUNCH_X0/2, -R_AFT + BAR_HEIGHT + RF24_T, M_RF24 - DZ - EPS]) {
-                cube(size=[RF24_PUNCH_X0, PILLAR_H, RF24_OUTER_T + EPS2]);
+            translate([-RF24_PUNCH_X0/2, -R_AFT + BAR_HEIGHT + RF24_T, M_RF24 - EPS]) {
+                cube(size=[RF24_PUNCH_X0, PILLAR_H, RF24_T + EPS2]);
             }
             translate([-RF24_PUNCH_X1/2, RF24_PUNCH_Y, M_RF24 - EPS]) {
                 cube(size=[RF24_PUNCH_X1, RF24_PUNCH_DY, RF24_T + EPS2]);
