@@ -360,10 +360,10 @@ Z_B4 = M_TRANSITION + EPS - M_B4_FRONT - T_TRANSITION_RING;
     forwardRail();
 }
 
-rf24Pillar();
+*rf24Pillar();
 
 // Back battery holder
-difference() {
+*difference() {
     intersection() {
         innerTube();
         union() {
