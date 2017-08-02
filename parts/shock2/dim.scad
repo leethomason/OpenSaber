@@ -11,6 +11,7 @@ M_SPEAKER_BACK      = -36;
 M_0                 = 0;        // physical back of the lightsaber main body.
 M_AFT_STOP          = 10;
 M_DISPLAY           = 14;       // was 15
+M_EMITTER_BASE      = 140;
 
 // GOLD
 // M_PORT_CENTER       = 57.5;

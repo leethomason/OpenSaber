@@ -2,6 +2,7 @@ include <dim.scad>
 use <buttress.scad>
 use <../shapes.scad>
 use <vents.scad>
+use <emitter.scad>
 
 $fn=90;
 EPS = 0.01;
@@ -73,10 +74,12 @@ module displayConnectors()
 		innerTube();
 		union() {			
 		    translate([0, 0, M_AFT_STOP_FRONT - INSET]) {
-		        intersection() {
+		        /*
+                intersection() {
 		            translate([-20, -20, 0]) cube(size=[30, 17, LENLONG]);
 		            tube(LENLONG, D_INNER/2 - 0.5, D_INNER/2);
 		        }
+                */
 			    color("yellow") {
 		            translate([-15, -2, 0]) cylinder(d=4, h=LEN);
 		            translate([ 14, -5, 0]) cylinder(d=6, h=LEN);
@@ -383,8 +386,7 @@ union() {
 	displayConnectors();
 }
 
-*dotstarHolder();
-*dotstarCap();
+translate([0, 0, M_EMITTER_BASE]) emitterBase();
 
 portButtress();
 crystalButtress();
