@@ -55,6 +55,7 @@ SOFTWARE.
 #define PCB_VERSION_5				5   // PCB, Prop Shield, Teensy 3.2, OLED (VERIFY)
 #define PCB_VERSION_7				7	// Split PCB. Prop shield. Teensy 3.5.
 #define PCB_VERSION_9				9   // Split PCB. Prop shield. Teensy 3.5.
+#define PCB_SHIELD_2			   12	// Grinliz shield + Teensy 3.5
 
 static const int EEPROM_SIZE = 512;
 
@@ -467,7 +468,34 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 		#define PIN_LED_A		  22
 	#endif
 
+#elif (PCB_VERSION == PCB_SHIELD_2)
+	/* Grinning Lizard Shield v2
+	   + dotstar optional
+	 */
+	#define PIN_RX1           0
+	#define PIN_TX1           1
+	#define PIN_AMP_EN        2 
+	#define PIN_SWITCH_A      3 
+	#define PIN_SWITCH_B	  4 
+	#define PIN_LED_B		  5	// PWM
+	#define PIN_LED_A		  6 // PWM
+	#define PIN_DOTSTAR_EN    7 
+	#define PIN_SPI_DC		  8
+	#define PIN_SPI_CE		  9
+	#define PIN_SPI_CS		  10
+	#define PIN_SABER_MOSI    11
+	#define PIN_SABER_MISO    12
 
+	// 14
+	// 15
+	// 16
+	// 17
+	#define PIN_SDA           18
+	#define PIN_SCL           19
+	#define PIN_VMETER        20
+	#define PIN_EMITTER_BLUE  21
+	#define PIN_EMITTER_GREEN 22
+	#define PIN_EMITTER_BLUE  23
 #else
 	#error Pins not defined.
 #endif
