@@ -427,14 +427,14 @@ module drillGuide(alignment)
 //---------------------------//
 
 // Speaker holder.
-*difference() {
+difference() {
     speakerHolder();
     speakerBolts();
     aftPowerHoles();
 }
 
 // Aft battery holder.
-*difference() {
+difference() {
 	batteryHolder();
    	battery();
 	mainRod();
@@ -458,13 +458,13 @@ union() {
 }
 
 *dotstarHolder();
-dotstarCap();
+*dotstarCap();
 
-*portButtress();
-*crystalButtress();
-*midButtress();
-*frontButtress();
+portButtress();
+crystalButtress();
+midButtress();
+frontButtress();
 
 *rail(NOTCH_ANGLE_0);
-*rail(NOTCH_ANGLE_1);
+rail(NOTCH_ANGLE_1);
 *drillGuide(alignment=true);

@@ -113,6 +113,17 @@ public:
 		len = 0;
 	}
 
+	bool beginsWith(const char* str) const {
+		if (!str || empty()) return false;
+
+		const char* key = str;
+		const char* p = buf;
+		for(; *key && *p && (*key == *p); ++key, ++p) {
+			// do nothing.
+		}
+		return *key == 0;
+	}
+
 	bool operator==(const char* str) const {
 		return strEqual(buf, str);
 	}
@@ -306,7 +317,7 @@ private:
 /**
 Sin wave.
 Input: 0-255 (range will be clipped correctly.)
-Output:: -256 - 256
+Output:: [-256, 256]
 */
 int16_t isin(uint16_t x);
 

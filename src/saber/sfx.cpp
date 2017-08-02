@@ -47,7 +47,6 @@ SFX::SFX(AudioPlayer* audioPlayer)
     m_igniteTime = 1000;
     m_retractTime = 1000;
     m_lastSFX = SFX_NONE;
-    m_enabled = true;
 
     memset(m_location, 255, sizeof(SFXLocation)*NUM_SFX_TYPES);
 }
@@ -255,10 +254,6 @@ bool SFX::playSound(int sound, int mode, bool playIfOff)
     // Flush out tests before switching sounds:
     Tester::instance()->process();
 
-    if (!m_enabled) {
-        return false;
-    }
-
     ASSERT(sound >= 0);
     ASSERT(sound < NUM_SFX_TYPES);
     ASSERT(m_player);
@@ -321,9 +316,45 @@ bool SFX::playSound(int sound, int mode, bool playIfOff)
     return false;
 }
 
+bool SFX::playUISound(int n)
+{
+    CStr<10> str;
+    switch(n) {
+        case 0: str = "zero"; break;
+        case 1: str = "one"; break;
+        case 2: str = "two"; break;
+        case 3: str = "three"; break;
+        case 4: str = "four"; break;
+        case 5: str = "five"; break;
+        case 6: str = "six"; break;
+        case 7: str = "seven"; break;
+        default: ASSERT(false); break;
+    }
+    return playUISound(str.c_str());
+}
+
+bool SFX::playUISound(const char* name)
+{
+    if (!m_player) return false;
+
+    // Overrides the volume so the UI is at
+    // a consistent volume. Volume will be restored
+    // when the sound playing is done.
+    CStr<24> path("ui/");
+    path.append(name);
+    path.append(".wav");
+
+    if (m_savedVolume < 0) {
+        m_savedVolume = m_player->volume();
+    }
+
+    m_player->setVolume(0.5);
+    return m_player->play(path.c_str());
+}
+
 bool SFX::playSound(const char* sfx)
 {
-    if (!m_enabled) {
+    if (!m_player) {
         return false;
     }
     m_player->play(sfx);
@@ -332,9 +363,6 @@ bool SFX::playSound(const char* sfx)
 
 void SFX::stopSound()
 {
-    if (!m_enabled) {
-        return;
-    }
     m_player->stop();
     m_currentSound = SFX_NONE;
 }
@@ -342,12 +370,20 @@ void SFX::stopSound()
 void SFX::process()
 {
     if (!m_player) return;
-    if (!m_enabled) return;
 
-    // Play the idle sound if the blade is on.
-    if (m_bladeOn && !m_player->isPlaying()) {
-        playSound(SFX_IDLE, SFX_OVERRIDE);
+    if (!m_player->isPlaying()) {
+        if (m_savedVolume >= 0) {
+            Log.p("restoring volume=").p(m_savedVolume).eol();
+            m_player->setVolume(m_savedVolume);
+            m_savedVolume = -1;
+        }
+        // Play the idle sound if the blade is on.
+        if (m_bladeOn) {
+            playSound(SFX_IDLE, SFX_OVERRIDE);
+        }
     }
+    // Basically sets the enable line; do this 
+    // last so enable isn't cycled without need.
     m_player->process();
 }
 

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<script type="text/javascript" src="d3.js"></script>
+
+<body>
+
+<h1>Name</h1>
+
+<svg width="720" height="800">
+</svg>
+
+<script type="text/javascript">
+
+	function totalColor(led) {
+		var total = [0, 0, 0];
+		total[0] = led.R[0] + led.G[0] + led.B[0];
+		total[1] = led.R[1] + led.G[1] + led.B[1];
+		total[2] = led.R[2] + led.G[2] + led.B[2];
+		//console.log("totalColor", total);
+		return total;
+	}
+
+	function normalColor(led, arr) {
+		var normal = [0, 0, 0];
+
+		var total = totalColor(led);
+
+		normal[0] = (led.R[0] * arr[0] + led.G[0] * arr[1] + led.B[0] * arr[2]) / (total[0] * 255);
+		normal[1] = (led.R[1] * arr[0] + led.G[1] * arr[1] + led.B[1] * arr[2]) / (total[1] * 255);
+		normal[2] = (led.R[2] * arr[0] + led.G[2] * arr[1] + led.B[2] * arr[2]) / (total[2] * 255);
+		//console.log("normalColor", normal);
+		return normal;
+	}
+
+	function arrayToColor(led, arr) {
+		var normal = normalColor(led, arr);
+		return "rgb(" + normal[0]*255 + "," + normal[1]*255 + "," + normal[2]*255 + ")";
+	}
+
+	function render(data) {
+		d3.selectAll("h1")
+			.style("font-family", "Verdana")
+			.text(data.name);
+
+		var item = d3.select("svg").selectAll("circle").data(data.palette).enter();
+
+		// Binary count.
+		item.append("circle")
+			.attr("cx", 10)
+			.attr("cy", function(d,i) {return 50 + i*100; })
+			.attr("r", 10)
+			.attr("fill", function(d, i) { return (i & 4) ? "rgb(255,255,255)" : "rgb(0,0,0)"; })
+			.attr("stroke", "rgb(0,0,0)");
+
+		item.append("circle")
+			.attr("cx", 32)
+			.attr("cy", function(d,i) {return 50 + i*100; })
+			.attr("r", 10)
+			.attr("fill", function(d, i) { return (i & 2) ? "rgb(255,255,255)" : "rgb(0,0,0)"; })
+			.attr("stroke", "rgb(0,0,0)");
+
+		item.append("circle")
+			.attr("cx", 54)
+			.attr("cy", function(d,i) {return 50 + i*100; })
+			.attr("r", 10)
+			.attr("fill", function(d, i) { return (i & 1) ? "rgb(255,255,255)" : "rgb(0,0,0)"; })
+			.attr("stroke", "rgb(0,0,0)");
+
+		// Color of the blade.
+		item.append("circle")
+			.attr("cx", 120)
+			.attr("cy", function(d, i) { return 50 + i * 100; })
+			.attr("r", 40)
+			.attr("fill", function(d) { return arrayToColor(data.LED, d.color); })
+			.attr("stroke", "rgb(0, 0, 0)");
+
+		// Power / channel
+		item.append("rect")
+			.attr("x", 180)
+			.attr("y", function(d, i) { return 15 + 100 * i; })
+			.attr("width", function(d) {
+				var nc = normalColor(data.LED, d.color)
+				return nc[0] ? 100 * nc[0] : 1;
+			})
+			.attr("height", 20)
+			.attr("fill", "rgb(255, 0, 0")
+			.attr("stroke", "rgb(0,0,0)");
+
+		item.append("rect")
+			.attr("x", 180)
+			.attr("y", function(d, i) { return 40 + 100 * i; })
+			.attr("width", function(d) {
+				var nc = normalColor(data.LED, d.color)
+				return nc[1] ? 100 * nc[1] : 1;
+			})
+			.attr("height", 20)
+			.attr("fill", "rgb(0, 255, 0")
+			.attr("stroke", "rgb(0,0,0)");
+
+		item.append("rect")
+			.attr("x", 180)
+			.attr("y", function(d, i) { return 65 + 100 * i; })
+			.attr("width", function(d) {
+				var nc = normalColor(data.LED, d.color)
+				return nc[2] ? 100 * nc[2] : 1;
+			})
+			.attr("height", 20)
+			.attr("fill", "rgb(0, 0, 255")
+			.attr("stroke", "rgb(0,0,0)");
+
+		item.append("text")
+			.attr("x", 300)
+			.attr("y", function(d, i) { return 25 + i * 100; })
+			.attr("font-size", 24)
+			.attr("font-family", "Verdana")
+			.text(function(d, i) { return d.font});
+
+		item.append("text")
+			.attr("x", 300)
+			.attr("y", function(d, i) { return 60 + i * 100; })
+			.attr("font-size", 24)
+			.attr("font-family", "Verdana")
+			.text(function(d, i) {
+				var amps = data.LED.mA * (d.color[0] + d.color[1] + d.color[2]) / 255; 
+				return "" + amps.toFixed(0) + "mA"
+			});		
+	}
+
+	d3.json("data/testled.json", function(data) {
+  		console.log(data);
+  		render(data);
+	});
+
+
+</script>
+
+</body>
+</html>

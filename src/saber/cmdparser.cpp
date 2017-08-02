@@ -28,6 +28,9 @@
 #include "SFX.h"
 #include "Tester.h"
 #include "saberUtil.h"
+#include "comrf24.h"
+
+File streamFile;
 
 CMDParser::CMDParser(SaberDB* _db) {
     database = _db;
@@ -37,6 +40,8 @@ void CMDParser::tokenize()
 {
     action.clear();
     value.clear();
+    value2.clear();
+
     if (token.empty()) return;
 
     int i = 0;
@@ -45,8 +50,14 @@ void CMDParser::tokenize()
     }
     if (token[i] == ' ') {
         i++;
-        for ( ; token[i]; i++) {
+        for ( ; token[i] && token[i] != ' '; i++) {
             value.append(token[i]);
+        }
+    }
+    if (token[i] == ' ') {
+        i++;
+        for ( ; token[i] && token[i] != ' '; i++) {
+            value2.append(token[i]);
         }
     }
 }
@@ -84,10 +95,52 @@ void CMDParser::printLead(const char* str) {
     Serial.print(' ');
 }
 
+bool CMDParser::push(int c)
+{
+    if (m_streamBytes) {
+        --m_streamBytes;
+        streamFile.write(c);
+        if (m_streamBytes == 0) {
+            Serial.print("Streaming complete. Size=");
+            Serial.println(streamFile.size());
+            streamFile.close();
+        }
+        return false;
+    }
+    else {
+        bool processed = false;
+        if (c == '\n') {
+            processed = processCMD();
+        }
+        else {
+            token.append(c);
+        }
+        return processed;
+    }
+}
+
+void CMDParser::upload(const char* path, uint32_t size)
+{
+    Serial.print("Upload. path='");
+    Serial.print(path);
+    Serial.println("'");
+
+    SD.remove(path);
+    streamFile = SD.open(path, FILE_WRITE);
+    if (!streamFile) {
+        Serial.println("Path could not be opened.");
+        return;
+    }
+    Serial.print("Upload Ready. size=");
+    Serial.println(size);
+    m_streamBytes = size;
+}
+
 bool CMDParser::processCMD() 
 {
     static const char BC[]      = "bc";
     static const char IC[]      = "ic";
+    static const char LSPAL[]   = "lspal";
     static const char PAL[]     = "pal";
     static const char FONT[]    = "font";
     static const char FONTS[]   = "fonts";
@@ -100,11 +153,13 @@ bool CMDParser::processCMD()
     static const char STATUS[]  = "stat";
     static const char RESET[]   = "reset";
     static const char ID[]      = "id";
-    static const char LIST[]    = "list";
+    static const char LIST[]    = "ls"; 
     static const char TEST[]    = "test";
     static const char ACCEL[]   = "accel";
     static const char CRYSTAL[] = "crys";
     static const char PLAY[]    = "play";
+    static const char UPLOAD[]  = "up";
+    static const char COMLOG[]  = "comlog";
 
     static const int DELAY = 20;  // don't saturate the serial line. Too much for SoftwareSerial.
 
@@ -136,6 +191,19 @@ bool CMDParser::processCMD()
         Serial.print(" ");
         printMAmps(database->impactColor());
         Serial.print('\n');
+    }
+    else if (action == LSPAL) {
+        for(int i=0; i<SaberDB::NUM_PALETTES; ++i) {
+            SaberDB::Palette pal;
+            database->getPalette(i, &pal);
+            Log.p(i).p(": ")
+               .p(pal.soundFont.c_str())
+               .p(" ")
+               .p(pal.bladeColor)
+               .p(" ")
+               .p(pal.impactColor)
+               .eol();
+        }
     }
     else if (action == PAL) {
         if (isSet) {
@@ -256,8 +324,12 @@ bool CMDParser::processCMD()
         Serial.println("");
     }
     else if (action == PLAY) {
-        printLead(action.c_str());
+        printLead(action.c_str());        
         SFX* sfx = SFX::instance();
+        uint8_t nChannels = 0;
+        uint32_t samples = 0;
+        uint32_t length = 0;
+        sfx->readHeader(value.c_str(), &nChannels, &samples, &length, true);
         sfx->playSound(value.c_str());
     }
     else if (action == TEST) {
@@ -276,6 +348,23 @@ bool CMDParser::processCMD()
         }
         tester->runTests(count, longTest);
     }
+    else if (action == UPLOAD) {
+        // up ui/foo.wav 1182
+        uint32_t size = atoi(value2.c_str());
+        Serial.print("Upload path='");
+        Serial.print(value.c_str());
+        Serial.print("' value2=");
+        Serial.print(value2.c_str());
+        Serial.print(" size=");
+        Serial.println(size);
+        upload(value.c_str(), size);
+    }
+    else if (action == COMLOG) {
+        ComRF24* com = ComRF24::instance();
+        com->setComLog(!com->isComLogging());
+        Serial.print("Com logging=");
+        Serial.println(com->isComLogging());
+    }
     else if (action == STATUS) {
         static const char* space = "-----------";
         delay(DELAY);
@@ -284,52 +373,70 @@ bool CMDParser::processCMD()
         Serial.println(F(ID_STR));
         Serial.print("# setup() ");
         Serial.println(database->numSetupCalls());
+        
         delay(DELAY);
         printLead(PAL);
         Serial.println(database->paletteIndex());
+        
         delay(DELAY);
         printLead(FONT);
         Serial.println(database->soundFont());
+        
         delay(DELAY);
         printLead(VOL);
         Serial.print(database->volume());
         Serial.print(" audioOn=");
         Serial.println(database->soundOn());
+        
         delay(DELAY);
         printLead(MOTION);
         Serial.println(database->motion());
+        
         delay(DELAY);
         printLead(IMPACT);
         Serial.println(database->impact());
+
         delay(DELAY);
         printLead(VOLTS);
         Serial.println(Blade::blade().voltage());
+
+        delay(DELAY);
+        ComRF24* com = ComRF24::instance();
+        printLead("RF24");
+        Serial.print("inUse="); 
+        Serial.print(com->inUse());
+        Serial.print(" isConnected=");
+        Serial.print(com->isConnected());
+        Serial.print(" role=");
+        Serial.println(com->role());
+        
         delay(DELAY);
         printLead(UTIL);
+        
         delay(DELAY);
         for (int i = 0; i < NCHANNELS; ++i) {
             Serial.print(Blade::blade().util(i));
             Serial.print(' ');
         }
         Serial.print('\n');
+        
         delay(DELAY);
-
         printLead(PWM);
         for (int i = 0; i < NCHANNELS; ++i) {
             Serial.print(Blade::blade().pwmVal(i));
             Serial.print(' ');
         }
         Serial.print('\n');
+        
         delay(DELAY);
-
         // font
         printLead(BC);
         printHexColor(database->bladeColor());
         Serial.print(" ");
         printMAmps(database->bladeColor());
         Serial.print('\n');
-        delay(DELAY);
 
+        delay(DELAY);
         printLead(IC);
         printHexColor(database->impactColor());
         Serial.print(" ");

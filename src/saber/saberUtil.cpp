@@ -1,12 +1,14 @@
-//#include <Adafruit_LIS3DH.h>
-
 #include "pins.h"
+#if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH
+#   include <Adafruit_LIS3DH.h>
+#elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
+#   include "accelFXOS8700.h"
+#endif
 #include "saberUtil.h"
 #include "Grinliz_Arduino_Util.h"
 #include "blade.h"
 #include "saberDB.h"
 #include "sfx.h"
-#include "accelFXOS8700.h"
 
 //#define USE_PS_NXP
 
@@ -107,16 +109,27 @@ void BladeState::process(Blade* blade, const SaberDB& saberDB, uint32_t time)
 
 void UIModeUtil::nextMode()
 {
-    switch(m_mode) {
-        case UIMode::NORMAL:        m_mode = UIMode::PALETTE;       Log.p("mode: palette").eol();    break;
-        case UIMode::PALETTE:       m_mode = UIMode::VOLUME;        Log.p("mode: volume").eol();     break;
+    SFX* sfx = 0;
+    #ifdef SABER_AUDIO_UI
+    sfx = SFX::instance();
+    #endif
 
-#if (MEDITATION_MODE)
-        case UIMode::VOLUME:        m_mode = UIMode::MEDITATION;    Log.p("mode: meditation").eol(); break;
-        case UIMode::MEDITATION:    m_mode = UIMode::NORMAL;        Log.p("mode: normal").eol();     break;
-#else
-        case UIMode::VOLUME:        m_mode = UIMode::NORMAL;        Log.p("mode: normal").eol();     break;
-#endif
+    switch(m_mode) {
+        case UIMode::NORMAL:        
+            m_mode = UIMode::PALETTE;       
+            Log.p("mode: palette").eol();    
+            if (sfx) sfx->playUISound("palette");
+            break;
+        case UIMode::PALETTE:       
+            m_mode = UIMode::VOLUME;        
+            Log.p("mode: volume").eol();     
+            if (sfx) sfx->playUISound("audio");
+            break;
+        case UIMode::VOLUME:        
+            m_mode = UIMode::NORMAL;        
+            Log.p("mode: normal").eol();     
+            if (sfx) sfx->playUISound("ready");
+            break;
         default:
             ASSERT(false);
             m_mode = UIMode::NORMAL;
@@ -147,6 +160,8 @@ void AveragePower::push(uint32_t milliVolts)
 Adafruit_LIS3DH localAccel;
 #elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
 AccelFXOS8700 localAccel;
+#else
+    #error Accelerometer not defined.
 #endif
 
 Accelerometer* Accelerometer::_instance = 0;

@@ -40,7 +40,7 @@ SOFTWARE.
 #define SABER_MODEL_TANO 			7
 #define SABER_MODEL_SISTER 			8
 
-#define SABER_MODEL 				SABER_MODEL_SHOCK
+#define SABER_MODEL 				SABER_MODEL_SISTER
 
 #define LED_TOPOLOGY_RESISTOR		1
 #define LED_TOPOLOGY_DRIVER			2
@@ -55,6 +55,7 @@ SOFTWARE.
 #define PCB_VERSION_5				5   // PCB, Prop Shield, Teensy 3.2, OLED (VERIFY)
 #define PCB_VERSION_7				7	// Split PCB. Prop shield. Teensy 3.5.
 #define PCB_VERSION_9				9   // Split PCB. Prop shield. Teensy 3.5.
+#define PCB_SHIELD_2			   12	// Grinliz shield + Teensy 3.5
 
 static const int EEPROM_SIZE = 512;
 
@@ -140,7 +141,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_CRYSTAL			80
 	#define SABER_CRYSTAL_LOW		24
 	#define SABER_DISPLAY
-	//#define MEDITATION_MODE			1
 	#define SABER_LOWPASS_FILTER	1
 	#define SABER_AUDIO_EXTERNAL_REF
 
@@ -273,6 +273,11 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
+	#define SABER_SISTERS
+	#define SABER_AUDIO_UI
+
+	#define SABER_ADDR_0 "1Sist"
+	#define SABER_ADDR_1 "2Sist"
 
 	#undef SABER_BUTTON
 	#define SABER_BUTTON Button::INTERNAL_PULLUP
@@ -325,8 +330,8 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_SABER_MOSI    11
 	#define PIN_SABER_MISO    12
 	#define PIN_SABER_CLOCK   13
-	//#define PIN_OLED_DC       14
-	// 15 open
+	#define PIN_RF24_CS       14
+	#define PIN_RF24_CE		  15// fixme
 	//#define PIN_OLED_RESET    16 
 	//#define PIN_OLED_CS       17
 	#define PIN_SDA           18
@@ -437,8 +442,8 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_SABER_MISO    12
 
 	#define PIN_SABER_CLOCK   13
-	// 14
-	// 15
+	#define PIN_RF24_CS       14
+	#define PIN_RF24_CE		  15
 	#define PIN_LED_A         16
 	#define PIN_SWITCH_A      17
 	#define PIN_SDA           18 // fixed
@@ -447,6 +452,50 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_SWITCH_B	  21
 	#define PIN_LED_B		  22
 	// 23
+
+	// "Sister" switches A/B.
+	// Primarily so that the main button can be PWM.
+	// This is to work around a bug in V9 that
+	// LED A isn't analog; LED B is.
+	#if (SABER_MODEL == SABER_MODEL_SISTER)
+		#undef PIN_LED_A
+		#undef PIN_LED_B
+		#undef PIN_SWITCH_A
+		#undef PIN_SWITCH_B
+		#define PIN_LED_B         16
+		#define PIN_SWITCH_B      17
+		#define PIN_SWITCH_A	  21
+		#define PIN_LED_A		  22
+	#endif
+
+#elif (PCB_VERSION == PCB_SHIELD_2)
+	/* Grinning Lizard Shield v2
+	   + dotstar optional
+	 */
+	#define PIN_RX1           0
+	#define PIN_TX1           1
+	#define PIN_AMP_EN        2 
+	#define PIN_SWITCH_A      3 
+	#define PIN_SWITCH_B	  4 
+	#define PIN_LED_B		  5	// PWM
+	#define PIN_LED_A		  6 // PWM
+	#define PIN_DOTSTAR_EN    7 
+	#define PIN_SPI_DC		  8
+	#define PIN_SPI_CE		  9
+	#define PIN_SPI_CS		  10
+	#define PIN_SABER_MOSI    11
+	#define PIN_SABER_MISO    12
+
+	// 14
+	// 15
+	// 16
+	// 17
+	#define PIN_SDA           18
+	#define PIN_SCL           19
+	#define PIN_VMETER        20
+	#define PIN_EMITTER_BLUE  21
+	#define PIN_EMITTER_GREEN 22
+	#define PIN_EMITTER_BLUE  23
 #else
 	#error Pins not defined.
 #endif

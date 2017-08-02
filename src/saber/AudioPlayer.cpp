@@ -55,7 +55,7 @@ void AudioPlayer::init() {
     delay(50);  //stabalize
 }
 
-void AudioPlayer::play(const char* filename)
+bool AudioPlayer::play(const char* filename)
 {
     bool okay = true;
 #if (SABER_SOUND_ON == SABER_SOUND_SD)
@@ -72,6 +72,7 @@ void AudioPlayer::play(const char* filename)
     // remember, about a 5ms warmup for header to be loaded and start playing.
     m_startPlayingTime = millis();
     setShutdown();
+    return okay;
 }
 
 void AudioPlayer::stop() {
@@ -104,14 +105,14 @@ void AudioPlayer::setShutdown() {
     bool shouldEnable = (m_volume > 0) && isPlaying();
 
     if (shouldEnable && !m_enabled) {
-        Log.p("AudioPlayer: amp enabled.").eol();
+        //Log.p("AudioPlayer: amp enabled.").eol();
         digitalWrite(PIN_AMP_EN, HIGH);
         delay(10);  // warm up the amp.
         m_enabled = true;
         ++m_nEnabled;
     }
     else if (!shouldEnable && m_enabled) {
-        Log.p(" AudioPlayer: amp shutdown.").eol();
+        //Log.p(" AudioPlayer: amp shutdown.").eol();
         digitalWrite(PIN_AMP_EN, LOW);
         m_enabled = false;
         ++m_nDisabled;

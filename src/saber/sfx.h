@@ -65,6 +65,8 @@ public:
 
   bool playSound(int sfx, int mode, bool playIfOff=false);
   bool playSound(const char* sfx);
+  bool playUISound(const char* name);
+  bool playUISound(int n);
   void stopSound();
 
   // The class of SFX (MOTION, IMPACT, etc) last successfully played.
@@ -88,7 +90,7 @@ public:
   int numFonts() const { return m_numFonts; }
   const char* currentFontName() const;
 
-  void setEnabled(bool enabled) { m_enabled = enabled; }
+  bool readHeader(const char* filename, uint8_t* nChannels, uint32_t* nSamplesPerSec, uint32_t* lengthMillis, bool logToConsole);
 
   // testing
   uint16_t nEnabled() const;
@@ -103,7 +105,6 @@ private:
   void addFile(const char* filename, int index);
   int calcSlot(const char* filename); // -1 if not a supported file
   void readIgniteRetract();
-  bool readHeader(const char* filename, uint8_t* nChannels, uint32_t* nSamplesPerSec, uint32_t* lengthMillis, bool logToConsole);
   uint32_t readU32(File& file, int n);
   uint32_t readU32(SerialFlashFile& file, int n);
 
@@ -124,7 +125,7 @@ private:
   uint8_t      m_currentFont;
   uint32_t     m_igniteTime;
   uint32_t     m_retractTime;
-  bool         m_enabled;
+  float        m_savedVolume = -1.f;  // negative means not in use.
 
   SFXLocation  m_location[NUM_SFX_TYPES];
   CStr<13>     m_filename[MAX_SFX_FILES];

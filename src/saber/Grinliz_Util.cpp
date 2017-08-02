@@ -145,6 +145,14 @@ bool TestCStr()
 			TEST_IS_EQ(s, answer[i]);
 		}
 	}
+    { 
+        CStr<10> val("value");
+        TEST_IS_TRUE(val.beginsWith("v"));
+        TEST_IS_TRUE(val.beginsWith("val"));
+        TEST_IS_TRUE(val.beginsWith("value"));
+        TEST_IS_FALSE(val.beginsWith("al"));
+        TEST_IS_FALSE(val.beginsWith("values"));
+    }
 	return true;
 }
 

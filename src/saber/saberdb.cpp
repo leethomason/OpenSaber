@@ -58,6 +58,7 @@ bool SaberDB::writeDefaults()
             "JAINA",
         };
     #else
+        // STANDARD
         static Palette defPalette[NUM_PALETTES] = {
             { 0x00ff00,  0x00ffa0,    0 },    // green
             { 0x0000ff,  0x00c8ff,    0 },    // blue
@@ -119,6 +120,7 @@ void SaberDB::nextPalette() {
     setPalette(dataHeader.currentPalette + 1);
 }
 
+
 void SaberDB::setPalette(int n)
 {
 #ifdef SABER_SOUND_ON
@@ -135,6 +137,13 @@ void SaberDB::setPalette(int n)
     EEPROM.put(headerAddr(), dataHeader);
     EEPROM.get(paletteAddr(dataHeader.currentPalette), palette);
 }
+
+
+void SaberDB::getPalette(int i, Palette* pal)
+{
+    EEPROM.get(paletteAddr(i), *pal);
+}
+
 
 void SaberDB::setupInit()
 {

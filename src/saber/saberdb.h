@@ -94,16 +94,18 @@ public:
         return m_crystalColor;
     }
 
-private:
-    void setupInit();
-
-    static const int BASE_ADDR    = 20;
-
     struct Palette {
         RGB bladeColor;
         RGB impactColor;
         CStr<9> soundFont;
     };
+
+    void getPalette(int i, Palette* palette);
+
+private:
+    void setupInit();
+
+    static const int BASE_ADDR    = 20;
 
     struct DataHeader {
         DataHeader() :

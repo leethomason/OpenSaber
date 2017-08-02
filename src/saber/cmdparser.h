@@ -34,29 +34,31 @@ class CMDParser
 public:
     CMDParser(SaberDB* database);
 
-    void push(int c)                  {
-        token.append(c);
-    }
-    bool processCMD();
-    
+    bool push(int c);
+   
     const char* getBuffer() const     {
         return token.c_str();
     }
+    
     void clearBuffer()                {
         token.clear();
     }
 
 private:
+    bool processCMD();
     void tokenize();
     void printHexColor(const RGB& color);
     void parseHexColor(const char* str, RGB* c);
     void printLead(const char* str);
     void printMAmps(const RGB& color);
+    void upload(const char* path, uint32_t size);
 
-    SaberDB* database;
-    CStr<18> token;
-    CStr<6>  action;
+    uint32_t m_streamBytes = 0;
+    SaberDB* database = 0;
+    CStr<30> token;
+    CStr<10>  action;
     CStr<20> value;
+    CStr<20> value2;
 };
 
 
