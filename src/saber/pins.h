@@ -469,8 +469,10 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#endif
 
 #elif (PCB_VERSION == PCB_SHIELD_2)
-	/* Grinning Lizard Shield v2
+	/* 
+	  Grinning Lizard Shield v2
 	   + dotstar optional
+	   + SPI optional
 	 */
 	#define PIN_RX1           0
 	#define PIN_TX1           1

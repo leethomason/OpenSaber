@@ -20,8 +20,8 @@ The Open Saber site / repo is 3 things:
   arduino class micro-controllers.
 - Documentation & circuit diagrams for circuits and components.
 
-The example platform is the "Gecko" saber, which is a SaberZ Sentris body (the
-empty hilt option) with Open Saber electronics. You can see it in action
+You can see the original Gecko based on a SaberZ Sentris body (the
+empty hilt option) with Open Saber electronics in action
 here: https://youtu.be/9_-Rfe4UBJM.
 
 ## Features:
@@ -33,26 +33,33 @@ here: https://youtu.be/9_-Rfe4UBJM.
 - Battery level tracking and indicator
 - Command set to program saber with computer
 - Recharge port / kill key port
+- SPI support for secondary display, etc.
+- Dotstar support for UI, etc.
 
 ## Status & Direction
 
 There are over 5 working sabers on the OpenSaber design with cases
-by SaberZ and UltraSabers. (With TCSS V1 cases and SaberForge ASP
-in the works.)
+by SaberZ, UltraSabers, TCSS v1, and SaberForge ASP.
 
 The version number - as much as it is consistent - references
 the PCB board. The PCB board determines the electrical architecture
 and features.
 
-- Based on Teensy 3.2 microcontroller.
-- The V5 optionally uses a PJRC Prop Shield. The prop shield condenses
-  a bunch of the electronics into one board, which is very 
-  handy. (Although sometimes it's useful to spread components out, to
-  be able to utilize space in the saber.)
-  The PCB design contains both a prop shield version and a 
-  breakout version.
-- The V7 version will require the PJRC Prop Shield. (Although the V5 still
-  works, of course.)
+There have been several major revisions of the design:
+- V1 Microcontroller with discrete breakout boards for audio,
+  accelerometer, and SD Card. Worked, but not elegant.
+- V5 Teensy 3.2 microcontroller stacked on a PJRC prop shield with a 
+  breakout for the SD card. This was a very practical design for 
+  larger saber bodies.
+- V7 moved to the Teensy 3.5 with integrated SD. (Handy! Saves space
+  and frees up the SPI.) Also the circuit board is now split into
+  "wings" to use less space. This is the smallest design I have been
+  able to achieve with through hole components, and is used
+  in several sabers.
+- V9 moves to SMD components, although I use the "largest" possible.
+  This involves taking on SMD soldering, etc, but switches over
+  to an OpenSaber prop shield, so the design is now a Teensy 3.5
+  stacked with a circuit board. This design is still in development.
 
 Note that many commits to the github repo are parts for a 3D
 printer. While you are welcome to use them, the focus of 
@@ -88,7 +95,6 @@ I am not affiliated with any of these, but have found them all useful.
   http://forums.thecustomsabershop.com/showthread.php?2025-Step-2-I-have-decided-to-make-a-LED-saber
 
 ### Saber bodies
-- SaberZ sells "empty hilts": http://saberz.com/
 - The Custom Saber Shop (http://www.thecustomsabershop.com)
 - UltraSabers http://www.ultrasabers.com/, in the "Build your own
   Lightsaber" section.
@@ -115,25 +121,20 @@ An overview of the parts of a saber, with specific examples of the Gecko.
 Technically speaking, to organize you electrical thoughts, a saber is a *very* 
 fancy flashlight. 
 
-NOTE: This is the v1 architecture. Hope to get new photos up soon!
-
-![Image of Saber](img/Schematic.png)
-
 In roughly front to back order, an saber is:
 
 1.  A **blade holder**. (1" is standard.)
-2.  A **lens** to focus the LED. The Gecko uses a 10511 Carclo Lens.
+2.  A **lens** to focus the LED. The lens is bought to match the LED,
+    and narrower is usually better.
 3.  3 (or 4) **LEDs** in the 1-Watt each range. Red, green, blue, and 
-    sometimes white or another color. (Gecko uses a "Luxeon Rebel - 
-    Endor Star RGB High Power LED"  which fits nicely in the case.)
+    sometimes white or another color. I like both the Luxeon and Cree XPE-2.
+    I haven't experimented with the 12W LEDs yet; electrically
+    most of the designs should handle it, but the power from the battery
+    and the cooling are potential issues.
 4.  A **heat sink** for cooling the LED. Often part of the saber body. 
-    TCSS provides them as well. LEDs are kept to 350ma each (although you
-    can change this.) Many LED's, if cooled correctly, can take considerably
-    more power, but I haven't tested the actual cooling ability of the
-    various heat sinks I use. The trend is to 12W (3-4 LEDs at 3-4 Watts
-    each) which is super bright...but takes a lot of power and generates
-    lots of heat. I'm experimenting with more powerful LEDs, but nothing
-    to post here yet.
+    TCSS provides them as well. LEDs are kept to 350ma - 400ma each (although 
+    you can change this.) Many LED's, if cooled correctly, can take considerably
+    more power.
 5.  **Power and Auxillary** switches (momentary on, typically 12mm). The
     code supports both a one button version and a two button version. Both
     versions support the same features except "clash sound" which is only
@@ -143,12 +144,11 @@ In roughly front to back order, an saber is:
 7.  **Power port**. Typically 2.1 mm. If plugged into a Li-Ion charger,
     charges the battery (and disconnects the microcontroller). If a kill key
     is inserted, turns off the saber.
-8.  **SD Card**. Gecko uses a simple SD card breakout board. This is where
+8.  **SD Card**. A simple SD card breakout board or integrated card. This is where
     the sound fonts are stored. Note that the saber code WILL NOT work without 
     sound fonts stored and named properly on the MicroSD card.
-9. **Accelerometer**. Gecko uses an "Adafruit LIS3DH Triple-Axis 
-    Accelerometer" but the new designs all use the accelerometer on the 
-    Prop shield.  
+9. **Accelerometer**. Either discrete or on the prop shield. In my experience,
+    the LIS3DH is very reliable if you have a choice.  
 10. 3.7v Li-Ion **battery**. TCSS and Adafruit both sell good, small, long 
     lasting batteries. Need something rated 2000mAh or better. Amazon as well
     carries protected Li-Ion batteries. (The Panasonic NCR18650B 18650 has 
@@ -171,15 +171,16 @@ In roughly front to back order, an saber is:
 
 ## Wiring
 
-Wiring diagram for Prop Shield version of saber: 
+Wiring diagram for V5 Prop Shield version of saber: 
 [wiring v5 with prop shield](img/v5prop.png)
 (Github isn't keen on image preview. You may need to clone the source and view
-locally.) Shown without the optional DotStar LED User Interface.
+locally.) Shown without the optional DotStar LED User Interface. There 
+isn't a wiring diagram for the higher versions yet, although they are similar.
 
 An actual photo of a V5 circuit. "Front" is
 the direction of the pin header.
 
-![v% with Prop Shield](img/v5propShield.jpg)
+![v5 with Prop Shield](img/v5propShield.jpg)
 
 - The Teensy Microcontroller is the top board. The microcontroller sits on 
   top of the Prop Shield.
@@ -247,6 +248,7 @@ Specific LED usage:
   (The provided wiring diagram does not include this.)
 
 ### Power Bus
+
 The saber uses a common ground. There are 4 positive power voltages. Please
 be aware of the power supply. Shorts between the supplies can cause big
 issues. It's very important to not "cross" the power supplies or use the 
@@ -261,11 +263,16 @@ wrong one.
   should be a 5 volt power supply. I often use a super-tiny booster 
   (from Polulu) to go from Vbat to V5 to power the microcontroller.
 - USB. When the saber is plugged into USB, there is Yet Another power supply.
-  It's (VERY) important to not connect the USB power into the saber power.
-  I often use a USB connector to save space; in this case, I simply don't
-  attach the positive power of the USB. If you use the USB connector on the
-  microcontoller, I usually open up a cable and cut the red power line.
-  You want to avoid connecting the USB power to the Li-Ion battery.
+  WARNING: it is VERY easy to short a Teensy by plugging in a standard USB
+  cable. This causes a short between the 5V USB power supply and the 3.7V
+  Li-Ion battery. This will destroy the saber. Your options:
+    - Cut the USB power on the Teensy board. I don't recommend this; it
+      seems much too easy to "reconnect" via a short (metal dust?) or
+      thermal expansion. I've burned out 3 microcrotrollers due to 
+      mysterious issues when connecting USB.
+    - Cut the power (red) line in the USB cable. Much more reliable...but
+      you must *always* use the modified cable. I mark the USB port in 
+      red paint and the cables with red tape.
 
 #### Power Port
 Convention, and the current design, uses a 2.1mm recharge jack. Wiring of the
@@ -297,7 +304,7 @@ Why?
   microcontroller and DotStars. 
 
 Note that the actual battery voltage varies significantly, 
-and the control circuit has to account for that.
+and the control circuit accounts for that.
 
 ### Electronics
 
@@ -309,11 +316,10 @@ thusfar with the service.
 The prop shield "collects" 1) an audio amplifier, 2) a DotStar LED controller,
 and 3) an accelerometer onto one board. The PCB with and without the Prop
 Shield are functionally equivalent. But without the Prop Shield, you need
-to add the amp and accelerometer yourself. Depending on space constraints,
-one or the other is more appealing. (Which is why I maintain both versions,
-but the V7 will move to Prop Shield exclusively.)
+to add the amp and accelerometer yourself. This is almost always more trouble;
+the wires to connect everything become a problem.
 
-- A **microcontroller**, the Teensy 3.2, is the micro-computer
+- A **microcontroller**, the Teensy 3.2 or 3.5, is the micro-computer
   that runs the software. It controls the blade state, the color
   of the LEDs, the color of the blade, and does audio processing.
 
@@ -470,7 +476,6 @@ The saber has 8 palettes. The palette is a combination of:
 - `pal` returns the current palette. `pal <0-7>` sets the current palette.
 - `font` gets/sets the sound font in use.
 - `fonts` lists the available sound fonts.
-- `aud` and `aud <0-1>` gets and sets audio on/off.
 - `vol` and `vol <0-204>` gets and sets the current volume.
 - `vbat' is the current battery level, in milli-volts. 4200 is fresh, 3700 is 
   nominal, 3500 is low. This is read from the Vmeter of the emitter circuit.
@@ -488,12 +493,17 @@ The saber has 8 palettes. The palette is a combination of:
 - `accel` prints the current accelerometer output. Useful for checking
   calibration and that your axis are set up correctly.
 - `test` runs the saber test suite.
+- 'play' plays a sound on the SD card. You need the full name: 'play demichel.wav'
+   or 'play bespin2/hum.wav'
 
 ## Future Direction
 
-In general direction, cleaning up the existing solution and adding support
-for more chipsets is desirable. As I add features to sabers I build, I'll
-add them here. There is now at least one other contributor, and that
-feedback is being incorporated as well.
+In practice I've found that there are two drivers to the design:
+- Size. Smaller electronics leads to more features that can be packedd into
+  theh saber. I try to balance size with ability to be soldered and
+  wired up.
+- Features for sabers. With every saber I build I put in some new or
+  novel feature. (Although sometimes this is in the case, not electronics.)
+  But those changes and improvements are reflected here
 
 ![Image of Saber](img/BladeTeal.jpg)
