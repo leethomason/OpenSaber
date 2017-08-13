@@ -16,6 +16,9 @@ const uint8_t* get_jBird(int* width, int* height);
 //		X: tightest
 //		Bit layout: Column Major
 //		Bit order: MSB first
+// Images:
+//		Bit layout: Column Major
+//		Bit order: MSB first
 
 const uint8_t* getGlypth_aurekBesh6(int charID, int* advance, int* w, int* rows);
 const uint8_t* getGlypth_calibri8(int charID, int* advance, int* w, int* rows);

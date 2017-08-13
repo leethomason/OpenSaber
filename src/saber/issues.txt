@@ -1,12 +1,13 @@
 Issues:
 High
-- Sound based UI ("palette", "audio", "ready", 0-7)
-- Connect RF24
 
 Low
+- circuit diagram based on Saber shield
 - Fix analogReference()
 
 Fixed
+x Sound based UI ("palette", "audio", "ready", 0-7)
+x Connect RF24
 x switch to new version
 x PWM for LED
 x select pin move/test (CSN is select)
