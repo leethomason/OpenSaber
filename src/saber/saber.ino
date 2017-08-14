@@ -126,8 +126,8 @@ bool soundOk = false;
 
 void setupSD()
 {
-    SPI.setMOSI(PIN_SABER_MOSI);
-    SPI.setSCK(PIN_SABER_CLOCK);
+//    SPI.setMOSI(PIN_SABER_MOSI);
+//    SPI.setSCK(PIN_SABER_CLOCK);
     #if (SABER_SOUND_ON == SABER_SOUND_SD)
         #ifdef SABER_INTEGRATED_SD
             Log.p("Connecting to built in SD...").eol();

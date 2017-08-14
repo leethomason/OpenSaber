@@ -175,7 +175,7 @@ void Accelerometer::begin()
 {
     #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH
         Log.p("LIS3DH Accelerometer starting.").eol();
-        if (!localAccel.begin()) {
+        if (!localAccel.begin(0x19)) {
             Log.p("Accelerometer ERROR.").eol();
         }
         else {

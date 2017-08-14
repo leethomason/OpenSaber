@@ -28,7 +28,7 @@ SOFTWARE.
 // --- Configuration ---
 // Note: Serial connection should be set to 19200 baud with a newline after commands.
 
-#define SERIAL_DEBUG 0
+#define SERIAL_DEBUG 1
 
 #define SABER_MODEL_TEST			0
 #define SABER_MODEL_GECKO			1	// PCB, Teensy 3, external amp and accel
@@ -39,8 +39,9 @@ SOFTWARE.
 //#define SABER_MODEL_PROTO 		6	// Burned out; never needed to rebuild.
 #define SABER_MODEL_TANO 			7
 #define SABER_MODEL_SISTER 			8
+#define SABER_MODEL_AQUATIC			9
 
-#define SABER_MODEL 				SABER_MODEL_SISTER
+#define SABER_MODEL 				SABER_MODEL_AQUATIC
 
 #define LED_TOPOLOGY_RESISTOR		1
 #define LED_TOPOLOGY_DRIVER			2
@@ -303,6 +304,43 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int VOLUME_3 = 120;
 	static const int VOLUME_4 = 200;
 
+#elif (SABER_MODEL == SABER_MODEL_AQUATIC)
+	#define PCB_VERSION 				PCB_SHIELD_2
+	#define LED_TOPOLOGY 				LED_TOPOLOGY_RESISTOR
+	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_LIS3DH
+	#define SABER_INTEGRATED_SD
+	#define SABER_SOUND_ON 				SABER_SOUND_SD
+	#define SABER_SOUND_SHUTDOWN
+	#define SABER_VOLTMETER
+
+	#define SABER_NUM_LEDS 			4
+	#define SABER_UI_START  		0
+	#define SABER_UI_BRIGHTNESS		8
+
+	#undef SABER_BUTTON
+	#define SABER_BUTTON Button::INTERNAL_PULLUP
+
+	static const int32_t UVOLT_MULT = 6691;		
+	#define ID_STR "Aquatic Cree XPE2 RGB"
+
+	// Thermal paste heat sinking.
+	static const int32_t RED_VF   = 2100;   // milli-volts
+	static const int32_t RED_I    = 400;    // milli-amps
+	static const int32_t RED_R    = 4300;   // milli-ohms
+
+	static const int32_t GREEN_VF = 3400;
+	static const int32_t GREEN_I  = 400;
+	static const int32_t GREEN_R  = 1000;
+
+	static const int32_t BLUE_VF  = 3100;
+	static const int32_t BLUE_I   = 400;
+	static const int32_t BLUE_R   = 1600;
+
+	static const int VOLUME_1 = 15;
+	static const int VOLUME_2 = 50;
+	static const int VOLUME_3 = 120;
+	static const int VOLUME_4 = 200;
+
 #endif
 
 #if (PCB_VERSION == PCB_VERSION_1)	
@@ -497,7 +535,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_VMETER        20
 	#define PIN_EMITTER_BLUE  21
 	#define PIN_EMITTER_GREEN 22
-	#define PIN_EMITTER_BLUE  23
+	#define PIN_EMITTER_RED   23
 #else
 	#error Pins not defined.
 #endif
