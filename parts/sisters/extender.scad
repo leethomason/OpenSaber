@@ -1,6 +1,6 @@
 $fn=90;
 
-H = 14;
+H = 16.5;
 DELTA = 24.5;
 
 difference() {
