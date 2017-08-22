@@ -19,16 +19,15 @@ RF24_ANT_DZ     = RF24_Z - RF24_ANT_Z;
 
 WALL_T          = 1;
 
-BOLT_HEAD_D     = 6;                // fixme
-BOLT_HEAD_SPACE = BOLT_HEAD_D + 2;
-BOLT_D          = 4;                // fixme
-BOLT_INSET      = 2;
+BOLT_HEAD_D     = 5.5;                
+BOLT_D          = 3.2;   
+BOLT_INSET      = 2.5;
 BOLT_Z0         = 4;
-BOLT_Z1         = BOLT_Z0 + 37.2;   // only specific intervals work
+BOLT_Z1         = BOLT_Z0 + 35;   // only specific intervals work
                                     // due to grip spacing
 BOLT_DZ = BOLT_Z1 - BOLT_Z0;
 
-BOX_DZ = BOLT_HEAD_SPACE*2 + RF24_Z;
+BOX_DZ = BOLT_Z0 + BOLT_Z1;
 BOX_DY = 5;
 BOX_DX = RF24_X + WALL_T * 2;
 
@@ -69,21 +68,18 @@ difference() {
     
     // Punch out the actual chip
     translate([-RF24_X/2, 0, RF24_START_Z])
-        cube(size=[RF24_X, R_SABER_OUTER + RF24_Y, RF24_Z]);
+        cube(size=[RF24_X, R_SABER_OUTER + RF24_Y, RF24_Z-2]);
     
     // Crystal opening
     translate([-RF24_X/2, 0, RF24_START_Z + RF24_CRYSTAL_Z])
         roundCube(size=[RF24_CRYSTAL_DX, 100, RF24_CRYSTAL_DZ], rad=RAD);
     
     translate([RF24_X/2 - RF24_DECO, 0, RF24_START_Z + RF24_CRYSTAL_Z])
-        roundCube(size=[RF24_DECO, 100, RF24_DECO], rad=RAD);
+        roundCube(size=[RF24_DECO, 100, RF24_DECO*1.5], rad=RAD);
     
-    translate([RF24_X/2 - RF24_DECO, 0, RF24_START_Z + RF24_CRYSTAL_Z + RF24_CRYSTAL_DZ - RF24_DECO])
-        roundCube(size=[RF24_DECO, 100, RF24_DECO], rad=RAD);
-
     // Antenna
     translate([-RF24_X/2, 0, RF24_START_Z + RF24_ANT_Z])
-        cube(size=[RF24_X, R_SABER_OUTER + RF24_Y, RF24_ANT_DZ]);
+        cube(size=[RF24_X, R_SABER_OUTER + RF24_Y-1.5, RF24_ANT_DZ]);
     
     // same, inset
     translate([-RF24_X/2, 0, RF24_START_Z + RF24_ANT_Z])
