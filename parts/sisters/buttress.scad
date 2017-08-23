@@ -29,50 +29,31 @@ module circuitry(h, deltaY, wideWing)
 	}
 }
 
-module shelfRail(h, right=true, t=3)
-{
-	T = 3;
-	intersection() {
-		cylinder(h=h, d=D_AFT);
-		if (right)
-			mirror([1, 0, 0]) translate([W_MC/2, Y_MC + H_MC - T, 0]) cube(size=[t, T, h]);
-		else
-			translate([W_MC/2, Y_MC + H_MC - T, 0]) cube(size=[t, T, h]);
-	}
-}
-
 module oneShelfBeam(h, fill, width)
 {
-	H = 8;
-	translate([W_MC/2, Y_MC + H_MC - H, 0]) {
+	translate([W_MC/2, Y_MC + H_MC - BEAM_HEIGHT, 0]) {
 		if (fill)
-			cube(size=[width, H, h]);
+			cube(size=[width, BEAM_HEIGHT, h]);
 		else
-			beam(width, H, h);
+			beam(width, BEAM_HEIGHT, h);
 	}
-	translate([W_MC/2, Y_MC + H_MC - H - 10, 0]) cube(size=[width, 10, h]);
+	translate([W_MC/2, Y_MC + H_MC - BEAM_HEIGHT - 10, 0]) cube(size=[width, 10, h]);
 }
 
-module shelfBeam(h, right=true, width=4, fill=false) {
+module shelfBeam(h, width=4, fill=false) {
 	intersection() {
 		cylinder(h=h, d=D_AFT);
-		if (right) 
-			mirror([1, 0, 0]) oneShelfBeam(h, fill, width);
-		else
-			oneShelfBeam(h, fill, width);
+		oneShelfBeam(h, fill, width);
 	}
 }
 
-module buttress(	h=H_BUTTRESS,
-					leftWiring=true, 
+module buttress(	leftWiring=true, 
 					rightWiring=true, 
 					battery=true, 
-					mc=true, 
-					mcDeltaY=0, 
-					trough=0, 
-					wideWing=0,
-					highHoles=0,
-					highBoost=[])
+					trough=0,
+					clip=false,
+					wiring=false,
+					h=H_BUTTRESS)
 {
 	difference() {
 		cylinder(h=h, d=D_AFT);	
@@ -82,17 +63,43 @@ module buttress(	h=H_BUTTRESS,
 			translate([0, 0, -EPS]) battery(h + EPS2);
 		}
 
-		// Board
-		if (mc) {
-			translate([0, 0, -EPS]) circuitry(h + EPS2, mcDeltaY, wideWing);
-		}
-
 		if (trough != 0) {
 			T = trough < 0 ? TROUGH : trough;
             translate([-T/2, -12, -EPS]) {
                 cube(size=[T, 40, h + EPS2]);
             }
 		}
+
+		// microcontroller / beams
+		translate([-W_MC/2, Y_MC + H_MC - 40 - 1, -EPS])
+			cube(size=[W_MC, 40, h + EPS2]);
+		translate([W_MC/2, Y_MC + H_MC - 40, -EPS])
+			cube(size=[BEAM_WIDTH, 40, h + EPS2]);
+		mirror([1, 0, 0]) translate([W_MC/2, Y_MC + H_MC - 40, -EPS])
+			cube(size=[BEAM_WIDTH, 40, h + EPS2]);
+		
+		if (clip) {
+			translate([W_MC/2 + BEAM_WIDTH - 1, -20, -EPS]) {
+				cube(size=[20, 40, h + EPS2]);
+			}
+			mirror([1, 0, 0]) translate([W_MC/2 + BEAM_WIDTH - 1, -20, -EPS]) {
+				cube(size=[20, 40, h + EPS2]);
+			}
+			CR = 12;
+			translate([W_MC/2 + BEAM_WIDTH - 1 + CR, 0, -EPS]) {
+				cylinder(h=h + EPS2, r=CR + 1);
+			}
+			mirror([1, 0, 0]) translate([W_MC/2 + BEAM_WIDTH - 1 + CR, 0, -EPS]) {
+				cylinder(h=h + EPS2, r=CR + 1);
+			}
+
+		}
+
+		if (wiring) {
+			translate([9, -2.5, -EPS]) cylinder(d=4, h=h + EPS2);		
+			mirror([1, 0, 0]) translate([9, -2.5, -EPS]) cylinder(d=4, h=h + EPS2);		
+		}
+
 
 	    // Wiring holes
 	    X_WIRING =  11.5;
@@ -112,20 +119,6 @@ module buttress(	h=H_BUTTRESS,
 			    translate([-X_WIRING, Y_WIRING, -EPS]) cylinder(h=h + EPS2, d=D);
 			    translate([-X_WIRING, Y_WIRING_B, -EPS]) cylinder(h=h + EPS2, d=D);
 	    	}
-	    }
-	    if (highHoles) {
-		    hull() {
-			    translate([13, 3, -EPS]) cylinder(h=h + EPS2, d=3);
-			    translate([13, 0, -EPS]) cylinder(h=h + EPS2, d=3);
-			    translate([13-highHoles, 3 + highBoost, -EPS]) cylinder(h=h + EPS2, d=3);
-			    translate([13-highHoles, 0, -EPS]) cylinder(h=h + EPS2, d=3);
-		    }
-		    hull() {
-			    translate([-13, 3, -EPS]) cylinder(h=h + EPS2, d=3);
-			    translate([-13, 0, -EPS]) cylinder(h=h + EPS2, d=3);
-			    translate([-13+highHoles, 3 + highBoost, -EPS]) cylinder(h=h + EPS2, d=3);
-			    translate([-13+highHoles, 0, -EPS]) cylinder(h=h + EPS2, d=3);
-		    }
 	    }
 	}
 }

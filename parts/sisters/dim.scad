@@ -14,19 +14,17 @@ M_PORT_CENTER       = M_TRANSITION + 5.5; // Luna
 X_SWITCH			= 0.0;
 */
 
-M_POMMEL_BACK		= 9.0;		// Back of the pommel, leaving (in this case)
-								// enough space for the various pommels.
-M_0					= 0;
-M_POMMEL_FRONT		= 10;		// Where the pommel becomes aft
-M_RAIL_START		= 12;
 M_SPKR_RING			= 15.5;		// Front of the speaker ring.
+M_RAIL_START        = 12;
+M_POMMEL_FRONT      = 10;       // Where the pommel becomes aft
+M_POMMEL_BACK       = 9.0;      // Back of the pommel, leaving (in this case)
+                                // enough space for the various pommels.
+M_0                 = 0;
 
 H_BUTTRESS			= 4;
 
-M_BUTTRESS_0		= M_SPKR_RING;			// speaker holder, behind wings
-M_BUTTRESS_1		= M_SPKR_RING + 18;
-M_BUTTRESS_2		= M_SPKR_RING + 37;
-M_BUTTRESS_3		= M_BUTTRESS_0 + H_BUTTRESS + 55;
+M_BUTTRESS_0		= M_SPKR_RING + H_BUTTRESS;			// speaker holder, behind wings
+M_BUTTRESS_3		= M_SPKR_RING + H_BUTTRESS + 55;
 M_BUTTRESS_4		= M_SPKR_RING + 70;		// holds speaker in place, space for foam
 
 M_WAY_BACK			= -20;
@@ -78,6 +76,8 @@ W_WING  			= 25;
 H_WING  			= 10.5;	// higher over power converter
 
 W_MC 				= 18;
+MC_RAIL             = 2.8;
+RAIL_DY             = -13;
 H_MC    			= 10;
 Y_MC    			= -15.5;	// low config -13.5, this value in flat config
 Z_MC_35 			= 71.5;		// includes SD
@@ -86,6 +86,9 @@ SHOULDER_DZ			= 3.5;
 
 HORN_WIDTH			= 5;
 HORN_BASE_WIDTH		= 6.5;
+
+BEAM_WIDTH          = 5.0;
+BEAM_HEIGHT         = 8.0;
 
 M_RF24				= 95;	// fixme
 RF24_PUNCH_X0		= 10;
