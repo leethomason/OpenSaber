@@ -394,8 +394,7 @@ difference() {
             upperBars(M_BUTTRESS_3 - M_BUTTRESS_0 + EPS);
 
         translate([0, 0, M_SPKR_RING]) {
-            intersection() 
-            {
+            intersection() {
                 tube(H_BUTTRESS, D_SPKR_INNER/2, D_AFT/2);
                 union() {
                     translate([W_MC/2, 5, 0]) 
