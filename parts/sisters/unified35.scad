@@ -316,7 +316,7 @@ FLATTEN = 1.8;
 }
 
 // Back battery holder
-color("green") difference() {
+*color("green") difference() {
     intersection() {
         innerTube();
         union() {
@@ -388,10 +388,23 @@ difference() {
             translate([0, 0, M_SPKR_RING + H_BUTTRESS * (1 + 2 * i) + 11]) 
                 buttress(leftWiring=false, rightWiring=false, trough=W_MC, clip=true);
         }
-        translate([0, 0, M_SPKR_RING - EPS])
-            upperBars(M_BUTTRESS_3 - M_SPKR_RING + EPS2);
-        mirror([1, 0, 0]) translate([0, 0, M_SPKR_RING - EPS])
-            upperBars(M_BUTTRESS_3 - M_SPKR_RING + EPS2);
+        translate([0, 0, M_BUTTRESS_0])
+            upperBars(M_BUTTRESS_3 - M_BUTTRESS_0 + EPS);
+        mirror([1, 0, 0]) translate([0, 0, M_BUTTRESS_0])
+            upperBars(M_BUTTRESS_3 - M_BUTTRESS_0 + EPS);
+
+        translate([0, 0, M_SPKR_RING]) {
+            intersection() 
+            {
+                tube(H_BUTTRESS, D_SPKR_INNER/2, D_AFT/2);
+                union() {
+                    translate([W_MC/2, 5, 0]) 
+                        cube(size=[BEAM_WIDTH, 10, H_BUTTRESS]);
+                    mirror([1,0,0]) translate([W_MC/2, 5, 0]) 
+                        cube(size=[BEAM_WIDTH, 10, H_BUTTRESS]);
+                }
+            }
+        }
     }
     // Flatten the bottom for printing.
     translate([-20, -D_AFT_RING/2, M_WAY_BACK]) cube(size=[40, FLATTEN, H_FAR]);
