@@ -260,15 +260,8 @@ module upperBars(h)
         cube(size=[2, 4, h]);
 }
 
-M_BAR_STOP = M_TRANSITION - 19;
+M_MC_START = M_SPKR_RING + H_BUTTRESS;
 BAR_HEIGHT = 9.5;    // was 7.5
-
-module frontBar(w, dx, dz)
-{
-    translate([-w/2 + dx, -R_AFT, M_SPKR_RING + H_BUTTRESS + Z_MC_35]) {
-        cube(size=[w, BAR_HEIGHT, EPS + M_BAR_STOP - (M_SPKR_RING + H_BUTTRESS + Z_MC_35)]);
-    }
-}
 
 module horn()
 {
@@ -355,27 +348,31 @@ difference() {
         {
             innerTube();
             union() {
-                translate([0, -R_AFT, M_SPKR_RING + H_BUTTRESS + Z_MC_35 - SHOULDER_DZ]) {
-                    translate([W_MC/2 - 3, 0, 0]) cube(size=[3, BAR_HEIGHT,9]);
+                // Stop bars, left & right
+                translate([0, -R_AFT, M_MC_START + Z_MC_35]) {
+                    translate([W_MC/2 - 3, 0, 0]) cube(size=[3, BAR_HEIGHT, 9]);
                     mirror([1, 0, 0]) translate([W_MC/2 - 3, 0, 0]) cube(size=[3, BAR_HEIGHT, 9]);
                 }
-                translate([-W_MC/2, -R_AFT, M_BAR_STOP]) {
+                // Stop bar, center.
+                translate([-W_MC/2, -R_AFT, M_MC_START + Z_MC_35 + 4]) {
                     cube(size=[W_MC, BAR_HEIGHT, 2]);
                 }
-                frontBar(2, 5);
-                mirror([1, 0, 0]) frontBar(2, 5);
 
                 translate([0, 0, M_SPKR_RING]) mirror([1, 0, 0])
                     shelfBeam(M_TRANSITION - T_TRANSITION_RING + EPS - M_SPKR_RING, BEAM_WIDTH);
                 translate([0, 0, M_SPKR_RING]) 
                     shelfBeam(M_TRANSITION - T_TRANSITION_RING + EPS - M_SPKR_RING, BEAM_WIDTH);
 
-                // Rails that hold up microcontrolller
+                // Bottom rails that hold up microcontrolller
                 RAIL_Z = M_TRANSITION - T_TRANSITION_RING + EPS - M_SPKR_RING;
                 translate([0, 0, M_SPKR_RING]) {
                     mcRail(RAIL_Z);
                     mirror([1, 0, 0]) mcRail(RAIL_Z);
                 }
+
+                // aft stop for microcontroller
+                translate([0, -R_AFT, M_SPKR_RING]) cube(size=[9, 10, H_BUTTRESS]);
+                mirror([1, 0, 0]) translate([0, -R_AFT, M_SPKR_RING]) cube(size=[9, 10, H_BUTTRESS]);
             }
         }
         translate([0, 0, M_BUTTRESS_0]) buttress(trough = 8, wiring=false);
