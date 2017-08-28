@@ -348,13 +348,14 @@ difference() {
         {
             innerTube();
             union() {
+                OFFSET = 2;
                 // Stop bars, left & right
-                translate([0, -R_AFT, M_MC_START + Z_MC_35]) {
-                    translate([W_MC/2 - 3, 0, 0]) cube(size=[3, BAR_HEIGHT, 9]);
-                    mirror([1, 0, 0]) translate([W_MC/2 - 3, 0, 0]) cube(size=[3, BAR_HEIGHT, 9]);
+                translate([0, -R_AFT, M_MC_START + Z_MC_35 + OFFSET- 4]) {
+                    translate([W_MC/2 - 3, 0, 0]) cube(size=[3, BAR_HEIGHT, 6]);
+                    mirror([1, 0, 0]) translate([W_MC/2 - 3, 0, 0]) cube(size=[3, BAR_HEIGHT, 6]);
                 }
                 // Stop bar, center.
-                translate([-W_MC/2, -R_AFT, M_MC_START + Z_MC_35 + 4]) {
+                translate([-W_MC/2, -R_AFT, M_MC_START + Z_MC_35 + OFFSET]) {
                     cube(size=[W_MC, BAR_HEIGHT, 2]);
                 }
 
