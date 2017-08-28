@@ -1,5 +1,5 @@
 #include "pins.h"
-#if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH
+#if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH || SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH_SPI
 #   include <Adafruit_LIS3DH.h>
 #elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
 #   include "accelFXOS8700.h"
@@ -158,6 +158,8 @@ void AveragePower::push(uint32_t milliVolts)
 
 #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH
 Adafruit_LIS3DH localAccel;
+#elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH_SPI
+Adafruit_LIS3DH localAccel(PIN_ACCEL_EN);
 #elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
 AccelFXOS8700 localAccel;
 #else
@@ -174,8 +176,18 @@ Accelerometer::Accelerometer()
 void Accelerometer::begin()
 {
     #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH
-        Log.p("LIS3DH Accelerometer starting.").eol();
+        Log.p("LIS3DH Accelerometer starting: I2C mode.").eol();
         if (!localAccel.begin(0x19)) {
+            Log.p("Accelerometer ERROR.").eol();
+        }
+        else {
+            Log.p("Accelerometer open.").eol();
+            localAccel.setRange(LIS3DH_RANGE_4_G);
+            localAccel.setDataRate(LIS3DH_DATARATE_100_HZ);
+        }
+    #elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH_SPI
+        Log.p("LIS3DH Accelerometer starting: SPI mode").eol();
+        if (!localAccel.begin(0)) {
             Log.p("Accelerometer ERROR.").eol();
         }
         else {
@@ -198,7 +210,7 @@ void Accelerometer::begin()
 
 void Accelerometer::read(float* ax, float* ay, float* az, float* g2, float* g2Normal)
 {
-    #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH
+    #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH || SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH_SPI
         localAccel.read();
 
         // Y is blade direction!

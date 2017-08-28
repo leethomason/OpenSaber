@@ -67,6 +67,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 #define SABER_ACCELEROMETER_NONE 	0
 #define SABER_ACCELEROMETER_LIS3DH	1
 #define SABER_ACCELEROMETER_NXP		2
+#define SABER_ACCELEROMETER_LIS3DH_SPI 3
 
 #define SABER_BUTTON Button::PULL_DOWN
 
@@ -267,15 +268,16 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int VOLUME_4 = 200;
 
 #elif (SABER_MODEL == SABER_MODEL_SISTER)
-	#define PCB_VERSION 				PCB_VERSION_9
+	#define PCB_VERSION 				PCB_SHIELD_3
 	#define LED_TOPOLOGY 				LED_TOPOLOGY_RESISTOR
-	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
+	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_LIS3DH_SPI
 	#define SABER_SOUND_ON 				SABER_SOUND_SD
 	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
-	#define SABER_SISTERS
+	//#define SABER_SISTERS
 	#define SABER_AUDIO_UI
+	//#define SABER_AUDIO_EXTERNAL_REF
 
 	#define SABER_ADDR_0 "1Sist"
 	#define SABER_ADDR_1 "2Sist"
@@ -283,7 +285,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#undef SABER_BUTTON
 	#define SABER_BUTTON Button::INTERNAL_PULLUP
 
-	static const int32_t UVOLT_MULT = 6691;		// calibrated
+	static const int32_t UVOLT_MULT = 6691;		// fixme
 	#define ID_STR "Sisters Cree XPE2 RGB"
 
 	// Thermal paste heat sinking.
@@ -307,7 +309,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 #elif (SABER_MODEL == SABER_MODEL_AQUATIC)
 	#define PCB_VERSION 				PCB_SHIELD_2
 	#define LED_TOPOLOGY 				LED_TOPOLOGY_RESISTOR
-	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_LIS3DH
+	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_LIS3DH_SPI
 	#define SABER_INTEGRATED_SD
 	#define SABER_SOUND_ON 				SABER_SOUND_SD
 	#define SABER_SOUND_SHUTDOWN
@@ -506,7 +508,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 		#define PIN_LED_A		  22
 	#endif
 
-#elif (PCB_VERSION == PCB_SHIELD_2)
+#elif (PCB_VERSION == PCB_SHIELD_3)
 	/* 
 	  Grinning Lizard Shield v2
 	   + dotstar optional
@@ -525,13 +527,13 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_SPI_CS		  10
 	#define PIN_SABER_MOSI    11
 	#define PIN_SABER_MISO    12
-
-	// 14
+	// 13 clock
+	#define PIN_ACCEL_EN      14
 	// 15
 	// 16
 	// 17
-	#define PIN_SDA           18
-	#define PIN_SCL           19
+	// 18
+	// 19
 	#define PIN_VMETER        20
 	#define PIN_EMITTER_BLUE  21
 	#define PIN_EMITTER_GREEN 22
