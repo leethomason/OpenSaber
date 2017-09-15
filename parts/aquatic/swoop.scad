@@ -35,7 +35,7 @@ module arch(dx=12, sy=1, dz=1, inset=2)
 
 *arch(16, 0.8, 4);
 
-for(i=[0:3]) {
+*for(i=[0:3]) {
     translate([i*8.5,0,0])
         //arch(18, 0.7, 4, 3);
         arch(14, 1.0, 4, 2);
