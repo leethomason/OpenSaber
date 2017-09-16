@@ -324,11 +324,6 @@ if (DRAW_BAT) {
 
                 translate([0, 0, M_TRANSITION - T_TRANSITION_RING - SUB_H]) buttress(battery=false, trough=20, clip=true, h=SUB_H);
 
-                /*
-                translate([W_MC/2 + 1, Y_MC + H_MC, M_TRANSITION - T_TRANSITION_RING - SUB_H])
-                    cube(size=[2, 12, SUB_H]);
-                */
-
                 M = M_BUTTRESS_0 + H_BUTTRESS * 13 - EPS;
                 translate([0, 0, M])
                     upperBars(M_TRANSITION -T_TRANSITION_RING - M + EPS2);
@@ -392,14 +387,6 @@ if (DRAW_BACK) {
                 translate([0, 0, M_SPKR_RING + H_BUTTRESS * (3 + 2 * i)]) 
                     buttress(leftWiring=false, rightWiring=false, trough=W_MC, clip=true, bridge=true);
             }
-            /*
-            // Bars that strengthen the buttresses.
-            translate([0, 0, M_BUTTRESS_0 + H_BUTTRESS])
-                upperBars(M_BUTTRESS_3 - M_BUTTRESS_0 - H_BUTTRESS + EPS, true);
-            mirror([1, 0, 0]) translate([0, 0, M_BUTTRESS_0 + H_BUTTRESS])
-                upperBars(M_BUTTRESS_3 - M_BUTTRESS_0 - H_BUTTRESS + EPS, true);
-            */
-            
             // Hold the forward PCB
             hull() {
                 translate([W_MC/2 + 1, -5.5, M_BUTTRESS_4 + H_BUTTRESS + 3]) 
