@@ -52,6 +52,7 @@ Y_DOTSTAR           = 1.4;  // from spec
 DOTSTAR_SPACE		= 7;
 
 H_BATTERY           = 68;
+BATTERY_BIAS        = 0.5;  // downward bias to fit it tape / protector
 D_BATTERY           = 18.50 + 0.5;    // An 1850. Huh. 
 R_BATTERY			= D_BATTERY / 2;
 

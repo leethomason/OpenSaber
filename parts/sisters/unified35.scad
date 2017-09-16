@@ -252,12 +252,12 @@ module rail(r, m=0, h=0)
 }
 
 
-module upperBars(h)
+module upperBars(h, arch)
 {
-    translate([W_MC/2 + 1, 5, 0])
-         cube(size=[2, 4, h]);
-    mirror([1, 0, 0]) translate([W_MC/2 + 1, 5, 0])
-        cube(size=[2, 4, h]);
+    translate([W_MC/2 + 1, 1, 0])
+        beam(2, 7, h);
+    mirror([1, 0, 0]) translate([W_MC/2 + 1, 1, 0])
+        beam(2, 7, h);
 }
 
 M_MC_START = M_SPKR_RING + H_BUTTRESS;
@@ -324,8 +324,9 @@ FLATTEN = 1.8;
                 cube(size=[2, 12, SUB_H]);
             */
 
-            translate([0, 0, M_BUTTRESS_3 + H_BUTTRESS - EPS])
-                upperBars(M_TRANSITION - M_BUTTRESS_3 - H_BUTTRESS - T_TRANSITION_RING);
+            M = M_BUTTRESS_0 + H_BUTTRESS * 13 - EPS;
+            translate([0, 0, M])
+                upperBars(M_TRANSITION -T_TRANSITION_RING - M + EPS2);
         }
     }
     // Flatten the bottom for printing.
@@ -382,15 +383,24 @@ difference() {
 
         horn();
 
-        for(i=[0:4]) {
-            translate([0, 0, M_SPKR_RING + H_BUTTRESS * (1 + 2 * i) + 11]) 
-                buttress(leftWiring=false, rightWiring=false, trough=W_MC, clip=true);
+        for(i=[0:5]) {
+            translate([0, 0, M_SPKR_RING + H_BUTTRESS * (3 + 2 * i)]) 
+                buttress(leftWiring=false, rightWiring=false, trough=W_MC, clip=true, bridge=true);
         }
-        translate([0, 0, M_BUTTRESS_0])
-            upperBars(M_BUTTRESS_3 - M_BUTTRESS_0 + EPS);
-        mirror([1, 0, 0]) translate([0, 0, M_BUTTRESS_0])
-            upperBars(M_BUTTRESS_3 - M_BUTTRESS_0 + EPS);
+        // Bars that strengthen the buttresses.
+        /*translate([0, 0, M_BUTTRESS_0 + H_BUTTRESS])
+            upperBars(M_BUTTRESS_3 - M_BUTTRESS_0 - H_BUTTRESS + EPS, true);
+        mirror([1, 0, 0]) translate([0, 0, M_BUTTRESS_0 + H_BUTTRESS])
+            upperBars(M_BUTTRESS_3 - M_BUTTRESS_0 - H_BUTTRESS + EPS, true);*/
 
+        
+        // Hold the forward PCB
+        translate([W_MC/2 + 1, -5.5, M_BUTTRESS_4 + H_BUTTRESS + 3])
+            cube(size=[2, 5, 12]);
+        mirror([1,0,0]) translate([W_MC/2 + 1, -5.5, M_BUTTRESS_4 + H_BUTTRESS + 3])
+            cube(size=[2, 5, 12]);
+
+        // Special connectors from the back buttress to the lock ring.
         translate([0, 0, M_SPKR_RING]) {
             intersection() {
                 tube(H_BUTTRESS, D_SPKR_INNER/2, D_AFT/2);
@@ -400,8 +410,10 @@ difference() {
                     mirror([1,0,0]) translate([W_MC/2, 5, 0]) 
                         cube(size=[BEAM_WIDTH, 10, H_BUTTRESS]);
                 }
+                translate([-20, 1.8, 7]) rotate([-45, 0, 0]) cube(size=[40, 14, 14]);
             }
         }
+
     }
     // Flatten the bottom for printing.
     translate([-20, -D_AFT_RING/2, M_WAY_BACK]) cube(size=[40, FLATTEN, H_FAR]);

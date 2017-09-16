@@ -8,7 +8,7 @@ TROUGH 				= 12;
 
 module battery(h)
 {
-	BATTERY_Y = R_AFT - R_BATTERY;
+	BATTERY_Y = R_AFT - R_BATTERY - BATTERY_BIAS;
 
 	translate([0, BATTERY_Y, 0]) {
 	    cylinder(h=h, d=D_BATTERY);
@@ -53,7 +53,8 @@ module buttress(	leftWiring=true,
 					trough=0,
 					clip=false,
 					wiring=false,
-					h=H_BUTTRESS)
+					h=H_BUTTRESS,
+					bridge=false)
 {
 	difference() {
 		cylinder(h=h, d=D_AFT);	
@@ -121,5 +122,20 @@ module buttress(	leftWiring=true,
 	    	}
 	    }
 	}
+
+    if (bridge) {
+	   	hull() {
+   		    translate([W_MC/2 + 1, 4, -H_BUTTRESS - EPS])
+		   		cube(size=[2, 4, H_BUTTRESS + EPS2]);
+   		    translate([W_MC/2 + 1, 0, 0])
+		   		cube(size=[2, 4, EPS]);   	    	
+   	    }
+	   	mirror([1, 0, 0]) hull() {
+   		    translate([W_MC/2 + 1, 4, -H_BUTTRESS - EPS])
+		   		cube(size=[2, 4, H_BUTTRESS + EPS2]);
+   		    translate([W_MC/2 + 1, 0, 0])
+		   		cube(size=[2, 4, EPS]);   	    	
+   	    }
+    }
 }
 

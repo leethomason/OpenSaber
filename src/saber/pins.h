@@ -275,7 +275,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
-	//#define SABER_SISTERS
+	#define SABER_SISTERS
 	#define SABER_AUDIO_UI
 	//#define SABER_AUDIO_EXTERNAL_REF
 
@@ -492,21 +492,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_SWITCH_B	  21
 	#define PIN_LED_B		  22
 	// 23
-
-	// "Sister" switches A/B.
-	// Primarily so that the main button can be PWM.
-	// This is to work around a bug in V9 that
-	// LED A isn't analog; LED B is.
-	#if (SABER_MODEL == SABER_MODEL_SISTER)
-		#undef PIN_LED_A
-		#undef PIN_LED_B
-		#undef PIN_SWITCH_A
-		#undef PIN_SWITCH_B
-		#define PIN_LED_B         16
-		#define PIN_SWITCH_B      17
-		#define PIN_SWITCH_A	  21
-		#define PIN_LED_A		  22
-	#endif
 
 #elif (PCB_VERSION == PCB_SHIELD_3)
 	/* 
