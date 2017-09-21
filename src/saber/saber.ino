@@ -108,7 +108,7 @@ Renderer renderer;
 #endif
 
 #ifdef SABER_SISTERS
-RF24 rf24(PIN_RF24_CE, PIN_RF24_CS);
+RF24 rf24(PIN_SPI_CE, PIN_SPI_CS);
 ComRF24 comRF24(&rf24);
 #else
 ComRF24 comRF24(0);
@@ -223,7 +223,7 @@ void setup() {
 
     #ifdef SABER_SISTERS 
         pinMode(PIN_SWITCH_B, INPUT);
-        int rolePin = digitalRead(PIN_SWITCH_B);    // they are switched; labelled "A"
+        int rolePin = digitalRead(PIN_SWITCH_B);
         if(comRF24.begin(rolePin == HIGH ? 1 : 0)) {
             Log.p("RF24 initialized. Role=").p(comRF24.role()).eol();
         }

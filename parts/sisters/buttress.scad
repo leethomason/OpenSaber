@@ -5,7 +5,7 @@ EPS = 0.01;
 EPS2 = EPS * 2;
 BATTERY_CUTOUT		= 18;	// 12 to hold. This value set for drop in.
 TROUGH 				= 12;
-BATTERY_Y 			= R_AFT - R_BATTERY;
+BATTERY_Y 			= R_AFT - R_BATTERY - BATTERY_BIAS;
 
 module battery(h)
 {
@@ -52,7 +52,8 @@ module buttress(	leftWiring=true,
 					trough=0,
 					clip=false,
 					wiring=false,
-					h=H_BUTTRESS)
+					h=H_BUTTRESS,
+					bridge=false)
 {
 	difference() {
 		cylinder(h=h, d=D_AFT);	
@@ -120,5 +121,20 @@ module buttress(	leftWiring=true,
 	    	}
 	    }
 	}
+
+    if (bridge) {
+	   	hull() {
+   		    translate([W_MC/2 + 1, 4, -H_BUTTRESS - EPS])
+		   		cube(size=[2, 4, H_BUTTRESS + EPS2]);
+   		    translate([W_MC/2 + 1, 0, 0])
+		   		cube(size=[2, 4, EPS]);   	    	
+   	    }
+	   	mirror([1, 0, 0]) hull() {
+   		    translate([W_MC/2 + 1, 4, -H_BUTTRESS - EPS])
+		   		cube(size=[2, 4, H_BUTTRESS + EPS2]);
+   		    translate([W_MC/2 + 1, 0, 0])
+		   		cube(size=[2, 4, EPS]);   	    	
+   	    }
+    }
 }
 
