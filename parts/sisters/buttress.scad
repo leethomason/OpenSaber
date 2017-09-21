@@ -5,11 +5,10 @@ EPS = 0.01;
 EPS2 = EPS * 2;
 BATTERY_CUTOUT		= 18;	// 12 to hold. This value set for drop in.
 TROUGH 				= 12;
+BATTERY_Y 			= R_AFT - R_BATTERY;
 
 module battery(h)
 {
-	BATTERY_Y = R_AFT - R_BATTERY;
-
 	translate([0, BATTERY_Y, 0]) {
 	    cylinder(h=h, d=D_BATTERY);
 

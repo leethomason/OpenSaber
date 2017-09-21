@@ -309,27 +309,26 @@ FLATTEN = 1.8;
 }
 
 // Back battery holder
-*color("green") difference() {
+color("green") difference() {
     intersection() {
         innerTube();
         union() {
-            translate([0, 0, M_BUTTRESS_3]) buttress(wiring=true, clip=true);
-            translate([0, 0, M_BUTTRESS_4]) buttress(battery=false, trough=10, wiring=true, clip=true);
-            SUB_H = 1;
-
-            translate([0, 0, M_TRANSITION - T_TRANSITION_RING - SUB_H]) buttress(battery=false, trough=20, clip=true, h=SUB_H);
-
-            /*
-            translate([W_MC/2 + 1, Y_MC + H_MC, M_TRANSITION - T_TRANSITION_RING - SUB_H])
-                cube(size=[2, 12, SUB_H]);
-            */
+            translate([0, 0, M_BUTTRESS_3]) 
+                buttress(wiring=true, clip=true, ring=true);
+            translate([0, 0, M_BUTTRESS_4]) 
+                buttress(battery=false, trough=10, wiring=true, clip=true, ring=true);
+            
+        // SUB_H = 1;
+        //   translate([0, 0, M_TRANSITION - T_TRANSITION_RING - SUB_H])
+        //      buttress(battery=false, trough=20, clip=true, h=SUB_H);
 
             translate([0, 0, M_BUTTRESS_3 + H_BUTTRESS - EPS])
                 upperBars(M_TRANSITION - M_BUTTRESS_3 - H_BUTTRESS - T_TRANSITION_RING);
         }
     }
     // Flatten the bottom for printing.
-    translate([-20, -D_AFT_RING/2, M_WAY_BACK]) cube(size=[40, FLATTEN, H_FAR]);
+    translate([-20, -D_AFT_RING/2, M_WAY_BACK]) 
+        cube(size=[40, FLATTEN, H_FAR]);
 
     OFFSET = 20;
     translate([-W_MC/2, Y_MC - OFFSET, M_SPKR_RING + H_BUTTRESS]) {
@@ -339,7 +338,7 @@ FLATTEN = 1.8;
 
 
 // Back body
-difference() {
+*difference() {
 
      union() {
         transitionRing();
