@@ -4,15 +4,15 @@ M_LED_HOLDER_BACK	= M_LED_HOLDER_FRONT - 10;
 M_SWITCH_CENTER		= M_TRANSITION + 25.5;
 M_DOTSTAR			= M_TRANSITION + 12;
 
+/*
 // Celestia
 M_PORT_CENTER       = M_TRANSITION + 6;
 X_SWITCH			= 0.3;
+*/
 
-/*
 // Luna
 M_PORT_CENTER       = M_TRANSITION + 5.5; // Luna
 X_SWITCH			= 0.0;
-*/
 
 M_SPKR_RING			= 15.5;		// Front of the speaker ring.
 M_RAIL_START        = 12;

@@ -6,7 +6,7 @@ include <dim.scad>
 use <buttress.scad>
 use <beam.scad>
 
-DRAW_FRONT = true;
+DRAW_FRONT = false;
 DRAW_BACK = true;
 DRAW_BAT = true;
 
@@ -259,9 +259,9 @@ module rail(r, m=0, h=0)
 module upperBars(h, arch)
 {
     translate([W_MC/2 + 1, 1, 0])
-        beam(2, 7, h);
+        cube(size=[2, 7, h]); //beam(2, 7, h);
     mirror([1, 0, 0]) translate([W_MC/2 + 1, 1, 0])
-        beam(2, 7, h);
+        cube(size=[2, 7, h]); //beam(2, 7, h);
 }
 
 M_MC_START = M_SPKR_RING + H_BUTTRESS;
@@ -372,9 +372,10 @@ if (DRAW_BACK) {
                         mirror([1, 0, 0]) mcRail(RAIL_Z);
                     }
 
+                    /*
                     // aft stop for microcontroller
-                    translate([0, -R_AFT, M_SPKR_RING]) cube(size=[9, 10, H_BUTTRESS]);
-                    mirror([1, 0, 0]) translate([0, -R_AFT, M_SPKR_RING]) cube(size=[9, 10, H_BUTTRESS]);
+                    translate([0, -R_AFT, M_SPKR_RING]) cube(size=[9, 10, H_BUTTRESS]);                    mirror([1, 0, 0]) translate([0, -R_AFT, M_SPKR_RING]) cube(size=[9, 10, H_BUTTRESS]);
+                    */
                 }
             }
             translate([0, 0, M_BUTTRESS_0]) buttress(trough = 8, wiring=false);
@@ -387,6 +388,7 @@ if (DRAW_BACK) {
                 translate([0, 0, M_SPKR_RING + H_BUTTRESS * (3 + 2 * i)]) 
                     buttress(leftWiring=false, rightWiring=false, trough=W_MC, clip=true, bridge=true);
             }
+
             // Hold the forward PCB
             hull() {
                 translate([W_MC/2 + 1, -5.5, M_BUTTRESS_4 + H_BUTTRESS + 3]) 
@@ -423,7 +425,7 @@ if (DRAW_BACK) {
         
         // Take out a chunk for access to the USB port.
         X_USB = 14; // 10 to tight fit
-        Y_USB = 10;
+        Y_USB = 9;
         Z_USB = 20;
         translate([-X_USB/2, -R_AFT, M_POMMEL_BACK]) cube(size=[X_USB, Y_USB, Z_USB]);
     }
