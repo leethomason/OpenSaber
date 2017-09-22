@@ -1,5 +1,6 @@
 include <dim.scad>
 use <beam.scad>
+use <../shapes.scad>
 
 EPS = 0.01;
 EPS2 = EPS * 2;
@@ -53,14 +54,22 @@ module buttress(	leftWiring=true,
 					clip=false,
 					wiring=false,
 					h=H_BUTTRESS,
-					bridge=false)
+					bridge=false,
+					circle=0)
 {
+
 	difference() {
 		cylinder(h=h, d=D_AFT);	
 
 		// Battery
 		if (battery) {
 			translate([0, 0, -EPS]) battery(h + EPS2);
+		}
+
+		if (circle > 0) {
+			translate([0, BATTERY_Y, 0]) {
+		    	tube(h, D_BATTERY/2+circle, D_BATTERY/2 + 20);
+		    }
 		}
 
 		if (trough != 0) {
