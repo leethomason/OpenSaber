@@ -258,10 +258,12 @@ module rail(r, m=0, h=0)
 
 module upperBars(h, arch)
 {
+    DY = 8;
+
     translate([W_MC/2 + 1, 1, 0])
-        cube(size=[2, 7, h]); //beam(2, 7, h);
+        cube(size=[2, DY, h]);
     mirror([1, 0, 0]) translate([W_MC/2 + 1, 1, 0])
-        cube(size=[2, 7, h]); //beam(2, 7, h);
+        cube(size=[2, DY, h]);
 }
 
 M_MC_START = M_SPKR_RING + H_BUTTRESS;
@@ -314,21 +316,41 @@ if (DRAW_FRONT) {
 }
 
 if (DRAW_BAT) {
+    D = 1.5;
+
     color("green") difference() {
         intersection() {
             innerTube();
             union() {
-                translate([0, 0, M_BUTTRESS_3]) buttress(wiring=true, clip=true);
-                translate([0, 0, M_BUTTRESS_4]) buttress(battery=false, trough=10, wiring=true, clip=true);
-                SUB_H = 1;
-
-                translate([0, 0, M_TRANSITION - T_TRANSITION_RING - SUB_H]) buttress(battery=false, trough=20, clip=true, h=SUB_H);
+                translate([0, 0, M_BUTTRESS_3]) 
+                    buttress(wiring=false, clip=true, circle=2.5, h=11);
+                translate([0, 0, M_BUTTRESS_4]) 
+                    buttress(battery=false, trough=10, wiring=false, clip=true);
 
                 M = M_BUTTRESS_0 + H_BUTTRESS * 13 - EPS;
+                L = M_TRANSITION - T_TRANSITION_RING - M + EPS2;
+
                 translate([0, 0, M])
-                    upperBars(M_TRANSITION -T_TRANSITION_RING - M + EPS2);
+                    upperBars(L);
+
+                // Front and back rails.
+
+                translate([0, 0, M]) 
+                    buttress(leftWiring=false, rightWiring=false, trough=W_MC, clip=true, bridge=true, h=D);
+
+                translate([0, 0, M_TRANSITION - T_TRANSITION_RING - D]) {
+                    difference() {
+                        tube(D, R_FORWARD, R_AFT);
+                        translate([-W_MC/2-1, -10, 0]) cube(size=[W_MC+2, 40, D]);
+                        translate([-20, -20, 0]) cube(size=[40, 14.5, D]);
+                    }
+                    translate([W_MC/2 + 1, 1, 0]) cube(size=[10, 7, D]);
+                    mirror([1,0,0]) translate([W_MC/2 + 1, 1, 0]) cube(size=[10, 7, D]);
+                }
             }
         }
+        translate([-20, -10, M_BUTTRESS_4-EPS]) cube(size=[40, 11, H_BUTTRESS+EPS2]);
+
         // Flatten the bottom for printing.
         translate([-20, -D_AFT_RING/2, M_WAY_BACK]) cube(size=[40, FLATTEN, H_FAR]);
 
