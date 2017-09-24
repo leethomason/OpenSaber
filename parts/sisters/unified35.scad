@@ -7,7 +7,7 @@ use <buttress.scad>
 use <beam.scad>
 
 DRAW_FRONT = false;
-DRAW_BACK = true;
+DRAW_BACK = false;
 DRAW_BAT = true;
 
 M_DOTSTAR_EDGE = M_DOTSTAR - X_DOTSTAR / 2;
@@ -258,7 +258,7 @@ module rail(r, m=0, h=0)
 
 module upperBars(h, arch)
 {
-    DY = 12;
+    DY = 8;
 
     translate([0, 1, 0])
         cubePair(x=W_MC/2 + 1, size=[2, DY, h]);
@@ -314,12 +314,14 @@ if (DRAW_FRONT) {
 }
 
 if (DRAW_BAT) {
+    D = 1.5;
+
     color("green") difference() {
         intersection() {
             innerTube();
             union() {
                 translate([0, 0, M_BUTTRESS_3]) 
-                    buttress(wiring=false, clip=true, circle=2.5, h=11);
+                    buttress(wiring=false, clip=true, circle=2.5, h=7);
                 translate([0, 0, M_BUTTRESS_4]) 
                     buttress(battery=false, trough=10, wiring=false, clip=true);
 
@@ -330,14 +332,19 @@ if (DRAW_BAT) {
                     upperBars(L);
 
                 // Front and back rails.
-                translate([0, Y_MC + H_MC, M]) 
-                    cubePair(x=W_MC/2 + 1, size=[2, 7, 2]);
-                translate([0, Y_MC + H_MC, M_TRANSITION - T_TRANSITION_RING - 2]) 
-                    cubePair(x=W_MC/2 +1, size=[2, 7, 2]);
+                translate([0, 0, M]) 
+                    buttress(leftWiring=false, rightWiring=false, trough=W_MC, clip=true, h=D);
+
+                translate([0, 0, M_TRANSITION - T_TRANSITION_RING - D]) {
+                    difference() {
+                        tube(D, R_FORWARD, R_AFT);
+                        translate([-W_MC/2-1, -10, 0]) cube(size=[W_MC+2, 40, D]);
+                        translate([-20, -20, 0]) cube(size=[40, 14.5, D]);
+                    }
+                    translate([0, 1, 0]) cubePair(x=W_MC/2 + 1, size=[10, 7, D]);
+                }
             }
         }
-        //translate([W_MC/2, -10, 0]) cube(size=[10, 11, 100]);
-        //mirror([1,0,0]) translate([W_MC/2, -10, 0]) cube(size=[10, 11, 100]);
         translate([-20, -10, M_BUTTRESS_4-EPS]) cube(size=[40, 11, H_BUTTRESS+EPS2]);
 
         // Flatten the bottom for printing.
@@ -380,10 +387,6 @@ if (DRAW_BACK) {
                         mcRail(RAIL_Z);
                         mirror([1, 0, 0]) mcRail(RAIL_Z);
                     }
-
-                    // aft stop for microcontroller
-                    translate([0, -R_AFT, M_SPKR_RING])
-                        cubePair(x=0, size=[9, 10, H_BUTTRESS]);
                 }
             }
             translate([0, 0, M_BUTTRESS_0]) buttress(trough = 8, wiring=false);
@@ -396,6 +399,7 @@ if (DRAW_BACK) {
                 translate([0, 0, M_SPKR_RING + H_BUTTRESS * (3 + 2 * i)]) 
                     buttress(leftWiring=false, rightWiring=false, trough=W_MC, clip=true, bridge=true);
             }
+
             // Hold the forward PCB
             hull() {
                 translate([W_MC/2 + 1, -5.5, M_BUTTRESS_4 + H_BUTTRESS + 3]) 
@@ -432,7 +436,7 @@ if (DRAW_BACK) {
         
         // Take out a chunk for access to the USB port.
         X_USB = 14; // 10 to tight fit
-        Y_USB = 10;
+        Y_USB = 9;
         Z_USB = 20;
         translate([-X_USB/2, -R_AFT, M_POMMEL_BACK]) cube(size=[X_USB, Y_USB, Z_USB]);
     }
