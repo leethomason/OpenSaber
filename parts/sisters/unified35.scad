@@ -7,7 +7,7 @@ use <buttress.scad>
 use <beam.scad>
 
 DRAW_FRONT = false;
-DRAW_BACK = false;
+DRAW_BACK = true;
 DRAW_BAT = true;
 
 M_DOTSTAR_EDGE = M_DOTSTAR - X_DOTSTAR / 2;
@@ -260,10 +260,8 @@ module upperBars(h, arch)
 {
     DY = 12;
 
-    translate([W_MC/2 + 1, 1, 0])
-        cube(size=[2, DY, h]);
-    mirror([1, 0, 0]) translate([W_MC/2 + 1, 1, 0])
-        cube(size=[2, DY, h]);
+    translate([0, 1, 0])
+        cubePair(x=W_MC/2 + 1, size=[2, DY, h]);
 }
 
 M_MC_START = M_SPKR_RING + H_BUTTRESS;
@@ -327,21 +325,15 @@ if (DRAW_BAT) {
 
                 M = M_BUTTRESS_0 + H_BUTTRESS * 13 - EPS;
                 L = M_TRANSITION - T_TRANSITION_RING - M + EPS2;
-                //translate([W_MC/2 + 1, Y_MC + H_MC, M])
-                //    cube(size=[2, 7, L]);
 
                 translate([0, 0, M])
                     upperBars(L);
 
                 // Front and back rails.
-                translate([W_MC/2 + 1, Y_MC + H_MC, M]) 
-                    cube(size=[2, 7, 2]);  
-                translate([W_MC/2 + 1, Y_MC + H_MC, M_TRANSITION - T_TRANSITION_RING - 2])
-                    cube(size=[2, 7, 2]);
-                mirror([1,0,0]) translate([W_MC/2 + 1, Y_MC + H_MC, M]) 
-                    cube(size=[2, 7, 2]);  
-                mirror([1,0,0]) translate([W_MC/2 + 1, Y_MC + H_MC, M_TRANSITION - T_TRANSITION_RING - 2])
-                    cube(size=[2, 7, 2]);
+                translate([0, Y_MC + H_MC, M]) 
+                    cubePair(x=W_MC/2 + 1, size=[2, 7, 2]);
+                translate([0, Y_MC + H_MC, M_TRANSITION - T_TRANSITION_RING - 2]) 
+                    cubePair(x=W_MC/2 +1, size=[2, 7, 2]);
             }
         }
         //translate([W_MC/2, -10, 0]) cube(size=[10, 11, 100]);
@@ -360,7 +352,6 @@ if (DRAW_BAT) {
 
 if (DRAW_BACK) {
     difference() {
-
          union() {
             transitionRing();
             
@@ -370,10 +361,9 @@ if (DRAW_BACK) {
                 union() {
                     OFFSET = 2;
                     // Stop bars, left & right
-                    translate([0, -R_AFT, M_MC_START + Z_MC_35 + OFFSET- 4]) {
-                        translate([W_MC/2 - 3, 0, 0]) cube(size=[3, BAR_HEIGHT, 6]);
-                        mirror([1, 0, 0]) translate([W_MC/2 - 3, 0, 0]) cube(size=[3, BAR_HEIGHT, 6]);
-                    }
+                    translate([0, -R_AFT, M_MC_START + Z_MC_35 + OFFSET- 4])
+                        cubePair(x=W_MC/2 - 3, size=[2, BAR_HEIGHT, 6]);
+
                     // Stop bar, center.
                     translate([-W_MC/2, -R_AFT, M_MC_START + Z_MC_35 + OFFSET]) {
                         cube(size=[W_MC, BAR_HEIGHT, 2]);
@@ -392,8 +382,8 @@ if (DRAW_BACK) {
                     }
 
                     // aft stop for microcontroller
-                    translate([0, -R_AFT, M_SPKR_RING]) cube(size=[9, 10, H_BUTTRESS]);
-                    mirror([1, 0, 0]) translate([0, -R_AFT, M_SPKR_RING]) cube(size=[9, 10, H_BUTTRESS]);
+                    translate([0, -R_AFT, M_SPKR_RING])
+                        cubePair(x=0, size=[9, 10, H_BUTTRESS]);
                 }
             }
             translate([0, 0, M_BUTTRESS_0]) buttress(trough = 8, wiring=false);

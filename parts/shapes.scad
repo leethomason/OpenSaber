@@ -49,3 +49,11 @@ module roundedRect(h, d)
 		translate([ D0/2,  D0/2, 0])  cylinder(d=D1, h=H);
 	}
 }
+
+module cubePair(x, size)
+{
+	translate([x, 0, 0])
+		cube(size=size);
+	mirror([1,0,0]) translate([x, 0, 0])
+		cube(size=size);
+}
