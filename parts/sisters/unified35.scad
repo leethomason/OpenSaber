@@ -7,7 +7,7 @@ use <buttress.scad>
 use <beam.scad>
 
 DRAW_FRONT = false;
-DRAW_BACK = false;
+DRAW_BACK = true;
 DRAW_BAT = true;
 
 M_DOTSTAR_EDGE = M_DOTSTAR - X_DOTSTAR / 2;
@@ -228,6 +228,7 @@ module transitionRing()
                 }  
             }
         }
+        upperBars();
     }
 }
 
@@ -256,12 +257,15 @@ module rail(r, m=0, h=0)
 }
 
 
-module upperBars(h, arch)
+module upperBars()
 {
-    DY = 8;
+    DY = 12;
+    M = M_BUTTRESS_0 + H_BUTTRESS * 13 - EPS;
+    DZ = 1;
+    L = M_TRANSITION - T_TRANSITION_RING - M + EPS2;
 
-    translate([0, 1, 0])
-        cubePair(x=W_MC/2 + 1, size=[2, DY, h]);
+    translate([0, 1, M - DZ])
+        cubePair(x=W_MC/2 + 1, size=[2, DY, L + DZ*2]);
 }
 
 M_MC_START = M_SPKR_RING + H_BUTTRESS;
@@ -328,13 +332,12 @@ if (DRAW_BAT) {
                 M = M_BUTTRESS_0 + H_BUTTRESS * 13 - EPS;
                 L = M_TRANSITION - T_TRANSITION_RING - M + EPS2;
 
-                translate([0, 0, M])
-                    upperBars(L);
+                upperBars();
 
                 // Front and back rails.
+                /* LUNA
                 translate([0, 0, M]) 
                     buttress(leftWiring=false, rightWiring=false, trough=W_MC, clip=true, h=D);
-
                 translate([0, 0, M_TRANSITION - T_TRANSITION_RING - D]) {
                     difference() {
                         tube(D, R_FORWARD, R_AFT);
@@ -343,6 +346,7 @@ if (DRAW_BAT) {
                     }
                     translate([0, 1, 0]) cubePair(x=W_MC/2 + 1, size=[10, 7, D]);
                 }
+                */
             }
         }
         translate([-20, -10, M_BUTTRESS_4-EPS]) cube(size=[40, 11, H_BUTTRESS+EPS2]);
@@ -431,6 +435,8 @@ if (DRAW_BACK) {
             }
 
         }
+        upperBars();
+
         // Flatten the bottom for printing.
         translate([-20, -D_AFT_RING/2, M_WAY_BACK]) cube(size=[40, FLATTEN, H_FAR]);
         
