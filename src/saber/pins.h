@@ -28,7 +28,6 @@ SOFTWARE.
 // --- Configuration ---
 // Note: Serial connection should be set to 19200 baud with a newline after commands.
 
-#define SERIAL_DEBUG 1
 
 #define SABER_MODEL_TEST			0
 #define SABER_MODEL_GECKO			1	// PCB, Teensy 3, external amp and accel
@@ -41,7 +40,17 @@ SOFTWARE.
 #define SABER_MODEL_SISTER 			8
 #define SABER_MODEL_AQUATIC			9
 
+
+#define SABER_SUB_MODEL_NONE		0
+#define SABER_SUB_MODEL_LUNA		1
+#define SABER_SUB_MODEL_CELESTIA	2
+
+// ----------------------------------
+#define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_SISTER
+#define SABER_SUB_MODEL				SABER_SUB_MODEL_LUNA
+// ----------------------------------
+
 
 #define LED_TOPOLOGY_RESISTOR		1
 #define LED_TOPOLOGY_DRIVER			2
@@ -286,7 +295,11 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_BUTTON Button::INTERNAL_PULLUP
 
 	static const int32_t UVOLT_MULT = 6691;		// fixme
-	#define ID_STR "Sisters Cree XPE2 RGB"
+	#if SABER_SUB_MODEL == SABER_SUB_MODEL_LUNA
+	#define ID_STR "Luna: Sisters Cree XPE2 RGB"
+	#elif SABER_SUB_MODEL == SABER_SUB_MODEL_CELESTIA
+	#define ID_STR "Celestia: Sisters Cree XPE2 RGB"
+	#endif
 
 	// Thermal paste heat sinking.
 	static const int32_t RED_VF   = 2100;   // milli-volts
@@ -535,7 +548,7 @@ enum {
 };
 
 static const float DEFAULT_G_FORCE_MOTION = 1.3f;
-static const float DEFAULT_G_FORCE_IMPACT = 2.2f;
+static const float DEFAULT_G_FORCE_IMPACT = 2.8f;
 
 #endif // PINS_HEADER
 

@@ -222,9 +222,16 @@ void setup() {
     #endif
 
     #ifdef SABER_SISTERS 
-        pinMode(PIN_SWITCH_B, INPUT);
-        int rolePin = digitalRead(PIN_SWITCH_B);
-        if(comRF24.begin(rolePin == HIGH ? 1 : 0)) {
+        //pinMode(PIN_SWITCH_B, INPUT);
+        //int rolePin = digitalRead(PIN_SWITCH_B);
+        #if SABER_SUB_MODEL == SABER_SUB_MODEL_LUNA
+            const int role = 0;
+        #elif SABER_SUB_MODEL == SABER_SUB_MODEL_CELESTIA
+            const int role = 1;
+        #else
+            #error Role not defined.
+        #endif
+        if(comRF24.begin(role)) {
             Log.p("RF24 initialized. Role=").p(comRF24.role()).eol();
         }
         else {

@@ -57,6 +57,45 @@ bool SaberDB::writeDefaults()
             "JAINA",
             "JAINA",
         };
+    #elif (SABER_MODEL == SABER_MODEL_SISTER)
+        #if SABER_SUB_MODEL == SABER_SUB_MODEL_CELESTIA
+            static Palette defPalette[NUM_PALETTES] = {
+                { 0x00ff00,  0x00ffa0,    0 },    // green-green
+                { 0x0000ff,  0x00c8ff,    0 },    // blue-blue
+                { 0x00ffff,  0x00a0ff,    0 },    // cyan-cyan
+                { 0xff0000,  0xa08000,    0 },    // red-red
+                { 0x00ff00,  0x00c8ff,    0 },    // green-blue
+                { 0x00ff00,  0x00ccff,    0 },    // green-cyan
+                { 0x9000ff,  0x9064ff,    0 },    // purple-purple
+                { 0xffff00,  0x44ff00,    0 }     // yellow-yellow
+            };
+
+        #elif SABER_SUB_MODEL == SABER_SUB_MODEL_LUNA
+            static Palette defPalette[NUM_PALETTES] = {
+                { 0x00ff00,  0x00ffa0,    0 },    // green-green
+                { 0x0000ff,  0x00c8ff,    0 },    // blue-blue
+                { 0x00ffff,  0x00a0ff,    0 },    // cyan-cyan
+                { 0xff0000,  0xa08000,    0 },    // red-red
+                { 0x0000ff,  0x00c8ff,    0 },    // green-blue
+                { 0x00ffff,  0x00ccff,    0 },    // green-cyan
+                { 0x9000ff,  0x9064ff,    0 },    // purple-purple
+                { 0xffff00,  0x44ff00,    0 },    // yellow-yellow
+            };
+        #else 
+            #error SUB_MODEL not defined.
+        #endif
+        static const char* defNames[NUM_PALETTES] = {
+            "BESPIN2",
+            "JAINA",
+            "FATES",
+            "REVENGE",
+            "FATES",
+            "JAINA",
+            "JAINA",
+            "ROGUE"
+        };
+
+
     #else
         // STANDARD
         static Palette defPalette[NUM_PALETTES] = {
