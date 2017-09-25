@@ -6,9 +6,9 @@ include <dim.scad>
 use <buttress.scad>
 use <beam.scad>
 
-DRAW_FRONT = false;
-DRAW_BACK = true;
-DRAW_BAT = true;
+DRAW_FRONT = true;
+DRAW_BACK = false;
+DRAW_BAT = false;
 
 M_DOTSTAR_EDGE = M_DOTSTAR - X_DOTSTAR / 2;
 
@@ -149,9 +149,21 @@ module switchAndPortHolder()
                         }
                     }
                 }
+
+                NOTCH = 0.5;
+                difference() {
+                    union() {
+                        translate([-20, Y_SWITCH - T - NOTCH, M_FORWARD_PCB-3]) cube(size=[40, NOTCH, 2]);
+                        translate([-20, Y_SWITCH - T - NOTCH, M_FORWARD_PCB+1]) cube(size=[40, NOTCH, 2]);
+                    }
+                    translate([-8, Y_SWITCH - T - NOTCH, M_FORWARD_PCB-3]) cube(size=[16, NOTCH, 6]);
+
+                }
+                translate([-4, -R_FORWARD + 3 - NOTCH, M_FORWARD_PCB-3]) cube(size=[8, NOTCH, 2]);
+                translate([-4, -R_FORWARD + 3 - NOTCH, M_FORWARD_PCB+1]) cube(size=[8, NOTCH, 2]);
             }
             // switch
-            translate([X_SWITCH, 0, M_SWITCH_CENTER]) {
+            translate([0, 0, M_SWITCH_CENTER]) {
                 rotate([-90, 0, 0]) {
                     cylinder(h=20, d=D_SWITCH);
                     translate([0, 0, Y_SWITCH]) cylinder(h=20, d=D_SWITCH_TOP);
@@ -164,7 +176,7 @@ module switchAndPortHolder()
                     cylinder(h=20, d=D_SMALL_PORT);
                 }
             }
-            transitionRing();
+            transitionRing(false);
             heatSink();
         }
     }
@@ -203,7 +215,7 @@ module forwardRail()
     }
 }
 
-module transitionRing()
+module transitionRing(bars=true)
 {
     R = [RAIL_ANGLE_0, RAIL_ANGLE_1];
     R_INNER = D_FORWARD/2;
@@ -228,7 +240,7 @@ module transitionRing()
                 }  
             }
         }
-        upperBars();
+        if (bars) upperBars();
     }
 }
 
