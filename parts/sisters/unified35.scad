@@ -7,8 +7,8 @@ use <buttress.scad>
 use <beam.scad>
 
 DRAW_FRONT = true;
-DRAW_BACK = false;
-DRAW_BAT = false;
+DRAW_BACK  = true;
+DRAW_BAT   = false;
 
 M_DOTSTAR_EDGE = M_DOTSTAR - X_DOTSTAR / 2;
 
@@ -91,14 +91,6 @@ module speakerHolder()
             }
         }
     }
-    
-    *color("yellow") {
-        W_CUT = 26;
-        Y_CUT = 5;
-        translate([-W_CUT/2, Y_CUT, M_POMMEL_BACK + SPKR_OFFSET]) {
-            cube(size=[W_CUT, 20, H_SPKR_PLASTIC]);
-        }
-    }
 }
 
 module speakerRing()
@@ -150,14 +142,17 @@ module switchAndPortHolder()
                     }
                 }
 
+                // Holders for the PCB
                 NOTCH = 0.5;
                 difference() {
                     union() {
-                        translate([-20, Y_SWITCH - T - NOTCH, M_FORWARD_PCB-3]) cube(size=[40, NOTCH, 2]);
-                        translate([-20, Y_SWITCH - T - NOTCH, M_FORWARD_PCB+1]) cube(size=[40, NOTCH, 2]);
+                        translate([-20, Y_SWITCH - T - NOTCH, M_FORWARD_PCB-3]) 
+                            cube(size=[40, NOTCH, 2]);
+                        translate([-20, Y_SWITCH - T - NOTCH, M_FORWARD_PCB+1]) 
+                            cube(size=[40, NOTCH, 2]);
                     }
-                    translate([-8, Y_SWITCH - T - NOTCH, M_FORWARD_PCB-3]) cube(size=[16, NOTCH, 6]);
-
+                    translate([-8, Y_SWITCH - T - NOTCH, M_FORWARD_PCB-3]) 
+                        cube(size=[16, NOTCH, 6]);
                 }
                 translate([-4, -R_FORWARD + 3 - NOTCH, M_FORWARD_PCB-3]) cube(size=[8, NOTCH, 2]);
                 translate([-4, -R_FORWARD + 3 - NOTCH, M_FORWARD_PCB+1]) cube(size=[8, NOTCH, 2]);
@@ -244,31 +239,6 @@ module transitionRing(bars=true)
     }
 }
 
-module rail(r, m=0, h=0)
-{
-   H = h ? h :M_TRANSITION - M_RAIL_START - T_TRANSITION_RING;
-   M = m ? m : M_RAIL_START + H/2;
-
-    difference() {
-        intersection()
-        {
-            innerTube();
-            rotate([0, 0, r]) {
-                translate([R_AFT - X_RAIL/2, 0, M + H/2]) {
-                    rotate([0, 0, -r]) {
-                        cube(size=[20, Y_RAIL, H], center=true);
-                    }
-                }            
-            }        
-        }
-        W = W_WING + 1;
-   	    translate([-W/2, -40, M_WAY_BACK]) {
-	        cube(size=[W, 120, H_FAR]);
-	    }
-    }
-}
-
-
 module upperBars()
 {
     DY = 12;
@@ -313,12 +283,6 @@ module horn()
     }    
 }
 
-module mcRail(z)
-{
-    translate([W_MC/2 - MC_RAIL, RAIL_DY - 20, 0])
-        cube(size=[MC_RAIL, 20, z]);
-}
-
 FLATTEN = 1.8;
 
 if (DRAW_FRONT) {
@@ -332,7 +296,7 @@ if (DRAW_FRONT) {
 if (DRAW_BAT) {
     D = 1.5;
 
-    color("green") difference() {
+    color("olive") difference() {
         intersection() {
             innerTube();
             union() {
@@ -400,8 +364,8 @@ if (DRAW_BACK) {
                     // Bottom rails that hold up microcontrolller
                     RAIL_Z = M_TRANSITION - T_TRANSITION_RING + EPS - M_SPKR_RING;
                     translate([0, 0, M_SPKR_RING]) {
-                        mcRail(RAIL_Z);
-                        mirror([1, 0, 0]) mcRail(RAIL_Z);
+                        translate([0, RAIL_DY - 20, 0])
+                            cubePair(x=W_MC/2 - MC_RAIL, size=[MC_RAIL, 20, RAIL_Z]);
                     }
                 }
             }
@@ -460,15 +424,9 @@ if (DRAW_BACK) {
     }
 }
 
-translate([0, 0, 70]) {
-    //color("yellow") battery(12);
-    //circuitry(10);
-}
-
 *switch();
 *color("yellow") heatSink();
 *color("yellow") speaker();
 *color("yellow") speakerHolder();
 *color("yellow") teensy35();
-
 *buttress();
