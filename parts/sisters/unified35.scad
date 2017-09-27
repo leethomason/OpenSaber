@@ -7,7 +7,7 @@ use <buttress.scad>
 use <beam.scad>
 
 DRAW_FRONT = true;
-DRAW_BACK  = true;
+DRAW_BACK  = false;
 DRAW_BAT   = false;
 
 M_DOTSTAR_EDGE = M_DOTSTAR - X_DOTSTAR / 2;
