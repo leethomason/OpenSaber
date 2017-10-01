@@ -1356,9 +1356,9 @@ const uint8_t* getGlypth_tomThumb5(int charID, int* advance, int* w, int* rows)
 			}
 		}
 
-		*advance = 4;
-		*w = 3;
-		*rows = 1; 
+		if (advance) *advance = 4;
+		if (w) *w = 3;
+		if (rows) *rows = 1; 
 		return glyph;
 	}
 	return 0;

@@ -6,7 +6,7 @@ include <dim.scad>
 use <buttress.scad>
 use <beam.scad>
 
-DRAW_FRONT = true;
+DRAW_FRONT = false;
 DRAW_BACK  = true;
 DRAW_BAT   = false;
 
@@ -383,14 +383,14 @@ if (DRAW_BACK) {
             // Hold the forward PCB
             hull() {
                 translate([W_MC/2 + 1, -5.5, M_BUTTRESS_4 + H_BUTTRESS + 3]) 
-                    cube(size=[2, 5, 12]);
+                    cube(size=[2, 4.5, 12]);
                 translate([W_MC/2, -5.5, M_BUTTRESS_4 + H_BUTTRESS + 2]) 
                     cube(size=[4, 1, 14]);
             }
             mirror([1,0,0]) 
             hull() {
                 translate([W_MC/2 + 1, -5.5, M_BUTTRESS_4 + H_BUTTRESS + 3]) 
-                    cube(size=[2, 5, 12]);
+                    cube(size=[2, 4.5, 12]);
                 translate([W_MC/2, -5.5, M_BUTTRESS_4 + H_BUTTRESS + 2]) 
                     cube(size=[4, 1, 14]);
             }
