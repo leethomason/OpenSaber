@@ -219,21 +219,13 @@ void Sketcher::DrawVolumeMode(Renderer* d, uint32_t time, const UIRenderData* da
 
 void Sketcher::DrawMeditationMode(Renderer* d, uint32_t time, const UIRenderData* data)
 {
-	DrawDials(d, data, false);
-	d->DrawBitmap(WIDTH / 2 - 16, 0, get_jBird);
+	d->DrawBitmap(0, 0, get_jBird);
 
-	uint32_t seconds = data->meditationTimeRemain / 1000;
-	uint32_t minutes = seconds / 60;
-	uint32_t secondsRemain = seconds - minutes * 60;
-
-	CStr<3> secStr;
-	CStr<3> minStr;
-
-	secStr.setFromNum(secondsRemain, true);
-	minStr.setFromNum(minutes, false);
-
-	d->DrawStr(minStr.c_str(), WIDTH / 2 - 30, HEIGHT / 2 - 2, getGlypth_calibri8);
-	d->DrawStr(secStr.c_str(), WIDTH / 2 + 20, HEIGHT / 2 - 2, getGlypth_calibri8);
+	d->DrawStr("no Emotion...Stillness",	33, 1, getGlypth_tomThumb5);
+	d->DrawStr("no Thought...Silence",		33, 7, getGlypth_tomThumb5);
+	d->DrawStr("no Ignorance...Attention",	33, 13, getGlypth_tomThumb5);
+	d->DrawStr("no Division...Perception",	33, 19, getGlypth_tomThumb5);
+	d->DrawStr("no Self...the Force",		33, 25, getGlypth_tomThumb5);
 }
 
 
