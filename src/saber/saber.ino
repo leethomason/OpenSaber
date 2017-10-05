@@ -56,8 +56,8 @@ static const uint32_t INDICATOR_TIME          = 500;
 static const uint32_t INDICATOR_CYCLE         = INDICATOR_TIME * 2;
 static const float    GFORCE_RANGE            = 4.0f;
 static const float    GFORCE_RANGE_INV        = 1.0f / GFORCE_RANGE;
-static const uint32_t PING_PONG_INTERVAL      = 1000;
-static const uint32_t BREATH_TIME             = 800;
+static const uint32_t PING_PONG_INTERVAL      = 2400;
+static const uint32_t BREATH_TIME             = 1200;
 
 bool     paletteChange  = false;    // used to prevent sound fx on palette changes when in 2 button mode.
 uint32_t reflashTime    = 0;
@@ -560,7 +560,7 @@ void processCom(uint32_t delta)
             }
         }
     }
-    if (comRF24.role() == 1) {
+    if (comRF24.role() == 1 && bladeState.state() == BLADE_OFF) {
         if (pingPongTimer.tick(delta)) {
             comRF24.send("ping");
         }
