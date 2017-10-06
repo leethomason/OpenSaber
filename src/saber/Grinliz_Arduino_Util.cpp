@@ -17,15 +17,17 @@ LEDManager::LEDManager(uint8_t pin, bool on)
 void LEDManager::set(bool on)
 {
     m_on = on;
-    digitalWrite(m_pin, m_on ? HIGH : LOW );
+    if (m_analogMode)
+        analogWrite(m_pin, m_on ? 255 : 0);
+    else
+        digitalWrite(m_pin, m_on ? HIGH : LOW );
     m_nBlink = 0;
 }
 
 
 bool LEDManager::isOn() const
 {
-    int value = digitalRead(m_pin);
-    return (value == HIGH) ? true : false;
+    return m_on;
 }
 
 
@@ -40,7 +42,7 @@ void LEDManager::blink(uint8_t n, uint32_t cycle, BlinkHandler h, uint8_t style)
         m_nBlink = 0;
         m_cycle = 1;
         m_startTime = 0;
-        digitalWrite(m_pin, m_on ? HIGH : LOW );
+        set(m_on);
     }
     else {
         m_handler = h;
@@ -62,7 +64,7 @@ void LEDManager::process()
 
         if (n >= m_nBlink) {
             m_nBlink = 0;
-            digitalWrite(m_pin, m_on ? HIGH : LOW );
+            set(m_on);
         }
         else {
             if (m_style == BLINK_BREATH) {
@@ -72,10 +74,14 @@ void LEDManager::process()
                 int16_t val = 255 - sinVal;
                 if (val < 0) val = 0;
                 if (val > 255) val = 255;
+                m_analogMode = true;
                 analogWrite(m_pin, (uint8_t)val);
             }
             else {
-                digitalWrite(m_pin, ((p & 1) == m_style) ? LOW : HIGH );
+                if (m_analogMode)
+                    analogWrite(m_pin, ((p & 1) == m_style) ? 0 : 255 );
+                else
+                  digitalWrite(m_pin, ((p & 1) == m_style) ? LOW : HIGH );
             }
 
             if (n >= m_nCallbacks) {

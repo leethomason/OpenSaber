@@ -451,6 +451,8 @@ void buttonAClickHandler(const Button&)
     Log.p("buttonAClickHandler").eol();
     if (bladeState.bladeOff()) {
         uiMode.nextMode();
+        // Turn off blinking so we aren't in a weird state when we change modes.
+        ledA.blink(0, 0, 0);
         // Not the best indication: show power if
         // the modes are cycled. But haven't yet
         // figured out a better option.
@@ -547,7 +549,7 @@ void processCom(uint32_t delta)
         else if (comStr == "ping") {
             // Low priority event. Only do the breathing
             // if the LED isn't being used to display something else.
-            if (!ledA.blinking()) {
+            if (!ledA.blinking() && bladeState.state() == BLADE_OFF && uiMode.mode() == UIMode::NORMAL) {
                 ledA.blink(1, BREATH_TIME, 0, LEDManager::BLINK_BREATH);
             }
             comRF24.send("pong");
@@ -555,12 +557,12 @@ void processCom(uint32_t delta)
         else if (comStr == "pong") {
             // Low priority event. Only do the breathing
             // if the LED isn't being used to display something else.
-            if (!ledA.blinking()) {
+            if (!ledA.blinking() && bladeState.state() == BLADE_OFF && uiMode.mode() == UIMode::NORMAL) {
                 ledA.blink(1, BREATH_TIME, 0, LEDManager::BLINK_BREATH);
             }
         }
     }
-    if (comRF24.role() == 1 && bladeState.state() == BLADE_OFF) {
+    if (comRF24.role() == 1 && bladeState.state() == BLADE_OFF && uiMode.mode() == UIMode::NORMAL) {
         if (pingPongTimer.tick(delta)) {
             comRF24.send("ping");
         }

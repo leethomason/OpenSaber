@@ -40,6 +40,7 @@ private:
     uint32_t m_startTime = 0;
     BlinkHandler m_handler = 0;
     uint8_t m_nCallbacks = 0;
+    bool m_analogMode = false;   // Teensy has a bug; once it goes analog, it STAYS analog
 };
 
 // --- Interupts & Time --- //
