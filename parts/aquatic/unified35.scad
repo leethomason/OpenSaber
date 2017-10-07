@@ -5,7 +5,10 @@ use <../vents.scad>
 include <dim.scad>
 use <buttress.scad>
 use <beam.scad>
-use <swoop.scad>
+
+DRAW_FRONT = true;
+DRAW_BACK  = true;
+DRAW_BAT   = true;
 
 M_DOTSTAR_EDGE = M_DOTSTAR - X_DOTSTAR / 2;
 
@@ -88,14 +91,6 @@ module speakerHolder()
             }
         }
     }
-    
-    *color("yellow") {
-        W_CUT = 26;
-        Y_CUT = 5;
-        translate([-W_CUT/2, Y_CUT, M_POMMEL_BACK + SPKR_OFFSET]) {
-            cube(size=[W_CUT, 20, H_SPKR_PLASTIC]);
-        }
-    }
 }
 
 module speakerRing()
@@ -146,9 +141,24 @@ module switchAndPortHolder()
                         }
                     }
                 }
+
+                // Holders for the PCB
+                NOTCH = 0.5;
+                difference() {
+                    union() {
+                        translate([-20, Y_SWITCH - T - NOTCH, M_FORWARD_PCB-3]) 
+                            cube(size=[40, NOTCH, 2]);
+                        translate([-20, Y_SWITCH - T - NOTCH, M_FORWARD_PCB+1]) 
+                            cube(size=[40, NOTCH, 2]);
+                    }
+                    translate([-8, Y_SWITCH - T - NOTCH, M_FORWARD_PCB-3]) 
+                        cube(size=[16, NOTCH, 6]);
+                }
+                translate([-4, -R_FORWARD + 3 - NOTCH, M_FORWARD_PCB-3]) cube(size=[8, NOTCH, 2]);
+                translate([-4, -R_FORWARD + 3 - NOTCH, M_FORWARD_PCB+1]) cube(size=[8, NOTCH, 2]);
             }
             // switch
-            translate([X_SWITCH, 0, M_SWITCH_CENTER]) {
+            translate([0, 0, M_SWITCH_CENTER]) {
                 rotate([-90, 0, 0]) {
                     cylinder(h=20, d=D_SWITCH);
                     translate([0, 0, Y_SWITCH]) cylinder(h=20, d=D_SWITCH_TOP);
@@ -161,7 +171,7 @@ module switchAndPortHolder()
                     cylinder(h=20, d=D_SMALL_PORT);
                 }
             }
-            transitionRing();
+            transitionRing(false);
             heatSink();
         }
     }
@@ -200,7 +210,7 @@ module forwardRail()
     }
 }
 
-module transitionRing()
+module transitionRing(bars=true)
 {
     R = [RAIL_ANGLE_0, RAIL_ANGLE_1];
     R_INNER = D_FORWARD/2;
@@ -225,40 +235,19 @@ module transitionRing()
                 }  
             }
         }
+        if (bars) upperBars();
     }
 }
 
-module rail(r, m=0, h=0)
+module upperBars()
 {
-   H = h ? h :M_TRANSITION - M_RAIL_START - T_TRANSITION_RING;
-   M = m ? m : M_RAIL_START + H/2;
+    DY = 12;
+    M = M_BUTTRESS_0 + H_BUTTRESS * 13 - EPS;
+    DZ = 1;
+    L = M_TRANSITION - T_TRANSITION_RING - M + EPS2;
 
-    difference() {
-        intersection()
-        {
-            innerTube();
-            rotate([0, 0, r]) {
-                translate([R_AFT - X_RAIL/2, 0, M + H/2]) {
-                    rotate([0, 0, -r]) {
-                        cube(size=[20, Y_RAIL, H], center=true);
-                    }
-                }            
-            }        
-        }
-        W = W_WING + 1;
-   	    translate([-W/2, -40, M_WAY_BACK]) {
-	        cube(size=[W, 120, H_FAR]);
-	    }
-    }
-}
-
-
-module upperBars(h)
-{
-    translate([W_MC/2 + 1, 5, 0])
-         cube(size=[2, 4, h]);
-    mirror([1, 0, 0]) translate([W_MC/2 + 1, 5, 0])
-        cube(size=[2, 4, h]);
+    translate([0, 1, M - DZ])
+        cubePair(x=W_MC/2 + 1, size=[2, DY, L + DZ*2]);
 }
 
 M_MC_START = M_SPKR_RING + H_BUTTRESS;
@@ -294,125 +283,145 @@ module horn()
     }    
 }
 
-module mcRail(z)
-{
-    translate([W_MC/2 - MC_RAIL, RAIL_DY - 20, 0])
-        cube(size=[MC_RAIL, 20, z]);
-}
-
 FLATTEN = 1.8;
 
-// front
-*union() {
-    ledHolder();
-    switchAndPortHolder();
-    forwardRail();
-}
-
-// Back battery holder
-*color("green") difference() {
-    intersection() {
-        innerTube();
-        union() {
-            translate([0, 0, M_BUTTRESS_3]) buttress(wiring=true, clip=true);
-            translate([0, 0, M_BUTTRESS_4]) buttress(battery=false, trough=10, wiring=true, clip=true);
-            SUB_H = 1;
-
-            translate([0, 0, M_TRANSITION - T_TRANSITION_RING - SUB_H]) buttress(battery=false, trough=20, clip=true, h=SUB_H);
-
-            translate([0, 0, M_BUTTRESS_3 + H_BUTTRESS - EPS])
-                upperBars(M_TRANSITION - M_BUTTRESS_3 - H_BUTTRESS - T_TRANSITION_RING);
-        }
-    }
-    // Flatten the bottom for printing.
-    translate([-20, -D_AFT_RING/2, M_WAY_BACK]) cube(size=[40, FLATTEN, H_FAR]);
-
-    OFFSET = 20;
-    translate([-W_MC/2, Y_MC - OFFSET, M_SPKR_RING + H_BUTTRESS]) {
-        cube(size=[W_MC, H_MC + OFFSET - 1, 100]);
+if (DRAW_FRONT) {
+    union() {
+        ledHolder();
+        switchAndPortHolder();
+        forwardRail();
     }
 }
 
+if (DRAW_BAT) {
+    D = 1.5;
 
-// Back body
-difference() {
-
-     union() {
-        transitionRing();
-        
-        intersection() 
-        {
+    color("olive") difference() {
+        intersection() {
             innerTube();
             union() {
-                OFFSET = 2;
-                // Stop bars, left & right
-                translate([0, -R_AFT, M_MC_START + Z_MC_35 + OFFSET- 4]) {
-                    translate([W_MC/2 - 3, 0, 0]) cube(size=[3, BAR_HEIGHT, 6]);
-                    mirror([1, 0, 0]) translate([W_MC/2 - 3, 0, 0]) cube(size=[3, BAR_HEIGHT, 6]);
-                }
-                // Stop bar, center.
-                translate([-W_MC/2, -R_AFT, M_MC_START + Z_MC_35 + OFFSET]) {
-                    cube(size=[W_MC, BAR_HEIGHT, 2]);
-                }
+                translate([0, 0, M_BUTTRESS_3]) 
+                    buttress(wiring=false, clip=true, circle=2.5, h=7);
+                translate([0, 0, M_BUTTRESS_4]) 
+                    buttress(battery=false, trough=10, wiring=false, clip=true);
 
-                translate([0, 0, M_SPKR_RING]) mirror([1, 0, 0])
-                    shelfBeam(M_TRANSITION - T_TRANSITION_RING + EPS - M_SPKR_RING, BEAM_WIDTH);
-                translate([0, 0, M_SPKR_RING]) 
-                    shelfBeam(M_TRANSITION - T_TRANSITION_RING + EPS - M_SPKR_RING, BEAM_WIDTH);
+                M = M_BUTTRESS_0 + H_BUTTRESS * 13 - EPS;
+                L = M_TRANSITION - T_TRANSITION_RING - M + EPS2;
 
-                // Bottom rails that hold up microcontrolller
-                RAIL_Z = M_TRANSITION - T_TRANSITION_RING + EPS - M_SPKR_RING;
-                translate([0, 0, M_SPKR_RING]) {
-                    mcRail(RAIL_Z);
-                    mirror([1, 0, 0]) mcRail(RAIL_Z);
+                upperBars();
+
+                // Front and back rails.
+                /* LUNA
+                translate([0, 0, M]) 
+                    buttress(leftWiring=false, rightWiring=false, trough=W_MC, clip=true, h=D);
+                translate([0, 0, M_TRANSITION - T_TRANSITION_RING - D]) {
+                    difference() {
+                        tube(D, R_FORWARD, R_AFT);
+                        translate([-W_MC/2-1, -10, 0]) cube(size=[W_MC+2, 40, D]);
+                        translate([-20, -20, 0]) cube(size=[40, 14.5, D]);
+                    }
+                    translate([0, 1, 0]) cubePair(x=W_MC/2 + 1, size=[10, 7, D]);
                 }
-
-                // aft stop for microcontroller
-                translate([0, -R_AFT, M_SPKR_RING]) cube(size=[9, 10, H_BUTTRESS]);
-                mirror([1, 0, 0]) translate([0, -R_AFT, M_SPKR_RING]) cube(size=[9, 10, H_BUTTRESS]);
+                */
             }
         }
-        translate([0, 0, M_BUTTRESS_0]) buttress(trough = 8, wiring=false);
+        translate([-20, -10, M_BUTTRESS_4-EPS]) cube(size=[40, 11, H_BUTTRESS+EPS2]);
 
-        speakerHolder();
+        // Flatten the bottom for printing.
+        translate([-20, -D_AFT_RING/2, M_WAY_BACK]) cube(size=[40, FLATTEN, H_FAR]);
 
-        horn();
-
-        for(i=[0:4]) {
-            translate([0, 0, M_SPKR_RING + H_BUTTRESS * (1 + 2 * i) + 11]) 
-                buttress(leftWiring=false, rightWiring=false, trough=W_MC, clip=true);
-                //rotate([0, 90, 0]) arch(14, 1, 20, 2);
-        }
-        translate([0, 0, M_BUTTRESS_0])
-            upperBars(M_BUTTRESS_3 - M_BUTTRESS_0 + EPS);
-        mirror([1, 0, 0]) translate([0, 0, M_BUTTRESS_0])
-            upperBars(M_BUTTRESS_3 - M_BUTTRESS_0 + EPS);
-
-        translate([0, 0, M_SPKR_RING]) {
-            intersection() {
-                tube(H_BUTTRESS, D_SPKR_INNER/2, D_AFT/2);
-                union() {
-                    translate([W_MC/2, 5, 0]) 
-                        cube(size=[BEAM_WIDTH, 10, H_BUTTRESS]);
-                    mirror([1,0,0]) translate([W_MC/2, 5, 0]) 
-                        cube(size=[BEAM_WIDTH, 10, H_BUTTRESS]);
-                }
-            }
+        OFFSET = 20;
+        translate([-W_MC/2, Y_MC - OFFSET, M_SPKR_RING + H_BUTTRESS]) {
+            cube(size=[W_MC, H_MC + OFFSET - 1, 100]);
         }
     }
-    // Flatten the bottom for printing.
-    translate([-20, -D_AFT_RING/2, M_WAY_BACK]) cube(size=[40, FLATTEN, H_FAR]);
-    
-    // Take out a chunk for access to the USB port.
-    X_USB = 14; // 10 to tight fit
-    Y_USB = 10;
-    Z_USB = 20;
-    translate([-X_USB/2, -R_AFT, M_POMMEL_BACK]) cube(size=[X_USB, Y_USB, Z_USB]);
 }
 
-translate([0, 0, 70]) {
-    //color("yellow") battery(12);
-    //circuitry(10);
+if (DRAW_BACK) {
+    difference() {
+         union() {
+            transitionRing();
+            
+            intersection() 
+            {
+                innerTube();
+                union() {
+                    OFFSET = 2;
+                    // Stop bars, left & right
+                    translate([0, -R_AFT, M_MC_START + Z_MC_35 + OFFSET- 4])
+                        cubePair(x=W_MC/2 - 3, size=[2, BAR_HEIGHT, 6]);
+
+                    // Stop bar, center.
+                    translate([-W_MC/2, -R_AFT, M_MC_START + Z_MC_35 + OFFSET]) {
+                        cube(size=[W_MC, BAR_HEIGHT, 2]);
+                    }
+
+                    translate([0, 0, M_SPKR_RING]) mirror([1, 0, 0])
+                        shelfBeam(M_TRANSITION - T_TRANSITION_RING + EPS - M_SPKR_RING, BEAM_WIDTH);
+                    translate([0, 0, M_SPKR_RING]) 
+                        shelfBeam(M_TRANSITION - T_TRANSITION_RING + EPS - M_SPKR_RING, BEAM_WIDTH);
+
+                    // Bottom rails that hold up microcontrolller
+                    RAIL_Z = M_TRANSITION - T_TRANSITION_RING + EPS - M_SPKR_RING;
+                    translate([0, 0, M_SPKR_RING]) {
+                        translate([0, RAIL_DY - 20, 0])
+                            cubePair(x=W_MC/2 - MC_RAIL, size=[MC_RAIL, 20, RAIL_Z]);
+                    }
+                }
+            }
+            translate([0, 0, M_BUTTRESS_0]) buttress(trough = 8, wiring=false);
+
+            speakerHolder();
+
+            horn();
+
+            for(i=[0:5]) {
+                translate([0, 0, M_SPKR_RING + H_BUTTRESS * (3 + 2 * i)]) 
+                    buttress(leftWiring=false, rightWiring=false, trough=W_MC, clip=true, bridge=true);
+            }
+
+            // Hold the forward PCB
+            hull() {
+                translate([W_MC/2 + 1, -5.5, M_BUTTRESS_4 + H_BUTTRESS + 3]) 
+                    cube(size=[2, 4.5, 12]);
+                translate([W_MC/2, -5.5, M_BUTTRESS_4 + H_BUTTRESS + 2]) 
+                    cube(size=[4, 1, 14]);
+            }
+            mirror([1,0,0]) 
+            hull() {
+                translate([W_MC/2 + 1, -5.5, M_BUTTRESS_4 + H_BUTTRESS + 3]) 
+                    cube(size=[2, 4.5, 12]);
+                translate([W_MC/2, -5.5, M_BUTTRESS_4 + H_BUTTRESS + 2]) 
+                    cube(size=[4, 1, 14]);
+            }
+
+
+            // Special connectors from the back buttress to the lock ring.
+            translate([0, 0, M_SPKR_RING]) {
+                intersection() {
+                    tube(H_BUTTRESS, D_SPKR_INNER/2, D_AFT/2);
+                    union() {
+                        translate([W_MC/2, 5, 0]) 
+                            cube(size=[BEAM_WIDTH, 10, H_BUTTRESS]);
+                        mirror([1,0,0]) translate([W_MC/2, 5, 0]) 
+                            cube(size=[BEAM_WIDTH, 10, H_BUTTRESS]);
+                    }
+                    translate([-20, 1.8, 7]) rotate([-45, 0, 0]) cube(size=[40, 14, 14]);
+                }
+            }
+
+        }
+        upperBars();
+
+        // Flatten the bottom for printing.
+        translate([-20, -D_AFT_RING/2, M_WAY_BACK]) cube(size=[40, FLATTEN, H_FAR]);
+        
+        // Take out a chunk for access to the USB port.
+        X_USB = 14; // 10 to tight fit
+        Y_USB = 9;
+        Z_USB = 20;
+        translate([-X_USB/2, -R_AFT, M_POMMEL_BACK]) cube(size=[X_USB, Y_USB, Z_USB]);
+    }
 }
 
 *switch();
@@ -420,5 +429,4 @@ translate([0, 0, 70]) {
 *color("yellow") speaker();
 *color("yellow") speakerHolder();
 *color("yellow") teensy35();
-
 *buttress();

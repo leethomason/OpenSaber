@@ -2,16 +2,15 @@ M_TRANSITION		= 114;
 M_LED_HOLDER_FRONT	= M_TRANSITION + 44.5;
 M_LED_HOLDER_BACK	= M_LED_HOLDER_FRONT - 10;
 M_SWITCH_CENTER		= M_TRANSITION + 25.5;
+M_FORWARD_PCB       = M_TRANSITION + 15;
 M_DOTSTAR			= M_TRANSITION + 12;
 
 // Celestia
 M_PORT_CENTER       = M_TRANSITION + 6;
-X_SWITCH			= 0.3;
 
 /*
 // Luna
 M_PORT_CENTER       = M_TRANSITION + 5.5; // Luna
-X_SWITCH			= 0.0;
 */
 
 M_SPKR_RING			= 15.5;		// Front of the speaker ring.
@@ -24,7 +23,7 @@ M_0                 = 0;
 H_BUTTRESS			= 4;
 
 M_BUTTRESS_0		= M_SPKR_RING + H_BUTTRESS;			// speaker holder, behind wings
-M_BUTTRESS_3		= M_SPKR_RING + H_BUTTRESS + 55;
+M_BUTTRESS_3		= M_SPKR_RING + H_BUTTRESS + 59;
 M_BUTTRESS_4		= M_SPKR_RING + 70;		// holds speaker in place, space for foam
 
 M_WAY_BACK			= -20;
@@ -52,6 +51,7 @@ Y_DOTSTAR           = 1.4;  // from spec
 DOTSTAR_SPACE		= 7;
 
 H_BATTERY           = 68;
+BATTERY_BIAS        = 0.5;  // downward bias to fit it tape / protector
 D_BATTERY           = 18.50 + 0.5;    // An 1850. Huh. 
 R_BATTERY			= D_BATTERY / 2;
 
