@@ -68,7 +68,7 @@ difference() {
     
     // Punch out the actual chip
     translate([-RF24_X/2, 0, RF24_START_Z])
-        cube(size=[RF24_X, R_SABER_OUTER + RF24_Y, RF24_Z-2]);
+        cube(size=[RF24_X, R_SABER_OUTER + RF24_Y, RF24_Z-8]);
     
     // Crystal opening
     translate([-RF24_X/2, 0, RF24_START_Z + RF24_CRYSTAL_Z])
@@ -81,10 +81,10 @@ difference() {
     translate([-RF24_X/2, 0, RF24_START_Z + RF24_ANT_Z])
         cube(size=[RF24_X, R_SABER_OUTER + RF24_Y-1.5, RF24_ANT_DZ]);
     
-    // same, inset
-    translate([-RF24_X/2, 0, RF24_START_Z + RF24_ANT_Z])
-        roundCube(size=[RF24_X, 100, RF24_ANT_DZ - WALL_T], rad=RAD);
+    translate([-RF24_X/2+1, 0, RF24_START_Z + RF24_ANT_Z])
+        roundCube(size=[RF24_X-2, 100, RF24_ANT_DZ], rad=RAD);
     
+
     // Bolts
     translate([0, D_SABER_OUTER / 2 + BOX_DY + EPS, BOLT_Z0]) rotate([90, 0, 0])
         bolt(boltD=BOLT_D, boltHeadD=BOLT_HEAD_D, boltHeadH=BOLT_INSET);
