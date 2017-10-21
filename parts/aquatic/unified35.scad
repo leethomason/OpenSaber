@@ -6,11 +6,9 @@ include <dim.scad>
 use <buttress.scad>
 use <beam.scad>
 
-DRAW_FRONT = true;
-DRAW_BACK  = true;
+DRAW_FRONT = false;
+DRAW_BACK  = false;
 DRAW_BAT   = true;
-
-M_DOTSTAR_EDGE = M_DOTSTAR - X_DOTSTAR / 2;
 
 INCHES_TO_MM = 25.4;
 MM_TO_INCHES = 1 / 25.4;
@@ -127,35 +125,31 @@ module switchAndPortHolder()
                 }
                 
                 // Build up port holder for standard power port.
-                // (Never get to use that kind.)
-                W = 2 * (M_PORT_CENTER - M_TRANSITION); // fancy; snaps into ring.
-                difference() 
-                {
-                    translate([-W/2, Y_SWITCH, M_PORT_CENTER - W/2]) {
-                        cube(size=[W, 6 - T, W]);
+                W =  D_PORT;
+                DZ0 = 3;
+
+                hull() {
+                    OFFSET = 2;
+                    translate([-W/2, Y_SWITCH, M_PORT_CENTER - W/2 - DZ0]) {
+                        cube(size=[W, 6 - T, W + DZ0]);
                     }
-                    // Slope the front.
-                    translate([-W/2, Y_SWITCH, M_PORT_CENTER + W/2 + 2]) {
-                        rotate([-45, 0, 0]) {
-                            cube(size=[W, W, W]);
-                        }
+                    translate([-W/2, Y_SWITCH, M_PORT_CENTER - W/2 - OFFSET - DZ0]) {
+                        cube(size=[W, EPS, W + OFFSET*2 + DZ0]);
                     }
                 }
 
                 // Holders for the PCB
-                NOTCH = 0.5;
                 difference() {
                     union() {
-                        translate([-20, Y_SWITCH - T - NOTCH, M_FORWARD_PCB-3]) 
-                            cube(size=[40, NOTCH, 2]);
-                        translate([-20, Y_SWITCH - T - NOTCH, M_FORWARD_PCB+1]) 
-                            cube(size=[40, NOTCH, 2]);
-                    }
-                    translate([-8, Y_SWITCH - T - NOTCH, M_FORWARD_PCB-3]) 
-                        cube(size=[16, NOTCH, 6]);
+                        NOTCH = 1;
+                        // First one is also for positioning
+                        translate([0, -R_FORWARD + 2, M_TRANSITION-2]) triBump(3, 2, 4);
+                        translate([0, -R_FORWARD + 2.5, M_TRANSITION+2]) triBump(3, NOTCH, NOTCH*2);
+                        translate([0,  Y_SWITCH - T, M_TRANSITION+2]) mirror([0, 1, 0]) triBump(12, NOTCH, NOTCH*2);
+                        translate([0,  Y_SWITCH - T, M_TRANSITION-2]) mirror([0, 1, 0]) triBump(12, 1.5, 3);
+                    }                
+                    cylinder(h=M_TRANSITION, d=30);
                 }
-                translate([-4, -R_FORWARD + 3 - NOTCH, M_FORWARD_PCB-3]) cube(size=[8, NOTCH, 2]);
-                translate([-4, -R_FORWARD + 3 - NOTCH, M_FORWARD_PCB+1]) cube(size=[8, NOTCH, 2]);
             }
             // switch
             translate([0, 0, M_SWITCH_CENTER]) {
@@ -173,6 +167,17 @@ module switchAndPortHolder()
             }
             transitionRing(false);
             heatSink();
+        }
+    }
+}
+
+
+module triBump(halfDX, dy, dz)
+{
+    translate([-halfDX, 0, 0]) {
+        hull() {
+            cube(size=[halfDX*2, EPS, dz]);
+            translate([0, 0, dz/2]) cube(size=[halfDX*2, dy, EPS]);
         }
     }
 }
@@ -197,15 +202,6 @@ module forwardRail()
             translate([-W/2, -R_FORWARD, M_TRANSITION]) {
                 cube(size=[W, H, 100]);
             }
-        }
-    }
-    // Add a ridge for positioning.
-    intersection() {
-        translate([0, 0, M_TRANSITION]) {
-            cylinder(d=D_FORWARD, h=M_LED_HOLDER_BACK - M_TRANSITION);
-        }
-        translate([-4, -R_FORWARD, M_TRANSITION - T_TRANSITION_RING]) rotate([10, 0, 0]) {
-            cube(size=[8, 5, 100]);
         }
     }
 }
@@ -251,8 +247,9 @@ module upperBars()
 }
 
 M_MC_START = M_SPKR_RING + H_BUTTRESS;
-BAR_HEIGHT = 9.5;    // was 7.5
+BAR_HEIGHT = 8;
 
+/*
 module horn()
 {
     translate([0, 0, M_TRANSITION]) {
@@ -282,6 +279,7 @@ module horn()
         }
     }    
 }
+*/
 
 FLATTEN = 1.8;
 
@@ -296,7 +294,8 @@ if (DRAW_FRONT) {
 if (DRAW_BAT) {
     D = 1.5;
 
-    color("olive") difference() {
+    color("olive") 
+    difference() {
         intersection() {
             innerTube();
             union() {
@@ -309,20 +308,19 @@ if (DRAW_BAT) {
                 L = M_TRANSITION - T_TRANSITION_RING - M + EPS2;
 
                 upperBars();
-
-                // Front and back rails.
-                /* LUNA
-                translate([0, 0, M]) 
-                    buttress(leftWiring=false, rightWiring=false, trough=W_MC, clip=true, h=D);
-                translate([0, 0, M_TRANSITION - T_TRANSITION_RING - D]) {
-                    difference() {
-                        tube(D, R_FORWARD, R_AFT);
-                        translate([-W_MC/2-1, -10, 0]) cube(size=[W_MC+2, 40, D]);
-                        translate([-20, -20, 0]) cube(size=[40, 14.5, D]);
+                for(i=[0:1]) {
+                    translate([0, 0, M_BUTTRESS_4 + H_BUTTRESS*(2 + 2*i)]) {
+                        intersection() {
+                            //translate([-10, 1, 0]) cube(size=[20, 100, H_BUTTRESS]);
+                            translate([-13, 1, 0]) cube(size=[26, 100, H_BUTTRESS]);
+                            difference() {
+                                cylinder(h=H_BUTTRESS, d=D_AFT);
+                                cylinder(h=H_BUTTRESS, d=D_AFT-10);
+                                translate([-5, 0, 0]) cube(size=[10, 100, H_BUTTRESS]);
+                            }                        
+                        }
                     }
-                    translate([0, 1, 0]) cubePair(x=W_MC/2 + 1, size=[10, 7, D]);
                 }
-                */
             }
         }
         translate([-20, -10, M_BUTTRESS_4-EPS]) cube(size=[40, 11, H_BUTTRESS+EPS2]);
@@ -373,7 +371,7 @@ if (DRAW_BACK) {
 
             speakerHolder();
 
-            horn();
+            //horn();
 
             for(i=[0:5]) {
                 translate([0, 0, M_SPKR_RING + H_BUTTRESS * (3 + 2 * i)]) 

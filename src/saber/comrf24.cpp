@@ -35,10 +35,11 @@ bool ComRF24::begin(int role)
 	Log.p("Data rate (0-2): ").p((int)m_rf24->getDataRate()).eol();
 	Log.p("isConnected    : ").p(m_rf24->isChipConnected() ? "true" : "false").eol();
 
-	if(m_role){
+	if(m_role) {
 		m_rf24->openWritingPipe(ADDR1);
 		m_rf24->openReadingPipe(1, ADDR0);
-	}else{
+	} 
+    else {
 		m_rf24->openWritingPipe(ADDR0);
 		m_rf24->openReadingPipe(1, ADDR1);
 	}

@@ -46,9 +46,9 @@ SOFTWARE.
 #define SABER_SUB_MODEL_CELESTIA	2
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_SISTER
-#define SABER_SUB_MODEL				SABER_SUB_MODEL_LUNA
+#define SERIAL_DEBUG 				1
+#define SABER_MODEL 				SABER_MODEL_AQUATIC
+#define SABER_SUB_MODEL				
 // ----------------------------------
 
 
@@ -320,18 +320,20 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int VOLUME_4 = 200;
 
 #elif (SABER_MODEL == SABER_MODEL_AQUATIC)
-	#define PCB_VERSION 				PCB_SHIELD_2
+	#define PCB_VERSION 				PCB_SHIELD_3
 	#define LED_TOPOLOGY 				LED_TOPOLOGY_RESISTOR
 	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_LIS3DH_SPI
-	#define SABER_INTEGRATED_SD
 	#define SABER_SOUND_ON 				SABER_SOUND_SD
 	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
+	#define SABER_INTEGRATED_SD
+	#define SABER_AUDIO_UI
 
+/*
 	#define SABER_NUM_LEDS 			4
 	#define SABER_UI_START  		0
 	#define SABER_UI_BRIGHTNESS		8
-
+*/
 	#undef SABER_BUTTON
 	#define SABER_BUTTON Button::INTERNAL_PULLUP
 

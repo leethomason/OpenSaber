@@ -110,8 +110,6 @@ Renderer renderer;
 #ifdef SABER_SISTERS
 RF24 rf24(PIN_SPI_CE, PIN_SPI_CS);
 ComRF24 comRF24(&rf24);
-#else
-ComRF24 comRF24(0);
 #endif
 Timer2 pingPongTimer(PING_PONG_INTERVAL);
 
@@ -237,6 +235,7 @@ void setup() {
         else {
             Log.p("RF24 error.").eol();
         }
+
     #endif
 
     syncToDB();
@@ -482,9 +481,11 @@ void buttonAHoldHandler(const Button& button)
             if (button.nHolds() == 1) {
                 igniteBlade();
                 int pal = saberDB.paletteIndex();
+                #ifdef SABER_SISTERS
                 char buf[] = "ignite0";
                 buf[6] = '0' + pal;
                 comRF24.send(buf);
+                #endif
             }
         }
         else 
@@ -506,7 +507,9 @@ void buttonAHoldHandler(const Button& button)
     else if (bladeState.state() != BLADE_RETRACT) {
         if (button.nHolds() == 1) {
             retractBlade();
+            #ifdef SABER_SISTERS
             comRF24.send("retract");
+            #endif
         }
     }
 }
@@ -531,6 +534,8 @@ void serialEvent() {
     }
 }
 
+
+#ifdef SABER_SISTERS
 void processCom(uint32_t delta)
 {
     CStr<16> comStr;
@@ -568,6 +573,8 @@ void processCom(uint32_t delta)
         }
     }
 }
+#endif
+
 
 void processAccel(uint32_t msec)
 {
@@ -631,7 +638,9 @@ void loop() {
     buttonB.process();
     ledB.process();
     #endif
+    #ifdef SABER_SISTERS
     processCom(delta);
+    #endif
     tester.process();
     processAccel(msec);
 

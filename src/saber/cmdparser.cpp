@@ -361,9 +361,11 @@ bool CMDParser::processCMD()
     }
     else if (action == COMLOG) {
         ComRF24* com = ComRF24::instance();
-        com->setComLog(!com->isComLogging());
-        Serial.print("Com logging=");
-        Serial.println(com->isComLogging());
+        if (com) {
+            com->setComLog(!com->isComLogging());
+            Serial.print("Com logging=");
+            Serial.println(com->isComLogging());
+        }
     }
     else if (action == STATUS) {
         static const char* space = "-----------";
@@ -400,15 +402,17 @@ bool CMDParser::processCMD()
         printLead(VOLTS);
         Serial.println(Blade::blade().voltage());
 
-        delay(DELAY);
         ComRF24* com = ComRF24::instance();
-        printLead("RF24");
-        Serial.print("inUse="); 
-        Serial.print(com->inUse());
-        Serial.print(" isConnected=");
-        Serial.print(com->isConnected());
-        Serial.print(" role=");
-        Serial.println(com->role());
+        if (com) {
+            delay(DELAY);
+            printLead("RF24");
+            Serial.print("inUse="); 
+            Serial.print(com->inUse());
+            Serial.print(" isConnected=");
+            Serial.print(com->isConnected());
+            Serial.print(" role=");
+            Serial.println(com->role());
+        }
         
         delay(DELAY);
         printLead(UTIL);

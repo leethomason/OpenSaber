@@ -1,17 +1,9 @@
 M_TRANSITION		= 114;
-M_LED_HOLDER_FRONT	= M_TRANSITION + 44.5;
+M_LED_HOLDER_FRONT	= M_TRANSITION + 48;
 M_LED_HOLDER_BACK	= M_LED_HOLDER_FRONT - 10;
-M_SWITCH_CENTER		= M_TRANSITION + 25.5;
-M_FORWARD_PCB       = M_TRANSITION + 15;
-M_DOTSTAR			= M_TRANSITION + 12;
-
-// Celestia
-M_PORT_CENTER       = M_TRANSITION + 6;
-
-/*
-// Luna
-M_PORT_CENTER       = M_TRANSITION + 5.5; // Luna
-*/
+M_SWITCH_CENTER		= M_TRANSITION + 30.5;
+M_FORWARD_PCB       = M_TRANSITION + 20;
+M_PORT_CENTER       = M_TRANSITION + 14;
 
 M_SPKR_RING			= 15.5;		// Front of the speaker ring.
 M_RAIL_START        = 12;
@@ -45,10 +37,6 @@ D_PORT 				= 12.7;		// FIXME
 D_SMALL_PORT		= 7.9;
 
 D_SABER_OUTER		= 37.5;
-
-X_DOTSTAR           = 5.0;  // from spec
-Y_DOTSTAR           = 1.4;  // from spec
-DOTSTAR_SPACE		= 7;
 
 H_BATTERY           = 68;
 BATTERY_BIAS        = 0.5;  // downward bias to fit it tape / protector
