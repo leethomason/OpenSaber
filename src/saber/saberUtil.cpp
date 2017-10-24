@@ -181,9 +181,10 @@ void Accelerometer::begin()
             Log.p("Accelerometer ERROR.").eol();
         }
         else {
-            Log.p("Accelerometer open.").eol();
+            delay(20);
             localAccel.setRange(LIS3DH_RANGE_4_G);
             localAccel.setDataRate(LIS3DH_DATARATE_100_HZ);
+            Log.p("Accelerometer open.").eol();
         }
     #elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH_SPI
         Log.p("LIS3DH Accelerometer starting: SPI mode").eol();
@@ -191,9 +192,27 @@ void Accelerometer::begin()
             Log.p("Accelerometer ERROR.").eol();
         }
         else {
-            Log.p("Accelerometer open.").eol();
-            localAccel.setRange(LIS3DH_RANGE_4_G);
-            localAccel.setDataRate(LIS3DH_DATARATE_100_HZ);
+            /*  FIXME
+                On failure to set the range, the range
+                should be recorded and corrected for.
+                If that ever happens. Very intermittent bug.
+            */
+            bool success = false;
+            int n=0;
+            for(; n<4; n++) {
+                localAccel.setRange(LIS3DH_RANGE_4_G);
+                localAccel.setDataRate(LIS3DH_DATARATE_100_HZ);
+                delay(20);
+                lis3dh_range_t range = localAccel.getRange();
+                lis3dh_dataRate_t rate = localAccel.getDataRate();
+
+                if (range == LIS3DH_RANGE_4_G && rate == LIS3DH_DATARATE_100_HZ) {
+                    success = true;
+                    break;
+                }
+                delay(100);
+            }
+            Log.p("Accelerometer open. Configuration success=").p(success ? "true" : "false").p(" on attempt=").p(n).eol();
         }
     #elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
         Log.p("Accelerometer starting.").eol();
@@ -210,15 +229,43 @@ void Accelerometer::begin()
 
 void Accelerometer::read(float* ax, float* ay, float* az, float* g2, float* g2Normal)
 {
-    #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH || SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH_SPI
+    #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH 
         localAccel.read();
 
-        // Y is blade direction!
+        // Y is blade direction
         *ax = localAccel.x_g;
         *ay = localAccel.y_g;
         *az = localAccel.z_g;
         *g2Normal = (*ax)*(*ax) + (*az)*(*az);
         *g2 = *g2Normal + (*ay)*(*ay);
+
+    #elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH_SPI
+        /*  This code path correctly uses the ACCEL_BLADE_DIRECTION
+            which is set by the circuit design. (Not saber model.)
+            Should be ported to the other code paths if they are
+            brought back in use.
+        */
+        localAccel.read();
+
+        *ax = localAccel.x_g;
+        *ay = localAccel.y_g;
+        *az = localAccel.z_g;
+
+        *g2 = (*ax)*(*ax) + (*ay)*(*ay) + (*az)*(*az);
+
+        *g2Normal = 0;
+        #ifndef ACCEL_BLADE_DIRECTION
+            #error Need ACCEL_BLADE_DIRECTION to be defined.
+        #endif
+        #if ACCEL_BLADE_DIRECTION != 0
+            *g2Normal += (*ax)*(*ax);
+        #endif
+        #if ACCEL_BLADE_DIRECTION != 1
+            *g2Normal += (*ay)*(*ay);
+        #endif
+        #if ACCEL_BLADE_DIRECTION != 2
+            *g2Normal += (*az)*(*az);
+        #endif
 
     #elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
         // Using the prop shield: x is in the blade direction,

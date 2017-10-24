@@ -6,6 +6,7 @@
 #include "DotStar.h"
 #include "Grinliz_Util.h"
 #include "saberUtil.h"
+#include "pixelmatrix.h"
 
 struct UIRenderData
 {
@@ -35,6 +36,18 @@ public:
 private:
 	uint16_t m_brightness = 256;
 };
+
+
+class Pixel_7_5_UI
+{
+public:
+    Pixel_7_5_UI();
+    void Draw(uint32_t time, UIMode mode, bool bladeIgnited, const UIRenderData* data);
+
+private:
+    PixelMatrix pixelMatrix;
+};
+
 
 class Sketcher
 {

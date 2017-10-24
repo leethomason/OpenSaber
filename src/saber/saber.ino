@@ -97,7 +97,7 @@ DotStarUI dotstarUI;
 Accelerometer accel;
 
 Timer2 displayTimer(100);
-#ifdef SABER_DISPLAY
+#if SABER_DISPLAY == SABER_DISPLAY_128_32
 static const int OLED_WIDTH = 128;
 static const int OLED_HEIGHT = 32;
 uint8_t oledBuffer[OLED_WIDTH * OLED_HEIGHT / 8] = {0};
@@ -105,6 +105,8 @@ uint8_t oledBuffer[OLED_WIDTH * OLED_HEIGHT / 8] = {0};
 OLED_SSD1306 display(PIN_OLED_DC, PIN_OLED_RESET, PIN_OLED_CS);
 Sketcher sketcher;
 Renderer renderer;
+#elif SABER_DISPLAY == SABER_DISPLAY_7_5
+Pixel_7_5_UI display;
 #endif
 
 #ifdef SABER_SISTERS
@@ -199,13 +201,15 @@ void setup() {
 
     blade.setVoltage(voltmeter.averagePower());
 
-    #ifdef SABER_DISPLAY
+    #if SABER_DISPLAY == SABER_DISPLAY_128_32
         display.begin(OLED_WIDTH, OLED_HEIGHT, SSD1306_SWITCHCAPVCC);
         renderer.Attach(OLED_WIDTH, OLED_HEIGHT, oledBuffer);
         renderer.Fill(0);
         display.display(oledBuffer);
 
         Log.p("OLED display connected.").eol();
+    #elif SABER_DISPLAY == SABER_DISPLAY_7_5
+
     #endif
 
     #if defined(SABER_NUM_LEDS)
@@ -481,6 +485,7 @@ void buttonAHoldHandler(const Button& button)
             if (button.nHolds() == 1) {
                 igniteBlade();
                 int pal = saberDB.paletteIndex();
+                (void) pal;
                 #ifdef SABER_SISTERS
                 char buf[] = "ignite0";
                 buf[6] = '0' + pal;
@@ -660,7 +665,7 @@ void loop() {
     }
 
     if (gforceDataTimer.tick(delta)) {
-        #ifdef SABER_DISPLAY
+        #if SABER_DISPLAY == SABER_DISPLAY_128_32
             maxGForce2 = constrain(maxGForce2, 0.1, 16);
             static const float MULT = 256.0f / GFORCE_RANGE;  // g=1 translates to uint8 64
             const uint8_t gForce = constrain(sqrtf(maxGForce2) * MULT, 0, 255);
@@ -678,10 +683,13 @@ void loop() {
         }
     }
 
+    #if SABER_DISPLAY == SABER_DISPLAY_7_5
+        display.Draw(msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
+    #endif
     if (displayTimer.tick(delta)) {
         uiRenderData.color = Blade::convertRawToPerceived(saberDB.bladeColor());
 
-        #ifdef SABER_DISPLAY
+        #if SABER_DISPLAY == SABER_DISPLAY_128_32
             sketcher.Draw(&renderer, displayTimer.period(), uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
             display.display(oledBuffer);
         #endif

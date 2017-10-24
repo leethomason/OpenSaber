@@ -61,6 +61,9 @@ SOFTWARE.
 #define SABER_SOUND_SD 				1
 #define SABER_SOUND_FLASH 			2
 
+#define SABER_DISPLAY_128_32		1
+#define SABER_DISPLAY_7_5			2
+
 #define PCB_VERSION_1				1   // PCB, Teensy 3.2, external amp and accel
 #define PCB_VERSION_5				5   // PCB, Prop Shield, Teensy 3.2, OLED (VERIFY)
 #define PCB_VERSION_7				7	// Split PCB. Prop shield. Teensy 3.5.
@@ -151,7 +154,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_NUM_LEDS 			1
 	#define SABER_CRYSTAL			80
 	#define SABER_CRYSTAL_LOW		24
-	#define SABER_DISPLAY
+	#define SABER_DISPLAY			SABER_DISPLAY_128_32
 	#define SABER_LOWPASS_FILTER	1
 	#define SABER_AUDIO_EXTERNAL_REF
 
@@ -320,14 +323,15 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int VOLUME_4 = 200;
 
 #elif (SABER_MODEL == SABER_MODEL_AQUATIC)
-	#define PCB_VERSION 				PCB_SHIELD_3
-	#define LED_TOPOLOGY 				LED_TOPOLOGY_RESISTOR
-	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_LIS3DH_SPI
-	#define SABER_SOUND_ON 				SABER_SOUND_SD
+	#define PCB_VERSION 			PCB_SHIELD_3
+	#define LED_TOPOLOGY 			LED_TOPOLOGY_RESISTOR
+	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
+	#define SABER_SOUND_ON 			SABER_SOUND_SD
 	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
 	#define SABER_AUDIO_UI
+	#define SABER_DISPLAY			SABER_DISPLAY_7_5
 
 /*
 	#define SABER_NUM_LEDS 			4
@@ -357,6 +361,20 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int VOLUME_2 = 50;
 	static const int VOLUME_3 = 120;
 	static const int VOLUME_4 = 200;
+
+	static const uint8_t ANODE_COL_1 	= 28;
+	static const uint8_t ANODE_COL_2 	= 32;
+	static const uint8_t ANODE_COL_3 	= 38;
+	static const uint8_t ANODE_COL_4 	= 27;
+	static const uint8_t ANODE_COL_5 	= 33;
+
+	static const uint8_t CATHODE_ROW_1 	= 31;
+	static const uint8_t CATHODE_ROW_2 	= 34;
+	static const uint8_t CATHODE_ROW_3 	= 30;
+	static const uint8_t CATHODE_ROW_4 	= 29;
+	static const uint8_t CATHODE_ROW_5 	= 35;
+	static const uint8_t CATHODE_ROW_6 	= 36;
+	static const uint8_t CATHODE_ROW_7 	= 37;
 
 #endif
 
@@ -538,6 +556,8 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_EMITTER_BLUE  21
 	#define PIN_EMITTER_GREEN 22
 	#define PIN_EMITTER_RED   23
+
+	#define ACCEL_BLADE_DIRECTION 0	// x is in the blade direction
 #else
 	#error Pins not defined.
 #endif

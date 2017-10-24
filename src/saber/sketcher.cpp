@@ -449,3 +449,12 @@ bool TestCrystalColor()
 	return true;
 }
 
+
+Pixel_7_5_UI::Pixel_7_5_UI()
+{
+}
+
+void Pixel_7_5_UI::Draw(uint32_t time, UIMode mode, bool bladeIgnited, const UIRenderData* data)
+{
+	pixelMatrix.loop(time);
+}
