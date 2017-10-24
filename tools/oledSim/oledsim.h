@@ -12,6 +12,7 @@ public:
 	const uint32_t* Pixels() const { return pixels; }
 	uint8_t* Buffer() { return buffer;}
 	void Commit();
+	void Clear();
 
 private:
 	int width;

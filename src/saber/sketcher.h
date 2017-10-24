@@ -22,6 +22,7 @@ struct UIRenderData
     UIRenderData() {}
 };
 
+
 class DotStarUI
 {
 public:
@@ -44,8 +45,14 @@ public:
     Pixel_7_5_UI();
     void Draw(uint32_t time, UIMode mode, bool bladeIgnited, const UIRenderData* data);
 
+	const uint8_t* Pixels() { return col; }
+
 private:
-    PixelMatrix pixelMatrix;
+	void DrawBar(uint8_t* c, int v);
+
+	static const int NCOLS = 7;
+	static const int NROWS = 5;
+	uint8_t col[NCOLS + 1];		// enough memory for writing the glyphs 4+4 bytes
 };
 
 

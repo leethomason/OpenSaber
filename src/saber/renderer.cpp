@@ -9,12 +9,12 @@ void Renderer::Attach(int w, int h, uint8_t* buf)
 {
 	ASSERT(buf);
 
-	width = w;
-	height = h;
-	buffer = buf;
-	nRows = height / 8;
+	m_width = w;
+	m_height = h;
+	m_buffer = buf;
+	m_nRows = m_height / 8;
 
-	ASSERT(nRows <= MAX_ROWS);
+	ASSERT(m_nRows <= MAX_ROWS);
 }
 
 bool Renderer::DrawBitmap(int x, int y, textureData data, int flags, int clip0, int clip1)
@@ -29,13 +29,13 @@ bool Renderer::DrawBitmap(int x, int y, textureData data, int flags, int clip0, 
 bool Renderer::DrawBitmap(int x, int y, const uint8_t* tex, int texW, int texH, int flags, int clip0, int clip1)
 {
 	if (!tex) return false;
-	ASSERT(buffer);
-	if (!buffer) return false;
+	ASSERT(m_buffer);
+	if (!m_buffer) return false;
 
 	const int texRows = (texH + 7) / 8;
 
 	const int x0 = MAX(MAX(clip0, 0), x);
-	const int x1 = MIN(x + texW, MIN(width, clip1));
+	const int x1 = MIN(x + texW, MIN(m_width, clip1));
 	const int dx = x0 - x;
 	if (x1 <= x0) return false;
 
@@ -44,13 +44,13 @@ bool Renderer::DrawBitmap(int x, int y, const uint8_t* tex, int texW, int texH, 
 	const unsigned shift = (y+256) - ((y+256) / 8) * 8;
 	const unsigned downShift = 8 - shift;
 
-	for (int r = MAX(r0, 0); r < MIN(r1, nRows); ++r) {
-		mask[r] = (flags & NO_MASK) ? 0 : 0xff;
+	for (int r = MAX(r0, 0); r < MIN(r1, m_nRows); ++r) {
+		m_mask[r] = (flags & NO_MASK) ? 0 : 0xff;
 	}
 
 	if (!(flags & NO_MASK)) {
 		CalcMask(y, texH, 0, 0);
-		if (r0 == r1 && mask[r0] == 0)
+		if (r0 == r1 && m_mask[r0] == 0)
 			return false;
 	}
 
@@ -59,28 +59,28 @@ bool Renderer::DrawBitmap(int x, int y, const uint8_t* tex, int texW, int texH, 
 	(void)src;
 
 	for (int r = r0; r < r1; ++r) {
-		if (r < 0 || r >= nRows) continue;
+		if (r < 0 || r >= m_nRows) continue;
 
-		uint8_t* dst = buffer + x0 + r * width;
-		ASSERT(dst >= buffer && dst < buffer + nRows * width);
+		uint8_t* dst = m_buffer + x0 + r * m_width;
+		ASSERT(dst >= m_buffer && dst < m_buffer + m_nRows * m_width);
 		const uint8_t* src = tex + (r - r0) * texW + dx;
 		int bias = 1;
 		if (flags & FLIP_X) {
-			dst = buffer + (x1 - 1) + r * width;
+			dst = m_buffer + (x1 - 1) + r * m_width;
 			bias = -1;
 		}
 
 		for (int i = x0; i < x1; ++i) {
 
-			*dst = *dst & (~mask[r]);
+			*dst = *dst & (~m_mask[r]);
 			if (src < texEnd) {
 				ASSERT(src >= tex && src < tex + texRows * texW);
-				ASSERT(dst >= buffer && dst < buffer + nRows * width);
+				ASSERT(dst >= m_buffer && dst < m_buffer + m_nRows * m_width);
 				*dst |= *src << shift;
 			}
 			if (r > r0) {
 				ASSERT((src - texW) >= tex && (src - texW) < tex + texRows * texW);
-				ASSERT(dst >= buffer && dst < buffer + nRows * width);
+				ASSERT(dst >= m_buffer && dst < m_buffer + m_nRows * m_width);
 				*dst |= *(src - texW) >> downShift;
 			}
 			dst += bias;
@@ -98,16 +98,16 @@ void Renderer::DrawRectangle(int x, int y, int w, int h)
 	CalcMask(y, h, &r0, &r1);
 
 	int x0 = MAX(x, 0);
-	int x1 = MIN(x + w, width);
+	int x1 = MIN(x + w, m_width);
 
 	for (int r = r0; r < r1; ++r) {
 		if (r < 0) continue;
-		if (r >= nRows) continue;
+		if (r >= m_nRows) continue;
 
-		uint8_t* dst = buffer + x0 + r * width;
+		uint8_t* dst = m_buffer + x0 + r * m_width;
 		for (int x = x0; x < x1; ++x) {
-			ASSERT(dst >= buffer && dst < buffer + nRows * width);
-			*dst++ |= mask[r];
+			ASSERT(dst >= m_buffer && dst < m_buffer + m_nRows * m_width);
+			*dst++ |= m_mask[r];
 		}
 	}
 }
@@ -128,18 +128,18 @@ void Renderer::CalcMask(int y, int h, int* pr0, int* pr1)
 	if (pr0) *pr0 = r0;
 	if (pr1) *pr1 = r1;
 
-	ASSERT(nRows <= MAX_ROWS);
-	for (int r = MAX(r0, 0); r < MIN(r1, nRows); ++r) {
-		mask[r] = 0xff;
+	ASSERT(m_nRows <= MAX_ROWS);
+	for (int r = MAX(r0, 0); r < MIN(r1, m_nRows); ++r) {
+		m_mask[r] = 0xff;
 	}
 
 	if (r0 >= 0) {
 		int trim = y - r0 * 8;
-		mask[r0] &= LOWBYTES[trim];
+		m_mask[r0] &= LOWBYTES[trim];
 	}
-	if (r1 <= nRows)  {
+	if (r1 <= m_nRows)  {
 		int trim = r1 * 8 - (y + h);
-		mask[r1 - 1] &= HIGHBYTES[trim];
+		m_mask[r1 - 1] &= HIGHBYTES[trim];
 	}
 }
 
@@ -177,12 +177,12 @@ int Renderer::StrWidth(const char* str, glyphMetrics metrics)
 
 void Renderer::Fill(int c)
 {
-	if (buffer) {
-		const int size = nRows * width;
+	if (m_buffer) {
+		const int size = m_nRows * m_width;
 		const uint8_t val = c ? 0xff : 0;
 
 		for (int i = 0; i < size; ++i) {
-			buffer[i] = val;
+			m_buffer[i] = val;
 		}
 	}
 }

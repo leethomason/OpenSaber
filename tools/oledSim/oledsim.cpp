@@ -34,3 +34,10 @@ void OledSim::Commit()
 		}
 	}
 }
+
+
+void OledSim::Clear()
+{
+	memset(pixels, 0, width * height * sizeof(uint32_t));
+	memset(buffer, 0, width * height * sizeof(uint8_t));
+}

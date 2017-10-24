@@ -27,18 +27,18 @@ public:
 
 	void Fill(int c);
 
-	uint8_t* Buffer() { return buffer;  }
+	uint8_t* Buffer() { return m_buffer;  }
 
 private:
 	void CalcMask(int y, int h, int* r0, int* r1);
 
-	int width	= 0;
-	int height	= 0;
-	int nRows	= 0;
-	uint8_t* buffer = 0;
+	int m_width	= 0;
+	int m_height	= 0;
+	int m_nRows	= 0;
+	uint8_t* m_buffer = 0;
 
 	enum { MAX_ROWS = 4};
-	uint8_t mask[MAX_ROWS];
+	uint8_t m_mask[MAX_ROWS];
 };
 
 #endif // DISPLAY_INCLUDED

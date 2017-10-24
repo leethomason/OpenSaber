@@ -44,6 +44,7 @@ int main(int, char**) {
 	OledSim oled(WIDTH, HEIGHT);
 	Renderer display;
 	display.Attach(WIDTH, HEIGHT, oled.Buffer());
+	Pixel_7_5_UI pixel75;
 
 	SDL_SetRenderDrawColor(ren, 128, 128, 128, 255);
 
@@ -62,10 +63,11 @@ int main(int, char**) {
 	SDL_Event e;
 	int scale = 4;
 	UIModeUtil mode;
-	mode.set(UIMode::MEDITATION);
+	mode.set(UIMode::NORMAL);
 	bool bladeOn = false;
 	int count = 0;
 	uint32_t lastUpdate = SDL_GetTicks();
+	bool oledMode = false;
 
 	const char* FONT_NAMES[8] = {
 		"Bespin", "Vader", "Vader", "ObiAni", "Bespin", "JainaSw", "Maul", "MAUL"
@@ -100,6 +102,9 @@ int main(int, char**) {
 			else if (e.key.keysym.sym == SDLK_v) {
 				data.volume = (data.volume + 1) % 5;
 			}
+			else if (e.key.keysym.sym == SDLK_o) {
+				oledMode = !oledMode;
+			}
 			else if (e.key.keysym.sym == SDLK_c) {
 				palette = (palette + 1) % 8;
 				data.color.set(COLORS[(palette * 3 + 0) % 8],
@@ -117,6 +122,7 @@ int main(int, char**) {
 			++count;
 			sketcher.Push(value);
 			sketcher.Draw(&display, 100, mode.mode(), bladeOn, &data);
+			pixel75.Draw(t, mode.mode(), bladeOn, &data);
 		}
 
 		oled.Commit();
@@ -128,8 +134,14 @@ int main(int, char**) {
 		const int h = HEIGHT * scale;
 		SDL_Rect dst = { (winRect.w - w) / 2, (winRect.h - h) / 2, w, h };
 
-		SDL_UpdateTexture(texture, NULL, oled.Pixels(), WIDTH * 4);
+		if (!oledMode) {
+			oled.Clear();
+			memcpy(oled.Buffer(), pixel75.Pixels(), 7);
+			oled.Commit();
+		}
+
 		SDL_RenderClear(ren);
+		SDL_UpdateTexture(texture, NULL, oled.Pixels(), WIDTH * 4);
 		SDL_RenderCopy(ren, texture, &src, &dst);
 		SDL_RenderPresent(ren);
 	}

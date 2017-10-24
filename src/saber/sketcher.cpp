@@ -456,5 +456,37 @@ Pixel_7_5_UI::Pixel_7_5_UI()
 
 void Pixel_7_5_UI::Draw(uint32_t time, UIMode mode, bool bladeIgnited, const UIRenderData* data)
 {
-	pixelMatrix.loop(time);
+	for (int i = 0; i < NCOLS; ++i)
+		col[i] = 0;
+
+	switch (mode) {
+	case UIMode::NORMAL:
+		getGlypth_tomThumb5('0' + data->palette, col);
+
+		DrawBar(col + 4, data->power);
+		DrawBar(col + 6, data->volume);
+		break;
+
+	case UIMode::PALETTE:
+		getGlypth_tomThumb5('P', col);
+		getGlypth_tomThumb5('0' + data->palette, col + 4);
+		break;
+
+	case UIMode::VOLUME:
+		getGlypth_tomThumb5('V', col);
+		getGlypth_tomThumb5('0' + data->volume, col + 4);
+		break;
+
+	default:
+		break;
+	}
+}
+
+
+void Pixel_7_5_UI::DrawBar(uint8_t* c, int v)
+{
+	*c = 0;
+	for (int i = 0; i < v; ++i) {
+		*c |= (16 >> i);
+	}
 }
