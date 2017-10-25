@@ -3,6 +3,7 @@ use <buttress.scad>
 use <../shapes.scad>
 use <vents.scad>
 use <emitter.scad>
+use <swoop.scad>
 
 $fn=90;
 EPS = 0.01;
@@ -382,17 +383,30 @@ difference() {
 
 // Display holder.
 union() {
-	displayButtress();
-	displayConnectors();
+	//displayButtress();
+	//displayConnectors();
 }
+translate([0, 0, ])
 
 translate([0, 0, M_EMITTER_BASE]) emitterBase();
 
-portButtress();
-crystalButtress();
-midButtress();
-frontButtress();
+//portButtress();
+//crystalButtress();
+//midButtress();
+//frontButtress();
 
 *rail(NOTCH_ANGLE_0);
-rail(NOTCH_ANGLE_1);
+*rail(NOTCH_ANGLE_1);
 *drillGuide(alignment=true);
+
+intersection() {
+    translate([0, 0, M_AFT_STOP_FRONT]) cylinder(h=H_FAR, d=D_INNER);
+    union() {
+        DY = -12;
+        DZ = M_EMITTER_BASE - M_AFT_STOP_FRONT;
+        for(i=[0:11]) {
+            translate([-20, DY, M_AFT_STOP_FRONT + i*10]) xArch(20, 1, 40, 3);    
+        }
+        translate([-20, DY-20, M_AFT_STOP_FRONT]) cube(size=[40, 20, DZ]);
+    }
+}

@@ -33,9 +33,13 @@ module arch(dx=12, sy=1, dz=1, inset=2)
     }
 }
 
-*arch(16, 0.8, 4);
+module xArch(dx=12, sy=1, dz=1, inset=2) {
+    rotate([0, 90, 0]) arch(dx, sy, dz, inset);
+}
 
-for(i=[0:3]) {
+xArch();
+
+*for(i=[0:3]) {
     translate([i*8.5,0,0])
         //arch(18, 0.7, 4, 3);
         arch(14, 1.0, 4, 2);
@@ -52,8 +56,10 @@ for(i=[0:3]) {
                     arch(dz=12);
             translate([0, 20, 12 + i*22]) 
                 rotate([0, -90, 0])
-                    rotate([0, 0, 180])
+                 rotate([0, 0, 180])
                         arch(dz=12);
         }
     }
 }
+
+
