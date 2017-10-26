@@ -15,13 +15,13 @@ M_PORT_CENTER       = 57.5;
 M_CRYSTAL_START     = 68;
 M_MC                = 68;
 M_CRYSTAL_VIEW_CENTER = 93;
-M_SWITCH_CENTER     = 125;
-M_EMITTER_BASE      = 140;
+M_SWITCH_CENTER     = 145;
+M_EMITTER_BASE      = 185;
 
 M_PORT_BUTTRESS     = 63.5;
 M_FRONT_BUTTRESS    = 104.0;
 
-H_FAR               = 200;
+H_FAR               = 240;
 
 // inner diameter of the lightsaber tube.
 // shock is constant, within tolerances
@@ -90,6 +90,12 @@ SHOULDER_DZ         = 3.5;
 X_ROD               = 10.5;
 Y_ROD               =  3.5;
 D_ROD               =  3.4;
+
+POWER_DX            = 9.6;
+POWER_DY            = 14;
+POWER_DZ            = 11;
+POWER_Y             = 0.5;
+POWER_X             = 0;
 
 H_BATTERY           = 68;
 D_BATTERY           = 18.50 + 0.5;    // An 1850. Huh. 
