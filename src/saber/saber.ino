@@ -106,7 +106,8 @@ OLED_SSD1306 display(PIN_OLED_DC, PIN_OLED_RESET, PIN_OLED_CS);
 Sketcher sketcher;
 Renderer renderer;
 #elif SABER_DISPLAY == SABER_DISPLAY_7_5
-Pixel_7_5_UI display;
+Pixel_7_5_UI display75;
+PixelMatrix pixelMatrix;
 #endif
 
 #ifdef SABER_SISTERS
@@ -209,7 +210,7 @@ void setup() {
 
         Log.p("OLED display connected.").eol();
     #elif SABER_DISPLAY == SABER_DISPLAY_7_5
-
+        Log.p("Pixel display init.").eol();
     #endif
 
     #if defined(SABER_NUM_LEDS)
@@ -684,7 +685,7 @@ void loop() {
     }
 
     #if SABER_DISPLAY == SABER_DISPLAY_7_5
-        display.Draw(msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
+        pixelMatrix.loop(msec, display75.Pixels());
     #endif
     if (displayTimer.tick(delta)) {
         uiRenderData.color = Blade::convertRawToPerceived(saberDB.bladeColor());
@@ -692,6 +693,8 @@ void loop() {
         #if SABER_DISPLAY == SABER_DISPLAY_128_32
             sketcher.Draw(&renderer, displayTimer.period(), uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
             display.display(oledBuffer);
+        #elif SABER_DISPLAY == SABER_DISPLAY_7_5
+            display75.Draw(msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
         #endif
         #ifdef SABER_UI_START
             bool changed = dotstarUI.Draw(leds + SABER_UI_START, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);

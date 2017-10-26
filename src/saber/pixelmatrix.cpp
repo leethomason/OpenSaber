@@ -38,18 +38,21 @@ PixelMatrix::PixelMatrix()
 }
 
 
-/*
-void PixelMatrix::render(uint8_t* g0, uint8_t* g1)
-{
-
-}
-*/
-
-void PixelMatrix::loop(uint32_t t)
+void PixelMatrix::loop(uint32_t t, const uint8_t* pixels)
 {
     /* Remember the connection is from 
        anode (HIGH) to cathode (LOW)
     */
+
+    uint32_t y = (t/1) % NUM_ANODES;
+    for(uint8_t j=0; j<NUM_ANODES; ++j) {
+        digitalWrite(ANODES[j], j == y ? HIGH : LOW);
+    }
+    for(uint8_t x=0; x<7; ++x) {
+        uint8_t b = pixels[x] & (1 << (4-y));
+        digitalWrite(CATHODES[x], b ? LOW : HIGH);
+    }
+
 #if 0
     uint32_t y = (t/1000) % NUM_ANODES;
     for(uint8_t j=0; j<NUM_ANODES; ++j) {
@@ -59,7 +62,7 @@ void PixelMatrix::loop(uint32_t t)
         digitalWrite(CATHODES[i], LOW);
     }
 #endif
-#if 1
+#if 0
     uint32_t y = (t/2) % NUM_ANODES;
     for(uint8_t j=0; j<NUM_ANODES; ++j) {
         digitalWrite(ANODES[j], j == y ? HIGH : LOW);

@@ -8,9 +8,8 @@ class PixelMatrix
 public:
     PixelMatrix();
 
-    void loop(uint32_t time);
+    void loop(uint32_t time, const uint8_t* display);
 private:
-//    void render(uint8_t* g0, uint8_t* g1);
 };
 
 #endif // PIXEL_MATRIX_INCLUDED

@@ -26,7 +26,7 @@ H_TEETH = 2;
 // Top part (emitter)
 module emitter()
 {
-    *difference() {
+    difference() {
         union() {
             // Top cap
             translate([0, 0, H_OUTER]) {
@@ -83,28 +83,6 @@ module emitterBase()
                 // End cap.
                 translate([0, 0, -H_CAP]) {
                     tube(H_CAP, D_INNER_CAP/2, D_INNER/2);
-                }
-
-                // Pin holder & alignment
-                // Note that the end cap consumes the bottom of this part.
-                difference() {
-                    // Emitter port.
-                    translate([0, 0, -H_CONNECTOR]) {
-                        difference() {
-                            emitterHolder(H_CONNECTOR);
-                            emitterPin(H_CONNECTOR, true);
-                        }
-                    }
-                    H_SPACE = H_CONNECTOR - 3;
-                    translate([-X_EMITTER * PIN /2, 0, -H_SPACE]) {
-                        cube(size=[X_EMITTER * PIN, 40, H_SPACE]);
-                    }
-                }       
-                
-                rotate([0, 0, 180]) {
-                    translate([0, 0, -H_CONNECTOR]) {
-                        emitterHolder(H_CONNECTOR);
-                    }
                 }
             }                 
         }

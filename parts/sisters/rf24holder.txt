@@ -1,0 +1,16 @@
+o o   o-o-o
+| |       |
+o o o o o o
+  | | | | |
+o o m s c g
+| |
+o o i m c v
+  |   | | |
+o o   o o o
+| |       |
+o o   o-o-o
+
+
+# RF24 holder circuit.
+Left row bus (RGB?)
+Next row vbat but

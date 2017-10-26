@@ -16,8 +16,8 @@ M_SPEAKER_FRONT 	= M_SPEAKER_BACK + H_SPEAKER_HOLDER;
 M_BATTERY_BACK 		= M_SPEAKER_FRONT;
 M_AFT_STOP_FRONT	= M_AFT_STOP + H_AFT_RING + H_AFT_LIP;
 M_DISPLAY_BUTTRESS 	= M_DISPLAY + DISPLAY_L - DISPLAY_INNER_L - H_BUTTRESS / 2;
-M_CRYSTAL_BUTTRESS  = M_PORT_BUTTRESS + H_BUTTRESS + H_CRYSTAL_HOLDER;
-M_MID_BUTTRESS      = M_CRYSTAL_BUTTRESS + H_BUTTRESS + H_CRYSTAL_HOLDER;
+//M_CRYSTAL_BUTTRESS  = M_PORT_BUTTRESS + H_BUTTRESS + H_CRYSTAL_HOLDER;
+//M_MID_BUTTRESS      = M_CRYSTAL_BUTTRESS + H_BUTTRESS + H_CRYSTAL_HOLDER;
 
 R_DISPLAY_THREAD = 0.8; // M2 bolt
 R_DISPLAY_THREAD_HEAD = 2.0;
@@ -34,13 +34,39 @@ module battery() {
     }
 }
 
-module mainRod() {
-	translate([X_ROD, Y_ROD, H_AFT_RING - 16]) {
-		cylinder(d=D_ROD, h=H_FAR);
-        translate([0, 0, -10]) {
-            cylinder(d2=D_ROD, d1=0, h=10);
+// LED / button positive (above axis)
+// thread negative (below axis)
+//
+module switch()
+{
+    D_OUTER_TOP = 13.8;
+    D_INNER_TOP = 11.0;
+    H_TOP       =  1.5;
+    H_BODY      = 13;   // approx. connections below.
+
+    color("yellow") {
+        translate([0, 0, M_SWITCH_CENTER]) {
+            rotate([-90, 0, 0]) {
+                translate([0, 0, Y_SWITCH]) {
+                    cylinder(h = H_TOP, r1 = D_OUTER_TOP / 2, r2 = D_INNER_TOP / 2);
+                    translate([0, 0, -H_BODY]) {
+                        cylinder(h = H_BODY, d=D_SWITCH);
+                    }            
+                }
+            }
         }
-	}
+    }
+}
+
+module mainRod() {
+	color("yellow") {
+        translate([X_ROD, Y_ROD, H_AFT_RING - 16]) {
+    		cylinder(d=D_ROD, h=H_FAR);
+        }
+        translate([-X_ROD, Y_ROD, H_AFT_RING - 16]) {
+            cylinder(d=D_ROD, h=H_FAR);
+        }
+    }
 }
 
 module innerTube() {
@@ -108,7 +134,7 @@ module display()
     translate([0, Y_DISPLAY, M_DISPLAY]) {
         X_CABLE = 12;
         Y_CABLE = 2;
-        Z_CABLE = 3;
+        Z_CABLE = 3 + 1;    // cheat so we don't get a super thin piece in the locking ring.
         translate([-X_CABLE/2, -Y_CABLE, -Z_CABLE]) {
             cube(size=[X_CABLE, 10, Z_CABLE + 7]);
         }
@@ -255,66 +281,7 @@ module portButtress()
         
     }          
 }
-
-module crystalButtress()
-{
-    translate([0, 0, M_CRYSTAL_BUTTRESS]) {
-        buttress(pcb=12, crystal="body", crystalHolder=9, upperWiring=true, altRod=true);
-    }
-}
-
-module midButtress() 
-{
-    translate([0, 0, M_MID_BUTTRESS]) {
-        buttress(pcb=11, crystal="body", upperWiring=true);
-    }
-}    
-
-module frontButtress() 
-
-{
-    translate([0, 0, M_FRONT_BUTTRESS]) {
-        buttress(pcb=11, crystal="body", altRod=true, upperWiring=true);
-    }
-}    
-
-module rail(angle) 
-{
-    RAIL_EPS    = 0.2;
-    CAP         = 2;
-    
-    FRONT = M_FRONT_BUTTRESS + H_BUTTRESS + CAP;
-    BACK = M_DISPLAY_BUTTRESS - CAP;
-    LEN = FRONT - BACK;
-    STOPS = [   M_DISPLAY_BUTTRESS, 
-                M_PORT_BUTTRESS,
-                M_CRYSTAL_BUTTRESS,
-                M_MID_BUTTRESS,
-                M_FRONT_BUTTRESS ];
-    SIDE = (RAIL_WIDTH - NOTCH_WIDTH)/2 + RAIL_EPS;
-    
-    color("green") {
-        rotate([0, 0, angle]) {
-            difference() {
-                translate([-R_INNER + RAIL_EPS, -RAIL_WIDTH/2, BACK]) {
-                    cube(size=[NOTCH_DEPTH - RAIL_EPS, RAIL_WIDTH, LEN]);
-                }
-                for(stop = STOPS) {
-                    translate([-R_INNER, -RAIL_WIDTH/2, stop - RAIL_EPS/2]) {
-                        cube(size=[NOTCH_DEPTH, SIDE, H_BUTTRESS + RAIL_EPS]);
-                    }
-                    translate([-R_INNER, RAIL_WIDTH/2-SIDE, stop]) {
-                        cube(size=[NOTCH_DEPTH, SIDE, H_BUTTRESS + RAIL_EPS]);
-                    }
-                }
-            }
-            translate([-R_INNER + RAIL_EPS, -RAIL_WIDTH/2-1, FRONT - CAP]) {
-            	cube(size=[NOTCH_DEPTH - RAIL_EPS, RAIL_WIDTH+2, CAP]);
-            }
-        }
-    }
-}
-
+  
 
 module drillGuide(alignment)
 {
@@ -357,7 +324,7 @@ module drillGuide(alignment)
 //---------------------------//
 
 // Speaker holder.
-difference() {
+*difference() {
     speakerHolder();
     speakerBolts();
     aftPowerHoles();
@@ -372,41 +339,126 @@ difference() {
 	aftPowerHoles();
 }
 
-// Aft lock
-difference() {
-	aftLock();
-	display();
-	mainRod();
-	displayConnectors();
-	aftPowerHoles();
-}
-
 // Display holder.
 union() {
 	//displayButtress();
 	//displayConnectors();
 }
-translate([0, 0, ])
 
-translate([0, 0, M_EMITTER_BASE]) emitterBase();
 
-//portButtress();
-//crystalButtress();
-//midButtress();
-//frontButtress();
+MAIN_DISPLAY = true;
+MAIN_CRYSTAL = true;
+MAIN_EMITTER = true;
 
-*rail(NOTCH_ANGLE_0);
-*rail(NOTCH_ANGLE_1);
-*drillGuide(alignment=true);
+M_ZONE_0 = M_AFT_STOP_FRONT;
+M_ZONE_1 = M_CRYSTAL_START;
+M_ZONE_2 = M_SWITCH_CENTER - 5;
+M_ZONE_3 = M_EMITTER_BASE;
 
-intersection() {
-    translate([0, 0, M_AFT_STOP_FRONT]) cylinder(h=H_FAR, d=D_INNER);
-    union() {
-        DY = -12;
-        DZ = M_EMITTER_BASE - M_AFT_STOP_FRONT;
-        for(i=[0:11]) {
-            translate([-20, DY, M_AFT_STOP_FRONT + i*10]) xArch(20, 1, 40, 3);    
-        }
-        translate([-20, DY-20, M_AFT_STOP_FRONT]) cube(size=[40, 20, DZ]);
+
+// Aft lock
+if (MAIN_DISPLAY)
+{
+    difference() {
+        aftLock();
+        display();
+        mainRod();
+        displayConnectors();
+        aftPowerHoles();
+        translate([-20, Y_FLATTEN-20, -20]) cube(size=[40, 20, 100]);
     }
 }
+
+if (MAIN_EMITTER) {
+   difference() {
+        translate([0, 0, M_EMITTER_BASE]) emitterBase();
+        translate([-20, Y_FLATTEN-20, M_EMITTER_BASE - 5]) cube(size=[40, 20, 20]);
+    }
+}
+
+
+module mainBody() {
+    DY = -12;
+    DZ = M_EMITTER_BASE - M_AFT_STOP_FRONT - H_BUTTRESS;
+    SWITCH_DX = 14;
+    SWITCH_DZ = 15;
+    PORT_DZ = 8;
+    T = 4;
+
+    intersection() {
+        union() {
+            if (MAIN_DISPLAY) translate([0, 0, M_ZONE_0]) 
+                cylinder(h=M_ZONE_1 - M_ZONE_0, d=D_INNER);
+            if (MAIN_CRYSTAL) translate([0, 0, M_ZONE_1]) 
+                cylinder(h=M_ZONE_2 - M_ZONE_1, d=D_INNER);
+            if (MAIN_EMITTER) translate([0, 0, M_ZONE_2])
+                cylinder(h=M_ZONE_3 - M_ZONE_2, d=D_INNER);
+        }
+        union() {
+            difference() {
+                union() {
+                    STEPS = 12;
+                    STEP_Z = DZ / (STEPS-1);
+                    SKIP = STEPS - 2;
+                    for(i=[0:STEPS-1]) {
+                        translate([-20, DY, M_AFT_STOP_FRONT + i*STEP_Z]) 
+                            xArch(21, 1, 40, 2.5);    
+                        translate([-20, DY-20, M_AFT_STOP_FRONT + i*STEP_Z + 2])
+                            cube(size=[40, 20, 6]);
+                    }
+                    //translate([-20, DY-20, M_AFT_STOP_FRONT]) cube(size=[40, 20, DZ]);
+                }
+                // Switch cut-out
+                translate([-SWITCH_DX/2, DY, M_SWITCH_CENTER - SWITCH_DZ]) cube(size=[SWITCH_DX, 100, 100]);
+                translate([0, 0,  M_SWITCH_CENTER - SWITCH_DZ]) cylinder(h=100, d=D_INNER_CORE);
+
+                // Port cut-out
+                translate([-SWITCH_DX/2, DY, M_PORT_CENTER - PORT_DZ]) cube(size=[SWITCH_DX, 100, PORT_DZ*2]);
+                translate([0, 0,  M_PORT_CENTER - PORT_DZ]) cylinder(h=PORT_DZ*2, d=D_INNER_CORE);
+
+                // Crystal cut-out
+                translate([0, Y_CRYSTAL, M_CRYSTAL_START]) {
+                    scale([W_CRYSTAL, H_CRYSTAL, 1]) {
+                        cylinder(h=Z_CRYSTAL, d=1);
+                    }                
+                }
+                translate([0, Y_CRYSTAL-1, M_CRYSTAL_START]) {
+                    rotate([0, 0, 45]) cube(size=[20, 20, Z_CRYSTAL]);
+                }
+
+                // MC cut out
+                translate([-W_MC/2, DY, M_MC]) 
+                    cube(size=[W_MC, H_MC, Z_MC_35]);
+                MC_TROUGH = 8;                
+                translate([-MC_TROUGH/2, DY, M_MC]) 
+                    cube(size=[MC_TROUGH, 100, Z_MC_35]);
+
+                // Display cut outs
+                display();
+                DISPLAY_TROUGH = 13;
+                translate([-DISPLAY_TROUGH/2, DY, M_DISPLAY]) 
+                    cube(size=[DISPLAY_TROUGH, 100, DISPLAY_L]);
+
+                translate([-20, Y_FLATTEN-20, M_AFT_STOP_FRONT]) cube(size=[40, 20, DZ]);
+
+            }    
+            // Switch plate.
+            difference() {
+                PAD = 4;
+                translate([-D_SWITCH/2 - PAD, Y_SWITCH-T, M_SWITCH_CENTER - D_SWITCH/2 - 3]) 
+                    cube(size=[D_SWITCH + PAD * 2, T, 100]);
+                switch();
+            }
+            // Port plate
+            difference() {
+                PAD = 4;
+                translate([-D_PORT/2 - PAD, Y_SWITCH-T, M_PORT_CENTER - D_PORT]) 
+                    cube(size=[D_PORT + PAD * 2, T, D_PORT*2]);
+                translate([0, 0, M_PORT_CENTER]) rotate([-90, 0, 0]) cylinder(h=100, d=D_PORT);
+            }
+        }
+    }
+}
+
+mainBody();
+mainRod();

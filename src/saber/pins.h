@@ -46,7 +46,7 @@ SOFTWARE.
 #define SABER_SUB_MODEL_CELESTIA	2
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
+#define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_AQUATIC
 #define SABER_SUB_MODEL				
 // ----------------------------------
@@ -330,7 +330,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
-	#define SABER_AUDIO_UI
+//	#define SABER_AUDIO_UI
 	#define SABER_DISPLAY			SABER_DISPLAY_7_5
 
 /*
