@@ -289,13 +289,13 @@ module powerHolder(addative)
 	aftPowerHoles();
 }
 
-MAIN_DISPLAY = true;
-MAIN_CRYSTAL = false;
+MAIN_DISPLAY = false;
+MAIN_CRYSTAL = true;
 MAIN_EMITTER = false;
 
 M_ZONE_0 = M_AFT_STOP_FRONT;
-M_ZONE_1 = M_CRYSTAL_START + 0.5;
-M_ZONE_2 = M_SWITCH_CENTER - 5;
+M_ZONE_1 = M_CRYSTAL_START;
+M_ZONE_2 = M_SWITCH_CENTER - 11.5;
 M_ZONE_3 = M_EMITTER_BASE;
 
 
@@ -343,7 +343,7 @@ module mainBody() {
                     STEP_Z = DZ / (STEPS-1);
                     for(i=[0:STEPS-1]) {
                         translate([-20, DY, M_AFT_STOP_FRONT + i*STEP_Z]) 
-                            xArch(18, 1.2, 40, 2);    //xArch(21, 1, 40, 2.5)
+                            xArch(18, 1.2, 40, 2.1);    //xArch(21, 1, 40, 2.5)
                         translate([-20, DY-20, M_AFT_STOP_FRONT + i*STEP_Z + 2])
                             cube(size=[40, 20, 6]);
                     }
@@ -353,17 +353,33 @@ module mainBody() {
                 translate([-SWITCH_DX/2, DY, M_SWITCH_CENTER - SWITCH_DZ]) cube(size=[SWITCH_DX, 100, 100]);
                 translate([0, 0,  M_SWITCH_CENTER - SWITCH_DZ]) cylinder(h=100, d=D_INNER_CORE);
 
+                // Rail exposure:
+                RAIL_TROUGH = 13;
+                translate([-RAIL_TROUGH/2, DY, M_DISPLAY]) 
+                    cube(size=[DISPLAY_TROUGH, -DY, M_ZONE_1 - M_DISPLAY]);
+
+
                 // Port cut-out
-                translate([0, 0,  M_ZONE_0]) cylinder(h=M_ZONE_1 - M_ZONE_0 + EPS, d=D_INNER_CORE);
+                translate([0, 0,  M_ZONE_0]) cylinder(h=M_ZONE_1 - M_DISPLAY + EPS, d=D_INNER_CORE);
                 //translate([-5, 0,  M_ZONE_0]) cube(size=[10, 100, M_ZONE_1 - M_ZONE_0]);
-                powerHolder(false);
+                //powerHolder(false);
+                LEADS = 5;
+                translate([-POWER_DX/2 + POWER_X, POWER_Y, M_PORT_CENTER - POWER_DZ/2 - LEADS])
+                    cube(size=[POWER_DX, POWER_DY+10, POWER_DZ + LEADS]);
+                //PORT_TROUGH = POWER_DX - 4;
+                //translate([-PORT_TROUGH/2, DY, M_DISPLAY]) 
+                //    cube(size=[PORT_TROUGH, 100, 100]);
 
                 // Display cut outs
                 display();
                 DISPLAY_TROUGH = 13;
                 translate([-DISPLAY_TROUGH/2, DY, M_DISPLAY]) 
-                    cube(size=[DISPLAY_TROUGH, 100, M_ZONE_1 - M_DISPLAY]);
+                    cube(size=[DISPLAY_TROUGH, 100, M_PORT_CENTER - M_ZONE_0 - D_PORT/2 - M_DISPLAY]);
+                translate([0, 0, M_DISPLAY + (DISPLAY_L - DISPLAY_PINS)/2]) {
+                    cube(size=[DISPLAY_MOUNT_W/2 + 2, 100, DISPLAY_PINS]);
+                }
 
+                /*
                 // Crystal cut-out
                 translate([0, Y_CRYSTAL, M_CRYSTAL_START]) {
                     scale([W_CRYSTAL, H_CRYSTAL, 1]) {
@@ -380,7 +396,7 @@ module mainBody() {
                 MC_TROUGH = 8;                
                 translate([-MC_TROUGH/2, DY, M_MC]) 
                     cube(size=[MC_TROUGH, 100, Z_MC_35]);
-
+                */
 
                 // Flatten
                 translate([-20, Y_FLATTEN-20, M_AFT_STOP_FRONT]) cube(size=[40, 20, DZ]);
@@ -395,13 +411,15 @@ module mainBody() {
                 switch();
             }
             // Port plate
-            powerHolder(true);
+            //powerHolder(true);
             /*difference() {
                 PAD = 4;
                 translate([-D_PORT/2 - PAD, Y_SWITCH-T, M_PORT_CENTER - D_PORT]) 
                     cube(size=[D_PORT + PAD * 2, T, D_PORT*2]);
                 translate([0, 0, M_PORT_CENTER]) rotate([-90, 0, 0]) cylinder(h=100, d=D_PORT);
             }*/
+            translate([-POWER_DX/2, Y_FLATTEN, M_PORT_CENTER - POWER_DZ/2])
+                cube(size=[POWER_DX, POWER_Y - Y_FLATTEN, POWER_DZ]);
         }
     }
 }
