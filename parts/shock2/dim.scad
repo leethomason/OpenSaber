@@ -12,14 +12,20 @@ M_0                 = 0;        // physical back of the lightsaber main body.
 M_AFT_STOP          = 10;
 M_DISPLAY           = 14;       // was 15
 M_PORT_CENTER       = 57.5;
-M_CRYSTAL_START     = 68.5;
-M_MC                = 68;
 M_CRYSTAL_VIEW_CENTER = 93;
-M_SWITCH_CENTER     = 145;
-M_EMITTER_BASE      = 185;
+M_SWITCH_CENTER     = 148;
+M_EMITTER_BASE      = 167;
+M_EMITTER           = M_EMITTER_BASE + 0;
 
-M_PORT_BUTTRESS     = 63.5;
-M_FRONT_BUTTRESS    = 104.0;
+M_ZONE_0            = M_DISPLAY;
+M_ZONE_1            = 69.8;
+M_ZONE_2            = M_SWITCH_CENTER - 11.5;
+M_ZONE_3            = M_EMITTER_BASE;
+
+M_CRYSTAL_START     = M_ZONE_1 + 8;
+Z_CRYSTAL           = 50;
+M_CRYSTAL_END       = M_CRYSTAL_START + Z_CRYSTAL;
+M_MC                = M_ZONE_1;
 
 H_FAR               = 240;
 
@@ -67,10 +73,9 @@ H_BUTTRESS			= 3;       // internal buttress / baffles
 W_CRYSTAL           = 12.1;
 H_CRYSTAL           = 9;
 Y_CRYSTAL           = 8;        // offset up of the crystal
-Z_CRYSTAL           = 50;
 
-DISPLAY_W           = 23;
-DISPLAY_L           = 32;
+DISPLAY_W           = 23 + 0.5;
+DISPLAY_L           = 32 + 0.5;
 DISPLAY_MOUNT_W     = 17;
 DISPLAY_MOUNT_L     = 26;
 D_DISPLAY_MOUNT     = 2;
@@ -83,7 +88,7 @@ Y_SWITCH            = 13.5;
 D_PORT              = 7.9;
 
 W_MC                = 18;
-H_MC                = 10;
+H_MC                = 11;
 Z_MC_35             = 71.5;     // includes SD
 SHOULDER_DX         = 2.5;
 SHOULDER_DZ         = 3.5;
@@ -104,6 +109,7 @@ BATTERY_DROP        = 0.5;
 
 X_DOTSTAR           = 5.0;  // from spec
 Y_DOTSTAR           = 1.4;  // from spec
+DOTSTAR_STRIP       = 12.4;
 
 OFFSET_EMITTER = -PIN + sqrt(R_INNER * R_INNER - PIN * PIN * X_EMITTER * X_EMITTER / 4);
 
