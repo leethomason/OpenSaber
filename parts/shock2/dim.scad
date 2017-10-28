@@ -107,7 +107,7 @@ H_BATTERY           = 68;
 D_BATTERY           = 18.50 + 0.5;    // An 1850. Huh. 
 BATTERY_DROP        = 0.5;
 
-X_DOTSTAR           = 5.0;  // from spec
+X_DOTSTAR           = 5.0 + 0.5;  // from spec
 Y_DOTSTAR           = 1.4;  // from spec
 DOTSTAR_STRIP       = 12.4;
 
