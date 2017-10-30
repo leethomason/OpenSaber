@@ -47,7 +47,7 @@ SOFTWARE.
 
 // ----------------------------------
 #define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_AQUATIC
+#define SABER_MODEL 				SABER_MODEL_TANO
 #define SABER_SUB_MODEL				
 // ----------------------------------
 

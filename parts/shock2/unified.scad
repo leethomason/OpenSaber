@@ -14,8 +14,8 @@ AFT_HOLDER   = false;
 AFT          = false;
 MAIN_DISPLAY = false;
 MAIN_CRYSTAL = false;
-MAIN_EMITTER = false;
-EMITTER      = true;
+MAIN_EMITTER = true;
+EMITTER      = false;
 
 DISPLAY_INNER_W = (DISPLAY_W - DISPLAY_MOUNT_W)/2;
 DISPLAY_INNER_L = (DISPLAY_L - DISPLAY_MOUNT_L)/2;
@@ -475,20 +475,22 @@ if (EMITTER) {
 
 module mainBody() 
 {
-    difference() {
-        union() {
-            if (MAIN_DISPLAY) Zone0();
-            if (MAIN_CRYSTAL) Zone1();
-            if (MAIN_EMITTER) {
-               difference() {
-                    translate([0, 0, M_EMITTER_BASE]) emitterBase();
-                    translate([-20, Y_FLATTEN-20, M_EMITTER_BASE - 5]) cube(size=[40, 20, 20]);
+    if (MAIN_DISPLAY || MAIN_CRYSTAL || MAIN_EMITTER) {
+        difference() {
+            union() {
+                if (MAIN_DISPLAY) Zone0();
+                if (MAIN_CRYSTAL) Zone1();
+                if (MAIN_EMITTER) {
+                   difference() {
+                        translate([0, 0, M_EMITTER_BASE]) emitterBase();
+                        translate([-20, Y_FLATTEN-20, M_EMITTER_BASE - 5]) cube(size=[40, 20, 20]);
+                    }
+                    Zone2();
                 }
-                Zone2();
             }
+            mainRod();
+            translate([-20, Y_FLATTEN-20, M_AFT_STOP_FRONT]) cube(size=[40, 20, BODY_Z]);
         }
-        mainRod();
-        translate([-20, Y_FLATTEN-20, M_AFT_STOP_FRONT]) cube(size=[40, 20, BODY_Z]);
     }
 }
 

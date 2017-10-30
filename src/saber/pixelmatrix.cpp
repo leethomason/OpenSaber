@@ -3,6 +3,8 @@
 #include "pixelmatrix.h"
 #include "assets.h"
 
+#ifdef ANODE_COL_1
+
 static const int NUM_ANODES = 5;
 static const int NUM_CATHODES = 7;
 
@@ -82,3 +84,5 @@ void PixelMatrix::loop(uint32_t t, const uint8_t* pixels)
     }
 #endif
 }
+
+#endif
