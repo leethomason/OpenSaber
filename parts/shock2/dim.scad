@@ -6,7 +6,7 @@ MM_TO_INCHES 		= 1 / INCHES_TO_MM;
 
 // Marks - absolute location.
 M_WAY_BACK          = -40;
-M_POMMEL            = -37;    // approximate. hard to measure.
+M_POMMEL            = -37;      // approximate. hard to measure.
 M_SPEAKER_BACK      = -36;
 M_0                 = 0;        // physical back of the lightsaber main body.
 M_AFT_STOP          = 10;
@@ -105,7 +105,6 @@ POWER_X             = 0;
 
 H_BATTERY           = 68;
 D_BATTERY           = 18.50 + 0.5;    // An 1850. Huh. 
-BATTERY_DROP        = 0.5;
 
 X_DOTSTAR           = 5.0 + 0.5;  // from spec
 Y_DOTSTAR           = 1.4;  // from spec

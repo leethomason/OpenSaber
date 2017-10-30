@@ -1,9 +1,3 @@
-/* 
-    - wiring access to display over rods
-    - stop for battery
-
-*/
-
 include <dim.scad>
 use <buttress.scad>
 use <../shapes.scad>
@@ -20,8 +14,8 @@ AFT_HOLDER   = false;
 AFT          = false;
 MAIN_DISPLAY = false;
 MAIN_CRYSTAL = false;
-MAIN_EMITTER = true;
-EMITTER      = false;
+MAIN_EMITTER = false;
+EMITTER      = true;
 
 DISPLAY_INNER_W = (DISPLAY_W - DISPLAY_MOUNT_W)/2;
 DISPLAY_INNER_L = (DISPLAY_L - DISPLAY_MOUNT_L)/2;
@@ -35,13 +29,8 @@ R_DISPLAY_THREAD = 0.8; // M2 bolt
 R_DISPLAY_THREAD_HEAD = 2.0;
 DEPTH_DISPLAY_THREAD = 4;
 
-DOTSTAR_HOLDER_TRIM = 2;
-DOTSTAR_HOLDER_T    = 1.5;    
-DOTSTAR_START       = 3;
-DOTSTAR_SPACE       = 7;
-
 module battery() {
-    color("yellow") translate([0, -BATTERY_DROP, M_BATTERY_BACK - EPS]) {
+    color("yellow") translate([0, 0, M_BATTERY_BACK - EPS]) {
         cylinder(d=D_BATTERY, h = H_BATTERY + EPS2);
     }
 }
@@ -73,10 +62,10 @@ module switch()
 
 module mainRod() {
 	color("yellow") {
-        translate([X_ROD, Y_ROD, M_WAY_BACK]) {
+        translate([X_ROD, Y_ROD, M_0 - 10]) {
     		cylinder(d=D_ROD, h=H_FAR);
         }
-        translate([-X_ROD, Y_ROD, M_WAY_BACK]) {
+        translate([-X_ROD, Y_ROD, M_0 - 10]) {
             cylinder(d=D_ROD, h=H_FAR);
         }
     }
@@ -130,28 +119,6 @@ module display()
     }
 }
 
-
-module displayButtress()
-{
-    difference() {
-        translate([0, 0, M_DISPLAY_BUTTRESS]) buttress(rods=true);
-		display();
-		translate([0, 0, M_DISPLAY_BUTTRESS - EPS]) {
-			D0 = 15; // less that 18
-            D1 = 19;
-			Y = 5;
-			cylinder(d=D0, h=10);
-			translate([-D1/2, -20, 0]) cube(size=[D1, 20, 10]);
-		}
-		translate([12, -0.5, M_DISPLAY_BUTTRESS - EPS]) {
-            cylinder(d=3, h=10);
-        }
-		translate([-12, -0.5, M_DISPLAY_BUTTRESS - EPS]) {
-            cylinder(d=3, h=10);
-        }
-	}
-}
-
 module aftLock()
 {
     difference() {
@@ -185,7 +152,8 @@ module aftPowerHoles()
         	cylinder(h=H, d=D_AFT);
 
 	    	translate([0, 0, H - 4]) {
-	        	rotate([180, 0, 0]) vent1(3, H-8, 6, 20);
+	        	//rotate([180, 0, 0]) vent1(3, H-8, 6, 20);
+                rotate([180, 0, 1]) vent1(3, H-8, 8, 20);
         	}
         }
     } 	
@@ -212,20 +180,22 @@ module speakerHolder()
     }     
 }
 
+
+module speakerBolt()
+{
+    cylinder(h=10, r=R_DISPLAY_THREAD);
+    cylinder(h=2, r=R_DISPLAY_THREAD_HEAD);
+}
+
 module speakerBolts()
 {
     translate([0, 0, M_SPEAKER_BACK]) {
-        translate([4.5, 9.5, -EPS]) {
-            cylinder(h=10, r=R_DISPLAY_THREAD);
-            cylinder(h=2, r=R_DISPLAY_THREAD_HEAD);
-        }
-        translate([-4.5, 9.5, -EPS]) {
-            cylinder(h=10, r=R_DISPLAY_THREAD);
-            cylinder(h=2, r=R_DISPLAY_THREAD_HEAD);
-        }
+        translate([ 4.5,  9.9, -EPS]) speakerBolt();
+        translate([-4.5,  9.9, -EPS]) speakerBolt();
+        translate([ 4.5, -9.9, -EPS]) speakerBolt();
+        translate([-4.5, -9.9, -EPS]) speakerBolt();
     }
 }
-
 
 module portButtress()
 {
@@ -368,10 +338,18 @@ module Zone0()
             BW = 14;
             BZ = 10;
             hull() {
-                translate([-BW/2, FLOOR_Y, M_BAT]) cube(size=[BW, 8, 1]);
-                translate([-BW/4, FLOOR_Y, M_BAT + BZ]) cube(size=[BW/2, 4, 1]);
+                translate([-BW/2, Y_FLATTEN, M_BAT]) cube(size=[BW, 13, 1]);
+                translate([-BW/4, Y_FLATTEN, M_BAT + BZ]) cube(size=[BW/2, 8, 1]);
             }
 
+            // Shore up under the wiring opening.
+            translate([0, 0, M_DISPLAY + 12]) intersection() {
+                translate([0, FLOOR_Y, 0]) cube(size=[100, 10, 10]);
+                difference() {
+                    cylinder(h=10, d=D_INNER);
+                    cylinder(h=10, d=D_INNER-4);
+                }
+            }
         }
     }
 }
