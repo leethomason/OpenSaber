@@ -9,12 +9,11 @@ $fn=90;
 EPS = 0.01;
 EPS2 = EPS * 2;
 
-
 AFT_HOLDER   = false;
 AFT          = false;
-MAIN_DISPLAY = true;
+MAIN_DISPLAY = false;
 MAIN_CRYSTAL = true;
-MAIN_EMITTER = true;
+MAIN_EMITTER = false;
 EMITTER      = false;
 
 DISPLAY_INNER_W = (DISPLAY_W - DISPLAY_MOUNT_W)/2;
@@ -22,7 +21,6 @@ DISPLAY_INNER_L = (DISPLAY_L - DISPLAY_MOUNT_L)/2;
 
 M_SPEAKER_FRONT 	= M_SPEAKER_BACK + H_SPEAKER_HOLDER;
 M_BATTERY_BACK 		= M_SPEAKER_FRONT;
-M_AFT_STOP_FRONT	= M_AFT_STOP + H_AFT_RING + H_AFT_LIP;
 M_DISPLAY_BUTTRESS 	= M_DISPLAY + DISPLAY_L - DISPLAY_INNER_L - H_BUTTRESS / 2;
 
 R_DISPLAY_THREAD = 0.8; // M2 bolt
@@ -103,6 +101,9 @@ module displayBolt()
         rotate([-90, 0, 0]) cylinder(r=R_DISPLAY_THREAD, h=20);
     }
 }
+
+function displayBoltX(vec) = vec * DISPLAY_MOUNT_W / 2;
+function displayBoltZ(vec) = (DISPLAY_L - DISPLAY_MOUNT_L) / 2 + vec * DISPLAY_MOUNT_L;
 
 module displayBolts()
 {
@@ -246,13 +247,13 @@ module mc()
     }
 }
 
-FLOOR_Y = -12;
 BODY_Z = M_EMITTER_BASE - M_AFT_STOP_FRONT - H_BUTTRESS;
 T = 4;
 DISPLAY_TROUGH = 13;
 
 module arches()
 {
+    /*
     STEPS = 14;
     STEP_Z = BODY_Z / (STEPS-1);
     for(i=[0:STEPS-1]) {
@@ -260,6 +261,13 @@ module arches()
             xArch(18, 1.2, 40, 2.1);    //xArch(21, 1, 40, 2.5)
         translate([-20, FLOOR_Y-20, M_AFT_STOP_FRONT + i*STEP_Z + 2.5])
             cube(size=[40, 20, 6]);
+    }
+    */
+
+    STEPS = 14;
+    for(i=[0:STEPS-1]) {
+        translate([0, 0, buttressZ(i)])
+            buttress(bridge=DZ_BUTTRESS, rail=true);
     }
 }
 
@@ -271,17 +279,6 @@ module Zone0()
             difference() {
                 arches();
 
-                // Rail exposure:
-                RAIL_TROUGH = 13;
-                translate([-RAIL_TROUGH/2, FLOOR_Y, M_DISPLAY]) 
-                    cube(size=[RAIL_TROUGH, -FLOOR_Y, M_ZONE_1 - M_DISPLAY]);
-
-                // Port cut-out
-                translate([0, 0,  M_ZONE_0]) cylinder(h=M_ZONE_1 - M_DISPLAY + EPS, d=D_INNER_CORE);
-                LEADS = 5;
-                translate([-POWER_DX/2 + POWER_X, POWER_Y, M_PORT_CENTER - POWER_DZ/2 - LEADS])
-                    cube(size=[POWER_DX, POWER_DY+10, POWER_DZ + LEADS]);
-
                 // Display cut outs
                 display();
                 translate([-DISPLAY_TROUGH/2, FLOOR_Y, M_DISPLAY]) 
@@ -290,21 +287,38 @@ module Zone0()
                     cube(size=[DISPLAY_MOUNT_W/2 + 2, 100, DISPLAY_PINS]);
                 }
                 // Access to display wiring
-                color("green") translate([0, 5, M_DISPLAY + 9.5 ]) 
-                hull() 
-                {
-                    translate([0, 6, 0]) cube(size=[20, 1, 15]);
-                    translate([0, -5, 3]) cube(size=[20, 1, 9]);
+                translate([0, -8, M_AFT_STOP_FRONT]) {
+                    cube(size=[100, 100, H_BUTTRESS * 2 + DZ_BUTTRESS * 3]);
                 }
-            }    
+            } 
+
+            POWER_PAD_DX = 18;
+            POWER_PAD_DY = 12;
+
+            difference() {
+                translate([-POWER_PAD_DX/2, Y_SWITCH - 5, M_PORT_CENTER - POWER_PAD_DY/2 ]) {
+                    cube(size=[POWER_PAD_DX, 5, POWER_PAD_DY]);
+                }
+                translate([0, 0, M_PORT_CENTER]) rotate([-90, 0, 0]) cylinder(h=100, d=D_PORT);
+            }
+
+            /*
             // Port plate
-            hull() {
+            T = 1;
+            translate([-POWER_DX/2 - T, POWER_Y - T, M_PORT_CENTER - POWER_DX/2]) {
+                difference() {
+                    cube(size = [POWER_DX + T*2, POWER_DY + T, POWER_DZ + T]);
+                    translate([T, T, 0]) cube(size=[POWER_DX, 100, POWER_DZ]);
+                }
+            }
+            *hull() {
                 SMALL_DX = POWER_DX * 0.5;
                 translate([-SMALL_DX/2, Y_FLATTEN, M_PORT_CENTER - POWER_DZ/2]) 
                     cube(size=[SMALL_DX, 1, POWER_DZ]);
                 translate([-POWER_DX/2, POWER_Y - 1, M_PORT_CENTER - POWER_DZ/2]) 
                     cube(size=[POWER_DX, 1, POWER_DZ]);
             }
+            */
 
             // MC holder
             difference() {
@@ -321,17 +335,23 @@ module Zone0()
                 translate([-BW/4, Y_FLATTEN, M_BAT + BZ]) cube(size=[BW/2, 8, 1]);
             }
 
-            // Shore up under the wiring opening.
-            translate([0, 0, M_DISPLAY + 12]) intersection() {
-                translate([0, FLOOR_Y, 0]) cube(size=[100, 10, 10]);
-                difference() {
-                    cylinder(h=10, d=D_INNER);
-                    cylinder(h=10, d=D_INNER-4);
-                }
+            
+            difference() {
+                PAD = 5;  
+                union() {
+                    hull() {
+                        translate([3, 0, buttressZ(2)]) railCube();
+                        translate([ displayBoltX(1) - PAD/2, Y_DISPLAY - 1, M_DISPLAY + displayBoltZ(1) - PAD/2 ])
+                            cube(size=[PAD + 3, 1, PAD]);
+                    }
+                    mirror([1, 0, 0]) hull() {
+                        translate([3, 0, buttressZ(2)]) railCube();
+                        translate([ displayBoltX(1) - PAD/2, Y_DISPLAY - 1, M_DISPLAY + displayBoltZ(1) - PAD/2 ])
+                            cube(size=[PAD + 3, 1, PAD]);
+                    }
+                }              
+                display();
             }
-
-            MRZ = 11;
-            translate([0, 0, M_ZONE_1 - MRZ]) mainRodSupport(MRZ);
         }
     }
 }

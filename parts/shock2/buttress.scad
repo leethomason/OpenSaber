@@ -1,126 +1,64 @@
 include <dim.scad>
-use <vents.scad>
 
 EPS = 0.1;
 EPS2 = EPS * 2;
 
-module buttress(battery=false, pcb=0, crystal="none", showBolt=false, rods=true, altRod=false, biasRight=false, lowerWiring=false, upperWiring=false, crystalHolder=0) {
+module bridgeSide(h)
+{
+    BRIDGE_X = 13;
+    Y = 5;
+    BRIDGE_DY = 3;
 
-    H_C = crystalHolder > 0 ? crystalHolder : H_CRYSTAL;
-    
+    hull() {
+        // Skinny end
+        translate([BRIDGE_X, Y - BRIDGE_DY, -h - EPS])
+            cube(size=[2, BRIDGE_DY, h + EPS2]);
+        // Fat end (achieve a 45 degree angle)
+        translate([BRIDGE_X,  Y - BRIDGE_DY - h, 0])
+            cube(size=[2, BRIDGE_DY + h, EPS]);             
+    }
+}
+
+
+function buttressZ(i) = M_AFT_STOP_FRONT + (i+1) * DZ_BUTTRESS + i * H_BUTTRESS;
+
+module railCube()
+{
+    translate([9, -12, 0]) cube(size=[3, 2, H_BUTTRESS]);
+}
+
+module buttress(    trough=0,
+                    h=H_BUTTRESS,
+                    bridge=0,
+                    rail=false)
+{
+
+    if (rail == true) {
+        intersection() {
+            translate([0, 0, -bridge - EPS]) cylinder(h=bridge + EPS2, d = D_INNER);
+            union() {
+                translate([9, -12, -bridge - EPS]) cube(size=[10, 2, bridge + EPS2]);
+                mirror([1, 0, 0]) translate([9, -12, -bridge - EPS]) cube(size=[10, 2, bridge + EPS2]);
+            }
+        }
+    }
+
     difference() {
-        cylinder(h=H_BUTTRESS, r=D_INNER/2, $fn=FACES);
-        
-        if (battery) {
-            translate([0, 0, -EPS]) {
-               cylinder(h=H_BUTTRESS + EPS2, r=D_BATTERY/2, $fn=FACES);    
-            }
-        }
-        
-        if(pcb > 0) {
-            OFFSET = 40;
+        cylinder(h=h, d=D_INNER); 
+        TR = 16;
+        translate([-TR/2, 0, -EPS]) cube(size=[TR, 100, h + EPS2]);
+        translate([0, 0, -EPS]) cylinder(h=h + EPS2, d=D_INNER_CORE);
 
-            translate([-W_PCB/2 + (biasRight ? 0 : -OFFSET), -11, -EPS]) {
-                // Front: H_PCB
-                // Back pins: H_PCB + 1
-                // Center: 12
-                cube(size=[W_PCB + OFFSET, pcb, H_BUTTRESS + EPS2]);
-            }
-        }
-
-        if (upperWiring) {
-            for(r=[0:1]) {
-                bias = (r==0) ? 1 : -1;
-                translate([9 * bias, 8, -EPS]) {
-                    cylinder(r=2, h=H_BUTTRESS + EPS2, $fn=40);
-                }
-            }
-        }
-
-        if (lowerWiring) {
-            for(r=[0:1]) {
-                bias = (r==0) ? 1 : -1;
-                translate([9 * bias, -2, -EPS]) {
-                    cylinder(r=2, h=H_BUTTRESS + EPS2, $fn=40);
-                }
-            }
-        }
-
-        if (crystal == "body" || crystal == "tip") {
-            translate([0, CRYSTAL_Y, -EPS]) {
-                if (crystal == "body") {
-                    scale([W_CRYSTAL, H_C, 1]) {
-                        cylinder(h=H_BUTTRESS + EPS2, r=0.5, $fn=FACES);   
-                    }
-                }
-                else {
-                    cylinder(h=H_BUTTRESS + EPS2, d=D_CRYSTAL_TIP, $fn=FACES);   
-                }
-
-            }
-            translate([0, CRYSTAL_Y/2 + 2, -EPS]) 
-            { 
-                scale([0.8, 1, 1]) {
-                    rotate([0, 0, 45]) {
-                        cube(size=[20, 20, H_BUTTRESS + EPS2]);
-                    }
-                }
-            }
-        }
-
-        if (rods) {     
-            translate([X_ROD, Y_ROD, 0]) {
-                cylinder(d=D_ROD, h=H_BUTTRESS + EPS2, $fn=FACES);
-            }
-        }
-        if (altRod) {
-            translate([-X_ROD, Y_ROD, 0]) {
-                cylinder(d=D_ROD, h=H_BUTTRESS + EPS2, $fn=FACES);
-            }
-        }
-
-        // Notch.
-        NOTCH_ANGLES = [NOTCH_ANGLE_0, NOTCH_ANGLE_1];
-        for(angle = NOTCH_ANGLES) {
-            rotate([0, 0, angle]) {
-                translate([-R_INNER, -NOTCH_WIDTH/2, -EPS]) {
-                    cube(size=[NOTCH_DEPTH, NOTCH_WIDTH, H_BUTTRESS + EPS2]);
-                }
+        if (trough != 0) {
+            T = trough < 0 ? TROUGH : trough;
+            translate([-T/2, -12, -EPS]) {
+                cube(size=[T, 40, h + EPS2]);
             }
         }
     }
 
-    if (crystalHolder > 0) {
-        translate([0, CRYSTAL_Y, -H_CRYSTAL_HOLDER]) {
-            difference() {
-                MULT = 1.15;
-                scale([W_CRYSTAL * MULT, H_C * MULT, 1]) {
-                    cylinder(h=H_CRYSTAL_HOLDER + H_BUTTRESS, r=0.5, $fn=FACES);   
-                }
-                scale([W_CRYSTAL, H_C, 1]) {
-                    cylinder(h=H_CRYSTAL_HOLDER + H_BUTTRESS, r=0.5, $fn=FACES);   
-                }
-                translate([-10, -3, 0]) {
-                    cube(size=[20, 6, H_CRYSTAL_HOLDER/2]);
-                }
-            }
-        }
-    }
-
-    if (showBolt) {
-        for(r=[0:1]) {
-            translate([0, ROD_Y, 0]) {
-                rotate([0, 0, r*180]) {
-                    translate([ROD_X, 0, H_BUTTRESS]) {
-                        color("red") {
-                            cylinder(r=D_ROD/2, h=2);
-                        }
-                        color("green") {
-                            cylinder(r=4.8, h=1);
-                        }
-                    }
-                }
-            }
-        }
+    if (bridge > 0) {
+        bridgeSide(bridge);
+        mirror([1, 0, 0]) bridgeSide(bridge);
     }
 }

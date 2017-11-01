@@ -17,15 +17,10 @@ M_SWITCH_CENTER     = 147.5;
 M_EMITTER_BASE      = 165.5;
 M_EMITTER           = M_EMITTER_BASE + 0;
 
-M_ZONE_0            = M_DISPLAY;
-M_ZONE_1            = 69.3;
-M_ZONE_2            = M_SWITCH_CENTER - 11.5;
-M_ZONE_3            = M_EMITTER_BASE;
-
-M_CRYSTAL_START     = M_ZONE_1 + 8;
+M_CRYSTAL_START     = 68;
 Z_CRYSTAL           = 50;
 M_CRYSTAL_END       = M_CRYSTAL_START + Z_CRYSTAL;
-M_MC                = M_ZONE_1;
+M_MC                = 68;
 
 H_FAR               = 240;
 
@@ -40,8 +35,10 @@ R_AFT               = D_AFT / 2;
 D_AFT_RING          = 33.5;
 H_AFT_RING          = 6;
 H_AFT_LIP           = 4;
+FLOOR_Y             = -12;
 Y_FLATTEN           = -15;
 
+M_AFT_STOP_FRONT    = M_AFT_STOP + H_AFT_RING + H_AFT_LIP;
 
 H_SPEAKER = 3.6 + 1.0;  // space for the physical speaker
 X_SPEAKER = 20;
@@ -69,6 +66,12 @@ X_EMITTER 			= 4;
 Y_EMITTER 			= 1;
 
 H_BUTTRESS			= 3;       // internal buttress / baffles
+DZ_BUTTRESS         = 5;
+
+M_ZONE_0            = M_DISPLAY;
+M_ZONE_1            = M_AFT_STOP_FRONT + H_BUTTRESS*6 + DZ_BUTTRESS*6;
+M_ZONE_2            = M_SWITCH_CENTER - 11.5;
+M_ZONE_3            = M_EMITTER_BASE;
 
 W_CRYSTAL           = 12.1;
 H_CRYSTAL           = 9;
@@ -101,7 +104,6 @@ POWER_DX            = 9.6;
 POWER_DY            = 14;
 POWER_DZ            = 11;
 POWER_Y             = 0.5;
-POWER_X             = 0;
 
 H_BATTERY           = 68;
 D_BATTERY           = 18.50 + 0.5;    // An 1850. Huh. 
