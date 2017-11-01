@@ -12,8 +12,8 @@ EPS2 = EPS * 2;
 
 AFT_HOLDER   = false;
 AFT          = false;
-MAIN_DISPLAY = false;
-MAIN_CRYSTAL = false;
+MAIN_DISPLAY = true;
+MAIN_CRYSTAL = true;
 MAIN_EMITTER = true;
 EMITTER      = false;
 
@@ -64,9 +64,28 @@ module mainRod() {
 	color("yellow") {
         translate([X_ROD, Y_ROD, M_0 - 10]) {
     		cylinder(d=D_ROD, h=H_FAR);
+            translate([0, 0, -5])
+                cylinder(h=5, d1=0, d2=D_ROD);
         }
         translate([-X_ROD, Y_ROD, M_0 - 10]) {
             cylinder(d=D_ROD, h=H_FAR);
+            translate([0, 0, -5])
+                cylinder(h=5, d1=0, d2=D_ROD);
+        }
+    }
+}
+
+module mainRodSupport(h) {
+    translate([X_ROD, Y_ROD, 0]) {
+        difference() {
+            cylinder(d=D_ROD + 3, h=h);
+            cylinder(d=D_ROD, h=h);
+        }
+    }
+    translate([-X_ROD, Y_ROD, 0]) {
+        difference() {
+            cylinder(d=D_ROD + 3, h=h);
+            cylinder(d=D_ROD, h=h);
         }
     }
 }
@@ -145,7 +164,6 @@ module aftPowerHoles()
  module batteryHolder()
  {
  	H = M_AFT_STOP - M_BATTERY_BACK;
-    echo("H battery", H);
 
     translate([0, 0, M_BATTERY_BACK]) {
 	    difference() {
@@ -195,50 +213,6 @@ module speakerBolts()
         translate([ 4.5, -9.9, -EPS]) speakerBolt();
         translate([-4.5, -9.9, -EPS]) speakerBolt();
     }
-}
-
-module portButtress()
-{
-    POWER_X = 11;
-    POWER_Y = 14.5;
-	POWER_Z = 10;
-
-    T = 2;
-    OFFSET_Y = 0.2;
-    OFFSET_X = -1;
-    
-    INNER_X0 = -POWER_X / 2 + OFFSET_X;
-    INNER_Y0 = OFFSET_Y;
-    INNER_Z0 = -POWER_Z / 2; // from port center.
-
-    LED_X = 13;
-    LED_Y = 10;
-    LED_Z = 1.5; 
-
-    Z_WITH_FILL = M_PORT_BUTTRESS - (M_PORT_CENTER - POWER_Z/2) + T;
-    
-    difference() {
-        union() {
-            translate([0, 0, M_PORT_CENTER]) {
-                translate([INNER_X0, INNER_Y0 - T, INNER_Z0 - T]) {
-                    cube(size=[POWER_X + T, POWER_Y + T, Z_WITH_FILL]);
-                }
-            }
-            translate([0, 0, M_PORT_BUTTRESS]) {
-                difference() {
-                    buttress(pcb=7, upperWiring=true);
-                    translate([-LED_X/2, CRYSTAL_Y - LED_Y/2, H_BUTTRESS - LED_Z]) {
-                        cube(size=[LED_X, LED_Y, LED_Z + EPS]);
-                    }
-                }
-            }
-        }
-        translate([INNER_X0-EPS, INNER_Y0, INNER_Z0 + M_PORT_CENTER]) {
-            cube(size=[POWER_X+EPS, 30, POWER_Z]);
-            translate([-10, 0, 0]) cube(size=[10 + POWER_X+EPS, 5, POWER_Z]);
-        }   
-        
-    }          
 }
 
 module powerHolder(addative)
@@ -324,8 +298,13 @@ module Zone0()
                 }
             }    
             // Port plate
-            translate([-POWER_DX/2, Y_FLATTEN, M_PORT_CENTER - POWER_DZ/2])
-                cube(size=[POWER_DX, POWER_Y - Y_FLATTEN, POWER_DZ]);
+            hull() {
+                SMALL_DX = POWER_DX * 0.5;
+                translate([-SMALL_DX/2, Y_FLATTEN, M_PORT_CENTER - POWER_DZ/2]) 
+                    cube(size=[SMALL_DX, 1, POWER_DZ]);
+                translate([-POWER_DX/2, POWER_Y - 1, M_PORT_CENTER - POWER_DZ/2]) 
+                    cube(size=[POWER_DX, 1, POWER_DZ]);
+            }
 
             // MC holder
             difference() {
@@ -334,8 +313,8 @@ module Zone0()
             }
 
             // Battery stop
-            M_BAT = M_BATTERY_BACK + H_BATTERY + 1.5;    // space for padding
-            BW = 14;
+            M_BAT = M_BATTERY_BACK + H_BATTERY + 2.5;    // space for padding
+            BW = 6;
             BZ = 10;
             hull() {
                 translate([-BW/2, Y_FLATTEN, M_BAT]) cube(size=[BW, 13, 1]);
@@ -350,6 +329,9 @@ module Zone0()
                     cylinder(h=10, d=D_INNER-4);
                 }
             }
+
+            MRZ = 11;
+            translate([0, 0, M_ZONE_1 - MRZ]) mainRodSupport(MRZ);
         }
     }
 }
