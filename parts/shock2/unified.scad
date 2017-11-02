@@ -11,8 +11,9 @@ EPS2 = EPS * 2;
 
 AFT_HOLDER   = false;
 AFT          = false;
-MAIN_DISPLAY = false;
+MAIN_DISPLAY = true;
 MAIN_CRYSTAL = true;
+MAIN_MC      = true;
 MAIN_EMITTER = false;
 EMITTER      = false;
 
@@ -238,6 +239,11 @@ module mc()
         // lower
         translate([-W_MC/2, 0, 0])
             cube(size=[W_MC, 5.5, 61.5]);
+        // Under space
+        SOLDER = 2.2;
+        UNDER = 2.5;
+        translate([-W_MC/2 + SOLDER, -UNDER, 0])
+            cube(size=[W_MC - SOLDER*2, UNDER, 61.5]);
         // sd
         translate([-6, 0, -3.6])
             cube(size=[12, 5.5, 3.6]);
@@ -358,6 +364,35 @@ module Zone0()
 
 
 // Crystal and Microcontroller
+
+SPLIT_Y = -3;
+
+module mcSection() {
+    translate([-50, -R_INNER, M_ZONE_1]) {
+        cube(size=[100, R_INNER + SPLIT_Y, M_ZONE_2 - M_ZONE_1]);
+    }
+}
+
+module oneLockRail() {
+    //translate([0, 2, 0]) 
+    color("yellow") translate([13.5, SPLIT_Y-2, M_ZONE_1]) {
+        difference() 
+        {
+            cube(size=[1, 4, M_ZONE_2 - M_ZONE_1]);
+            for(i=[0:7]) {
+                translate([0, -1, DZ_BUTTRESS*(i+1) + H_BUTTRESS*i]) {
+                    cube(size=[2, 2, H_BUTTRESS]);
+                }
+            }
+        }
+    }
+}
+
+module lockRail() {
+    oneLockRail();
+    mirror([1, 0, 0]) oneLockRail();
+}
+
 module Zone1()
 {
     intersection() {
@@ -399,6 +434,41 @@ module Zone1()
         }
     }
 }
+
+module Zone1Crystal()
+{
+    intersection() {
+        translate([0, 0, M_ZONE_1]) cylinder(h=M_ZONE_2 - M_ZONE_1, d=D_INNER);
+        difference() {
+            union() {
+                for(i=[0:7]) {
+                    translate([0, 0, M_ZONE_1 + DZ_BUTTRESS*(i+1) + H_BUTTRESS*i]) {
+                        difference() {
+                            cylinder(h=H_BUTTRESS, d=D_INNER);
+                            //translate([0, 0, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=D_INNER_CORE);
+
+                        }
+                    }
+                }
+            }
+            translate([0, Y_CRYSTAL, M_ZONE_1 + H_BUTTRESS + DZ_BUTTRESS + EPS]) 
+            {
+                scale([W_CRYSTAL, H_CRYSTAL, 1])
+                    cylinder(h=H_FAR, d=1);
+                translate([0, -1, 0])
+                    scale([1.5, 1, 1])
+                        rotate([0, 0, 45])
+                            cube(size=[20, 20, H_FAR]);
+                translate([0, -Y_CRYSTAL + SPLIT_Y, 0])
+                scale([2.7, 1, 1])
+                    cylinder(h=H_FAR, d=9);
+            }
+            translate([-X_DOTSTAR/2, Y_CRYSTAL-X_DOTSTAR/2, M_ZONE_1])
+                cube(size=[X_DOTSTAR, X_DOTSTAR, H_BUTTRESS + DZ_BUTTRESS + EPS2]);
+        }
+    }  
+}
+
 
 module Zone2()
 {
@@ -477,11 +547,26 @@ if (EMITTER) {
 
 module mainBody() 
 {
-    if (MAIN_DISPLAY || MAIN_CRYSTAL || MAIN_EMITTER) {
+    if (MAIN_DISPLAY || MAIN_MC || MAIN_CRYSTAL || MAIN_EMITTER) {
         difference() {
             union() {
                 if (MAIN_DISPLAY) Zone0();
-                if (MAIN_CRYSTAL) Zone1();
+                if (MAIN_CRYSTAL) {
+                    difference() {
+                        Zone1Crystal();
+                        mcSection();
+                    }
+                    lockRail(); 
+                }
+                if (MAIN_MC) {
+                    difference() {
+                        intersection() {
+                            mcSection();
+                            Zone1();
+                        }
+                        lockRail();
+                    }
+                }
                 if (MAIN_EMITTER) {
                    difference() {
                         translate([0, 0, M_EMITTER_BASE]) emitterBase();
@@ -502,3 +587,4 @@ mainBody();
 //translate([0, FLOOR_Y, M_MC]) mc();
 //translate([0, 0, -20]) switch();
 //battery();
+//lockRail();
