@@ -17,9 +17,6 @@ M_SWITCH_CENTER     = 147.5;
 M_EMITTER_BASE      = 165.5;
 M_EMITTER           = M_EMITTER_BASE + 0;
 
-M_CRYSTAL_START     = 68;
-Z_CRYSTAL           = 50;
-M_CRYSTAL_END       = M_CRYSTAL_START + Z_CRYSTAL;
 M_MC                = 68;
 
 H_FAR               = 240;
@@ -70,12 +67,13 @@ DZ_BUTTRESS         = 5;
 
 M_ZONE_0            = M_DISPLAY;
 M_ZONE_1            = M_AFT_STOP_FRONT + H_BUTTRESS*6 + DZ_BUTTRESS*6;
-M_ZONE_2            = M_SWITCH_CENTER - 11.5;
+M_ZONE_2            = M_AFT_STOP_FRONT + H_BUTTRESS*14 + DZ_BUTTRESS*14;
 M_ZONE_3            = M_EMITTER_BASE;
 
 W_CRYSTAL           = 12.1;
 H_CRYSTAL           = 9;
 Y_CRYSTAL           = 8;        // offset up of the crystal
+Z_CRYSTAL           = 50;
 
 DISPLAY_W           = 23 + 0.5;
 DISPLAY_L           = 32 + 0.5;
@@ -111,6 +109,11 @@ D_BATTERY           = 18.50 + 0.5;    // An 1850. Huh.
 X_DOTSTAR           = 5.0 + 0.5;  // from spec
 Y_DOTSTAR           = 1.4;  // from spec
 DOTSTAR_STRIP       = 12.4;
+
+DX_USB              = 21.0;
+DX_USB_INNER        = 14.0;
+DY_USB              = 10.4;
+SLOT_USB            = 1.0;
 
 OFFSET_EMITTER = -PIN + sqrt(R_INNER * R_INNER - PIN * PIN * X_EMITTER * X_EMITTER / 4);
 

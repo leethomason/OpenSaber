@@ -14,7 +14,7 @@ AFT          = false;
 MAIN_DISPLAY = true;
 MAIN_CRYSTAL = true;
 MAIN_MC      = true;
-MAIN_EMITTER = false;
+MAIN_EMITTER = true;
 EMITTER      = false;
 
 DISPLAY_INNER_W = (DISPLAY_W - DISPLAY_MOUNT_W)/2;
@@ -31,6 +31,19 @@ DEPTH_DISPLAY_THREAD = 4;
 module battery() {
     color("yellow") translate([0, 0, M_BATTERY_BACK - EPS]) {
         cylinder(d=D_BATTERY, h = H_BATTERY + EPS2);
+    }
+}
+
+module crystal() {
+    translate([0, Y_CRYSTAL, M_ZONE_1 + H_BUTTRESS + DZ_BUTTRESS + EPS]) {
+        color("Aquamarine") {
+            cylinder(h=Z_CRYSTAL, d=H_CRYSTAL-2);
+        }
+    }
+    translate([0, Y_CRYSTAL, M_CRYSTAL_VIEW_CENTER-10]) {
+        color("MediumTurquoise") {
+            cylinder(h=20, d=H_CRYSTAL);
+        }
     }
 }
 
@@ -217,21 +230,6 @@ module speakerBolts()
     }
 }
 
-module powerHolder(addative)
-{
-    T = 2;
-    KNOCKOUT = 10;
-    difference() {
-       translate([-POWER_DX/2 + POWER_X - T, POWER_Y - T, M_PORT_CENTER - POWER_DZ/2 - T])
-           cube(size=[POWER_DX + T*2, POWER_DY + T + 10, POWER_DZ + T*2]);
-       if (addative) {
-            translate([-POWER_DX/2 + POWER_X, POWER_Y, M_PORT_CENTER - POWER_DZ/2 - KNOCKOUT])
-                cube(size=[POWER_DX, POWER_DY+10, POWER_DZ + KNOCKOUT]);
-       }
-       mainRod();
-    }
-}
-
 // USB in front
 module mc()
 {
@@ -253,24 +251,43 @@ module mc()
     }
 }
 
+module usbPort()
+{
+    TZ = 5;
+    TBOTTOM = 3;
+    TX = 3;
+    Z = M_SWITCH_CENTER - 15;
+    translate([0, R_INNER - DY_USB - TBOTTOM, Z]) {
+        difference() {
+            translate([-DX_USB/2 - TX, 0, 0])
+                cube(size=[DX_USB + TX*2, DY_USB, TZ]);
+            translate([-DX_USB_INNER/2, -EPS, -EPS])
+                cube(size=[DX_USB_INNER, 100, TZ+EPS2]);
+            translate([-DX_USB/2, TBOTTOM, TZ/2 - SLOT_USB/2])
+                cube(size=[DX_USB, 100, SLOT_USB]);
+        }
+    }
+    hull() {
+        RAILX = (DX_USB + TX*2 - DX_USB_INNER) / 2;
+        translate([0, 0, Z]) railCube();
+        translate([DX_USB/2 + TX - RAILX, 3, Z])
+            cube(size=[RAILX, 1, TZ]);        
+    }
+    mirror([1,0,0]) hull() {
+        RAILX = (DX_USB + TX*2 - DX_USB_INNER) / 2;
+        translate([0, 0, Z]) railCube();
+        translate([DX_USB/2 + TX - RAILX, 3, Z])
+            cube(size=[RAILX, 1, TZ]);        
+    }
+}
+
 BODY_Z = M_EMITTER_BASE - M_AFT_STOP_FRONT - H_BUTTRESS;
 T = 4;
 DISPLAY_TROUGH = 13;
 
 module arches()
 {
-    /*
-    STEPS = 14;
-    STEP_Z = BODY_Z / (STEPS-1);
-    for(i=[0:STEPS-1]) {
-        translate([-20, FLOOR_Y, M_AFT_STOP_FRONT + i*STEP_Z]) 
-            xArch(18, 1.2, 40, 2.1);    //xArch(21, 1, 40, 2.5)
-        translate([-20, FLOOR_Y-20, M_AFT_STOP_FRONT + i*STEP_Z + 2.5])
-            cube(size=[40, 20, 6]);
-    }
-    */
-
-    STEPS = 14;
+    STEPS = 18;
     for(i=[0:STEPS-1]) {
         translate([0, 0, buttressZ(i)])
             buttress(bridge=DZ_BUTTRESS, rail=true);
@@ -307,24 +324,6 @@ module Zone0()
                 }
                 translate([0, 0, M_PORT_CENTER]) rotate([-90, 0, 0]) cylinder(h=100, d=D_PORT);
             }
-
-            /*
-            // Port plate
-            T = 1;
-            translate([-POWER_DX/2 - T, POWER_Y - T, M_PORT_CENTER - POWER_DX/2]) {
-                difference() {
-                    cube(size = [POWER_DX + T*2, POWER_DY + T, POWER_DZ + T]);
-                    translate([T, T, 0]) cube(size=[POWER_DX, 100, POWER_DZ]);
-                }
-            }
-            *hull() {
-                SMALL_DX = POWER_DX * 0.5;
-                translate([-SMALL_DX/2, Y_FLATTEN, M_PORT_CENTER - POWER_DZ/2]) 
-                    cube(size=[SMALL_DX, 1, POWER_DZ]);
-                translate([-POWER_DX/2, POWER_Y - 1, M_PORT_CENTER - POWER_DZ/2]) 
-                    cube(size=[POWER_DX, 1, POWER_DZ]);
-            }
-            */
 
             // MC holder
             difference() {
@@ -401,27 +400,6 @@ module Zone1()
             difference() {
                 arches();
 
-                // Rail exposure:
-                RAIL_TROUGH = 13;
-                *translate([-RAIL_TROUGH/2, FLOOR_Y, M_ZONE_1]) 
-                    cube(size=[RAIL_TROUGH, -FLOOR_Y, M_ZONE_2 - M_ZONE_1]);
-
-                // Crystal cut-out
-                translate([0, Y_CRYSTAL, M_ZONE_1 + 5.0]) {
-                    scale([W_CRYSTAL, H_CRYSTAL, 1]) {
-                        cylinder(h=Z_CRYSTAL + (M_CRYSTAL_END - M_ZONE_1), d=1);
-                    }                
-                }
-                translate([0, Y_CRYSTAL-2, M_CRYSTAL_START]) {
-                    scale([1.3, 1, 1])
-                        rotate([0, 0, 45]) 
-                            cube(size=[20, 20, 100]);
-                }
-                *translate([-DOTSTAR_STRIP/2, Y_CRYSTAL - 10, M_ZONE_1])
-                    cube(size=[DOTSTAR_STRIP, 20, 2.5]);
-                translate([-X_DOTSTAR/2, Y_CRYSTAL - X_DOTSTAR/2, M_ZONE_1])
-                    cube(size=[X_DOTSTAR, X_DOTSTAR, 10]);
-
                 // MC cut out
                 translate([-W_MC/2, FLOOR_Y + H_MC/2, M_MC]) 
                     cube(size=[W_MC, H_MC/2 + 2, Z_MC_35]);
@@ -482,25 +460,29 @@ module Zone2()
                 arches();
 
                 // Switch cut-out
-                translate([-SWITCH_DX/2, FLOOR_Y, M_SWITCH_CENTER - SWITCH_DZ]) cube(size=[SWITCH_DX, 100, 100]);
                 translate([0, 0,  M_SWITCH_CENTER - SWITCH_DZ]) cylinder(h=100, d=D_INNER_CORE);
 
-                // Rail exposure 
-                RAIL_TROUGH = 13;
-                translate([-RAIL_TROUGH/2, FLOOR_Y, M_DISPLAY]) 
-                    cube(size=[DISPLAY_TROUGH, -FLOOR_Y, M_ZONE_1 - M_DISPLAY]);
-
-                // USB cut out
-                USB_TROUGH = 12;
-                translate([-USB_TROUGH/2, FLOOR_Y - 10, M_ZONE_2])
-                    cube(size=[USB_TROUGH, 10 + EPS, 38]);
             }    
             // Switch plate.
+            PAD = 4;
             difference() {
-                PAD = 4;
                 translate([-D_SWITCH/2 - PAD, Y_SWITCH-T, M_SWITCH_CENTER - D_SWITCH/2 - 3]) 
                     cube(size=[D_SWITCH + PAD * 2, T + 2, D_SWITCH + 6]);
                 switch();
+            }
+
+            // Hardpoint; in case a rotation set needs to be inserted.
+            PLATE = 12;
+            translate([-PLATE/2, -R_INNER, M_SWITCH_CENTER - PLATE/2]) 
+                cube(size=[PLATE, 4, PLATE]);
+ 
+            usbPort();
+
+            translate([13, 4, M_ZONE_2 + H_BUTTRESS*3 + DZ_BUTTRESS*3]) {
+                cube(size=[2, 100, DZ_BUTTRESS]);
+            }
+            mirror([1,0,0]) translate([13, 4, M_ZONE_2 + H_BUTTRESS*3 + DZ_BUTTRESS*3]) {
+                cube(size=[2, 100, DZ_BUTTRESS]);
             }
         }
     }
@@ -583,8 +565,9 @@ module mainBody()
 
 mainBody();
 
-//mainRod();
+mainRod();
 //translate([0, FLOOR_Y, M_MC]) mc();
 //translate([0, 0, -20]) switch();
 //battery();
 //lockRail();
+crystal();
