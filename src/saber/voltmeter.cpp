@@ -56,3 +56,13 @@ void Voltmeter::takeSample()
     m_averagePower.push(readVBat());
 }
 
+
+int AveragePower::vbatToPowerLevel(int32_t vbat)
+{
+    int level = 0;
+    if      (vbat > 3950) level = 4;
+    else if (vbat > 3800) level = 3;
+    else if (vbat > 3650) level = 2;
+    else if (vbat > LOW_VOLTAGE) level = 1;
+    return level;
+}

@@ -35,6 +35,8 @@ public:
     }
     enum { NUM_SAMPLES = 8};
 
+    static vbatToPowerLevel(int32_t vbat);
+
 private:
     uint32_t m_power;
     uint32_t m_sample[NUM_SAMPLES];
