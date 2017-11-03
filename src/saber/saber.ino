@@ -54,8 +54,6 @@ static const uint32_t VBAT_TIME_INTERVAL      = 500;
 
 static const uint32_t INDICATOR_TIME          = 500;
 static const uint32_t INDICATOR_CYCLE         = INDICATOR_TIME * 2;
-static const float    GFORCE_RANGE            = 4.0f;
-static const float    GFORCE_RANGE_INV        = 1.0f / GFORCE_RANGE;
 static const uint32_t PING_PONG_INTERVAL      = 2400;
 static const uint32_t BREATH_TIME             = 1200;
 
@@ -127,8 +125,6 @@ bool soundOk = false;
 
 void setupSD()
 {
-//    SPI.setMOSI(PIN_SABER_MOSI);
-//    SPI.setSCK(PIN_SABER_CLOCK);
     #if (SABER_SOUND_ON == SABER_SOUND_SD)
         #ifdef SABER_INTEGRATED_SD
             Log.p("Connecting to built in SD...").eol();
@@ -225,8 +221,6 @@ void setup() {
     #endif
 
     #ifdef SABER_SISTERS 
-        //pinMode(PIN_SWITCH_B, INPUT);
-        //int rolePin = digitalRead(PIN_SWITCH_B);
         #if SABER_SUB_MODEL == SABER_SUB_MODEL_LUNA
             const int role = 0;
         #elif SABER_SUB_MODEL == SABER_SUB_MODEL_CELESTIA
@@ -668,7 +662,7 @@ void loop() {
     if (gforceDataTimer.tick(delta)) {
         #if SABER_DISPLAY == SABER_DISPLAY_128_32
             maxGForce2 = constrain(maxGForce2, 0.1, 16);
-            static const float MULT = 256.0f / GFORCE_RANGE;  // g=1 translates to uint8 64
+            static const float MULT = 256.0f / accel.range();  // g=1 translates to uint8 64
             const uint8_t gForce = constrain(sqrtf(maxGForce2) * MULT, 0, 255);
             sketcher.Push(gForce);
         #endif
