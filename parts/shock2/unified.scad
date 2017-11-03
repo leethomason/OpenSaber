@@ -11,10 +11,10 @@ EPS2 = EPS * 2;
 
 AFT_HOLDER   = false;
 AFT          = false;
-MAIN_DISPLAY = true;
-MAIN_CRYSTAL = true;
+MAIN_DISPLAY = false;
+MAIN_CRYSTAL = false;
 MAIN_MC      = true;
-MAIN_EMITTER = true;
+MAIN_EMITTER = false;
 EMITTER      = false;
 
 DISPLAY_INNER_W = (DISPLAY_W - DISPLAY_MOUNT_W)/2;
@@ -231,7 +231,7 @@ module speakerBolts()
 }
 
 // USB in front
-module mc()
+module mc(cutoutLow=false)
 {
     color("blue") {
         // lower
@@ -239,7 +239,7 @@ module mc()
             cube(size=[W_MC, 5.5, 61.5]);
         // Under space
         SOLDER = 2.2;
-        UNDER = 2.5;
+        UNDER = cutoutLow ? 20 : 3;
         translate([-W_MC/2 + SOLDER, -UNDER, 0])
             cube(size=[W_MC - SOLDER*2, UNDER, 61.5]);
         // sd
@@ -398,16 +398,17 @@ module Zone1()
         translate([0, 0, M_ZONE_1]) cylinder(h=M_ZONE_2 - M_ZONE_1, d=D_INNER);
         union() {
             difference() {
-                arches();
+                union() {
+                    arches();
+                    translate([-20, -R_INNER, M_ZONE_1])
+                        cube(size=[40, 5, M_ZONE_2 - M_ZONE_1]);
+                }
 
                 // MC cut out
                 translate([-W_MC/2, FLOOR_Y + H_MC/2, M_MC]) 
                     cube(size=[W_MC, H_MC/2 + 2, Z_MC_35]);
-                INNER = 7;
-                translate([-INNER/2, FLOOR_Y + H_MC/2, M_MC]) 
-                    cube(size=[INNER, 12, Z_MC_35]);
                 translate([0, FLOOR_Y, M_MC]) 
-                    mc();
+                    mc(true);
             }    
         }
     }
@@ -415,6 +416,7 @@ module Zone1()
 
 module Zone1Crystal()
 {
+    DOT = X_DOTSTAR + 4;
     intersection() {
         translate([0, 0, M_ZONE_1]) cylinder(h=M_ZONE_2 - M_ZONE_1, d=D_INNER);
         difference() {
@@ -428,6 +430,8 @@ module Zone1Crystal()
                         }
                     }
                 }
+                translate([-DOT/2, Y_CRYSTAL-DOT/2, M_ZONE_1 + DZ_BUTTRESS - H_BUTTRESS])
+                    cube(size=[DOT, DOT, H_BUTTRESS + EPS]);
             }
             translate([0, Y_CRYSTAL, M_ZONE_1 + H_BUTTRESS + DZ_BUTTRESS + EPS]) 
             {
@@ -565,9 +569,9 @@ module mainBody()
 
 mainBody();
 
-mainRod();
+//mainRod();
 //translate([0, FLOOR_Y, M_MC]) mc();
 //translate([0, 0, -20]) switch();
 //battery();
 //lockRail();
-crystal();
+//crystal();

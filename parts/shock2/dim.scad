@@ -66,8 +66,8 @@ H_BUTTRESS			= 3;       // internal buttress / baffles
 DZ_BUTTRESS         = 5;
 
 M_ZONE_0            = M_DISPLAY;
-M_ZONE_1            = M_AFT_STOP_FRONT + H_BUTTRESS*6 + DZ_BUTTRESS*6;
-M_ZONE_2            = M_AFT_STOP_FRONT + H_BUTTRESS*14 + DZ_BUTTRESS*14;
+M_ZONE_1            = M_AFT_STOP_FRONT + H_BUTTRESS*6 + DZ_BUTTRESS*6 + 0.001;
+M_ZONE_2            = M_AFT_STOP_FRONT + H_BUTTRESS*14 + DZ_BUTTRESS*14 + 0.001;
 M_ZONE_3            = M_EMITTER_BASE;
 
 W_CRYSTAL           = 12.1;

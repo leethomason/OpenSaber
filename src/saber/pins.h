@@ -32,13 +32,14 @@ SOFTWARE.
 #define SABER_MODEL_TEST			0
 #define SABER_MODEL_GECKO			1	// PCB, Teensy 3, external amp and accel
 #define SABER_MODEL_BLACK			2	// PCB, Prop Shield, Teensy 3, Dotstar UI
-#define SABER_MODEL_SHOCK			3	// PCB, Prop Shield, Teensy 3, OLED
+//#define SABER_MODEL_SHOCK			3	// PCB, Prop Shield, Teensy 3, OLED. Dropped; heatsink crushed carriage when I dropped it. Become SHOCK2.
 #define SABER_MODEL_SILVER_SHOCK	4	// PCB, Prop Shield, Teensy 3
 #define SABER_MODEL_BO				5	// 2 button prop shield
 //#define SABER_MODEL_PROTO 		6	// Burned out; never needed to rebuild.
 #define SABER_MODEL_TANO 			7
-#define SABER_MODEL_SISTER 			8
+#define SABER_MODEL_SISTER 			8	// Shield v3, Teensy 3.5
 #define SABER_MODEL_AQUATIC			9
+#define SABER_MODEL_SHOCK2		   10	// Shield v3, Teensy 3.5, Dotstar, Display (woh)
 
 
 #define SABER_SUB_MODEL_NONE		0
@@ -46,8 +47,8 @@ SOFTWARE.
 #define SABER_SUB_MODEL_CELESTIA	2
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_TANO
+#define SERIAL_DEBUG 				1
+#define SABER_MODEL 				SABER_MODEL_SHOCK2
 #define SABER_SUB_MODEL				
 // ----------------------------------
 
@@ -333,11 +334,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 //	#define SABER_AUDIO_UI
 	#define SABER_DISPLAY			SABER_DISPLAY_7_5
 
-/*
-	#define SABER_NUM_LEDS 			4
-	#define SABER_UI_START  		0
-	#define SABER_UI_BRIGHTNESS		8
-*/
 	#undef SABER_BUTTON
 	#define SABER_BUTTON Button::INTERNAL_PULLUP
 
@@ -375,6 +371,45 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const uint8_t CATHODE_ROW_5 	= 35;
 	static const uint8_t CATHODE_ROW_6 	= 36;
 	static const uint8_t CATHODE_ROW_7 	= 37;
+
+#elif (SABER_MODEL == SABER_MODEL_SHOCK2)
+
+	#define PCB_VERSION 			PCB_SHIELD_3
+	#define LED_TOPOLOGY 			LED_TOPOLOGY_RESISTOR
+	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
+	#define SABER_SOUND_ON 			SABER_SOUND_SD
+	#define SABER_SOUND_SHUTDOWN
+	#define SABER_VOLTMETER
+	#define SABER_INTEGRATED_SD
+	#define SABER_AUDIO_UI
+	//#define SABER_DISPLAY			SABER_DISPLAY_7_5
+	#define SABER_NUM_LEDS 			1
+	#define SABER_CRYSTAL			80
+	#define SABER_CRYSTAL_LOW		24
+
+	#undef SABER_BUTTON
+	#define SABER_BUTTON Button::INTERNAL_PULLUP
+
+	static const int32_t UVOLT_MULT = 6691;		
+	#define ID_STR "Shock-2 Cree XPE2 RGB"
+
+	// Thermal paste heat sinking.
+	static const int32_t RED_VF   = 2100;   // milli-volts
+	static const int32_t RED_I    = 400;    // milli-amps
+	static const int32_t RED_R    = 4300;   // milli-ohms
+
+	static const int32_t GREEN_VF = 3400;
+	static const int32_t GREEN_I  = 400;
+	static const int32_t GREEN_R  = 1000;
+
+	static const int32_t BLUE_VF  = 3100;
+	static const int32_t BLUE_I   = 400;
+	static const int32_t BLUE_R   = 1600;
+
+	static const int VOLUME_1 = 15;
+	static const int VOLUME_2 = 50;
+	static const int VOLUME_3 = 120;
+	static const int VOLUME_4 = 200;
 
 #endif
 
