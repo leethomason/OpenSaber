@@ -5,6 +5,7 @@
 #include "saberUtil.h"
 #include "sketcher.h"
 #include "rgb.h"
+#include "voltmeter.h"
 
 #include "Button.h"
 #include "Grinliz_Arduino_Util.h"

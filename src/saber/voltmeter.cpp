@@ -1,4 +1,8 @@
+#include <Arduino.h>
+
+#include "pins.h"
 #include "voltmeter.h"
+#include "Grinliz_Arduino_Util.h"
 
 AveragePower::AveragePower()
 {

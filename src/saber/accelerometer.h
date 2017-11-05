@@ -1,6 +1,8 @@
 #ifndef SABER_ACCELEROMETER_INCLUDED
 #define SABER_ACCELEROMETER_INCLUDED
 
+#include <stdint.h>
+
 class Accelerometer
 {
 public:

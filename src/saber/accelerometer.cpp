@@ -1,5 +1,14 @@
+#include <Arduino.h>
 #include "pins.h"
+
+#if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH || SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH_SPI
+#   include <Adafruit_LIS3DH.h>
+#elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
+#   include "accelFXOS8700.h"
+#endif
+
 #include "accelerometer.h"
+#include "Grinliz_Arduino_Util.h"
 
 #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH
 Adafruit_LIS3DH localAccel;

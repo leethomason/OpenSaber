@@ -28,8 +28,6 @@
 #include <OLED_SSD1306.h>
 #include <SerialFlash.h>
 #include <Audio.h>
-//#include <Adafruit_LIS3DH.h> // turn back on if needed. causes compile warnings.
-
 #include "Button.h"
 #include "Grinliz_Arduino_Util.h"
 #include "DotStar.h"
@@ -38,6 +36,8 @@
 // -- Must be first. Has configuration. -- //
 #include "pins.h"
 
+#include "accelerometer.h"
+#include "voltmeter.h"
 #include "sfx.h"
 #include "AudioPlayer.h"
 #include "saberdb.h"
@@ -274,7 +274,7 @@ void syncToDB()
     uiRenderData.volume = saberDB.volume4();
     uiRenderData.color = Blade::convertRawToPerceived(saberDB.bladeColor());
     uiRenderData.palette = saberDB.paletteIndex();
-    uiRenderData.power = vbatToPowerLevel(voltmeter.averagePower());
+    uiRenderData.power = AveragePower::vbatToPowerLevel(voltmeter.averagePower());
     uiRenderData.mVolts = voltmeter.averagePower();
     #ifdef SABER_SOUND_ON
     uiRenderData.fontName = sfx.currentFontName();
@@ -355,7 +355,7 @@ void buttonAClickHandler(const Button&)
             {
                 int32_t vbat = voltmeter.averagePower();
                 Log.event("[Vbat]", vbat);
-                ledA.blink(vbatToPowerLevel(vbat), INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
+                ledA.blink(AveragePower::vbatToPowerLevel(vbat), INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
             }
     }
 }
@@ -446,7 +446,7 @@ void buttonAClickHandler(const Button&)
         // the modes are cycled. But haven't yet
         // figured out a better option.
         if (uiMode.mode() == UIMode::NORMAL) {
-            int power = vbatToPowerLevel(voltmeter.averagePower());
+            int power = AveragePower::vbatToPowerLevel(voltmeter.averagePower());
             ledA.blink(power, INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
         }
     }
@@ -647,7 +647,7 @@ void loop() {
         //Log.p("power ").p(averagePower.power()).eol();
         blade.setVoltage(voltmeter.averagePower());
         uiRenderData.mVolts = voltmeter.averagePower();
-        uiRenderData.power = vbatToPowerLevel(voltmeter.averagePower());
+        uiRenderData.power = AveragePower::vbatToPowerLevel(voltmeter.averagePower());
     }
 
     if (gforceDataTimer.tick(delta)) {
