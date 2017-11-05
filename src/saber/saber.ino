@@ -51,7 +51,6 @@
 #include "tester.h"
 
 static const uint32_t VBAT_TIME_INTERVAL      = 500;
-
 static const uint32_t INDICATOR_TIME          = 500;
 static const uint32_t INDICATOR_CYCLE         = INDICATOR_TIME * 2;
 static const uint32_t PING_PONG_INTERVAL      = 2400;
@@ -101,27 +100,27 @@ static const int OLED_HEIGHT = 32;
 uint8_t oledBuffer[OLED_WIDTH * OLED_HEIGHT / 8] = {0};
 
 OLED_SSD1306 display(PIN_OLED_DC, PIN_OLED_RESET, PIN_OLED_CS);
-Sketcher sketcher;
-Renderer renderer;
+Sketcher    sketcher;
+Renderer    renderer;
 #elif SABER_DISPLAY == SABER_DISPLAY_7_5
 Pixel_7_5_UI display75;
 PixelMatrix pixelMatrix;
 #endif
 
 #ifdef SABER_SISTERS
-RF24 rf24(PIN_SPI_CE, PIN_SPI_CS);
-ComRF24 comRF24(&rf24);
+RF24        rf24(PIN_SPI_CE, PIN_SPI_CS);
+ComRF24     comRF24(&rf24);
+Timer2      pingPongTimer(PING_PONG_INTERVAL);
 #endif
-Timer2 pingPongTimer(PING_PONG_INTERVAL);
 
-CMDParser cmdParser(&saberDB);
-Blade blade;
-Timer2 vbatTimer(VBAT_TIME_INTERVAL);
-Timer2 gforceDataTimer(110);
+CMDParser   cmdParser(&saberDB);
+Blade       blade;
+Timer2      vbatTimer(VBAT_TIME_INTERVAL);
+Timer2      gforceDataTimer(110);
 
-Tester tester;
-uint32_t unlocked = 0;
-bool soundOk = false;
+Tester      tester;
+uint32_t    unlocked = 0;
+bool        soundOk = false;
 
 void setupSD()
 {
@@ -644,7 +643,6 @@ void loop() {
 
     if (vbatTimer.tick(delta)) {
         voltmeter.takeSample();
-        //Log.p("power ").p(averagePower.power()).eol();
         blade.setVoltage(voltmeter.averagePower());
         uiRenderData.mVolts = voltmeter.averagePower();
         uiRenderData.power = AveragePower::vbatToPowerLevel(voltmeter.averagePower());
