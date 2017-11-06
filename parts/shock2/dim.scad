@@ -11,7 +11,7 @@ M_SPEAKER_BACK      = -36;
 M_0                 = 0;        // physical back of the lightsaber main body.
 M_AFT_STOP          = 10;
 M_DISPLAY           = 14;       // was 15
-M_PORT_CENTER       = 57;
+M_PORT_CENTER       = 58;
 M_CRYSTAL_VIEW_CENTER = 93;
 M_SWITCH_CENTER     = 147.5;
 M_EMITTER_BASE      = 165.5;
@@ -62,18 +62,18 @@ TEETH_ANGLE			= 90;
 X_EMITTER 			= 4;
 Y_EMITTER 			= 1;
 
-H_BUTTRESS			= 3;       // internal buttress / baffles
-DZ_BUTTRESS         = 5;
+H_BUTTRESS			= 3.5;       // internal buttress / baffles
+DZ_BUTTRESS         = 4.5;
 
 M_ZONE_0            = M_DISPLAY;
-M_ZONE_1            = M_AFT_STOP_FRONT + H_BUTTRESS*6 + DZ_BUTTRESS*6;
-M_ZONE_2            = M_AFT_STOP_FRONT + H_BUTTRESS*14 + DZ_BUTTRESS*14;
+M_ZONE_1            = M_AFT_STOP_FRONT + H_BUTTRESS*5 + DZ_BUTTRESS*6 - 0.001;
+M_ZONE_2            = M_AFT_STOP_FRONT + H_BUTTRESS*14 + DZ_BUTTRESS*14 + 0.001;
 M_ZONE_3            = M_EMITTER_BASE;
 
 W_CRYSTAL           = 12.1;
-H_CRYSTAL           = 9;
-Y_CRYSTAL           = 8;        // offset up of the crystal
-Z_CRYSTAL           = 50;
+H_CRYSTAL           = 10;
+Y_CRYSTAL           = 9;        // offset up of the crystal
+Z_CRYSTAL           = 52;
 
 DISPLAY_W           = 23 + 0.5;
 DISPLAY_L           = 32 + 0.5;

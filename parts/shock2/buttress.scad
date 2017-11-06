@@ -27,7 +27,7 @@ module railCube()
     translate([9, -12, 0]) cube(size=[3, 2, H_BUTTRESS]);
 }
 
-module buttress(    trough=0,
+module buttress(    trough=16,
                     h=H_BUTTRESS,
                     bridge=0,
                     rail=false)
@@ -45,16 +45,8 @@ module buttress(    trough=0,
 
     difference() {
         cylinder(h=h, d=D_INNER); 
-        TR = 16;
-        translate([-TR/2, 0, -EPS]) cube(size=[TR, 100, h + EPS2]);
+        translate([-trough/2, 0, -EPS]) cube(size=[trough, 100, h + EPS2]);
         translate([0, 0, -EPS]) cylinder(h=h + EPS2, d=D_INNER_CORE);
-
-        if (trough != 0) {
-            T = trough < 0 ? TROUGH : trough;
-            translate([-T/2, -12, -EPS]) {
-                cube(size=[T, 40, h + EPS2]);
-            }
-        }
     }
 
     if (bridge > 0) {
