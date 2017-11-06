@@ -6,8 +6,8 @@ include <dim.scad>
 use <buttress.scad>
 use <beam.scad>
 
-DRAW_FRONT = false;
-DRAW_BACK  = false;
+DRAW_FRONT = true;
+DRAW_BACK  = true;
 DRAW_BAT   = true;
 
 INCHES_TO_MM = 25.4;

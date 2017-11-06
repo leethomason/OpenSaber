@@ -381,8 +381,8 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
-	#define SABER_AUDIO_UI
-	//#define SABER_DISPLAY			SABER_DISPLAY_7_5
+	//#define SABER_AUDIO_UI
+	#define SABER_DISPLAY			SABER_DISPLAY_128_32
 	#define SABER_NUM_LEDS 			1
 	#define SABER_CRYSTAL			80
 	#define SABER_CRYSTAL_LOW		24
@@ -580,7 +580,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_SPI_CS		  10
 	#define PIN_SABER_MOSI    11
 	#define PIN_SABER_MISO    12
-	// 13 clock
+	#define PIN_SPI_CLOCK	  13
 	#define PIN_ACCEL_EN      14
 	// 15
 	// 16
@@ -591,6 +591,12 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_EMITTER_BLUE  21
 	#define PIN_EMITTER_GREEN 22
 	#define PIN_EMITTER_RED   23
+
+	// ALIAS
+	#define PIN_OLED_CS		  PIN_SPI_CS
+	#define PIN_OLED_RESET 	  PIN_SPI_CE
+	#define PIN_OLED_DC    	  PIN_SPI_DC
+	#define PIN_OLED_CLOCK    PIN_SPI_CLOCK
 
 	#define ACCEL_BLADE_DIRECTION 0	// x is in the blade direction
 #else
