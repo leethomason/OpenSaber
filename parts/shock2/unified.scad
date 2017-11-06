@@ -13,8 +13,8 @@ AFT_HOLDER   = false;
 AFT          = false;
 MAIN_DISPLAY = false;
 MAIN_CRYSTAL = false;
-MAIN_MC      = true;
-MAIN_EMITTER = false;
+MAIN_MC      = false;
+MAIN_EMITTER = true;
 EMITTER      = false;
 
 DISPLAY_INNER_W = (DISPLAY_W - DISPLAY_MOUNT_W)/2;
@@ -524,7 +524,7 @@ module Zone2()
 
             // Hardpoint; in case a rotation set needs to be inserted.
             PLATE = 12;
-            translate([-PLATE/2, -R_INNER, M_SWITCH_CENTER - PLATE/2]) 
+            *translate([-PLATE/2, -R_INNER, M_SWITCH_CENTER - PLATE/2]) 
                 cube(size=[PLATE, 4, PLATE]);
  
             difference() {
@@ -630,7 +630,7 @@ module mainBody()
                 }
             }
             mainRod();
-            translate([-20, Y_FLATTEN-20, M_AFT_STOP_FRONT]) cube(size=[40, 20, BODY_Z]);
+            translate([-20, Y_FLATTEN-20, M_AFT_STOP_FRONT]) cube(size=[40, 20, H_FAR]);
         }
     }
 }
@@ -644,5 +644,5 @@ mainBody();
 //lockRail();
 //crystal();
 
-//RX = 22;
-//color("red") translate([-RX/2, -5, M_ZONE_2]) cube(size=[RX, 1, 15]);
+RX = 10.2;
+//color("red") translate([-RX/2, -10, M_ZONE_2+DZ_BUTTRESS]) cube(size=[RX, 1, 22]);
