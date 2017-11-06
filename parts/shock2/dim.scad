@@ -73,7 +73,7 @@ M_ZONE_3            = M_EMITTER_BASE;
 W_CRYSTAL           = 12.1;
 H_CRYSTAL           = 10;
 Y_CRYSTAL           = 9;        // offset up of the crystal
-Z_CRYSTAL           = 50;
+Z_CRYSTAL           = 52;
 
 DISPLAY_W           = 23 + 0.5;
 DISPLAY_L           = 32 + 0.5;
