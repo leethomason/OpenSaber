@@ -11,10 +11,10 @@ EPS2 = EPS * 2;
 
 AFT_HOLDER   = false;
 AFT          = false;
-MAIN_DISPLAY = true;
+MAIN_DISPLAY = false;
 MAIN_CRYSTAL = false;
 MAIN_MC      = true;
-MAIN_EMITTER = true;
+MAIN_EMITTER = false;
 EMITTER      = false;
 
 DISPLAY_INNER_W = (DISPLAY_W - DISPLAY_MOUNT_W)/2;
@@ -608,7 +608,8 @@ module mainBody()
                             mcSection();
                             Zone1();
                         }
-                        lockRail();
+                        // room for part expansion
+                        translate([0, -0.5, 0]) lockRail();
                     }
                     intersection() {
                         innerTube();                
