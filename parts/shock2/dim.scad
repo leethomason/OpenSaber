@@ -80,7 +80,7 @@ DISPLAY_L           = 32 + 0.5;
 DISPLAY_MOUNT_W     = 17;
 DISPLAY_MOUNT_L     = 26;
 D_DISPLAY_MOUNT     = 2;
-Y_DISPLAY           = 9.5;
+Y_DISPLAY           = 10;
 DISPLAY_PINS        = 20;
 
 D_SWITCH			= 12.5;						// actually 12, by thread.
@@ -105,6 +105,7 @@ POWER_Y             = 0.5;
 
 H_BATTERY           = 68;
 D_BATTERY           = 18.50 + 0.5;    // An 1850. Huh. 
+DY_BATTERY          = -1;
 
 X_DOTSTAR           = 5.0 + 0.5;  // from spec
 Y_DOTSTAR           = 1.4;  // from spec
