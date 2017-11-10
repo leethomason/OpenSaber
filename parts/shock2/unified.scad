@@ -14,8 +14,9 @@ AFT          = false;
 MAIN_DISPLAY = false;
 MAIN_CRYSTAL = false;
 MAIN_MC      = false;
-MAIN_EMITTER = true;
+MAIN_EMITTER = false;
 EMITTER      = false;
+FILLER       = true;
 
 DISPLAY_INNER_W = (DISPLAY_W - DISPLAY_MOUNT_W)/2;
 DISPLAY_INNER_L = (DISPLAY_L - DISPLAY_MOUNT_L)/2;
@@ -27,6 +28,24 @@ M_DISPLAY_BUTTRESS 	= M_DISPLAY + DISPLAY_L - DISPLAY_INNER_L - H_BUTTRESS / 2;
 R_DISPLAY_THREAD = 0.8; // M2 bolt
 R_DISPLAY_THREAD_HEAD = 2.0;
 DEPTH_DISPLAY_THREAD = 4;
+
+module filler()
+{
+    difference() {
+        translate([0,0,M_ZONE_1+DZ_BUTTRESS+H_BUTTRESS*2]) 
+        {
+            intersection() {
+                cylinder(h=DZ_BUTTRESS, d=D_INNER);
+                translate([-20, -2, 0]) 
+                    cube(size=[10, 20, DZ_BUTTRESS]);
+            }
+        }
+        lockRail();
+        mainRod();
+    }
+}
+
+if (FILLER) filler();
 
 module battery() {
     color("yellow") translate([0, 0, M_BATTERY_BACK - EPS]) {
@@ -643,6 +662,7 @@ mainBody();
 //battery();
 //lockRail();
 //crystal();
-
-RX = 10.2;
+//RX = 10.2;
 //color("red") translate([-RX/2, -10, M_ZONE_2+DZ_BUTTRESS]) cube(size=[RX, 1, 22]);
+
+
