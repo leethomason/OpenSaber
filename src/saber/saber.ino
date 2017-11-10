@@ -28,8 +28,6 @@
 #include <OLED_SSD1306.h>
 #include <SerialFlash.h>
 #include <Audio.h>
-//#include <Adafruit_LIS3DH.h> // turn back on if needed. causes compile warnings.
-
 #include "Button.h"
 #include "Grinliz_Arduino_Util.h"
 #include "DotStar.h"
@@ -38,6 +36,8 @@
 // -- Must be first. Has configuration. -- //
 #include "pins.h"
 
+#include "accelerometer.h"
+#include "voltmeter.h"
 #include "sfx.h"
 #include "AudioPlayer.h"
 #include "saberdb.h"
@@ -51,11 +51,8 @@
 #include "tester.h"
 
 static const uint32_t VBAT_TIME_INTERVAL      = 500;
-
 static const uint32_t INDICATOR_TIME          = 500;
 static const uint32_t INDICATOR_CYCLE         = INDICATOR_TIME * 2;
-static const float    GFORCE_RANGE            = 4.0f;
-static const float    GFORCE_RANGE_INV        = 1.0f / GFORCE_RANGE;
 static const uint32_t PING_PONG_INTERVAL      = 2400;
 static const uint32_t BREATH_TIME             = 1200;
 
@@ -103,32 +100,30 @@ static const int OLED_HEIGHT = 32;
 uint8_t oledBuffer[OLED_WIDTH * OLED_HEIGHT / 8] = {0};
 
 OLED_SSD1306 display(PIN_OLED_DC, PIN_OLED_RESET, PIN_OLED_CS);
-Sketcher sketcher;
-Renderer renderer;
+Sketcher    sketcher;
+Renderer    renderer;
 #elif SABER_DISPLAY == SABER_DISPLAY_7_5
 Pixel_7_5_UI display75;
 PixelMatrix pixelMatrix;
 #endif
 
 #ifdef SABER_SISTERS
-RF24 rf24(PIN_SPI_CE, PIN_SPI_CS);
-ComRF24 comRF24(&rf24);
+RF24        rf24(PIN_SPI_CE, PIN_SPI_CS);
+ComRF24     comRF24(&rf24);
+Timer2      pingPongTimer(PING_PONG_INTERVAL);
 #endif
-Timer2 pingPongTimer(PING_PONG_INTERVAL);
 
-CMDParser cmdParser(&saberDB);
-Blade blade;
-Timer2 vbatTimer(VBAT_TIME_INTERVAL);
-Timer2 gforceDataTimer(110);
+CMDParser   cmdParser(&saberDB);
+Blade       blade;
+Timer2      vbatTimer(VBAT_TIME_INTERVAL);
+Timer2      gforceDataTimer(110);
 
-Tester tester;
-uint32_t unlocked = 0;
-bool soundOk = false;
+Tester      tester;
+uint32_t    unlocked = 0;
+bool        soundOk = false;
 
 void setupSD()
 {
-//    SPI.setMOSI(PIN_SABER_MOSI);
-//    SPI.setSCK(PIN_SABER_CLOCK);
     #if (SABER_SOUND_ON == SABER_SOUND_SD)
         #ifdef SABER_INTEGRATED_SD
             Log.p("Connecting to built in SD...").eol();
@@ -225,8 +220,6 @@ void setup() {
     #endif
 
     #ifdef SABER_SISTERS 
-        //pinMode(PIN_SWITCH_B, INPUT);
-        //int rolePin = digitalRead(PIN_SWITCH_B);
         #if SABER_SUB_MODEL == SABER_SUB_MODEL_LUNA
             const int role = 0;
         #elif SABER_SUB_MODEL == SABER_SUB_MODEL_CELESTIA
@@ -265,15 +258,6 @@ uint32_t calcReflashTime() {
     return millis() + random(500) + 200;
 }
 
-int vbatToPowerLevel(int32_t vbat)
-{
-    int level = 0;
-    if      (vbat > 3950) level = 4;
-    else if (vbat > 3800) level = 3;
-    else if (vbat > 3650) level = 2;
-    else if (vbat > LOW_VOLTAGE) level = 1;
-    return level;
-}
 
 /*
    The saberDB is the source of truth. (The Model.)
@@ -289,7 +273,7 @@ void syncToDB()
     uiRenderData.volume = saberDB.volume4();
     uiRenderData.color = Blade::convertRawToPerceived(saberDB.bladeColor());
     uiRenderData.palette = saberDB.paletteIndex();
-    uiRenderData.power = vbatToPowerLevel(voltmeter.averagePower());
+    uiRenderData.power = AveragePower::vbatToPowerLevel(voltmeter.averagePower());
     uiRenderData.mVolts = voltmeter.averagePower();
     #ifdef SABER_SOUND_ON
     uiRenderData.fontName = sfx.currentFontName();
@@ -370,7 +354,7 @@ void buttonAClickHandler(const Button&)
             {
                 int32_t vbat = voltmeter.averagePower();
                 Log.event("[Vbat]", vbat);
-                ledA.blink(vbatToPowerLevel(vbat), INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
+                ledA.blink(AveragePower::vbatToPowerLevel(vbat), INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
             }
     }
 }
@@ -461,7 +445,7 @@ void buttonAClickHandler(const Button&)
         // the modes are cycled. But haven't yet
         // figured out a better option.
         if (uiMode.mode() == UIMode::NORMAL) {
-            int power = vbatToPowerLevel(voltmeter.averagePower());
+            int power = AveragePower::vbatToPowerLevel(voltmeter.averagePower());
             ledA.blink(power, INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
         }
     }
@@ -659,16 +643,15 @@ void loop() {
 
     if (vbatTimer.tick(delta)) {
         voltmeter.takeSample();
-        //Log.p("power ").p(averagePower.power()).eol();
         blade.setVoltage(voltmeter.averagePower());
         uiRenderData.mVolts = voltmeter.averagePower();
-        uiRenderData.power = vbatToPowerLevel(voltmeter.averagePower());
+        uiRenderData.power = AveragePower::vbatToPowerLevel(voltmeter.averagePower());
     }
 
     if (gforceDataTimer.tick(delta)) {
         #if SABER_DISPLAY == SABER_DISPLAY_128_32
             maxGForce2 = constrain(maxGForce2, 0.1, 16);
-            static const float MULT = 256.0f / GFORCE_RANGE;  // g=1 translates to uint8 64
+            static const float MULT = 256.0f / accel.range();  // g=1 translates to uint8 64
             const uint8_t gForce = constrain(sqrtf(maxGForce2) * MULT, 0, 255);
             sketcher.Push(gForce);
         #endif
