@@ -47,7 +47,7 @@ SOFTWARE.
 #define SABER_SUB_MODEL_CELESTIA	2
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
+#define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_SHOCK2
 #define SABER_SUB_MODEL				
 // ----------------------------------
@@ -395,16 +395,16 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 	// Thermal paste heat sinking.
 	static const int32_t RED_VF   = 2100;   // milli-volts
-	static const int32_t RED_I    = 400;    // milli-amps
-	static const int32_t RED_R    = 4300;   // milli-ohms
+	static const int32_t RED_I    = 380;    // milli-amps
+	static const int32_t RED_R    = 4700;   // milli-ohms
 
 	static const int32_t GREEN_VF = 3400;
-	static const int32_t GREEN_I  = 400;
+	static const int32_t GREEN_I  = 380;
 	static const int32_t GREEN_R  = 1000;
 
 	static const int32_t BLUE_VF  = 3100;
-	static const int32_t BLUE_I   = 400;
-	static const int32_t BLUE_R   = 1600;
+	static const int32_t BLUE_I   = 380;
+	static const int32_t BLUE_R   = 1800;
 
 	static const int VOLUME_1 = 15;
 	static const int VOLUME_2 = 50;

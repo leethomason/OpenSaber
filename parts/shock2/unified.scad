@@ -10,9 +10,9 @@ EPS = 0.01;
 EPS2 = EPS * 2;
 
 AFT_HOLDER   = false;
-AFT          = true;
+AFT          = false;
 MAIN_DISPLAY = false;
-MAIN_CRYSTAL = false;
+MAIN_CRYSTAL = true;
 MAIN_MC      = false;
 MAIN_EMITTER = false;
 EMITTER      = false;
@@ -480,7 +480,6 @@ module Zone1Crystal()
                     translate([0, 0, M_ZONE_1 + DZ_BUTTRESS*(i+1) + H_BUTTRESS*(i+1)]) {
                         difference() {
                             cylinder(h=H_BUTTRESS, d=D_INNER);
-                            //translate([0, 0, -EPS]) cylinder(h=H_BUTTRESS + EPS2, d=D_INNER_CORE);
                         }
                     }
                 }
@@ -498,7 +497,7 @@ module Zone1Crystal()
                             cube(size=[20, 20, H_FAR]);
             }
             translate([0, SPLIT_Y, M_ZONE_1 + H_BUTTRESS + DZ_BUTTRESS - EPS]) 
-                scale([2.7, 1, 1])
+                scale([2.7, 1.3, 1])
                     cylinder(h=H_FAR, d=9);
             translate([-X_DOTSTAR/2, Y_CRYSTAL-X_DOTSTAR/2, M_ZONE_1])
                 cube(size=[X_DOTSTAR, X_DOTSTAR, H_BUTTRESS + DZ_BUTTRESS + EPS2]);
