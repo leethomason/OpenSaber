@@ -10,13 +10,14 @@ EPS = 0.01;
 EPS2 = EPS * 2;
 
 AFT_HOLDER   = false;
-AFT          = false;
+AFT          = true;
 MAIN_DISPLAY = false;
 MAIN_CRYSTAL = false;
 MAIN_MC      = false;
 MAIN_EMITTER = false;
 EMITTER      = false;
 FILLER       = true;
+BATTERY      = false;
 
 DISPLAY_INNER_W = (DISPLAY_W - DISPLAY_MOUNT_W)/2;
 DISPLAY_INNER_L = (DISPLAY_L - DISPLAY_MOUNT_L)/2;
@@ -48,7 +49,7 @@ module filler()
 if (FILLER) filler();
 
 module battery() {
-    color("yellow") translate([0, 0, M_BATTERY_BACK - EPS]) {
+    color("yellow") translate([0, DY_BATTERY, M_BATTERY_BACK - EPS]) {
         cylinder(d=D_BATTERY, h = H_BATTERY + EPS2);
     }
 }
@@ -242,10 +243,10 @@ module speakerBolt()
 module speakerBolts()
 {
     translate([0, 0, M_SPEAKER_BACK]) {
-        translate([ 4.5,  9.9, -EPS]) speakerBolt();
-        translate([-4.5,  9.9, -EPS]) speakerBolt();
-        translate([ 4.5, -9.9, -EPS]) speakerBolt();
-        translate([-4.5, -9.9, -EPS]) speakerBolt();
+        translate([ 4.5,  9.5, -EPS]) speakerBolt();
+        translate([-4.5,  9.5, -EPS]) speakerBolt();
+        //translate([ 4.5, -9.9, -EPS]) speakerBolt();
+        //translate([-4.5, -9.9, -EPS]) speakerBolt();
     }
 }
 
@@ -279,6 +280,8 @@ module usbSlot()
 
     translate([-DX_USB/2, 4, M_ZONE_2 + DZ_BUTTRESS + H_BUTTRESS/2 - SLOT_USB/2])
         cube(size=[DX_USB, 100, SLOT_USB]);
+    translate([-20, 9, M_ZONE_2 + DZ_BUTTRESS - EPS])
+        cube(size=[40, 10, 2.2]);
 }
 
 BODY_Z = M_EMITTER_BASE - M_AFT_STOP_FRONT - H_BUTTRESS;
@@ -373,6 +376,13 @@ module Zone0()
             // hold up buttress connections
             translate([11, -12, M_ZONE_1 - 2]) cube(size=[4, 15, 3]);
             mirror([1,0,0]) translate([11, -12, M_ZONE_1 - 2]) cube(size=[4, 15, 3]);
+
+            difference() {
+                translate([-20, Y_FLATTEN, M_ZONE_1 - DZ_BUTTRESS])
+                    cube(size=[40, 4, DZ_BUTTRESS]);
+                translate([-7, Y_FLATTEN, M_ZONE_1 - DZ_BUTTRESS - EPS])
+                    cube(size=[14, 4+EPS, DZ_BUTTRESS + EPS2]);
+            }
         }
     }
 }
@@ -527,10 +537,9 @@ module Zone2()
             difference() {
                 arches();
 
-                // Switch cut-out
-                //translate([0, 0,  M_SWITCH_CENTER - SWITCH_DZ]) cylinder(h=100, d=D_INNER_CORE);
-
                 usbSlot();
+                *translate([-40, 10, M_ZONE_2 + DZ_BUTTRESS])
+                    cube(size=[80, 40, H_BUTTRESS]);
             }    
             // Switch plate.
             PAD = 4;
@@ -541,15 +550,19 @@ module Zone2()
                 usbSlot();
             }
 
+            /*
             // Hardpoint; in case a rotation set needs to be inserted.
             PLATE = 12;
-            *translate([-PLATE/2, -R_INNER, M_SWITCH_CENTER - PLATE/2]) 
+            translate([-PLATE/2, -R_INNER, M_SWITCH_CENTER - PLATE/2]) 
                 cube(size=[PLATE, 4, PLATE]);
+            */
  
             difference() {
                 union() {
-                    translate([-R_INNER, Y_FLATTEN, M_ZONE_2 + DZ_BUTTRESS]) cube(size=[9, 100, H_BUTTRESS]);
-                    mirror([1,0,0]) translate([-R_INNER, Y_FLATTEN, M_ZONE_2 + DZ_BUTTRESS]) cube(size=[9, 100, H_BUTTRESS]);
+                    translate([-R_INNER, Y_FLATTEN, M_ZONE_2 + DZ_BUTTRESS]) 
+                        cube(size=[9, 100, H_BUTTRESS]);
+                    mirror([1,0,0]) translate([-R_INNER, Y_FLATTEN, M_ZONE_2 + DZ_BUTTRESS]) 
+                        cube(size=[9, 100, H_BUTTRESS]);
                 }
                 usbSlot();
             }
@@ -601,6 +614,10 @@ if (MAIN_DISPLAY)
 
 if (EMITTER) {
     color("white") translate([0, 0, M_EMITTER]) emitter();
+}
+
+if (BATTERY) {
+    color("white") battery();
 }
 
 
@@ -659,10 +676,7 @@ mainBody();
 //mainRod();
 //translate([0, FLOOR_Y, M_MC]) mc();
 //translate([0, 0, -20]) switch();
-//battery();
 //lockRail();
 //crystal();
 //RX = 10.2;
 //color("red") translate([-RX/2, -10, M_ZONE_2+DZ_BUTTRESS]) cube(size=[RX, 1, 22]);
-
-

@@ -31,10 +31,7 @@ module emitter()
             // Top cap
             translate([0, 0, H_OUTER]) {
                 difference() {
-                    if (LOCK_RING)
-                        cylinder(h=H_RING, r=D_EMITTER_RING/2, $fn=FACES);
-                    else
-                        cylinder(h=H_RING, r=D_INNER/2, $fn=FACES);
+                    cylinder(h=H_RING, r=D_INNER/2, $fn=FACES);
                     cylinder(h=H_RING, r=D_LED/2, $fn=FACES);
                 }
             };
