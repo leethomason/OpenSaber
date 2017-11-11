@@ -12,7 +12,7 @@ EPS2 = EPS * 2;
 AFT_HOLDER   = false;
 AFT          = false;
 MAIN_DISPLAY = false;
-MAIN_CRYSTAL = true;
+MAIN_CRYSTAL = false;
 MAIN_MC      = false;
 MAIN_EMITTER = false;
 EMITTER      = false;
@@ -36,13 +36,15 @@ module filler()
         translate([0,0,M_ZONE_1+DZ_BUTTRESS+H_BUTTRESS*2]) 
         {
             intersection() {
-                cylinder(h=DZ_BUTTRESS, d=D_INNER);
+                cylinder(h=DZ_BUTTRESS - 0.2, d=D_INNER);
                 translate([-20, -2, 0]) 
                     cube(size=[10, 20, DZ_BUTTRESS]);
             }
         }
         lockRail();
         mainRod();
+        translate([-13, -2, M_ZONE_1+DZ_BUTTRESS+H_BUTTRESS*2]) 
+            cube(size=[25, 1, DZ_BUTTRESS + EPS]);
     }
 }
 
