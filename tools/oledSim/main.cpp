@@ -63,11 +63,11 @@ int main(int, char**) {
 	SDL_Event e;
 	int scale = 4;
 	UIModeUtil mode;
-	mode.set(UIMode::NORMAL);
+	mode.set(UIMode::MEDITATION);
 	bool bladeOn = false;
 	int count = 0;
 	uint32_t lastUpdate = SDL_GetTicks();
-	bool oledMode = false;
+	bool oledMode = true;
 
 	const char* FONT_NAMES[8] = {
 		"Bespin", "Vader", "Vader", "ObiAni", "Bespin", "JainaSw", "Maul", "MAUL"

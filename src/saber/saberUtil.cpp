@@ -119,11 +119,23 @@ void UIModeUtil::nextMode()
             Log.p("mode: volume").eol();     
             if (sfx) sfx->playUISound("audio");
             break;
+#if SABER_MODEL == SABER_MODEL_SHOCK2
+        case UIMode::VOLUME:        
+            m_mode = UIMode::MEDITATION;        
+            Log.p("mode: meditation").eol();     
+            break;
+        case UIMode::MEDITATION:        
+            m_mode = UIMode::NORMAL;        
+            Log.p("mode: normal").eol();     
+            break;
+#else            
         case UIMode::VOLUME:        
             m_mode = UIMode::NORMAL;        
             Log.p("mode: normal").eol();     
             if (sfx) sfx->playUISound("ready");
             break;
+#endif
+
         default:
             ASSERT(false);
             m_mode = UIMode::NORMAL;
