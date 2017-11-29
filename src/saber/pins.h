@@ -48,8 +48,8 @@ SOFTWARE.
 
 // ----------------------------------
 #define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_SHOCK2
-#define SABER_SUB_MODEL				
+#define SABER_MODEL 				SABER_MODEL_SISTER
+#define SABER_SUB_MODEL				SABER_SUB_MODEL_LUNA
 // ----------------------------------
 
 
