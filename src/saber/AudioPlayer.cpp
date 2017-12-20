@@ -49,9 +49,10 @@ void AudioPlayer::init() {
     AudioMemory(8);
     // This is much louder, but started causing distortion.
     // Bug in the system? Better value to use?
-    #ifdef SABER_AUDIO_EXTERNAL_REF
-    dac.analogReference(EXTERNAL); // much louder!
-    #endif
+    //#ifdef SABER_AUDIO_EXTERNAL_REF
+    //dac.analogReference(AR_EXTERNAL); // much louder!
+    //#endif
+    dac.analogReference(INTERNAL);
     delay(50);  //stabalize
 }
 

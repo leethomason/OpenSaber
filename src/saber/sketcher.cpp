@@ -219,13 +219,17 @@ void Sketcher::DrawVolumeMode(Renderer* d, uint32_t time, const UIRenderData* da
 
 void Sketcher::DrawMeditationMode(Renderer* d, uint32_t time, const UIRenderData* data)
 {
+	//d->DrawBitmap(0, 0, get_jBird, 0, 0, 15);
+	//d->DrawBitmap(128-32, 0, get_jBird, 0, 113, 128);
 	d->DrawBitmap(0, 0, get_jBird);
 
-	d->DrawStr("no Emotion...Stillness",	33, 1, getGlypth_tomThumb5);
-	d->DrawStr("no Thought...Silence",		33, 7, getGlypth_tomThumb5);
-	d->DrawStr("no Ignorance...Attention",	33, 13, getGlypth_tomThumb5);
-	d->DrawStr("no Division...Perception",	33, 19, getGlypth_tomThumb5);
-	d->DrawStr("no Self...the Force",		33, 25, getGlypth_tomThumb5);
+	static const int X = 33;
+
+	d->DrawStr("no Emotion...Stillness",	X, 1, getGlypth_tomThumb5);
+	d->DrawStr("no Thought...Silence",		X, 7, getGlypth_tomThumb5);
+	d->DrawStr("no Ignorance...Attention",	X, 13, getGlypth_tomThumb5);
+	d->DrawStr("no Division...Perception",	X, 19, getGlypth_tomThumb5);
+	d->DrawStr("no Self...the Force",		X, 25, getGlypth_tomThumb5);
 }
 
 

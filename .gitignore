@@ -7,4 +7,5 @@
 *.stl
 .gitignore
 *.factory
+gcode
 *.nc
