@@ -40,6 +40,7 @@ SOFTWARE.
 #define SABER_MODEL_SISTER 			8	// Shield v3, Teensy 3.5
 #define SABER_MODEL_AQUATIC			9
 #define SABER_MODEL_SHOCK2		   10	// Shield v3, Teensy 3.5, Dotstar, Display (woh)
+#define SABER_MODEL_TALI		   11	//
 
 
 #define SABER_SUB_MODEL_NONE		0
@@ -48,8 +49,8 @@ SOFTWARE.
 
 // ----------------------------------
 #define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_SISTER
-#define SABER_SUB_MODEL				SABER_SUB_MODEL_LUNA
+#define SABER_MODEL 				SABER_MODEL_TALI
+#define SABER_SUB_MODEL				
 // ----------------------------------
 
 
@@ -70,6 +71,7 @@ SOFTWARE.
 #define PCB_VERSION_7				7	// Split PCB. Prop shield. Teensy 3.5.
 #define PCB_VERSION_9				9   // Split PCB. Prop shield. Teensy 3.5.
 #define PCB_SHIELD_2			   12	// Grinliz shield + Teensy 3.5
+#define PCB_SHIELD_3			   13	
 
 static const int EEPROM_SIZE = 512;
 
@@ -392,6 +394,45 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 	static const int32_t UVOLT_MULT = 6691;		
 	#define ID_STR "Shock-2 Cree XPE2 RGB"
+
+	// Thermal paste heat sinking.
+	static const int32_t RED_VF   = 2100;   // milli-volts
+	static const int32_t RED_I    = 380;    // milli-amps
+	static const int32_t RED_R    = 4700;   // milli-ohms
+
+	static const int32_t GREEN_VF = 3400;
+	static const int32_t GREEN_I  = 380;
+	static const int32_t GREEN_R  = 1000;
+
+	static const int32_t BLUE_VF  = 3100;
+	static const int32_t BLUE_I   = 380;
+	static const int32_t BLUE_R   = 1800;
+
+	static const int VOLUME_1 = 15;
+	static const int VOLUME_2 = 50;
+	static const int VOLUME_3 = 120;
+	static const int VOLUME_4 = 200;
+
+#elif (SABER_MODEL == SABER_MODEL_TALI)
+
+	#define PCB_VERSION 			PCB_SHIELD_3
+	#define LED_TOPOLOGY 			LED_TOPOLOGY_RESISTOR
+	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
+	#define SABER_SOUND_ON 			SABER_SOUND_SD
+	#define SABER_SOUND_SHUTDOWN
+	#define SABER_VOLTMETER
+	#define SABER_INTEGRATED_SD
+	#define SABER_AUDIO_EXTERNAL_REF
+	#define SABER_AUDIO_UI
+	#define SABER_NUM_LEDS 			4
+	#define SABER_UI_START  		0
+	#define SABER_UI_BRIGHTNESS		8
+
+	#undef SABER_BUTTON
+	#define SABER_BUTTON Button::INTERNAL_PULLUP
+
+	static const int32_t UVOLT_MULT = 6691;		
+	#define ID_STR "Tali Cree XPE2 RGB"
 
 	// Thermal paste heat sinking.
 	static const int32_t RED_VF   = 2100;   // milli-volts
