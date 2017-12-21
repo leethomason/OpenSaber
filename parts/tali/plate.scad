@@ -21,9 +21,18 @@ difference() {
        cylinder(h=H, d=1.25 * 25.4 + 3.2*2);
     } 
     
-    for(x=[0:3]) {
-        for(y=[0:2]) {
-            translate([8+x*10, 10+y*12, -1]) cylinder(h=H+2, d=9);
+    XSTART = -1;
+    XEND = 3;
+    YSTART = -1;
+    YEND = 3;
+    
+    for(x=[XSTART:XEND]) {
+        for(y=[YSTART:YEND]) {
+            xAtEnd = (x == XSTART) || (x == XEND);
+            yAtEnd = (y == YSTART) || (y == YEND);
+            atEnd = xAtEnd && yAtEnd;
+            if (!atEnd)
+                translate([11+x*12, 11+y*12, -1]) cylinder(h=H+2, d=9);
         }
     }
 }
