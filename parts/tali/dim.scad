@@ -1,148 +1,84 @@
-FACES 				= 180;
-EPSILON 			= 0.1;
+M_TRANSITION		= 114;
+M_LED_HOLDER_FRONT	= M_TRANSITION + 48;
+M_LED_HOLDER_BACK	= M_LED_HOLDER_FRONT - 10;
+M_SWITCH_CENTER		= M_TRANSITION + 30.5;
+M_FORWARD_PCB       = M_TRANSITION + 20;
+M_PORT_CENTER       = M_TRANSITION + 14;
 
-INCHES_TO_MM 		= 25.4;
-MM_TO_INCHES 		= 1 / INCHES_TO_MM;
+M_SPKR_RING			= 15.5;		// Front of the speaker ring.
+M_RAIL_START        = 12;
+M_POMMEL_FRONT      = 10;       // Where the pommel becomes aft
+M_POMMEL_BACK       = 9.0;      // Back of the pommel, leaving (in this case)
+                                // enough space for the various pommels.
+M_0                 = 0;
 
-// Marks - absolute location.
-M_WAY_BACK          = -40;
-M_POMMEL            = -37;      // approximate. hard to measure.
-M_SPEAKER_BACK      = -36;
-M_0                 = 0;        // physical back of the lightsaber main body.
-M_AFT_STOP          = 10;
-M_DISPLAY           = 14;       // was 15
-M_PORT_CENTER       = 58;
-M_CRYSTAL_VIEW_CENTER = 93;
-M_SWITCH_CENTER     = 147.5;
-M_EMITTER_BASE      = 165.5;
-M_EMITTER           = M_EMITTER_BASE + 0;
+H_BUTTRESS			= 4;
 
-M_MC                = 68;
+M_BUTTRESS_0		= M_SPKR_RING + H_BUTTRESS;			// speaker holder, behind wings
+M_BUTTRESS_3		= M_SPKR_RING + H_BUTTRESS + 59;
+M_BUTTRESS_4		= M_SPKR_RING + 70;		// holds speaker in place, space for foam
 
-H_FAR               = 240;
+M_WAY_BACK			= -20;
+H_FAR				= 200;
 
-// inner diameter of the lightsaber tube.
-// shock is constant, within tolerances
-D_INNER      		= 32.258;
-R_INNER             = D_INNER / 2;
-D_INNER_CORE        = 25;
-D_OUTER             = 37.6;
-D_AFT               = 25.8;
-R_AFT               = D_AFT / 2;
-D_AFT_RING          = 33.5;
-H_AFT_RING          = 6;
-H_AFT_LIP           = 4;
-FLOOR_Y             = -12;
-Y_FLATTEN           = -15;
+MM_TO_INCHES = 1 / 25.4;
+INCHES_TO_MM = 25.4;
 
-M_AFT_STOP_FRONT    = M_AFT_STOP + H_AFT_RING + H_AFT_LIP;
+D_AFT				= 32;
+R_AFT 				= D_AFT / 2;
+T_TRANSITION_RING	= 4;
 
-H_SPEAKER = 3.6 + 1.0;  // space for the physical speaker
-X_SPEAKER = 20;
-Y_SPEAKER = 14.2;   
-Y_SPEAKER_INNER = 8.4;  // air channel
-H_SPEAKER_HOLDER = H_SPEAKER + 1.2;
+Y_SWITCH			= 9.6;
+D_SWITCH			= 12.5;
+D_SWITCH_TOP		= 14.5;
+D_PORT 				= 12.7;		// FIXME
+D_SMALL_PORT		= 7.9;
 
-// emitter head
-D_EMITTER_RING      = 33.4;
-
-// dimensions of the main ring.
-H_RING 				= 16;
-T_RING 				= 2.5;
-
-// dimensions of pin holders and pins
-PIN	   				= 2.54;
-H_PIN_HOLDER 		= 8;
-T_PIN_HOLDER_WALL 	= 2;
-
-N_TEETH				= 2;
-TEETH_ANGLE			= 90;
-
-// Pin counts:
-X_EMITTER 			= 4;
-Y_EMITTER 			= 1;
-
-H_BUTTRESS			= 3.5;       // internal buttress / baffles
-DZ_BUTTRESS         = 4.5;
-
-M_ZONE_0            = M_DISPLAY;
-M_ZONE_1            = M_AFT_STOP_FRONT + H_BUTTRESS*5 + DZ_BUTTRESS*6 - 0.001;
-M_ZONE_2            = M_AFT_STOP_FRONT + H_BUTTRESS*14 + DZ_BUTTRESS*14 + 0.001;
-M_ZONE_3            = M_EMITTER_BASE;
-
-W_CRYSTAL           = 12.1;
-H_CRYSTAL           = 10;
-Y_CRYSTAL           = 9;        // offset up of the crystal
-Z_CRYSTAL           = 52;
-
-DISPLAY_W           = 23 + 0.5;
-DISPLAY_L           = 32 + 0.5;
-DISPLAY_MOUNT_W     = 17;
-DISPLAY_MOUNT_L     = 26;
-D_DISPLAY_MOUNT     = 2;
-Y_DISPLAY           = 10;
-DISPLAY_PINS        = 20;
-
-D_SWITCH			= 12.5;						// actually 12, by thread.
-Y_SWITCH            = 13.5;
-
-D_PORT              = 7.9;
-
-W_MC                = 18;
-H_MC                = 11;
-Z_MC_35             = 71.5;     // includes SD
-SHOULDER_DX         = 2.5;
-SHOULDER_DZ         = 3.5;
-
-X_ROD               = 10.5;
-Y_ROD               =  3.5;
-D_ROD               =  3.4;
-
-POWER_DX            = 9.6;
-POWER_DY            = 14;
-POWER_DZ            = 11;
-POWER_Y             = 0.5;
+D_SABER_OUTER		= 37.5;
 
 H_BATTERY           = 68;
+BATTERY_BIAS        = 0.5;  // downward bias to fit it tape / protector
 D_BATTERY           = 18.50 + 0.5;    // An 1850. Huh. 
-DY_BATTERY          = -1;
+R_BATTERY			= D_BATTERY / 2;
 
-X_DOTSTAR           = 5.0 + 0.5;  // from spec
-Y_DOTSTAR           = 1.4;  // from spec
-DOTSTAR_STRIP       = 12.4;
+H_SPKR_PLASTIC 		= 2.3;
+D_SPKR_PLASTIC 		= 28 + 1;
+SPKR_OFFSET         = 1.5;    // distance from FRONT of pommel to speaker
+D_SPKR_INNER 		= D_SPKR_PLASTIC - 1.5;
 
-DX_USB              = 21.0;
-DX_USB_INNER        = 14.0;
-DY_USB              = 10.4;
-SLOT_USB            = 1.0;
+D_POMMEL			= 31.0; // 31.5 is correct, but snug
+R_POMMEL 			= D_POMMEL / 2;
+D_AFT_RING			= 33.5;
 
-OFFSET_EMITTER = -PIN + sqrt(R_INNER * R_INNER - PIN * PIN * X_EMITTER * X_EMITTER / 4);
+RAIL_ANGLE_0		=  25; //38;
+RAIL_ANGLE_1		= -18; //-38;
+RAIL_ANGLE_2		=  180 - RAIL_ANGLE_0;
+RAIL_ANGLE_3		= -180 - RAIL_ANGLE_1;
 
-module emitterPin(h, longY)
-{
-	Y = longY ? 40 : PIN;
+X_RAIL				= 3;
+Y_RAIL				= 4;
 
-    translate([-X_EMITTER * PIN / 2, OFFSET_EMITTER, 0]) {
-        cube([X_EMITTER * PIN, Y, h]);
-    }	
-}
+W_WING  			= 25;
+H_WING  			= 10.5;	// higher over power converter
 
-module emitterHolder(h)
-{
-    translate([-X_EMITTER * PIN / 2, OFFSET_EMITTER, 0]) {
-    	translate([-T_PIN_HOLDER_WALL, -T_PIN_HOLDER_WALL, 0]) {
-      		cube([X_EMITTER * PIN + T_PIN_HOLDER_WALL*2, PIN + T_PIN_HOLDER_WALL*2, h]);
-    	}
-    }	
-	
-}
+W_MC 				= 18;
+MC_RAIL             = 2.8;
+RAIL_DY             = -13;
 
-// Uses the same dimensions as the emitter holder so they 
-// can be used interchangeably.
-module lock(h)
-{
-    translate([-X_EMITTER * PIN / 2 - T_PIN_HOLDER_WALL, -20, 0]) {
-		cube([X_EMITTER * PIN + T_PIN_HOLDER_WALL * 2, 40, h]);
-	}	
-}
+// FIXME correct MC values and the circuit() function
+H_MC    			= 10;
+Y_MC    			= -15.5;	// low config -13.5, this value in flat config
+Z_MC_35 			= 71.5;		// includes SD
 
+SHOULDER_DX			= 2.5;
+SHOULDER_DZ			= 3.5;
+
+HORN_WIDTH			= 5;
+HORN_BASE_WIDTH		= 6.5;
+
+BEAM_WIDTH          = 5.0;
+BEAM_HEIGHT         = 8.0;
+
+POWER_X = 11;
+POWER_Y = 14.5;
+POWER_Z = 10;

@@ -1,1 +1,0 @@
-# Perform a seperate cut for each piece. Easier than computing the aggregate shape

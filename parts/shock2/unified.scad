@@ -11,12 +11,12 @@ EPS2 = EPS * 2;
 
 AFT_HOLDER   = false;
 AFT          = false;
-MAIN_DISPLAY = false;
+MAIN_DISPLAY = true;
 MAIN_CRYSTAL = false;
 MAIN_MC      = false;
 MAIN_EMITTER = false;
 EMITTER      = false;
-FILLER       = true;
+FILLER       = false;
 BATTERY      = false;
 
 DISPLAY_INNER_W = (DISPLAY_W - DISPLAY_MOUNT_W)/2;
