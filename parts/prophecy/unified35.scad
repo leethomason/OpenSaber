@@ -383,7 +383,7 @@ union() {
 }
 
 // Back body
-*difference() {
+difference() {
     
     union() {
         transitionRing();

@@ -71,25 +71,12 @@ module speakerHolder()
             translate([0, 0, M_POMMEL_FRONT]) {
                 cylinder(h=M_SPKR_RING - M_POMMEL_FRONT, d=D_SPKR_INNER);
             }
-            translate([0, 0, M_POMMEL_BACK + SPKR_OFFSET]) {
+            translate([0, 0, M_POMMEL_FRONT - 1 + SPKR_OFFSET]) {
                 speaker(0, 0);
             }
         }
     }
 }
-
-module speakerRing()
-{
-    PAD = 1;    // space for foam, etc.
-
-    translate([0, 0, M_POMMEL_BACK]) {
-        difference() {
-            cylinder(h=SPKR_OFFSET - PAD, d=D_POMMEL);
-            cylinder(h=SPKR_OFFSET - PAD, d=D_SPKR_PLASTIC - 2);
-        }
-    }
-}
-
 
 module triBump(halfDX, dy, dz)
 {
@@ -118,6 +105,21 @@ module upperBars()
 
     translate([0, 1, M - DZ])
         cubePair(x=W_MC/2 + 1, size=[2, DY, L + DZ*2]);
+}
+
+module speakerBass28() 
+{
+    translate([0, 0, M_POMMEL_BACK]) {
+        intersection() {
+            translate([-20, -7, 0]) cube(size=[40, 40, 100]);
+            difference() {
+                cylinder(h=M_POMMEL_FRONT - M_POMMEL_BACK, d=D_POMMEL);
+                cylinder(h=M_POMMEL_FRONT - M_POMMEL_BACK, d=D_SPKR_METAL);
+                translate([0, 0, 1]) cylinder(h=H_SPKR_PLASTIC, d=D_SPKR_PLASTIC);
+            }
+        }      
+    }
+
 }
 
 M_MC_START = M_SPKR_RING + H_BUTTRESS;
@@ -172,6 +174,7 @@ if (DRAW_BACK) {
     difference() {
          union() {
             transitionRing();
+            speakerBass28();
             
             intersection() 
             {
@@ -243,10 +246,11 @@ if (DRAW_BACK) {
         // Take out a chunk for access to the USB port.
         X_USB = 14; // 10 to tight fit
         Y_USB = 9;
-        Z_USB = 20;
+        Z_USB = 30;
         translate([-X_USB/2, -R_AFT, M_POMMEL_BACK]) cube(size=[X_USB, Y_USB, Z_USB]);
     }
 }
+
 
 *color("yellow") heatSink();
 *color("yellow") speaker();

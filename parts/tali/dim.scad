@@ -8,8 +8,7 @@ M_PORT_CENTER       = M_TRANSITION + 14;
 M_SPKR_RING			= 15.5;		// Front of the speaker ring.
 M_RAIL_START        = 12;
 M_POMMEL_FRONT      = 10;       // Where the pommel becomes aft
-M_POMMEL_BACK       = 9.0;      // Back of the pommel, leaving (in this case)
-                                // enough space for the various pommels.
+M_POMMEL_BACK       = -5.0;
 M_0                 = 0;
 
 H_BUTTRESS			= 4;
@@ -46,14 +45,15 @@ D_SPKR_PLASTIC 		= 28 + 1;
 SPKR_OFFSET         = 1.5;    // distance from FRONT of pommel to speaker
 D_SPKR_INNER 		= D_SPKR_PLASTIC - 1.5;
 
-D_POMMEL			= 31.0; // 31.5 is correct, but snug
+// FIXME
+D_POMMEL			= 29.0;
 R_POMMEL 			= D_POMMEL / 2;
 D_AFT_RING			= 33.5;
 
-RAIL_ANGLE_0		=  25; //38;
-RAIL_ANGLE_1		= -18; //-38;
-RAIL_ANGLE_2		=  180 - RAIL_ANGLE_0;
-RAIL_ANGLE_3		= -180 - RAIL_ANGLE_1;
+H_SPKR_METAL        = 8 + 0.5;
+D_SPKR_METAL        = 23.6; 
+H_SPKR_PLASTIC      = 2.4;
+D_SPKR_PLASTIC      = 28;
 
 X_RAIL				= 3;
 Y_RAIL				= 4;
