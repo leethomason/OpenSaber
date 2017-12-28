@@ -11,7 +11,8 @@ DRAW_BAT   = false;
 
 INCHES_TO_MM = 25.4;
 MM_TO_INCHES = 1 / 25.4;
-$fn = 90;
+$fn = 16;
+//$fn = 100;
 EPS = 0.01;
 EPS2 = EPS * 2;
 
@@ -110,14 +111,14 @@ module upperBars()
 module speakerBass28() 
 {
     translate([0, 0, M_POMMEL_BACK]) {
-        intersection() {
-            translate([-20, -7, 0]) cube(size=[40, 40, 100]);
-            difference() {
-                cylinder(h=M_POMMEL_FRONT - M_POMMEL_BACK, d=D_POMMEL);
-                cylinder(h=M_POMMEL_FRONT - M_POMMEL_BACK, d=D_SPKR_METAL);
-                translate([0, 0, 1]) cylinder(h=H_SPKR_PLASTIC, d=D_SPKR_PLASTIC);
-            }
-        }      
+        difference() {
+            cylinder(h=M_POMMEL_FRONT - M_POMMEL_BACK+EPS, d=D_POMMEL);
+            cylinder(h=M_POMMEL_FRONT - M_POMMEL_BACK+EPS2, d=D_SPKR_METAL);
+            translate([0, 0, 1]) cylinder(h=H_SPKR_PLASTIC, d=D_SPKR_PLASTIC);
+
+            translate([-20, -20, 0]) cube(size=[40, 13, 100]);
+            translate([-4, -0, 0]) cube(size=[8, 40, 100]);
+        }
     }
 
 }
