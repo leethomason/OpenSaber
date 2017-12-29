@@ -15,7 +15,7 @@ module battery(cutAbove=true)
 
 	    if (cutAbove == true) {
 		    translate([-BATTERY_CUTOUT/2, 0, 0]) {
-		        cube(size=[BATTERY_CUTOUT, 15, H_BATTERY]);
+		        cube(size=[BATTERY_CUTOUT, 25, H_BATTERY]);
 		    }
 	    }
 	}
@@ -67,6 +67,10 @@ module buttress(	leftWiring=true,
 		if (circle > 0) {
 			translate([0, BATTERY_Y, 0]) {
 		    	tube(h, D_BATTERY/2+circle, D_BATTERY/2 + 20);
+		    }
+		    DX = D_BATTERY - 1;
+			translate([-DX/2, BATTERY_Y, 0]) {
+		    	cube(size=[DX, 40, h]);
 		    }
 		}
 

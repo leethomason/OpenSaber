@@ -7,11 +7,11 @@ use <buttress.scad>
 use <beam.scad>
 
 DRAW_BACK  = true;
-DRAW_BAT   = false;
+DRAW_BAT   = true;
 
 INCHES_TO_MM = 25.4;
 MM_TO_INCHES = 1 / 25.4;
-$fn = 16;
+$fn = 20;
 //$fn = 100;
 EPS = 0.01;
 EPS2 = EPS * 2;
@@ -147,22 +147,24 @@ if (DRAW_BAT) {
                 for(i=[0:1]) {
                     translate([0, 0, M_BUTTRESS_4 + H_BUTTRESS*(2 + 2*i)]) {
                         intersection() {
-                            //translate([-10, 1, 0]) cube(size=[20, 100, H_BUTTRESS]);
                             translate([-13, 1, 0]) cube(size=[26, 100, H_BUTTRESS]);
                             difference() {
                                 cylinder(h=H_BUTTRESS, d=D_AFT);
                                 cylinder(h=H_BUTTRESS, d=D_AFT-10);
-                                translate([-5, 0, 0]) cube(size=[10, 100, H_BUTTRESS]);
+                                translate([-5, 0, 0]) 
+                                    cube(size=[10, 100, H_BUTTRESS]);
                             }                        
                         }
                     }
                 }
             }
         }
-        translate([-20, -10, M_BUTTRESS_4-EPS]) cube(size=[40, 11, H_BUTTRESS+EPS2]);
+        translate([-20, -10, M_BUTTRESS_4-EPS]) 
+            cube(size=[40, 11, H_BUTTRESS+EPS2]);
 
         // Flatten the bottom for printing.
-        translate([-20, -D_AFT_RING/2, M_WAY_BACK]) cube(size=[40, FLATTEN, H_FAR]);
+        translate([-20, -D_AFT_RING/2, M_WAY_BACK]) 
+            cube(size=[40, FLATTEN, H_FAR]);
 
         OFFSET = 20;
         translate([-W_MC/2, Y_MC - OFFSET, M_SPKR_RING + H_BUTTRESS]) {
@@ -259,7 +261,7 @@ if (DRAW_BACK) {
 *color("yellow") translate([0, 0, M_SPKR_RING]) battery(false);
 *color("green") translate([0, 0, M_SPKR_RING]) circuitry();
 
-color("orange") translate([0, 0, M_TRANSITION - T_TRANSITION_RING - 24]) {
+*color("orange") translate([0, 0, M_TRANSITION - T_TRANSITION_RING - 24]) {
     translate([0, 9, 0]) {
         // 7 segment FIXME
         //    10mm wide
