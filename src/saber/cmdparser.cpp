@@ -374,8 +374,11 @@ bool CMDParser::processCMD()
         Serial.println(space);
         printLead(ID);
         Serial.println(F(ID_STR));
-        Serial.print("# setup() ");
-        Serial.println(database->numSetupCalls());
+
+        #define STRINGIZE_(x) #x
+        #define STRINGIZE(x) STRINGIZE_(x)
+        static const char* BUILD_ID = "SABER_MODEL: " STRINGIZE(SABER_MODEL) " SABER_SUB_MODEL: " STRINGIZE(SABER_SUB_MODEL) " PCB:" STRINGIZE(PCB_VERSION) " SERIAL_DEBUG: " STRINGIZE(SERIAL_DEBUG) " " __DATE__;
+        Serial.println(BUILD_ID);
         
         delay(DELAY);
         printLead(PAL);
