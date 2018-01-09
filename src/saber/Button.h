@@ -42,7 +42,7 @@ public:
     Button(uint8_t buttonPin=255, uint8_t resistor = PULL_DOWN, uint16_t debounceDuration = DEFAULT_BOUNCE_DURATION);
 
     void init(uint8_t buttonPin, uint8_t resistor = PULL_DOWN, uint16_t debounceDuration = DEFAULT_BOUNCE_DURATION);
-    const int pin() const {
+    int pin() const {
         return m_myPin;
     }
 
@@ -65,7 +65,7 @@ public:
     }
 
     void setHoldThreshold(uint32_t holdTime);
-    const uint16_t holdThreshold() const {
+    uint16_t holdThreshold() const {
         return m_holdEventThreshold;
     }
 
@@ -75,7 +75,7 @@ public:
     void setHoldRepeats(bool holdRepeats) { m_holdRepeats = holdRepeats; }
 
     /// Return true of the hold event repeats.
-    const bool holdRepeats() const {
+    bool holdRepeats() const {
         return m_holdRepeats;
     }
 
