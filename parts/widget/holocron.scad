@@ -6,10 +6,13 @@ PIN_X = 45.72;
 PIN_Y = 17.78;
 POST_BASE_D = 5;
 POST_PIN_D  = 2.4;
-POST_Z0 = STONE;
+POST_Z0 = STONE/2 + 6;
 POST_Z1 = POST_Z0 + 2;
 PLATE_X = 10;
 PLATE_Y = 60;
+BAT_X = 37;
+BAT_Y = 30;
+BAT_Z =  4.5;
 
 module cubeBounds()
 {
@@ -103,4 +106,19 @@ translate([0, -PLATE_Y/2 + PLATE_X/2, 0]) {
 
 translate([0, PLATE_Y/2 - PLATE_X/2, 0]) {
     pillar();
+}
+
+difference() {
+    union() {
+        translate([-BAT_X/2 - STONE/2, -BAT_Y/2 - STONE/2, 0])
+            cube(size=[STONE, STONE, STONE/2 + BAT_Z]);
+        translate([BAT_X/2 - STONE/2, -BAT_Y/2 - STONE/2, 0])
+            cube(size=[STONE, STONE, STONE/2 + BAT_Z]);
+        translate([-BAT_X/2 - STONE/2, BAT_Y/2 - STONE/2, 0])
+            cube(size=[STONE, STONE, STONE/2 + BAT_Z]);
+        translate([BAT_X/2 - STONE/2, BAT_Y/2 - STONE/2, 0])
+            cube(size=[STONE, STONE, STONE/2 + BAT_Z]);
+    }
+    translate([-BAT_X/2, -BAT_Y/2, STONE/2]) 
+        cube(size=[BAT_X, BAT_Y, BAT_Z]);
 }
