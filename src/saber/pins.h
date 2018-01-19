@@ -41,16 +41,19 @@ SOFTWARE.
 #define SABER_MODEL_AQUATIC			9
 #define SABER_MODEL_SHOCK2		   10	// Shield v3, Teensy 3.5, Dotstar, Display (woh)
 #define SABER_MODEL_TALI		   11	//
+#define SABER_MODEL_AHSOKA		   12
 
 
 #define SABER_SUB_MODEL_NONE		0
 #define SABER_SUB_MODEL_LUNA		1
 #define SABER_SUB_MODEL_CELESTIA	2
+#define SABER_SUB_MODEL_SHOTO       3
+#define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
 #define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_TALI
-#define SABER_SUB_MODEL				
+#define SABER_MODEL 				SABER_MODEL_AHSOKA
+#define SABER_SUB_MODEL				SABER_SUB_MODEL_SHOTO
 // ----------------------------------
 
 
@@ -59,6 +62,7 @@ SOFTWARE.
 
 #define LED_TYPE_RGB				1
 #define LED_TYPE_BBG				2
+#define LED_TYPE_WWG				3
 
 #define SABER_SOUND_SD 				1
 #define SABER_SOUND_FLASH 			2
@@ -446,6 +450,55 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int32_t BLUE_VF  = 3100;
 	static const int32_t BLUE_I   = 380;
 	static const int32_t BLUE_R   = 1800;
+
+	static const int VOLUME_1 = 15;
+	static const int VOLUME_2 = 50;
+	static const int VOLUME_3 = 120;
+	static const int VOLUME_4 = 200;
+
+#elif (SABER_MODEL == SABER_MODEL_AHSOKA)
+
+	#define PCB_VERSION 			PCB_SHIELD_3
+	#define LED_TOPOLOGY 			LED_TOPOLOGY_RESISTOR
+	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
+	#define SABER_SOUND_ON 			SABER_SOUND_SD
+	#define SABER_BOOT_SOUND
+	#define LED_TYPE 				LED_TYPE_WWG
+
+	#if SABER_SUB_MODEL == SABER_SUB_MODEL_SHOTO
+		#define ID_STR "Ahsoka Shoto Cree XPE2 WWG"
+		#define PIN_SDCARD_CS    10
+	#elif SABER_SUB_MODEL == SABER_SUB_MODEL_STANDARD
+		#define ID_STR "Ahsoka Standard Cree XPE2 WWG"
+		#define SABER_INTEGRATED_SD
+	#else
+	  	#error sub model not defined
+	#endif
+	#define SABER_SOUND_SHUTDOWN
+	#define SABER_VOLTMETER
+	#define SABER_AUDIO_EXTERNAL_REF
+	#define SABER_AUDIO_UI
+
+	#undef SABER_BUTTON
+	#define SABER_BUTTON Button::INTERNAL_PULLUP
+
+	static const int32_t UVOLT_MULT = 6691;		
+
+	// Thermal paste heat sinking.
+	// White
+	static const int32_t RED_VF   = 2950;
+	static const int32_t RED_I    = 400;
+	static const int32_t RED_R    = 2200;
+
+	// Green
+	static const int32_t GREEN_VF = 3400;
+	static const int32_t GREEN_I  = 400;
+	static const int32_t GREEN_R  = 1000;
+
+	// White
+	static const int32_t BLUE_VF   = 2950;
+	static const int32_t BLUE_I    = 400;
+	static const int32_t BLUE_R    = 2200;
 
 	static const int VOLUME_1 = 15;
 	static const int VOLUME_2 = 50;

@@ -129,6 +129,10 @@ void setupSD()
             Log.p("Connecting to built in SD...").eol();
             soundOk = SD.begin(BUILTIN_SDCARD);
         #else
+            // WARNING: if using LIS3DH ond SPI and and SD,
+            // may need to comment out:
+            // #define USE_TEENSY3_SPI
+            // in Sd2Card2.cpp
             Log.p("Connecting to SPI SD...").eol();
             soundOk = SD.begin(PIN_SDCARD_CS);
         #endif
@@ -161,6 +165,7 @@ void setup() {
     // Database is the "source of truth".
     // Set it up first.
     saberDB.readData();
+    SPI.begin();
     setupSD();
     Log.p("setup()").eol(); 
 
@@ -249,9 +254,14 @@ void setup() {
         dotstarUI.SetBrightness(SABER_UI_BRIGHTNESS);
     #endif
 
-
     Log.event("[saber start]");
     lastLoopTime = millis();    // so we don't get a big jump on the first loop()
+
+    #ifdef SABER_BOOT_SOUND
+    #ifdef SABER_AUDIO_UI
+    SFX::instance()->playUISound("ready");
+    #endif
+    #endif
 }
 
 uint32_t calcReflashTime() {

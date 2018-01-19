@@ -149,6 +149,13 @@ int32_t Blade::power() const {
             // routines later tend to just use the high bit.
             rgb.g = (uint8_t) clamp((uint32_t(raw.r) + 1)/2 + (uint32_t(raw.g) + 1)/2, uint32_t(0), uint32_t(255));
             rgb.b = (raw.b + 1) / 2;
+        #elif (LED_TYPE == LED_TYPE_WWG)
+            uint32_t r = uint32_t(raw.r / 2) + uint32_t(raw.b /2 );
+            uint32_t g = uint32_t(raw.r / 2) + uint32_t(raw.b /2 ) + uint32_t(raw.g);
+            uint32_t b = uint32_t(raw.r / 2) + uint32_t(raw.b /2 );
+            rgb.r = clamp(r, uint32_t(0), uint32_t(255));
+            rgb.g = clamp(g, uint32_t(0), uint32_t(255));
+            rgb.b = clamp(b, uint32_t(0), uint32_t(255));
         #else
             #error LED_TYPE not defined.
         #endif

@@ -57,6 +57,29 @@ bool SaberDB::writeDefaults()
             "JAINA",
             "JAINA",
         };
+    #elif (defined(LED_TYPE) && (LED_TYPE == LED_TYPE_WWG))
+        static Palette defPalette[NUM_PALETTES] = {
+            { 0x220022,  0x222200,    0 }, 
+            { 0x440044,  0x444400,    0 }, 
+            { 0x660066,  0x666600,    0 }, 
+            { 0x880088,  0x888800,    0 }, 
+
+            { 0xaa00aa,  0xaaaa00,    0 }, 
+            { 0xcc00cc,  0xcccc00,    0 }, 
+            { 0xee00ee,  0xeeee00,    0 }, 
+            { 0xff00ff,  0xffff00,    0 }, 
+        };
+
+        static const char* defNames[NUM_PALETTES] = {
+            "JAINA",
+            "JAINA",
+            "JAINA",
+            "JAINA",
+            "JAINA",
+            "JAINA",
+            "JAINA",
+            "JAINA",
+        };        
     #elif (SABER_MODEL == SABER_MODEL_SISTER)
         #if SABER_SUB_MODEL == SABER_SUB_MODEL_CELESTIA
             static Palette defPalette[NUM_PALETTES] = {
@@ -93,9 +116,7 @@ bool SaberDB::writeDefaults()
             "JAINA",
             "JAINA",
             "ROGUE"
-        };
-
-
+        };        
     #else
         // STANDARD
         static Palette defPalette[NUM_PALETTES] = {

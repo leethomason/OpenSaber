@@ -44,15 +44,21 @@ void Accelerometer::begin()
         }
     #elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH_SPI
         Log.p("LIS3DH Accelerometer starting: SPI mode").eol();
-        if (!localAccel.begin(0)) {
+        bool success = false;
+        for(int i=0; i<5; ++i) {
+            // Buggy buggy buggy SPI code.
+            delay(20);
+            if (localAccel.begin(0)) {
+                Log.p("Accelerometer open on attempt: ").p(i).eol();
+                success = true;
+                break;
+            }   
+        }
+
+        if (!success) {
             Log.p("Accelerometer ERROR.").eol();
         }
         else {
-            /*  FIXME
-                On failure to set the range, the range
-                should be recorded and corrected for.
-                If that ever happens. Very intermittent bug.
-            */
             bool success = false;
             int n=0;
             for(; n<4; n++) {

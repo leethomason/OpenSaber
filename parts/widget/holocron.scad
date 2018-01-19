@@ -122,3 +122,14 @@ difference() {
     translate([-BAT_X/2, -BAT_Y/2, STONE/2]) 
         cube(size=[BAT_X, BAT_Y, BAT_Z]);
 }
+
+
+SW_T = 2;
+SW_X = 4.2;
+SW_Y = 12;
+SW_Z = 6;
+
+translate([PIN_X/2 + POST_PIN_D, -SW_Y/2 - SW_T, 0]) difference() {
+    cube(size=[SW_X + SW_T*2, SW_Y + SW_T*2, SW_Z]);    
+    translate([SW_T, SW_T, 0]) cube(size=[SW_X, SW_Y, 100]);
+}
