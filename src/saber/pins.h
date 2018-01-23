@@ -51,9 +51,9 @@ SOFTWARE.
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
+#define SERIAL_DEBUG 				1
 #define SABER_MODEL 				SABER_MODEL_AHSOKA
-#define SABER_SUB_MODEL				SABER_SUB_MODEL_SHOTO
+#define SABER_SUB_MODEL				SABER_SUB_MODEL_STANDARD
 // ----------------------------------
 
 
@@ -484,7 +484,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 	static const int32_t UVOLT_MULT = 6691;		
 
-	// Thermal paste heat sinking.
+	// Thermal paste heat sinking to the case.
 	// White
 	static const int32_t RED_VF   = 2950;
 	static const int32_t RED_I    = 400;
