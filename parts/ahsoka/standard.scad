@@ -105,8 +105,8 @@ difference() {
     translate([4, 3, -EPS]) rotate([0, 0, 2]) mc(true);
     translate([BAT_DX, 19, 0]) rotate([0, 0, 6]) battery(true);
     
-    for(x=[0:12]) {
-        rotate([0, 0, 2]) translate([18 + x*4, 15, -EPS]) cube(size=[2, 10, 5]);
+    for(x=[0:14]) {
+        rotate([0, 0, 2]) translate([14 + x*4, 15, -EPS]) cube(size=[2, 10, 5]);
     }
 }
 
