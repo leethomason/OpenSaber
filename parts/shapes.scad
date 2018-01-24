@@ -3,31 +3,13 @@ EPSILON = 0.1;
 PIN	    = 2.54;
 
 
-module tube(_h, _rInner, _rOuter) {
+module tube(h, inner, outer) {
 	difference() {
-		cylinder(h=_h, r=_rOuter, $fn=FACES);
+		cylinder(h=h, r=outer, $fn=FACES);
 		translate([0,0,-EPSILON]) {
-			cylinder(h=_h + EPSILON*2, r=_rInner, $fn=FACES);
+			cylinder(h=h + EPSILON*2, r=inner, $fn=FACES);
 		}
 	}
-}
-
-module shelf(_r0, _h, _r1) {
-	rotate_extrude($fn=FACES) {
-		polygon([[_r0, 0], [_r1, _h], [_r0, _h]]);
-	}
-}
-
-
-module pinsAtTube(r, h, nX, nY, longY)
-{
-	OFFSET = sqrt(r * r - PIN * PIN * nX * nX / 4);
-
-	Y = longY ? 40 : PIN * nY;
-
-    translate([-nX * PIN / 2, OFFSET - PIN * nY, 0]) {
-        cube([nX * PIN, Y, h]);
-    }	
 }
 
 module roundedRect(h, d)
@@ -57,3 +39,58 @@ module cubePair(x, size)
 	mirror([1,0,0]) translate([x, 0, 0])
 		cube(size=size);
 }
+
+module polygonXY(h, points)
+{
+    linear_extrude(height = h) {
+        polygon(points=points);
+    }  
+}
+
+module polygonYZ(h, points)
+{
+    multmatrix(m = [ [0, 0, 1, 0],
+    				 [1, 0, 0, 0],
+    				 [0, 1, 0, 0],
+    				 [0, 0, 0, 1]
+       			   ])
+    linear_extrude(height = h) {
+        polygon(points=points);
+    }  	
+}
+
+module polygonXZ(h, points)
+{
+    multmatrix(m = [ [1, 0, 0, 0],
+    				 [0, 0, 1, 0],
+    				 [0, 1, 0, 0],
+    				 [0, 0, 0, 1]
+       			   ])
+    linear_extrude(height = h) {
+        polygon(points=points);
+    }  	
+}
+
+
+////////////////
+// DEPRECATED //
+////////////////
+
+module shelf(_r0, _h, _r1) {
+	rotate_extrude($fn=FACES) {
+		polygon([[_r0, 0], [_r1, _h], [_r0, _h]]);
+	}
+}
+
+
+module pinsAtTube(r, h, nX, nY, longY)
+{
+	OFFSET = sqrt(r * r - PIN * PIN * nX * nX / 4);
+
+	Y = longY ? 40 : PIN * nY;
+
+    translate([-nX * PIN / 2, OFFSET - PIN * nY, 0]) {
+        cube([nX * PIN, Y, h]);
+    }	
+}
+
