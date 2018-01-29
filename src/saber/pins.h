@@ -42,6 +42,7 @@ SOFTWARE.
 #define SABER_MODEL_SHOCK2		   10	// Shield v3, Teensy 3.5, Dotstar, Display (woh)
 #define SABER_MODEL_TALI		   11	//
 #define SABER_MODEL_AHSOKA		   12
+#define SABER_MODEL_GREEN_SKY	   13
 
 
 #define SABER_SUB_MODEL_NONE		0
@@ -51,8 +52,8 @@ SOFTWARE.
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_AHSOKA
+#define SERIAL_DEBUG 				1
+#define SABER_MODEL 				SABER_MODEL_GREEN_SKY
 #define SABER_SUB_MODEL				SABER_SUB_MODEL_STANDARD
 // ----------------------------------
 
@@ -505,6 +506,46 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int VOLUME_3 = 120;
 	static const int VOLUME_4 = 200;
 
+#elif (SABER_MODEL == SABER_MODEL_GREEN_SKY)
+
+	#define PCB_VERSION 			PCB_SHIELD_4
+	#define LED_TOPOLOGY 			LED_TOPOLOGY_RESISTOR
+	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
+	#define SABER_SOUND_ON 			SABER_SOUND_SD
+	#define ID_STR "Green Skywalker Luxeon GGC"
+	#define SABER_INTEGRATED_SD
+	
+	#define SABER_SOUND_SHUTDOWN
+	#define SABER_VOLTMETER
+	#define SABER_AUDIO_EXTERNAL_REF
+	#define SABER_AUDIO_UI
+
+	#undef SABER_BUTTON
+	#define SABER_BUTTON Button::INTERNAL_PULLUP
+
+	static const int32_t UVOLT_MULT = 6691;		
+
+	// Thermal paste heat sinking to the case.
+	// White
+	static const int32_t RED_VF   = 2950;
+	static const int32_t RED_I    = 400;
+	static const int32_t RED_R    = 2200;
+
+	// Green
+	static const int32_t GREEN_VF = 3400;
+	static const int32_t GREEN_I  = 400;
+	static const int32_t GREEN_R  = 1000;
+
+	// White
+	static const int32_t BLUE_VF   = 2950;
+	static const int32_t BLUE_I    = 400;
+	static const int32_t BLUE_R    = 2200;
+
+	static const int VOLUME_1 = 15;
+	static const int VOLUME_2 = 50;
+	static const int VOLUME_3 = 120;
+	static const int VOLUME_4 = 200;
+
 #endif
 
 #if (PCB_VERSION == PCB_VERSION_1)	
@@ -685,6 +726,36 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_EMITTER_BLUE  21
 	#define PIN_EMITTER_GREEN 22
 	#define PIN_EMITTER_RED   23
+
+	// ALIAS
+	#define PIN_OLED_CS		  PIN_SPI_CS
+	#define PIN_OLED_RESET 	  PIN_SPI_CE
+	#define PIN_OLED_DC    	  PIN_SPI_DC
+	#define PIN_OLED_CLOCK    PIN_SPI_CLOCK
+
+	#define ACCEL_BLADE_DIRECTION 0	// x is in the blade direction
+#elif (PCB_VERSION == PCB_SHIELD_4)
+	#define PIN_RX1           0
+	#define PIN_TX1           1
+	#define PIN_AMP_EN        2 
+	#define PIN_SWITCH_A      3 
+	#define PIN_SWITCH_B	  4 
+	#define PIN_LED_B		  5	// PWM
+	#define PIN_LED_A		  6 // PWM
+	#define PIN_DOTSTAR_EN    7 
+	#define PIN_SPI_DC		  8
+	#define PIN_SPI_CE		  9
+	#define PIN_SPI_CS		  10
+	#define PIN_SABER_MOSI    11
+	#define PIN_SABER_MISO    12
+	#define PIN_SPI_CLOCK	  13
+
+	#define PIN_VMETER        23
+	#define PIN_ACCEL_EN      24
+
+	#define PIN_EMITTER_RED   36
+	#define PIN_EMITTER_GREEN 37
+	#define PIN_EMITTER_BLUE  38
 
 	// ALIAS
 	#define PIN_OLED_CS		  PIN_SPI_CS
