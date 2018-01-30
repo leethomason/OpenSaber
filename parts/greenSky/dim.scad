@@ -24,6 +24,8 @@ Y_SWITCH           = 13.5;
 X_CRYSTAL          = 11.5;
 Y_CRYSTAL          = 10.0;
 Z_CRYSTAL          = 30.0;
+D_CRYSTAL_BAFFLE   = 16;
+H_CRYSTAL_BAFFLE   = 2;
 
 D_PORT             = 7.9;
 H_PORT             = 16;

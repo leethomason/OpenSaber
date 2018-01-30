@@ -41,15 +41,17 @@ module mc(cutoutLow=false)
 
 module crystal()
 {
+    translate([0, DY_CRYSTAL, 0])
     color("pink") scale([1.0, Y_CRYSTAL/X_CRYSTAL, 1.0]) {
         cylinder(d=X_CRYSTAL, h=Z_CRYSTAL);
     }
 }
 
-module port()
+module port(extend=false)
 {
+    H = extend ? 30 : 21;
     rotate([-90, 0, 0]) {
-        cylinder(h=21, d=D_PORT);
+        cylinder(h=H, d=D_PORT);
         cylinder(h=15, d=11.3);
     }
 }
@@ -95,17 +97,24 @@ module baffle(battery=true, mc=true, useRods=true, bridge=true, h=H_BUTTRESS)
     }
 }
 
+module cBaffle() {
+    difference() {
+        translate([0, DY_CRYSTAL, 0])
+            cylinder(h=H_CRYSTAL_BAFFLE, d=D_CRYSTAL_BAFFLE);
+        crystal();
+        translate([0, DY_CRYSTAL, -EPS]) rotate([0, 0, -135])
+            cube(size=[20, 20, 20]);
+    }
+}
+
 // Parts
 translate([0, 0, M_POMMEL]) {
     translate([0, D_INNER/2 - D_BATTERY/2, 0]) battery();
     translate([0, DY_MC, 0]) mc();
 }
-translate([0, 0, M_SWITCH_CENTER]) {
-    switch();
-}
-
-translate([0, DY_CRYSTAL, M_CRYSTAL]) crystal();
-translate([0, -5.5, M_PORT_CENTER]) port();
+translate([0, 0, M_SWITCH_CENTER]) switch();
+translate([0, 0, M_CRYSTAL]) crystal();
+//translate([0, -5.5, M_PORT_CENTER]) port(extend=true);
 
 
 // Case
@@ -113,5 +122,28 @@ translate([0, 0, M_POMMEL]) baffle(h=5);
 
 NBAF = 8;
 for(x=[0:NBAF-1])
-     translate([0, 0, M_POMMEL + H_BUTTRESS*2 + H_BUTTRESS*2*x]) 
+     translate([0, 0, M_POMMEL + H_BUTTRESS*2*(1 + x)]) 
         baffle(bridge = x<NBAF-1);
+
+M_END_BAFFLE = M_POMMEL + H_BUTTRESS*2*(1 + NBAF);
+
+// Power port
+difference() {
+    DCB = M_CRYSTAL - M_END_BAFFLE;
+    translate([0, 0, M_END_BAFFLE]) union() {
+        tube(h=DCB, inner=(D_INNER-2)/2, outer=D_INNER/2);
+        intersection() {
+            cylinder(h=DCB, d=D_INNER);
+            translate([-20, D_INNER/2 - 6, 0])
+                cube(size=[40, 10, DCB]);
+        }        
+    }
+    translate([0, -5.5, M_PORT_CENTER]) port(true);
+}
+
+// crystal
+for(z=[0:7])
+    translate([0, 0, M_CRYSTAL + z*2*H_CRYSTAL_BAFFLE])
+        cBaffle();
+
+
