@@ -57,13 +57,10 @@ SOFTWARE.
 #define SABER_SUB_MODEL				SABER_SUB_MODEL_STANDARD
 // ----------------------------------
 
-
-#define LED_TOPOLOGY_RESISTOR		1
-#define LED_TOPOLOGY_DRIVER			2
-
-#define LED_TYPE_RGB				1
-#define LED_TYPE_BBG				2
-#define LED_TYPE_WWG				3
+#define LED_TYPE_RGB				1   // red-green-blue
+#define LED_TYPE_BBG				2   // blue-blue-green
+#define LED_TYPE_WWG				3   // white-white-green
+#define LED_TYPE_GGC				4	// green-green-cyan
 
 #define SABER_SOUND_SD 				1
 #define SABER_SOUND_FLASH 			2
@@ -94,7 +91,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PCB_VERSION 				PCB_VERSION_1
 	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_LIS3DH
 	#define SABER_SOUND_ON 				SABER_SOUND_SD
-	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
 	#define SABER_TWO_BUTTON
 	#define SABER_LOCK
@@ -127,7 +123,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_UI_START				0
 	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
 	#define SABER_SOUND_ON 				SABER_SOUND_SD
-	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
 	#define SABER_UI_BRIGHTNESS			4
 
@@ -156,14 +151,12 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define LED_TOPOLOGY 				LED_TOPOLOGY_RESISTOR
 	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
 	#define SABER_SOUND_ON 				SABER_SOUND_SD
-	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
 	#define SABER_NUM_LEDS 			1
 	#define SABER_CRYSTAL			80
 	#define SABER_CRYSTAL_LOW		24
 	#define SABER_DISPLAY			SABER_DISPLAY_128_32
 	#define SABER_LOWPASS_FILTER	1
-	#define SABER_AUDIO_EXTERNAL_REF
 
 	// FIXME TUNE ALL
 	static const int32_t UVOLT_MULT = 6680;
@@ -191,7 +184,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define LED_TOPOLOGY 				LED_TOPOLOGY_RESISTOR
 	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
 	#define SABER_SOUND_ON 				SABER_SOUND_SD
-	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
 	#define SABER_NUM_LEDS 			5
 	#define SABER_UI_START  		1
@@ -225,7 +217,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define LED_TOPOLOGY 				LED_TOPOLOGY_RESISTOR
 	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
 	#define SABER_SOUND_ON 				SABER_SOUND_SD
-	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
 
 	static const int32_t UVOLT_MULT = 6750;
@@ -253,7 +244,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define LED_TOPOLOGY 				LED_TOPOLOGY_RESISTOR
 	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
 	#define SABER_SOUND_ON 				SABER_SOUND_SD
-	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
 	#define LED_TYPE 					LED_TYPE_BBG
@@ -289,7 +279,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define LED_TOPOLOGY 				LED_TOPOLOGY_RESISTOR
 	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_LIS3DH_SPI
 	#define SABER_SOUND_ON 				SABER_SOUND_SD
-	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
 	#define SABER_SISTERS
@@ -329,7 +318,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define LED_TOPOLOGY 			LED_TOPOLOGY_RESISTOR
 	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
 	#define SABER_SOUND_ON 			SABER_SOUND_SD
-	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
 //	#define SABER_AUDIO_UI
@@ -373,15 +361,12 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const uint8_t CATHODE_ROW_7 	= 37;
 
 #elif (SABER_MODEL == SABER_MODEL_SHOCK2)
-
 	#define PCB_VERSION 			PCB_SHIELD_3
 	#define LED_TOPOLOGY 			LED_TOPOLOGY_RESISTOR
 	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
 	#define SABER_SOUND_ON 			SABER_SOUND_SD
-	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
-	#define SABER_AUDIO_EXTERNAL_REF
 	#define SABER_DISPLAY			SABER_DISPLAY_128_32
 	#define SABER_NUM_LEDS 			1
 	#define SABER_CRYSTAL			80
@@ -411,15 +396,12 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int VOLUME_4 = 200;
 
 #elif (SABER_MODEL == SABER_MODEL_TALI)
-
 	#define PCB_VERSION 			PCB_SHIELD_3
 	#define LED_TOPOLOGY 			LED_TOPOLOGY_RESISTOR
 	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
 	#define SABER_SOUND_ON 			SABER_SOUND_SD
-	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
-	#define SABER_AUDIO_EXTERNAL_REF
 	#define SABER_AUDIO_UI
 	#define SABER_NUM_LEDS 			4
 	#define SABER_UI_START  		0
@@ -448,7 +430,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int VOLUME_4 = 200;
 
 #elif (SABER_MODEL == SABER_MODEL_AHSOKA)
-
 	#define PCB_VERSION 			PCB_SHIELD_3
 	#define LED_TOPOLOGY 			LED_TOPOLOGY_RESISTOR
 	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
@@ -465,9 +446,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#else
 	  	#error sub model not defined
 	#endif
-	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
-	#define SABER_AUDIO_EXTERNAL_REF
 	#define SABER_AUDIO_UI
 
 	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
@@ -496,7 +475,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int VOLUME_4 = 200;
 
 #elif (SABER_MODEL == SABER_MODEL_GREEN_SKY)
-
 	#define PCB_VERSION 			PCB_SHIELD_4
 	#define LED_TOPOLOGY 			LED_TOPOLOGY_RESISTOR
 	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
@@ -504,28 +482,28 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define ID_STR "Green Skywalker Luxeon GGC"
 	#define SABER_INTEGRATED_SD
 	
-	#define SABER_SOUND_SHUTDOWN
 	#define SABER_VOLTMETER
-	#define SABER_AUDIO_EXTERNAL_REF
 	#define SABER_AUDIO_UI
+	#define SABER_BOOT_SOUND
+	#define LED_TYPE 				LED_TYPE_GGC
 
 	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 
 	static const int32_t UVOLT_MULT = 6691;		
 
 	// Thermal paste heat sinking to the case.
-	// White
-	static const int32_t RED_VF   = 2950;
+	// Green
+	static const int32_t RED_VF   = 2900;
 	static const int32_t RED_I    = 400;
 	static const int32_t RED_R    = 2200;
 
 	// Green
-	static const int32_t GREEN_VF = 3400;
+	static const int32_t GREEN_VF = 2900;
 	static const int32_t GREEN_I  = 400;
-	static const int32_t GREEN_R  = 1000;
+	static const int32_t GREEN_R  = 2200;
 
-	// White
-	static const int32_t BLUE_VF   = 2950;
+	// Cyan
+	static const int32_t BLUE_VF   = 2900;
 	static const int32_t BLUE_I    = 400;
 	static const int32_t BLUE_R    = 2200;
 
@@ -743,9 +721,9 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_VMETER        23
 	#define PIN_ACCEL_EN      24
 
-	#define PIN_EMITTER_RED   36
+	#define PIN_EMITTER_RED   38
 	#define PIN_EMITTER_GREEN 37
-	#define PIN_EMITTER_BLUE  38
+	#define PIN_EMITTER_BLUE  36
 
 	// ALIAS
 	#define PIN_OLED_CS		  PIN_SPI_CS

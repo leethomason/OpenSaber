@@ -1,6 +1,7 @@
 include <dim.scad>
 use <../shapes.scad>
 
+$fn = 40;
 EPS = 0.01;
 EPS2 = EPS * 2;
 
@@ -10,17 +11,17 @@ module battery() {
     }
 }
 
-module switch()
+module switch(extend=false)
 {
     D_OUTER_TOP = 13.8;
     D_INNER_TOP = 11.0;
     H_TOP       =  1.5;
-    H_BODY      = 13;   // approx. connections below.
+    H_BODY      = 18;   // approx. connections below.
 
     color("yellow") {
         rotate([-90, 0, 0]) {
             translate([0, 0, Y_SWITCH]) {
-                cylinder(h=5, d=D_OUTER_TOP+1);
+                cylinder(h=H_TOP + (extend ? 5 : 0), d=D_OUTER_TOP+1);
                 translate([0, 0, -H_BODY]) {
                     cylinder(h = H_BODY, d=D_SWITCH);
                 }            
@@ -48,7 +49,8 @@ module crystal()
 module port()
 {
     rotate([-90, 0, 0]) {
-        cylinder(h=H_PORT, d=D_PORT);
+        cylinder(h=21, d=D_PORT);
+        cylinder(h=15, d=11.3);
     }
 }
 
@@ -68,33 +70,32 @@ module halfBridge()
     polygonYZ(1.5, [[0,0], [H_BUTTRESS*2, H_BUTTRESS*2], [H_BUTTRESS*2, 0]]);
 }
 
-module baffle(battery=true, mc=true, useRods=true, bridge=true)
+module baffle(battery=true, mc=true, useRods=true, bridge=true, h=H_BUTTRESS)
 {
     TROUGH_0 = 10;
-    TROUGH_1 = 12;
+    TROUGH_1 = 14;
     difference() {
-        cylinder(h=H_BUTTRESS, d=D_INNER);
+        cylinder(h=h, d=D_INNER);
         if (battery)
             translate([0, D_INNER/2 - D_BATTERY/2, -EPS]) battery();
         if (mc)
             translate([0, DY_MC, -EPS]) mc();
         translate([-TROUGH_0/2, 0, -EPS]) 
-            cube(size=[TROUGH_0, 30, H_BUTTRESS + EPS2]);
+            cube(size=[TROUGH_0, 30, h + EPS2]);
         translate([-TROUGH_1/2, -5, -EPS]) 
-            cube(size=[TROUGH_1, 5, H_BUTTRESS + EPS2]);
+            cube(size=[TROUGH_1, 5, h + EPS2]);
         translate([-X_MC/2 + 2, -20, -EPS])
-            cube(size=[X_MC - 4, 15, H_BUTTRESS + EPS2]);
+            cube(size=[X_MC - 4, 15, h + EPS2]);
         if (useRods)
             rods();
     }
     if (bridge) {
-        translate([X_MC/2+1, -11, H_BUTTRESS]) halfBridge();        
-        mirror([1, 0, 0]) translate([X_MC/2+1, -11, H_BUTTRESS]) halfBridge();
+        translate([X_MC/2+1, -11, h]) halfBridge();        
+        mirror([1, 0, 0]) translate([X_MC/2+1, -11, h]) halfBridge();
     }
 }
 
-/*
-cylinder(h=1, d=D_INNER);
+// Parts
 translate([0, 0, M_POMMEL]) {
     translate([0, D_INNER/2 - D_BATTERY/2, 0]) battery();
     translate([0, DY_MC, 0]) mc();
@@ -102,9 +103,15 @@ translate([0, 0, M_POMMEL]) {
 translate([0, 0, M_SWITCH_CENTER]) {
     switch();
 }
-translate([0, -8, 84]) crystal();
-translate([0, -1, 100]) port();
-*/
 
-for(x=[0:4])
-    translate([0, 0, H_BUTTRESS*2*x]) baffle(bridge=x<4);
+translate([0, DY_CRYSTAL, M_CRYSTAL]) crystal();
+translate([0, -5.5, M_PORT_CENTER]) port();
+
+
+// Case
+translate([0, 0, M_POMMEL]) baffle(h=5);
+
+NBAF = 8;
+for(x=[0:NBAF-1])
+     translate([0, 0, M_POMMEL + H_BUTTRESS*2 + H_BUTTRESS*2*x]) 
+        baffle(bridge = x<NBAF-1);

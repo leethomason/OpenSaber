@@ -92,7 +92,6 @@ void Blade::setVoltage(int milliVolts) {
     // leave f1000 = 1000. If a resistor is in use,
     // account for the voltage being above design voltage.
 
-#if (LED_TOPOLOGY == LED_TOPOLOGY_RESISTOR)
     static const int32_t f = 256;   // 256 is "use new value"
     static const int32_t m = 256 - f;
     int32_t vF[NCHANNELS]   = { RED_VF, GREEN_VF, BLUE_VF };
@@ -104,18 +103,14 @@ void Blade::setVoltage(int milliVolts) {
     for (int i = 0; i < NCHANNELS; ++i) {
         f1000[i] = amps[i] * res[i] / (vbat - vF[i]);
         f1000[i] = clamp(f1000[i], int32_t(0), int32_t(1000));
-  }
-#elif (LED_TOPOLOGY == LED_TOPOLOGY_DRIVER)
-    vbat = int32_t(milliVolts);  // used for reporting on the command line, but f1000 isn't change,
-    // so therefore the blade power doesn't change.
-#endif
+    }
     setRGB(color);
 }
 
 
 int32_t Blade::power() const {
     int32_t amps = 0;
-#if (LED_TOPOLOGY == LED_TOPOLOGY_RESISTOR)
+
     static const int32_t cV[NCHANNELS] = { RED_VF, GREEN_VF, BLUE_VF };
     static const int32_t cR[NCHANNELS] = { RED_R, GREEN_R, BLUE_R };
 
@@ -125,16 +120,6 @@ int32_t Blade::power() const {
         int32_t aChannel = int32_t(LED_RANGE) * cI * int32_t(color[i]) / int32_t(65025);
         amps += aChannel;
     }
-#elif (LED_TOPOLOGY == LED_TOPOLOGY_DRIVER)
-    static const int32_t cA[NCHANNELS] = { RED_I, GREEN_I, BLUE_I };
-
-    for (int i = 0; i < NCHANNELS; ++i) {
-        int32_t aChannel = cA[i] * int32_t(color[i]) / int32_t(255);
-        amps += aChannel;
-    }
-#else
-#error Topology not defined.
-#endif
     return amps;
 }
 
@@ -153,6 +138,13 @@ int32_t Blade::power() const {
             uint32_t r = uint32_t(raw.r / 2) + uint32_t(raw.b /2 );
             uint32_t g = uint32_t(raw.r / 2) + uint32_t(raw.b /2 ) + uint32_t(raw.g);
             uint32_t b = uint32_t(raw.r / 2) + uint32_t(raw.b /2 );
+            rgb.r = clamp(r, uint32_t(0), uint32_t(255));
+            rgb.g = clamp(g, uint32_t(0), uint32_t(255));
+            rgb.b = clamp(b, uint32_t(0), uint32_t(255));
+        #elif (LED_TYPE == LED_TYPE_GGC)
+            uint32_t r = 0;
+            uint32_t g = uint32_t(raw.r / 2) + uint32_t(raw.g / 2 ) + uint32_t(raw.b / 2);
+            uint32_t b = uint32_t(raw.b / 2 );
             rgb.r = clamp(r, uint32_t(0), uint32_t(255));
             rgb.g = clamp(g, uint32_t(0), uint32_t(255));
             rgb.b = clamp(b, uint32_t(0), uint32_t(255));

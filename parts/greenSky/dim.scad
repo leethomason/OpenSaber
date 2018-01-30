@@ -1,9 +1,13 @@
 M_0 = 0;
-M_POMMEL = 10;
-M_SWITCH_CENTER = 120;
-M_FRONT = 130;
+M_POMMEL = 10;          // thread is to 15; pommel to 10
+M_SWITCH_CENTER = 135;
+M_PORT_CENTER = 90;     // max is 102
 
-D_INNER = 32;
+M_CRYSTAL = 97;
+DY_CRYSTAL = -9;
+
+D_POMMEL           = 25.5;
+D_INNER            = 32;
 
 Z_BATTERY          = 68;
 D_BATTERY          = 18.50 + 0.5;    // An 1850. Huh. 
