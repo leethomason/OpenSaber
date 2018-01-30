@@ -89,8 +89,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 #define SABER_ACCELEROMETER_NXP		2
 #define SABER_ACCELEROMETER_LIS3DH_SPI 3
 
-#define SABER_BUTTON Button::PULL_DOWN
-
 #if SABER_MODEL == SABER_MODEL_GECKO
 	#define LED_TOPOLOGY 				LED_TOPOLOGY_RESISTOR
 	#define PCB_VERSION 				PCB_VERSION_1
@@ -100,6 +98,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_VOLTMETER
 	#define SABER_TWO_BUTTON
 	#define SABER_LOCK
+	#define SABER_BUTTON 				Button::PULL_DOWN
 
 	static const int32_t UVOLT_MULT = 6680;	// FIXME
 	#define ID_STR "Gecko (Sentris Body) RGB Luxeon"
@@ -258,9 +257,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
 	#define LED_TYPE 					LED_TYPE_BBG
-
-	#undef SABER_BUTTON
-	#define SABER_BUTTON Button::INTERNAL_PULLUP
+	#define SABER_BUTTON 				Button::INTERNAL_PULLUP
 
 	#define SABER_NUM_LEDS 			4
 	#define SABER_UI_START  		0
@@ -297,13 +294,10 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_INTEGRATED_SD
 	#define SABER_SISTERS
 	#define SABER_AUDIO_UI
-	//#define SABER_AUDIO_EXTERNAL_REF
+	#define SABER_BUTTON 				Button::INTERNAL_PULLUP
 
 	#define SABER_ADDR_0 "1Sist"
 	#define SABER_ADDR_1 "2Sist"
-
-	#undef SABER_BUTTON
-	#define SABER_BUTTON Button::INTERNAL_PULLUP
 
 	static const int32_t UVOLT_MULT = 6691;		// fixme
 	#if SABER_SUB_MODEL == SABER_SUB_MODEL_LUNA
@@ -341,8 +335,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 //	#define SABER_AUDIO_UI
 	#define SABER_DISPLAY			SABER_DISPLAY_7_5
 
-	#undef SABER_BUTTON
-	#define SABER_BUTTON Button::INTERNAL_PULLUP
+	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 
 	static const int32_t UVOLT_MULT = 6691;		
 	#define ID_STR "Aquatic Cree XPE2 RGB"
@@ -394,8 +387,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_CRYSTAL			80
 	#define SABER_CRYSTAL_LOW		24
 
-	#undef SABER_BUTTON
-	#define SABER_BUTTON Button::INTERNAL_PULLUP
+	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 
 	static const int32_t UVOLT_MULT = 6691;		
 	#define ID_STR "Shock-2 Cree XPE2 RGB"
@@ -432,9 +424,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_NUM_LEDS 			4
 	#define SABER_UI_START  		0
 	#define SABER_UI_BRIGHTNESS		8
-
-	#undef SABER_BUTTON
-	#define SABER_BUTTON Button::INTERNAL_PULLUP
+	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 
 	static const int32_t UVOLT_MULT = 6691;		
 	#define ID_STR "Tali Cree XPE2 RGB"
@@ -480,8 +470,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_AUDIO_EXTERNAL_REF
 	#define SABER_AUDIO_UI
 
-	#undef SABER_BUTTON
-	#define SABER_BUTTON Button::INTERNAL_PULLUP
+	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 
 	static const int32_t UVOLT_MULT = 6691;		
 
@@ -520,8 +509,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_AUDIO_EXTERNAL_REF
 	#define SABER_AUDIO_UI
 
-	#undef SABER_BUTTON
-	#define SABER_BUTTON Button::INTERNAL_PULLUP
+	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 
 	static const int32_t UVOLT_MULT = 6691;		
 
@@ -698,7 +686,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 #elif (PCB_VERSION == PCB_SHIELD_3)
 	/* 
-	  Grinning Lizard Shield v2
+	   Grinning Lizard Shield
 	   + dotstar optional
 	   + SPI optional
 	 */
@@ -717,11 +705,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_SABER_MISO    12
 	#define PIN_SPI_CLOCK	  13
 	#define PIN_ACCEL_EN      14
-	// 15
-	// 16
-	// 17
-	// 18
-	// 19
+
 	#define PIN_VMETER        20
 	#define PIN_EMITTER_BLUE  21
 	#define PIN_EMITTER_GREEN 22
@@ -735,6 +719,12 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 	#define ACCEL_BLADE_DIRECTION 0	// x is in the blade direction
 #elif (PCB_VERSION == PCB_SHIELD_4)
+	/* 
+	   Grinning Lizard Shield
+	   + dotstar optional
+	   + SPI optional
+	   Includes mounting for high-watt resistors
+	 */
 	#define PIN_RX1           0
 	#define PIN_TX1           1
 	#define PIN_AMP_EN        2 
@@ -763,6 +753,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_OLED_DC    	  PIN_SPI_DC
 	#define PIN_OLED_CLOCK    PIN_SPI_CLOCK
 
+	// FIXME: accelerometer is rotated
 	#define ACCEL_BLADE_DIRECTION 0	// x is in the blade direction
 #else
 	#error Pins not defined.
