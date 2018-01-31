@@ -108,6 +108,87 @@ module cBaffle() {
     }
 }
 
+
+NUM_BAFFLES = 8;
+M_END_BAFFLE = M_POMMEL + H_BUTTRESS*2*(1 + NUM_BAFFLES);
+
+DZ_PORT = M_CRYSTAL - M_END_BAFFLE;
+PORT_FRONT = DZ_PORT + M_END_BAFFLE;
+
+SWITCH_FRONT = M_SWITCH_CENTER + 8;
+
+module aftElectronics()
+{
+    // Case
+    translate([0, 0, M_POMMEL]) baffle(h=5);
+
+    for(x=[0:NUM_BAFFLES-1])
+         translate([0, 0, M_POMMEL + H_BUTTRESS*2*(1 + x)]) 
+            baffle(bridge = x<NUM_BAFFLES-1);
+}
+
+module powerPort() 
+{
+    difference() {
+        translate([0, 0, M_END_BAFFLE]) union() {
+            tube(h=DZ_PORT, inner=(D_INNER-2)/2, outer=D_INNER/2);
+            intersection() {
+                cylinder(h=DZ_PORT, d=D_INNER);
+                translate([-20, D_INNER/2 - 6, 0])
+                    cube(size=[40, 10, DZ_PORT]);
+            }        
+        }
+        translate([0, -5.5, M_PORT_CENTER]) port(true);
+    }
+}
+
+
+module crystalHolder()
+{
+    for(z=[0:7])
+        translate([0, 0, M_CRYSTAL + z*2*H_CRYSTAL_BAFFLE])
+            cBaffle();
+}
+
+module centerCover()
+{
+    // Cover
+    translate([0, 0, PORT_FRONT]) difference() {
+        tube(h=M_CRYSTAL + Z_CRYSTAL - PORT_FRONT, inner=(D_INNER-2)/2, outer=D_INNER/2);
+        scale([0.5, 1.0, 1.0])
+            rotate([0, 0, 225])
+                cube(size=[40, 40, M_CRYSTAL + Z_CRYSTAL - PORT_FRONT]);        
+    }
+}
+
+module switchHolder()
+{
+    difference() {
+        Z = M_CRYSTAL + Z_CRYSTAL;
+        DZ = SWITCH_FRONT - Z;
+
+        translate([0, 0, Z]) union() {
+            tube(h=DZ, inner=(D_INNER-2)/2, outer=D_INNER/2);
+            intersection() {
+                cylinder(h=DZ, d=D_INNER);
+                translate([-20, D_INNER/2 - 6, 0])
+                    cube(size=[40, 10, DZ]);
+            }        
+        }
+        translate([0, 0, M_SWITCH_CENTER]) switch(true);
+    }
+}
+
+module emitter() {
+    intersection() {
+        cylinder(h=200, d=D_INNER);
+        translate([0, 0, SWITCH_FRONT])
+            for(r=[0:19])
+                rotate([0, 0, r*18]) translate([-1, 0, 0])
+                polygonYZ(2, [[2, 0], [5,4], [6,2], [12, 4], [D_INNER/2,0]]);
+    }
+}
+
 // Parts
 *translate([0, 0, M_POMMEL]) {
     translate([0, D_INNER/2 - D_BATTERY/2, 0]) battery();
@@ -117,69 +198,9 @@ module cBaffle() {
 *translate([0, 0, M_CRYSTAL]) crystal();
 *translate([0, -5.5, M_PORT_CENTER]) port(extend=true);
 
-
-// Case
-translate([0, 0, M_POMMEL]) baffle(h=5);
-
-NBAF = 8;
-for(x=[0:NBAF-1])
-     translate([0, 0, M_POMMEL + H_BUTTRESS*2*(1 + x)]) 
-        baffle(bridge = x<NBAF-1);
-
-M_END_BAFFLE = M_POMMEL + H_BUTTRESS*2*(1 + NBAF);
-
-DCB = M_CRYSTAL - M_END_BAFFLE;
-PORT_FRONT = DCB + M_END_BAFFLE;
-
-// Power port
-difference() {
-    translate([0, 0, M_END_BAFFLE]) union() {
-        tube(h=DCB, inner=(D_INNER-2)/2, outer=D_INNER/2);
-        intersection() {
-            cylinder(h=DCB, d=D_INNER);
-            translate([-20, D_INNER/2 - 6, 0])
-                cube(size=[40, 10, DCB]);
-        }        
-    }
-    translate([0, -5.5, M_PORT_CENTER]) port(true);
-}
-
-// crystal
-for(z=[0:7])
-    translate([0, 0, M_CRYSTAL + z*2*H_CRYSTAL_BAFFLE])
-        cBaffle();
-
-SWITCH_FRONT = M_SWITCH_CENTER + 8;
-
-// Cover
-translate([0, 0, PORT_FRONT]) difference() {
-    tube(h=M_CRYSTAL + Z_CRYSTAL - PORT_FRONT, inner=(D_INNER-2)/2, outer=D_INNER/2);
-    scale([0.5, 1.0, 1.0])
-        rotate([0, 0, 225])
-            cube(size=[40, 40, M_CRYSTAL + Z_CRYSTAL - PORT_FRONT]);        
-}
-
-// Switch
-difference() {
-    Z = M_CRYSTAL + Z_CRYSTAL;
-    DZ = SWITCH_FRONT - Z;
-
-    translate([0, 0, Z]) union() {
-        tube(h=DZ, inner=(D_INNER-2)/2, outer=D_INNER/2);
-        intersection() {
-            cylinder(h=DZ, d=D_INNER);
-            translate([-20, D_INNER/2 - 6, 0])
-                cube(size=[40, 10, DZ]);
-        }        
-    }
-    translate([0, 0, M_SWITCH_CENTER]) switch(true);
-}
-
-// Emitter
-intersection() {
-    cylinder(h=200, d=D_INNER);
-    translate([0, 0, SWITCH_FRONT])
-        for(r=[0:19])
-            rotate([0, 0, r*18]) translate([-1, 0, 0])
-            polygonYZ(2, [[2, 0], [5,4], [6,2], [12, 4], [D_INNER/2,0]]);
-}
+aftElectronics();
+powerPort();
+crystalHolder();
+centerCover();
+switchHolder();
+emitter();
