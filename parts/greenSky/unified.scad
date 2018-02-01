@@ -100,11 +100,23 @@ module baffle(battery=true, mc=true, useRods=true, bridge=true, h=H_BUTTRESS)
 
 module cBaffle() {
     difference() {
-        translate([0, DY_CRYSTAL, 0])
-            cylinder(h=H_CRYSTAL_BAFFLE, d=D_CRYSTAL_BAFFLE);
+        union() {        
+            translate([0, DY_CRYSTAL, 0]) {
+                cylinder(h=H_CRYSTAL_BAFFLE, d=D_CRYSTAL_BAFFLE);
+            }
+            tube(h=H_CRYSTAL_BAFFLE, do=D_INNER, di=D_INNER-2);
+        }
         crystal();
         translate([0, DY_CRYSTAL, -EPS]) rotate([0, 0, -135])
             cube(size=[20, 20, 20]);
+    }
+}
+
+module capsule(theta0, theta1)
+{
+    hull() {
+        rotate([-90, -0, theta0]) cylinder(h=20, r=2);
+        rotate([-90, -0, theta1]) cylinder(h=20, r=2);
     }
 }
 
@@ -145,19 +157,42 @@ module powerPort()
 
 module crystalHolder()
 {
-    for(z=[0:7])
-        translate([0, 0, M_CRYSTAL + z*2*H_CRYSTAL_BAFFLE])
-            cBaffle();
+    intersection() {
+        translate([-20, -40, PORT_FRONT]) 
+            cube(size=[40, 40, M_CRYSTAL + Z_CRYSTAL - PORT_FRONT]);
+        union() {
+            for(z=[0:7])
+                translate([0, 0, M_CRYSTAL + z*2*H_CRYSTAL_BAFFLE])
+                    cBaffle();
+        }    
+    }
 }
 
 module centerCover()
 {
     // Cover
-    translate([0, 0, PORT_FRONT]) difference() {
+    translate([0, 0, PORT_FRONT]) 
+    difference() {
         tube(h=M_CRYSTAL + Z_CRYSTAL - PORT_FRONT, inner=(D_INNER-2)/2, outer=D_INNER/2);
-        scale([0.5, 1.0, 1.0])
-            rotate([0, 0, 225])
-                cube(size=[40, 40, M_CRYSTAL + Z_CRYSTAL - PORT_FRONT]);        
+        translate([-20, -40, 0]) 
+            cube(size=[40, 40, M_CRYSTAL + Z_CRYSTAL - PORT_FRONT]);
+
+        translate([0, 0, 6])  capsule(-18, 18);
+        translate([0, 0, 12]) capsule(-18, 18);
+        translate([0, 0, 18]) capsule(-18, 18);
+        translate([0, 0, 24]) capsule(-18, 18);
+
+        translate([0, 0, 6])  capsule(-60, -60);
+        translate([0, 0, 12])  capsule(-60, -60);
+        translate([0, 0, 18])  capsule(-60, -60);
+
+        translate([0, 0, 12])  capsule(60, 60);
+        translate([0, 0, 18])  capsule(60, 60);
+        translate([0, 0, 24])  capsule(60, 60);
+
+//        scale([0.5, 1.0, 1.0])
+//            rotate([0, 0, 225])
+//                cube(size=[40, 40, M_CRYSTAL + Z_CRYSTAL - PORT_FRONT]);        
     }
 }
 
@@ -199,8 +234,9 @@ module emitter() {
 *translate([0, -5.5, M_PORT_CENTER]) port(extend=true);
 
 aftElectronics();
-powerPort();
+*powerPort();
 crystalHolder();
 centerCover();
-switchHolder();
-emitter();
+*switchHolder();
+*emitter();
+

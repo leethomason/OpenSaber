@@ -3,16 +3,14 @@ EPSILON = 0.1;
 PIN	    = 2.54;
 
 
-module tube(h, inner, outer) { //, dInner=0, dOuter=0) {
-    //if (dInner > 0)
-    //    inner = dInner / 2;
-    //if (dOuter > 0)
-    //    outer = dOuter / 2;
+module tube(h, inner=0, outer=0, di=0, do=0) { //, dInner=0, dOuter=0) {
+    rInner = inner > 0 ? inner : di / 2;
+    rOuter = outer > 0 ? outer : do / 2;
 
 	difference() {
-		cylinder(h=h, r=outer, $fn=FACES);
+		cylinder(h=h, r=rOuter, $fn=FACES);
 		translate([0,0,-EPSILON]) {
-			cylinder(h=h + EPSILON*2, r=inner, $fn=FACES);
+			cylinder(h=h + EPSILON*2, r=rInner, $fn=FACES);
 		}
 	}
 }
