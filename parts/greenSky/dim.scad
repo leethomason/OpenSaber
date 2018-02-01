@@ -1,11 +1,13 @@
-M_0 = 0;
-M_POMMEL = 10;          // thread is to 15; pommel to 10
-M_SWITCH_CENTER = 135;
-M_PORT_CENTER = 90;     // max is 102
+M_BACK              = -3;   // fixme
+M_SPEAKER           = -1;   // fixme
+M_0                 = 0;
+M_POMMEL            = 10;     // thread is to 15; pommel to 10
+M_PORT_CENTER       = 90;     // max is 102
+M_SWITCH_CENTER     = 135;
 
-M_CRYSTAL = 97;
-DY_CRYSTAL = -9;
+M_CRYSTAL           = 97;
 
+DY_CRYSTAL          = -9;
 D_POMMEL           = 25.5;
 D_INNER            = 32;
 
@@ -24,11 +26,17 @@ Y_SWITCH           = 13.5;
 X_CRYSTAL          = 11.5;
 Y_CRYSTAL          = 10.0;
 Z_CRYSTAL          = 30.0;
-D_CRYSTAL_BAFFLE   = 16;
+D_CRYSTAL_BAFFLE   = 18;
 H_CRYSTAL_BAFFLE   = 2;
 
 D_PORT             = 7.9;
 H_PORT             = 16;
 
 H_BUTTRESS          = 4;
-D_ROD               = 4.2;  // 3.4 is a tough fit
+D_ROD               = 4.2;  // 3.4 is a tight fit // FIXME
+
+// FIXME FIXME FIXME
+H_SPKR_METAL        = 6;
+D_SPKR_METAL        = 16; 
+H_SPKR_PLASTIC      = 2;
+D_SPKR_PLASTIC      = 20;
