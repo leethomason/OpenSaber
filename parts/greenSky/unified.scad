@@ -59,7 +59,7 @@ module port(extend=false)
 
 module rod() {
     $fn = 30;
-    translate([13, 0, 0])
+    translate([13, 0, -20])
         cylinder(h=200, d=D_ROD);
 }
 
@@ -68,10 +68,14 @@ module rods() {
     mirror([1, 0, 0]) rod();
 }
 
+T_BRIDGE = 1.6;
+
 module halfBridge()
 {
-    polygonYZ(1.5, [[0,0], [H_BUTTRESS*2, H_BUTTRESS*2], [H_BUTTRESS*2, 0]]);
+    polygonYZ(T_BRIDGE, [[0,0], [H_BUTTRESS*2, H_BUTTRESS*2], [H_BUTTRESS*2, 0]]);
 }
+
+X_BRIDGE = X_MC/2+1;
 
 module baffle(battery=true, mc=true, useRods=true, bridge=true, h=H_BUTTRESS, d=D_INNER)
 {
@@ -93,18 +97,262 @@ module baffle(battery=true, mc=true, useRods=true, bridge=true, h=H_BUTTRESS, d=
             rods();
     }
     if (bridge) {
-        translate([X_MC/2+1, -11, h]) halfBridge();        
-        mirror([1, 0, 0]) translate([X_MC/2+1, -11, h]) halfBridge();
+        translate([X_BRIDGE, -11, h]) halfBridge();        
+        mirror([1, 0, 0]) translate([X_BRIDGE, -11, h]) halfBridge();
+
+        translate([X_BRIDGE, 2, h]) halfBridge();        
+        mirror([1, 0, 0]) translate([X_BRIDGE, 2, h]) halfBridge();
     }
 }
 
 module cBaffle() {
+    intersection() {
+        cylinder(d=D_INNER, h=H_CRYSTAL_BAFFLE*2);
+
+        difference() {
+            union() {        
+                translate([0, DY_CRYSTAL, 0]) {
+                    cylinder(h=H_CRYSTAL_BAFFLE, d=D_CRYSTAL_BAFFLE);
+                }
+                tube(h=H_CRYSTAL_BAFFLE, do=D_INNER, di=D_INNER-6);
+                difference() {
+                    tube(h=H_CRYSTAL_BAFFLE*2, do=D_INNER-2, di=D_INNER-4);                
+                    translate([-20, -4, 0])
+                        cube(size=[40, 40, 40]);
+                }
+            }
+            crystal();
+            translate([0, DY_CRYSTAL, -EPS]) rotate([0, 0, -135])
+                cube(size=[20, 20, 20]);
+        }        
+    }
+}
+
+module capsule(theta0, theta1, r=2)
+{
+    hull() {
+        rotate([-90, -0, theta0]) cylinder(h=20, r=r);
+        rotate([-90, -0, theta1]) cylinder(h=20, r=r);
+    }
+}
+
+module speaker()
+{
+    color("yellow") {
+        cylinder(h=H_SPKR_PLASTIC + EPS, d=D_SPKR_PLASTIC);
+        translate([0, 0, H_SPKR_PLASTIC])
+            cylinder(h=H_SPKR_METAL, d=D_SPKR_METAL);
+    }
+}
+
+
+NUM_BAFFLES = 8;
+M_END_BAFFLE = M_POMMEL + H_BUTTRESS*2*(1 + NUM_BAFFLES);
+
+DZ_PORT = M_CRYSTAL - M_END_BAFFLE;
+PORT_FRONT = DZ_PORT + M_END_BAFFLE;
+
+SWITCH_FRONT = M_SWITCH_CENTER + 9;
+T_SWITCH_RING = 2;
+
+module speakerHolder()
+{
     difference() {
-        translate([0, DY_CRYSTAL, 0])
-            cylinder(h=H_CRYSTAL_BAFFLE, d=D_CRYSTAL_BAFFLE);
-        crystal();
-        translate([0, DY_CRYSTAL, -EPS]) rotate([0, 0, -135])
-            cube(size=[20, 20, 20]);
+        translate([0, 0, M_BACK])
+            tube(h=M_POMMEL - M_BACK, do=D_POMMEL, di=D_SPKR_PLASTIC - 2);
+        translate([0, 0, M_SPEAKER])
+            speaker();
+        translate([-20, -20, M_BACK-EPS])
+            cube(size=[40, 14, 20]);
+        rods();
+
+        THETA = 14;
+        for(r=[0:2]) {
+            rotate([0, 0, -50 + r*50]) translate([0, 0, M_BACK]) {
+                translate([0, 0, 3])  capsule(-THETA, THETA, 1);
+                translate([0, 0, 6]) capsule(-THETA, THETA, 1);
+                translate([0, 0, 9]) capsule(-THETA, THETA, 1);
+            }
+        }
+    }
+}
+
+module key(extend=false)
+{
+    D = 5.0 * (extend ? 1.0 : 0.98);
+    DI = extend ? D_INNER + 2 : D_INNER;
+
+    KZ0 = M_POMMEL + H_BUTTRESS*2*(NUM_BAFFLES) + H_BUTTRESS;     
+    KZ = M_POMMEL + H_BUTTRESS*2*(NUM_BAFFLES+1) + D/2;    
+    difference() {
+        intersection() {
+            cylinder(h=200, d=DI);
+            union() {
+                translate([X_BRIDGE, -20, KZ0])
+                    cube(size=[T_BRIDGE, 40, H_BUTTRESS+1]);
+                mirror([1,0,0]) translate([X_BRIDGE, -20, KZ0])
+                    cube(size=[T_BRIDGE, 40, H_BUTTRESS+1]);
+                translate([0, -20, KZ]) {
+                    translate([X_BRIDGE, 0, 0]) rotate([-90, 0, 0]) cylinder(h=40, d=D);
+                    translate([-X_BRIDGE, 0, 0]) rotate([-90, 0, 0]) cylinder(h=40, d=D);
+                }
+            }
+        }
+        rods();
+    }
+}
+
+module aftElectronics()
+{
+    // Case
+    translate([0, 0, M_POMMEL]) baffle(h=5);
+
+    for(x=[0:NUM_BAFFLES-1])
+         translate([0, 0, M_POMMEL + H_BUTTRESS*2*(1 + x)]) 
+            baffle(bridge = true);
+
+    key();
+}
+
+module powerPort() 
+{
+    difference() {
+        translate([0, 0, M_END_BAFFLE]) union() {
+            tube(h=DZ_PORT, inner=(D_INNER-2)/2, outer=D_INNER/2);
+            intersection() {
+                cylinder(h=DZ_PORT, d=D_INNER);
+                union() {
+                    translate([-20, D_INNER/2 - 6, 0])
+                        cube(size=[40, 10, DZ_PORT]);
+                    //translate([X_BRIDGE, -D_INNER/2, 0])
+                    //    cube(size=[2, 40, DZ_PORT]);
+                    //mirror([1,0,0]) translate([X_BRIDGE, -D_INNER/2, 0])
+                    //    cube(size=[2, 40, DZ_PORT]);
+                }
+            }        
+        }
+        translate([0, -5.5, M_PORT_CENTER]) port(true);
+        rods();
+        key(true);
+    }
+}
+
+
+module crystalHolder()
+{
+    difference() {
+        union() {
+            intersection() {
+                translate([-20, -40, PORT_FRONT]) 
+                    cube(size=[40, 40, M_CRYSTAL + Z_CRYSTAL - PORT_FRONT]);
+                union() {
+                    for(z=[0:7])
+                        translate([0, 0, M_CRYSTAL + z*2*H_CRYSTAL_BAFFLE])
+                            cBaffle();
+                }    
+            }
+//            intersection() {
+//               translate([0, 0, PORT_FRONT]) cylinder(h=100, d=D_INNER-2);
+//                translate([10, -20, PORT_FRONT]) cube(size=[20, 23, H_CRYSTAL_BAFFLE]);
+ //           }
+        }
+        rods();        
+    }
+}
+
+module centerCover()
+{
+    // Cover
+    translate([0, 0, PORT_FRONT]) 
+    difference() {
+        tube(h=M_CRYSTAL + Z_CRYSTAL - PORT_FRONT, inner=(D_INNER-2)/2, outer=D_INNER/2);
+        translate([-20, -40, 0]) 
+            cube(size=[40, 40, M_CRYSTAL + Z_CRYSTAL - PORT_FRONT]);
+
+        translate([0, 0, 6])  capsule(-18, 18);
+        translate([0, 0, 12]) capsule(-18, 18);
+        translate([0, 0, 18]) capsule(-18, 18);
+        translate([0, 0, 24]) capsule(-18, 18);
+
+        translate([0, 0, 6])  capsule(-60, -60);
+        translate([0, 0, 12])  capsule(-60, -60);
+        translate([0, 0, 18])  capsule(-60, -60);
+
+        translate([0, 0, 12])  capsule(60, 60);
+        translate([0, 0, 18])  capsule(60, 60);
+        translate([0, 0, 24])  capsule(60, 60);
+
+//        scale([0.5, 1.0, 1.0])
+//            rotate([0, 0, 225])
+//                cube(size=[40, 40, M_CRYSTAL + Z_CRYSTAL - PORT_FRONT]);        
+    }
+    intersection() {
+        cylinder(h=200, d=D_INNER);    
+
+        difference() {
+            union() {
+                translate([10, -4, PORT_FRONT + H_CRYSTAL_BAFFLE]) cube(size=[10, 30, H_CRYSTAL_BAFFLE]);
+                mirror([1,0,0]) translate([10, -4, PORT_FRONT + H_CRYSTAL_BAFFLE]) cube(size=[10, 30, H_CRYSTAL_BAFFLE]);
+                translate([10, -4, PORT_FRONT + H_CRYSTAL_BAFFLE*13]) cube(size=[10, 30, H_CRYSTAL_BAFFLE]);
+                mirror([1,0,0]) translate([10, -4, PORT_FRONT + H_CRYSTAL_BAFFLE*13]) cube(size=[10, 30, H_CRYSTAL_BAFFLE]);
+            }
+            rods();
+        }
+    }
+}
+
+module switchHolder()
+{
+    difference() {
+        Z = M_CRYSTAL + Z_CRYSTAL;
+        DZ = SWITCH_FRONT - Z;
+
+        translate([0, 0, Z]) union() {
+            tube(h=DZ, di=(D_INNER-T_SWITCH_RING), do=D_INNER);
+            intersection() {
+                cylinder(h=DZ, d=D_INNER);
+                translate([-20, D_INNER/2 - 6, 0])
+                    cube(size=[40, 10, DZ]);
+            }        
+        }
+        translate([0, 0, M_SWITCH_CENTER]) switch(true);
+    }
+}
+
+module emitter() {
+    N0 = 20;
+    N1 = 5;
+
+    ANGLE0 = 360/N0;
+    ANGLE1 = 360/N1;
+
+    R = D_INNER / 2;
+    T1 = 4;
+    DZ = M_EMITTER_BACK - SWITCH_FRONT;
+
+    difference() {
+        union() {
+            intersection() {
+                cylinder(h=200, d=D_INNER);
+                translate([0, 0, SWITCH_FRONT]) union() {
+                    for(r=[0:(N0-1)])
+                        rotate([0, 0, r*ANGLE0]) translate([-1, 0, 0])
+                           polygonYZ(2, [[2, 0], [5,4], [6,2], [12, 4], [D_INNER/2,0]]);
+                    for(r=[0:(N1-1)]) 
+                        rotate([0, 0, r*ANGLE1]) translate([-T1/2, 0, 0])
+                            polygonYZ(T1, [
+                                [10,0], 
+                                [R-3, DZ], 
+                                [R, DZ], 
+                                [R, 0]]);
+                            //cube(size=[8,20, M_EMITTER_BACK - SWITCH_FRONT]);
+                }
+            }
+            translate([0, 0, SWITCH_FRONT-1.5]) {
+                tube(h=2, do=D_INNER, di=D_INNER-8);
+            }
+        }
+        switchHolder();
     }
 }
 
@@ -116,70 +364,27 @@ module cBaffle() {
 *translate([0, 0, M_SWITCH_CENTER]) switch();
 *translate([0, 0, M_CRYSTAL]) crystal();
 *translate([0, -5.5, M_PORT_CENTER]) port(extend=true);
+*translate([0, 0, M_SPEAKER]) speaker();
 
+DRAW_AFT     = true;
+DRAW_FRONT   = true;
+DRAW_COVER   = true;
+DRAW_EMITTER = true;
 
-// Case
-translate([0, 0, M_POMMEL]) baffle(h=5, d=D_RING);
-
-NBAF = 8;
-for(x=[0:NBAF-1])
-     translate([0, 0, M_POMMEL + H_BUTTRESS*2*(1 + x)]) 
-        baffle(bridge = x<NBAF-1);
-
-M_END_BAFFLE = M_POMMEL + H_BUTTRESS*2*(1 + NBAF);
-
-DCB = M_CRYSTAL - M_END_BAFFLE;
-PORT_FRONT = DCB + M_END_BAFFLE;
-
-// Power port
-difference() {
-    translate([0, 0, M_END_BAFFLE]) union() {
-        tube(h=DCB, inner=(D_INNER-2)/2, outer=D_INNER/2);
-        intersection() {
-            cylinder(h=DCB, d=D_INNER);
-            translate([-20, D_INNER/2 - 6, 0])
-                cube(size=[40, 10, DCB]);
-        }        
-    }
-    translate([0, -5.5, M_PORT_CENTER]) port(true);
+if (DRAW_AFT) {
+    speakerHolder();
+    aftElectronics();
 }
 
-// crystal
-for(z=[0:7])
-    translate([0, 0, M_CRYSTAL + z*2*H_CRYSTAL_BAFFLE])
-        cBaffle();
-
-SWITCH_FRONT = M_SWITCH_CENTER + 8;
-
-// Cover
-translate([0, 0, PORT_FRONT]) difference() {
-    tube(h=M_CRYSTAL + Z_CRYSTAL - PORT_FRONT, inner=(D_INNER-2)/2, outer=D_INNER/2);
-    scale([0.5, 1.0, 1.0])
-        rotate([0, 0, 225])
-            cube(size=[40, 40, M_CRYSTAL + Z_CRYSTAL - PORT_FRONT]);        
+if (DRAW_FRONT)
+{
+    powerPort();
+    crystalHolder();
+    switchHolder();
 }
 
-// Switch
-difference() {
-    Z = M_CRYSTAL + Z_CRYSTAL;
-    DZ = SWITCH_FRONT - Z;
+if (DRAW_COVER) centerCover();
 
-    translate([0, 0, Z]) union() {
-        tube(h=DZ, inner=(D_INNER-2)/2, outer=D_INNER/2);
-        intersection() {
-            cylinder(h=DZ, d=D_INNER);
-            translate([-20, D_INNER/2 - 6, 0])
-                cube(size=[40, 10, DZ]);
-        }        
-    }
-    translate([0, 0, M_SWITCH_CENTER]) switch(true);
-}
-
-// Emitter
-intersection() {
-    cylinder(h=200, d=D_INNER);
-    translate([0, 0, SWITCH_FRONT])
-        for(r=[0:19])
-            rotate([0, 0, r*18]) translate([-1, 0, 0])
-            polygonYZ(2, [[2, 0], [5,4], [6,2], [12, 4], [D_INNER/2,0]]);
-}
+if (DRAW_EMITTER) emitter();
+ 
+ echo("Length pommel->switch front mm:", (SWITCH_FRONT - M_BACK), "in:", ((SWITCH_FRONT - M_BACK) / 25.4));
