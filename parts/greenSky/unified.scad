@@ -73,12 +73,12 @@ module halfBridge()
     polygonYZ(1.5, [[0,0], [H_BUTTRESS*2, H_BUTTRESS*2], [H_BUTTRESS*2, 0]]);
 }
 
-module baffle(battery=true, mc=true, useRods=true, bridge=true, h=H_BUTTRESS)
+module baffle(battery=true, mc=true, useRods=true, bridge=true, h=H_BUTTRESS, d=D_INNER)
 {
     TROUGH_0 = 10;
     TROUGH_1 = 14;
     difference() {
-        cylinder(h=h, d=D_INNER);
+        cylinder(h=h, d=d);
         if (battery)
             translate([0, D_INNER/2 - D_BATTERY/2, -EPS]) battery();
         if (mc)
@@ -119,7 +119,7 @@ module cBaffle() {
 
 
 // Case
-translate([0, 0, M_POMMEL]) baffle(h=5);
+translate([0, 0, M_POMMEL]) baffle(h=5, d=D_RING);
 
 NBAF = 8;
 for(x=[0:NBAF-1])

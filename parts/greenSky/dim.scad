@@ -8,6 +8,7 @@ DY_CRYSTAL = -9;
 
 D_POMMEL           = 25.5;
 D_INNER            = 32;
+D_RING             = 33.5;
 
 Z_BATTERY          = 68;
 D_BATTERY          = 18.50 + 0.5;    // An 1850. Huh. 
