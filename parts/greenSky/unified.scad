@@ -153,6 +153,7 @@ DZ_PORT = M_CRYSTAL - M_END_BAFFLE;
 PORT_FRONT = DZ_PORT + M_END_BAFFLE;
 
 SWITCH_FRONT = M_SWITCH_CENTER + 9;
+T_SWITCH_RING = 2;
 
 module speakerHolder()
 {
@@ -178,23 +179,26 @@ module speakerHolder()
 
 module key(extend=false)
 {
-    D = 5;
+    D = 5.0 * (extend ? 1.0 : 0.98);
     DI = extend ? D_INNER + 2 : D_INNER;
 
     KZ0 = M_POMMEL + H_BUTTRESS*2*(NUM_BAFFLES) + H_BUTTRESS;     
     KZ = M_POMMEL + H_BUTTRESS*2*(NUM_BAFFLES+1) + D/2;    
-    intersection() {
-        cylinder(h=200, d=DI);
-        union() {
-            translate([X_BRIDGE, -20, KZ0])
-                cube(size=[T_BRIDGE, 40, H_BUTTRESS+1]);
-            mirror([1,0,0]) translate([X_BRIDGE, -20, KZ0])
-                cube(size=[T_BRIDGE, 40, H_BUTTRESS+1]);
-            translate([0, -20, KZ]) {
-                translate([X_BRIDGE, 0, 0]) rotate([-90, 0, 0]) cylinder(h=40, d=D);
-                translate([-X_BRIDGE, 0, 0]) rotate([-90, 0, 0]) cylinder(h=40, d=D);
+    difference() {
+        intersection() {
+            cylinder(h=200, d=DI);
+            union() {
+                translate([X_BRIDGE, -20, KZ0])
+                    cube(size=[T_BRIDGE, 40, H_BUTTRESS+1]);
+                mirror([1,0,0]) translate([X_BRIDGE, -20, KZ0])
+                    cube(size=[T_BRIDGE, 40, H_BUTTRESS+1]);
+                translate([0, -20, KZ]) {
+                    translate([X_BRIDGE, 0, 0]) rotate([-90, 0, 0]) cylinder(h=40, d=D);
+                    translate([-X_BRIDGE, 0, 0]) rotate([-90, 0, 0]) cylinder(h=40, d=D);
+                }
             }
         }
+        rods();
     }
 }
 
@@ -285,7 +289,7 @@ module switchHolder()
         DZ = SWITCH_FRONT - Z;
 
         translate([0, 0, Z]) union() {
-            tube(h=DZ, inner=(D_INNER-2)/2, outer=D_INNER/2);
+            tube(h=DZ, di=(D_INNER-T_SWITCH_RING), do=D_INNER);
             intersection() {
                 cylinder(h=DZ, d=D_INNER);
                 translate([-20, D_INNER/2 - 6, 0])
@@ -297,13 +301,44 @@ module switchHolder()
 }
 
 module emitter() {
-    intersection() {
-        cylinder(h=200, d=D_INNER);
-        translate([0, 0, SWITCH_FRONT])
-            for(r=[0:19])
-                rotate([0, 0, r*18]) translate([-1, 0, 0])
-                polygonYZ(2, [[2, 0], [5,4], [6,2], [12, 4], [D_INNER/2,0]]);
+    N0 = 20;
+    N1 = 5;
+
+    ANGLE0 = 360/N0;
+    ANGLE1 = 360/N1;
+
+    R = D_INNER / 2;
+    T1 = 4;
+    DZ = M_EMITTER_BACK - SWITCH_FRONT;
+    Z_LIP = 1.5;
+
+    difference() {
+        union() {
+            intersection() {
+                cylinder(h=200, d=D_INNER);
+                translate([0, 0, SWITCH_FRONT]) union() {
+                    for(r=[0:(N0-1)])
+                        rotate([0, 0, r*ANGLE0]) translate([-1, 0, 0])
+                           polygonYZ(2, [[2, 0], [5,4], [6,2], [12, 4], [D_INNER/2,0]]);
+                    for(r=[0:(N1-1)]) 
+                        rotate([0, 0, r*ANGLE1]) translate([-T1/2, 0, 0])
+                            polygonYZ(T1, [
+                                [10,0], 
+                                [R-3, DZ], 
+                                [R, DZ], 
+                                [R, 0]]);
+                            //cube(size=[8,20, M_EMITTER_BACK - SWITCH_FRONT]);
+                }
+            }
+            translate([0, 0, SWITCH_FRONT-2]) {
+                tube(h=2, do=D_INNER, di=D_INNER-12);
+            }
+        }
+        switchHolder();
     }
+    //translate([0, 0, SWITCH_FRONT-Z_LIP])
+    //    tube(h=Z_LIP, di=(D_INNER - T_SWITCH_RING - 2), do=(D_INNER - T_SWITCH_RING));
+
 }
 
 // Parts
@@ -316,15 +351,25 @@ module emitter() {
 *translate([0, -5.5, M_PORT_CENTER]) port(extend=true);
 *translate([0, 0, M_SPEAKER]) speaker();
 
-*speakerHolder();
-*aftElectronics();
+DRAW_AFT     = false;
+DRAW_FRONT   = false;
+DRAW_COVER   = false;
+DRAW_EMITTER = true;
 
-powerPort();
-crystalHolder();
-switchHolder();
+if (DRAW_AFT) {
+    speakerHolder();
+    aftElectronics();
+}
 
-*centerCover();
+if (DRAW_FRONT)
+{
+    powerPort();
+    crystalHolder();
+    switchHolder();
+}
 
-*emitter();
+if (DRAW_COVER) centerCover();
+
+if (DRAW_EMITTER) emitter();
  
  echo("Length pommel->switch front mm:", (SWITCH_FRONT - M_BACK), "in:", ((SWITCH_FRONT - M_BACK) / 25.4));

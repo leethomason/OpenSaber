@@ -4,6 +4,7 @@ M_0                 = 0;
 M_POMMEL            = 10;     // thread is to 15; pommel to 10
 M_PORT_CENTER       = 90;     // max is 102
 M_SWITCH_CENTER     = 135;
+M_EMITTER_BACK      = 165;
 
 M_CRYSTAL           = 97;
 
