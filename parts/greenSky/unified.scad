@@ -1,7 +1,7 @@
 include <dim.scad>
 use <../shapes.scad>
 
-$fn = 40;
+$fn = 30;
 EPS = 0.01;
 EPS2 = EPS * 2;
 
@@ -349,7 +349,7 @@ module emitter() {
                 }
             }
             translate([0, 0, SWITCH_FRONT-1.5]) {
-                tube(h=2, do=D_INNER, di=D_INNER-8);
+                tube(h=2, do=D_INNER, di=D_INNER-12);
             }
         }
         switchHolder();
@@ -365,11 +365,12 @@ module emitter() {
 *translate([0, 0, M_CRYSTAL]) crystal();
 *translate([0, -5.5, M_PORT_CENTER]) port(extend=true);
 *translate([0, 0, M_SPEAKER]) speaker();
+*color("yellow") rods();
 
 DRAW_AFT     = true;
 DRAW_FRONT   = true;
-DRAW_COVER   = true;
-DRAW_EMITTER = true;
+DRAW_COVER   = false;
+DRAW_EMITTER = false;
 
 if (DRAW_AFT) {
     speakerHolder();
@@ -387,4 +388,4 @@ if (DRAW_COVER) centerCover();
 
 if (DRAW_EMITTER) emitter();
  
- echo("Length pommel->switch front mm:", (SWITCH_FRONT - M_BACK), "in:", ((SWITCH_FRONT - M_BACK) / 25.4));
+ //echo("Length pommel->switch front mm:", (SWITCH_FRONT - M_BACK), "in:", ((SWITCH_FRONT - M_BACK) / 25.4));
