@@ -3,22 +3,20 @@ EPSILON = 0.1;
 PIN	    = 2.54;
 
 
-module tube(h, inner=0, outer=0, di=0, do=0) { //, dInner=0, dOuter=0) {
+module tube(h, inner=0, outer=0, di=0, do=0) {
     rInner = inner > 0 ? inner : di / 2;
     rOuter = outer > 0 ? outer : do / 2;
 
 	difference() {
-		cylinder(h=h, r=rOuter, $fn=FACES);
+		cylinder(h=h, r=rOuter);
 		translate([0,0,-EPSILON]) {
-			cylinder(h=h + EPSILON*2, r=rInner, $fn=FACES);
+			cylinder(h=h + EPSILON*2, r=rInner);
 		}
 	}
 }
 
 module roundedRect(h, d)
 {
-	$fn=20;
-
 	D0 = d * 0.8;
 	D1 = d * 0.2;
 	H = h;

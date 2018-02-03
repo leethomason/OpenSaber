@@ -1,7 +1,7 @@
 include <dim.scad>
 use <../shapes.scad>
 
-$fn = 40;
+$fn = 30;
 EPS = 0.01;
 EPS2 = EPS * 2;
 
