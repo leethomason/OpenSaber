@@ -20,7 +20,7 @@ DY_BATTERY         = 0;
 X_MC               = 18.5;
 Y_MC               =  9.0;
 Z_MC               = 71.0;     // includes SD
-DY_MC              = -12.5;
+DY_MC              = -12.0;
 
 D_SWITCH           = 12.5;     // actually 12, by thread.
 Y_SWITCH           = 13.5;

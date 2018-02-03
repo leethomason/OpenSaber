@@ -1,7 +1,7 @@
 include <dim.scad>
 use <../shapes.scad>
 
-$fn = 30;
+$fn = 40;
 EPS = 0.01;
 EPS2 = EPS * 2;
 
@@ -42,9 +42,12 @@ module mc(cutoutLow=false)
 
 module crystal()
 {
+    TAPER = 5;
     translate([0, DY_CRYSTAL, 0])
     color("pink") scale([1.0, Y_CRYSTAL/X_CRYSTAL, 1.0]) {
-        cylinder(d=X_CRYSTAL, h=Z_CRYSTAL);
+        cylinder(d=X_CRYSTAL, h=Z_CRYSTAL - TAPER);
+        translate([0, 0, Z_CRYSTAL - TAPER])
+            cylinder(h=TAPER, d1 = X_CRYSTAL, d2=X_CRYSTAL / 2);
     }
 }
 
@@ -80,7 +83,9 @@ X_BRIDGE = X_MC/2+1;
 module baffle(battery=true, mc=true, useRods=true, bridge=true, h=H_BUTTRESS, d=D_INNER)
 {
     TROUGH_0 = 10;
-    TROUGH_1 = 14;
+    TROUGH_1 = 10;
+    TROUGH_2 = 14; //X_MC - 4;    // not related to X_MC
+
     difference() {
         cylinder(h=h, d=d);
         if (battery)
@@ -91,8 +96,8 @@ module baffle(battery=true, mc=true, useRods=true, bridge=true, h=H_BUTTRESS, d=
             cube(size=[TROUGH_0, 30, h + EPS2]);
         translate([-TROUGH_1/2, -5, -EPS]) 
             cube(size=[TROUGH_1, 5, h + EPS2]);
-        translate([-X_MC/2 + 2, -20, -EPS])
-            cube(size=[X_MC - 4, 15, h + EPS2]);
+        translate([-TROUGH_2/2, -20, -EPS])
+            cube(size=[TROUGH_2, 15, h + EPS2]);
         if (useRods)
             rods();
     }
@@ -102,6 +107,16 @@ module baffle(battery=true, mc=true, useRods=true, bridge=true, h=H_BUTTRESS, d=
 
         translate([X_BRIDGE, 2, h]) halfBridge();        
         mirror([1, 0, 0]) translate([X_BRIDGE, 2, h]) halfBridge();
+
+        intersection() {
+            translate([0, 0, -EPS]) cylinder(h=H_BUTTRESS*2 + EPS2, d=D_INNER);
+            union() {
+                translate([TROUGH_2/2, DY_MC - 5, -EPS])
+                    cube(size=[TROUGH_2, 5, H_BUTTRESS*2 + EPS]);
+                mirror([1,0,0]) translate([TROUGH_2/2, DY_MC - 5, -EPS])
+                    cube(size=[TROUGH_2, 5, H_BUTTRESS*2 + EPS]);
+            }
+        }
     }
 }
 
@@ -121,7 +136,6 @@ module cBaffle() {
                         cube(size=[40, 40, 40]);
                 }
             }
-            crystal();
             translate([0, DY_CRYSTAL, -EPS]) rotate([0, 0, -135])
                 cube(size=[20, 20, 20]);
         }        
@@ -209,7 +223,7 @@ module aftElectronics()
 
     for(x=[0:NUM_BAFFLES-1])
          translate([0, 0, M_POMMEL + H_BUTTRESS*2*(1 + x)]) 
-            baffle(bridge = true);
+            baffle(bridge = x < NUM_BAFFLES-1);
 
     key();
 }
@@ -251,11 +265,8 @@ module crystalHolder()
                             cBaffle();
                 }    
             }
-//            intersection() {
-//               translate([0, 0, PORT_FRONT]) cylinder(h=100, d=D_INNER-2);
-//                translate([10, -20, PORT_FRONT]) cube(size=[20, 23, H_CRYSTAL_BAFFLE]);
- //           }
         }
+        translate([0, 0, M_CRYSTAL]) crystal();
         rods();        
     }
 }
@@ -281,10 +292,6 @@ module centerCover()
         translate([0, 0, 12])  capsule(60, 60);
         translate([0, 0, 18])  capsule(60, 60);
         translate([0, 0, 24])  capsule(60, 60);
-
-//        scale([0.5, 1.0, 1.0])
-//            rotate([0, 0, 225])
-//                cube(size=[40, 40, M_CRYSTAL + Z_CRYSTAL - PORT_FRONT]);        
     }
     intersection() {
         cylinder(h=200, d=D_INNER);    
@@ -387,5 +394,3 @@ if (DRAW_FRONT)
 if (DRAW_COVER) centerCover();
 
 if (DRAW_EMITTER) emitter();
- 
- //echo("Length pommel->switch front mm:", (SWITCH_FRONT - M_BACK), "in:", ((SWITCH_FRONT - M_BACK) / 25.4));
