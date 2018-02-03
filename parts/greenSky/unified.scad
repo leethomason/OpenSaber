@@ -1,7 +1,7 @@
 include <dim.scad>
 use <../shapes.scad>
 
-$fn = 30;
+$fn = 90;
 EPS = 0.01;
 EPS2 = EPS * 2;
 
@@ -186,6 +186,7 @@ module speakerHolder()
                 translate([0, 0, 3])  capsule(-THETA, THETA, 1);
                 translate([0, 0, 6]) capsule(-THETA, THETA, 1);
                 translate([0, 0, 9]) capsule(-THETA, THETA, 1);
+                translate([0, 0, 12]) capsule(-THETA, THETA, 1);
             }
         }
     }
@@ -219,7 +220,7 @@ module key(extend=false)
 module aftElectronics()
 {
     // Case
-    translate([0, 0, M_POMMEL]) baffle(h=5);
+    translate([0, 0, M_POMMEL]) baffle(h=Z_RING, d=D_RING);
 
     for(x=[0:NUM_BAFFLES-1])
          translate([0, 0, M_POMMEL + H_BUTTRESS*2*(1 + x)]) 
@@ -248,6 +249,8 @@ module powerPort()
         translate([0, -5.5, M_PORT_CENTER]) port(true);
         rods();
         key(true);
+        translate([-10, -D_INNER/2 - 1, M_END_BAFFLE]) 
+            cube(size=[20, 1.3, 100]);
     }
 }
 
@@ -352,7 +355,6 @@ module emitter() {
                                 [R-3, DZ], 
                                 [R, DZ], 
                                 [R, 0]]);
-                            //cube(size=[8,20, M_EMITTER_BACK - SWITCH_FRONT]);
                 }
             }
             translate([0, 0, SWITCH_FRONT-1.5]) {
@@ -375,7 +377,7 @@ module emitter() {
 *color("yellow") rods();
 
 DRAW_AFT     = true;
-DRAW_FRONT   = true;
+DRAW_FRONT   = false;
 DRAW_COVER   = false;
 DRAW_EMITTER = false;
 
