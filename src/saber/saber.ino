@@ -51,8 +51,7 @@
 #include "tester.h"
 
 static const uint32_t VBAT_TIME_INTERVAL      = 500;
-static const uint32_t INDICATOR_TIME          = 500;
-static const uint32_t INDICATOR_CYCLE         = INDICATOR_TIME * 2;
+static const uint32_t INDICATOR_CYCLE         = 1000;
 static const uint32_t PING_PONG_INTERVAL      = 2400;
 static const uint32_t BREATH_TIME             = 1200;
 
@@ -693,10 +692,8 @@ void loop() {
             bool changed = dotstarUI.Draw(leds + SABER_UI_START, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
             if (changed) {
                 Log.event("[UIChange]");
-                //Log.p("LED ").p(leds[0]).p(leds[1]).p(leds[2]).p(leds[3]).eol();
             }
         #endif
-        //Log.p("crystal: ").p(leds[0].r).p(" ").p(leds[0].g).p(" ").p(leds[0].b).eol();
     }
 
     #if defined(SABER_CRYSTAL)

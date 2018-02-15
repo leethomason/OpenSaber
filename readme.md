@@ -12,6 +12,12 @@ is for you!
 The information and documentation assume a basic knowledge of Arduinos,
 electronics, soldering, etc.
 
+In 2017, the design switch from through hole components, which have wires
+and can be fairly easily hand soldered, to SMD components, which need
+to be flow soldered in an oven. The current code uses only the SMD
+approach. If you are interested in the through hole approach, check out
+the source at FIXME
+
 ![Image of Saber](img/GeckoOnMat.jpg)
 
 The Open Saber site / repo is 3 things:
@@ -20,9 +26,7 @@ The Open Saber site / repo is 3 things:
   arduino class micro-controllers.
 - Documentation & circuit diagrams for circuits and components.
 
-You can see the original Gecko based on a SaberZ Sentris body (the
-empty hilt option) with Open Saber electronics in action
-here: https://youtu.be/9_-Rfe4UBJM.
+An Open Saber electronics in action here: https://youtu.be/9_-Rfe4UBJM.
 
 ## Features:
 - Support for 3 LED RGB "any color" saber 
@@ -42,24 +46,20 @@ There are over 5 working sabers on the OpenSaber design with cases
 by SaberZ, UltraSabers, TCSS v1, and SaberForge ASP.
 
 The version number - as much as it is consistent - references
-the PCB board. The PCB board determines the electrical architecture
-and features.
+the PCB board. The PCB board is called a "shield" because it sits on top
+of a Teensy Microcontroller.
 
-There have been several major revisions of the design:
-- V1 Microcontroller with discrete breakout boards for audio,
-  accelerometer, and SD Card. Worked, but not elegant.
-- V5 Teensy 3.2 microcontroller stacked on a PJRC prop shield with a 
-  breakout for the SD card. This was a very practical design for 
-  larger saber bodies.
-- V7 moved to the Teensy 3.5 with integrated SD. (Handy! Saves space
-  and frees up the SPI.) Also the circuit board is now split into
-  "wings" to use less space. This is the smallest design I have been
-  able to achieve with through hole components, and is used
-  in several sabers.
-- V9 moves to SMD components, although I use the "largest" possible.
-  This involves taking on SMD soldering, etc, but switches over
-  to an OpenSaber prop shield, so the design is now a Teensy 3.5
-  stacked with a circuit board. This design is still in development.
+I use the largest possible SMD components to make it as straightforward
+as possible for a human to solder. They are still *small*.
+
+Generally speaking the shields sit on a Teensy 3.5. You can also use a
+Teensy 3.2, but you need to connect an SD card on the SPI interface.
+(The 3.2 does not have an integrated SD card.)
+
+- Shield V3: Does *not* have integrated LED resistors. The emitter LED
+  needs to have the correct resistors soldered in place.
+- Shield V4: Has space for 3 through hole, small form factor, 1W 
+  resistors. This can be much more tidy, but it's a longer board.
 
 Note that many commits to the github repo are parts for a 3D
 printer. While you are welcome to use them, the focus of 
@@ -126,7 +126,7 @@ In roughly front to back order, an saber is:
 1.  A **blade holder**. (1" is standard.)
 2.  A **lens** to focus the LED. The lens is bought to match the LED,
     and narrower is usually better.
-3.  3 (or 4) **LEDs** in the 1-Watt each range. Red, green, blue, and 
+3.  3 **LEDs** in the 1-Watt each range. Red, green, blue, and 
     sometimes white or another color. I like both the Luxeon and Cree XPE-2.
     I haven't experimented with the 12W LEDs yet; electrically
     most of the designs should handle it, but the power from the battery
@@ -134,7 +134,8 @@ In roughly front to back order, an saber is:
 4.  A **heat sink** for cooling the LED. Often part of the saber body. 
     TCSS provides them as well. LEDs are kept to 350ma - 400ma each (although 
     you can change this.) Many LED's, if cooled correctly, can take considerably
-    more power.
+    more power. Conversly, many sabers with poor heat sinking fail over time
+    as their LEDs burn out.
 5.  **Power and Auxillary** switches (momentary on, typically 12mm). The
     code supports both a one button version and a two button version. Both
     versions support the same features except "clash sound" which is only
@@ -144,69 +145,30 @@ In roughly front to back order, an saber is:
 7.  **Power port**. Typically 2.1 mm. If plugged into a Li-Ion charger,
     charges the battery (and disconnects the microcontroller). If a kill key
     is inserted, turns off the saber.
-8.  **SD Card**. A simple SD card breakout board or integrated card. This is where
-    the sound fonts are stored. Note that the saber code WILL NOT work without 
-    sound fonts stored and named properly on the MicroSD card.
-9. **Accelerometer**. Either discrete or on the prop shield. In my experience,
-    the LIS3DH is very reliable if you have a choice.  
-10. 3.7v Li-Ion **battery**. TCSS and Adafruit both sell good, small, long 
+8.  **SD Card**. A simple SD card breakout board or integrated card. This is 
+    where the sound fonts are stored. Note that the saber code WILL NOT work 
+    without sound fonts stored and named properly on the MicroSD card. Also,
+    if using the Teensy 3.5, the SD card is integrated.
+9.  3.7v Li-Ion **battery**. TCSS and Adafruit both sell good, small,  long 
     lasting batteries. Need something rated 2000mAh or better. Amazon as well
     carries protected Li-Ion batteries. (The Panasonic NCR18650B 18650 has 
     been recommended.)
-11. **Speaker**. TCSS and Adafruit carry them, as well as Mouser and Digikey. 
+10. **Speaker**. TCSS and Adafruit carry them, as well as Mouser and Digikey. 
     (I've had a lot of inexpensive speakers arrived damaged from China, so I 
     do recommend a reputable supplier.)
 
 ## Directory Organization
 
 - root
-  - src - ardruito source code
+  - src - ardruino source code
     - saber - code for the saber itself
-    - many other directories for test code and experiments
   - circuits
-    - components - circuit diagrams (as text files) of the different
-      sub-systems.
     - pcb - printed circurit board diagrams
   - img - images and diagrams used by the docs
 
 ## Wiring
 
-Wiring diagram for V5 Prop Shield version of saber: 
-[wiring v5 with prop shield](img/v5prop.png)
-(Github isn't keen on image preview. You may need to clone the source and view
-locally.) Shown without the optional DotStar LED User Interface. There 
-isn't a wiring diagram for the higher versions yet, although they are similar.
-
-An actual photo of a V5 circuit. "Front" is
-the direction of the pin header.
-
-![v5 with Prop Shield](img/v5propShield.jpg)
-
-- The Teensy Microcontroller is the top board. The microcontroller sits on 
-  top of the Prop Shield.
-- The Prop Shield is in the middle. Note that the Teensy microcontroller 
-  needs to be securely soldered onto the Prop Shield, just plugging 
-  it in is not enough.
-  - front: 2 wires are speaker out.
-  - front: a blue and yellow wire that connect the USB on the Teensy 
-    above to the USB on the PCB below. (This is to set up an alternate USB 
-    connection since the standard port is removed. If you don't remove the
-    standard USB port, you don't need these wires.)
-- The OpenSaber PCB is on the bottom. The top 2 boards (Teensy microcontroller 
-  and Prop Shield needs to be soldered securely onto the PCB.
-  - front: 10 solder connections to the switch and blade LED.
-  - front: A 5V power booster and capacitor is nestled in between 2 MOSFETs. 
-    The placement is a little over engineered, honestly. You only need the power
-    booster if using the DotStar LEDs. However, it is generally useful for
-    keeping consistent power to the MicroController, so it is a good to have
-    even without them. Polulu has a great buck/boost converter: 
-    https://www.pololu.com/product/2119
-  - front: red, black, and black lines are for ground and power in from
-    the battery.
-  - front: yellow, blue, and black lines are for connecting a (non-standard)
-    USB port. (Again, if you aren't moving / removing the USB, you probably
-    don't need this.)
-  - back: SD connections. The SD wires haven't been connected yet.
+FIXME new wiring diagram
   
 ### LEDs
 
@@ -241,7 +203,7 @@ Specific LED usage:
 - LED indicator lights, usually on the buttons. Powered at Vcc,
   3.3 volts, stable from the microcontroller. In theory these
   often take 20mA, about a 47 ohm resistors. But that is BRIGHT.
-  I often use 500 to 1000 ohm resistors.
+  I often use 470 or 1000 ohm resistors.
 
 - DotStar smart LEDs. Used for user indicators. (Power meter,
   volume, etc.) Driven by the prop shield, requires no resistors.
@@ -285,8 +247,7 @@ jack is such that:
 This is useful, and convention for almost all saber designs, but a little 
 weird. For it to work (safely) for case #1, the grounded sleeve of the recharge 
 port should be isolated from "true ground" and the case of the saber. You need 
-to be careful with a metal port, or use an insulated plastic one. (I went with
-an insulated plastic one. For example: https://www.amazon.com/gp/product/B0147XFIQ6)
+to be careful with a metal port, or use an insulated plastic one.
 
 #### 3V or 7V
 
@@ -308,29 +269,29 @@ and the control circuit accounts for that.
 
 ### Electronics
 
-The electronics are the heart of the OpenSaber project. There
-are 2 configurations: with and without a Prop Shield. The files are
+The electronics are the heart of the OpenSaber project. The files are
 ExpressPCB files. I regret the proprietary solution, but I've been happy
 thusfar with the service.
 
-The prop shield "collects" 1) an audio amplifier, 2) a DotStar LED controller,
-and 3) an accelerometer onto one board. The PCB with and without the Prop
-Shield are functionally equivalent. But without the Prop Shield, you need
-to add the amp and accelerometer yourself. This is almost always more trouble;
-the wires to connect everything become a problem.
+The shield - which is the PCB that sits on top of the Teensy - collects 
+together 1) an audio amplifier, 2) a DotStar LED controller,
+3) an accelerometer, and 4) and emitter LED power onto one board. It also 
+provides an SPI inteface connection for an external SD card, display, or 
+similar.
 
 - A **microcontroller**, the Teensy 3.2 or 3.5, is the micro-computer
   that runs the software. It controls the blade state, the color
   of the LEDs, the color of the blade, and does audio processing.
 
-  It is soldered to a PCB and (optionally) a prop shield. The microcontroller
-  can be programmed directly via USB, but the PCB also provides an alternate
-  connection to the USB.
+  It is soldered to a shield PCB. The microcontroller
+  can be programmed directly via USB. The 3.5 includes an integrated
+  SD card (handy!), but an SD breakout board can be connected via
+  the SPI interface.
 
 - **LED amplifier** The LED uses a 3 channel, 350ma (average) controller.
-  The microcrontroller uses an amplifier bridge made of 3 MOSFETS, 
-  resistors, and a capacitor. Note the LED resistors
-  are on the PCB and not off-board, as is conventional.
+  The microcrontroller uses an amplifier bridge made of 3 MOSFETS
+  to drive the LEDs. Voltage monitoring is used to keep the LED current
+  constant. You may change the LED current in the software.
 
 - **LED** a 1 WATT Cree or Luxeon LED in a star configuration is typical.
   The LED uses a common anode, as well as 3 control lines: Red, Green, and
