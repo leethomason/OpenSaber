@@ -47,7 +47,7 @@ module crystal()
     color("pink") scale([1.0, Y_CRYSTAL/X_CRYSTAL, 1.0]) {
         cylinder(d=X_CRYSTAL, h=Z_CRYSTAL - TAPER);
         translate([0, 0, Z_CRYSTAL - TAPER])
-            cylinder(h=TAPER, d1 = X_CRYSTAL, d2=X_CRYSTAL / 2);
+            cylinder(h=TAPER, d1 = X_CRYSTAL, d2=X_CRYSTAL *0.7);
     }
 }
 
@@ -166,6 +166,7 @@ M_END_BAFFLE = M_POMMEL + H_BUTTRESS*2*(1 + NUM_BAFFLES);
 DZ_PORT = M_CRYSTAL - M_END_BAFFLE;
 PORT_FRONT = DZ_PORT + M_END_BAFFLE;
 
+SWITCH_BACK = M_SWITCH_CENTER - 9;
 SWITCH_FRONT = M_SWITCH_CENTER + 9;
 T_SWITCH_RING = 2;
 
