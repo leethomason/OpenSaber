@@ -87,10 +87,10 @@ bool SaberDB::writeDefaults()
             { 0xbbbb00,  0xbb00bb,    0 }, 
             { 0xffff00,  0xff00ff,    0 }, 
 
-            { 0xffff00,  0xff00ff,    0 }, 
-            { 0xffff00,  0xff00ff,    0 }, 
-            { 0xffff00,  0xff00ff,    0 }, 
-            { 0xffff00,  0xff00ff,    0 }, 
+            { 0x440044,  0x444400,    0 }, 
+            { 0x880088,  0x888800,    0 }, 
+            { 0xbb00bb,  0xbbbb00,    0 }, 
+            { 0x00ff00,  0xffff00,    0 }, 
         };
 
         static const char* defNames[NUM_PALETTES] = {

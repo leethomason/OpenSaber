@@ -329,7 +329,6 @@ module centerCover()
 
         translate([0, 0, 12])  capsule(60, 60);
         translate([0, 0, 18])  capsule(60, 60);
-        translate([0, 0, 24])  capsule(60, 60);
 
         rods();
     }
@@ -372,13 +371,25 @@ module switchHolder()
                 translate([-20, D_INNER/2 - 6, 0])
                     cube(size=[40, 10, DZ]);
             }        
+            intersection() {
+                cylinder(h=DZ, d=D_INNER);
+                translate([0, -20, 9])
+                    cubePair(10, size=[20, 21.5, 40]);
+            }
         }
         translate([0, 0, M_SWITCH_CENTER]) switch(true);
+        translate([0, 0, Z+4])  capsule(60, 70);
+        translate([0, 0, Z+10])  capsule(60, 70);
+
+        translate([0, 0, Z+4])  capsule(-60, -70);
+        translate([0, 0, Z+10])  capsule(-60, -70);
+
+        rods();
     }
     intersection() {
         translate([0, 0, Z]) cylinder(h=DZ, d=D_INNER);
-        translate([10, -20, M_EMITTER_BACK - 8])
-            cube(size=[20, 24, 40]);
+        translate([0, -20, M_EMITTER_BACK - 8])
+            cubePair(10, size=[20, 24, 40]);
     }
 }
 
@@ -431,8 +442,8 @@ module emitter() {
 *translate([0, 0, M_SPEAKER]) speaker();
 *color("yellow") rods();
 
-DRAW_AFT        = true;
-DRAW_FRONT      = false;
+DRAW_AFT        = false;
+DRAW_FRONT      = true;
 DRAW_LED_PLATE  = false;
 DRAW_COVER      = false;
 
