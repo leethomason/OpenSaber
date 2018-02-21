@@ -47,7 +47,7 @@ module crystal()
     color("pink") scale([1.0, Y_CRYSTAL/X_CRYSTAL, 1.0]) {
         cylinder(d=X_CRYSTAL, h=Z_CRYSTAL - TAPER);
         translate([0, 0, Z_CRYSTAL - TAPER])
-            cylinder(h=TAPER, d1 = X_CRYSTAL, d2=X_CRYSTAL / 2);
+            cylinder(h=TAPER, d1 = X_CRYSTAL, d2=X_CRYSTAL *0.7);
     }
 }
 
@@ -172,6 +172,7 @@ M_END_BAFFLE = M_POMMEL + H_BUTTRESS*2*(1 + NUM_BAFFLES);
 DZ_PORT = M_CRYSTAL - M_END_BAFFLE;
 PORT_FRONT = DZ_PORT + M_END_BAFFLE;
 
+SWITCH_BACK = M_SWITCH_CENTER - 9;
 SWITCH_FRONT = M_SWITCH_CENTER + 9;
 T_SWITCH_RING = 2;
 
@@ -328,7 +329,6 @@ module centerCover()
 
         translate([0, 0, 12])  capsule(60, 60);
         translate([0, 0, 18])  capsule(60, 60);
-        translate([0, 0, 24])  capsule(60, 60);
 
         rods();
     }
@@ -360,10 +360,10 @@ module centerCover()
 
 module switchHolder()
 {
-    difference() {
-        Z = M_CRYSTAL + Z_CRYSTAL;
-        DZ = M_EMITTER_BACK - Z;
+    Z = M_CRYSTAL + Z_CRYSTAL;
+    DZ = M_EMITTER_BACK - Z;
 
+    difference() {
         translate([0, 0, Z]) union() {
             tube(h=DZ, di=(D_INNER - DD_HOLDER_TUBES), do=D_INNER);
             intersection() {
@@ -371,8 +371,25 @@ module switchHolder()
                 translate([-20, D_INNER/2 - 6, 0])
                     cube(size=[40, 10, DZ]);
             }        
+            intersection() {
+                cylinder(h=DZ, d=D_INNER);
+                translate([0, -20, 9])
+                    cubePair(10, size=[20, 21.5, 40]);
+            }
         }
         translate([0, 0, M_SWITCH_CENTER]) switch(true);
+        translate([0, 0, Z+4])  capsule(60, 70);
+        translate([0, 0, Z+10])  capsule(60, 70);
+
+        translate([0, 0, Z+4])  capsule(-60, -70);
+        translate([0, 0, Z+10])  capsule(-60, -70);
+
+        rods();
+    }
+    intersection() {
+        translate([0, 0, Z]) cylinder(h=DZ, d=D_INNER);
+        translate([0, -20, M_EMITTER_BACK - 8])
+            cubePair(10, size=[20, 24, 40]);
     }
 }
 
@@ -425,8 +442,8 @@ module emitter() {
 *translate([0, 0, M_SPEAKER]) speaker();
 *color("yellow") rods();
 
-DRAW_AFT        = true;
-DRAW_FRONT      = false;
+DRAW_AFT        = false;
+DRAW_FRONT      = true;
 DRAW_LED_PLATE  = false;
 DRAW_COVER      = false;
 

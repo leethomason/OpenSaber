@@ -3,7 +3,7 @@ M_SPEAKER           = -2;
 M_0                 =  0;
 M_POMMEL            =  10;     // thread is to 15; pommel to 10
 M_PORT_CENTER       =  90;     // max is 102
-M_SWITCH_CENTER     = 135;
+M_SWITCH_CENTER     = 135.5;
 M_EMITTER_BACK      = 149.5;
 
 M_CRYSTAL           =  97;
@@ -26,8 +26,8 @@ DY_MC               = -12.5;
 D_SWITCH            =  12.5;     // actually 12, by thread.
 Y_SWITCH            =  13.5;
 
-X_CRYSTAL           =  11.5;
-Y_CRYSTAL           =   9.5;
+X_CRYSTAL           =  11;
+Y_CRYSTAL           =   8.5;
 Z_CRYSTAL           =  30.0;
 D_CRYSTAL_BAFFLE    =  18;
 H_CRYSTAL_BAFFLE    =   2;
