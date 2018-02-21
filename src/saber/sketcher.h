@@ -97,6 +97,8 @@ private:
 
 void calcCrystalColor(uint32_t msec, int32_t lowVariation, int32_t highVariation, const RGB& base, RGB* out);
 
+uint8_t calcSingleCrystalColor(uint32_t msec);
+
 bool TestCrystalColor();
 
 #endif // SKETCHER_INCLUDED

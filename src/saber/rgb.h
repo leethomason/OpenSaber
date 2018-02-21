@@ -33,9 +33,14 @@ struct RGB {
 	uint32_t get() const {
 		return (uint32_t(r) << 16) | (uint32_t(g) << 8) | uint32_t(b);
 	}
+
 	uint8_t get(int index) const {
 		return *(&r + index);
 	}
+
+    uint8_t average() const {
+        return (int(r) + int(g) + int(b)) / 3;
+    }
 
     void scale(uint16_t s) {
         r = (uint16_t(r) * uint16_t(s)) >> 8;

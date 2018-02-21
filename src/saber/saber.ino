@@ -223,6 +223,11 @@ void setup() {
         Log.p("Crystal Dotstart initialized.").eol();
     #endif
 
+    #ifdef PINB_CRYSTAL
+        analogWrite(PIN_LED_B, 0);
+        pinMode(PIN_LED_B, OUTPUT);
+    #endif
+
     #ifdef SABER_SISTERS 
         #if SABER_SUB_MODEL == SABER_SUB_MODEL_LUNA
             const int role = 0;
@@ -707,14 +712,27 @@ void loop() {
             const RGB bladeColor = saberDB.bladeColor();
             if (bladeState.state() == BLADE_OFF && (uiMode.mode() == UIMode::NORMAL)) {
                 calcCrystalColor(msec, SABER_CRYSTAL_LOW, SABER_CRYSTAL, bladeColor, &leds[0]);
-                //OSASSERT(leds[0].get());
-                //OSASSERT(dotstar.brightness() == 256);
             }
             else {
                 leds[0] = bladeColor;
             }
         }
     }
+    #endif
+    #if defined(PINB_CRYSTAL)
+        if (saberDB.crystalColor().get()) {
+            // It has been set on the command line for testing.
+           analogWrite(PIN_LED_B, saberDB.crystalColor().average());
+        }
+        else {
+            if (bladeState.state() == BLADE_OFF && (uiMode.mode() == UIMode::NORMAL)) {
+                uint8_t c = calcSingleCrystalColor(msec);
+                analogWrite(PIN_LED_B, c);
+            }
+            else {
+                analogWrite(PIN_LED_B, 255);
+            }
+        }
     #endif
 
     #ifdef SABER_NUM_LEDS

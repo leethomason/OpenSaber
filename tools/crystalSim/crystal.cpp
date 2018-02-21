@@ -40,6 +40,7 @@ int main(int, char**) {
 	SDL_Event e;
 	int currentBase = 0;
 	uint32_t baseTime = 0;
+	bool rgbCrystal = true;
 
 	while (true) {
 		SDL_PollEvent(&e);
@@ -50,6 +51,9 @@ int main(int, char**) {
 			if (e.key.keysym.sym == SDLK_SPACE) {
 				currentBase = (currentBase + 1) % 6;
 				baseTime = SDL_GetTicks();
+			}
+			else if (e.key.keysym.sym == SDLK_r) {
+				rgbCrystal = !rgbCrystal;
 			}
 		}
 
@@ -68,7 +72,14 @@ int main(int, char**) {
 		};
 		RGB c;
 		RGB base(baseColors[currentBase].r, baseColors[currentBase].g, baseColors[currentBase].b);
-		calcCrystalColor(SDL_GetTicks() - baseTime, 20, 80, base, &c);
+
+		if (rgbCrystal) {
+			calcCrystalColor(SDL_GetTicks() - baseTime, 20, 80, base, &c);
+		}
+		else {
+			uint8_t v = calcSingleCrystalColor(SDL_GetTicks() - baseTime);
+			c.r = c.g = c.b = v;
+		}
 
 		SDL_SetRenderDrawColor(ren, c[0], c[1], c[2], 255);
 		SDL_RenderFillRects(ren, rects, 5);

@@ -485,11 +485,12 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_VOLTMETER
 	#define SABER_AUDIO_UI
 	#define SABER_BOOT_SOUND
+	#define PINB_CRYSTAL
 	#define LED_TYPE 				LED_TYPE_GGC
 
 	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 
-	static const int32_t UVOLT_MULT = 6691;		
+	static const int32_t UVOLT_MULT = 6691;		// FIXME, true.
 
 	// Thermal paste heat sinking to the case.
 	// Green
