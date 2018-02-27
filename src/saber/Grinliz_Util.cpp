@@ -287,88 +287,90 @@ int Timer2::tick(uint32_t delta)
 	return true;
 }
 
-void SPLog::event(const char* e)
+void SPLog::event(const char* e, int data)
 {
 	ASSERT(e);
-	_hasEvent = true;
-	eventName = e;
-	eventStrData.clear();
-	eventIData = 0;
+	ASSERT(m_nEvents < NUM_EVENTS);
+	if (m_nEvents == NUM_EVENTS)
+		return;
 
-	p(eventName.c_str()).eol();
+	int slot = (m_head + m_nEvents) % NUM_EVENTS;
+
+	m_events[slot].name = e;
+	m_events[slot].data = data;
+
+	if (m_eventLogging)
+		p(m_events[slot].name).p(" data=").p(m_events[slot].data).eol();
+
+	++m_nEvents;
 }
 
-void SPLog::event(const char* e, const char* d)
+SPLog::Event SPLog::popEvent()
 {
-	ASSERT(e);
-	ASSERT(d);
-	_hasEvent = true;
+	Event e;
+	ASSERT(m_nEvents > 0);
+	if (m_nEvents == 0)
+		return e;
 
-	eventName = e;
-	eventStrData = d;
-	eventIData = 0;
-
-	p(eventName.c_str()).p(" ").p(eventStrData.c_str()).eol();
-}
-
-void SPLog::event(const char* e, int d)
-{
-	ASSERT(e);
-	_hasEvent = true;
-
-	eventName = e;
-	eventStrData.clear();
-	eventIData = d;
-
-	p(eventName.c_str()).p(" ").p(eventIData).eol();
-}
-
-const char* SPLog::popEvent(const char** n, const char** d, int* di)
-{
-	if (_hasEvent) {
-		_hasEvent = false;
-		if (n)
-			*n = eventName.c_str();
-		if (d)
-			*d = eventStrData.c_str();
-		if (di)
-			*di = eventIData;
-		return eventName.c_str();
-	}
-	if (n) *n = 0;
-	if (d) *d = 0;
-	if (di) *di = 0;
-	return 0;
+	e = m_events[m_head];
+	++m_head;
+	--m_nEvents;
+	if (m_head == NUM_EVENTS)
+		m_head = 0;
+	return e;
 }
 
 SPLog Log;
 
+void PushTestEvents(int n)
+{
+	if (n >= 1) Log.event("Event0");
+	if (n >= 2) Log.event("Event1", 1);
+	if (n >= 3) Log.event("Event2", 2);
+	if (n >= 4) Log.event("Event3", 3);
+	if (n >= 5) Log.event("Event4", 4);
+	if (n >= 6) Log.event("Event5", 5);
+	if (n >= 7) Log.event("Event6", 6);
+	if (n >= 8) Log.event("Event7", 7);
+}
+
+
 bool TestEvent()
 {
-	const char* name = 0;
-	const char* data = 0;
-	int iData = 0;
-
-	const char* savedName = 0;
-	const char* savedData = 0;
-
-	if (Log.hasEvent()) {
-		Log.popEvent(&savedName, &savedData, 0);
+	Log.setEventLogging(false);
+	TEST_IS_FALSE(Log.hasEvent());
+	{
+		PushTestEvents(1);
+		TEST_IS_TRUE(Log.hasEvent());
+		SPLog::Event e = Log.popEvent();
+		TEST_IS_TRUE(strEqual(e.name, "Event0"));
+		TEST_IS_TRUE(e.data == 0);
 	}
-
 	TEST_IS_FALSE(Log.hasEvent());
-
-	Log.event("foo");
-	Log.popEvent(&name, &data, &iData);
-	TEST_IS_TRUE(strEqual(name, "foo"));
-	TEST_IS_TRUE(*data == 0);
-	TEST_IS_TRUE(iData == 0);
+	{
+		PushTestEvents(3);
+		TEST_IS_TRUE(Log.hasEvent());
+		SPLog::Event e = Log.popEvent();
+		TEST_IS_TRUE(strEqual(e.name, "Event0"));
+		TEST_IS_TRUE(e.data == 0);
+		e = Log.popEvent();
+		TEST_IS_TRUE(strEqual(e.name, "Event1"));
+		TEST_IS_TRUE(e.data == 1);	
+		e = Log.popEvent();
+		TEST_IS_TRUE(strEqual(e.name, "Event2"));
+		TEST_IS_TRUE(e.data == 2);	
+	}
 	TEST_IS_FALSE(Log.hasEvent());
-
-	//if (savedName) {
-	//    Log.event(savedName, savedData);
-	//}
-
+	{
+		PushTestEvents(8);
+		for (int i = 0; i < 7; ++i)
+			Log.popEvent();
+		SPLog::Event e = Log.popEvent();
+		TEST_IS_TRUE(strEqual(e.name, "Event7"));
+		TEST_IS_TRUE(e.data == 7);
+	}
+	TEST_IS_FALSE(Log.hasEvent());
+	Log.setEventLogging(true);
 	return true;
 }
 

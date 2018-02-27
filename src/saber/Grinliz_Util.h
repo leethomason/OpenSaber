@@ -356,21 +356,26 @@ public:
 	const SPLog& p(const RGB& rgb) const;
 	void eol() const;
 
-	void event(const char* event);
-	void event(const char* event, const char* data);
-	void event(const char* event, int data);
+	void event(const char* event, int data=0);
 
-	const char* popEvent(const char** name, const char** data = 0, int* dataI = 0);
-	bool hasEvent() const { return _hasEvent; }
+	struct Event{
+		const char* name = 0;
+		int			data = 0;
+	};
+
+	Event popEvent();
+	bool hasEvent() const { return m_nEvents > 0; }
+	void setEventLogging(bool enable) { m_eventLogging = enable; }
 
 private:
 	Stream* serialStream = 0;
 	Stream* logStream = 0;
 
-	bool     _hasEvent = false;
-	CStr<40> eventName;
-	CStr<40> eventStrData;
-	int      eventIData;
+	static const int NUM_EVENTS = 8;
+	int m_nEvents = 0;
+	int m_head = 0;
+	bool m_eventLogging = true;
+	Event m_events[NUM_EVENTS];
 };
 
 extern SPLog Log;
