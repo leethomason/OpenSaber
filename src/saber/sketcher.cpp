@@ -427,19 +427,13 @@ void calcCrystalColor(uint32_t t, int32_t lowVariation, int32_t highVariation, c
 
 uint8_t calcSingleCrystalColor(uint32_t t)
 {
-	/*
-	uint32_t tc[2] = { t / 17UL, t / 71UL };
-	int32_t s0 = isin(tc[0]);
-	int32_t s1 = isin(tc[1]);
+	static const uint32_t DIV = 23;
+	static const uint32_t DIVL = DIV * 4;
 
-	int32_t scaledColor = ((s0+256) * 2 + s1) / 5;
-	//int32_t scaledColor = s1;
-	scaledColor = (scaledColor + 256) / 2;
-	scaledColor = clamp(scaledColor, 0, 255);
-	*/
-
-	int32_t s = isin(uint16_t(t / uint32_t(17)));
-	uint32_t scaledColor = uint32_t(30) + uint32_t(s + 256) * uint32_t(205) / uint32_t(512);
+	uint8_t s  = isin255(uint16_t(t / uint32_t(DIV)));
+	uint8_t sL = isin255(uint16_t(t / uint32_t(DIVL)));
+	uint32_t base = 10 + 50 * sL / 255;
+	uint32_t scaledColor = base + uint32_t(s+1) * uint32_t(255 - base) / uint32_t(256);
 
 	return uint8_t(clamp(scaledColor, uint32_t(0), uint32_t(255)));
 }

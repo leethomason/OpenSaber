@@ -580,11 +580,8 @@ Test* Tester::done()
 		Log.p("******").eol();
 		Log.p("Test passes run=").p(nPasses).eol();
 
-		Log.p("Unit test: CStr:   ").p(TestCStr() ? "pass" : "fail").eol();
-		Log.p("Unit test: HexDec: ").p(TestHexDec() ? "pass" : "fail").eol();
-		Log.p("Unit test: Event:  ").p(TestEvent() ? "pass" : "fail").eol();
-		Log.p("Test DotStar UI").eol(); DotStarUI::Test();
-		Log.p("Test crystal color.").eol(); TestCrystalColor();
+		bool success = runUnitTests();
+		ASSERT(success);
 
 		#if SERIAL_DEBUG == 0
 		Log.attachSerial(0);

@@ -221,95 +221,10 @@ void SPLog::eol() const
     }
 }
 
-void SPLog::event(const char* e)
-{
-  ASSERT(e);
-  _hasEvent = true;
-  eventName = e;
-  eventStrData.clear();
-  eventIData = 0;
-
-  p(eventName.c_str()).eol();
-}
-
-void SPLog::event(const char* e, const char* d)
-{
-  ASSERT(e);
-  ASSERT(d);
-  _hasEvent = true;
-
-  eventName = e;
-  eventStrData = d;
-  eventIData = 0;
-
-  p(eventName.c_str()).p(" ").p(eventStrData.c_str()).eol();
-}
-
-void SPLog::event(const char* e, int d)
-{
-  ASSERT(e);
-  _hasEvent = true;
-
-  eventName = e;
-  eventStrData.clear();
-  eventIData = d;
-
-  p(eventName.c_str()).p(" ").p(eventIData).eol();
-}
-
-const char* SPLog::popEvent(const char** n, const char** d, int* di)
-{
-    if (_hasEvent) {
-      _hasEvent = false;
-      if (n) 
-          *n = eventName.c_str();
-      if (d)
-          *d = eventStrData.c_str();
-      if (di)
-          *di = eventIData;
-      return eventName.c_str();
-    }
-    if (n) *n = 0;
-    if (d) *d = 0;
-    if (di) *di = 0;
-    return 0;
-}
-
-SPLog Log;
 
 void AssertOut(const char* message, const char* file, int line)
 {
   Log.p("ASSERT: ").p(message).p(" ").p(file).p(" ").p(line).eol();
-}
-
-
-bool TestEvent()
-{
-    const char* name = 0;
-    const char* data = 0;
-    int iData = 0;
-
-    const char* savedName = 0;
-    const char* savedData = 0;
-
-    if (Log.hasEvent()) {
-        Log.popEvent(&savedName, &savedData, 0);
-    }
-
-    TEST_IS_FALSE(Log.hasEvent());
-
-    Log.event("foo");
-    Log.popEvent(&name, &data, &iData);
-    TEST_IS_TRUE(strEqual(name, "foo"));
-    TEST_IS_TRUE(*data == 0);
-    TEST_IS_TRUE(iData == 0);
-    TEST_IS_FALSE(Log.hasEvent());
-
-    //if (savedName) {
-    //    Log.event(savedName, savedData);
-    //}
-
-    return true;
 }
 
 

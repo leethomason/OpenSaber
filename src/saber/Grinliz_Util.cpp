@@ -39,6 +39,12 @@ int16_t isin(uint16_t x)
 	return gSinTable[x & 0xff];
 }
 
+uint8_t isin255(uint16_t x)
+{
+	uint32_t s = uint32_t(isin(x) + 256);	// 0-512
+	s = s * uint32_t(255) / uint32_t(512);  // 0-255
+	return uint8_t(s);
+}
 
 bool strStarts(const char* str, const char* prefix)
 {
@@ -278,6 +284,91 @@ int Timer2::tick(uint32_t delta)
 	TEST_IS_EQ(t2.tick(400), 0);
 	TEST_IS_EQ(t2.tick(100), 1);
 	TEST_IS_FALSE(t2.enabled());
+	return true;
+}
+
+void SPLog::event(const char* e)
+{
+	ASSERT(e);
+	_hasEvent = true;
+	eventName = e;
+	eventStrData.clear();
+	eventIData = 0;
+
+	p(eventName.c_str()).eol();
+}
+
+void SPLog::event(const char* e, const char* d)
+{
+	ASSERT(e);
+	ASSERT(d);
+	_hasEvent = true;
+
+	eventName = e;
+	eventStrData = d;
+	eventIData = 0;
+
+	p(eventName.c_str()).p(" ").p(eventStrData.c_str()).eol();
+}
+
+void SPLog::event(const char* e, int d)
+{
+	ASSERT(e);
+	_hasEvent = true;
+
+	eventName = e;
+	eventStrData.clear();
+	eventIData = d;
+
+	p(eventName.c_str()).p(" ").p(eventIData).eol();
+}
+
+const char* SPLog::popEvent(const char** n, const char** d, int* di)
+{
+	if (_hasEvent) {
+		_hasEvent = false;
+		if (n)
+			*n = eventName.c_str();
+		if (d)
+			*d = eventStrData.c_str();
+		if (di)
+			*di = eventIData;
+		return eventName.c_str();
+	}
+	if (n) *n = 0;
+	if (d) *d = 0;
+	if (di) *di = 0;
+	return 0;
+}
+
+SPLog Log;
+
+bool TestEvent()
+{
+	const char* name = 0;
+	const char* data = 0;
+	int iData = 0;
+
+	const char* savedName = 0;
+	const char* savedData = 0;
+
+	if (Log.hasEvent()) {
+		Log.popEvent(&savedName, &savedData, 0);
+	}
+
+	TEST_IS_FALSE(Log.hasEvent());
+
+	Log.event("foo");
+	Log.popEvent(&name, &data, &iData);
+	TEST_IS_TRUE(strEqual(name, "foo"));
+	TEST_IS_TRUE(*data == 0);
+	TEST_IS_TRUE(iData == 0);
+	TEST_IS_FALSE(Log.hasEvent());
+
+	//if (savedName) {
+	//    Log.event(savedName, savedData);
+	//}
+
 	return true;
 }
 

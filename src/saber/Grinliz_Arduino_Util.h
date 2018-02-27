@@ -55,41 +55,5 @@ private:
     uint8_t cs;
 };
 
-class SPLog
-{
-public:
-	void attachSerial(Stream* stream);
-	void attachLog(Stream* stream);
-
-	const SPLog& p(const char v[]) const;
-    const SPLog& p(char v) const;
-    const SPLog& p(unsigned char v, int p = DEC) const;
-    const SPLog& p(int v, int p = DEC) const;
-    const SPLog& p(unsigned int v, int p = DEC) const;
-    const SPLog& p(long v, int p = DEC) const;
-    const SPLog& p(unsigned long v, int p = DEC) const;
-    const SPLog& p(double v, int p = 2) const;
-    const SPLog& p(const RGB& rgb) const;
-    void eol() const;
-
-    void event(const char* event);
-    void event(const char* event, const char* data);
-    void event(const char* event, int data);
-
-    const char* popEvent(const char** name, const char** data = 0, int* dataI = 0);
-    bool hasEvent() const { return _hasEvent; }
-
-private:
-	Stream* serialStream = 0;
-	Stream* logStream = 0;  
-
-    bool     _hasEvent = false;
-	CStr<40> eventName;
-	CStr<40> eventStrData;
-	int      eventIData;
-};
-
-extern SPLog Log;
-bool TestEvent();
 
 #endif // CSTR_INCLUDED

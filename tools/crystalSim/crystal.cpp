@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 #include "../../src/saber/sketcher.h"
+#include "../../src/saber/unittest.h"
 
 static const int WIDTH = 256;
 static const int HEIGHT = 192;
@@ -19,8 +20,6 @@ int main(int, char**) {
 	baseColors[3].set(0xff0000);
 	baseColors[4].set(0xa000a0);
 	baseColors[5].set(0x0080ff);
-
-	TestCrystalColor();
 
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
 		printf("SDL_Init Error: %s\n", SDL_GetError());
@@ -41,6 +40,8 @@ int main(int, char**) {
 	int currentBase = 0;
 	uint32_t baseTime = 0;
 	bool rgbCrystal = true;
+
+	runUnitTests();
 
 	while (true) {
 		SDL_PollEvent(&e);
