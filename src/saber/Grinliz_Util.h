@@ -363,9 +363,17 @@ public:
 	const SPLog& p(const RGB& rgb) const;
 	void eol() const;
 
-	void event(const char* event, int data=0);
+private:
+	Stream* serialStream = 0;
+	Stream* logStream = 0;
+};
 
-	struct Event{
+class EventQueue
+{
+public:
+	void event(const char* event, int data = 0);
+
+	struct Event {
 		const char* name = 0;
 		int			data = 0;
 	};
@@ -374,10 +382,10 @@ public:
 	bool hasEvent() const { return m_nEvents > 0; }
 	void setEventLogging(bool enable) { m_eventLogging = enable; }
 
-private:
-	Stream* serialStream = 0;
-	Stream* logStream = 0;
+	int numEvents() const			{ return m_nEvents; }
+	const Event& peek(int i) const;
 
+private:
 	static const int NUM_EVENTS = 8;
 	int m_nEvents = 0;
 	int m_head = 0;
@@ -386,6 +394,8 @@ private:
 };
 
 extern SPLog Log;
+extern EventQueue EventQ;
+
 bool TestEvent();
 
 #endif // GRINLIZ_UTIL_INCLUDED

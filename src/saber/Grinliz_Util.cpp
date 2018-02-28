@@ -287,7 +287,7 @@ int Timer2::tick(uint32_t delta)
 	return true;
 }
 
-void SPLog::event(const char* e, int data)
+void EventQueue::event(const char* e, int data)
 {
 	ASSERT(e);
 	ASSERT(m_nEvents < NUM_EVENTS);
@@ -300,12 +300,21 @@ void SPLog::event(const char* e, int data)
 	m_events[slot].data = data;
 
 	if (m_eventLogging)
-		p(m_events[slot].name).p(" data=").p(m_events[slot].data).eol();
+		Log.p(m_events[slot].name).p(" data=").p(m_events[slot].data).eol();
 
 	++m_nEvents;
 }
 
-SPLog::Event SPLog::popEvent()
+
+const EventQueue::Event& EventQueue::peek(int i) const
+{
+	ASSERT(i < m_nEvents);
+	int slot = (m_head + m_nEvents) % NUM_EVENTS;
+	return m_events[slot];
+}
+
+
+EventQueue::Event EventQueue::popEvent()
 {
 	Event e;
 	ASSERT(m_nEvents > 0);
@@ -321,56 +330,57 @@ SPLog::Event SPLog::popEvent()
 }
 
 SPLog Log;
+EventQueue EventQ;
 
 void PushTestEvents(int n)
 {
-	if (n >= 1) Log.event("Event0");
-	if (n >= 2) Log.event("Event1", 1);
-	if (n >= 3) Log.event("Event2", 2);
-	if (n >= 4) Log.event("Event3", 3);
-	if (n >= 5) Log.event("Event4", 4);
-	if (n >= 6) Log.event("Event5", 5);
-	if (n >= 7) Log.event("Event6", 6);
-	if (n >= 8) Log.event("Event7", 7);
+	if (n >= 1) EventQ.event("Event0");
+	if (n >= 2) EventQ.event("Event1", 1);
+	if (n >= 3) EventQ.event("Event2", 2);
+	if (n >= 4) EventQ.event("Event3", 3);
+	if (n >= 5) EventQ.event("Event4", 4);
+	if (n >= 6) EventQ.event("Event5", 5);
+	if (n >= 7) EventQ.event("Event6", 6);
+	if (n >= 8) EventQ.event("Event7", 7);
 }
 
 
 bool TestEvent()
 {
-	Log.setEventLogging(false);
-	TEST_IS_FALSE(Log.hasEvent());
+	EventQ.setEventLogging(false);
+	TEST_IS_FALSE(EventQ.hasEvent());
 	{
 		PushTestEvents(1);
-		TEST_IS_TRUE(Log.hasEvent());
-		SPLog::Event e = Log.popEvent();
+		TEST_IS_TRUE(EventQ.hasEvent());
+		EventQueue::Event e = EventQ.popEvent();
 		TEST_IS_TRUE(strEqual(e.name, "Event0"));
 		TEST_IS_TRUE(e.data == 0);
 	}
-	TEST_IS_FALSE(Log.hasEvent());
+	TEST_IS_FALSE(EventQ.hasEvent());
 	{
 		PushTestEvents(3);
-		TEST_IS_TRUE(Log.hasEvent());
-		SPLog::Event e = Log.popEvent();
+		TEST_IS_TRUE(EventQ.hasEvent());
+		EventQueue::Event e = EventQ.popEvent();
 		TEST_IS_TRUE(strEqual(e.name, "Event0"));
 		TEST_IS_TRUE(e.data == 0);
-		e = Log.popEvent();
+		e = EventQ.popEvent();
 		TEST_IS_TRUE(strEqual(e.name, "Event1"));
 		TEST_IS_TRUE(e.data == 1);	
-		e = Log.popEvent();
+		e = EventQ.popEvent();
 		TEST_IS_TRUE(strEqual(e.name, "Event2"));
 		TEST_IS_TRUE(e.data == 2);	
 	}
-	TEST_IS_FALSE(Log.hasEvent());
+	TEST_IS_FALSE(EventQ.hasEvent());
 	{
 		PushTestEvents(8);
 		for (int i = 0; i < 7; ++i)
-			Log.popEvent();
-		SPLog::Event e = Log.popEvent();
+			EventQ.popEvent();
+		EventQueue::Event e = EventQ.popEvent();
 		TEST_IS_TRUE(strEqual(e.name, "Event7"));
 		TEST_IS_TRUE(e.data == 7);
 	}
-	TEST_IS_FALSE(Log.hasEvent());
-	Log.setEventLogging(true);
+	TEST_IS_FALSE(EventQ.hasEvent());
+	EventQ.setEventLogging(true);
 	return true;
 }
 
