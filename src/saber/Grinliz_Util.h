@@ -4,6 +4,13 @@
 #include <string.h>
 #include <stdint.h>
 
+#ifndef _WIN32
+#include <Arduino.h>
+#endif
+
+struct RGB;
+class Stream;
+
 template<bool> struct CompileTimeAssert;
 template<> struct CompileTimeAssert <true> {};
 #define STATIC_ASSERT(e) (CompileTimeAssert <(e) != 0>())
