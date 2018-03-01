@@ -20,7 +20,7 @@ public:
 
 	virtual const char* name() const = 0;
 	virtual void start(Tester* tester)	{}
-	virtual int process(Tester* tester, const char* event, const char* eventData) = 0;
+	virtual int process(Tester* tester, EventQueue* queue) = 0;
 
 	int finalResult = 0;
 
@@ -35,7 +35,7 @@ public:
 	void attach(Button* buttonA, Button* buttonB);
 	void attachUI(const RGB* uiLEDs) { leds = uiLEDs; }
 
-	void runTests(int count = 1, bool longTestTime=false);
+	void runTests();
 	void process();
 	static Tester* instance() { return s_instance; }
 
@@ -44,12 +44,12 @@ public:
 	void fire(const char* event);
 	void press(int button, uint32_t time);
 	void delayedPress(int button, uint32_t wait, uint32_t time);
-	void checkAudio(const char* name, uint32_t low, uint32_t high);
 	uint32_t getRandom() { return r.rand16(); }
 	bool longTest() const { return useLongTest; }
 	const RGB* getLEDs() const { return leds; }
 
-	int order = 0;
+	int getOrder() const { return order; }
+	void incrementOrder() { order++; }
 
 private:	
 	void start();
@@ -70,11 +70,7 @@ private:
 	int nPasses = 1;
 	bool useLongTest;
 	const RGB* leds = 0;
-
-	uint32_t testAudio = 0;
-	const char* audioName = 0;
-	uint32_t audioLow = 0;
-	uint32_t audioHigh = 0;
+	int order = 0;
 
 	struct Press {
 		uint32_t start;

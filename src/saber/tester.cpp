@@ -34,6 +34,14 @@ static const int EFFECT_BUTTON = 1;
 		while(true)	{}							\
 	 }
 
+#define TEST_STR_EQUAL(expected, actual) 		\
+	ASSERT(strEqual(expected, actual));			\
+	if (expected != actual) { 					\
+		Log.p("Expected:").p(expected).eol(); 	\
+		Log.p("Actual:").p(actual).eol();		\
+		while(true)	{}							\
+	 }
+
 #define TEST_RANGE(low, high, actual) 	\
 	ASSERT(actual >= low && actual <= high);	\
 	if (actual < low || actual > high) {		\
@@ -53,282 +61,98 @@ class IgniteRetractTest : public Test
 	uint16_t startDs = 0;
 
 	virtual const char* name() const { return "IgniteRetractTest"; }
+
 	virtual void start(Tester* tester) 
 	{
 		tester->press(0, HOLD_TIME);
 	}
 
-	virtual int process(Tester* tester, const char* event, const char* eventData) 
+	virtual int process(Tester* tester, EventQueue* queue) 
 	{
 		int result = TEST_CONTINUE;
 
-		if (strEqual(event, "[BLADE_IGNITE]")) {
-			TEST_ORDER(0);
-			Log.p("en=").p(SFX::instance()->nEnabled()).p(" ds=").p(SFX::instance()->nDisabled()).eol();
-			startEn = SFX::instance()->nEnabled();
-			startDs = SFX::instance()->nDisabled();
-			tester->checkAudio("ignite", 500, 2500);	
-		}
-		else if (strEqual(event, "[BLADE_ON]")) {
-			TEST_ORDER(1);
-			TEST_RANGE(1, 255*3, Blade::blade().pwmVal(0) + Blade::blade().pwmVal(1) + Blade::blade().pwmVal(2));
-			tester->checkAudio("idle", 1000, 120000);	// hum
+		while(queue->hasEvent()) {
+			EventQueue::Event e = queue->popEvent();
+			if (!strStarts(e.name, "[BLADE_"))
+				continue;
 
-			uint32_t delayTime = tester->longTest() ? 5000 : AUDIO_CHECKED_TIME;
-			tester->delayedPress(0, delayTime, HOLD_TIME);
+			static const char* EXPECTED[4] = {
+				"[BLADE_IGNITE]",
+				"[BLADE_ON]",
+				"[BLADE_RETRACT]",
+				"[BLADE_OFF]"
+			};
+
+			ASSERT(tester->getOrder() < 4);
+
+			TEST_STR_EQUAL(e.name, EXPECTED[tester->getOrder()]);
+			if (tester->getOrder() == 1) {
+				// Turn off again.
+				tester->delayedPress(0, 1000, HOLD_TIME);
+			}
+			else if (tester->getOrder() == 3) {
+				result = TEST_SUCCESS;
+				break;
+			}
+			tester->incrementOrder();
 		}
-		else if (strEqual(event, "[unlocked]")) {
-			Log.p("unlocked").eol();
-			tester->delayedPress(0, 200, 100);
-		}
-		else if (strEqual(event, "[BLADE_RETRACT]")) {
-			TEST_ORDER(2);
-			tester->checkAudio("retract", 500, 2000);
-		}
-		else if (strEqual(event, "[BLADE_OFF]")) {
-			TEST_ORDER(3);
-			Log.p("en=").p(SFX::instance()->nEnabled()).p(" ds=").p(SFX::instance()->nDisabled()).eol();
-			// These tests aren't stable. Need to understand why.
-			//TEST_EQUAL(startEn + 1, SFX::instance()->nEnabled());
-			//TEST_EQUAL(startDs, SFX::instance()->nDisabled());
-			result = TEST_SUCCESS;
-		}		
 		return result;
 	}
 };
 
 
-class PaletteTest : public Test
-{
-public:
-	int numChanges;
-	static const int NUM_ITERATION = 24;
-
-	virtual const char* name() const { return "PaletteTest"; }
-	virtual void start(Tester* tester) 
-	{
-		numChanges = 0;
-		tester->press(0, HOLD_TIME);
-	}
-
-	virtual int process(Tester* tester, const char* event, const char* eventData) 
-	{
-		int result = TEST_CONTINUE;
-
-		if (strEqual(event, "[BLADE_IGNITE]")) {
-			TEST_ORDER(0);
-			tester->checkAudio("ignite", 500, 2000);	
-		}
-		else if (strEqual(event, "[BLADE_ON]")) {
-			TEST_ORDER(1);
-			TEST_RANGE(1, 255*3, Blade::blade().pwmVal(0) + Blade::blade().pwmVal(1) + Blade::blade().pwmVal(2));
-			tester->checkAudio("idle", 1000, 120000);
-
-			tester->delayedPress(1, AUDIO_CHECKED_TIME, 300);
-			tester->delayedPress(0, AUDIO_CHECKED_TIME + 100, 100);
-		}
-		else if (strEqual(event, "[PALETTE]")) {
-			TEST_ORDER(2 + numChanges);
-			numChanges++;
-			tester->checkAudio("idle", 1000, 120000);		
-
-			if (numChanges < NUM_ITERATION) {
-				uint32_t offset = tester->getRandom() % 300;
-				tester->delayedPress(1, AUDIO_CHECKED_TIME, 500);
-				tester->delayedPress(0, AUDIO_CHECKED_TIME + offset, 100);
-			}
-			else {
-				tester->delayedPress(0, AUDIO_CHECKED_TIME, HOLD_TIME);
-			}
-		}		
-		else if (strEqual(event, "[unlocked]")) {
-			tester->delayedPress(0, 100, 100);
-		}
-		else if (strEqual(event, "[BLADE_RETRACT]")) {
-			tester->checkAudio("retract", 500, 2000);
-		}
-		else if (strEqual(event, "[BLADE_OFF]")) {
-			result = TEST_SUCCESS;
-		}		
-		return result;
-	}
-};
-
-class EffectTest : public Test
-{
-public:
-	int nFlash = 0;
-	bool firstCall = true;
-
-	virtual void start(Tester* tester) 
-	{
-		nFlash = 0;
-		firstCall = true;
-		tester->press(POWER_BUTTON, HOLD_TIME);
-	}
-};
-
-class BlasterTest : public EffectTest
+class BlasterTest : public Test
 {
 public:
 	virtual const char* name() const { return "BlasterTest"; }
 
-	virtual int process(Tester* tester, const char* event, const char* eventData) 
+	virtual int process(Tester* tester, EventQueue* queue) 
 	{
 		int result = TEST_CONTINUE;
 
-		if (strEqual(event, "[BLADE_ON]")) {
-			if (firstCall) {
-				tester->checkAudio("idle", 1000, 120000);	// hum
-				#ifdef SABER_TWO_BUTTON
-				tester->delayedPress(EFFECT_BUTTON, AUDIO_CHECKED_TIME, 10);	// trigger flash
-				#else
-				tester->delayedPress(POWER_BUTTON, AUDIO_CHECKED_TIME, 10);	// trigger flash
-				#endif
-				firstCall = false;
+		while(queue->hasEvent()) {
+			EventQueue::Event e = queue->popEvent();
+			if (!strStarts(e.name, "[BLADE_"))
+				continue;
+
+			static const char* EXPECTED[5] = {
+				"[BLADE_IGNITE]",
+				"[BLADE_ON]",
+				"[BLADE_FLASH]",
+				"[BLADE_RETRACT]",
+				"[BLADE_OFF]"
+			};
+
+			ASSERT(tester->getOrder() < 5);
+
+			TEST_STR_EQUAL(e.name, EXPECTED[tester->getOrder()]);
+			switch(tester->getOrder()) {
+				case 1:
+					// Flash effect
+					tester->delayedPress(0, 1000, PRESS_TIME);
+					break;
+				case 2:
+					// Turn off again.
+					tester->delayedPress(0, 1000, HOLD_TIME);
+				default:
+					break;
 			}
-		}
-		else if (strEqual(event, "[BLADE_FLASH]")) {
-			//Blade::blade().getColor(ic);
-			//bool equal = (bc[0] == ic[0] && bc[1] == ic[1] && bc[2] == ic[2]);
-			//TEST_EQUAL(false, equal);
-			tester->delayedPress(POWER_BUTTON, 500, HOLD_TIME);
-		}
-		else if (strEqual(event, "[unlocked]")) {
-			tester->delayedPress(0, 100, 100);
-		}
-		else if (strEqual(event, "[BLADE_OFF]")) {
-			result = TEST_SUCCESS;
-		}		
-		return result;
-	}
-};
-
-class ClashTest : public EffectTest
-{
-public:
-
-	virtual const char* name() const { return "ClashTest"; }
-
-	virtual int process(Tester* tester, const char* event, const char* eventData) 
-	{
-		int result = TEST_CONTINUE;
-
-		if (strEqual(event, "[BLADE_ON]")) {
-			if (firstCall) {
-				tester->checkAudio("idle", 1000, 120000);	// hum
-				//Blade::blade().getColor(bc);
-				tester->delayedPress(EFFECT_BUTTON, AUDIO_CHECKED_TIME,             3000);		// trigger clash
-				tester->delayedPress(POWER_BUTTON, AUDIO_CHECKED_TIME + 3000 + 200, HOLD_TIME);	// queue blade off
-				firstCall = false;
-			}
-		}
-		else if (strEqual(event, "[BLADE_FLASH]")) {
-			nFlash++;
-		}
-		else if (strEqual(event, "[unlocked]")) {
-			tester->delayedPress(0, 100, 100);
-		}
-		else if (strEqual(event, "[BLADE_OFF]")) {
-			TEST_RANGE
-			(3, 40, nFlash);
-			result = TEST_SUCCESS;
-		}		
-		return result;
-	}
-};
-
-
-// Needs to be redone with timers?
-// The event / timing / dependency very hard to get right.
-class LEDUI4Test : public Test
-{
-public:
-	virtual const char* name() const { return "LEDUI4Test"; }
-
-	virtual int process(Tester* tester, const char* event, const char* eventData) {
-
-		if (millis() < startTime)
-			return TEST_CONTINUE;
-		if (!strEqual(event, "[UIChange]"))
-			return TEST_CONTINUE;
-
-		int result = TEST_CONTINUE;
-		++sequence;
-
-		Log.p("bRel=").p(sequence).eol();
-		const RGB* leds = tester->getLEDs();
-		ASSERT(leds != 0);
-
-		switch (sequence) {
-			case 1:
-				// Palette
-				tester->delayedPress(0, DELAY, PRESS_TIME);
-				break;
-
-			case 2:
-				// volume
-				tester->delayedPress(0, DELAY, PRESS_TIME);
-				break;
-
-			case 3:
-				// normal
-				TEST_EQUAL(RGB(RGB::BLACK), leds[2]);	// canonical start state.
-				tester->delayedPress(0, DELAY, PRESS_TIME);
-				break;
-
-			case 4:
-				// palette
-				// ->reset to 1
-				tester->delayedPress(0, DELAY, 2200);
-				break;
-
-			case 5:
-				// 800 should do nothing.
-				TEST_EQUAL(RGB(RGB::BLACK), leds[1]);
-				TEST_EQUAL(RGB(RGB::BLACK), leds[2]);
-				tester->delayedPress(0, DELAY, 800);
-				break;
-
-			case 6:
-				// But 1200 reset
-				TEST_EQUAL(RGB(RGB::BLACK), leds[1]);
-				TEST_EQUAL(RGB(RGB::BLACK), leds[2]);
-				tester->delayedPress(0, DELAY, 1200);
-				break;
-
-			case 7:
-				TEST_EQUAL(RGB(RGB::BLACK), leds[0]);
-				TEST_EQUAL(RGB(RGB::BLACK), leds[1]);
-				TEST_EQUAL(RGB(RGB::BLACK), leds[2]);
+			if (tester->getOrder() == 3) {
 				result = TEST_SUCCESS;
 				break;
-
-			default:
-				ASSERT(false);
-				result = TEST_ERROR;
-				break;
+			}
+			tester->incrementOrder();
 		}
 		return result;
-	}	
-
-	virtual void start(Tester* tester) {
-		sequence = 0;
-		Log.p("Start").eol();
-		startTime = millis() + 500;
-		tester->delayedPress(0, 500 , PRESS_TIME);
 	}
-
-private:
-	const int DELAY = 200;
-	int sequence = 0;
-	uint32_t startTime = 0;
 };
+
 
 class AveragePowerTest : public Test
 {
 public:
 	virtual const char* name() const { return "AveragePowerTest"; }
+
 	virtual void start(Tester* tester) 
 	{
 		AveragePower ave;
@@ -342,9 +166,11 @@ public:
 		tester->press(0, 50);
 	}
 
-	virtual int process(Tester* tester, const char* event, const char* eventData) 
+	virtual int process(Tester* tester, EventQueue* queue) 
 	{
-		if (strEqual(event, "[Vbat]")) {
+		if(queue->hasEvent()) {
+			EventQueue::Event e = queue->popEvent();
+			TEST_STR_EQUAL(e.name, "[Vbat]");
 			TEST_RANGE(3200, 5300, Blade::blade().voltage());
 			return TEST_SUCCESS;
 		}
@@ -352,63 +178,6 @@ public:
 	}
 };
 
-
-class InstantPowerTest : public Test{
-public:
-	static const int SAMPLES = 40;
-	int32_t nSamples = 0;
-	bool bladeOn = false;
-	int32_t sum = 0;
-	int32_t minV = 6000;
-	int32_t maxV = 0;
-
-	virtual const char* name() const { return "InstantPowerTest"; }
-	virtual void start(Tester* tester) 
-	{
-		tester->press(0, HOLD_TIME);
-		nSamples = 0;
-		bladeOn = false;
-		sum = 0;
-		minV = 6000;
-		maxV = 0;
-	}
-
-	void sample(Tester* tester) 
-	{
-		delayMicroseconds(400 + (tester->getRandom() % 400));
-		int32_t analog = analogRead(PIN_VMETER);
-		int32_t mV = analog * UVOLT_MULT / int32_t(1000);
-		sum += mV;
-		minV = min(minV, mV);
-		maxV = max(maxV, mV);
-		++nSamples;
-	}
-
-	virtual int process(Tester* tester, const char* event, const char* eventData) 
-	{
-		int result = TEST_CONTINUE;
-
-		if (bladeOn && (nSamples < SAMPLES)) {
-			sample(tester);
-			tester->delayedPress(0, AUDIO_CHECKED_TIME, HOLD_TIME);
-		}
-
-		if (strEqual(event, "[unlocked]")) {
-			tester->delayedPress(0, 100, 100);
-		}
-		else if (strEqual(event, "[BLADE_ON]")) {
-			bladeOn = true;
-		}
-		else if (strEqual(event, "[BLADE_OFF]")) {
-			result = TEST_SUCCESS;
-			int32_t ave = sum / nSamples;
-			int32_t delta = maxV - minV;
-			Log.p("minV=").p(minV).p(" ").p(" maxV=").p(maxV).p(" delta=").p(delta).p(" ave=").p(ave).eol();
-			TEST_RANGE(0, 400, delta);
-		}		
-		return result;
-	}	
-};
 
 class ButtonTest : public Test
 {
@@ -450,8 +219,9 @@ public:
 		Log.event("[dummyEvent]");
 	}
 
-	virtual int process(Tester* tester, const char* event, const char* eventData) 
+	virtual int process(Tester* tester, EventQueue* queue) 
 	{
+		queue->popEvent();
 		return TEST_SUCCESS;
 	}
 };
@@ -460,27 +230,13 @@ public:
 ButtonTest buttonTest;
 IgniteRetractTest igniteRetractTest;
 BlasterTest blasterTest;
-#ifdef SABER_UI_START
-LEDUI4Test ledUI4Test;
-#endif
-ClashTest clashTest;
-PaletteTest paletteTest;
 AveragePowerTest averagePowerTest;
-InstantPowerTest instantPowerTest;
 
 Test* gTests[] = {
 	&buttonTest,
 	&igniteRetractTest,
 	&blasterTest,
-#	ifdef SABER_UI_START
-	//&ledUI4Test,
-#	endif	
-#	ifdef SABER_TWO_BUTTON
-	&clashTest,
-	&paletteTest,
 	&averagePowerTest,
-#	endif	
-//	&instantPowerTest,		// unstable - why? clean up test structure!!!
 	0
 };
 
@@ -500,14 +256,11 @@ void Tester::attach(Button* buttonA, Button* buttonB)
 	button[1] = buttonB;
 }
 
-void Tester::runTests(int count, bool longTest)
+void Tester::runTests()
 {
 	Log.attachSerial(&Serial);
-	passCount = 0;
-	nPasses = count;
-	useLongTest = longTest;
+	runUnitTests();
 
-	if (nPasses < 1) nPasses = 1;
 	running = true;
 
 	for(int i=0; i<2; ++i) {
@@ -532,11 +285,11 @@ void Tester::start()
 #	endif
 	r.setSeed(0);
 
+
 	Log.p("Test start: '").p(test->name()).p("'").eol();
-	while(Log.hasEvent()) {
-		const char* dummy = 0;
-		Log.popEvent(&dummy);
-	}
+	while(EventQ.hasEvent())
+		EventQ.popEvent();
+
 	test->start(this);
 }
 
@@ -547,21 +300,6 @@ Test* Tester::done()
 	++currentTest;
 	test = gTests[currentTest];
 	
-	if (!test) {
-		++passCount;
-		if (passCount < nPasses) {
-			currentTest = 0;
-			test = gTests[currentTest];
-
-			for(int i=0; gTests[i]; ++i) {
-				gTests[i]->finalResult = 0;
-			}
-			for(int i=0; i<2; ++i) {
-				pressState[i].reset();
-			}
-		}
-	}
-
 	if (test) {
 		start();
 	}
@@ -579,10 +317,7 @@ Test* Tester::done()
 		}
 		Log.p("******").eol();
 		Log.p("Test passes run=").p(nPasses).eol();
-
-		bool success = runUnitTests();
-		ASSERT(success);
-
+		
 		#if SERIAL_DEBUG == 0
 		Log.attachSerial(0);
 		#endif
@@ -627,39 +362,21 @@ void Tester::process()
 	const char* e = 0;
 	const char* d = 0;
 
-	if (testAudio && testAudio <= m) {
-		testAudio = 0;
-		uint32_t len = SFX::instance()->lengthMillis();
-		Log.p("Audio test:").p(audioName).p(" time(millis)=").p(len).eol();
-		TEST_RANGE(audioLow, audioHigh, len);
+	int result = test->process(this, e, d);
+
+	if (result == Test::TEST_ERROR) {
+		Log.p("**Tester ERROR: '").p(test->name()).p("'").eol();
+		test->finalResult = Test::TEST_ERROR;
 	}
-	e = Log.popEvent(&d);
-
-	if (e) {
-		int result = test->process(this, e, d);
-
-		if (result == Test::TEST_ERROR) {
-			Log.p("**Tester ERROR: '").p(test->name()).p("'").eol();
-			test->finalResult = Test::TEST_ERROR;
-		}
-		else if (result == Test::TEST_SUCCESS) {
-			Log.p("**Tester pass: '").p(test->name()).p("'").eol();
-			test->finalResult = Test::TEST_SUCCESS;
-		}
+	else if (result == Test::TEST_SUCCESS) {
+		Log.p("**Tester pass: '").p(test->name()).p("'").eol();
+		test->finalResult = Test::TEST_SUCCESS;
 	}
 }
 
 void Tester::delay(uint32_t t) 
 {
 	delayTime = millis() + t;
-}
-
-void Tester::checkAudio(const char* name, uint32_t low, uint32_t high)
-{
-	testAudio = millis() + AUDIO_LAG_TIME;
-	audioName = name;
-	audioLow = low;
-	audioHigh = high;
 }
 
 void Tester::press(int button, uint32_t time)

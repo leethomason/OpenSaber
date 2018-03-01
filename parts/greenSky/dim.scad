@@ -1,12 +1,13 @@
-M_BACK              = -5;   // and even more
-M_SPEAKER           = -2; 
-M_0                 =  0;
-M_POMMEL            =  10;     // thread is to 15; pommel to 10
-M_PORT_CENTER       =  90;     // max is 102
+M_BACK              = -5;      // Where the speaker holder starts, in the pommel.
+M_SPEAKER           = -2;      // Where the speaker starts. 
+M_0                 =  0;      // 0 mark. The back of the saber body, pommel off.
+M_POMMEL            =  10;     // Pommel thread is to 15; pommel to 10
+M_PORT_CENTER       =  90;     // 
 M_SWITCH_CENTER     = 135.5;
-M_EMITTER_BACK      = 149.5;
+M_EMITTER_BACK      = 149.5;   // The font of the saber rests against the heat sink.
 
 M_CRYSTAL           =  97;
+
 
 DY_CRYSTAL          =  -9;
 D_POMMEL            =  25.5;

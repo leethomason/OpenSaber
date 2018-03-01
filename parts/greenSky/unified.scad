@@ -173,7 +173,6 @@ DZ_PORT = M_CRYSTAL - M_END_BAFFLE;
 PORT_FRONT = DZ_PORT + M_END_BAFFLE;
 
 SWITCH_BACK = M_SWITCH_CENTER - 9;
-SWITCH_FRONT = M_SWITCH_CENTER + 9;
 T_SWITCH_RING = 2;
 
 module speakerHolder()
@@ -442,7 +441,7 @@ module emitter() {
 *translate([0, 0, M_SPEAKER]) speaker();
 *color("yellow") rods();
 
-DRAW_AFT        = false;
+DRAW_AFT        = true;
 DRAW_FRONT      = true;
 DRAW_LED_PLATE  = false;
 DRAW_COVER      = false;

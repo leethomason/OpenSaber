@@ -636,6 +636,7 @@ void loop() {
     lastLoopTime = msec;
 
     tester.process();
+
     buttonA.process();
     ledA.process();
     #ifdef SABER_TWO_BUTTON
@@ -645,15 +646,12 @@ void loop() {
     #ifdef SABER_SISTERS
     processCom(delta);
     #endif
-    tester.process();
     processAccel(msec);
 
     bladeState.process(&blade, saberDB, millis());
-    tester.process();
     #ifdef SABER_SOUND_ON
     sfx.process();
     #endif
-    tester.process();
 
     if (vbatTimer.tick(delta)) {
         voltmeter.takeSample();
@@ -738,7 +736,6 @@ void loop() {
     #ifdef SABER_NUM_LEDS
         dotstar.display();
     #endif
-    tester.process();
     lastLoopTime = msec;
 }
  
