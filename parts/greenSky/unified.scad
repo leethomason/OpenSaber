@@ -1,55 +1,8 @@
 include <dim.scad>
+include <../commonUnified.scad>
 use <../shapes.scad>
 
 $fn = 90;
-EPS = 0.01;
-EPS2 = EPS * 2;
-
-module battery() {
-    color("yellow") translate([0, DY_BATTERY, 0]) {
-        cylinder(d=D_BATTERY, h = Z_BATTERY + EPS2);
-    }
-}
-
-module switch(extend=false)
-{
-    D_OUTER_TOP = 13.8;
-    D_INNER_TOP = 11.0;
-    H_TOP       =  1.5;
-    H_BODY      = 18;   // approx. connections below.
-    H = extend ? H_TOP + 5 : H_TOP;
-
-    color("yellow") {
-        rotate([-90, 0, 0]) {
-            translate([0, 0, Y_SWITCH]) {
-                cylinder(h=H, d=D_OUTER_TOP+1);
-                translate([0, 0, -H_BODY]) {
-                    cylinder(h = H_BODY, d=D_SWITCH);
-                }            
-            }
-        }
-    }
-}
-
-
-module mc(cutoutLow=false)
-{
-    color("aqua") {
-        translate([-X_MC/2, 0, 0])
-            cube(size=[X_MC, Y_MC, Z_MC]);
-    }
-}
-
-module crystal()
-{
-    TAPER = 5;
-    translate([0, DY_CRYSTAL, 0])
-    color("pink") scale([1.0, Y_CRYSTAL/X_CRYSTAL, 1.0]) {
-        cylinder(d=X_CRYSTAL, h=Z_CRYSTAL - TAPER);
-        translate([0, 0, Z_CRYSTAL - TAPER])
-            cylinder(h=TAPER, d1 = X_CRYSTAL, d2=X_CRYSTAL *0.7);
-    }
-}
 
 module port(extend=false)
 {
@@ -148,28 +101,12 @@ module cBaffle(threads=false) {
     }
 }
 
-module capsule(theta0, theta1, r=2)
-{
-    hull() {
-        rotate([-90, -0, theta0]) cylinder(h=20, r=r);
-        rotate([-90, -0, theta1]) cylinder(h=20, r=r);
-    }
-}
 
-module speaker()
-{
-    color("yellow") {
-        cylinder(h=H_SPKR_PLASTIC + EPS, d=D_SPKR_PLASTIC);
-        translate([0, 0, H_SPKR_PLASTIC])
-            cylinder(h=H_SPKR_METAL, d=D_SPKR_METAL);
-    }
-}
-
-
+// Move M_END_BAFFLE to dim file? This is actually pretty key:
 NUM_BAFFLES = 8;
 M_END_BAFFLE = M_POMMEL + H_BUTTRESS*2*(1 + NUM_BAFFLES);
 
-DZ_PORT = M_CRYSTAL - M_END_BAFFLE;
+DZ_PORT = M_PORT_CENTER + ZPAD_PORT - M_END_BAFFLE;
 PORT_FRONT = DZ_PORT + M_END_BAFFLE;
 
 SWITCH_BACK = M_SWITCH_CENTER - 9;
@@ -181,7 +118,7 @@ module speakerHolder()
         translate([0, 0, M_BACK])
             tube(h=M_POMMEL - M_BACK, do=D_POMMEL, di=D_SPKR_PLASTIC - 2);
         translate([0, 0, M_SPEAKER])
-            speaker();
+            speakerBass22();
         translate([-20, -20, M_BACK-EPS])
             cube(size=[40, 14, 20]);
         rods();
@@ -359,7 +296,7 @@ module centerCover()
 
 module switchHolder()
 {
-    Z = M_CRYSTAL + Z_CRYSTAL;
+    Z = M_SWITCH_CENTER - ZPAD_SWITCH;
     DZ = M_EMITTER_BACK - Z;
 
     difference() {
@@ -438,7 +375,7 @@ module emitter() {
 *translate([0, 0, M_SWITCH_CENTER]) switch();
 *translate([0, 0, M_CRYSTAL]) crystal();
 *translate([0, -5.5, M_PORT_CENTER]) port(extend=true);
-*translate([0, 0, M_SPEAKER]) speaker();
+*translate([0, 0, M_SPEAKER]) speakerBass22();
 *color("yellow") rods();
 
 DRAW_AFT        = true;
