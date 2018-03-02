@@ -18,6 +18,11 @@ D_PORT_SUPPORT      =  12;
 H_PORT              =  16;
 DY_PORT             =  6;
 
+X_MC                =  18.5;
+Y_MC                =   9.0;
+Z_MC                =  71.0;     // includes SD
+DY_MC               = -12.5;
+
 EPS = 0.01;
 EPS2 = EPS * 2;
 
@@ -99,6 +104,72 @@ module speakerBass22()
             cylinder(h=H_SPKR_METAL, d=D_SPKR_METAL);
     }
 }
+
+// Intermediate parts -----------------
+
+module baffleHalfBridge(dz, t)
+{
+    polygonYZ(t, [[0,0], [dz*2, dz*2], [dz*2, 0]]);
+}
+
+
+module oneBaffle(   d,
+                    dz,
+                    battery=true, 
+                    mc=true,
+                    useRods=true, 
+                    bridge=true, 
+                    mcSpace=false)
+{
+    TROUGH_0 = 10;
+    TROUGH_1 = 10;
+    TROUGH_2 = 14;
+    X_BRIDGE = X_MC/2+1;
+    T_BRIDGE = 1.6;
+
+    difference() {
+        cylinder(h=dz, d=d);
+        if (battery)
+            translate([0, d/2 - D_BATTERY/2, -EPS]) 
+                battery();
+        if (mc)
+            translate([0, DY_MC, -EPS]) 
+                mc();
+        if (mcSpace)
+            translate([-X_MC/2, DY_MC, -EPS])
+                cube(size=[X_MC, 20, dz+EPS2]);
+
+        translate([-TROUGH_0/2, 0, -EPS]) 
+            cube(size=[TROUGH_0, 30, dz + EPS2]);
+        translate([-TROUGH_1/2, -5, -EPS]) 
+            cube(size=[TROUGH_1, 5, dz + EPS2]);
+        translate([-TROUGH_2/2, -20, -EPS])
+            cube(size=[TROUGH_2, 15, dz + EPS2]);
+    }
+
+    if (bridge) {
+        translate([X_BRIDGE, -11, dz]) 
+            baffleHalfBridge(dz, T_BRIDGE);        
+        mirror([1, 0, 0]) translate([X_BRIDGE, -11, dz]) 
+            baffleHalfBridge(dz, T_BRIDGE);
+
+        translate([X_BRIDGE, 2, dz]) 
+            baffleHalfBridge(dz, T_BRIDGE);        
+        mirror([1, 0, 0]) translate([X_BRIDGE, 2, dz]) 
+            baffleHalfBridge(dz, T_BRIDGE);
+
+        intersection() {
+            translate([0, 0, -EPS]) cylinder(h=dz*2 + EPS2, d=d);
+            union() {
+                translate([TROUGH_2/2, DY_MC - 5, -EPS])
+                    cube(size=[TROUGH_2, 5, dz*2 + EPS]);
+                mirror([1,0,0]) translate([TROUGH_2/2, DY_MC - 5, -EPS])
+                    cube(size=[TROUGH_2, 5, dz*2 + EPS]);
+            }
+        }
+    }
+}
+
 
 
 // Resuable parts -----------------------------------
