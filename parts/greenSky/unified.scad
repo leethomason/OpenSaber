@@ -4,15 +4,6 @@ use <../shapes.scad>
 
 $fn = 90;
 
-module port(extend=false)
-{
-    H = extend ? 30 : 21;
-    rotate([-90, 0, 0]) {
-        cylinder(h=H, d=D_PORT);
-        cylinder(h=15, d=11.3);
-    }
-}
-
 module rod() {
     $fn = 30;
     translate([13, 0, -20])

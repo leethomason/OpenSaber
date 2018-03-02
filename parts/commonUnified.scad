@@ -83,6 +83,13 @@ module crystal()
     }
 }
 
+module port(extend=false)
+{
+    H = extend ? 30 : 21;
+    rotate([-90, 0, 0]) {
+        cylinder(h=H, d=D_PORT);
+    }
+}
 
 module speakerBass22()
 {
@@ -95,6 +102,30 @@ module speakerBass22()
 
 
 // Resuable parts -----------------------------------
+module speakerHolder(outer, dz, dzToSpkrBack)
+{
+    difference() {
+        tube(h=dz, do=outer, di=D_SPKR_METAL);
+        translate([0, 0, dzToSpkrBack])
+            speakerBass22();
+        translate([-50, -outer, -EPS])
+            cube(size=[100, outer - 4, 100]);    
+
+        THETA = 14;
+        for(r=[0:2]) {
+            rotate([0, 0, -50 + r*50]) translate([0, 0, dzToSpkrBack]) {
+                for(x=[0:6]) {
+                    tx = 3 * x + dzToSpkrBack;
+                    if (tx + 5 <= dz) {
+                        translate([0, 0, tx])  
+                            capsule(-THETA, THETA, 1);
+                    }
+                }
+            }
+        }    
+    }
+}
+
 module powerPortRing(outer, t, dz, dzToPort)
 {    
     difference() {
@@ -107,7 +138,7 @@ module powerPortRing(outer, t, dz, dzToPort)
             }
         }
         translate([0, 0, dzToPort]) {
-            rotate([-90,0,0]) cylinder(h=100, d=D_PORT);
+            port(true);
         }
     }
 }
