@@ -1,8 +1,8 @@
 use <shapes.scad>
 
 Z_BATTERY           =  68;
+Z_PADDED_BATTERY    = Z_BATTERY + 1;
 D_BATTERY           =  18.50 + 0.5;    // An 1850. Huh. 
-DY_BATTERY          =  0;
 
 D_SWITCH            =  12.5;     // actually 12, by thread.
 D_SWITCH_SUPPORT    =  16;
@@ -26,6 +26,9 @@ DY_MC               = -12.5;
 EPS = 0.01;
 EPS2 = EPS * 2;
 
+// Math ------------
+function yAtX(x, r) = sqrt(r*r - x*x);
+
 // Utilities, shapes. ------------------------
 module capsule(theta0, theta1, r=2)
 {
@@ -37,8 +40,8 @@ module capsule(theta0, theta1, r=2)
 
 
 // Physical components. ----------------------
-module battery() {
-    color("yellow") translate([0, DY_BATTERY, 0]) {
+module battery(outer) {
+    color("yellow") translate([0, outer/2 - D_BATTERY/2, 0]) {
         cylinder(d=D_BATTERY, h = Z_BATTERY + EPS2);
     }
 }
@@ -119,7 +122,8 @@ module oneBaffle(   d,
                     mc=true,
                     useRods=true, 
                     bridge=true, 
-                    mcSpace=false)
+                    mcSpace=false,
+                    dExtra=0)
 {
     TROUGH_0 = 10;
     TROUGH_1 = 10;
@@ -127,14 +131,17 @@ module oneBaffle(   d,
     X_BRIDGE = X_MC/2+1;
     T_BRIDGE = 1.6;
 
+    yMC = -yAtX(X_MC/2, d/2) + 0.5;
+
     difference() {
-        cylinder(h=dz, d=d);
+        cylinder(h=dz, d=d + dExtra);
         if (battery)
             translate([0, d/2 - D_BATTERY/2, -EPS]) 
                 battery();
-        if (mc)
-            translate([0, DY_MC, -EPS]) 
+        if (mc) {
+            translate([0, yMC, -EPS]) 
                 mc();
+        }
         if (mcSpace)
             translate([-X_MC/2, DY_MC, -EPS])
                 cube(size=[X_MC, 20, dz+EPS2]);
@@ -148,22 +155,24 @@ module oneBaffle(   d,
     }
 
     if (bridge) {
-        translate([X_BRIDGE, -11, dz]) 
+        yBridge = yAtX(X_BRIDGE+T_BRIDGE, d/2);
+
+        translate([X_BRIDGE, -yBridge, dz]) 
             baffleHalfBridge(dz, T_BRIDGE);        
-        mirror([1, 0, 0]) translate([X_BRIDGE, -11, dz]) 
+        mirror([1, 0, 0]) translate([X_BRIDGE, -yBridge, dz]) 
             baffleHalfBridge(dz, T_BRIDGE);
 
-        translate([X_BRIDGE, 2, dz]) 
+        translate([X_BRIDGE, yBridge - dz*2, dz]) 
             baffleHalfBridge(dz, T_BRIDGE);        
-        mirror([1, 0, 0]) translate([X_BRIDGE, 2, dz]) 
+        mirror([1, 0, 0]) translate([X_BRIDGE, yBridge - dz*2, dz]) 
             baffleHalfBridge(dz, T_BRIDGE);
 
         intersection() {
             translate([0, 0, -EPS]) cylinder(h=dz*2 + EPS2, d=d);
             union() {
-                translate([TROUGH_2/2, DY_MC - 5, -EPS])
+                translate([TROUGH_2/2, yMC - 5, -EPS])
                     cube(size=[TROUGH_2, 5, dz*2 + EPS]);
-                mirror([1,0,0]) translate([TROUGH_2/2, DY_MC - 5, -EPS])
+                mirror([1,0,0]) translate([TROUGH_2/2, yMC - 5, -EPS])
                     cube(size=[TROUGH_2, 5, dz*2 + EPS]);
             }
         }
@@ -232,5 +241,18 @@ module switchRing(outer, t, dz, dzToSwitch)
     }
     *translate([0, 0, dzToSwitch]) {
         switch(outer, false);
+    }
+}
+
+module baffledBatMC(d, dzButtress, dFirst, dzFirst)
+{
+    N = ceil(Z_PADDED_BATTERY / (dzButtress*2));
+
+    for(i=[0:N-1]) {
+        translate([0, 0, i*dzButtress*2]) 
+            if (i==0)
+                oneBaffle(d, dzFirst, dExtra=dFirst - d);
+            else
+                oneBaffle(d, dzButtress);
     }
 }
