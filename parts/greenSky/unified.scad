@@ -103,26 +103,12 @@ PORT_FRONT = DZ_PORT + M_END_BAFFLE;
 SWITCH_BACK = M_SWITCH_CENTER - 9;
 T_SWITCH_RING = 2;
 
-module speakerHolder()
+module uniSpeakerHolder()
 {
     difference() {
-        translate([0, 0, M_BACK])
-            tube(h=M_POMMEL - M_BACK, do=D_POMMEL, di=D_SPKR_PLASTIC - 2);
-        translate([0, 0, M_SPEAKER])
-            speakerBass22();
-        translate([-20, -20, M_BACK-EPS])
-            cube(size=[40, 14, 20]);
+        translate([0, 0, M_BACK]) 
+            speakerHolder(D_POMMEL, M_POMMEL - M_BACK, M_SPEAKER - M_BACK);
         rods();
-
-        THETA = 14;
-        for(r=[0:2]) {
-            rotate([0, 0, -50 + r*50]) translate([0, 0, M_BACK]) {
-                translate([0, 0, 3])  capsule(-THETA, THETA, 1);
-                translate([0, 0, 6]) capsule(-THETA, THETA, 1);
-                translate([0, 0, 9]) capsule(-THETA, THETA, 1);
-                translate([0, 0, 12]) capsule(-THETA, THETA, 1);
-            }
-        }
     }
 }
 
@@ -191,23 +177,9 @@ module powerPort()
 {
     DZ = 3;
     difference() {
-        translate([0, 0, M_END_BAFFLE]) 
-        union() {
-            tube(h=DZ_PORT, di=D_INNER - DD_HOLDER_TUBES, do=D_INNER);
-            intersection() {
-                cylinder(h=DZ_PORT, d=D_INNER);
-                union() {
-                    translate([-20, D_INNER/2 - 6, 0])
-                        cube(size=[40, 10, DZ_PORT]);
+        translate([0, 0, M_END_BAFFLE])
+            powerPortRing(D_INNER, DD_HOLDER_TUBES, DZ_PORT, M_PORT_CENTER - M_END_BAFFLE);
 
-                    translate([6, -20, M_CRYSTAL - M_END_BAFFLE - DZ_LED_PLATE - DZ])
-                        cube(size=[10, 14, DZ]);
-                    mirror([1,0, 0]) translate([6, -20, M_CRYSTAL - M_END_BAFFLE - DZ_LED_PLATE - DZ])
-                        cube(size=[10, 14, DZ]);
-                }
-            }        
-        }
-        translate([0, -5.5, M_PORT_CENTER]) port(true);
         rods();
         key(true);
         translate([-10, -D_INNER/2 - 1, M_END_BAFFLE]) 
@@ -290,21 +262,11 @@ module switchHolder()
     Z = M_SWITCH_CENTER - ZPAD_SWITCH;
     DZ = M_EMITTER_BACK - Z;
 
+    
     difference() {
-        translate([0, 0, Z]) union() {
-            tube(h=DZ, di=(D_INNER - DD_HOLDER_TUBES), do=D_INNER);
-            intersection() {
-                cylinder(h=DZ, d=D_INNER);
-                translate([-20, D_INNER/2 - 6, 0])
-                    cube(size=[40, 10, DZ]);
-            }        
-            intersection() {
-                cylinder(h=DZ, d=D_INNER);
-                translate([0, -20, 9])
-                    cubePair(10, size=[20, 21.5, 40]);
-            }
-        }
-        translate([0, 0, M_SWITCH_CENTER]) switch(true);
+        translate([0, 0, Z])
+            switchRing(D_INNER, DD_HOLDER_TUBES, DZ, M_SWITCH_CENTER - Z);
+
         translate([0, 0, Z+4])  capsule(60, 70);
         translate([0, 0, Z+10])  capsule(60, 70);
 
@@ -319,44 +281,6 @@ module switchHolder()
             cubePair(10, size=[20, 24, 40]);
     }
 }
-
-/*
-module emitter() {
-    N0 = 20;
-    N1 = 5;
-
-    ANGLE0 = 360/N0;
-    ANGLE1 = 360/N1;
-
-    R = D_INNER / 2;
-    T1 = 4;
-    DZ = M_EMITTER_BACK - SWITCH_FRONT;
-
-    difference() {
-        union() {
-            intersection() {
-                cylinder(h=200, d=D_INNER);
-                translate([0, 0, SWITCH_FRONT]) union() {
-                    for(r=[0:(N0-1)])
-                        rotate([0, 0, r*ANGLE0]) translate([-1, 0, 0])
-                           polygonYZ(2, [[2, 0], [5,4], [6,2], [12, 4], [D_INNER/2,0]]);
-                    for(r=[0:(N1-1)]) 
-                        rotate([0, 0, r*ANGLE1]) translate([-T1/2, 0, 0])
-                            polygonYZ(T1, [
-                                [10,0], 
-                                [R-3, DZ], 
-                                [R, DZ], 
-                                [R, 0]]);
-                }
-            }
-            translate([0, 0, SWITCH_FRONT-1.5]) {
-                tube(h=2, do=D_INNER, di=D_INNER-12);
-            }
-        }
-        switchHolder();
-    }
-}
-*/
 
 // Parts
 *translate([0, 0, M_POMMEL]) {
@@ -375,7 +299,7 @@ DRAW_LED_PLATE  = false;
 DRAW_COVER      = false;
 
 if (DRAW_AFT) {
-    speakerHolder();
+    uniSpeakerHolder();
     aftElectronics();
 }
 
