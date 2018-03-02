@@ -5,7 +5,8 @@ D_BATTERY           =  18.50 + 0.5;    // An 1850. Huh.
 DY_BATTERY          =  0;
 
 D_SWITCH            =  12.5;     // actually 12, by thread.
-Y_SWITCH            =  13.5;
+D_SWITCH_SUPPORT    =  16;
+DY_SWITCH            =  -2; //13.5;
 
 H_SPKR_METAL        =  4;
 D_SPKR_METAL        =  18; 
@@ -15,7 +16,7 @@ D_SPKR_PLASTIC      =  20;
 D_PORT              =  7.9;
 D_PORT_SUPPORT      =  12;
 H_PORT              =  16;
-DY_PORT             =  5;
+DY_PORT             =  6;
 
 EPS = 0.01;
 EPS2 = EPS * 2;
@@ -37,20 +38,24 @@ module battery() {
     }
 }
 
-module switch(extend=false)
+module switch(outer, extend=false)
 {
     D_OUTER_TOP = 13.8;
     D_INNER_TOP = 11.0;
     H_TOP       =  1.5;
     H_BODY      = 18;   // approx. connections below.
-    H = extend ? H_TOP + 5 : H_TOP;
 
     color("yellow") {
         rotate([-90, 0, 0]) {
-            translate([0, 0, Y_SWITCH]) {
-                cylinder(h=H, d=D_OUTER_TOP+1);
+            translate([0, 0, outer/2 + DY_SWITCH]) {
+                if (extend) {
+                    cylinder(h=H_TOP+10, d=D_OUTER_TOP+1);
+                }
+                else {
+                    cylinder(h=H_TOP, d1=D_OUTER_TOP+1, d2=D_INNER_TOP);
+                }
                 translate([0, 0, -H_BODY]) {
-                    cylinder(h = H_BODY, d=D_SWITCH);
+                    cylinder(h = H_BODY + EPS, d=D_SWITCH);
                 }            
             }
         }
@@ -93,9 +98,37 @@ module speakerBass22()
 module powerPortRing(outer, t, dz, dzToPort)
 {    
     difference() {
-        tube(h=dz, do=outer, di=outer-t);
-        translate([0, 0, dzToPort]) {
-            rotate([0,90,0]) cylinder(h=100, d=D_PORT);
+        union() {
+            tube(h=dz, do=outer, di=outer-t);
+            intersection() {
+                cylinder(h=dz, d=outer);
+                translate([-50, outer/2 - DY_PORT, dzToPort - D_PORT_SUPPORT/2])
+                    cube(size=[100, 50, D_PORT_SUPPORT]);
+            }
         }
+        translate([0, 0, dzToPort]) {
+            rotate([-90,0,0]) cylinder(h=100, d=D_PORT);
+        }
+    }
+}
+
+
+module switchRing(outer, t, dz, dzToSwitch)
+{
+    difference() {
+        union() {
+            tube(h=dz, do=outer, di=outer-t);
+            intersection() {
+                cylinder(h=dz, d=outer);
+                translate([-50, outer/2 - 6, dzToSwitch - D_SWITCH_SUPPORT/2])
+                    cube(size=[100, 50, D_SWITCH_SUPPORT]);
+            }
+        }
+        translate([0, 0, dzToSwitch]) {
+            switch(outer, true);
+        }
+    }
+    *translate([0, 0, dzToSwitch]) {
+        switch(outer, false);
     }
 }
