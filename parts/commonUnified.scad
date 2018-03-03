@@ -244,11 +244,12 @@ module switchRing(outer, t, dz, dzToSwitch)
     }
 }
 
-module baffledBatMC(d, dzButtress, dFirst, dzFirst)
-{
-    N = ceil(Z_PADDED_BATTERY / (dzButtress*2));
 
-    for(i=[0:N-1]) {
+function nBafflesNeeded(dzButtress) = ceil(Z_PADDED_BATTERY / (dzButtress*2));
+
+module baffleMCBattery(d, n, dzButtress, dFirst, dzFirst)
+{
+    for(i=[0:n-1]) {
         translate([0, 0, i*dzButtress*2]) 
             if (i==0)
                 oneBaffle(d, dzFirst, dExtra=dFirst - d);

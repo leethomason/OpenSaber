@@ -8,5 +8,6 @@ $fn = 80;
 *translate([0, 0, 100]) 
     oneBaffle(32, 4);
     
-baffledBatMC(32, 4, 34, 6);
-battery(32);
+n = nBafflesNeeded(4);
+baffleMCBattery(32, n, 4, 34, 6);
+//battery(32);
