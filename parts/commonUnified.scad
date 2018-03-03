@@ -23,6 +23,10 @@ Y_MC                =   9.0;
 Z_MC                =  71.0;     // includes SD
 DY_MC               = -12.5;
 
+X_CRYSTAL           =  11;
+Y_CRYSTAL           =   8.5;
+Z_CRYSTAL           =  30.0;
+
 EPS = 0.01;
 EPS2 = EPS * 2;
 
@@ -79,15 +83,13 @@ module mc(cutoutLow=false)
     }
 }
 
-module crystal()
+module crystal(dx=X_CRYSTAL, dy=Y_CRYSTAL, dz=Z_CRYSTAL)
 {
     TAPER = 5;
-    translate([0, DY_CRYSTAL, 0]) {
-        color("pink") scale([1.0, Y_CRYSTAL/X_CRYSTAL, 1.0]) {
-            cylinder(d=X_CRYSTAL, h=Z_CRYSTAL - TAPER);
-            translate([0, 0, Z_CRYSTAL - TAPER])
-                cylinder(h=TAPER, d1 = X_CRYSTAL, d2=X_CRYSTAL *0.7);
-        }
+    color("pink") scale([1.0, dy/dx, 1.0]) {
+        cylinder(d=dx, h=dz - TAPER);
+        translate([0, 0, dz - TAPER])
+            cylinder(h=TAPER, d1 = dx, d2=dx *0.7);
     }
 }
 
@@ -180,6 +182,32 @@ module oneBaffle(   d,
 }
 
 
+function crystalYPos(outer, holderDiameter) = -(outer/2 - holderDiameter/2); 
+
+
+module crystalView(outer, d, dz)
+{
+    dy = crystalYPos(outer, d);
+    translate([0, dy, 0]) rotate([0, 0, -135]) 
+        cube(size=[100, 100, dz]);
+
+}
+
+// Subtract crystalView() and crystal() to get the complete part.
+module oneCrystalBaffleOuter(outer, d, dz)
+{
+    dy = -(outer/2 - d/2); 
+
+    intersection() {
+        cylinder(d=outer, h=dz*2);
+
+        difference() {
+            translate([0, dy, 0])   
+                cylinder(h=dz, d=d);
+        }
+    }
+}
+
 
 // Resuable parts -----------------------------------
 module speakerHolder(outer, dz, dzToSpkrBack)
@@ -255,5 +283,26 @@ module baffleMCBattery(d, n, dzButtress, dFirst, dzFirst)
                 oneBaffle(d, dzFirst, dExtra=dFirst - d);
             else
                 oneBaffle(d, dzButtress);
+    }
+}
+
+module crystalHolder(outer, dzOfBaffle, crystalX, crystalY, crystalZ)
+{
+    n = ceil(crystalZ / (dzOfBaffle * 2));
+    d = max(crystalX, crystalY) * 1.5;
+    dy = crystalYPos(outer, d);
+
+    difference() {
+        union() {
+            for(i=[0:n-1]) {
+                translate([0, 0, i*dzOfBaffle*2]) {
+                    oneCrystalBaffleOuter(outer, d, dzOfBaffle);
+                }
+            }
+        }
+        translate([0, dy, -EPS])
+            crystal(crystalX, crystalY, crystalZ);
+        translate([0, 0, -EPS])
+            crystalView(outer, d, crystalZ);
     }
 }

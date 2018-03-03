@@ -11,7 +11,6 @@ M_CRYSTAL           =  97;
 ZPAD_PORT             = 8;       // Space in front of the port.
 ZPAD_SWITCH           = 9;       // Space behind switch. 
 
-DY_CRYSTAL          =  -9;
 D_POMMEL            =  25.5;
 D_INNER             =  32.2;
 D_RING              =  33.5;
@@ -22,6 +21,7 @@ Y_MC                =   9.0;
 Z_MC                =  71.0;     // includes SD
 DY_MC               = -12.5;
 
+DY_CRYSTAL          =  -9;
 X_CRYSTAL           =  11;
 Y_CRYSTAL           =   8.5;
 Z_CRYSTAL           =  30.0;
