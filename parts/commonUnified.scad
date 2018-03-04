@@ -27,10 +27,22 @@ X_CRYSTAL           =  11;
 Y_CRYSTAL           =   8.5;
 Z_CRYSTAL           =  30.0;
 
+OLED_R_DISPLAY_THREAD = 0.8; // M2 bolt, 2mm head
+OLED_DEPTH_DISPLAY_THREAD = 4;
+OLED_DISPLAY_W           = 23 + 1;
+OLED_DISPLAY_L           = 32 + 1;
+OLED_DISPLAY_MOUNT_W     = 17;
+OLED_DISPLAY_MOUNT_L     = 26;
+OLED_DY                  = -4;  // offset how far the holes/solder points
+                                // should be under the case. mesaured from y=0 on model.
+
 EPS = 0.01;
 EPS2 = EPS * 2;
 
 // Math ------------
+OLED_DISPLAY_INNER_W = (OLED_DISPLAY_W - OLED_DISPLAY_MOUNT_W)/2;
+OLED_DISPLAY_INNER_L = (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L)/2;
+
 function yAtX(x, r) = sqrt(r*r - x*x);
 
 // Utilities, shapes. ------------------------
@@ -42,6 +54,15 @@ module capsule(theta0, theta1, r=2)
     }
 }
 
+module columnY(dx, dy, dz, biasX=0, biasZ=0)
+{
+    translate([-dx/2, 0, -dz/2]) {
+        hull() {
+            cube([dx, EPS, dz]);
+            translate([biasX, dy, biasZ]) cube([dx, EPS, dz]);
+        }
+    }
+}
 
 // Physical components. ----------------------
 module battery(outer) {
@@ -110,6 +131,49 @@ module speakerBass22()
     }
 }
 
+module oledDisplayBolt() 
+{
+    // Pins are challenging to print small & accurate.
+    // Trying holes for M2 bolts instead.
+    translate([0, -OLED_DEPTH_DISPLAY_THREAD, 0]) {
+        rotate([-90, 0, 0]) cylinder(r=OLED_R_DISPLAY_THREAD, h=20);
+    }
+}
+
+module oledDisplayBolts()
+{
+    translate([OLED_DISPLAY_INNER_W, 0, OLED_DISPLAY_INNER_L])                            
+        oledDisplayBolt();
+    translate([OLED_DISPLAY_W - OLED_DISPLAY_INNER_W, 0, OLED_DISPLAY_INNER_L])                 
+        oledDisplayBolt();
+    translate([OLED_DISPLAY_W - OLED_DISPLAY_INNER_W, 0, OLED_DISPLAY_L - OLED_DISPLAY_INNER_L])    
+        oledDisplayBolt();
+    translate([OLED_DISPLAY_INNER_W, 0, OLED_DISPLAY_L - OLED_DISPLAY_INNER_L])                
+        oledDisplayBolt();
+}
+
+
+module oledDisplay()
+{
+    color("violet") translate([-OLED_DISPLAY_W/2, 0, 0]) {
+        cube(size=[OLED_DISPLAY_W, 10, OLED_DISPLAY_L]);
+        oledDisplayBolts();
+        
+        translate([0, -1, 6]) {
+            cube(size=[OLED_DISPLAY_W, 1, OLED_DISPLAY_L - 12]);
+        }
+    }
+    color("plum") translate([0, 0, 0]) {
+        X_CABLE = 12;
+        Y_CABLE = 2;
+        Z_CABLE = 3 + 1;    // cheat so we don't get a super thin piece in the locking ring.
+        translate([-X_CABLE/2, -Y_CABLE, -Z_CABLE]) {
+            cube(size=[X_CABLE, 10, Z_CABLE + 7]);
+        }
+    }    
+}
+
+
 // Intermediate parts -----------------
 
 module baffleHalfBridge(dz, t)
@@ -177,33 +241,6 @@ module oneBaffle(   d,
                 mirror([1,0,0]) translate([TROUGH_2/2, yMC - 5, -EPS])
                     cube(size=[TROUGH_2, 5, dz*2 + EPS]);
             }
-        }
-    }
-}
-
-
-function crystalYPos(outer, holderDiameter) = -(outer/2 - holderDiameter/2); 
-
-
-module crystalView(outer, d, dz)
-{
-    dy = crystalYPos(outer, d);
-    translate([0, dy, 0]) rotate([0, 0, -135]) 
-        cube(size=[100, 100, dz]);
-
-}
-
-// Subtract crystalView() and crystal() to get the complete part.
-module oneCrystalBaffleOuter(outer, d, dz)
-{
-    dy = -(outer/2 - d/2); 
-
-    intersection() {
-        cylinder(d=outer, h=dz*2);
-
-        difference() {
-            translate([0, dy, 0])   
-                cylinder(h=dz, d=d);
         }
     }
 }
@@ -286,23 +323,42 @@ module baffleMCBattery(d, n, dzButtress, dFirst, dzFirst)
     }
 }
 
-module crystalHolder(outer, dzOfBaffle, crystalX, crystalY, crystalZ)
-{
-    n = ceil(crystalZ / (dzOfBaffle * 2));
-    d = max(crystalX, crystalY) * 1.5;
-    dy = crystalYPos(outer, d);
 
-    difference() {
+module oledColumn(outer)
+{
+    translate([0,0,-2]) {
+        polygonXY(4, [[-2,0], [-2,-2], [14,-20], [14,0]]);
+    } 
+}
+
+
+module oledHolder(outer, t, dz, dzToOled)
+{
+    yDisplay = yAtX((OLED_DISPLAY_W - OLED_DISPLAY_MOUNT_W)/2, outer/2) + OLED_DY;
+
+    difference() 
+    {
         union() {
-            for(i=[0:n-1]) {
-                translate([0, 0, i*dzOfBaffle*2]) {
-                    oneCrystalBaffleOuter(outer, d, dzOfBaffle);
+            tube(h=dz, do=outer, di=outer-t);
+
+            intersection() {
+                cylinder(h=dz, d=outer);
+
+                color("plum") union() {
+                    translate([OLED_DISPLAY_W/2 - OLED_DISPLAY_INNER_W, yDisplay, dzToOled + OLED_DISPLAY_INNER_L])
+                        oledColumn();
+                    translate([-OLED_DISPLAY_W/2 + OLED_DISPLAY_INNER_W, yDisplay, dzToOled + OLED_DISPLAY_INNER_L])
+                        mirror([1,0,0]) oledColumn();
+                    translate([OLED_DISPLAY_W/2 - OLED_DISPLAY_INNER_W, yDisplay, dzToOled + OLED_DISPLAY_L - OLED_DISPLAY_INNER_L])
+                        oledColumn();
+                    translate([-OLED_DISPLAY_W/2 + OLED_DISPLAY_INNER_W, yDisplay, dzToOled + OLED_DISPLAY_L - OLED_DISPLAY_INNER_L])
+                        mirror([1,0,0]) oledColumn();                    
                 }
             }
         }
-        translate([0, dy, -EPS])
-            crystal(crystalX, crystalY, crystalZ);
-        translate([0, 0, -EPS])
-            crystalView(outer, d, crystalZ);
+        translate([0, yDisplay, dzToOled]) 
+            oledDisplay();
+        translate([0, -4, dzToOled + 6])
+            cube(size=[50, 50, OLED_DISPLAY_W - 3]);
     }
 }
