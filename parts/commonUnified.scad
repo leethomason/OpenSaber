@@ -319,7 +319,7 @@ module baffleMCBattery(d, n, dzButtress, dFirst, dzFirst)
             if (i==0)
                 oneBaffle(d, dzFirst, dExtra=dFirst - d);
             else
-                oneBaffle(d, dzButtress);
+                oneBaffle(d, dzButtress, bridge=(i < n-1));
     }
 }
 
