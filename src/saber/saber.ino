@@ -72,7 +72,9 @@ BladeState  bladeState;
 
 ButtonCB    buttonA(PIN_SWITCH_A, SABER_BUTTON);
 LEDManager  ledA(PIN_LED_A, false);
+#ifndef PINB_CRYSTAL
 LEDManager  ledB(PIN_LED_B, false);
+#endif
 
 UIRenderData uiRenderData;
 
