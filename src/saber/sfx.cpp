@@ -299,7 +299,7 @@ bool SFX::playSound(int sound, int mode, bool playIfOff)
         ASSERT(track < m_numFilenames);
 
         //Log.p("SFX play track ").p(m_filename[track].c_str()).eol();
-        Log.event("[SFX play]", sound);
+        EventQ.event("[SFX play]", sound);
 
         CStr<25> path;
         if (m_numFonts > 0 && m_currentFont >= 0) {

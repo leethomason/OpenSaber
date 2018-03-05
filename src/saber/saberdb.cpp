@@ -214,7 +214,7 @@ void SaberDB::setPalette(int n)
 #endif
 
     dataHeader.currentPalette = abs(n) % NUM_PALETTES;
-    Log.event("[PALETTE]", dataHeader.currentPalette);
+    EventQ.event("[PALETTE]", dataHeader.currentPalette);
     //Log.p("Switch Palette to: ").p(dataHeader.currentPalette).eol();
 
     EEPROM.put(headerAddr(), dataHeader);

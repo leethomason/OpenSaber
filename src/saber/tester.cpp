@@ -6,6 +6,7 @@
 #include "sketcher.h"
 #include "rgb.h"
 #include "voltmeter.h"
+#include "unittest.h"
 
 #include "Button.h"
 #include "Grinliz_Arduino_Util.h"
@@ -35,8 +36,9 @@ static const int EFFECT_BUTTON = 1;
 	 }
 
 #define TEST_STR_EQUAL(expected, actual) 		\
-	ASSERT(strEqual(expected, actual));			\
-	if (expected != actual) { 					\
+	bool equal = strEqual(expected, actual);	\
+	ASSERT(equal);								\
+	if (!equal) { 								\
 		Log.p("Expected:").p(expected).eol(); 	\
 		Log.p("Actual:").p(actual).eol();		\
 		while(true)	{}							\
@@ -112,6 +114,7 @@ public:
 
 		while(queue->hasEvent()) {
 			EventQueue::Event e = queue->popEvent();
+			Log.p("BasterTest: ").p(e.name).p( "order=").p(tester->getOrder()).eol();
 			if (!strStarts(e.name, "[BLADE_"))
 				continue;
 
@@ -137,7 +140,7 @@ public:
 				default:
 					break;
 			}
-			if (tester->getOrder() == 3) {
+			if (tester->getOrder() == 4) {
 				result = TEST_SUCCESS;
 				break;
 			}
@@ -216,7 +219,7 @@ public:
 		TEST_EQUAL(button.isDown(), false);
 
 		// Fire an event:
-		Log.event("[dummyEvent]");
+		EventQ.event("[dummyEvent]");
 	}
 
 	virtual int process(Tester* tester, EventQueue* queue) 
@@ -359,10 +362,7 @@ void Tester::process()
 		return;
 	}	
 
-	const char* e = 0;
-	const char* d = 0;
-
-	int result = test->process(this, e, d);
+	int result = test->process(this, &EventQ);
 
 	if (result == Test::TEST_ERROR) {
 		Log.p("**Tester ERROR: '").p(test->name()).p("'").eol();

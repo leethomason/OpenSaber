@@ -348,6 +348,8 @@ void PushTestEvents(int n)
 bool TestEvent()
 {
 	EventQ.setEventLogging(false);
+    while(EventQ.hasEvent()) 
+        EventQ.popEvent();
 	TEST_IS_FALSE(EventQ.hasEvent());
 	{
 		PushTestEvents(1);

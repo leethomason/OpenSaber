@@ -35,6 +35,7 @@ public:
 	void attach(Button* buttonA, Button* buttonB);
 	void attachUI(const RGB* uiLEDs) { leds = uiLEDs; }
 
+
 	void runTests();
 	void process();
 	static Tester* instance() { return s_instance; }
@@ -45,7 +46,6 @@ public:
 	void press(int button, uint32_t time);
 	void delayedPress(int button, uint32_t wait, uint32_t time);
 	uint32_t getRandom() { return r.rand16(); }
-	bool longTest() const { return useLongTest; }
 	const RGB* getLEDs() const { return leds; }
 
 	int getOrder() const { return order; }
@@ -68,7 +68,6 @@ private:
 	uint32_t delayTime = 0;
 	int passCount = 0;
 	int nPasses = 1;
-	bool useLongTest;
 	const RGB* leds = 0;
 	int order = 0;
 

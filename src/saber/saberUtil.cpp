@@ -14,19 +14,19 @@ void BladeState::change(uint8_t state)
 
     switch(m_currentState) {
     case BLADE_OFF:
-        Log.event("[BLADE_OFF]");
+        EventQ.event("[BLADE_OFF]");
         break;
     case BLADE_IGNITE:
-        Log.event("[BLADE_IGNITE]");
+        EventQ.event("[BLADE_IGNITE]");
         break;
     case BLADE_ON:
-        Log.event("[BLADE_ON]");
+        EventQ.event("[BLADE_ON]");
         break;
     case BLADE_FLASH:
-        Log.event("[BLADE_FLASH]");
+        EventQ.event("[BLADE_FLASH]");
         break;
     case BLADE_RETRACT:
-        Log.event("[BLADE_RETRACT]");
+        EventQ.event("[BLADE_RETRACT]");
         break;
     default:
         ASSERT(false);

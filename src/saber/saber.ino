@@ -72,9 +72,7 @@ BladeState  bladeState;
 
 ButtonCB    buttonA(PIN_SWITCH_A, SABER_BUTTON);
 LEDManager  ledA(PIN_LED_A, false);
-#ifndef PINB_CRYSTAL
 LEDManager  ledB(PIN_LED_B, false);
-#endif
 
 UIRenderData uiRenderData;
 
@@ -260,7 +258,7 @@ void setup() {
         dotstarUI.SetBrightness(SABER_UI_BRIGHTNESS);
     #endif
 
-    Log.event("[saber start]");
+    EventQ.event("[saber start]");
     lastLoopTime = millis();    // so we don't get a big jump on the first loop()
 
     #ifdef SABER_BOOT_SOUND
@@ -312,7 +310,7 @@ void buttonAReleaseHandler(const Button& b)
             Log.p("holdTime: ").p(holdTime).eol();
             if (holdTime >= b.holdThreshold()) {
                 unlocked = millis();
-                Log.event("[unlocked]");
+                EventQ.event("[unlocked]");
             }
         }
     #endif
@@ -369,7 +367,7 @@ void buttonAClickHandler(const Button&)
         #endif
             {
                 int32_t vbat = voltmeter.averagePower();
-                Log.event("[Vbat]", vbat);
+                EventQ.event("[Vbat]", vbat);
                 ledA.blink(AveragePower::vbatToPowerLevel(vbat), INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
             }
     }
@@ -675,7 +673,7 @@ void loop() {
     if (reflashTime && msec >= reflashTime) {
         reflashTime = 0;
         if (flashOnClash && bladeState.state() == BLADE_ON) {
-            Log.event("[FlashOnClash]");
+            EventQ.event("[FlashOnClash]");
             bladeState.change(BLADE_FLASH);
             reflashTime = calcReflashTime();
         }
@@ -696,7 +694,7 @@ void loop() {
         #ifdef SABER_UI_START
             bool changed = dotstarUI.Draw(leds + SABER_UI_START, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
             if (changed) {
-                Log.event("[UIChange]");
+                EventQ.event("[UIChange]");
             }
         #endif
     }

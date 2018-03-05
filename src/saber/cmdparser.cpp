@@ -335,19 +335,7 @@ bool CMDParser::processCMD()
     }
     else if (action == TEST) {
         Tester* tester = Tester::instance();
-        int count = 1;
-        bool longTest = false;
-        if (!value.empty()) {
-            const char* p = value.c_str();
-            if (*p == 'l') {
-                p++;
-                longTest = true;
-            }
-            if (*p) {
-                count = atoi(p);
-            }
-        }
-        tester->runTests(count, longTest);
+        tester->runTests();
     }
     else if (action == UPLOAD) {
         // up ui/foo.wav 1182
