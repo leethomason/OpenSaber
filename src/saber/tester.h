@@ -22,8 +22,6 @@ public:
 	virtual void start(Tester* tester)	{}
 	virtual int process(Tester* tester, EventQueue* queue) = 0;
 
-	int finalResult = 0;
-
 protected:
 };
 
@@ -34,7 +32,6 @@ public:
 	Tester();
 	void attach(Button* buttonA, Button* buttonB);
 	void attachUI(const RGB* uiLEDs) { leds = uiLEDs; }
-
 
 	void runTests();
 	void process();
@@ -53,7 +50,7 @@ public:
 
 private:	
 	void start();
-	Test* done();
+	void done();
 
 	enum {
 		TEST_STATE_NONE,
@@ -64,10 +61,7 @@ private:
 
 	int currentTest = 0;
 	bool running = false;
-	int testState = 0;
 	uint32_t delayTime = 0;
-	int passCount = 0;
-	int nPasses = 1;
 	const RGB* leds = 0;
 	int order = 0;
 

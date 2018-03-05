@@ -269,9 +269,6 @@ void Tester::runTests()
 	for(int i=0; i<2; ++i) {
 		if (button[i]) button[i]->enableTestMode(true);
 	}
-	for(int i=0; gTests[i]; i++) {
-		gTests[i]->finalResult = 0;
-	}
 	currentTest = 0;	
 	start();
 }
@@ -288,7 +285,6 @@ void Tester::start()
 #	endif
 	r.setSeed(0);
 
-
 	Log.p("Test start: '").p(test->name()).p("'").eol();
 	while(EventQ.hasEvent())
 		EventQ.popEvent();
@@ -296,12 +292,10 @@ void Tester::start()
 	test->start(this);
 }
 
-Test* Tester::done()
+void Tester::done()
 {
-	Test* test = 0;
-
 	++currentTest;
-	test = gTests[currentTest];
+	Test* test = gTests[currentTest];
 	
 	if (test) {
 		start();
@@ -311,21 +305,11 @@ Test* Tester::done()
 		for(int i=0; i<2; ++i) {
 			if (button[i]) button[i]->enableTestMode(false);
 		}
-		Log.p("******").eol();
-		for(int i = 0; gTests[i]; ++i) {
-			if (gTests[i]->finalResult == Test::TEST_ERROR)
-				Log.p("  Tester ERROR: '").p(gTests[i]->name()).p("'").eol();
-			else
-				Log.p("  Tester pass: '").p(gTests[i]->name()).p("'").eol();
-		}
-		Log.p("******").eol();
-		Log.p("Test passes run=").p(nPasses).eol();
 		
 		#if SERIAL_DEBUG == 0
 		Log.attachSerial(0);
 		#endif
 	}
-	return test;
 }
 
 void Tester::process()
@@ -334,13 +318,6 @@ void Tester::process()
 		return;
 
 	Test* test = gTests[currentTest];
-	ASSERT(test);
-
-	if (test->finalResult == Test::TEST_ERROR || test->finalResult == Test::TEST_SUCCESS) {
-		test = done();
-		if (!test)
-			return;
-	}
 	ASSERT(test);
 
 	uint32_t m = millis();
@@ -365,12 +342,12 @@ void Tester::process()
 	int result = test->process(this, &EventQ);
 
 	if (result == Test::TEST_ERROR) {
-		Log.p("**Tester ERROR: '").p(test->name()).p("'").eol();
-		test->finalResult = Test::TEST_ERROR;
+		Log.p("**Test ERROR: '").p(test->name()).p("'").eol();
+		done();
 	}
 	else if (result == Test::TEST_SUCCESS) {
-		Log.p("**Tester pass: '").p(test->name()).p("'").eol();
-		test->finalResult = Test::TEST_SUCCESS;
+		Log.p("**Test pass: '").p(test->name()).p("'").eol();
+		done();
 	}
 }
 
