@@ -16,58 +16,7 @@ module rods() {
 }
 
 T_BRIDGE = 1.6;
-
-module halfBridge()
-{
-    polygonYZ(T_BRIDGE, [[0,0], [H_BUTTRESS*2, H_BUTTRESS*2], [H_BUTTRESS*2, 0]]);
-}
-
 X_BRIDGE = X_MC/2+1;
-
-module baffle(battery=true, mc=true, useRods=true, bridge=true, h=H_BUTTRESS, d=D_INNER, mcSpace=false)
-{
-    TROUGH_0 = 10;
-    TROUGH_1 = 10;
-    TROUGH_2 = 14; //X_MC - 4;    // not related to X_MC
-
-    difference() {
-        cylinder(h=h, d=d);
-        if (battery)
-            translate([0, D_INNER/2 - D_BATTERY/2, -EPS]) battery();
-        if (mc)
-            translate([0, DY_MC, -EPS]) 
-                mc();
-        if (mcSpace)
-            translate([-X_MC/2, DY_MC, -EPS])
-                cube(size=[X_MC, 20, h+EPS2]);
-        translate([-TROUGH_0/2, 0, -EPS]) 
-            cube(size=[TROUGH_0, 30, h + EPS2]);
-        translate([-TROUGH_1/2, -5, -EPS]) 
-            cube(size=[TROUGH_1, 5, h + EPS2]);
-        translate([-TROUGH_2/2, -20, -EPS])
-            cube(size=[TROUGH_2, 15, h + EPS2]);
-        if (useRods)
-            rods();
-    }
-    if (bridge) {
-        translate([X_BRIDGE, -11, h]) halfBridge();        
-        mirror([1, 0, 0]) translate([X_BRIDGE, -11, h]) halfBridge();
-
-        translate([X_BRIDGE, 2, h]) halfBridge();        
-        mirror([1, 0, 0]) translate([X_BRIDGE, 2, h]) halfBridge();
-
-        intersection() {
-            translate([0, 0, -EPS]) cylinder(h=H_BUTTRESS*2 + EPS2, d=D_INNER);
-            union() {
-                translate([TROUGH_2/2, DY_MC - 5, -EPS])
-                    cube(size=[TROUGH_2, 5, H_BUTTRESS*2 + EPS]);
-                mirror([1,0,0]) translate([TROUGH_2/2, DY_MC - 5, -EPS])
-                    cube(size=[TROUGH_2, 5, H_BUTTRESS*2 + EPS]);
-            }
-        }
-    }
-}
-
 D_BAFFLE_INNER = D_INNER-6;
 
 module cBaffle(threads=false) {
@@ -103,15 +52,6 @@ PORT_FRONT = DZ_PORT + M_END_BAFFLE;
 SWITCH_BACK = M_SWITCH_CENTER - 9;
 T_SWITCH_RING = 2;
 
-module uniSpeakerHolder()
-{
-    difference() {
-        translate([0, 0, M_BACK]) 
-            speakerHolder(D_POMMEL, M_POMMEL - M_BACK, M_SPEAKER - M_BACK);
-        rods();
-    }
-}
-
 module key(extend=false)
 {
     D = 5.0 * (extend ? 1.0 : 0.98);
@@ -141,14 +81,12 @@ module key(extend=false)
 
 module aftElectronics()
 {
-    // Case
-    translate([0, 0, M_POMMEL]) 
-        baffle(h=Z_RING, d=D_RING, mcSpace=true);
-
-    for(x=[0:NUM_BAFFLES-1])
-         translate([0, 0, M_POMMEL + H_BUTTRESS*2*(1 + x)]) 
-            baffle(bridge = (x < NUM_BAFFLES-1), mcSpace = (x<1));
-
+    difference() {
+        // One extra baffle; the common code counts the ring.
+        translate([0, 0, M_POMMEL]) 
+            baffleMCBattery(D_INNER, NUM_BAFFLES+1, H_BUTTRESS, D_RING, Z_RING);
+        rods();
+    }
     key();
 }
 
@@ -203,7 +141,7 @@ module crystalHolder()
                 }    
             }
         }
-        translate([0, 0, M_CRYSTAL]) crystal();
+        translate([0, DY_CRYSTAL, M_CRYSTAL]) crystal();
         rods();        
     }
 }
@@ -294,12 +232,16 @@ module switchHolder()
 *color("yellow") rods();
 
 DRAW_AFT        = true;
-DRAW_FRONT      = false;
+DRAW_FRONT      = true;
 DRAW_LED_PLATE  = false;
 DRAW_COVER      = false;
 
 if (DRAW_AFT) {
-    uniSpeakerHolder();
+    difference() {
+        translate([0, 0, M_BACK]) 
+            speakerHolder(D_POMMEL, M_POMMEL - M_BACK, M_SPEAKER - M_BACK);
+        rods();
+    }
     aftElectronics();
 }
 

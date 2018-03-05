@@ -23,10 +23,26 @@ Y_MC                =   9.0;
 Z_MC                =  71.0;     // includes SD
 DY_MC               = -12.5;
 
+X_CRYSTAL           =  11;
+Y_CRYSTAL           =   8.5;
+Z_CRYSTAL           =  30.0;
+
+OLED_R_DISPLAY_THREAD = 0.8; // M2 bolt, 2mm head
+OLED_DEPTH_DISPLAY_THREAD = 4;
+OLED_DISPLAY_W           = 23 + 1;
+OLED_DISPLAY_L           = 32 + 1;
+OLED_DISPLAY_MOUNT_W     = 17;
+OLED_DISPLAY_MOUNT_L     = 26;
+OLED_DY                  = -4;  // offset how far the holes/solder points
+                                // should be under the case. mesaured from y=0 on model.
+
 EPS = 0.01;
 EPS2 = EPS * 2;
 
 // Math ------------
+OLED_DISPLAY_INNER_W = (OLED_DISPLAY_W - OLED_DISPLAY_MOUNT_W)/2;
+OLED_DISPLAY_INNER_L = (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L)/2;
+
 function yAtX(x, r) = sqrt(r*r - x*x);
 
 // Utilities, shapes. ------------------------
@@ -38,6 +54,15 @@ module capsule(theta0, theta1, r=2)
     }
 }
 
+module columnY(dx, dy, dz, biasX=0, biasZ=0)
+{
+    translate([-dx/2, 0, -dz/2]) {
+        hull() {
+            cube([dx, EPS, dz]);
+            translate([biasX, dy, biasZ]) cube([dx, EPS, dz]);
+        }
+    }
+}
 
 // Physical components. ----------------------
 module battery(outer) {
@@ -79,15 +104,13 @@ module mc(cutoutLow=false)
     }
 }
 
-module crystal()
+module crystal(dx=X_CRYSTAL, dy=Y_CRYSTAL, dz=Z_CRYSTAL)
 {
     TAPER = 5;
-    translate([0, DY_CRYSTAL, 0]) {
-        color("pink") scale([1.0, Y_CRYSTAL/X_CRYSTAL, 1.0]) {
-            cylinder(d=X_CRYSTAL, h=Z_CRYSTAL - TAPER);
-            translate([0, 0, Z_CRYSTAL - TAPER])
-                cylinder(h=TAPER, d1 = X_CRYSTAL, d2=X_CRYSTAL *0.7);
-        }
+    color("pink") scale([1.0, dy/dx, 1.0]) {
+        cylinder(d=dx, h=dz - TAPER);
+        translate([0, 0, dz - TAPER])
+            cylinder(h=TAPER, d1 = dx, d2=dx *0.7);
     }
 }
 
@@ -107,6 +130,49 @@ module speakerBass22()
             cylinder(h=H_SPKR_METAL, d=D_SPKR_METAL);
     }
 }
+
+module oledDisplayBolt() 
+{
+    // Pins are challenging to print small & accurate.
+    // Trying holes for M2 bolts instead.
+    translate([0, -OLED_DEPTH_DISPLAY_THREAD, 0]) {
+        rotate([-90, 0, 0]) cylinder(r=OLED_R_DISPLAY_THREAD, h=20);
+    }
+}
+
+module oledDisplayBolts()
+{
+    translate([OLED_DISPLAY_INNER_W, 0, OLED_DISPLAY_INNER_L])                            
+        oledDisplayBolt();
+    translate([OLED_DISPLAY_W - OLED_DISPLAY_INNER_W, 0, OLED_DISPLAY_INNER_L])                 
+        oledDisplayBolt();
+    translate([OLED_DISPLAY_W - OLED_DISPLAY_INNER_W, 0, OLED_DISPLAY_L - OLED_DISPLAY_INNER_L])    
+        oledDisplayBolt();
+    translate([OLED_DISPLAY_INNER_W, 0, OLED_DISPLAY_L - OLED_DISPLAY_INNER_L])                
+        oledDisplayBolt();
+}
+
+
+module oledDisplay()
+{
+    color("violet") translate([-OLED_DISPLAY_W/2, 0, 0]) {
+        cube(size=[OLED_DISPLAY_W, 10, OLED_DISPLAY_L]);
+        oledDisplayBolts();
+        
+        translate([0, -1, 6]) {
+            cube(size=[OLED_DISPLAY_W, 1, OLED_DISPLAY_L - 12]);
+        }
+    }
+    color("plum") translate([0, 0, 0]) {
+        X_CABLE = 12;
+        Y_CABLE = 2;
+        Z_CABLE = 3 + 1;    // cheat so we don't get a super thin piece in the locking ring.
+        translate([-X_CABLE/2, -Y_CABLE, -Z_CABLE]) {
+            cube(size=[X_CABLE, 10, Z_CABLE + 7]);
+        }
+    }    
+}
+
 
 // Intermediate parts -----------------
 
@@ -180,7 +246,6 @@ module oneBaffle(   d,
 }
 
 
-
 // Resuable parts -----------------------------------
 module speakerHolder(outer, dz, dzToSpkrBack)
 {
@@ -244,15 +309,56 @@ module switchRing(outer, t, dz, dzToSwitch)
     }
 }
 
-module baffledBatMC(d, dzButtress, dFirst, dzFirst)
-{
-    N = ceil(Z_PADDED_BATTERY / (dzButtress*2));
 
-    for(i=[0:N-1]) {
+function nBafflesNeeded(dzButtress) = ceil(Z_PADDED_BATTERY / (dzButtress*2));
+
+module baffleMCBattery(d, n, dzButtress, dFirst, dzFirst)
+{
+    for(i=[0:n-1]) {
         translate([0, 0, i*dzButtress*2]) 
             if (i==0)
                 oneBaffle(d, dzFirst, dExtra=dFirst - d);
             else
-                oneBaffle(d, dzButtress);
+                oneBaffle(d, dzButtress, bridge=(i < n-1));
+    }
+}
+
+
+module oledColumn(outer)
+{
+    translate([0,0,-2]) {
+        polygonXY(4, [[-2,0], [-2,-2], [14,-20], [14,0]]);
+    } 
+}
+
+
+module oledHolder(outer, t, dz, dzToOled)
+{
+    yDisplay = yAtX((OLED_DISPLAY_W - OLED_DISPLAY_MOUNT_W)/2, outer/2) + OLED_DY;
+
+    difference() 
+    {
+        union() {
+            tube(h=dz, do=outer, di=outer-t);
+
+            intersection() {
+                cylinder(h=dz, d=outer);
+
+                color("plum") union() {
+                    translate([OLED_DISPLAY_W/2 - OLED_DISPLAY_INNER_W, yDisplay, dzToOled + OLED_DISPLAY_INNER_L])
+                        oledColumn();
+                    translate([-OLED_DISPLAY_W/2 + OLED_DISPLAY_INNER_W, yDisplay, dzToOled + OLED_DISPLAY_INNER_L])
+                        mirror([1,0,0]) oledColumn();
+                    translate([OLED_DISPLAY_W/2 - OLED_DISPLAY_INNER_W, yDisplay, dzToOled + OLED_DISPLAY_L - OLED_DISPLAY_INNER_L])
+                        oledColumn();
+                    translate([-OLED_DISPLAY_W/2 + OLED_DISPLAY_INNER_W, yDisplay, dzToOled + OLED_DISPLAY_L - OLED_DISPLAY_INNER_L])
+                        mirror([1,0,0]) oledColumn();                    
+                }
+            }
+        }
+        translate([0, yDisplay, dzToOled]) 
+            oledDisplay();
+        translate([0, -4, dzToOled + 6])
+            cube(size=[50, 50, OLED_DISPLAY_W - 3]);
     }
 }
