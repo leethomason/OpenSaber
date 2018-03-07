@@ -299,8 +299,10 @@ void EventQueue::event(const char* e, int data)
 	m_events[slot].name = e;
 	m_events[slot].data = data;
 
+    #if SERIAL_DEBUG == 1
 	if (m_eventLogging)
 		Log.p(m_events[slot].name).p(" data=").p(m_events[slot].data).eol();
+    #endif
 
 	++m_nEvents;
 }

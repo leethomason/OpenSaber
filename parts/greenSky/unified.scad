@@ -232,7 +232,7 @@ module switchHolder()
 *color("yellow") rods();
 
 DRAW_AFT        = true;
-DRAW_FRONT      = true;
+DRAW_FRONT      = false;
 DRAW_LED_PLATE  = false;
 DRAW_COVER      = false;
 

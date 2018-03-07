@@ -307,7 +307,7 @@ void buttonAReleaseHandler(const Button& b)
     #ifdef SABER_LOCK
         if (bladeState.bladeOn()) {
             uint32_t holdTime = millis() - b.pressedTime();
-            Log.p("holdTime: ").p(holdTime).eol();
+            //Log.p("holdTime: ").p(holdTime).eol();
             if (holdTime >= b.holdThreshold()) {
                 unlocked = millis();
                 EventQ.event("[unlocked]");
@@ -350,10 +350,10 @@ void retractBlade()
 
 void buttonAClickHandler(const Button&)
 {
-    Log.p("buttonAClickHandler...");
+    //Log.p("buttonAClickHandler...");
     // Special case: color switch.
     if (bladeState.state() == BLADE_ON && buttonB.isDown()) {
-        Log.p("palette change.").eol();
+        //Log.p("palette change.").eol();
         saberDB.nextPalette();
         paletteChange = true;
         syncToDB();
@@ -375,7 +375,7 @@ void buttonAClickHandler(const Button&)
 
 
 void buttonAHoldHandler(const Button&) {
-    Log.p("buttonAHoldHandler").eol();
+    //Log.p("buttonAHoldHandler").eol();
     if (bladeState.state() == BLADE_OFF) {
         igniteBlade();
     }
@@ -393,7 +393,7 @@ void buttonBPressHandler(const Button&) {
 }
 
 void buttonBHoldHandler(const Button& button) {
-    Log.p("buttonBHoldHandler").eol();
+    //Log.p("buttonBHoldHandler").eol();
     if (bladeState.state() != BLADE_OFF) {
         if (!paletteChange) {
             bladeState.change(BLADE_FLASH);
@@ -424,7 +424,7 @@ void buttonBReleaseHandler(const Button& b) {
 }
 
 void buttonBClickHandler(const Button&) {
-    Log.p("buttonBClickHandler").eol();
+    //Log.p("buttonBClickHandler").eol();
     if (bladeState.state() == BLADE_ON) {
         if (!paletteChange) {
             bladeState.change(BLADE_FLASH);
@@ -450,7 +450,7 @@ bool setPaletteFromHoldCount(int count)
 // One button case.
 void buttonAClickHandler(const Button&)
 {
-    Log.p("buttonAClickHandler").eol();
+    //Log.p("buttonAClickHandler").eol();
     if (bladeState.bladeOff()) {
         uiMode.nextMode();
         // Turn off blinking so we aren't in a weird state when we change modes.
@@ -473,7 +473,7 @@ void buttonAClickHandler(const Button&)
 
 void buttonAHoldHandler(const Button& button)
 {
-    Log.p("buttonAHoldHandler nHolds=").p(button.nHolds()).eol();
+    //Log.p("buttonAHoldHandler nHolds=").p(button.nHolds()).eol();
     
     if (bladeState.state() == BLADE_OFF) {
         bool buttonOn = false;

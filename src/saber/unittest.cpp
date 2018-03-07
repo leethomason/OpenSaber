@@ -23,7 +23,7 @@ bool runUnitTests()
 
 	//RUN_TEST(FailTest);
 
-	Log.p("Unit tests ").p(allPass ? "PASSED" : "**FAILED**");
+	Log.p("Unit tests ").p(allPass ? "PASSED" : "**FAILED**").eol();
 	ASSERT(allPass);
 	return allPass;
 }
