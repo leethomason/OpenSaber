@@ -15,19 +15,15 @@ Tester* Tester::s_instance = 0;
 
 static const int HOLD_TIME = Button::DEFAULT_HOLD_TIME + 100;
 static const int PRESS_TIME = Button::DEFAULT_BOUNCE_DURATION * 2;
-static const int AUDIO_LAG_TIME = 100;
-static const int AUDIO_CHECKED_TIME = 200;
-static const int POWER_BUTTON = 0;
-static const int EFFECT_BUTTON = 1;
 
-#define TEST_EXISTS(expected) 				\
+#define TEST_EXISTS(expected) 						\
 	ASSERT(expected);								\
 	if (!(expected)) {								\
 		Log.p("Expected true:").p(#expected).eol();	\
 		while(true) {}								\
 	}
 
-#define TEST_EQUAL(expected, actual) 	\
+#define TEST_EQUAL(expected, actual) 			\
 	ASSERT(expected == actual);					\
 	if (expected != actual) { 					\
 		Log.p("Expected:").p(expected).eol(); 	\
@@ -44,7 +40,7 @@ static const int EFFECT_BUTTON = 1;
 		while(true)	{}							\
 	 }
 
-#define TEST_RANGE(low, high, actual) 	\
+#define TEST_RANGE(low, high, actual) 			\
 	ASSERT(actual >= low && actual <= high);	\
 	if (actual < low || actual > high) {		\
 		Log.p("Low   :").p(low).eol(); 			\
@@ -54,7 +50,7 @@ static const int EFFECT_BUTTON = 1;
 	} 
 
 #define TEST_ORDER(index)						\
-	TEST_EQUAL(tester->order, index);	\
+	TEST_EQUAL(tester->order, index);			\
 	tester->order += 1;
 
 class IgniteRetractTest : public Test
@@ -134,9 +130,12 @@ public:
 					// Flash effect
 					tester->delayedPress(0, 1000, PRESS_TIME);
 					break;
+
 				case 2:
 					// Turn off again.
 					tester->delayedPress(0, 1000, HOLD_TIME);
+					break;
+				
 				default:
 					break;
 			}
