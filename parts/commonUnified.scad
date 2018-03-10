@@ -280,15 +280,21 @@ module speakerHolder(outer, dz, dzToSpkrBack)
     }
 }
 
-module powerPortRing(outer, t, dz, dzToPort)
+module powerPortRing(outer, t, dz, dzToPort, portSupportToBack=false)
 {    
     difference() {
         union() {
             tube(h=dz, do=outer, di=outer-t);
             intersection() {
                 cylinder(h=dz, d=outer);
-                translate([-50, outer/2 - DY_PORT, dzToPort - D_PORT_SUPPORT/2])
-                    cube(size=[100, 50, D_PORT_SUPPORT]);
+                if (portSupportToBack) {
+                    translate([-50, outer/2 - DY_PORT, 0])
+                        cube(size=[100, 50, D_PORT_SUPPORT/2 + dzToPort]);
+                }
+                else {
+                    translate([-50, outer/2 - DY_PORT, dzToPort - D_PORT_SUPPORT/2])
+                        cube(size=[100, 50, D_PORT_SUPPORT]);
+                }
             }
         }
         translate([0, 0, dzToPort]) {
