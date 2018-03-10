@@ -241,7 +241,6 @@ if (DRAW_LED_PLATE) {
     ledPlate();
 }
 
-if (DRAW_COVER) 
+if (DRAW_COVER) {
     centerCover();
-
-//if (DRAW_EMITTER) emitter();
+}
