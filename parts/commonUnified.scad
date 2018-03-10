@@ -254,7 +254,7 @@ module speakerHolder(outer, dz, dzToSpkrBack)
         translate([0, 0, dzToSpkrBack])
             speakerBass22();
         translate([-50, -outer, -EPS])
-            cube(size=[100, outer - 4, 100]);    
+            cube(size=[100, outer - 5, 100]);    
 
         THETA = 14;
         for(r=[0:2]) {

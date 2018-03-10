@@ -216,8 +216,8 @@ module switchHolder()
 *translate([0, 0, M_SPEAKER]) speakerBass22();
 *color("yellow") rods();
 
-DRAW_AFT        = false;
-DRAW_FRONT      = true;
+DRAW_AFT        = true;
+DRAW_FRONT      = false;
 DRAW_LED_PLATE  = false;
 DRAW_COVER      = true;
 
