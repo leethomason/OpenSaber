@@ -148,19 +148,28 @@ module crystalHolder()
 
 module centerCover()
 {
+    M0 = M_END_BAFFLE + DZ_PORT;
+    M1 = M_SWITCH_CENTER - ZPAD_SWITCH;
+    DZ = M1 - M0;
+
     // Cover
     translate([0, 0, PORT_FRONT]) 
     difference() {
-        tube(h=M_CRYSTAL + Z_CRYSTAL - PORT_FRONT, inner=(D_INNER-DD_HOLDER_TUBES)/2, outer=D_INNER/2);
+        color("aqua") 
+            tube(h=DZ, di=(D_INNER-DD_HOLDER_TUBES), do=D_INNER);
+        
+        // Rods and top of bottom piece are at y=0.
+        // Which is sort of lucky and would need to be
+        // fixed if the rods get adjusted.
         translate([-20, -40, 0]) 
             cube(size=[40, 40, M_CRYSTAL + Z_CRYSTAL - PORT_FRONT]);
 
-        translate([0, 0, 6])  capsule(-18, 18);
-        translate([0, 0, 12]) capsule(-18, 18);
-        translate([0, 0, 18]) capsule(-18, 18);
-        translate([0, 0, 24]) capsule(-18, 18);
+        translate([0, 0, 6])   capsule(-18, 18);
+        translate([0, 0, 12])  capsule(-18, 18);
+        translate([0, 0, 18])  capsule(-18, 18);
+        translate([0, 0, 24])  capsule(-18, 18);
 
-        translate([0, 0, 6])  capsule(-60, -60);
+        translate([0, 0, 6])   capsule(-60, -60);
         translate([0, 0, 12])  capsule(-60, -60);
         translate([0, 0, 18])  capsule(-60, -60);
 
@@ -168,30 +177,6 @@ module centerCover()
         translate([0, 0, 18])  capsule(60, 60);
 
         rods();
-    }
-    intersection() {
-        union() {
-            cylinder(h=200, d=D_BAFFLE_INNER);    
-            intersection() {
-                translate([-20, 0, 0]) cube(size=[40, 40, 200]);
-                cylinder(h=200, d=D_INNER);
-            }
-        }
-
-        difference() {
-            DZ = H_CRYSTAL_BAFFLE*2;
-            union() {
-                translate([10, -4, PORT_FRONT + DZ]) 
-                    cube(size=[10, 30, DZ]);
-                mirror([1,0,0]) translate([10, -4, PORT_FRONT + DZ]) 
-                    cube(size=[10, 30, DZ]);
-                translate([10, -4, PORT_FRONT + H_CRYSTAL_BAFFLE*12]) 
-                    cube(size=[10, 30, DZ]);
-                mirror([1,0,0]) translate([10, -4, PORT_FRONT + H_CRYSTAL_BAFFLE*12]) 
-                    cube(size=[10, 30, DZ]);
-            }
-            rods();
-        }
     }
 }
 
@@ -231,10 +216,10 @@ module switchHolder()
 *translate([0, 0, M_SPEAKER]) speakerBass22();
 *color("yellow") rods();
 
-DRAW_AFT        = true;
+DRAW_AFT        = false;
 DRAW_FRONT      = true;
 DRAW_LED_PLATE  = false;
-DRAW_COVER      = false;
+DRAW_COVER      = true;
 
 if (DRAW_AFT) {
     difference() {
