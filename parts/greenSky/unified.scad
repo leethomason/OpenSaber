@@ -214,9 +214,17 @@ module switchHolder()
         rods();
     }
     intersection() {
-        translate([0, 0, Z]) cylinder(h=DZ, d=D_INNER);
-        translate([0, -20, M_EMITTER_BACK - 8])
-            cubePair(10, size=[20, 24, 40]);
+        translate([0, 0, Z]) 
+            cylinder(h=DZ, d=D_INNER);
+        union() {
+            translate([0, -20, M_EMITTER_BACK - 8])
+                cubePair(10, size=[20, 24, 40]);
+            difference() {
+                translate([0, -20, M_EMITTER_BACK - 11])
+                    cubePair(10, size=[20, 19, 4]);
+                rods();
+            }
+        }
     }
 }
 
@@ -231,8 +239,8 @@ module switchHolder()
 *translate([0, 0, M_SPEAKER]) speakerBass22();
 *color("yellow") rods();
 
-DRAW_AFT        = true;
-DRAW_FRONT      = false;
+DRAW_AFT        = false;
+DRAW_FRONT      = true;
 DRAW_LED_PLATE  = false;
 DRAW_COVER      = false;
 
@@ -258,5 +266,3 @@ if (DRAW_LED_PLATE) {
 
 if (DRAW_COVER) 
     centerCover();
-
-//if (DRAW_EMITTER) emitter();
