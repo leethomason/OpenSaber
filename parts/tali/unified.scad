@@ -11,7 +11,7 @@ DRAW_BAT   = true;
 
 INCHES_TO_MM = 25.4;
 MM_TO_INCHES = 1 / 25.4;
-$fn = 20;
+$fn = 40;
 //$fn = 100;
 EPS = 0.01;
 EPS2 = EPS * 2;
