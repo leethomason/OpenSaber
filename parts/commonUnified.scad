@@ -216,6 +216,21 @@ module baffleHalfBridge(dz, t)
 }
 
 
+module oneBaffleBottonRail(d, dz) 
+{
+    yMC = -yAtX(X_MC/2, d/2) + 0.5;
+
+    intersection() {
+        translate([0, 0, -EPS]) cylinder(h=dz*2 + EPS2, d=d);
+        union() {
+            translate([TROUGH_2 / 2, yMC - 10, -EPS])
+                cube(size=[20, 10, dz*2 + EPS]);
+            translate([X_MC / 2, yMC - 10, -EPS])
+                cube(size=[20, 11, dz*2 + EPS]);
+        }
+    }    
+}
+
 module oneBaffle(   d,
                     dz,
                     battery=true, 
@@ -232,6 +247,7 @@ module oneBaffle(   d,
     T_BRIDGE = 1.6;
 
     yMC = -yAtX(X_MC/2, d/2) + 0.7;
+    //yMC = -yAtX(X_MC/2, d/2) + 0.5;
 
     difference() {
         cylinder(h=dz, d=d + dExtra);
@@ -267,15 +283,8 @@ module oneBaffle(   d,
         mirror([1, 0, 0]) translate([X_BRIDGE, yBridge - dz*2, dz]) 
             baffleHalfBridge(dz, T_BRIDGE);
 
-        intersection() {
-            translate([0, 0, -EPS]) cylinder(h=dz*2 + EPS2, d=d);
-            union() {
-                translate([TROUGH_2/2, yMC - 5, -EPS])
-                    cube(size=[TROUGH_2, 5, dz*2 + EPS]);
-                mirror([1,0,0]) translate([TROUGH_2/2, yMC - 5, -EPS])
-                    cube(size=[TROUGH_2, 5, dz*2 + EPS]);
-            }
-        }
+        oneBaffleBottonRail(d, dz);
+        mirror([1,0,0]) oneBaffleBottonRail(d, dz);
     }
 }
 
@@ -325,15 +334,21 @@ module speakerHolder(outer, dz, dzToSpkrBack, type)
     }
 }
 
-module powerPortRing(outer, t, dz, dzToPort)
+module powerPortRing(outer, t, dz, dzToPort, portSupportToBack=false)
 {    
     difference() {
         union() {
             tube(h=dz, do=outer, di=outer-t);
             intersection() {
                 cylinder(h=dz, d=outer);
-                translate([-50, outer/2 - DY_PORT, dzToPort - D_PORT_SUPPORT/2])
-                    cube(size=[100, 50, D_PORT_SUPPORT]);
+                if (portSupportToBack) {
+                    translate([-50, outer/2 - DY_PORT, 0])
+                        cube(size=[100, 50, D_PORT_SUPPORT/2 + dzToPort]);
+                }
+                else {
+                    translate([-50, outer/2 - DY_PORT, dzToPort - D_PORT_SUPPORT/2])
+                        cube(size=[100, 50, D_PORT_SUPPORT]);
+                }
             }
         }
         translate([0, 0, dzToPort]) {
@@ -366,16 +381,28 @@ module switchRing(outer, t, dz, dzToSwitch)
 
 function nBafflesNeeded(dzButtress) = ceil(Z_PADDED_BATTERY / (dzButtress*2));
 
+<<<<<<< HEAD
 function zLenOfBaffles(n, dzButtress) = n * dzButtress * 2 - dzButtress;
 
 module baffleMCBattery(d, n, dzButtress, dFirst, dzFirst)
+=======
+module baffleMCBattery(outer, n, dzButtress, dFirst, dzFirst)
+>>>>>>> 1855ec297f389364704960efd58a3f93503570d8
 {
     for(i=[0:n-1]) {
         translate([0, 0, i*dzButtress*2]) 
-            if (i==0)
-                oneBaffle(d, dzFirst, dExtra=dFirst - d);
-            else
-                oneBaffle(d, dzButtress, bridge=(i < n-1));
+            if (i==0) {
+                // First baffle can "overflow" decause of
+                // the larger diameter. Use an intersection()
+                // to bring it in.
+                intersection() {
+                    cylinder(h=dzButtress*2, d=dFirst);
+                    oneBaffle(outer, dzFirst, dExtra=dFirst - outer);
+                }
+            }
+            else {
+                oneBaffle(outer, dzButtress, bridge=(i < n-1));
+            }
     }
 }
 

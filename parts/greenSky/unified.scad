@@ -4,6 +4,9 @@ use <../shapes.scad>
 
 $fn = 90;
 
+/* Need the space for the wires and connectors for the emitter. */
+SUPPORT_CRYSTAL = false;
+
 module rod() {
     $fn = 30;
     translate([13, 0, -20])
@@ -25,8 +28,10 @@ module cBaffle(threads=false) {
 
         difference() {
             union() {        
-                translate([0, DY_CRYSTAL, 0]) {
-                    cylinder(h=H_CRYSTAL_BAFFLE, d=D_CRYSTAL_BAFFLE);
+                if (SUPPORT_CRYSTAL) {
+                    translate([0, DY_CRYSTAL, 0]) {
+                        cylinder(h=H_CRYSTAL_BAFFLE, d=D_CRYSTAL_BAFFLE);
+                    }
                 }
                 tube(h=H_CRYSTAL_BAFFLE, do=D_INNER, di=D_BAFFLE_INNER);
                 difference() {
@@ -35,8 +40,10 @@ module cBaffle(threads=false) {
                         cube(size=[40, 40, 40]);
                 }
             }
-            translate([0, DY_CRYSTAL, -EPS]) rotate([0, 0, -135])
-                cube(size=[20, 20, 20]); 
+            if (SUPPORT_CRYSTAL) {
+                translate([0, DY_CRYSTAL, -EPS]) rotate([0, 0, -135])
+                    cube(size=[20, 20, 20]); 
+            }
         }        
     }
 }
@@ -116,7 +123,7 @@ module powerPort()
     DZ = 3;
     difference() {
         translate([0, 0, M_END_BAFFLE])
-            powerPortRing(D_INNER, DD_HOLDER_TUBES, DZ_PORT, M_PORT_CENTER - M_END_BAFFLE);
+            powerPortRing(D_INNER, DD_HOLDER_TUBES, DZ_PORT, M_PORT_CENTER - M_END_BAFFLE, portSupportToBack=true);
 
         rods();
         key(true);
@@ -199,9 +206,17 @@ module switchHolder()
         rods();
     }
     intersection() {
-        translate([0, 0, Z]) cylinder(h=DZ, d=D_INNER);
-        translate([0, -20, M_EMITTER_BACK - 8])
-            cubePair(10, size=[20, 24, 40]);
+        translate([0, 0, Z]) 
+            cylinder(h=DZ, d=D_INNER);
+        union() {
+            translate([0, -20, M_EMITTER_BACK - 8])
+                cubePair(10, size=[20, 24, 40]);
+            difference() {
+                translate([0, -20, M_EMITTER_BACK - 11])
+                    cubePair(10, size=[20, 19, 4]);
+                rods();
+            }
+        }
     }
 }
 
@@ -216,10 +231,10 @@ module switchHolder()
 *translate([0, 0, M_SPEAKER]) speakerBass22();
 *color("yellow") rods();
 
-DRAW_AFT        = true;
-DRAW_FRONT      = false;
+DRAW_AFT        = false;
+DRAW_FRONT      = true;
 DRAW_LED_PLATE  = false;
-DRAW_COVER      = true;
+DRAW_COVER      = false;
 
 if (DRAW_AFT) {
     difference() {
