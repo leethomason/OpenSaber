@@ -4,6 +4,9 @@ M_LED_HOLDER_BACK	= M_LED_HOLDER_FRONT - 10;
 M_SWITCH_CENTER		= M_TRANSITION + 30.5;
 M_FORWARD_PCB       = M_TRANSITION + 20;
 M_PORT_CENTER       = M_TRANSITION + 14;
+M_CHAMBER           = 105;      // FIXME
+                                // End of the plastic carriage, beginning
+                                // of the metal chamber.
 
 M_SPKR_RING			= 15.5;		// Front of the speaker ring.
 M_RAIL_START        = 12;

@@ -8,11 +8,6 @@ D_SWITCH            =  12.5;     // actually 12, by thread.
 D_SWITCH_SUPPORT    =  16;
 DY_SWITCH            =  -2; //13.5;
 
-H_SPKR_METAL        =  4;
-D_SPKR_METAL        =  18; 
-H_SPKR_PLASTIC      =  4.6;
-D_SPKR_PLASTIC      =  20;
-
 D_PORT              =  7.9;
 D_PORT_SUPPORT      =  12;
 H_PORT              =  16;
@@ -124,10 +119,25 @@ module port(extend=false)
 
 module speakerBass22()
 {
+    H_SPKR_METAL        =  4;
+    D_SPKR_METAL        =  18; 
+    H_SPKR_PLASTIC      =  4.6;
+    D_SPKR_PLASTIC      =  20;
+
     color("yellow") {
         cylinder(h=H_SPKR_PLASTIC + EPS, d=D_SPKR_PLASTIC);
         translate([0, 0, H_SPKR_PLASTIC])
             cylinder(h=H_SPKR_METAL, d=D_SPKR_METAL);
+    }
+}
+
+module speakerStd28()
+{
+    H_SPKR        =  4;       // FIXME: verify
+    D_SPKR        =  28;
+
+    color("yellow") {
+        cylinder(h=H_SPKR, d=D_SPKR);
     }
 }
 
@@ -173,6 +183,30 @@ module oledDisplay()
     }    
 }
 
+// Local origin is the bottom center of the board, back edge.
+// 'outer' is the size of the board.
+// 'mount' is the dimensions of the just the mounting holes.
+// 'heightY' can be quite large, if modelling displays, etc.
+// currently assumes 2mm.
+module pcb(outerX, outerZ, mountX, mountZ, heightY)
+{
+    translate([-outerX/2, 0, 0]) {
+        cube(size=[outerX, heightY, outerZ]);
+    }
+    translate([-mountX/2, -4, (outerZ - mountZ)/2])
+        rotate([-90, 0, 0])
+            cylinder(h=8 + heightY, d=2);
+    translate([mountX/2, -4, (outerZ - mountZ)/2])
+        rotate([-90, 0, 0])
+            cylinder(h=8 + heightY, d=2);
+    translate([-mountX/2, -4, outerZ - (outerZ - mountZ)/2])
+        rotate([-90, 0, 0])
+            cylinder(h=8 + heightY, d=2);
+    translate([mountX/2, -4, outerZ - (outerZ - mountZ)/2])
+        rotate([-90, 0, 0])
+            cylinder(h=8 + heightY, d=2);
+}
+
 
 // Intermediate parts -----------------
 
@@ -180,13 +214,6 @@ module baffleHalfBridge(dz, t)
 {
     polygonYZ(t, [[0,0], [dz*2, dz*2], [dz*2, 0]]);
 }
-
-
-TROUGH_0 = 10;
-TROUGH_1 = 10;
-TROUGH_2 = 14;
-X_BRIDGE = X_MC/2+1;
-T_BRIDGE = 1.6;
 
 
 module oneBaffleBottonRail(d, dz) 
@@ -213,7 +240,14 @@ module oneBaffle(   d,
                     mcSpace=false,
                     dExtra=0)
 {
-    yMC = -yAtX(X_MC/2, d/2) + 0.5;
+    TROUGH_0 = 10;
+    TROUGH_1 = 10;
+    TROUGH_2 = 14;
+    X_BRIDGE = X_MC/2+1;
+    T_BRIDGE = 1.6;
+
+    yMC = -yAtX(X_MC/2, d/2) + 0.7;
+    //yMC = -yAtX(X_MC/2, d/2) + 0.5;
 
     difference() {
         cylinder(h=dz, d=d + dExtra);
@@ -256,12 +290,32 @@ module oneBaffle(   d,
 
 
 // Resuable parts -----------------------------------
-module speakerHolder(outer, dz, dzToSpkrBack)
+/*
+    type = 
+        "bass22"
+        "std28"
+ */
+module speakerHolder(outer, dz, dzToSpkrBack, type)
 {
     difference() {
-        tube(h=dz, do=outer, di=D_SPKR_METAL);
-        translate([0, 0, dzToSpkrBack])
-            speakerBass22();
+        union() {
+            if(type == "bass22") {
+                difference() {
+                    tube(h=dz, do=outer, di=18);
+                    translate([0, 0, dzToSpkrBack])
+                        speakerBass22();
+                }
+            }
+            else if (type == "std28") {
+                difference() {
+                    tube(h=dz, do=outer, di=24);
+                    translate([0, 0, dzToSpkrBack])
+                        speakerStd28();
+                }
+            }
+            else
+                echo("Error speaker type not specified.");
+        }
         translate([-50, -outer, -EPS])
             cube(size=[100, outer - 5, 100]);    
 
@@ -327,7 +381,13 @@ module switchRing(outer, t, dz, dzToSwitch)
 
 function nBafflesNeeded(dzButtress) = ceil(Z_PADDED_BATTERY / (dzButtress*2));
 
+<<<<<<< HEAD
+function zLenOfBaffles(n, dzButtress) = n * dzButtress * 2 - dzButtress;
+
+module baffleMCBattery(d, n, dzButtress, dFirst, dzFirst)
+=======
 module baffleMCBattery(outer, n, dzButtress, dFirst, dzFirst)
+>>>>>>> 1855ec297f389364704960efd58a3f93503570d8
 {
     for(i=[0:n-1]) {
         translate([0, 0, i*dzButtress*2]) 
@@ -383,5 +443,56 @@ module oledHolder(outer, t, dz, dzToOled)
             oledDisplay();
         translate([0, -4, dzToOled + 6])
             cube(size=[50, 50, OLED_DISPLAY_W - 3]);
+    }
+}
+
+module pcbColumn()
+{
+    translate([0,0,-3]) {
+        polygonXY(6, [[-2,0], [-2,-2], [14,-20], [14,0]]);
+    } 
+}
+
+/*
+    outer: diameter of the saber 
+    t: thickness of the wall
+    dz: length of the section
+    dzToPCB: delta to where the pcb start
+    dyPCB: y delta to PCB bottom.
+    size[3]: outer size of the pcb
+    mount[3]: inner size to position the mounting holes.
+              y should be zero.
+*/
+module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount)
+{
+    xm = size[0] - mount[0];
+    zm = size[2] - mount[2];
+
+    difference() 
+    {
+        union() {
+            tube(h=dz, do=outer, di=outer-t);
+
+            intersection() {
+                cylinder(h=dz, d=outer);
+
+                color("plum") union() {
+                    translate([ size[0]/2 - xm/2, dyPCB, dzToPCB + zm/2 ])
+                        pcbColumn();
+                    mirror([1,0,0])
+                    translate([ size[0]/2 - xm/2, dyPCB, dzToPCB + zm/2 ])
+                        pcbColumn();
+                    translate([ size[0]/2 - xm/2, dyPCB, dzToPCB + size[2] - zm/2 ])
+                        pcbColumn();
+                    mirror([1,0,0])
+                    translate([ size[0]/2 - xm/2, dyPCB, dzToPCB + size[2] - zm/2 ])
+                        pcbColumn();
+                }
+            }
+        }
+        translate([0, dyPCB, dzToPCB]) 
+            pcb(size[0], size[2], mount[0], mount[2], size[1]);
+        //translate([0, -4, dzToOled + 6])
+        //    cube(size=[50, 50, OLED_DISPLAY_W - 3]);
     }
 }
