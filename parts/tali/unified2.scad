@@ -1,20 +1,49 @@
 include <dim.scad>
 use <../commonUnified.scad>
 use <../shapes.scad>
+
+$fn = 60;
 T = 4;
+JUNCTION = 6;
+EPS = 0.01;
+EPS2 = 2 * EPS;
+
+DRAW_AFT = true;
+DRAW_FRONT = true;
 
 N_BAFFLES = nBafflesNeeded(H_BUTTRESS);
 M_BAFFLE_FRONT = zLenOfBaffles(N_BAFFLES, H_BUTTRESS) + M_POMMEL_FRONT;
 
-translate([0, 0, M_POMMEL_FRONT]) {
-    baffleMCBattery(D_AFT, N_BAFFLES, H_BUTTRESS, D_AFT_RING, 6);
+if (DRAW_AFT) {
+    translate([0, 0, M_POMMEL_FRONT]) {
+        baffleMCBattery(D_AFT, N_BAFFLES, H_BUTTRESS, D_AFT_RING, 6);
+    }
+
+    translate([0, 0, M_POMMEL_BACK]) {
+        speakerHolder(D_POMMEL, M_POMMEL_FRONT - M_POMMEL_BACK, 4, "std28");
+    }
+
+    translate([0, 0, M_BAFFLE_FRONT]) {
+        intersection() {
+            tube(JUNCTION, do=D_AFT, di=D_AFT - T);
+            cylinderKeyJoint(JUNCTION);
+        }
+    }
 }
 
-translate([0, 0, M_POMMEL_BACK]) {
-    speakerHolder(D_POMMEL, M_POMMEL_FRONT - M_POMMEL_BACK, 4, "std28");
+if (DRAW_FRONT) {
+    /*
+        Assuming 3 things on PCB:
+        1. power port
+        2. switch
+        3. segment display
+    */
+    difference() {
+        translate([0, 0, M_BAFFLE_FRONT])
+            pcbHolder(D_AFT, T, M_CHAMBER - M_BAFFLE_FRONT, 2, 5, 
+                    [14, 20, 20], [10, 0, 16]);
+        translate([0, 0 , M_BAFFLE_FRONT - EPS])
+            cylinderKeyJoint(JUNCTION + EPS2);
+    }
 }
-
-translate([0, 0, M_BAFFLE_FRONT])
-    pcbHolder(D_AFT, T, M_CHAMBER - M_BAFFLE_FRONT, 2, 
-    5, [14, 20, 20], [10, 0, 16]);
 

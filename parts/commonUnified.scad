@@ -1,5 +1,7 @@
 use <shapes.scad>
 
+// TODO: unify the OledHolder and the PCB holder
+
 Z_BATTERY           =  68;
 Z_PADDED_BATTERY    = Z_BATTERY + 1;
 D_BATTERY           =  18.50 + 0.5;    // An 1850. Huh. 
@@ -57,6 +59,21 @@ module columnY(dx, dy, dz, biasX=0, biasZ=0)
             translate([biasX, dy, biasZ]) cube([dx, EPS, dz]);
         }
     }
+}
+
+/*
+    The green-sky version of the key joint was large, but
+    secure. More problematic is that it click together on the y
+    axis, so it's hard to run the wires.
+*/
+module cylinderKeyJoint(dz)
+{
+    Y = 20;
+    path = [
+        [0, 0], [40, Y], [40, -Y]
+    ];
+    polygonXY(dz, path);
+    mirror([1,0,0]) polygonXY(dz, path);
 }
 
 // Physical components. ----------------------
@@ -231,6 +248,12 @@ module oneBaffleBottonRail(d, dz)
     }    
 }
 
+TROUGH_0 = 10;
+TROUGH_1 = 10;
+TROUGH_2 = 14;
+X_BRIDGE = X_MC/2+1;
+T_BRIDGE = 1.6;
+
 module oneBaffle(   d,
                     dz,
                     battery=true, 
@@ -240,12 +263,6 @@ module oneBaffle(   d,
                     mcSpace=false,
                     dExtra=0)
 {
-    TROUGH_0 = 10;
-    TROUGH_1 = 10;
-    TROUGH_2 = 14;
-    X_BRIDGE = X_MC/2+1;
-    T_BRIDGE = 1.6;
-
     yMC = -yAtX(X_MC/2, d/2) + 0.7;
     //yMC = -yAtX(X_MC/2, d/2) + 0.5;
 
@@ -381,13 +398,9 @@ module switchRing(outer, t, dz, dzToSwitch)
 
 function nBafflesNeeded(dzButtress) = ceil(Z_PADDED_BATTERY / (dzButtress*2));
 
-<<<<<<< HEAD
 function zLenOfBaffles(n, dzButtress) = n * dzButtress * 2 - dzButtress;
 
-module baffleMCBattery(d, n, dzButtress, dFirst, dzFirst)
-=======
 module baffleMCBattery(outer, n, dzButtress, dFirst, dzFirst)
->>>>>>> 1855ec297f389364704960efd58a3f93503570d8
 {
     for(i=[0:n-1]) {
         translate([0, 0, i*dzButtress*2]) 
