@@ -63,8 +63,8 @@ module columnY(dx, dy, dz, biasX=0, biasZ=0)
 
 /*
     The green-sky version of the key joint was large, but
-    secure. More problematic is that it click together on the y
-    axis, so it's hard to run the wires.
+    secure. Problematic is that it click together on the y
+    axis so it's hard to run the wires.
 */
 module cylinderKeyJoint(dz)
 {
@@ -74,6 +74,18 @@ module cylinderKeyJoint(dz)
     ];
     polygonXY(dz, path);
     mirror([1,0,0]) polygonXY(dz, path);
+}
+
+module dotstarLED(n, dy)
+{
+    DOTSTAR_XZ = 5;
+    DOTSTAR_PITCH = 7;
+
+    for(i=[0:n-1]) {
+        translate([-DOTSTAR_XZ/2, 0, DOTSTAR_PITCH*i - DOTSTAR_XZ/2]) {
+            cube(size=[DOTSTAR_XZ, dy, DOTSTAR_XZ]);
+        }
+    }
 }
 
 // Physical components. ----------------------
