@@ -7,6 +7,7 @@
 #include "rgb.h"
 #include "voltmeter.h"
 #include "unittest.h"
+#include "saberdb.h"
 
 #include "Button.h"
 #include "Grinliz_Arduino_Util.h"
@@ -132,7 +133,7 @@ public:
                 "[BLADE_OFF]"
             };
 
-            ASSERT(tester->getOrder() < 5);
+            ASSERT(tester->getOrder() < 6);
 
             TEST_STR_EQUAL(EXPECTED[tester->getOrder()], e.name);
             switch(tester->getOrder()) {
@@ -149,11 +150,75 @@ public:
             default:
                 break;
             }
-            if (tester->getOrder() == 4) {
+            if (tester->getOrder() == 5) {
                 result = TEST_SUCCESS;
                 break;
             }
             tester->incrementOrder();
+        }
+        return result;
+    }
+};
+
+
+class ChannelTest : public Test
+{
+    bool bladeOn = false;
+    uint32_t startTime = 0;
+    uint32_t channel = uint32_t(-1);
+    RGB bladeColor;
+    SaberDB* saberDB = 0;
+
+    virtual const char* name() const {
+        return "ChannelTest";
+    }
+
+    virtual void start(Tester* tester)
+    {
+        //Log.p("start channel").eol();
+        tester->press(0, HOLD_TIME);
+        saberDB = tester->getSaberDB();
+    }
+
+    virtual int process(Tester* tester, EventQueue* queue)
+    {
+        int result = TEST_CONTINUE;
+        uint32_t t = millis();
+
+        while(queue->hasEvent()) {
+            EventQueue::Event e = queue->popEvent();
+            //Log.p("event ").p(e.name).eol();
+
+            if (strEqual(e.name, "[BLADE_ON]")) {
+                bladeOn = true;
+                startTime = t;
+                if (saberDB)
+                    bladeColor = saberDB->bladeColor();
+            }
+            else if (strEqual(e.name, "[BLADE_OFF]")) {
+                result = TEST_SUCCESS;
+            }
+        }
+
+        if (bladeOn) {
+            uint32_t newChannel = (t - startTime) / 1000;
+            if (newChannel < 3 && channel != newChannel) {
+                channel = newChannel;
+
+                if (saberDB) {
+                    switch(channel) {
+                        case 0: saberDB->setBladeColor(RGB(0x400000)); break;
+                        case 1: saberDB->setBladeColor(RGB(0x004000)); break;
+                        case 2: saberDB->setBladeColor(RGB(0x000040)); break;
+                    }
+                }
+            }
+            if (newChannel >= 3) {
+                tester->press(0, HOLD_TIME);
+                if (saberDB) 
+                    saberDB->setBladeColor(bladeColor);
+                bladeOn = false;
+            }
         }
         return result;
     }
@@ -166,6 +231,7 @@ public:
 
 	static const int GOAL = 100;
 	int nSamples = 0;
+    bool bladeOn = false;
 
     virtual const char* name() const {
         return "AveragePowerTest";
@@ -188,17 +254,24 @@ public:
     virtual int process(Tester* tester, EventQueue* queue)
     {
         EventQueue::Event e;
-        if (queue->hasEvent())
+        if (queue->hasEvent()) {
          	e = queue->popEvent();
 
-        if (strEqual("[BLADE_ON]", e.name)) {
-            TEST_RANGE(3200, 5300, Blade::blade().voltage());
-            nSamples++;
-            if (nSamples == GOAL) 
-            	tester->press(0, HOLD_TIME);
+            if (strEqual("[BLADE_ON]", e.name)) {
+                bladeOn = true;
+            }
+            else if (strEqual("[BLADE_OFF]", e.name)) {
+                return TEST_SUCCESS;
+            }
         }
-        else if (strEqual("[BLADE_OFF]", e.name)) {
-        	return TEST_SUCCESS;
+        if (bladeOn) {
+            nSamples++;
+            if (nSamples == GOAL) {
+                Log.p("Voltage: ").p(Blade::blade().voltage()).eol();
+                TEST_RANGE(3200, 5300, Blade::blade().voltage());
+                tester->press(0, HOLD_TIME);
+                bladeOn = false;
+            }
         }
         return TEST_CONTINUE;
     }
@@ -226,6 +299,7 @@ public:
         button.process();
         button.testRelease();
         button.process();
+
         // should still be down: release filtered by de-bounce.
         TEST_EQUAL(button.isDown(), true);
         delay(5);
@@ -257,12 +331,14 @@ public:
 
 ButtonTest buttonTest;
 IgniteRetractTest igniteRetractTest;
+ChannelTest channelTest;
 BlasterTest blasterTest;
 AveragePowerTest averagePowerTest;
 
 Test* gTests[] = {
     &buttonTest,
     &igniteRetractTest,
+    &channelTest,
     &blasterTest,
     &averagePowerTest,
     0
@@ -385,6 +461,9 @@ void Tester::delay(uint32_t t)
 
 void Tester::press(int button, uint32_t time)
 {
+    ASSERT(button >= 0 && button < 2);
+    ASSERT(pressState[button].start == 0);
+    ASSERT(pressState[button].end == 0);
     uint32_t m = millis();
     pressState[button].start = m;
     pressState[button].end = m + time;
@@ -393,6 +472,8 @@ void Tester::press(int button, uint32_t time)
 void Tester::delayedPress(int button, uint32_t delay, uint32_t time)
 {
     ASSERT(button >= 0 && button < 2);
+    ASSERT(pressState[button].start == 0);
+    ASSERT(pressState[button].end == 0);
     uint32_t m = millis();
     pressState[button].start = m + delay;
     pressState[button].end   = m + delay + time;

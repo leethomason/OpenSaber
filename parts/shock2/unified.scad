@@ -9,12 +9,12 @@ $fn=90;
 EPS = 0.01;
 EPS2 = EPS * 2;
 
-AFT_HOLDER   = false;
-AFT          = false;
+AFT_HOLDER   = true;
+AFT          = true;
 MAIN_DISPLAY = true;
-MAIN_CRYSTAL = false;
-MAIN_MC      = false;
-MAIN_EMITTER = false;
+MAIN_CRYSTAL = true;
+MAIN_MC      = true;
+MAIN_EMITTER = true;
 EMITTER      = false;
 FILLER       = false;
 BATTERY      = false;
