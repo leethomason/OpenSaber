@@ -8,6 +8,7 @@ class Button;
 struct ButtonCBHandlers;
 class Tester;
 struct RGB;
+class SaberDB;
 
 class Test
 {
@@ -32,6 +33,7 @@ public:
 	Tester();
 	void attach(Button* buttonA, Button* buttonB);
 	void attachUI(const RGB* uiLEDs) { leds = uiLEDs; }
+	void attachDB(SaberDB* _saberDB) { saberDB = _saberDB; }
 
 	void runTests();
 	void process();
@@ -44,6 +46,7 @@ public:
 	void delayedPress(int button, uint32_t wait, uint32_t time);
 	uint32_t getRandom() { return r.rand16(); }
 	const RGB* getLEDs() const { return leds; }
+	SaberDB* getSaberDB() { return saberDB; }
 
 	int getOrder() const { return order; }
 	void incrementOrder() { order++; }
@@ -63,6 +66,7 @@ private:
 	bool running = false;
 	uint32_t delayTime = 0;
 	const RGB* leds = 0;
+	SaberDB* saberDB = 0;
 	int order = 0;
 
 	struct Press {

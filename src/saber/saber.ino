@@ -191,6 +191,7 @@ void setup() {
     #ifdef SABER_UI_START
         tester.attachUI(leds + SABER_UI_START);
     #endif
+    tester.attachDB(&saberDB);
 
     #ifdef SABER_SOUND_ON
         if (soundOk) {
