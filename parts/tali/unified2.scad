@@ -4,7 +4,7 @@ use <../shapes.scad>
 
 $fn = 60;
 T = 4;
-JUNCTION = 6;
+JUNCTION = 7;
 EPS = 0.01;
 EPS2 = 2 * EPS;
 
