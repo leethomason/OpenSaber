@@ -68,9 +68,11 @@ module columnY(dx, dy, dz, biasX=0, biasZ=0)
 */
 module cylinderKeyJoint(dz)
 {
+    X0 = 10;
+    X = 30;
     Y = 20;
     path = [
-        [0, 0], [40, Y], [40, -Y]
+        [X0, 0], [X, Y], [X, -Y]
     ];
     polygonXY(dz, path);
     mirror([1,0,0]) polygonXY(dz, path);

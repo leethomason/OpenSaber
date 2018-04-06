@@ -8,8 +8,8 @@ JUNCTION = 7;
 EPS = 0.01;
 EPS2 = 2 * EPS;
 
-DRAW_AFT = false;
-DRAW_FRONT = true;
+DRAW_AFT   = true;
+DRAW_FRONT = false;
 
 N_BAFFLES = nBafflesNeeded(H_BUTTRESS);
 M_BAFFLE_FRONT = zLenOfBaffles(N_BAFFLES, H_BUTTRESS) + M_POMMEL_FRONT;
@@ -43,7 +43,10 @@ if (DRAW_FRONT) {
             pcbHolder(D_AFT, T, M_CHAMBER - M_BAFFLE_FRONT, 2, 5, 
                     [14, 20, 20], [10, 0, 16]);
         translate([0, 0 , M_BAFFLE_FRONT - EPS])
-            cylinderKeyJoint(JUNCTION + EPS2);
+        intersection() {
+            tube(JUNCTION, do=D_AFT+EPS, di=D_AFT - T - EPS);
+            cylinderKeyJoint(JUNCTION);
+        }
     }
 
     /*
