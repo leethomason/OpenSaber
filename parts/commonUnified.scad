@@ -3,7 +3,7 @@ use <shapes.scad>
 // TODO: unify the OledHolder and the PCB holder
 
 Z_BATTERY           =  68;
-Z_PADDED_BATTERY    = Z_BATTERY + 1;
+Z_PADDED_BATTERY    =  Z_BATTERY + 1;
 D_BATTERY           =  18.50 + 0.5;    // An 1850. Huh. 
 
 D_SWITCH            =  12.5;     // actually 12, by thread.
@@ -221,21 +221,23 @@ module oledDisplay()
 // currently assumes 2mm.
 module pcb(outerX, outerZ, mountX, mountZ, heightY)
 {
+    MOUNT_HOLE_D = 2;
+
     translate([-outerX/2, 0, 0]) {
         cube(size=[outerX, heightY, outerZ]);
     }
     translate([-mountX/2, -4, (outerZ - mountZ)/2])
         rotate([-90, 0, 0])
-            cylinder(h=8 + heightY, d=2);
+            cylinder(h=8 + heightY, d=MOUNT_HOLE_D);
     translate([mountX/2, -4, (outerZ - mountZ)/2])
         rotate([-90, 0, 0])
-            cylinder(h=8 + heightY, d=2);
+            cylinder(h=8 + heightY, d=MOUNT_HOLE_D);
     translate([-mountX/2, -4, outerZ - (outerZ - mountZ)/2])
         rotate([-90, 0, 0])
-            cylinder(h=8 + heightY, d=2);
+            cylinder(h=8 + heightY, d=MOUNT_HOLE_D);
     translate([mountX/2, -4, outerZ - (outerZ - mountZ)/2])
         rotate([-90, 0, 0])
-            cylinder(h=8 + heightY, d=2);
+            cylinder(h=8 + heightY, d=MOUNT_HOLE_D);
 }
 
 
