@@ -8,7 +8,7 @@ JUNCTION = 7;
 EPS = 0.01;
 EPS2 = 2 * EPS;
 
-DRAW_AFT = false;
+DRAW_AFT = true;
 DRAW_FRONT = true;
 
 N_BAFFLES = nBafflesNeeded(H_BUTTRESS);
