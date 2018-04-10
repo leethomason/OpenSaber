@@ -8,8 +8,8 @@ JUNCTION = 7;
 EPS = 0.01;
 EPS2 = 2 * EPS;
 
-DRAW_AFT   = true;
-DRAW_FRONT = false;
+DRAW_AFT = true;
+DRAW_FRONT = true;
 
 N_BAFFLES = nBafflesNeeded(H_BUTTRESS);
 M_BAFFLE_FRONT = zLenOfBaffles(N_BAFFLES, H_BUTTRESS) + M_POMMEL_FRONT;

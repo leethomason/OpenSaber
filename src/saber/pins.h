@@ -52,8 +52,8 @@ SOFTWARE.
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_GREEN_SKY
+#define SERIAL_DEBUG 				1
+#define SABER_MODEL 				SABER_MODEL_TALI
 #define SABER_SUB_MODEL				SABER_SUB_MODEL_STANDARD
 // ----------------------------------
 
@@ -403,9 +403,11 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
 	#define SABER_AUDIO_UI
+	/*
 	#define SABER_NUM_LEDS 			4
 	#define SABER_UI_START  		0
 	#define SABER_UI_BRIGHTNESS		8
+	*/
 	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 
 	static const int32_t UVOLT_MULT = 6691;		
