@@ -4,11 +4,12 @@ use <../shapes.scad>
 
 $fn = 60;
 T = 4;
+FRONT_T = 2;
 JUNCTION = 7;
 EPS = 0.01;
 EPS2 = 2 * EPS;
 
-DRAW_AFT = true;
+DRAW_AFT = false;
 DRAW_FRONT = true;
 
 N_BAFFLES = nBafflesNeeded(H_BUTTRESS);
@@ -31,6 +32,28 @@ if (DRAW_AFT) {
     }
 }
 
+
+module rods(h, expand=0) {
+    AFT_ROT = 12;
+    rotate([0, 0, AFT_ROT - 90]) {
+        if (expand == 0)
+            rotate([90, 0, 0])
+                dotstarLED(2, h);
+
+        // Wire tube
+        if (expand == 0)
+            translate([-8, 8, 0])
+                cylinder(h=h, d=6);
+
+        // Rods
+        translate([11, 0, 0])
+            cylinder(h=h, d=expand > 0 ? expand : 3.6);
+        translate([-11, 0, 0])
+            cylinder(h=h, d=expand > 0 ? expand : 3.6);
+    }
+}
+
+
 if (DRAW_FRONT) {
     /*
         Assuming 3 things on PCB:
@@ -40,40 +63,35 @@ if (DRAW_FRONT) {
     */
     difference() {
         translate([0, 0, M_BAFFLE_FRONT])
-            pcbHolder(D_AFT, T, M_CHAMBER - M_BAFFLE_FRONT, 2, 5, 
+            pcbHolder(D_AFT, T, M_CHAMBER - M_BAFFLE_FRONT - FRONT_T, 2, 5, 
                     [14, 20, 20], [10, 0, 16]);
         translate([0, 0 , M_BAFFLE_FRONT - EPS])
         intersection() {
             tube(JUNCTION, do=D_AFT+EPS, di=D_AFT - T - EPS);
             cylinderKeyJoint(JUNCTION);
         }
+        NUT_T = 5;
+        translate([0, 0, M_CHAMBER - FRONT_T - NUT_T])
+            rods(50, 12);
+
+        // flat bottom
+        translate([-50, -D_AFT/2, M_BAFFLE_FRONT]) 
+            cube(size=[100, 0.5, 100]);
     }
 
     /*
         And now a loose couple to the crystal chamber.
     */
-    translate([0, 0, M_CHAMBER - T]) {
+    AFT_ROT = 12;
+    translate([0, 0, M_CHAMBER - FRONT_T]) {
         W = 10;
         difference() {
-            translate([0, 0, EPS]) cylinder(h=T, d=D_AFT);
-            /*
-            intersection() {
-                cylinder(h=T, d=D_AFT);
-                translate([-W/2, -50, 0])
-                    cube(size=[W, 100, T]);
-            }
-            */
-            rotate([90, 0, 180])
-                dotstarLED(2, 10);
+            translate([0, 0, EPS]) cylinder(h=FRONT_T, d=D_AFT);
+            rods(10);
 
-            // Wire tube
-            translate([6, -6, 0])
-                cylinder(h=10, d=6);
-            // Rods
-            translate([10, 3, 0])
-                cylinder(h=10, d=3.6);
-            translate([-10, -3, 0])
-                cylinder(h=10, d=3.6);
+            // flat bottom
+            translate([-50, -D_AFT/2, 0]) 
+                cube(size=[100, 0.5, 100]);
         }
     }
 }
