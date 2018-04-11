@@ -1,10 +1,10 @@
-M_TRANSITION		= 114;
-M_LED_HOLDER_FRONT	= M_TRANSITION + 48;
-M_LED_HOLDER_BACK	= M_LED_HOLDER_FRONT - 10;
-M_SWITCH_CENTER		= M_TRANSITION + 30.5;
-M_FORWARD_PCB       = M_TRANSITION + 20;
-M_PORT_CENTER       = M_TRANSITION + 14;
-M_CHAMBER           = 105;      // FIXME
+//M_TRANSITION		= 114;
+//M_LED_HOLDER_FRONT	= M_TRANSITION + 48;
+//M_LED_HOLDER_BACK	= M_LED_HOLDER_FRONT - 10;
+//M_SWITCH_CENTER		= M_TRANSITION + 30.5;
+//M_FORWARD_PCB       = M_TRANSITION + 20;
+//M_PORT_CENTER       = M_TRANSITION + 14;
+M_CHAMBER           = 122;      // FIXME
                                 // End of the plastic carriage, beginning
                                 // of the metal chamber.
 

@@ -9,7 +9,7 @@ JUNCTION = 7;
 EPS = 0.01;
 EPS2 = 2 * EPS;
 
-DRAW_AFT = false;
+DRAW_AFT = true;
 DRAW_FRONT = true;
 
 N_BAFFLES = nBafflesNeeded(H_BUTTRESS);
@@ -63,8 +63,8 @@ if (DRAW_FRONT) {
     */
     difference() {
         translate([0, 0, M_BAFFLE_FRONT])
-            pcbHolder(D_AFT, T, M_CHAMBER - M_BAFFLE_FRONT - FRONT_T, 2, 5, 
-                    [14, 20, 20], [10, 0, 16]);
+            pcbHolder(D_AFT, T, M_CHAMBER - M_BAFFLE_FRONT - FRONT_T + EPS2, 2, 5, 
+                    [14, 20, 36], [10, 0, 28]);
         translate([0, 0 , M_BAFFLE_FRONT - EPS])
         intersection() {
             tube(JUNCTION, do=D_AFT+EPS, di=D_AFT - T - EPS);
