@@ -232,6 +232,7 @@ public:
 	static const int GOAL = 100;
 	int nSamples = 0;
     bool bladeOn = false;
+    Voltmeter voltmeter;
 
     virtual const char* name() const {
         return "AveragePowerTest";
@@ -249,12 +250,13 @@ public:
         TEST_EQUAL((4000*(AveragePower::NUM_SAMPLES-1) + 1000)/AveragePower::NUM_SAMPLES, ave.power());
 
         tester->press(0, HOLD_TIME);
+        voltmeter.begin();
     }
 
     virtual int process(Tester* tester, EventQueue* queue)
     {
         EventQueue::Event e;
-        if (queue->hasEvent()) {
+        while (queue->hasEvent()) {
          	e = queue->popEvent();
 
             if (strEqual("[BLADE_ON]", e.name)) {
@@ -265,10 +267,12 @@ public:
             }
         }
         if (bladeOn) {
+        	voltmeter.takeSample();
             nSamples++;
+
             if (nSamples == GOAL) {
-                Log.p("Voltage: ").p(Blade::blade().voltage()).eol();
-                TEST_RANGE(3200, 5300, Blade::blade().voltage());
+                Log.p("Voltage: ").p(voltmeter.averagePower()).eol();
+                TEST_RANGE(3200, 5300, voltmeter.averagePower());
                 tester->press(0, HOLD_TIME);
                 bladeOn = false;
             }

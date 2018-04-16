@@ -2,14 +2,14 @@ include <dim.scad>
 use <../commonUnified.scad>
 use <../shapes.scad>
 
-$fn = 60;
+$fn = 80;
 T = 4;
 FRONT_T = 2;
 JUNCTION = 7;
 EPS = 0.01;
 EPS2 = 2 * EPS;
 
-DRAW_AFT = true;
+DRAW_AFT = false;
 DRAW_FRONT = true;
 
 N_BAFFLES = nBafflesNeeded(H_BUTTRESS);
@@ -61,10 +61,20 @@ if (DRAW_FRONT) {
         2. switch
         3. segment display
     */
+    C = 19.32/2;
     difference() {
         translate([0, 0, M_BAFFLE_FRONT])
             pcbHolder(D_AFT, T, M_CHAMBER - M_BAFFLE_FRONT - FRONT_T + EPS2, 2, 5, 
-                    [14, 20, 36], [10, 0, 28]);
+                    [19.4, 20, 37.2], 
+                    [
+                        // remember axis are flipped from nanopcb
+                        // and x is re-oriented. *sigh*
+                        [17.78 - C, 25.40, "buttress"],
+                        [16.51 - C,  2.54, "buttress"],
+                        [10.16 - C, 34.29, , "pillar"],
+                        [3.81 - C, 2.54,  , "buttress"],
+                        [2.54 - C, 25.40,  , "buttress"]
+                    ]);
         translate([0, 0 , M_BAFFLE_FRONT - EPS])
         intersection() {
             tube(JUNCTION, do=D_AFT+EPS, di=D_AFT - T - EPS);

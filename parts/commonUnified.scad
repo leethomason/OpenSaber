@@ -24,6 +24,8 @@ X_CRYSTAL           =  11;
 Y_CRYSTAL           =   8.5;
 Z_CRYSTAL           =  30.0;
 
+D_M2                = 1.7;
+
 OLED_R_DISPLAY_THREAD = 0.8; // M2 bolt, 2mm head
 OLED_DEPTH_DISPLAY_THREAD = 4;
 OLED_DISPLAY_W           = 23 + 1;
@@ -213,33 +215,6 @@ module oledDisplay()
         }
     }    
 }
-
-// Local origin is the bottom center of the board, back edge.
-// 'outer' is the size of the board.
-// 'mount' is the dimensions of the just the mounting holes.
-// 'heightY' can be quite large, if modelling displays, etc.
-// currently assumes 2mm.
-module pcb(outerX, outerZ, mountX, mountZ, heightY)
-{
-    MOUNT_HOLE_D = 2;
-
-    translate([-outerX/2, 0, 0]) {
-        cube(size=[outerX, heightY, outerZ]);
-    }
-    translate([-mountX/2, -4, (outerZ - mountZ)/2])
-        rotate([-90, 0, 0])
-            cylinder(h=8 + heightY, d=MOUNT_HOLE_D);
-    translate([mountX/2, -4, (outerZ - mountZ)/2])
-        rotate([-90, 0, 0])
-            cylinder(h=8 + heightY, d=MOUNT_HOLE_D);
-    translate([-mountX/2, -4, outerZ - (outerZ - mountZ)/2])
-        rotate([-90, 0, 0])
-            cylinder(h=8 + heightY, d=MOUNT_HOLE_D);
-    translate([mountX/2, -4, outerZ - (outerZ - mountZ)/2])
-        rotate([-90, 0, 0])
-            cylinder(h=8 + heightY, d=MOUNT_HOLE_D);
-}
-
 
 // Intermediate parts -----------------
 
@@ -475,11 +450,23 @@ module oledHolder(outer, t, dz, dzToOled)
     }
 }
 
-module pcbColumn()
-{
-    translate([0,0,-3]) {
-        polygonXY(6, [[-2,0], [-2,-2], [14,-20], [14,0]]);
+module pcbButtress()
+{    
+    BUTTRESS_T = 5;
+    difference() {
+        translate([0,0,-BUTTRESS_T/2])
+            polygonXY(BUTTRESS_T, [[-2,0], [-2,-2], [14,-20], [14,0]]);
+        translate([0, -50, 0]) rotate([-90, 0, 0]) cylinder(h=50, d=D_M2);
     } 
+}
+
+module pcbPillar() {
+    translate([0, -50, 0]) 
+        rotate([-90, 0, 0])
+            difference() {
+                cylinder(h=50, d1=6, d2=4);
+                cylinder(h=50, d=D_M2);
+            }
 }
 
 /*
@@ -494,9 +481,6 @@ module pcbColumn()
 */
 module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount)
 {
-    xm = size[0] - mount[0];
-    zm = size[2] - mount[2];
-
     difference() 
     {
         union() {
@@ -506,22 +490,32 @@ module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount)
                 cylinder(h=dz, d=outer);
 
                 color("plum") union() {
-                    translate([ size[0]/2 - xm/2, dyPCB, dzToPCB + zm/2 ])
-                        pcbColumn();
-                    mirror([1,0,0])
-                    translate([ size[0]/2 - xm/2, dyPCB, dzToPCB + zm/2 ])
-                        pcbColumn();
-                    translate([ size[0]/2 - xm/2, dyPCB, dzToPCB + size[2] - zm/2 ])
-                        pcbColumn();
-                    mirror([1,0,0])
-                    translate([ size[0]/2 - xm/2, dyPCB, dzToPCB + size[2] - zm/2 ])
-                        pcbColumn();
+                    for(m = mount) {
+                        x = m[0];
+                        z = m[1];
+                        type = m[2];
+                        translate([x, dyPCB, dzToPCB + z]) 
+                        //translate([0, dyPCB, dzToPCB + z]) 
+                        {
+                            if (type == "pillar") {
+                                pcbPillar();
+                            }
+                            else if (type == "buttress") {
+                                shouldMirror = x < 0;
+                                //echo("shouldMirror", shouldMirror);
+                                if (shouldMirror)
+                                    mirror([1,0,0])
+                                        pcbButtress();
+                                else
+                                    pcbButtress();
+                            }
+                        }
+                        
+                    }
                 }
             }
         }
-        translate([0, dyPCB, dzToPCB]) 
-            pcb(size[0], size[2], mount[0], mount[2], size[1]);
-        //translate([0, -4, dzToOled + 6])
-        //    cube(size=[50, 50, OLED_DISPLAY_W - 3]);
+        translate([-size[0]/2, dyPCB, dzToPCB]) 
+            cube(size=[size[0], size[1], size[2]]);
     }
 }
