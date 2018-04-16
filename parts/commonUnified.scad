@@ -70,11 +70,11 @@ module columnY(dx, dy, dz, biasX=0, biasZ=0)
 */
 module cylinderKeyJoint(dz)
 {
-    X0 = 10;
-    X = 30;
-    Y = 20;
+    X0 = 18;
+    X1 = 10;
+    Y  = 7;
     path = [
-        [X0, 0], [X, Y], [X, -Y]
+        [X0, 0], [X1, Y], [X1, -Y]
     ];
     polygonXY(dz, path);
     mirror([1,0,0]) polygonXY(dz, path);
@@ -164,13 +164,17 @@ module speakerBass22()
     }
 }
 
-module speakerStd28()
+module speakerStd28(bass)
 {
-    H_SPKR        =  4;       // FIXME: verify
+    H_SPKR        =  3.2;
     D_SPKR        =  28;
+    X_NOTCH       =  6;
+    Z_NOTCH       =  11.5;
 
     color("yellow") {
         cylinder(h=H_SPKR, d=D_SPKR);
+        translate([-X_NOTCH/2, 0, 0])
+            cube(size=[X_NOTCH, D_SPKR * 0.6, Z_NOTCH]);
     }
 }
 
@@ -314,11 +318,11 @@ module speakerHolder(outer, dz, dzToSpkrBack, type)
                         speakerBass22();
                 }
             }
-            else if (type == "std28") {
+            else if (type == "std28" || type == "bass28") {
                 difference() {
                     tube(h=dz, do=outer, di=24);
                     translate([0, 0, dzToSpkrBack])
-                        speakerStd28();
+                        speakerStd28(type == "bass28");
                 }
             }
             else
@@ -464,7 +468,7 @@ module pcbPillar() {
     translate([0, -50, 0]) 
         rotate([-90, 0, 0])
             difference() {
-                cylinder(h=50, d1=6, d2=4);
+                cylinder(h=50, d1=8, d2=5);
                 cylinder(h=50, d=D_M2);
             }
 }
@@ -476,8 +480,8 @@ module pcbPillar() {
     dzToPCB: delta to where the pcb start
     dyPCB: y delta to PCB bottom.
     size[3]: outer size of the pcb
-    mount[3]: inner size to position the mounting holes.
-              y should be zero.
+    mount: array of:
+        x location, y location, "pillar" or "buttress"
 */
 module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount)
 {
