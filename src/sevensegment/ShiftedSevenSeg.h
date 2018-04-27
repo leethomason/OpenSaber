@@ -34,7 +34,7 @@ public:
     void loop(uint32_t microSeconds, uint8_t* a, uint8_t* b);
 
 private:
-    static const int TIME_PER_DIGIT = 10000;
+    static const int TIME_PER_DIGIT = 4000;
     static const int NUM_DIGITS = 4;
     static const int NUM_SEGMENTS = 8;  // includes the decimal point
 
