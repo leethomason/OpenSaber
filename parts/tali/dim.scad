@@ -1,5 +1,5 @@
-M_CHAMBER           = 128;      // FIXME
-                                // End of the plastic carriage, beginning
+M_CAP               = 140;      // Holds on the crystal. not critical.
+M_CHAMBER           = 128;      // End of the plastic carriage, beginning
                                 // of the metal chamber.
 
 M_POMMEL_FRONT      = 10;       // Where the pommel becomes aft

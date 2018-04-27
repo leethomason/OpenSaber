@@ -329,7 +329,7 @@ module speakerHolder(outer, dz, dzToSpkrBack, type)
                 echo("Error speaker type not specified.");
         }
         translate([-50, -outer, -EPS])
-            cube(size=[100, outer - 5, 100]);    
+            cube(size=[100, outer - 6, 100]);    
 
         THETA = 14;
         for(r=[0:2]) {

@@ -9,8 +9,11 @@ JUNCTION = 5;
 EPS = 0.01;
 EPS2 = 2 * EPS;
 
-DRAW_AFT = true;
+DRAW_AFT   = true;
 DRAW_FRONT = false;
+DRAW_CAP   = false;
+
+AFT_ROT = 12;
 
 N_BAFFLES = nBafflesNeeded(H_BUTTRESS);
 M_BAFFLE_FRONT = zLenOfBaffles(N_BAFFLES, H_BUTTRESS) + M_POMMEL_FRONT;
@@ -27,14 +30,13 @@ if (DRAW_AFT) {
     translate([0, 0, M_BAFFLE_FRONT]) {
         intersection() {
             tube(JUNCTION, do=D_AFT, di=D_AFT - T);
-            cylinderKeyJoint(JUNCTION);
+            cylinderKeyJoint(JUNCTION - 0.5);
         }
     }
 }
 
 
 module rods(h, expand=0) {
-    AFT_ROT = 12;
     rotate([0, 0, AFT_ROT - 90]) {
         if (expand == 0)
             rotate([90, 0, 0])
@@ -102,7 +104,6 @@ if (DRAW_FRONT) {
     /*
         And now a loose couple to the crystal chamber.
     */
-    AFT_ROT = 12;
     translate([0, 0, M_CHAMBER - FRONT_T]) {
         W = 10;
         difference() {
@@ -116,3 +117,38 @@ if (DRAW_FRONT) {
     }
 }
 
+
+if (DRAW_CAP) {
+    D = D_AFT;  //31.5;
+    H = 13; // 14.5 in theory; space for padding
+    D_WASHER = 9.5 + 0.5;
+    H_CRYSTAL = 10; // again, space for glue, padding
+    D1_CRYSTAL = 11;
+    D2_CRYSTAL = 5;
+
+    translate([0, 0, M_CAP]) {
+        difference() {
+            cylinder(h=H, d=D);
+
+            cylinder(h=H, d=D2_CRYSTAL);
+            cylinder(h=H_CRYSTAL, d1=D1_CRYSTAL, d2=D2_CRYSTAL);
+ 
+            rotate([0, 0, AFT_ROT - 90]) {
+                // Wire tube. (hold in place)
+                hull() {
+                    translate([-8, 8, 0]) cylinder(h=H/2, d=6);
+                    translate([-4, 4, 0]) cylinder(h=H/2, d=6);
+                }
+                translate([0, 0, H/2]) hull() {
+                    translate([-8, 8, 0]) cylinder(h=H, d=4.6);
+                    translate([-4, 4, 0]) cylinder(h=H, d=4.6);
+                }
+                    
+                // Rods
+                translate([11, 0, 0]) cylinder(h=H, d=D_WASHER);
+                translate([-11, 0, 0]) cylinder(h=H, d=D_WASHER);
+
+            }
+       }
+    }
+}
