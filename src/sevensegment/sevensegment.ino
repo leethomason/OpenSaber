@@ -1,24 +1,10 @@
-#include <SevSeg.h>
-#include <Grinliz_Arduino_Util.h>
+#include "ShiftedSevenSeg.h"
 
-SevSeg display7;
-static const int SPI_BUFFER_SIZE = 4;
-volatile uint8_t spiBuffer[SPI_BUFFER_SIZE];
-CStr<4> serialBuffer;
+ShiftedSevenSegment shifted7;
 
-// 7 segment bubble display.
-#define DIGIT_1 A0
-#define DIGIT_2 4
-#define DIGIT_3 A1
-#define DIGIT_4 3
-
-#define SEG_A 8
-#define SEG_B 6
-#define SEG_C A5
-#define SEG_D A2
-#define SEG_E A4
-#define SEG_F 5
-#define SEG_G A3
+static const uint8_t LATCH = 0;
+static const uint8_t CLOCK = 0;
+static const uint8_t DATA = 0;
 
 void setup() {
   Serial.begin(19200);
@@ -26,39 +12,35 @@ void setup() {
     delay(100);
   }
   
-  int displayType = COMMON_CATHODE;
+  pinMode(LATCH, OUTPUT);
+  pinMode(CLOCK, OUTPUT);
+  pinMode(DATA, OUTPUT);
 
-  int numberOfDigits = 4;
+  shifted7.attachDigit(0, 0);
+  shifted7.attachDigit(1, 1);
+  shifted7.attachDigit(2, 2);
+  shifted7.attachDigit(3, 3);
 
-  display7.Begin(displayType, numberOfDigits,
-                 DIGIT_1, DIGIT_2, DIGIT_3, DIGIT_4,
-                 SEG_A, SEG_B, SEG_C, SEG_D, SEG_E, SEG_F, SEG_G, 255);
+  shifted7.attachSegment(0, 6);
+  shifted7.attachSegment(1, 7);
+  shifted7.attachSegment(2, 8);
+  shifted7.attachSegment(3, 9);
+  shifted7.attachSegment(4, 10);
+  shifted7.attachSegment(5, 11);
+  shifted7.attachSegment(6, 12);
+  shifted7.attachSegment(7, 13);
 
-  display7.SetBrightness(50);
-  Serial.println("7seg setup()");
-}
+  shifted7.set("1234");
 
-void serialEvent() {
-  while (Serial.available()) {
-    int c = Serial.read();
-    if (c == '\n') {
-      for(int i=0; i<SPI_BUFFER_SIZE && i < serialBuffer.size(); ++i) {
-        spiBuffer[i] = serialBuffer[i];
-      }
-      serialBuffer.clear();
-    }
-  }
+  Serial.println("shifted7 setup complete.");
 }
 
 void loop() {
-  uint32_t t = millis() / 200;
+  uint8_t a=0, b=0;
+  shifted7.loop(micros(), &a, &b);
 
-  char str[5] = {0};
-  str[0] = (t / 1000) % 10 + '0';
-  str[1] = (t / 100)  % 10 + '0';
-  str[2] = (t / 10)   % 10 + '0';
-  str[3] = (t)        % 10 + '0';
-
-  display7.DisplayString(str, 0);
+  digitalWrite(LATCH, LOW);
+  shiftOut(DATA, CLOCK, MSBFIRST, a);
+  shiftOut(DATA, CLOCK, MSBFIRST, b);
+  digitalWrite(LATCH, HIGH);
 }
-
