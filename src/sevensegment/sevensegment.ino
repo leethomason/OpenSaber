@@ -17,21 +17,21 @@ void setup() {
   pinMode(CLOCK, OUTPUT);
   pinMode(DATA, OUTPUT);
 
-  shifted7.attachDigit(0, 1);
-  shifted7.attachDigit(1, 2);
-  shifted7.attachDigit(2, 3);
-  shifted7.attachDigit(3, 4);
+  shifted7.attachDigit(0, 10);
+  shifted7.attachDigit(1, 4);
+  shifted7.attachDigit(2, 13);
+  shifted7.attachDigit(3, 15);
 
-  shifted7.attachSegment(0, 12);  // a
-  shifted7.attachSegment(1, 13);  // b
-  shifted7.attachSegment(2, 10);  // c
-  shifted7.attachSegment(3, 15);  // d
-  shifted7.attachSegment(4, 9);   // e
-  shifted7.attachSegment(5, 14);  // f
-  shifted7.attachSegment(6, 5);   // g
-  shifted7.attachSegment(7, 11);  // h-dp
+  shifted7.attachSegment(0, 6);   // a
+  shifted7.attachSegment(1, 5);  // b
+  shifted7.attachSegment(2, 12);  // c
+  shifted7.attachSegment(3, 2);  // d
+  shifted7.attachSegment(4, 11);   // e
+  shifted7.attachSegment(5, 3);  // f
+  shifted7.attachSegment(6, 1);   // g
+  shifted7.attachSegment(7, 14);  // h-dp
 
-  shifted7.set("1234");
+  shifted7.set("1.2.3.4.");
 
   Serial.println("shifted7 setup complete.");
 }
@@ -59,6 +59,7 @@ void loop() {
   };
   shifted7.set(PAT[n]);
   */
+
   const char* TEST = "0123456789 -abcdefghijklmnopqrstuvwxyz"; // 26 + 10 + 2 = 38
   int n = (millis() / 1000);
   char str[5];
