@@ -1,3 +1,4 @@
+#if 0	// not currently working due to an "arch" include folder
 #include "comrf24.h"
 #include "Grinliz_Util.h"
 #include "Grinliz_Arduino_Util.h"
@@ -122,3 +123,4 @@ bool ComRF24::send(const char* str)
     return success;
 }
 
+#endif

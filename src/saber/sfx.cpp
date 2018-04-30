@@ -251,14 +251,11 @@ void SFX::addFile(const char* name, int index)
 
 bool SFX::playSound(int sound, int mode, bool playIfOff)
 {
-    // Flush out tests before switching sounds:
-    Tester::instance()->process();
+    if (!m_player) return false;
 
     ASSERT(sound >= 0);
     ASSERT(sound < NUM_SFX_TYPES);
     ASSERT(m_player);
-
-    if (!m_player) return false;
 
 #if SERIAL_DEBUG == 1
 #ifdef DEBUG_DEEP
@@ -354,15 +351,16 @@ bool SFX::playUISound(const char* name)
 
 bool SFX::playSound(const char* sfx)
 {
-    if (!m_player) {
-        return false;
-    }
+    if (!m_player) return false;
+
     m_player->play(sfx);
     return true;
 }
 
 void SFX::stopSound()
 {
+    if (!m_player) return;
+
     m_player->stop();
     m_currentSound = SFX_NONE;
 }
@@ -435,6 +433,7 @@ bool SFX::readHeader(const char* filename, uint8_t* nChannels, uint32_t* nSample
 
 const uint32_t SFX::lengthMillis() const
 {
+    if (!m_player) return 0;
     return m_player->lengthMillis();
 }
 
@@ -456,6 +455,7 @@ void SFX::readIgniteRetract()
 
 void SFX::setVolume204(int vol)
 {
+    if (!m_player) return;
     vol = constrain(vol, 0, 204);
     if (vol >= 204) {
         if (m_player)

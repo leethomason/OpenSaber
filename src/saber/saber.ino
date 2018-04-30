@@ -46,7 +46,7 @@
 #include "sketcher.h"
 #include "renderer.h"
 #include "saberUtil.h"
-#include "RF24.h"
+//#include "RF24.h"
 #include "comrf24.h"
 #include "tester.h"
 
@@ -66,6 +66,8 @@ uint32_t lastLoopTime   = 0;
 // First things first: disable that audio to avoid clicking.
 AudioPlayer audioPlayer;
 SFX sfx(&audioPlayer);
+#else
+SFX sfx(0);
 #endif
 
 BladeState  bladeState;
@@ -119,23 +121,23 @@ Timer2      gforceDataTimer(110);
 
 Tester      tester;
 uint32_t    unlocked = 0;
-bool        soundOk = false;
+bool        wavSource = false;
 
 void setupSD()
 {
     #if (SABER_SOUND_ON == SABER_SOUND_SD)
         #ifdef SABER_INTEGRATED_SD
             Log.p("Connecting to built in SD...").eol();
-            soundOk = SD.begin(BUILTIN_SDCARD);
+            wavSource = SD.begin(BUILTIN_SDCARD);
         #else
             // WARNING: if using LIS3DH ond SPI and and SD,
             // may need to comment out:
             // #define USE_TEENSY3_SPI
             // in Sd2Card2.cpp
             Log.p("Connecting to SPI SD...").eol();
-            soundOk = SD.begin(PIN_SDCARD_CS);
+            wavSource = SD.begin(PIN_SDCARD_CS);
         #endif
-        if (!soundOk) {
+        if (!wavSource) {
             Log.p("Unable to access the SD card").eol();
         }
     #elif (SABER_SOUND_ON == SABER_SOUND_FLASH)
@@ -143,7 +145,7 @@ void setupSD()
             Log.p("Unable to access SerialFlash memory.").eol();
             delay(500);
         }
-        soundOk = true;
+        wavSource = true;
     #endif
 }
 
@@ -194,7 +196,7 @@ void setup() {
     tester.attachDB(&saberDB);
 
     #ifdef SABER_SOUND_ON
-        if (soundOk) {
+        if (wavSource) {
             sfx.init();
             Log.p("sfx initialized.").eol();
         }
@@ -280,19 +282,15 @@ uint32_t calcReflashTime() {
 */
 void syncToDB()
 {
-    #ifdef SABER_SOUND_ON
     sfx.setFont(saberDB.soundFont());
     sfx.setVolume204(saberDB.volume());
-    #endif
 
     uiRenderData.volume = saberDB.volume4();
     uiRenderData.color = Blade::convertRawToPerceived(saberDB.bladeColor());
     uiRenderData.palette = saberDB.paletteIndex();
     uiRenderData.power = AveragePower::vbatToPowerLevel(voltmeter.averagePower());
     uiRenderData.mVolts = voltmeter.averagePower();
-    #ifdef SABER_SOUND_ON
     uiRenderData.fontName = sfx.currentFontName();
-    #endif
 
     // Only set ledB if not being used as UI
     if (buttonsReleased()) {
@@ -321,9 +319,7 @@ bool setVolumeFromHoldCount(int count)
 {
     saberDB.setVolume4(count - 1);
     syncToDB();
-    #ifdef SABER_AUDIO_UI
     SFX::instance()->playUISound(saberDB.volume4());
-    #endif
     return count >= 0 && count <= 5;
 }
 
@@ -331,9 +327,7 @@ void igniteBlade()
 {
     if (bladeState.state() == BLADE_OFF) {
         bladeState.change(BLADE_IGNITE);
-        #ifdef SABER_SOUND_ON
-            sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
-        #endif
+        sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
     }
 }
 
@@ -341,9 +335,7 @@ void retractBlade()
 {
     if (bladeState.state() != BLADE_OFF && bladeState.state() != BLADE_RETRACT) {
         bladeState.change(BLADE_RETRACT);
-        #ifdef SABER_SOUND_ON
-            sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
-        #endif
+        sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
     }
 }
 
@@ -398,9 +390,7 @@ void buttonBHoldHandler(const Button& button) {
     if (bladeState.state() != BLADE_OFF) {
         if (!paletteChange) {
             bladeState.change(BLADE_FLASH);
-            #ifdef SABER_SOUND_ON
-                sfx.playSound(SFX_USER_HOLD, SFX_OVERRIDE);
-            #endif
+            sfx.playSound(SFX_USER_HOLD, SFX_OVERRIDE);
             flashOnClash = true;
             reflashTime = calcReflashTime();
         }
@@ -413,9 +403,7 @@ void buttonBHoldHandler(const Button& button) {
 
 void buttonBReleaseHandler(const Button& b) {
     if (flashOnClash && bladeState.state() != BLADE_OFF) {
-        #ifdef SABER_SOUND_ON
-            sfx.playSound(SFX_IDLE, SFX_OVERRIDE);
-        #endif
+        sfx.playSound(SFX_IDLE, SFX_OVERRIDE);
     }
     flashOnClash = false;
     if (ledB.blinking()) {
@@ -429,9 +417,7 @@ void buttonBClickHandler(const Button&) {
     if (bladeState.state() == BLADE_ON) {
         if (!paletteChange) {
             bladeState.change(BLADE_FLASH);
-            #ifdef SABER_SOUND_ON
-                sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
-            #endif
+            sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
         }
     }
 }
@@ -466,9 +452,7 @@ void buttonAClickHandler(const Button&)
     }
     else if (bladeState.state() == BLADE_ON) {
         bladeState.change(BLADE_FLASH);
-        #ifdef SABER_SOUND_ON
-            sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
-        #endif
+        sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
     }
 }
 
@@ -604,11 +588,7 @@ void processAccel(uint32_t msec)
         #endif
 
         if ((g2Normal >= impact * impact)) {
-            bool sound = false;
-            #ifdef SABER_SOUND_ON
-                sound = sfx.playSound(SFX_IMPACT, sfxOverDue ? SFX_OVERRIDE : SFX_GREATER_OR_EQUAL);
-            #endif
-
+            bool sound = sfx.playSound(SFX_IMPACT, sfxOverDue ? SFX_OVERRIDE : SFX_GREATER_OR_EQUAL);
             if (sound) {
                 Log.p("Impact. g=").p(sqrt(g2)).eol();
                 bladeState.change(BLADE_FLASH);
@@ -616,10 +596,7 @@ void processAccel(uint32_t msec)
             }
         }
         else if ( g2 >= motion * motion) {
-            bool sound = false;
-            #ifdef SABER_SOUND_ON
-                sound = sfx.playSound(SFX_MOTION, sfxOverDue ? SFX_OVERRIDE : SFX_GREATER);
-            #endif
+            bool sound = sfx.playSound(SFX_MOTION, sfxOverDue ? SFX_OVERRIDE : SFX_GREATER);
             if (sound) {
                 Log.p("Motion. g=").p(sqrt(g2)).eol();
                 lastMotionTime = msec;
@@ -650,9 +627,7 @@ void loop() {
     processAccel(msec);
 
     bladeState.process(&blade, saberDB, millis());
-    #ifdef SABER_SOUND_ON
     sfx.process();
-    #endif
 
     if (vbatTimer.tick(delta)) {
         voltmeter.takeSample();
