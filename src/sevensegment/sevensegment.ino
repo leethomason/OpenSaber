@@ -31,7 +31,8 @@ void setup() {
   shifted7.attachSegment(6, 1);   // g
   shifted7.attachSegment(7, 14);  // h-dp
 
-  shifted7.set("1.2.3.4.");
+  //shifted7.set("1.2.3.4.");
+  shifted7.set("523.7");
 
   Serial.println("shifted7 setup complete.");
 }
@@ -59,7 +60,7 @@ void loop() {
   };
   shifted7.set(PAT[n]);
   */
-
+/*
   const char* TEST = "0123456789 -abcdefghijklmnopqrstuvwxyz"; // 26 + 10 + 2 = 38
   int n = (millis() / 1000);
   char str[5];
@@ -69,5 +70,6 @@ void loop() {
   str[3] = TEST[(n+3)%38];
   str[4] = 0;
   shifted7.set(str);
+  */
  }
   
