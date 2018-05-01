@@ -70,6 +70,22 @@ if (DRAW_FRONT) {
     RING_T = 4;
     MOUNT_DZ = -RING_T;  // offset for the PCB mounting holes
 
+    /*
+        Overall: 35.1
+        Lip 3.8
+        Total bottom 17.8
+        Delta Y: 4.1 (fr) or 5.3 (solder)
+
+        Top:
+        Hole (hole): d = 2.2  pos = 21.59, 17.78
+        Hole (hole): d = 8.0  pos = 20.32, 10.16
+        Hole (mark): d = 0.0  pos = 29.21, 10.16
+        Hole (hole): d = 2.2  pos = 21.59, 2.54
+        Number of drill =32
+        rows/cols = 27,17
+        size (after cut) = 32.02, 19.32
+    */
+
     difference() {
         translate([0, 0, M_BAFFLE_FRONT])
             pcbHolder(  D_AFT, T, 
