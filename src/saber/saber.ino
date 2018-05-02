@@ -108,7 +108,7 @@ Pixel_7_5_UI display75;
 PixelMatrix pixelMatrix;
 #endif
 
-#ifdef SABER_SISTERS
+#ifdef SABER_COMRF24
 RF24        rf24(PIN_SPI_CE, PIN_SPI_CS);
 ComRF24     comRF24(&rf24);
 Timer2      pingPongTimer(PING_PONG_INTERVAL);
@@ -231,7 +231,7 @@ void setup() {
         pinMode(PIN_LED_B, OUTPUT);
     #endif
 
-    #ifdef SABER_SISTERS 
+    #ifdef SABER_COMRF24 
         #if SABER_SUB_MODEL == SABER_SUB_MODEL_LUNA
             const int role = 0;
         #elif SABER_SUB_MODEL == SABER_SUB_MODEL_CELESTIA
@@ -470,7 +470,7 @@ void buttonAHoldHandler(const Button& button)
                 igniteBlade();
                 int pal = saberDB.paletteIndex();
                 (void) pal;
-                #ifdef SABER_SISTERS
+                #ifdef SABER_COMRF24
                 char buf[] = "ignite0";
                 buf[6] = '0' + pal;
                 comRF24.send(buf);
@@ -496,7 +496,7 @@ void buttonAHoldHandler(const Button& button)
     else if (bladeState.state() != BLADE_RETRACT) {
         if (button.nHolds() == 1) {
             retractBlade();
-            #ifdef SABER_SISTERS
+            #ifdef SABER_COMRF24
             comRF24.send("retract");
             #endif
         }
@@ -524,7 +524,7 @@ void serialEvent() {
 }
 
 
-#ifdef SABER_SISTERS
+#ifdef SABER_COMRF24
 void processCom(uint32_t delta)
 {
     CStr<16> comStr;
@@ -621,7 +621,7 @@ void loop() {
     buttonB.process();
     ledB.process();
     #endif
-    #ifdef SABER_SISTERS
+    #ifdef SABER_COMRF24
     processCom(delta);
     #endif
     processAccel(msec);
@@ -655,9 +655,14 @@ void loop() {
         }
     }
 
-    #if SABER_DISPLAY == SABER_DISPLAY_7_5
-        pixelMatrix.loop(msec, display75.Pixels());
-    #endif
+    loopDisplays(msec, delta);
+    lastLoopTime = msec;
+}
+ 
+
+void loopDisplays(uint32_t msec, uint32_t delta)
+{
+    // General display state processing. Draw to the current supported display.
     if (displayTimer.tick(delta)) {
         uiRenderData.color = Blade::convertRawToPerceived(saberDB.bladeColor());
 
@@ -668,12 +673,17 @@ void loop() {
             display75.Draw(msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
         #endif
         #ifdef SABER_UI_START
-            bool changed = dotstarUI.Draw(leds + SABER_UI_START, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
-            if (changed) {
-                EventQ.event("[UIChange]");
-            }
+            dotstarUI.Draw(leds + SABER_UI_START, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
         #endif
+        #ifdef SABER_NUM_LEDS
+            dotstar.display();
+        #endif    
     }
+
+    // Now loop() the specific display.
+    #if SABER_DISPLAY == SABER_DISPLAY_7_5
+        pixelMatrix.loop(msec, display75.Pixels());
+    #endif
 
     #if defined(SABER_CRYSTAL)
     {
@@ -693,6 +703,7 @@ void loop() {
         }
     }
     #endif
+
     #if defined(PINB_CRYSTAL)
         if (saberDB.crystalColor().get()) {
             // It has been set on the command line for testing.
@@ -708,10 +719,4 @@ void loop() {
             }
         }
     #endif
-
-    #ifdef SABER_NUM_LEDS
-        dotstar.display();
-    #endif
-    lastLoopTime = msec;
 }
- 

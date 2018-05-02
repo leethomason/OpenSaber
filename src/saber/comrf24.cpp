@@ -20,7 +20,7 @@ bool ComRF24::begin(int role)
 {
 	if (!m_rf24) return false;
 
-#ifdef SABER_SISTERS
+#ifdef SABER_COMRF24
 	static const uint8_t* ADDR0 = (const uint8_t*) SABER_ADDR_0;
 	static const uint8_t* ADDR1 = (const uint8_t*) SABER_ADDR_1;
 #else

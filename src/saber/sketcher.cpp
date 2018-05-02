@@ -509,3 +509,44 @@ void Pixel_7_5_UI::DrawBar(uint8_t* c, int v)
 		*c |= (16 >> i);
 	}
 }
+
+
+void Digit4UI::Draw(UIMode mode, const UIRenderData* data)
+{
+	char scratch[6] = "    ";
+	m_output.clear();
+	uint32_t volts = data->mVolts / 1000;
+	uint32_t deciVolts = (data->mVolts - volts * 1000) / 100;
+
+	switch(mode) {
+		case UIMode::NORMAL:
+			scratch[0] = '0' + data->palette;
+			scratch[1] = '0' + data->volume;
+			scratch[2] = '0' + volts;
+			scratch[3] = '.';
+			scratch[4] = '0' + deciVolts;
+			scratch[5] = 0;
+			break;
+
+		case UIMode::PALETTE:
+			scratch[0] = '0' + data->palette;
+			scratch[3] = 'P';
+			scratch[4] = 0;
+			break;
+
+		case UIMode::VOLUME:
+			scratch[1] = '0' + data->volume;
+			scratch[3] = 'A';
+			scratch[4] = 0;
+			break;
+
+		case UIMode::MEDITATION:
+			scratch[0] = 'M';
+			scratch[1] = 'A';
+			scratch[2] = 'Y';
+			scratch[3] = ' ';
+			scratch[4] = 0;
+			break;
+	}
+	m_output = scratch;
+}

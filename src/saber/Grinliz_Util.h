@@ -142,7 +142,7 @@ public:
 	char operator[](int i) const {
 		return buf[i];
 	}
-	
+
 	template < class T > bool operator==(const T& str) const {
 		return strEqual(buf, str.buf);
 	}
