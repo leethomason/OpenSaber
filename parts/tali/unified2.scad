@@ -9,8 +9,8 @@ JUNCTION = 5;
 EPS = 0.01;
 EPS2 = 2 * EPS;
 
-DRAW_AFT   = true;
-DRAW_FRONT = false;
+DRAW_AFT   = false;
+DRAW_FRONT = true;
 DRAW_CAP   = false;
 
 AFT_ROT = 12;
@@ -66,7 +66,6 @@ if (DRAW_FRONT) {
         2. switch
         3. segment display
     */
-    C = 19.32/2;    // center for coordinate conversion
     RING_T = 4;
     MOUNT_DZ = -RING_T;  // offset for the PCB mounting holes
 
@@ -78,31 +77,38 @@ if (DRAW_FRONT) {
 
         Top:
         Hole (hole): d = 2.2  pos = 21.59, 17.78
-        Hole (hole): d = 8.0  pos = 20.32, 10.16
+            Power: Hole (hole): d = 8.0  pos = 20.32, 10.16
         Hole (mark): d = 0.0  pos = 29.21, 10.16
         Hole (hole): d = 2.2  pos = 21.59, 2.54
         Number of drill =32
         rows/cols = 27,17
         size (after cut) = 32.02, 19.32
     */
+    C = 19.32/2;    // center for coordinate conversion
+    DYPCB = 6.5;
 
     difference() {
-        translate([0, 0, M_BAFFLE_FRONT])
+        translate([0, 0, M_BAFFLE_FRONT]) {
+            LENZ = M_CHAMBER - M_BAFFLE_FRONT - FRONT_T;
             pcbHolder(  D_AFT, T, 
-                        M_CHAMBER - M_BAFFLE_FRONT - FRONT_T + EPS2,    // dz 
-                        RING_T, // dzToPCB
-                        6.5, // dyPCB
-                    // Actual size: 19.4, 37.2
-                    [20, 20, M_CHAMBER - M_BAFFLE_FRONT - FRONT_T - RING_T], 
+                        LENZ + EPS2,    // dz 
+                        RING_T,         // dzToPCB
+                        DYPCB,          // dyPCB
+                    [20, 100, LENZ - RING_T], 
                     [
                         // remember axis are flipped from nanopcb
                         // and x is re-oriented. *sigh*
-                        [17.78 - C, 25.40 + MOUNT_DZ, "buttress"],
-                        [16.51 - C,  2.54 + MOUNT_DZ, "buttress"],
-                        [10.16 - C, 34.29 + MOUNT_DZ, "pillar"],
-                        [ 3.81 - C,  2.54 + MOUNT_DZ, "buttress"],
-                        [ 2.54 - C, 25.40 + MOUNT_DZ, "buttress"]
+                        [17.78 - C, 21.59 + MOUNT_DZ, "buttress"],
+                        [ 2.54 - C, 21.59 + MOUNT_DZ, "buttress"]
                     ]);
+            translate([0, 0, 29.21 + MOUNT_DZ + 2]) {
+                columnY(6, DYPCB, 10, D_AFT);
+            }
+            translate([0, 0, 10 + MOUNT_DZ]) {
+                columnY(6, DYPCB - 4.1, 6, D_AFT);
+            }
+            tube(JUNCTION, do=D_AFT - T, di=D_AFT - 2 * T);
+        }
         translate([0, 0 , M_BAFFLE_FRONT - EPS])
         intersection() {
             tube(JUNCTION, do=D_AFT+EPS, di=D_AFT - T - EPS);
@@ -163,7 +169,6 @@ if (DRAW_CAP) {
                 // Rods
                 translate([11, 0, 0]) cylinder(h=H, d=D_WASHER);
                 translate([-11, 0, 0]) cylinder(h=H, d=D_WASHER);
-
             }
        }
     }

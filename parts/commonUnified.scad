@@ -53,12 +53,12 @@ module capsule(theta0, theta1, r=2)
     }
 }
 
-module columnY(dx, dy, dz, biasX=0, biasZ=0)
+module columnY(dx, dyFrom0, dz, diameter)
 {
-    translate([-dx/2, 0, -dz/2]) {
-        hull() {
-            cube([dx, EPS, dz]);
-            translate([biasX, dy, biasZ]) cube([dx, EPS, dz]);
+    intersection() {
+        translate([0, 0, -dz/2]) cylinder(h=dz, d=diameter);
+        translate([-dx/2, -diameter/2, -dz/2]) {
+            cube(size=[dx, diameter/2 + dyFrom0, dz]);
         }
     }
 }
@@ -459,7 +459,7 @@ module pcbButtress()
     BUTTRESS_T = 5;
     difference() {
         translate([0,0,-BUTTRESS_T/2])
-            polygonXY(BUTTRESS_T, [[-2,0], [-2,-2], [14,-20], [14,0]]);
+            polygonXY(BUTTRESS_T, [[-2,0], [-2,-2], [14,-30], [14,0]]);
         translate([0, -50, 0]) rotate([-90, 0, 0]) cylinder(h=50, d=D_M2);
     } 
 }
