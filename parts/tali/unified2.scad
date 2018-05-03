@@ -67,7 +67,6 @@ if (DRAW_FRONT) {
         3. segment display
     */
     RING_T = 4;
-    MOUNT_DZ = -RING_T;  // offset for the PCB mounting holes
 
     /*
         Overall: 35.1
@@ -86,6 +85,7 @@ if (DRAW_FRONT) {
     */
     C = 19.32/2;    // center for coordinate conversion
     DYPCB = 6.5;
+    MOUNT_DZ = 0;  // offset for the PCB mounting holes
 
     difference() {
         translate([0, 0, M_BAFFLE_FRONT]) {
@@ -94,20 +94,20 @@ if (DRAW_FRONT) {
                         LENZ + EPS2,    // dz 
                         RING_T,         // dzToPCB
                         DYPCB,          // dyPCB
-                    [20, 100, LENZ - RING_T], 
+                    [22, 100, LENZ - RING_T], 
                     [
                         // remember axis are flipped from nanopcb
                         // and x is re-oriented. *sigh*
-                        [17.78 - C, 21.59 + MOUNT_DZ, "buttress"],
-                        [ 2.54 - C, 21.59 + MOUNT_DZ, "buttress"]
+                        [17.28 - C, 21.59 + MOUNT_DZ, "buttress"],
+                        [ 2.04 - C, 21.59 + MOUNT_DZ, "buttress"]
                     ]);
-            translate([0, 0, 29.21 + MOUNT_DZ + 2]) {
-                columnY(6, DYPCB, 10, D_AFT);
+            translate([0, 0, 10 + MOUNT_DZ + 2]) {
+                columnY(6, DYPCB - 4.1, 6, D_AFT, 4, 2);
             }
-            translate([0, 0, 10 + MOUNT_DZ]) {
-                columnY(6, DYPCB - 4.1, 6, D_AFT);
+            translate([0, 0, 29.21 + MOUNT_DZ + 3]) {
+                columnY(6, DYPCB, 10, D_AFT, 4, 2);
             }
-            tube(JUNCTION, do=D_AFT - T, di=D_AFT - 2 * T);
+            tube(RING_T, do=D_AFT - T, di=D_AFT - 2 * T);
         }
         translate([0, 0 , M_BAFFLE_FRONT - EPS])
         intersection() {

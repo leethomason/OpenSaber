@@ -53,12 +53,17 @@ module capsule(theta0, theta1, r=2)
     }
 }
 
-module columnY(dx, dyFrom0, dz, diameter)
+module columnY(dx, dyFrom0, dz, diameter, baseDX=0, baseDZ=0)
 {
     intersection() {
         translate([0, 0, -dz/2]) cylinder(h=dz, d=diameter);
-        translate([-dx/2, -diameter/2, -dz/2]) {
-            cube(size=[dx, diameter/2 + dyFrom0, dz]);
+        hull() {
+            translate([-dx/2, -diameter/2, -dz/2]) {
+                cube(size=[dx, diameter/2 + dyFrom0, dz]);
+            }
+            translate([-(dx + baseDX)/2, -diameter/2, -(dz + baseDZ)/2]) {
+                cube(size=[dx + baseDX, 1, dz + baseDZ]);
+            }
         }
     }
 }
