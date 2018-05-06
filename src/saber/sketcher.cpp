@@ -513,7 +513,7 @@ void Pixel_7_5_UI::DrawBar(uint8_t* c, int v)
 
 void Digit4UI::Draw(UIMode mode, const UIRenderData* data)
 {
-	char scratch[6] = "    ";
+	char scratch[6] = "     ";
 	m_output.clear();
 	uint32_t volts = data->mVolts / 1000;
 	uint32_t deciVolts = (data->mVolts - volts * 1000) / 100;

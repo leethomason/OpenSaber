@@ -46,7 +46,6 @@
 #include "sketcher.h"
 #include "renderer.h"
 #include "saberUtil.h"
-//#include "RF24.h"
 #include "comrf24.h"
 #include "tester.h"
 
@@ -656,7 +655,6 @@ void loop() {
     }
 
     loopDisplays(msec, delta);
-    lastLoopTime = msec;
 }
  
 
