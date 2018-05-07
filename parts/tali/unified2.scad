@@ -13,7 +13,7 @@ DRAW_AFT   = false;
 DRAW_FRONT = true;
 DRAW_CAP   = false;
 
-AFT_ROT = 12;
+AFT_ROT = 13;
 
 N_BAFFLES = nBafflesNeeded(H_BUTTRESS);
 M_BAFFLE_FRONT = zLenOfBaffles(N_BAFFLES, H_BUTTRESS) + M_POMMEL_FRONT;
@@ -84,8 +84,9 @@ if (DRAW_FRONT) {
         size (after cut) = 32.02, 19.32
     */
     C = 19.32/2;    // center for coordinate conversion
-    DYPCB = 6.5;
-    MOUNT_DZ = 0;  // offset for the PCB mounting holes
+    DYPCB = 7.5;
+    MOUNT_DZ = 2.5;  // offset for the PCB mounting holes
+    DZ_PCB = RING_T; // + 2.5;
 
     difference() {
         translate([0, 0, M_BAFFLE_FRONT]) {
@@ -104,8 +105,8 @@ if (DRAW_FRONT) {
             translate([0, 0, 10 + MOUNT_DZ + 2]) {
                 columnY(6, DYPCB - 4.1, 6, D_AFT, 4, 2);
             }
-            translate([0, 0, 29.21 + MOUNT_DZ + 3]) {
-                columnY(6, DYPCB, 10, D_AFT, 4, 2);
+            translate([0, 0, 29.21 + MOUNT_DZ + 6]) {
+                columnY(6, DYPCB, 6, D_AFT, 4, 2);
             }
             tube(RING_T, do=D_AFT - T, di=D_AFT - 2 * T);
         }
