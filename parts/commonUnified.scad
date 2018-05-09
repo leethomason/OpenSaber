@@ -8,13 +8,14 @@ D_BATTERY           =  18.50 + 0.5;    // An 1850. Huh.
 
 D_SWITCH            =  12.5;     // actually 12, by thread.
 D_SWITCH_SUPPORT    =  16;
-DY_SWITCH            =  -2; //13.5;
+DY_SWITCH            =  -2;
 
 D_PORT              =  7.9;
 D_PORT_SUPPORT      =  12;
 H_PORT              =  16;
 DY_PORT             =  6;
 
+// Dimensions for Teensy3.5 with OpenSaber shield
 X_MC                =  18.5;
 Y_MC                =   9.0;
 Z_MC                =  71.0;     // includes SD
@@ -134,7 +135,7 @@ module battery(outer) {
 
 module dotstarLED(n, dy)
 {
-    DOTSTAR_XZ = 5;
+    DOTSTAR_XZ = 5.2;
     DOTSTAR_PITCH = 7;
 
     for(i=[0:n-1]) {
@@ -305,7 +306,6 @@ module oneBaffle(   d,
                     dExtra=0)
 {
     yMC = -yAtX(X_MC/2, d/2) + 0.7;
-    //yMC = -yAtX(X_MC/2, d/2) + 0.5;
 
     difference() {
         cylinder(h=dz, d=d + dExtra);
@@ -352,6 +352,7 @@ module oneBaffle(   d,
     type = 
         "bass22"
         "std28"
+        "bass28"
  */
 module speakerHolder(outer, dz, dzToSpkrBack, type)
 {
@@ -391,6 +392,7 @@ module speakerHolder(outer, dz, dzToSpkrBack, type)
         }    
     }
 }
+
 
 module powerPortRing(outer, t, dz, dzToPort, portSupportToBack=false)
 {    
