@@ -86,29 +86,40 @@ module cylinderKeyJoint(dz)
 }
 
 
-module bridge(dx, dy, dz)
+module bridge(dx, dy, dz, inset=0)
 {
     half   = dx * 0.60;
     pillar = dx * 0.20;
     
-    echo(dx, dy, dz, half);
-
     PATH = [ 
-        //[-dx/2, 0], [-dx/2, dy], [-dx/2 + half, dy], [-dx/2 + offset, 0]
         [-dx/2, dy], 
         [-dx/2 + half, dy],
         [-dx/2, dy-half]
     ];
 
+    INSET = [
+        [-dx/2 - EPS, dy - inset],
+        [-dx/2 - EPS, dy + EPS],
+        [-dx/2 + inset, dy + EPS]
+    ];
+
     intersection() 
     {
         translate([-dx/2, 0, 0]) cube(size=[dx, dy, dz]);
-        union() {
-            polygonXY(dz, PATH);
-            mirror([1,0,0]) polygonXY(dz, PATH);
+        difference() {
+            union() {
+                polygonXY(dz, PATH);
+                mirror([1,0,0]) polygonXY(dz, PATH);
 
-            translate([-dx/2, 0, 0]) cube(size=[pillar, dy, dz]);
-            mirror([1,0,0]) translate([-dx/2, 0, 0]) cube(size=[pillar, dy, dz]);
+                translate([-dx/2, 0, 0]) cube(size=[pillar, dy, dz]);
+                mirror([1,0,0]) translate([-dx/2, 0, 0]) cube(size=[pillar, dy, dz]);
+            }
+            if (inset > 0) {
+                translate([0, 0, -EPS]) {
+                    polygonXY(dz + EPS2, INSET);
+                    mirror([1,0,0]) polygonXY(dz + EPS2, INSET);
+                }
+            }
         }
     }
 }
