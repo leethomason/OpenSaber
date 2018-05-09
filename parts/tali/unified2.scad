@@ -101,11 +101,26 @@ if (DRAW_FRONT) {
                         [17.28 - C, 21.59 + MOUNT_DZ, "buttress"],
                         [ 2.04 - C, 21.59 + MOUNT_DZ, "buttress"]
                     ]);
+            /*
             translate([0, 0, 10 + MOUNT_DZ + 2]) {
                 columnY(6, DYPCB - 4.1, 6, D_AFT, 4, 2);
             }
             translate([0, 0, 29.21 + MOUNT_DZ + 3]) {
                 columnY(6, DYPCB, 10, D_AFT, 4, 2);
+            }
+            */
+            intersection() {
+                cylinder(h=H_FAR, d=D_AFT + EPS2);
+                union() {
+                    translate([0, -D_AFT/2, MOUNT_DZ + 14]) {
+                        difference() {
+                            bridge(D_AFT, D_AFT/2 + DYPCB - 4.1, 4);
+                        }
+                    }
+                    translate([0, -D_AFT/2, MOUNT_DZ + 34]) {
+                        bridge(D_AFT, D_AFT/2 + DYPCB, 4);
+                    }
+                }
             }
             tube(RING_T, do=D_AFT - T, di=D_AFT - 2 * T);
         }

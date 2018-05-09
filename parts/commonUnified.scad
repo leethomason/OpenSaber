@@ -85,6 +85,42 @@ module cylinderKeyJoint(dz)
     mirror([1,0,0]) polygonXY(dz, path);
 }
 
+
+module bridge(dx, dy, dz)
+{
+    half   = dx * 0.60;
+    pillar = dx * 0.20;
+    
+    echo(dx, dy, dz, half);
+
+    PATH = [ 
+        //[-dx/2, 0], [-dx/2, dy], [-dx/2 + half, dy], [-dx/2 + offset, 0]
+        [-dx/2, dy], 
+        [-dx/2 + half, dy],
+        [-dx/2, dy-half]
+    ];
+
+    intersection() 
+    {
+        translate([-dx/2, 0, 0]) cube(size=[dx, dy, dz]);
+        union() {
+            polygonXY(dz, PATH);
+            mirror([1,0,0]) polygonXY(dz, PATH);
+
+            translate([-dx/2, 0, 0]) cube(size=[pillar, dy, dz]);
+            mirror([1,0,0]) translate([-dx/2, 0, 0]) cube(size=[pillar, dy, dz]);
+        }
+    }
+}
+
+// Physical components. ----------------------
+module battery(outer) {
+    color("yellow") translate([0, outer/2 - D_BATTERY/2, 0]) {
+        cylinder(d=D_BATTERY, h = Z_BATTERY + EPS2);
+    }
+}
+
+
 module dotstarLED(n, dy)
 {
     DOTSTAR_XZ = 5;
@@ -97,12 +133,6 @@ module dotstarLED(n, dy)
     }
 }
 
-// Physical components. ----------------------
-module battery(outer) {
-    color("yellow") translate([0, outer/2 - D_BATTERY/2, 0]) {
-        cylinder(d=D_BATTERY, h = Z_BATTERY + EPS2);
-    }
-}
 
 module switch(outer, extend=false)
 {
