@@ -9,9 +9,11 @@ JUNCTION = 5;
 EPS = 0.01;
 EPS2 = 2 * EPS;
 D_ROD = 3.6;
+D_TUBE = 6;
+D_TUBE_CAP = 4.6;
 
-DRAW_AFT   = false;
-DRAW_FRONT = false;
+DRAW_AFT   = true;
+DRAW_FRONT = true;
 DRAW_CAP   = true;
 
 AFT_ROT = 12;
@@ -46,9 +48,9 @@ module rods(h, expand=0) {
         // Wire tube
         if (expand == 0) {
             translate([-8, 8, 0])
-                cylinder(h=h, d=4.6);
+                cylinder(h=h, d=D_TUBE_CAP);
             translate([-8, 8, 2])
-                cylinder(h=h, d=6);
+                cylinder(h=h, d=D_TUBE);
         }
 
         // Rods
@@ -163,8 +165,8 @@ if (DRAW_CAP) {
  
             rotate([0, 0, AFT_ROT - 90]) {
                 // Wire tube. (hold in place)
-                translate([-8, 8, 0]) cylinder(h=H/2, d=6);
-                translate([-8, 8, 0]) cylinder(h=H, d=4.6);
+                translate([-8, 8, 0]) cylinder(h=H/2, d=D_TUBE);
+                translate([-8, 8, 0]) cylinder(h=H, d=D_TUBE_CAP);
 
                 // Rods
                 translate([11, 0, 0]) cylinder(h=H, d=D_ROD);
