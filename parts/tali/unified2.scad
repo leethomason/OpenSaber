@@ -8,10 +8,11 @@ FRONT_T = 4;
 JUNCTION = 5;
 EPS = 0.01;
 EPS2 = 2 * EPS;
+D_ROD = 3.6;
 
 DRAW_AFT   = false;
-DRAW_FRONT = true;
-DRAW_CAP   = false;
+DRAW_FRONT = false;
+DRAW_CAP   = true;
 
 AFT_ROT = 12;
 
@@ -52,9 +53,9 @@ module rods(h, expand=0) {
 
         // Rods
         translate([11, 0, 0])
-            cylinder(h=h, d=expand > 0 ? expand : 3.6);
+            cylinder(h=h, d=expand > 0 ? expand : D_ROD);
         translate([-11, 0, 0])
-            cylinder(h=h, d=expand > 0 ? expand : 3.6);
+            cylinder(h=h, d=expand > 0 ? expand : D_ROD);
     }
 }
 
@@ -126,7 +127,7 @@ if (DRAW_FRONT) {
         translate([0, 0, M_CHAMBER - FRONT_T - NUT_T])
             rods(50, 12);
 
-        // flat bottom
+        // flat bottom for printing
         translate([-50, -D_AFT/2, M_BAFFLE_FRONT]) 
             cube(size=[100, 0.5, 100]);
     }
@@ -149,10 +150,8 @@ if (DRAW_FRONT) {
 
 
 if (DRAW_CAP) {
-    D = D_AFT;  //31.5;
-    H = 13; // 14.5 in theory; space for padding
-    D_WASHER = 9.5 + 0.5;
-    H_CRYSTAL = 10; // again, space for glue, padding
+    D = D_AFT;
+    H = 4;
     D1_CRYSTAL = 11;
     D2_CRYSTAL = 5;
 
@@ -160,23 +159,16 @@ if (DRAW_CAP) {
         difference() {
             cylinder(h=H, d=D);
 
-            cylinder(h=H, d=D2_CRYSTAL);
-            cylinder(h=H_CRYSTAL, d1=D1_CRYSTAL, d2=D2_CRYSTAL);
+            cylinder(h=H, d1=D1_CRYSTAL, d2=D2_CRYSTAL);
  
             rotate([0, 0, AFT_ROT - 90]) {
                 // Wire tube. (hold in place)
-                hull() {
-                    translate([-8, 8, 0]) cylinder(h=H/2, d=6);
-                    translate([-4, 4, 0]) cylinder(h=H/2, d=6);
-                }
-                translate([0, 0, H/2]) hull() {
-                    translate([-8, 8, 0]) cylinder(h=H, d=4.6);
-                    translate([-4, 4, 0]) cylinder(h=H, d=4.6);
-                }
-                    
+                translate([-8, 8, 0]) cylinder(h=H/2, d=6);
+                translate([-8, 8, 0]) cylinder(h=H, d=4.6);
+
                 // Rods
-                translate([11, 0, 0]) cylinder(h=H, d=D_WASHER);
-                translate([-11, 0, 0]) cylinder(h=H, d=D_WASHER);
+                translate([11, 0, 0]) cylinder(h=H, d=D_ROD);
+                translate([-11, 0, 0]) cylinder(h=H, d=D_ROD);
             }
        }
     }
