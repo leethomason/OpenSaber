@@ -89,13 +89,14 @@ module cylinderKeyJoint(dz)
 
 module bridge(dx, dy, dz, inset=0)
 {
-    half   = dx * 0.60;
+    h1 = dx * 0.57;
+    h2 = dx * 0.65; 
     pillar = dx * 0.20;
     
     PATH = [ 
         [-dx/2, dy], 
-        [-dx/2 + half, dy],
-        [-dx/2, dy-half]
+        [-dx/2 + h1, dy],
+        [-dx/2, dy-h2]
     ];
 
     INSET = [

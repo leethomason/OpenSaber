@@ -12,9 +12,9 @@ D_ROD = 3.6;
 D_TUBE = 6;
 D_TUBE_CAP = 4.6;
 
-DRAW_AFT   = true;
+DRAW_AFT   = false;
 DRAW_FRONT = true;
-DRAW_CAP   = true;
+DRAW_CAP   = false;
 
 AFT_ROT = 13;
 
@@ -111,7 +111,7 @@ if (DRAW_FRONT) {
                 union() {
                     translate([0, -D_AFT/2, MOUNT_DZ + 14]) {
                         difference() {
-                            bridge(D_AFT, D_AFT/2 + DYPCB - 4.1, 4, 8);
+                            color("olive") bridge(D_AFT, D_AFT/2 + DYPCB - 4.1, 4, 8);
                         }
                     }
                     translate([0, -D_AFT/2, MOUNT_DZ + 34]) {
