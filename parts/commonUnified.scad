@@ -311,8 +311,7 @@ module oneBaffle(   d,
     difference() {
         cylinder(h=dz, d=d + dExtra);
         if (battery)
-            translate([0, d/2 - D_BATTERY/2, -EPS]) 
-                battery();
+            battery(d);
         if (mc) {
             translate([0, yMC, -EPS]) 
                 mc();

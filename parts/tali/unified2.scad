@@ -18,12 +18,17 @@ DRAW_CAP   = false;
 
 AFT_ROT = 13;
 
+EXTRA_BAFFLE = 2;
 N_BAFFLES = nBafflesNeeded(H_BUTTRESS);
-M_BAFFLE_FRONT = zLenOfBaffles(N_BAFFLES, H_BUTTRESS) + M_POMMEL_FRONT;
+M_BAFFLE_FRONT = zLenOfBaffles(N_BAFFLES, H_BUTTRESS) + M_POMMEL_FRONT + EXTRA_BAFFLE;
+
 
 if (DRAW_AFT) {
     translate([0, 0, M_POMMEL_FRONT]) {
         baffleMCBattery(D_AFT, N_BAFFLES, H_BUTTRESS, D_AFT_RING, 5.5);
+    }
+    translate([0, 0, M_BAFFLE_FRONT - EXTRA_BAFFLE]) {
+        oneBaffle(D_AFT, EXTRA_BAFFLE, bridge=false);
     }
 
     translate([0, 0, M_POMMEL_BACK]) {
@@ -69,7 +74,7 @@ if (DRAW_FRONT) {
         2. switch
         3. segment display
     */
-    RING_T = 4;
+    RING_T = 4 - EXTRA_BAFFLE;
 
     /*
         Overall: 35.1
@@ -88,7 +93,7 @@ if (DRAW_FRONT) {
     */
     C = 19.32/2;    // center for coordinate conversion
     DYPCB = 7.5;
-    MOUNT_DZ = 2.5;  // offset for the PCB mounting holes
+    MOUNT_DZ = 2.5 - EXTRA_BAFFLE;  // offset for the PCB mounting holes
     DZ_PCB = RING_T; // + 2.5;
 
     difference() {
@@ -109,12 +114,12 @@ if (DRAW_FRONT) {
             intersection() {
                 cylinder(h=H_FAR, d=D_AFT + EPS2);
                 union() {
-                    translate([0, -D_AFT/2, MOUNT_DZ + 14]) {
+                    translate([0, -D_AFT/2, MOUNT_DZ + 10]) {
                         difference() {
                             color("olive") bridge(D_AFT, D_AFT/2 + DYPCB - 4.1, 4, 8);
                         }
                     }
-                    translate([0, -D_AFT/2, MOUNT_DZ + 34]) {
+                    translate([0, -D_AFT/2, MOUNT_DZ + 32]) {
                         bridge(D_AFT, D_AFT/2 + DYPCB, 4, 8);
                     }
                 }
@@ -176,3 +181,6 @@ if (DRAW_CAP) {
        }
     }
 }
+
+*color("red") translate([0, 0, M_POMMEL_FRONT])
+    battery(D_AFT);
