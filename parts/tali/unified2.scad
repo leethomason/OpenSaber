@@ -135,21 +135,30 @@ if (DRAW_FRONT) {
         translate([0, 0, M_CHAMBER - FRONT_T - NUT_T])
             rods(50, 12);
 
-        // flat bottom for printing
+        // Flat bottom for printing
         translate([-50, -D_AFT/2, M_BAFFLE_FRONT]) 
             cube(size=[100, 0.5, 100]);
+
+        // Aesthetics
+        translate([0, 0, M_BAFFLE_FRONT + 18 ]) 
+            capsule(-110, -80, 2, true);
+        translate([0, 0, M_BAFFLE_FRONT + 30 ]) 
+            capsule(-110, -80, 2, true);
+        for(i=[0:4]) {
+            translate([0, 0, M_BAFFLE_FRONT + 8 + i*6])
+                capsule(-170, 170, 2);
+        }
     }
 
-    /*
-        And now a loose couple to the crystal chamber.
-    */
     translate([0, 0, M_CHAMBER - FRONT_T]) {
-        W = 10;
         difference() {
-            translate([0, 0, EPS]) cylinder(h=FRONT_T, d=D_AFT);
+            translate([0, 0, EPS]) 
+                cylinder(h=FRONT_T, d=D_AFT);
+            
+            // Connection for the crystal chamber.
             rods(10);
 
-            // flat bottom
+            // Flat bottom.
             translate([-50, -D_AFT/2, 0]) 
                 cube(size=[100, 0.5, 100]);
         }
@@ -181,6 +190,7 @@ if (DRAW_CAP) {
        }
     }
 }
+
 
 *color("red") translate([0, 0, M_POMMEL_FRONT])
     battery(D_AFT);

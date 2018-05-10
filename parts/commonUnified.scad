@@ -46,11 +46,15 @@ OLED_DISPLAY_INNER_L = (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L)/2;
 function yAtX(x, r) = sqrt(r*r - x*x);
 
 // Utilities, shapes. ------------------------
-module capsule(theta0, theta1, r=2)
+module capsule(theta0, theta1, r=2, _mirror=false)
 {
     hull() {
         rotate([-90, -0, theta0]) cylinder(h=20, r=r);
         rotate([-90, -0, theta1]) cylinder(h=20, r=r);
+    }
+    if (_mirror == true) hull() {
+        mirror([1,0,0]) rotate([-90, -0, theta0]) cylinder(h=20, r=r);
+        mirror([1,0,0]) rotate([-90, -0, theta1]) cylinder(h=20, r=r);
     }
 }
 
