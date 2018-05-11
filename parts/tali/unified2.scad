@@ -2,6 +2,8 @@ include <dim.scad>
 use <../commonUnified.scad>
 use <../shapes.scad>
 
+// 2mm more battery space (how did that happen??)
+
 $fn = 80;
 T = 4;
 FRONT_T = 4;
@@ -16,7 +18,7 @@ DRAW_AFT   = false;
 DRAW_FRONT = true;
 DRAW_CAP   = false;
 
-AFT_ROT = 13;
+AFT_ROT = 19;
 
 N_BAFFLES = nBafflesNeeded(H_BUTTRESS);
 M_BAFFLE_FRONT = zLenOfBaffles(N_BAFFLES, H_BUTTRESS) + M_POMMEL_FRONT;
@@ -111,7 +113,8 @@ if (DRAW_FRONT) {
                 union() {
                     translate([0, -D_AFT/2, MOUNT_DZ + 14]) {
                         difference() {
-                            color("olive") bridge(D_AFT, D_AFT/2 + DYPCB - 4.1, 4, 8);
+                            color("olive") 
+                                bridge(D_AFT, D_AFT/2 + DYPCB - 4.1, 4, 8);
                         }
                     }
                     translate([0, -D_AFT/2, MOUNT_DZ + 34]) {

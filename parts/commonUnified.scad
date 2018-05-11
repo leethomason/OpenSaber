@@ -136,7 +136,7 @@ module battery(outer) {
 
 module dotstarLED(n, dy)
 {
-    DOTSTAR_XZ = 5.2;
+    DOTSTAR_XZ = 5.4;
     DOTSTAR_PITCH = 7;
 
     for(i=[0:n-1]) {
