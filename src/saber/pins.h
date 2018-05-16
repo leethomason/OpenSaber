@@ -40,7 +40,7 @@ SOFTWARE.
 #define SABER_MODEL_SISTER 			8	// Shield v3, Teensy 3.5
 #define SABER_MODEL_AQUATIC			9
 #define SABER_MODEL_SHOCK2		   10	// Shield v3, Teensy 3.5, Dotstar, Display (woh)
-#define SABER_MODEL_TALI		   11	//
+#define SABER_MODEL_TALI		   11	// Shield v4, Teensy 3.5, Dotstar crystals, bubble display
 #define SABER_MODEL_AHSOKA		   12
 #define SABER_MODEL_GREEN_SKY	   13
 
@@ -87,7 +87,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 #define SABER_ACCELEROMETER_LIS3DH_SPI 3
 
 #if SABER_MODEL == SABER_MODEL_GECKO
-	#define LED_TOPOLOGY 				LED_TOPOLOGY_RESISTOR
 	#define PCB_VERSION 				PCB_VERSION_1
 	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_LIS3DH
 	#define SABER_SOUND_ON 				SABER_SOUND_SD
@@ -117,7 +116,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int VOLUME_4 = 200;	
 
 #elif SABER_MODEL == SABER_MODEL_BLACK
-	#define LED_TOPOLOGY 				LED_TOPOLOGY_RESISTOR
 	#define PCB_VERSION 				PCB_VERSION_5
 	#define SABER_NUM_LEDS				4
 	#define SABER_UI_START				0
@@ -148,7 +146,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 #elif SABER_MODEL == SABER_MODEL_SHOCK
 	#define PCB_VERSION 				PCB_VERSION_5
-	#define LED_TOPOLOGY 				LED_TOPOLOGY_RESISTOR
 	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
 	#define SABER_SOUND_ON 				SABER_SOUND_SD
 	#define SABER_VOLTMETER
@@ -181,7 +178,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 #elif SABER_MODEL == SABER_MODEL_SILVER_SHOCK
 	#define PCB_VERSION 				PCB_VERSION_5
-	#define LED_TOPOLOGY 				LED_TOPOLOGY_RESISTOR
 	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
 	#define SABER_SOUND_ON 				SABER_SOUND_SD
 	#define SABER_VOLTMETER
@@ -214,7 +210,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 #elif SABER_MODEL == SABER_MODEL_BO
 	#define PCB_VERSION 				PCB_VERSION_5
-	#define LED_TOPOLOGY 				LED_TOPOLOGY_RESISTOR
 	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
 	#define SABER_SOUND_ON 				SABER_SOUND_SD
 	#define SABER_VOLTMETER
@@ -241,7 +236,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 #elif (SABER_MODEL == SABER_MODEL_TANO)
 	#define PCB_VERSION 				PCB_VERSION_7
-	#define LED_TOPOLOGY 				LED_TOPOLOGY_RESISTOR
 	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
 	#define SABER_SOUND_ON 				SABER_SOUND_SD
 	#define SABER_VOLTMETER
@@ -276,7 +270,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 #elif (SABER_MODEL == SABER_MODEL_SISTER)
 	#define PCB_VERSION 				PCB_SHIELD_3
-	#define LED_TOPOLOGY 				LED_TOPOLOGY_RESISTOR
 	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_LIS3DH_SPI
 	#define SABER_SOUND_ON 				SABER_SOUND_SD
 	#define SABER_VOLTMETER
@@ -315,7 +308,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 #elif (SABER_MODEL == SABER_MODEL_AQUATIC)
 	#define PCB_VERSION 			PCB_SHIELD_3
-	#define LED_TOPOLOGY 			LED_TOPOLOGY_RESISTOR
 	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
 	#define SABER_SOUND_ON 			SABER_SOUND_SD
 	#define SABER_VOLTMETER
@@ -362,7 +354,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 #elif (SABER_MODEL == SABER_MODEL_SHOCK2)
 	#define PCB_VERSION 			PCB_SHIELD_3
-	#define LED_TOPOLOGY 			LED_TOPOLOGY_RESISTOR
 	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
 	#define SABER_SOUND_ON 			SABER_SOUND_SD
 	#define SABER_VOLTMETER
@@ -397,33 +388,38 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 #elif (SABER_MODEL == SABER_MODEL_TALI)
 	#define PCB_VERSION 			PCB_SHIELD_4
-	#define LED_TOPOLOGY 			LED_TOPOLOGY_RESISTOR
 	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
 	#define SABER_SOUND_ON 			SABER_SOUND_SD
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
+
+	// FIXME remove
 	#define SABER_AUDIO_UI
+
 	/*
-	#define SABER_NUM_LEDS 			4
-	#define SABER_UI_START  		0
-	#define SABER_UI_BRIGHTNESS		8
+	#define SABER_CRYSTAL			80
+	#define SABER_CRYSTAL_LOW		16
+	#define SABER_NUM_LEDS 			2
+	#define SABER_FLASH_LED			1
 	*/
 	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 
+	// FIXME tune
 	static const int32_t UVOLT_MULT = 6691;		
-	#define ID_STR "Tali Cree XPE2 RGB"
+	#define ID_STR "Vigilance (Tali) Luxeon RGB"
 
 	// Thermal paste heat sinking.
-	static const int32_t RED_VF   = 2100;   // milli-volts
-	static const int32_t RED_I    = 380;    // milli-amps
+	// FIXME resistors
+	static const int32_t RED_VF   = 2900;   // milli-volts
+	static const int32_t RED_I    = 400;    // milli-amps
 	static const int32_t RED_R    = 4700;   // milli-ohms
 
-	static const int32_t GREEN_VF = 3400;
-	static const int32_t GREEN_I  = 380;
+	static const int32_t GREEN_VF = 3150;
+	static const int32_t GREEN_I  = 400;
 	static const int32_t GREEN_R  = 1000;
 
-	static const int32_t BLUE_VF  = 3100;
-	static const int32_t BLUE_I   = 380;
+	static const int32_t BLUE_VF  = 3150;
+	static const int32_t BLUE_I   = 400;
 	static const int32_t BLUE_R   = 1800;
 
 	static const int VOLUME_1 = 15;
@@ -433,7 +429,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 #elif (SABER_MODEL == SABER_MODEL_AHSOKA)
 	#define PCB_VERSION 			PCB_SHIELD_3
-	#define LED_TOPOLOGY 			LED_TOPOLOGY_RESISTOR
 	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
 	#define SABER_SOUND_ON 			SABER_SOUND_SD
 	#define SABER_BOOT_SOUND
@@ -478,7 +473,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 #elif (SABER_MODEL == SABER_MODEL_GREEN_SKY)
 	#define PCB_VERSION 			PCB_SHIELD_4
-	#define LED_TOPOLOGY 			LED_TOPOLOGY_RESISTOR
 	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
 	#define SABER_SOUND_ON 			SABER_SOUND_SD
 	#define ID_STR "Green Skywalker Luxeon GGC"

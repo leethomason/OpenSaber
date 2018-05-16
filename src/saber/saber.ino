@@ -673,9 +673,6 @@ void loopDisplays(uint32_t msec, uint32_t delta)
         #ifdef SABER_UI_START
             dotstarUI.Draw(leds + SABER_UI_START, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
         #endif
-        #ifdef SABER_NUM_LEDS
-            dotstar.display();
-        #endif    
     }
 
     // Now loop() the specific display.
@@ -702,6 +699,11 @@ void loopDisplays(uint32_t msec, uint32_t delta)
     }
     #endif
 
+    #if defined(SABER_FLASH_LED)
+        // Flashes a secondary LED with the flash on clash color.
+        leds[SABER_FLASH_LED] = flashOnClash ? saberDB.impactColor() : RGB::BLACK;
+    #endif
+
     #if defined(PINB_CRYSTAL)
         if (saberDB.crystalColor().get()) {
             // It has been set on the command line for testing.
@@ -717,4 +719,7 @@ void loopDisplays(uint32_t msec, uint32_t delta)
             }
         }
     #endif
+    #ifdef SABER_NUM_LEDS
+        dotstar.display();
+    #endif    
 }
