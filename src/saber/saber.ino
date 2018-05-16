@@ -701,7 +701,9 @@ void loopDisplays(uint32_t msec, uint32_t delta)
 
     #if defined(SABER_FLASH_LED)
         // Flashes a secondary LED with the flash on clash color.
-        leds[SABER_FLASH_LED] = flashOnClash ? saberDB.impactColor() : RGB::BLACK;
+        RGB flashColor = saberDB.impactColor();
+        flashColor.scale(SABER_CRYSTAL);
+        leds[SABER_FLASH_LED] = flashOnClash ? flashColor : RGB::BLACK;
     #endif
 
     #if defined(PINB_CRYSTAL)
