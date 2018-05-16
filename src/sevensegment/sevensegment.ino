@@ -2,9 +2,9 @@
 
 ShiftedSevenSegment shifted7;
 
-static const uint8_t LATCH = 16;
-static const uint8_t CLOCK = 15;
-static const uint8_t DATA  = 14;
+static const uint8_t LATCH = 28;
+static const uint8_t CLOCK = 29;
+static const uint8_t DATA  = 27;
 
 void setup() {
   Serial.begin(19200);

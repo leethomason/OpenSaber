@@ -95,7 +95,7 @@ if (DRAW_FRONT) {
     */
     C = 19.32/2;    // center for coordinate conversion
     DYPCB = 7.5;
-    MOUNT_DZ = 2.5 - EXTRA_BAFFLE;  // offset for the PCB mounting holes
+    MOUNT_DZ = 4.5;  // offset for the PCB mounting holes
     DZ_PCB = RING_T; // + 2.5;
 
     difference() {
@@ -116,14 +116,14 @@ if (DRAW_FRONT) {
             intersection() {
                 cylinder(h=H_FAR, d=D_AFT + EPS2);
                 union() {
-                    translate([0, -D_AFT/2, MOUNT_DZ + 10]) {
+                    translate([0, -D_AFT/2, MOUNT_DZ + RING_T + 6]) {
                         difference() {
                             color("olive") 
-                                bridge(D_AFT, D_AFT/2 + DYPCB - 4.1, 4, 8);
+                                bridge(D_AFT, D_AFT/2 + DYPCB - 4.1, 4, 10);
                         }
                     }
-                    translate([0, -D_AFT/2, MOUNT_DZ + 32]) {
-                        bridge(D_AFT, D_AFT/2 + DYPCB, 4, 8);
+                    translate([0, -D_AFT/2, MOUNT_DZ + RING_T + 26]) {
+                        bridge(D_AFT, D_AFT/2 + DYPCB, 4, 10);
                     }
                 }
             }
@@ -143,9 +143,11 @@ if (DRAW_FRONT) {
             cube(size=[100, 0.5, 100]);
 
         // Aesthetics
-        translate([0, 0, M_BAFFLE_FRONT + 18 ]) 
+        translate([0, 0, M_BAFFLE_FRONT + 8 ]) 
             capsule(-110, -80, 2, true);
-        translate([0, 0, M_BAFFLE_FRONT + 30 ]) 
+        translate([0, 0, M_BAFFLE_FRONT + 20 ]) 
+            capsule(-110, -80, 2, true);
+        translate([0, 0, M_BAFFLE_FRONT + 40 ]) 
             capsule(-110, -80, 2, true);
         for(i=[0:4]) {
             translate([0, 0, M_BAFFLE_FRONT + 8 + i*6])

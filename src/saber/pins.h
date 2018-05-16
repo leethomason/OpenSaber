@@ -403,11 +403,12 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_INTEGRATED_SD
 	#define SABER_AUDIO_UI
 
-	/*
-	#define SABER_CRYSTAL
 	#define SABER_NUM_LEDS 			4
 	#define SABER_UI_START  		0
 	#define SABER_UI_BRIGHTNESS		8
+
+	/*
+	#define SABER_CRYSTAL
 	*/
 	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 
