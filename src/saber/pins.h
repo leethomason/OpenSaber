@@ -95,7 +95,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_LOCK
 	#define SABER_BUTTON 				Button::PULL_DOWN
 
-	static const int32_t UVOLT_MULT = 6680;	// FIXME
+	static const int32_t UVOLT_MULT = 6680;
 	#define ID_STR "Gecko (Sentris Body) RGB Luxeon"
 
 	static const int32_t RED_VF   = 2900;   // milli-volts
@@ -155,7 +155,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_DISPLAY			SABER_DISPLAY_128_32
 	#define SABER_LOWPASS_FILTER	1
 
-	// FIXME TUNE ALL
 	static const int32_t UVOLT_MULT = 6680;
 	#define ID_STR "Shock / Golden Knight RGB Cree XPE2"
 
@@ -281,7 +280,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_ADDR_0 "1Sist"
 	#define SABER_ADDR_1 "2Sist"
 
-	static const int32_t UVOLT_MULT = 6691;		// fixme
+	static const int32_t UVOLT_MULT = 6691;
 	#if SABER_SUB_MODEL == SABER_SUB_MODEL_LUNA
 	#define ID_STR "Luna: Sisters Cree XPE2 RGB"
 	#elif SABER_SUB_MODEL == SABER_SUB_MODEL_CELESTIA
@@ -486,7 +485,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 
-	static const int32_t UVOLT_MULT = 6691;		// FIXME, true.
+	static const int32_t UVOLT_MULT = 6691;
 
 	// Thermal paste heat sinking to the case.
 	// Green

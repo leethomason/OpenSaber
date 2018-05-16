@@ -2,25 +2,35 @@ include <dim.scad>
 use <../commonUnified.scad>
 use <../shapes.scad>
 
+// 2mm more battery space (how did that happen??)
+
 $fn = 80;
 T = 4;
 FRONT_T = 4;
 JUNCTION = 5;
 EPS = 0.01;
 EPS2 = 2 * EPS;
+D_ROD = 3.6;
+D_TUBE = 6;
+D_TUBE_CAP = 4.6;
 
 DRAW_AFT   = false;
 DRAW_FRONT = true;
 DRAW_CAP   = false;
 
-AFT_ROT = 12;
+AFT_ROT = 19;
 
+EXTRA_BAFFLE = 2;
 N_BAFFLES = nBafflesNeeded(H_BUTTRESS);
-M_BAFFLE_FRONT = zLenOfBaffles(N_BAFFLES, H_BUTTRESS) + M_POMMEL_FRONT;
+M_BAFFLE_FRONT = zLenOfBaffles(N_BAFFLES, H_BUTTRESS) + M_POMMEL_FRONT + EXTRA_BAFFLE;
+
 
 if (DRAW_AFT) {
     translate([0, 0, M_POMMEL_FRONT]) {
         baffleMCBattery(D_AFT, N_BAFFLES, H_BUTTRESS, D_AFT_RING, 5.5);
+    }
+    translate([0, 0, M_BAFFLE_FRONT - EXTRA_BAFFLE]) {
+        oneBaffle(D_AFT, EXTRA_BAFFLE, bridge=false);
     }
 
     translate([0, 0, M_POMMEL_BACK]) {
@@ -45,16 +55,16 @@ module rods(h, expand=0) {
         // Wire tube
         if (expand == 0) {
             translate([-8, 8, 0])
-                cylinder(h=h, d=4.6);
+                cylinder(h=h, d=D_TUBE_CAP);
             translate([-8, 8, 2])
-                cylinder(h=h, d=6);
+                cylinder(h=h, d=D_TUBE);
         }
 
         // Rods
         translate([11, 0, 0])
-            cylinder(h=h, d=expand > 0 ? expand : 3.6);
+            cylinder(h=h, d=expand > 0 ? expand : D_ROD);
         translate([-11, 0, 0])
-            cylinder(h=h, d=expand > 0 ? expand : 3.6);
+            cylinder(h=h, d=expand > 0 ? expand : D_ROD);
     }
 }
 
@@ -66,7 +76,7 @@ if (DRAW_FRONT) {
         2. switch
         3. segment display
     */
-    RING_T = 4;
+    RING_T = 4 - EXTRA_BAFFLE;
 
     /*
         Overall: 35.1
@@ -84,8 +94,9 @@ if (DRAW_FRONT) {
         size (after cut) = 32.02, 19.32
     */
     C = 19.32/2;    // center for coordinate conversion
-    DYPCB = 6.5;
-    MOUNT_DZ = 0;  // offset for the PCB mounting holes
+    DYPCB = 7.5;
+    MOUNT_DZ = 2.5 - EXTRA_BAFFLE;  // offset for the PCB mounting holes
+    DZ_PCB = RING_T; // + 2.5;
 
     difference() {
         translate([0, 0, M_BAFFLE_FRONT]) {
@@ -101,11 +112,20 @@ if (DRAW_FRONT) {
                         [17.28 - C, 21.59 + MOUNT_DZ, "buttress"],
                         [ 2.04 - C, 21.59 + MOUNT_DZ, "buttress"]
                     ]);
-            translate([0, 0, 10 + MOUNT_DZ + 2]) {
-                columnY(6, DYPCB - 4.1, 6, D_AFT, 4, 2);
-            }
-            translate([0, 0, 29.21 + MOUNT_DZ + 3]) {
-                columnY(6, DYPCB, 10, D_AFT, 4, 2);
+
+            intersection() {
+                cylinder(h=H_FAR, d=D_AFT + EPS2);
+                union() {
+                    translate([0, -D_AFT/2, MOUNT_DZ + 10]) {
+                        difference() {
+                            color("olive") 
+                                bridge(D_AFT, D_AFT/2 + DYPCB - 4.1, 4, 8);
+                        }
+                    }
+                    translate([0, -D_AFT/2, MOUNT_DZ + 32]) {
+                        bridge(D_AFT, D_AFT/2 + DYPCB, 4, 8);
+                    }
+                }
             }
             tube(RING_T, do=D_AFT - T, di=D_AFT - 2 * T);
         }
@@ -118,21 +138,30 @@ if (DRAW_FRONT) {
         translate([0, 0, M_CHAMBER - FRONT_T - NUT_T])
             rods(50, 12);
 
-        // flat bottom
+        // Flat bottom for printing
         translate([-50, -D_AFT/2, M_BAFFLE_FRONT]) 
             cube(size=[100, 0.5, 100]);
+
+        // Aesthetics
+        translate([0, 0, M_BAFFLE_FRONT + 18 ]) 
+            capsule(-110, -80, 2, true);
+        translate([0, 0, M_BAFFLE_FRONT + 30 ]) 
+            capsule(-110, -80, 2, true);
+        for(i=[0:4]) {
+            translate([0, 0, M_BAFFLE_FRONT + 8 + i*6])
+                capsule(-170, 170, 2);
+        }
     }
 
-    /*
-        And now a loose couple to the crystal chamber.
-    */
     translate([0, 0, M_CHAMBER - FRONT_T]) {
-        W = 10;
         difference() {
-            translate([0, 0, EPS]) cylinder(h=FRONT_T, d=D_AFT);
+            translate([0, 0, EPS]) 
+                cylinder(h=FRONT_T, d=D_AFT);
+            
+            // Connection for the crystal chamber.
             rods(10);
 
-            // flat bottom
+            // Flat bottom.
             translate([-50, -D_AFT/2, 0]) 
                 cube(size=[100, 0.5, 100]);
         }
@@ -141,10 +170,8 @@ if (DRAW_FRONT) {
 
 
 if (DRAW_CAP) {
-    D = D_AFT;  //31.5;
-    H = 13; // 14.5 in theory; space for padding
-    D_WASHER = 9.5 + 0.5;
-    H_CRYSTAL = 10; // again, space for glue, padding
+    D = D_AFT;
+    H = 4;
     D1_CRYSTAL = 11;
     D2_CRYSTAL = 5;
 
@@ -152,24 +179,21 @@ if (DRAW_CAP) {
         difference() {
             cylinder(h=H, d=D);
 
-            cylinder(h=H, d=D2_CRYSTAL);
-            cylinder(h=H_CRYSTAL, d1=D1_CRYSTAL, d2=D2_CRYSTAL);
+            cylinder(h=H, d1=D1_CRYSTAL, d2=D2_CRYSTAL);
  
             rotate([0, 0, AFT_ROT - 90]) {
                 // Wire tube. (hold in place)
-                hull() {
-                    translate([-8, 8, 0]) cylinder(h=H/2, d=6);
-                    translate([-4, 4, 0]) cylinder(h=H/2, d=6);
-                }
-                translate([0, 0, H/2]) hull() {
-                    translate([-8, 8, 0]) cylinder(h=H, d=4.6);
-                    translate([-4, 4, 0]) cylinder(h=H, d=4.6);
-                }
-                    
+                translate([-8, 8, 0]) cylinder(h=H/2, d=D_TUBE);
+                translate([-8, 8, 0]) cylinder(h=H, d=D_TUBE_CAP);
+
                 // Rods
-                translate([11, 0, 0]) cylinder(h=H, d=D_WASHER);
-                translate([-11, 0, 0]) cylinder(h=H, d=D_WASHER);
+                translate([11, 0, 0]) cylinder(h=H, d=D_ROD);
+                translate([-11, 0, 0]) cylinder(h=H, d=D_ROD);
             }
        }
     }
 }
+
+
+*color("red") translate([0, 0, M_POMMEL_FRONT])
+    battery(D_AFT);

@@ -8,13 +8,14 @@ D_BATTERY           =  18.50 + 0.5;    // An 1850. Huh.
 
 D_SWITCH            =  12.5;     // actually 12, by thread.
 D_SWITCH_SUPPORT    =  16;
-DY_SWITCH            =  -2; //13.5;
+DY_SWITCH            =  -2;
 
 D_PORT              =  7.9;
 D_PORT_SUPPORT      =  12;
 H_PORT              =  16;
 DY_PORT             =  6;
 
+// Dimensions for Teensy3.5 with OpenSaber shield
 X_MC                =  18.5;
 Y_MC                =   9.0;
 Z_MC                =  71.0;     // includes SD
@@ -45,11 +46,15 @@ OLED_DISPLAY_INNER_L = (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L)/2;
 function yAtX(x, r) = sqrt(r*r - x*x);
 
 // Utilities, shapes. ------------------------
-module capsule(theta0, theta1, r=2)
+module capsule(theta0, theta1, r=2, _mirror=false)
 {
     hull() {
         rotate([-90, -0, theta0]) cylinder(h=20, r=r);
         rotate([-90, -0, theta1]) cylinder(h=20, r=r);
+    }
+    if (_mirror == true) hull() {
+        mirror([1,0,0]) rotate([-90, -0, theta0]) cylinder(h=20, r=r);
+        mirror([1,0,0]) rotate([-90, -0, theta1]) cylinder(h=20, r=r);
     }
 }
 
@@ -85,14 +90,42 @@ module cylinderKeyJoint(dz)
     mirror([1,0,0]) polygonXY(dz, path);
 }
 
-module dotstarLED(n, dy)
-{
-    DOTSTAR_XZ = 5;
-    DOTSTAR_PITCH = 7;
 
-    for(i=[0:n-1]) {
-        translate([-DOTSTAR_XZ/2, 0, DOTSTAR_PITCH*i - DOTSTAR_XZ/2]) {
-            cube(size=[DOTSTAR_XZ, dy, DOTSTAR_XZ]);
+module bridge(dx, dy, dz, inset=0)
+{
+    h1 = dx * 0.57;
+    h2 = dx * 0.65; 
+    pillar = dx * 0.20;
+    
+    PATH = [ 
+        [-dx/2, dy], 
+        [-dx/2 + h1, dy],
+        [-dx/2, dy-h2]
+    ];
+
+    INSET = [
+        [-dx/2 - EPS, dy - inset],
+        [-dx/2 - EPS, dy + EPS],
+        [-dx/2 + inset, dy + EPS]
+    ];
+
+    intersection() 
+    {
+        translate([-dx/2, 0, 0]) cube(size=[dx, dy, dz]);
+        difference() {
+            union() {
+                polygonXY(dz, PATH);
+                mirror([1,0,0]) polygonXY(dz, PATH);
+
+                translate([-dx/2, 0, 0]) cube(size=[pillar, dy, dz]);
+                mirror([1,0,0]) translate([-dx/2, 0, 0]) cube(size=[pillar, dy, dz]);
+            }
+            if (inset > 0) {
+                translate([0, 0, -EPS]) {
+                    polygonXY(dz + EPS2, INSET);
+                    mirror([1,0,0]) polygonXY(dz + EPS2, INSET);
+                }
+            }
         }
     }
 }
@@ -103,6 +136,20 @@ module battery(outer) {
         cylinder(d=D_BATTERY, h = Z_BATTERY + EPS2);
     }
 }
+
+
+module dotstarLED(n, dy)
+{
+    DOTSTAR_XZ = 5.4;
+    DOTSTAR_PITCH = 7;
+
+    for(i=[0:n-1]) {
+        translate([-DOTSTAR_XZ/2, 0, DOTSTAR_PITCH*i - DOTSTAR_XZ/2]) {
+            cube(size=[DOTSTAR_XZ, dy, DOTSTAR_XZ]);
+        }
+    }
+}
+
 
 module switch(outer, extend=false)
 {
@@ -264,13 +311,11 @@ module oneBaffle(   d,
                     dExtra=0)
 {
     yMC = -yAtX(X_MC/2, d/2) + 0.7;
-    //yMC = -yAtX(X_MC/2, d/2) + 0.5;
 
     difference() {
         cylinder(h=dz, d=d + dExtra);
         if (battery)
-            translate([0, d/2 - D_BATTERY/2, -EPS]) 
-                battery();
+            battery(d);
         if (mc) {
             translate([0, yMC, -EPS]) 
                 mc();
@@ -311,6 +356,7 @@ module oneBaffle(   d,
     type = 
         "bass22"
         "std28"
+        "bass28"
  */
 module speakerHolder(outer, dz, dzToSpkrBack, type)
 {
@@ -350,6 +396,7 @@ module speakerHolder(outer, dz, dzToSpkrBack, type)
         }    
     }
 }
+
 
 module powerPortRing(outer, t, dz, dzToPort, portSupportToBack=false)
 {    

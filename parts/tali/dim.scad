@@ -19,6 +19,6 @@ R_AFT 				= D_AFT / 2;
 
 D_SABER_OUTER		= 37.5;
 
-D_POMMEL			= 29.0;
+D_POMMEL			= 31.5;
 R_POMMEL 			= D_POMMEL / 2;
 D_AFT_RING			= 33.5;
