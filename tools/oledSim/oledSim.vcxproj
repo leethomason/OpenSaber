@@ -73,6 +73,8 @@
     <ClCompile Include="..\..\src\saber\Grinliz_Util.cpp" />
     <ClCompile Include="..\..\src\saber\renderer.cpp" />
     <ClCompile Include="..\..\src\saber\sketcher.cpp" />
+    <ClCompile Include="..\..\src\saber\unittest.cpp" />
+    <ClCompile Include="..\WinUtil.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="oledsim.cpp" />
   </ItemGroup>
@@ -81,6 +83,7 @@
     <ClInclude Include="..\..\src\saber\Grinliz_Util.h" />
     <ClInclude Include="..\..\src\saber\renderer.h" />
     <ClInclude Include="..\..\src\saber\sketcher.h" />
+    <ClInclude Include="..\..\src\saber\unittest.h" />
     <ClInclude Include="oledsim.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

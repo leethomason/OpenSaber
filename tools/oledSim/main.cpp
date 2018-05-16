@@ -10,6 +10,7 @@
 #include "oledsim.h"
 #include "assets.h"
 #include "sketcher.h"
+#include "../saber/unittest.h"
 
 Sketcher sketcher;
 static const int WIDTH = 128;
@@ -54,11 +55,14 @@ int main(int, char**) {
 	data.mVolts = 3219;
 	data.fontName = "Bespin";
 
+    /*
 	Timer2::Test();
 	DotStarUI::Test();
 	TestCStr();
 	TestHex();
 	TestUtil();
+    */
+    runUnitTests();
 
 	SDL_Event e;
 	int scale = 4;

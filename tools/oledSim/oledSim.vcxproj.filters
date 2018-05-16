@@ -25,6 +25,12 @@
     <ClCompile Include="..\..\src\saber\Grinliz_Util.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\saber\unittest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\WinUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="oledsim.h">
@@ -40,6 +46,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\saber\Grinliz_Util.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\saber\unittest.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
