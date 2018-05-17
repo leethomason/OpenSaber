@@ -56,6 +56,19 @@ private:
 };
 
 
+class Digit4UI
+{
+public:
+	Digit4UI() {}
+
+	void Draw(UIMode mode, const UIRenderData* data);
+	const CStr<9>& Output() { return m_output; }
+
+private:
+	CStr<9> m_output;
+};
+
+
 class Sketcher
 {
 public:

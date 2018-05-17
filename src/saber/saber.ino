@@ -46,7 +46,6 @@
 #include "sketcher.h"
 #include "renderer.h"
 #include "saberUtil.h"
-#include "RF24.h"
 #include "comrf24.h"
 #include "tester.h"
 
@@ -66,6 +65,8 @@ uint32_t lastLoopTime   = 0;
 // First things first: disable that audio to avoid clicking.
 AudioPlayer audioPlayer;
 SFX sfx(&audioPlayer);
+#else
+SFX sfx(0);
 #endif
 
 BladeState  bladeState;
@@ -106,7 +107,7 @@ Pixel_7_5_UI display75;
 PixelMatrix pixelMatrix;
 #endif
 
-#ifdef SABER_SISTERS
+#ifdef SABER_COMRF24
 RF24        rf24(PIN_SPI_CE, PIN_SPI_CS);
 ComRF24     comRF24(&rf24);
 Timer2      pingPongTimer(PING_PONG_INTERVAL);
@@ -119,23 +120,23 @@ Timer2      gforceDataTimer(110);
 
 Tester      tester;
 uint32_t    unlocked = 0;
-bool        soundOk = false;
+bool        wavSource = false;
 
 void setupSD()
 {
     #if (SABER_SOUND_ON == SABER_SOUND_SD)
         #ifdef SABER_INTEGRATED_SD
             Log.p("Connecting to built in SD...").eol();
-            soundOk = SD.begin(BUILTIN_SDCARD);
+            wavSource = SD.begin(BUILTIN_SDCARD);
         #else
             // WARNING: if using LIS3DH ond SPI and and SD,
             // may need to comment out:
             // #define USE_TEENSY3_SPI
             // in Sd2Card2.cpp
             Log.p("Connecting to SPI SD...").eol();
-            soundOk = SD.begin(PIN_SDCARD_CS);
+            wavSource = SD.begin(PIN_SDCARD_CS);
         #endif
-        if (!soundOk) {
+        if (!wavSource) {
             Log.p("Unable to access the SD card").eol();
         }
     #elif (SABER_SOUND_ON == SABER_SOUND_FLASH)
@@ -143,7 +144,7 @@ void setupSD()
             Log.p("Unable to access SerialFlash memory.").eol();
             delay(500);
         }
-        soundOk = true;
+        wavSource = true;
     #endif
 }
 
@@ -194,7 +195,7 @@ void setup() {
     tester.attachDB(&saberDB);
 
     #ifdef SABER_SOUND_ON
-        if (soundOk) {
+        if (wavSource) {
             sfx.init();
             Log.p("sfx initialized.").eol();
         }
@@ -229,7 +230,7 @@ void setup() {
         pinMode(PIN_LED_B, OUTPUT);
     #endif
 
-    #ifdef SABER_SISTERS 
+    #ifdef SABER_COMRF24 
         #if SABER_SUB_MODEL == SABER_SUB_MODEL_LUNA
             const int role = 0;
         #elif SABER_SUB_MODEL == SABER_SUB_MODEL_CELESTIA
@@ -280,19 +281,15 @@ uint32_t calcReflashTime() {
 */
 void syncToDB()
 {
-    #ifdef SABER_SOUND_ON
     sfx.setFont(saberDB.soundFont());
     sfx.setVolume204(saberDB.volume());
-    #endif
 
     uiRenderData.volume = saberDB.volume4();
     uiRenderData.color = Blade::convertRawToPerceived(saberDB.bladeColor());
     uiRenderData.palette = saberDB.paletteIndex();
     uiRenderData.power = AveragePower::vbatToPowerLevel(voltmeter.averagePower());
     uiRenderData.mVolts = voltmeter.averagePower();
-    #ifdef SABER_SOUND_ON
     uiRenderData.fontName = sfx.currentFontName();
-    #endif
 
     // Only set ledB if not being used as UI
     if (buttonsReleased()) {
@@ -321,9 +318,7 @@ bool setVolumeFromHoldCount(int count)
 {
     saberDB.setVolume4(count - 1);
     syncToDB();
-    #ifdef SABER_AUDIO_UI
     SFX::instance()->playUISound(saberDB.volume4());
-    #endif
     return count >= 0 && count <= 5;
 }
 
@@ -331,9 +326,7 @@ void igniteBlade()
 {
     if (bladeState.state() == BLADE_OFF) {
         bladeState.change(BLADE_IGNITE);
-        #ifdef SABER_SOUND_ON
-            sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
-        #endif
+        sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
     }
 }
 
@@ -341,9 +334,7 @@ void retractBlade()
 {
     if (bladeState.state() != BLADE_OFF && bladeState.state() != BLADE_RETRACT) {
         bladeState.change(BLADE_RETRACT);
-        #ifdef SABER_SOUND_ON
-            sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
-        #endif
+        sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
     }
 }
 
@@ -398,9 +389,7 @@ void buttonBHoldHandler(const Button& button) {
     if (bladeState.state() != BLADE_OFF) {
         if (!paletteChange) {
             bladeState.change(BLADE_FLASH);
-            #ifdef SABER_SOUND_ON
-                sfx.playSound(SFX_USER_HOLD, SFX_OVERRIDE);
-            #endif
+            sfx.playSound(SFX_USER_HOLD, SFX_OVERRIDE);
             flashOnClash = true;
             reflashTime = calcReflashTime();
         }
@@ -413,9 +402,7 @@ void buttonBHoldHandler(const Button& button) {
 
 void buttonBReleaseHandler(const Button& b) {
     if (flashOnClash && bladeState.state() != BLADE_OFF) {
-        #ifdef SABER_SOUND_ON
-            sfx.playSound(SFX_IDLE, SFX_OVERRIDE);
-        #endif
+        sfx.playSound(SFX_IDLE, SFX_OVERRIDE);
     }
     flashOnClash = false;
     if (ledB.blinking()) {
@@ -429,9 +416,7 @@ void buttonBClickHandler(const Button&) {
     if (bladeState.state() == BLADE_ON) {
         if (!paletteChange) {
             bladeState.change(BLADE_FLASH);
-            #ifdef SABER_SOUND_ON
-                sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
-            #endif
+            sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
         }
     }
 }
@@ -466,9 +451,7 @@ void buttonAClickHandler(const Button&)
     }
     else if (bladeState.state() == BLADE_ON) {
         bladeState.change(BLADE_FLASH);
-        #ifdef SABER_SOUND_ON
-            sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
-        #endif
+        sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
     }
 }
 
@@ -486,7 +469,7 @@ void buttonAHoldHandler(const Button& button)
                 igniteBlade();
                 int pal = saberDB.paletteIndex();
                 (void) pal;
-                #ifdef SABER_SISTERS
+                #ifdef SABER_COMRF24
                 char buf[] = "ignite0";
                 buf[6] = '0' + pal;
                 comRF24.send(buf);
@@ -512,7 +495,7 @@ void buttonAHoldHandler(const Button& button)
     else if (bladeState.state() != BLADE_RETRACT) {
         if (button.nHolds() == 1) {
             retractBlade();
-            #ifdef SABER_SISTERS
+            #ifdef SABER_COMRF24
             comRF24.send("retract");
             #endif
         }
@@ -540,7 +523,7 @@ void serialEvent() {
 }
 
 
-#ifdef SABER_SISTERS
+#ifdef SABER_COMRF24
 void processCom(uint32_t delta)
 {
     CStr<16> comStr;
@@ -604,11 +587,7 @@ void processAccel(uint32_t msec)
         #endif
 
         if ((g2Normal >= impact * impact)) {
-            bool sound = false;
-            #ifdef SABER_SOUND_ON
-                sound = sfx.playSound(SFX_IMPACT, sfxOverDue ? SFX_OVERRIDE : SFX_GREATER_OR_EQUAL);
-            #endif
-
+            bool sound = sfx.playSound(SFX_IMPACT, sfxOverDue ? SFX_OVERRIDE : SFX_GREATER_OR_EQUAL);
             if (sound) {
                 Log.p("Impact. g=").p(sqrt(g2)).eol();
                 bladeState.change(BLADE_FLASH);
@@ -616,10 +595,7 @@ void processAccel(uint32_t msec)
             }
         }
         else if ( g2 >= motion * motion) {
-            bool sound = false;
-            #ifdef SABER_SOUND_ON
-                sound = sfx.playSound(SFX_MOTION, sfxOverDue ? SFX_OVERRIDE : SFX_GREATER);
-            #endif
+            bool sound = sfx.playSound(SFX_MOTION, sfxOverDue ? SFX_OVERRIDE : SFX_GREATER);
             if (sound) {
                 Log.p("Motion. g=").p(sqrt(g2)).eol();
                 lastMotionTime = msec;
@@ -644,15 +620,13 @@ void loop() {
     buttonB.process();
     ledB.process();
     #endif
-    #ifdef SABER_SISTERS
+    #ifdef SABER_COMRF24
     processCom(delta);
     #endif
     processAccel(msec);
 
     bladeState.process(&blade, saberDB, millis());
-    #ifdef SABER_SOUND_ON
     sfx.process();
-    #endif
 
     if (vbatTimer.tick(delta)) {
         voltmeter.takeSample();
@@ -680,9 +654,13 @@ void loop() {
         }
     }
 
-    #if SABER_DISPLAY == SABER_DISPLAY_7_5
-        pixelMatrix.loop(msec, display75.Pixels());
-    #endif
+    loopDisplays(msec, delta);
+}
+ 
+
+void loopDisplays(uint32_t msec, uint32_t delta)
+{
+    // General display state processing. Draw to the current supported display.
     if (displayTimer.tick(delta)) {
         uiRenderData.color = Blade::convertRawToPerceived(saberDB.bladeColor());
 
@@ -693,12 +671,14 @@ void loop() {
             display75.Draw(msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
         #endif
         #ifdef SABER_UI_START
-            bool changed = dotstarUI.Draw(leds + SABER_UI_START, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
-            if (changed) {
-                EventQ.event("[UIChange]");
-            }
+            dotstarUI.Draw(leds + SABER_UI_START, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
         #endif
     }
+
+    // Now loop() the specific display.
+    #if SABER_DISPLAY == SABER_DISPLAY_7_5
+        pixelMatrix.loop(msec, display75.Pixels());
+    #endif
 
     #if defined(SABER_CRYSTAL)
     {
@@ -718,6 +698,14 @@ void loop() {
         }
     }
     #endif
+
+    #if defined(SABER_FLASH_LED)
+        // Flashes a secondary LED with the flash on clash color.
+        RGB flashColor = saberDB.impactColor();
+        flashColor.scale(SABER_CRYSTAL);
+        leds[SABER_FLASH_LED] = bladeState.state() == BLADE_FLASH ? flashColor : RGB::BLACK;
+    #endif
+
     #if defined(PINB_CRYSTAL)
         if (saberDB.crystalColor().get()) {
             // It has been set on the command line for testing.
@@ -733,10 +721,7 @@ void loop() {
             }
         }
     #endif
-
     #ifdef SABER_NUM_LEDS
         dotstar.display();
-    #endif
-    lastLoopTime = msec;
+    #endif    
 }
- 

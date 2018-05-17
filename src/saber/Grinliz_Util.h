@@ -73,6 +73,7 @@ inline bool strEqual(const char* a, const char* b) {
 */
 bool strStarts(const char* str, const char* prefix);
 bool istrStarts(const char* str, const char* prefix);
+void intToString(int value, char* str, int allocated, bool writeZero);
 
 /**
 * The CStr class is a "c string": a simple array of
@@ -120,15 +121,8 @@ public:
 		len = 0;
 	}
 
-	bool beginsWith(const char* str) const {
-		if (!str || empty()) return false;
-
-		const char* key = str;
-		const char* p = buf;
-		for(; *key && *p && (*key == *p); ++key, ++p) {
-			// do nothing.
-		}
-		return *key == 0;
+	bool beginsWith(const char* prefix) const {
+		return strStarts(buf, prefix);
 	}
 
 	bool operator==(const char* str) const {
@@ -142,7 +136,7 @@ public:
 	char operator[](int i) const {
 		return buf[i];
 	}
-	
+
 	template < class T > bool operator==(const T& str) const {
 		return strEqual(buf, str.buf);
 	}
@@ -176,24 +170,8 @@ public:
 
 	void setFromNum(uint32_t value, bool writeZero) {
 		clear();
-
-		uint32_t range = 1;
-		for (int i = 1; i < ALLOCATE - 1; ++i)
-			range *= 10;
-		for (int i = 0; i < ALLOCATE - 1; ++i) {
-			uint32_t digit = value / range;
-			if (digit >= 0 && digit < 10) {
-				buf[i] = ' ';
-				if (digit || (i == ALLOCATE - 2) || writeZero) {
-					buf[i] = '0' + digit;
-					writeZero = true;
-				}
-				value -= range * digit;
-				range = range / 10;
-			}
-		}
-		len = ALLOCATE - 1;
-		buf[len] = 0;
+		intToString(value, buf, ALLOCATE, writeZero);
+		len = strlen(buf);
 	}
 
 private:

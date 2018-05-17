@@ -1,3 +1,4 @@
+#if 0	// not currently working due to an "arch" include folder
 #include "comrf24.h"
 #include "Grinliz_Util.h"
 #include "Grinliz_Arduino_Util.h"
@@ -19,7 +20,7 @@ bool ComRF24::begin(int role)
 {
 	if (!m_rf24) return false;
 
-#ifdef SABER_SISTERS
+#ifdef SABER_COMRF24
 	static const uint8_t* ADDR0 = (const uint8_t*) SABER_ADDR_0;
 	static const uint8_t* ADDR1 = (const uint8_t*) SABER_ADDR_1;
 #else
@@ -122,3 +123,4 @@ bool ComRF24::send(const char* str)
     return success;
 }
 
+#endif

@@ -350,10 +350,13 @@ you particular saber in "pins.h".
 
 ### Libraries
 
+I feel guilty about every forked library; but it's hard to
+work around API issues. Theser are minor forks, at least.
+
 #### Accelerometer
 
-The current design uses the (really great) LIS3DH unmodified.
-https://github.com/adafruit/Adafruit_LIS3DH
+The current design uses the (really great) LIS3DH.
+https://github.com/leethomason/Adafruit_LIS3DH
 
 #### OLED
 

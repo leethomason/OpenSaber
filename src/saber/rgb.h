@@ -42,6 +42,7 @@ struct RGB {
         return (int(r) + int(g) + int(b)) / 3;
     }
 
+	// From 0-256
     void scale(uint16_t s) {
         r = (uint16_t(r) * uint16_t(s)) >> 8;
         g = (uint16_t(g) * uint16_t(s)) >> 8;

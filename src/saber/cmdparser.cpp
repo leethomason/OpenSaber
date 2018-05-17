@@ -28,7 +28,7 @@
 #include "SFX.h"
 #include "Tester.h"
 #include "saberUtil.h"
-#include "comrf24.h"
+//#include "comrf24.h"
 #include "accelerometer.h"
 
 File streamFile;
@@ -349,12 +349,14 @@ bool CMDParser::processCMD()
         upload(value.c_str(), size);
     }
     else if (action == COMLOG) {
+        #if 0    // disabled until library updated and build fixed
         ComRF24* com = ComRF24::instance();
         if (com) {
             com->setComLog(!com->isComLogging());
             Serial.print("Com logging=");
             Serial.println(com->isComLogging());
         }
+        #endif
     }
     else if (action == STATUS) {
         static const char* space = "-----------";
@@ -394,6 +396,7 @@ bool CMDParser::processCMD()
         printLead(VOLTS);
         Serial.println(Blade::blade().voltage());
 
+        #if 0
         ComRF24* com = ComRF24::instance();
         if (com) {
             delay(DELAY);
@@ -407,6 +410,8 @@ bool CMDParser::processCMD()
         }
         
         delay(DELAY);
+        #endif 
+        
         printLead(UTIL);
         
         delay(DELAY);

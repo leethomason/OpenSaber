@@ -57,6 +57,7 @@ class SerialFlashFile;
 class SFX
 {
 public:
+  // AudioPlayer can be null to avoid a bunch of #if/if
   SFX(AudioPlayer* audioPlayer);
   static SFX* instance() { return m_instance; }
 

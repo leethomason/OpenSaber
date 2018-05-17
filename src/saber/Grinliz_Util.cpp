@@ -51,11 +51,36 @@ bool strStarts(const char* str, const char* prefix)
     if (!str || !prefix)
         return false;
 
+	if (!*str || !*prefix)
+		return false;
+
     while(*prefix) {
         if (*prefix++ != *str++)
             return false;
     }
     return true;
+}
+
+void intToString(int value, char* buf, int allocated, bool writeZero)
+{
+	uint32_t range = 1;
+	for (int i = 1; i < allocated - 1; ++i) {
+		range *= 10;
+		buf[i] = 0;
+	}
+	for (int i = 0; i < allocated - 1; ++i) {
+		uint32_t digit = value / range;
+		if (digit >= 0 && digit < 10) {
+			buf[i] = ' ';
+			if (digit || (i == allocated - 2) || writeZero) {
+				buf[i] = '0' + digit;
+				writeZero = true;
+			}
+			value -= range * digit;
+			range = range / 10;
+		}
+	}
+	buf[allocated - 1] = 0;
 }
 
 char ToLower(char c) {
