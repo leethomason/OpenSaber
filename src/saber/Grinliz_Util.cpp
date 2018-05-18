@@ -110,6 +110,14 @@ bool TestCStr()
     TEST_IS_FALSE(strStarts(0, "Foo"));
     TEST_IS_FALSE(strStarts("Foo", 0));
 
+    TEST_IS_TRUE(istrStarts("FooBar", "Foo"));
+    TEST_IS_FALSE(istrStarts("FooBar", "Bar"));
+    TEST_IS_FALSE(istrStarts("Foo", "FooBar"));
+    TEST_IS_FALSE(istrStarts(0, "Foo"));
+    TEST_IS_FALSE(strStarts("Foo", 0));
+    TEST_IS_TRUE(istrStarts("FooBar", "foo"));
+    TEST_IS_TRUE(istrStarts("FOOBAR", "Foo"));
+
     static const char* STR4 = "Four";
     static const char* STR8 = "ThisIs-8";
     static const char* STR9 = "ThisIs-8+";
@@ -184,7 +192,48 @@ bool TestCStr()
         TEST_IS_FALSE(val.beginsWith("al"));
         TEST_IS_FALSE(val.beginsWith("values"));
     }
-	return true;
+    {
+        TEST_IS_FALSE(strEqual(0, 0));
+        TEST_IS_FALSE(strEqual(0, ""));
+        TEST_IS_TRUE(strEqual("", ""));
+    }
+    {
+        // Short buffer test.
+        char buf[11] = "0123456789";
+        intToString(17, buf, 2, true);
+        TEST_IS_TRUE(buf[1] == 0);
+        TEST_IS_TRUE(buf[2] == '2');
+    }
+    {
+        // Fits buffer test.
+        char buf[11] = "0123456789";
+        intToString(17, buf, 3, true);
+        TEST_IS_TRUE(buf[0] == '1');
+        TEST_IS_TRUE(buf[1] == '7');
+        TEST_IS_TRUE(buf[2] == 0);
+        TEST_IS_TRUE(buf[3] == '3');
+    }
+    {
+        // Larger buffer test.
+        char buf[11] = "0123456789";
+        intToString(17, buf, 5, false);
+        TEST_IS_TRUE(buf[0] == ' ');
+        TEST_IS_TRUE(buf[1] == ' ');
+        TEST_IS_TRUE(buf[2] == '1');
+        TEST_IS_TRUE(buf[3] == '7');
+        TEST_IS_TRUE(buf[4] == 0);
+    }
+    {
+        // Larger buffer test.
+        char buf[11] = "0123456789";
+        intToString(17, buf, 5, true);
+        TEST_IS_TRUE(buf[0] == '0');
+        TEST_IS_TRUE(buf[1] == '0');
+        TEST_IS_TRUE(buf[2] == '1');
+        TEST_IS_TRUE(buf[3] == '7');
+        TEST_IS_TRUE(buf[4] == 0);
+    }
+    return true;
 }
 
 
@@ -316,8 +365,16 @@ void EventQueue::event(const char* e, int data)
 {
 	ASSERT(e);
 	ASSERT(m_nEvents < NUM_EVENTS);
-	if (m_nEvents == NUM_EVENTS)
-		return;
+
+    if (m_nEvents >= NUM_EVENTS) {
+        Log.p("Overflow: ");
+        for (int i = 0; i < NUM_EVENTS; ++i) {
+            int slot = (m_head + i) % NUM_EVENTS;
+            Log.p(m_events[slot].name).p(" ");
+        }
+        Log.eol();
+        return;
+    }
 
 	int slot = (m_head + m_nEvents) % NUM_EVENTS;
 

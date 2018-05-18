@@ -23,9 +23,11 @@ void dprintf(const char* format, ...)
 	fflush(0);
 }
 
+
 void SPLog::attachSerial(Stream* stream)
 {
 }
+
 
 void SPLog::attachLog(Stream* stream)
 {
@@ -38,11 +40,13 @@ const SPLog& SPLog::p(const char v[]) const
 	return *this;
 }
 
+
 const SPLog& SPLog::p(char v) const
 {
 	dprintf("%c", v);
 	return *this;
 }
+
 
 const SPLog& SPLog::p(unsigned char v, int p) const
 {
@@ -55,6 +59,7 @@ const SPLog& SPLog::p(unsigned char v, int p) const
 	return *this;
 }
 
+
 const SPLog& SPLog::p(int v, int p) const
 {
 	if (p == DEC)
@@ -65,6 +70,7 @@ const SPLog& SPLog::p(int v, int p) const
 		ASSERT(false);
 	return *this;
 }
+
 
 const SPLog& SPLog::p(unsigned int v, int p) const
 {
@@ -77,6 +83,7 @@ const SPLog& SPLog::p(unsigned int v, int p) const
 	return *this;
 }
 
+
 const SPLog& SPLog::p(long v, int p) const
 {
 	if (p == DEC)
@@ -87,6 +94,7 @@ const SPLog& SPLog::p(long v, int p) const
 		ASSERT(false);
 	return *this;
 }
+
 
 const SPLog& SPLog::p(unsigned long v, int p) const
 {
@@ -99,11 +107,13 @@ const SPLog& SPLog::p(unsigned long v, int p) const
 	return *this;
 }
 
+
 const SPLog& SPLog::p(double v, int p) const
 {
 	dprintf("%f", v);
 	return *this;
 }
+
 
 const SPLog& SPLog::p(const RGB& rgb) const
 {

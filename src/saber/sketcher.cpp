@@ -541,10 +541,10 @@ void Digit4UI::Draw(UIMode mode, const UIRenderData* data)
 			break;
 
 		case UIMode::MEDITATION:
-			scratch[0] = 'M';
-			scratch[1] = 'A';
-			scratch[2] = 'Y';
-			scratch[3] = ' ';
+			scratch[0] = 'F';
+			scratch[1] = 'O';
+			scratch[2] = 'R';
+			scratch[3] = 'C';
 			scratch[4] = 0;
 			break;
 	}
