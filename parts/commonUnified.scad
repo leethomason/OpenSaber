@@ -447,7 +447,12 @@ function nBafflesNeeded(dzButtress) = ceil(Z_PADDED_BATTERY / (dzButtress*2));
 
 function zLenOfBaffles(n, dzButtress) = n * dzButtress * 2 - dzButtress;
 
-module baffleMCBattery(outer, n, dzButtress, dFirst, dzFirst)
+module baffleMCBattery( outer,          // outer diameter 
+                        n,              // number of baffles 
+                        dzButtress,     // thickness of the baffle
+                        dFirst,         // make the back baffle this diameter
+                        dzFirst,        // make the back baffle this thicknes 
+                        extraBaffle=0)  // add this much to the front baffle
 {
     for(i=[0:n-1]) {
         translate([0, 0, i*dzButtress*2]) 
@@ -463,6 +468,11 @@ module baffleMCBattery(outer, n, dzButtress, dFirst, dzFirst)
             else {
                 oneBaffle(outer, dzButtress, bridge=(i < n-1));
             }
+    }
+    if (extraBaffle) {
+        translate([0, 0, (n*2 - 1) * dzButtress]) {
+            oneBaffle(outer, extraBaffle, bridge=false);
+        }
     }
 }
 
@@ -533,7 +543,7 @@ module pcbPillar() {
     dyPCB: y delta to PCB bottom.
     size[3]: outer size of the pcb
     mount: array of:
-        x location, y location, "pillar" or "buttress"
+        x location, z location, "pillar" or "buttress"
 */
 module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount)
 {
