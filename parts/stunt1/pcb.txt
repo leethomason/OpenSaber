@@ -2,7 +2,6 @@
 # +M 2.2  Mounting
 # # # # # # # # # # # # # # # # #
 [               ]
-
   M           M 
 
 V o     o-r g   b
@@ -14,7 +13,6 @@ G   o o   o   o
 G---o-o---o---o
 |
 G o-o o-o o-o o-o 
-
 
   M           M 
 [               ]
