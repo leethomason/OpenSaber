@@ -15,8 +15,8 @@ D_TUBE = 6;
 D_TUBE_CAP = 4.6;
 
 DRAW_AFT   = false;
-DRAW_FRONT = true;
-DRAW_CAP   = false;
+DRAW_FRONT = false;
+DRAW_CAP   = true;
 
 AFT_ROT = 19;
 
@@ -174,14 +174,14 @@ if (DRAW_FRONT) {
 if (DRAW_CAP) {
     D = D_AFT;
     H = 4;
-    D1_CRYSTAL = 11;
+    //D1_CRYSTAL = 11;
     D2_CRYSTAL = 5;
 
     translate([0, 0, M_CAP]) {
         difference() {
             cylinder(h=H, d=D);
 
-            cylinder(h=H, d1=D1_CRYSTAL, d2=D2_CRYSTAL);
+            cylinder(h=H, d=D2_CRYSTAL);
  
             rotate([0, 0, AFT_ROT - 90]) {
                 // Wire tube. (hold in place)
