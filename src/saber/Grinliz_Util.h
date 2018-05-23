@@ -63,6 +63,7 @@ bool TestUtil();
 /**
 * Returns 'true' if 2 strings are equal.
 * If one or both are null, they are never equal.
+* (But two empty strings are equal.)
 */
 inline bool strEqual(const char* a, const char* b) {
 	return a && b && strcmp(a, b) == 0;

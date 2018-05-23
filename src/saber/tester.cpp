@@ -421,8 +421,10 @@ void Tester::done()
 
 void Tester::process()
 {
-    if (!running)
+    if (!running) {
+        EventQ.popEvent();  // Need to clear this out to prevent overflow.
         return;
+    }
 
     Test* test = gTests[currentTest];
     ASSERT(test);

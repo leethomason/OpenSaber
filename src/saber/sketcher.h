@@ -82,7 +82,7 @@ public:
 		X1			= WIDTH - TWEAK_X1,
 		CENTER		= (X0 + X1) / 2,
 
-        DIAL_WIDTH = 28,
+        DIAL_WIDTH  = 28,
 		DATA_WIDTH	= WIDTH - DIAL_WIDTH * 2 - 20,
 		BAR_WIDTH   = 38 - TWEAK_X0 - TWEAK_X1,
     };
