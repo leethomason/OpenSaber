@@ -4,7 +4,7 @@ use <../shapes.scad>
 
 $fn = 80;
 
-if (false) {
+if (true) {
     pcbHolder(D_AFT, 
             4, 
             26,   // dz
@@ -20,7 +20,7 @@ if (false) {
     );
 }
 
-if (true) {
+if (false) {
     EXTRA_BAFFLE = 2;
     N_BAFFLES = nBafflesNeeded(H_BUTTRESS);
     N = N_BAFFLES;
