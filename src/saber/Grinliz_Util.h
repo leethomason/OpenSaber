@@ -19,7 +19,11 @@ template<> struct CompileTimeAssert <true> {};
 #	define ASSERT( x )	if ( !(x)) { _asm { int 3 } }
 #else
 	void AssertOut(const char* message, const char* file, int line);
-	#	define ASSERT( x ) 	if (!(x)) { AssertOut(#x, __FILE__, __LINE__); }
+	#ifdef NDEBUG
+		#define ASSERT( x ) 	if (!(x)) { AssertOut(#x, __FILE__, __LINE__); }
+	#else
+		#define ASSERT( x ) 	if (!(x)) { AssertOut(#x, __FILE__, __LINE__); while(true) {} }
+	#endif
 #endif
 
 #define TEST_IS_TRUE(x) {         \

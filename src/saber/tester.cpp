@@ -327,7 +327,8 @@ public:
 
     virtual int process(Tester* tester, EventQueue* queue)
     {
-        queue->popEvent();
+        while(queue->hasEvent())        
+            queue->popEvent();
         return TEST_SUCCESS;
     }
 };
@@ -413,6 +414,9 @@ void Tester::done()
             if (button[i]) button[i]->enableTestMode(false);
         }
         Log.p("---- Test run complete. -----").eol();
+        while(EventQ.hasEvent()) {
+            EventQ.popEvent();  // Need to clear this out to prevent overflow.
+        }
 #if SERIAL_DEBUG == 0
         Log.attachSerial(0);
 #endif
@@ -422,7 +426,9 @@ void Tester::done()
 void Tester::process()
 {
     if (!running) {
-        EventQ.popEvent();  // Need to clear this out to prevent overflow.
+        while(EventQ.hasEvent()) {
+            EventQ.popEvent();  // Need to clear this out to prevent overflow.
+        }
         return;
     }
 
@@ -435,6 +441,10 @@ void Tester::process()
         if (pressState[i].start && pressState[i].start <= m) {
             //Log.p("Firing press button=").p(i).eol();
             button[i]->testPress();
+            // This was a hard bug to find. Sometimes we don't get around
+            // to checking; so be sure to push out the end time so the
+            // duration doesn't fall below threshold.
+            pressState[i].end = m + (pressState[i].end - pressState[i].start);
             pressState[i].start = 0;
         }
         if (pressState[i].end && pressState[i].end <= m) {

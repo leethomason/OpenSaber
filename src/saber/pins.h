@@ -395,12 +395,10 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	// FIXME remove
 	#define SABER_AUDIO_UI
 
-	/*
 	#define SABER_CRYSTAL			80
 	#define SABER_CRYSTAL_LOW		16
 	#define SABER_NUM_LEDS 			2
 	#define SABER_FLASH_LED			1
-	*/
 	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 
 	// FIXME tune

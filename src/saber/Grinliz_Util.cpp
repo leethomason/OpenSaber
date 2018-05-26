@@ -1,6 +1,8 @@
 #include "Grinliz_Util.h"
 #include <math.h>
 
+#define DEBUG_EVENT
+
 static int16_t gSinTable[256] = { 0 };
 
 uint8_t lerpU8(uint8_t a, uint8_t b, uint8_t t) 
@@ -385,6 +387,9 @@ void EventQueue::event(const char* e, int data)
 	if (m_eventLogging)
 		Log.p(m_events[slot].name).p(" data=").p(m_events[slot].data).eol();
     #endif
+    #ifdef DEBUG_EVENT
+    Log.p("Event::push ").p(m_events[slot].name).p(" nEvents=").p(m_nEvents).eol();
+    #endif
 
 	++m_nEvents;
 }
@@ -410,6 +415,10 @@ EventQueue::Event EventQueue::popEvent()
 	--m_nEvents;
 	if (m_head == NUM_EVENTS)
 		m_head = 0;
+
+    #ifdef DEBUG_EVENT
+    Log.p("Event::pop ").p(e.name).p(" nRemain=").p(m_nEvents).eol();
+    #endif
 	return e;
 }
 

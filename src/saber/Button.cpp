@@ -1,5 +1,8 @@
 #include <Arduino.h>
 #include "Button.h"
+#include "Grinliz_Util.h"
+
+#define DEBUG_BUTTON_TEST
 
 #define BIT_CURRENT         0
 #define BIT_PREVIOUS        1
@@ -177,12 +180,18 @@ void Button::enableTestMode(bool testMode)
 
 void Button::testPress()
 {
+    #ifdef DEBUG_BUTTON_TEST
+    Log.p("Button::testPress time=").p(millis()).eol();
+    #endif
     bitWrite(m_state, BIT_TEST_PRESSED, true);
 }
 
 
 void Button::testRelease()
 {
+    #ifdef DEBUG_BUTTON_TEST
+    Log.p("Button::testRelease time=").p(millis()).eol();
+    #endif
     bitWrite(m_state, BIT_TEST_PRESSED, false);
 }
 
