@@ -75,6 +75,9 @@ H_MC    			= 10;
 Y_MC    			= -13.5;
 Z_MC_35 			= 71.2;		// includes SD
 
+H_HEAT_SINK_THREAD = 10.0;
+D_HEAT_SINK_THREAD = 20.2;  // 20.4 is loose (PHA), 20.1 tight (PLA)
+
 // Battery
 // 68mm
 //   - 4 front holder
