@@ -31,7 +31,7 @@ def main():
 
     pLED = vf * i
     pRes = (vb - vf) * i
-    eff = 1.0 - pRes / (vf * i)
+    eff = 1.0 - pRes / (pRes + pLED)
         
     fraction = 16.0
     while pRes > (1.0 / fraction):

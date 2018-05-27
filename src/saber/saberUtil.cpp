@@ -132,7 +132,11 @@ void UIModeUtil::nextMode()
         case UIMode::VOLUME:        
             m_mode = UIMode::NORMAL;        
             Log.p("mode: normal").eol();     
-            if (sfx) sfx->playUISound("ready");
+            #if defined(OVERRIDE_READY_SOUND)
+                if (sfx) sfx->playUISound(OVERRIDE_READY_SOUND, false);
+            #else
+                if (sfx) sfx->playUISound("ready");
+            #endif
             break;
 #endif
 

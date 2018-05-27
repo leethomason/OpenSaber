@@ -392,6 +392,9 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
 
+	#define OVERRIDE_BOOT_SOUND		"./me/Blip.wav"
+	#define OVERRIDE_READY_SOUND	"./me/Blip.wav"
+
 	// FIXME remove
 	#define SABER_AUDIO_UI
 

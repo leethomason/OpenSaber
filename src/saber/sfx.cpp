@@ -313,7 +313,7 @@ bool SFX::playSound(int sound, int mode, bool playIfOff)
     return false;
 }
 
-bool SFX::playUISound(int n)
+bool SFX::playUISound(int n, bool prepend)
 {
     CStr<10> str;
     switch(n) {
@@ -327,17 +327,19 @@ bool SFX::playUISound(int n)
         case 7: str = "seven"; break;
         default: ASSERT(false); break;
     }
-    return playUISound(str.c_str());
+    return playUISound(str.c_str(), prepend);
 }
 
-bool SFX::playUISound(const char* name)
+bool SFX::playUISound(const char* name, bool prepend)
 {
     if (!m_player) return false;
 
     // Overrides the volume so the UI is at
     // a consistent volume. Volume will be restored
     // when the sound playing is done.
-    CStr<24> path("ui/");
+    CStr<24> path;
+    if (prepend)
+        path.append("ui/";)
     path.append(name);
     path.append(".wav");
 

@@ -263,10 +263,12 @@ void setup() {
     EventQ.event("[saber start]");
     lastLoopTime = millis();    // so we don't get a big jump on the first loop()
 
-    #ifdef SABER_BOOT_SOUND
     #ifdef SABER_AUDIO_UI
-    SFX::instance()->playUISound("ready");
-    #endif
+        #if defined(OVERRIDE_BOOT_SOUND)
+            SFX::instance()->playUISound(OVERRIDE_BOOT_SOUND, false);
+        #elif defined(SABER_BOOT_SOUND)
+            SFX::instance()->playUISound("ready");
+        #endif
     #endif
 }
 

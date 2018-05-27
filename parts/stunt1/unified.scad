@@ -6,21 +6,20 @@ $fn = 80;
 
 DZ_PCB = 27;
 
-DX_POWER = 10;
-DY_POWER = 5;
+DX_POWER = 11;
+DY_POWER = 9;
 DZ_POWER = 14;
-DZ_WALL = 8;
 
 Y_POWER = -yAtX(DX_POWER/2, D_AFT/2) + 1;
 
-if (false) {
+if (true) {
     difference() {
         pcbHolder(D_AFT, 
                 4, 
                 DZ_PCB,   // dz
                 3,    // dz to pcb
                 0,    // dy pcb
-                [22, 50, 20],
+                [27, 50, 20],
                 [
                     [-11.430, 17.280, "buttress" ],     // d=2.2
                     [11.430, 17.280, "buttress" ],     // d=2.2
@@ -35,13 +34,17 @@ if (false) {
     }
     intersection() {
         cylinder(h=DZ_PCB, d=D_AFT);
-        translate([-20, 8, DZ_PCB - 3]) cube(size=[40, 20, 10]);
+        union() {
+            translate([-20, 8, DZ_PCB - 3]) cube(size=[40, 20, 10]);
+            translate([DX_POWER/2, Y_POWER, 0]) 
+                cube(size=[4, DY_POWER, DZ_POWER]);
+            mirror([1,0,0]) translate([DX_POWER/2, Y_POWER, 0]) 
+                cube(size=[4, DY_POWER, DZ_POWER]);
+        }
     }
-    translate([DX_POWER/2, Y_POWER, 0]) cube(size=[2, DY_POWER, DZ_POWER]);
-    mirror([1,0,0]) translate([DX_POWER/2, Y_POWER, 0]) cube(size=[2, DY_POWER, DZ_POWER]);
 }
 
-if (true) {
+if (false) {
     EXTRA_BAFFLE = 2;
     N_BAFFLES = nBafflesNeeded(H_BUTTRESS);
     N = N_BAFFLES + 1;
