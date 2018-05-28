@@ -286,10 +286,10 @@ void setup() {
     EventQ.event("[saber start]");
     lastLoopTime = millis();    // so we don't get a big jump on the first loop()
 
-    #ifdef SABER_BOOT_SOUND
-    #ifdef SABER_AUDIO_UI
-    SFX::instance()->playUISound("ready");
-    #endif
+    #if defined(OVERRIDE_BOOT_SOUND)
+        SFX::instance()->playUISound(OVERRIDE_BOOT_SOUND, false);
+    #elif defined(SABER_BOOT_SOUND) || defined(SABER_AUDIO_UI)
+        SFX::instance()->playUISound("ready");
     #endif
 }
 
@@ -341,7 +341,9 @@ bool setVolumeFromHoldCount(int count)
 {
     saberDB.setVolume4(count - 1);
     syncToDB();
+    #ifdef SABER_AUDIO_UI
     SFX::instance()->playUISound(saberDB.volume4());
+    #endif
     return count >= 0 && count <= 5;
 }
 

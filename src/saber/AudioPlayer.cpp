@@ -65,8 +65,8 @@ bool AudioPlayer::play(const char* filename)
     okay = playWav.play(filename, 44);
 #endif
     if (!okay) {
-        ASSERT(okay);
         Log.p("Error playing:").p(filename).eol();
+        ASSERT(okay);
     }
 
     //Serial.print("AudioPlayer::play: "); Serial.println(filename);// Serial.print(" len(ms)="); Serial.println(playWav.lengthMillis());

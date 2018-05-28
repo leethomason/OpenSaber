@@ -392,8 +392,10 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_SOUND_ON 			SABER_SOUND_SD
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
+	//#define SABER_LOWPASS_FILTER	1
 
-	//#define SABER_AUDIO_UI
+	#define OVERRIDE_BOOT_SOUND		"mesfx/Blip"
+	#define OVERRIDE_READY_SOUND	"mesfx/Blip"
 
 	#define SABER_CRYSTAL			80
 	#define SABER_CRYSTAL_LOW		16
@@ -402,8 +404,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 	#define SABER_DISPLAY			SABER_DISPLAY_SEGMENT
 
-	// FIXME tune
-	static const int32_t UVOLT_MULT = 6691;		
+	static const int32_t UVOLT_MULT = 6734;		
 	#define ID_STR "Vigilance (Tali) Luxeon RGB"
 
 	// Thermal paste heat sinking.

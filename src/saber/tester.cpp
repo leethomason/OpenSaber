@@ -230,8 +230,8 @@ class AveragePowerTest : public Test
 public:
 
 	static const int GOAL = 100;
-	int nSamples = 0;
-    bool bladeOn = false;
+	int nSamples;
+    bool bladeOn;
     Voltmeter voltmeter;
 
     virtual const char* name() const {
@@ -241,6 +241,9 @@ public:
     virtual void start(Tester* tester)
     {
         AveragePower ave;
+        nSamples = 0;
+        bladeOn = false;
+
         TEST_EQUAL(NOMINAL_VOLTAGE, ave.power());
         for(int i=0; i<AveragePower::NUM_SAMPLES; ++i) {
             ave.push(4000);
@@ -250,7 +253,7 @@ public:
         TEST_EQUAL((4000*(AveragePower::NUM_SAMPLES-1) + 1000)/AveragePower::NUM_SAMPLES, ave.power());
 
         tester->press(0, HOLD_TIME);
-        voltmeter.begin();
+        //voltmeter.begin();
     }
 
     virtual int process(Tester* tester, EventQueue* queue)

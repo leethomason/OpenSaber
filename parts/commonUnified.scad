@@ -308,7 +308,8 @@ module oneBaffle(   d,
                     useRods=true, 
                     bridge=true, 
                     mcSpace=false,
-                    dExtra=0)
+                    dExtra=0,
+                    scallop=false)
 {
     yMC = -yAtX(X_MC/2, d/2) + 0.7;
 
@@ -323,6 +324,16 @@ module oneBaffle(   d,
         if (mcSpace)
             translate([-X_MC/2, DY_MC, -EPS])
                 cube(size=[X_MC, 20, dz+EPS2]);
+        if (scallop) {
+            TUNE_X = 1.2;
+            TUNE_D = 1.6;
+
+            translate([d*TUNE_X, 0, -EPS]) 
+                cylinder(h=dz + EPS2, d=d * TUNE_D);
+            mirror([1,0,0])
+                translate([d*TUNE_X, 0, -EPS]) 
+                    cylinder(h=dz + EPS2, d=d * TUNE_D);
+        }
 
         translate([-TROUGH_0/2, 0, -EPS]) 
             cube(size=[TROUGH_0, 30, dz + EPS2]);
