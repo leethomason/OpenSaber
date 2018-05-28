@@ -48,6 +48,7 @@
 #include "saberUtil.h"
 #include "comrf24.h"
 #include "tester.h"
+#include "ShiftedSevenSeg.h"
 
 static const uint32_t VBAT_TIME_INTERVAL      = 500;
 static const uint32_t INDICATOR_CYCLE         = 1000;
@@ -105,6 +106,9 @@ Renderer    renderer;
 #elif SABER_DISPLAY == SABER_DISPLAY_7_5
 Pixel_7_5_UI display75;
 PixelMatrix pixelMatrix;
+#elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
+ShiftedSevenSegment shifted7;
+Digit4UI digit4UI;
 #endif
 
 #ifdef SABER_COMRF24
@@ -212,6 +216,25 @@ void setup() {
         Log.p("OLED display connected.").eol();
     #elif SABER_DISPLAY == SABER_DISPLAY_7_5
         Log.p("Pixel display init.").eol();
+    #elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
+        pinMode(PIN_LATCH, OUTPUT);
+        pinMode(PIN_CLOCK, OUTPUT);
+        pinMode(PIN_DATA, OUTPUT);
+
+        shifted7.attachDigit(0, 10);
+        shifted7.attachDigit(1, 4);
+        shifted7.attachDigit(2, 13);
+        shifted7.attachDigit(3, 15);
+
+        shifted7.attachSegment(0, 6);   // a
+        shifted7.attachSegment(1, 5);  // b
+        shifted7.attachSegment(2, 12);  // c
+        shifted7.attachSegment(3, 2);  // d
+        shifted7.attachSegment(4, 11);   // e
+        shifted7.attachSegment(5, 3);  // f
+        shifted7.attachSegment(6, 1);   // g
+        shifted7.attachSegment(7, 14);  // h-dp
+        Log.p("Shifted seven digi init.").eol();
     #endif
 
     #if defined(SABER_NUM_LEDS)
@@ -669,6 +692,9 @@ void loopDisplays(uint32_t msec, uint32_t delta)
             display.display(oledBuffer);
         #elif SABER_DISPLAY == SABER_DISPLAY_7_5
             display75.Draw(msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
+        #elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
+            digit4UI.Draw(uiMode.mode(), &uiRenderData);
+            shifted7.set(digit4UI.Output().c_str());
         #endif
         #ifdef SABER_UI_START
             dotstarUI.Draw(leds + SABER_UI_START, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
@@ -678,6 +704,16 @@ void loopDisplays(uint32_t msec, uint32_t delta)
     // Now loop() the specific display.
     #if SABER_DISPLAY == SABER_DISPLAY_7_5
         pixelMatrix.loop(msec, display75.Pixels());
+    #elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
+        {
+            uint8_t a=0, b=0;
+            shifted7.loop(micros(), &a, &b);
+
+            digitalWrite(PIN_LATCH, LOW);
+            shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, b);
+            shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, a);
+            digitalWrite(PIN_LATCH, HIGH);
+        }
     #endif
 
     #if defined(SABER_CRYSTAL)

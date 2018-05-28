@@ -2,7 +2,7 @@
 #include "Button.h"
 #include "Grinliz_Util.h"
 
-#define DEBUG_BUTTON_TEST
+//#define DEBUG_BUTTON_TEST
 
 #define BIT_CURRENT         0
 #define BIT_PREVIOUS        1

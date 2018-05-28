@@ -1,7 +1,7 @@
 #include "Grinliz_Util.h"
 #include <math.h>
 
-#define DEBUG_EVENT
+//#define DEBUG_EVENT
 
 static int16_t gSinTable[256] = { 0 };
 

@@ -52,7 +52,7 @@ SOFTWARE.
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
+#define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_TALI
 #define SABER_SUB_MODEL				SABER_SUB_MODEL_STANDARD
 // ----------------------------------
@@ -67,6 +67,7 @@ SOFTWARE.
 
 #define SABER_DISPLAY_128_32		1
 #define SABER_DISPLAY_7_5			2
+#define SABER_DISPLAY_SEGMENT		3
 
 #define PCB_VERSION_1				1   // PCB, Teensy 3.2, external amp and accel
 #define PCB_VERSION_5				5   // PCB, Prop Shield, Teensy 3.2, OLED (VERIFY)
@@ -392,14 +393,14 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
 
-	// FIXME remove
-	#define SABER_AUDIO_UI
+	//#define SABER_AUDIO_UI
 
 	#define SABER_CRYSTAL			80
 	#define SABER_CRYSTAL_LOW		16
 	#define SABER_NUM_LEDS 			2
 	#define SABER_FLASH_LED			1
 	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
+	#define SABER_DISPLAY			SABER_DISPLAY_SEGMENT
 
 	// FIXME tune
 	static const int32_t UVOLT_MULT = 6691;		
@@ -575,6 +576,10 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_OLED_RESET 	  PIN_SPI_CE
 	#define PIN_OLED_DC    	  PIN_SPI_DC
 	#define PIN_OLED_CLOCK    PIN_SPI_CLOCK
+
+	#define PIN_LATCH		  28
+	#define PIN_CLOCK 		  27
+	#define PIN_DATA  		  29
 
 	// FIXME: accelerometer is rotated
 	#define ACCEL_BLADE_DIRECTION 0	// x is in the blade direction
