@@ -309,7 +309,8 @@ module oneBaffle(   d,
                     bridge=true, 
                     mcSpace=false,
                     dExtra=0,
-                    scallop=false)
+                    scallop=false,
+                    cutout=true)
 {
     yMC = -yAtX(X_MC/2, d/2) + 0.7;
 
@@ -335,12 +336,14 @@ module oneBaffle(   d,
                     cylinder(h=dz + EPS2, d=d * TUNE_D);
         }
 
-        translate([-TROUGH_0/2, 0, -EPS]) 
-            cube(size=[TROUGH_0, 30, dz + EPS2]);
-        translate([-TROUGH_1/2, -5, -EPS]) 
-            cube(size=[TROUGH_1, 5, dz + EPS2]);
-        translate([-TROUGH_2/2, -20, -EPS])
-            cube(size=[TROUGH_2, 15, dz + EPS2]);
+            translate([-TROUGH_0/2, 0, -EPS]) 
+                cube(size=[TROUGH_0, 30, dz + EPS2]);
+        if (cutout) {
+            translate([-TROUGH_1/2, -5, -EPS]) 
+                cube(size=[TROUGH_1, 5, dz + EPS2]);
+            translate([-TROUGH_2/2, -20, -EPS])
+                cube(size=[TROUGH_2, 15, dz + EPS2]);
+        }
     }
 
     if (bridge) {

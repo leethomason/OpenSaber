@@ -12,7 +12,7 @@ DZ_POWER = 14;
 
 Y_POWER = -yAtX(DX_POWER/2, D_AFT/2) + 1;
 
-if (false) {
+if (true) {
     difference() {
         pcbHolder(D_AFT, 
                 4, 
@@ -32,6 +32,9 @@ if (false) {
             cube(size=[DX_POWER, DY_POWER, DZ_POWER]);
         }
     }
+    color("green") rotate([-30, 0, 0]) translate([-27/2, -4, 3]) 
+        cube(size=[27, 2, 20]);
+    
     intersection() {
         cylinder(h=DZ_PCB, d=D_AFT);
         union() {
@@ -44,7 +47,7 @@ if (false) {
     }
 }
 
-if (true) {
+if (false) {
     EXTRA_BAFFLE = 2;
     N_BAFFLES = nBafflesNeeded(H_BUTTRESS);
     N = N_BAFFLES + 1;
@@ -58,12 +61,15 @@ if (true) {
                     battery=false,
                     mc=false,
                     bridge=(i < N-1),
-                    scallop=false
+                    scallop=false,
+                    cutout=false
                 );
             }
         }
         translate([0, 0, DZ_PCB]) 
             battery(D_AFT);
+        translate([-10, -20, 0])
+            cube(size=[20, 16, 120]);
     }
     DZAFT = (2*N - 1) * H_BUTTRESS;
     *translate([0, 0, DZ_PCB]) intersection() {
