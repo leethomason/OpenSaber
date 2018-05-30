@@ -559,12 +559,13 @@ module pcbPillar() {
     mount: array of:
         x location, z location, "pillar" or "buttress"
 */
-module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount)
+module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount, makeSection=true)
 {
     difference() 
     {
         union() {
-            tube(h=dz, do=outer, di=outer-t);
+            if (makeSection)
+               tube(h=dz, do=outer, di=outer-t);
 
             intersection() {
                 cylinder(h=dz, d=outer);
