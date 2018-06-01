@@ -32,7 +32,7 @@ module key(out)
     }
 }
 
-if (true) {
+if (false) {
     difference() {
         intersection() {
             cylinder(h=DZ_PCB, d=D_AFT);
@@ -40,7 +40,7 @@ if (true) {
                 tube(h=DZ_PCB, do=D_AFT, di=D_AFT - 4);
                 
                 translate([0, Y_TWEAK, 0]) rotate([ROT, 0, 0]) 
-                pcbHolder(D_AFT, 
+                pcbHolder(0, 
                         4, 
                         DZ_PCB,   // dz
                         Z_OFFSET,    // dz to pcb
@@ -83,6 +83,9 @@ if (true) {
                 cube(size=[4, DY_POWER, DZ_POWER]);
             mirror([1,0,0]) translate([DX_POWER/2, Y_POWER, 0]) 
                 cube(size=[4, DY_POWER, DZ_POWER]);
+            
+            translate([-10, Y_POWER, DZ_POWER])
+                cube(size=[20, 1, 2]);
         }
     }
     

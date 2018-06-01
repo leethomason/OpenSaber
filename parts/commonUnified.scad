@@ -138,15 +138,27 @@ module battery(outer) {
 }
 
 
+DOTSTAR_XZ = 5.6;
+DOTSTAR_PITCH = 7;
+// FIXME: correct values for strip size.
+DOTSTAR_STRIP_XZ = 8;
+
 module dotstarLED(n, dy)
 {
-    DOTSTAR_XZ = 5.4;
-    DOTSTAR_PITCH = 7;
-
     for(i=[0:n-1]) {
         translate([-DOTSTAR_XZ/2, 0, DOTSTAR_PITCH*i - DOTSTAR_XZ/2]) {
             cube(size=[DOTSTAR_XZ, dy, DOTSTAR_XZ]);
         }
+    }
+}
+
+
+module dotstarStrip(n, y0=0, y1=1)
+{
+    translate([-DOTSTAR_STRIP_XZ/2, y0, -DOTSTAR_STRIP_XZ/2]) {
+        cube(size=[ DOTSTAR_STRIP_XZ, 
+                    y1 - y0,
+                    DOTSTAR_STRIP_XZ + DOTSTAR_PITCH * (n-1)]);
     }
 }
 
@@ -312,7 +324,7 @@ module oneBaffle(   d,
                     scallop=false,
                     cutout=true)
 {
-    yMC = -yAtX(X_MC/2, d/2) + 0.7;
+    yMC = -yAtX(X_MC/2, d/2) + 1.0;
 
     difference() {
         cylinder(h=dz, d=d + dExtra);
@@ -550,7 +562,7 @@ module pcbPillar() {
 }
 
 /*
-    outer: diameter of the saber 
+    outer: diameter of the saber. If 0, not clipped.
     t: thickness of the wall
     dz: length of the section
     dzToPCB: delta to where the pcb start
@@ -558,6 +570,8 @@ module pcbPillar() {
     size[3]: outer size of the pcb
     mount: array of:
         x location, z location, "pillar" or "buttress"
+    makeSection: if true, this is a section of the saber, else
+                 just the basic parts are generated.
 */
 module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount, makeSection=true)
 {
@@ -568,7 +582,7 @@ module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount, makeSection=true)
                tube(h=dz, do=outer, di=outer-t);
 
             intersection() {
-                cylinder(h=dz, d=outer);
+                cylinder(h=dz, d=outer ? outer : 100);
 
                 color("plum") union() {
                     for(m = mount) {
@@ -576,17 +590,14 @@ module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount, makeSection=true)
                         z = m[1];
                         type = m[2];
                         translate([x, dyPCB, dzToPCB + z]) 
-                        //translate([0, dyPCB, dzToPCB + z]) 
                         {
                             if (type == "pillar") {
                                 pcbPillar();
                             }
                             else if (type == "buttress") {
                                 shouldMirror = x < 0;
-                                //echo("shouldMirror", shouldMirror);
                                 if (shouldMirror)
-                                    mirror([1,0,0])
-                                        pcbButtress();
+                                    mirror([1,0,0]) pcbButtress();
                                 else
                                     pcbButtress();
                             }
