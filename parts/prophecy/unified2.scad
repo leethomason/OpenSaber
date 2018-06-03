@@ -7,7 +7,7 @@ EPS = 0.01;
 EPS2 = EPS * 2;
 
 DRAW_AFT = true;
-DRAW_FRONT = false;
+DRAW_FRONT = true;
 
 T = 4;
 JUNCTION = 6;
@@ -53,6 +53,12 @@ if (DRAW_FRONT) {
             DZ = M_TRANSITION - M_BAFFLE_FRONT;
             tube(h=DZ, do=D_AFT, di=D_AFT - T);
             cylinderKeyJoint(JUNCTION);
+
+            // Aesthetics and vents
+            for(r=[0:3])
+                rotate([0, 0, 90*r])
+                    translate([0, 0, 12])
+                        capsule(-20, 20, 3);
         }
     }
 
@@ -102,5 +108,13 @@ if (DRAW_FRONT) {
 
         translate([0, 0, M_SWITCH_CENTER])
             switch(D_FORWARD, true);
+
+        translate([0, 0, M_TRANSITION + 8]) {
+            rotate([0, 0, 180]) zCapsule(10, 3);
+        }
+        translate([0, 0, M_TRANSITION + 32]) {
+            rotate([0, 0, 180]) zCapsule(10, 3);
+        }
     }
 }
+

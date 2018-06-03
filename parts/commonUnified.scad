@@ -58,6 +58,14 @@ module capsule(theta0, theta1, r=2, _mirror=false)
     }
 }
 
+module zCapsule(dz, r)
+{
+    hull() {
+        rotate([-90, 0, 0]) cylinder(h=20, r=r);
+        translate([0, 0, dz]) rotate([-90, 0, 0]) cylinder(h=20, r=r);
+    }
+}
+
 module columnY(dx, dyFrom0, dz, diameter, baseDX=0, baseDZ=0)
 {
     intersection() {
