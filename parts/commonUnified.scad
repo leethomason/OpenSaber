@@ -96,8 +96,19 @@ module cylinderKeyJoint(dz, do, di, trim)
     path = [
         [X0, 0], [X1, Y], [X1, -Y]
     ];
-    polygonXY(dz, path);
-    mirror([1,0,0]) polygonXY(dz, path);
+    path2 = [
+        [X1, 0], [X0, Y], [X0, -Y]
+    ];
+    R = 22;
+    intersection() {
+        tube(h=dz, do=do, di=di); 
+        union() {
+            rotate([0, 0, -R]) polygonXY(dz - trim, path);
+            rotate([0, 0,  R]) polygonXY(dz - trim, path2);
+            mirror([1,0,0]) rotate([0, 0,  -R]) polygonXY(dz - trim, path);
+            mirror([1,0,0]) rotate([0, 0,   R]) polygonXY(dz - trim, path2);
+        }       
+    }
 }
 
 

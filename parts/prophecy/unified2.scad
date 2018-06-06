@@ -6,11 +6,11 @@ $fn = 90;
 EPS = 0.01;
 EPS2 = EPS * 2;
 
-DRAW_AFT = true;
-DRAW_FRONT = false;
+DRAW_AFT   = false;
+DRAW_FRONT = true;
 
 T = 4;
-JUNCTION = 6;
+JUNCTION = 4;
 EXTRA_BAFFLE = 2;
 N_BAFFLES = nBafflesNeeded(H_BUTTRESS);
 M_BAFFLE_FRONT = zLenOfBaffles(N_BAFFLES, H_BUTTRESS) + M_POMMEL_FRONT + EXTRA_BAFFLE;
@@ -25,10 +25,7 @@ if (DRAW_AFT) {
     }
 
     translate([0, 0, M_BAFFLE_FRONT]) {
-        intersection() {
-            tube(JUNCTION, do=D_AFT, di=D_AFT - T);
-            cylinderKeyJoint(JUNCTION, D_AFT, D_AFT - T, 0.5);
-        }
+        cylinderKeyJoint(JUNCTION, D_AFT, D_AFT - T, 0.2);
     }
 }
 
@@ -52,7 +49,8 @@ if (DRAW_FRONT) {
             W = 14;
             DZ = M_TRANSITION - M_BAFFLE_FRONT;
             tube(h=DZ, do=D_AFT, di=D_AFT - T);
-            cylinderKeyJoint(JUNCTION, D_AFT, D_AFT-T, 0);
+            translate([0, 0, -EPS])
+                cylinderKeyJoint(JUNCTION + EPS, D_AFT, D_AFT-T, 0);
 
             // Aesthetics and vents
             for(r=[0:3])
@@ -117,4 +115,3 @@ if (DRAW_FRONT) {
         }
     }
 }
-
