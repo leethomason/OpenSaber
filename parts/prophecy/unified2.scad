@@ -7,7 +7,7 @@ EPS = 0.01;
 EPS2 = EPS * 2;
 
 DRAW_AFT = true;
-DRAW_FRONT = true;
+DRAW_FRONT = false;
 
 T = 4;
 JUNCTION = 6;
@@ -27,7 +27,7 @@ if (DRAW_AFT) {
     translate([0, 0, M_BAFFLE_FRONT]) {
         intersection() {
             tube(JUNCTION, do=D_AFT, di=D_AFT - T);
-            cylinderKeyJoint(JUNCTION - 0.5);
+            cylinderKeyJoint(JUNCTION, D_AFT, D_AFT - T, 0.5);
         }
     }
 }
@@ -52,7 +52,7 @@ if (DRAW_FRONT) {
             W = 14;
             DZ = M_TRANSITION - M_BAFFLE_FRONT;
             tube(h=DZ, do=D_AFT, di=D_AFT - T);
-            cylinderKeyJoint(JUNCTION);
+            cylinderKeyJoint(JUNCTION, D_AFT, D_AFT-T, 0);
 
             // Aesthetics and vents
             for(r=[0:3])
@@ -100,7 +100,7 @@ if (DRAW_FRONT) {
         rotate([0, 0, 90])
             translate([0, 0, M_DOTSTAR]) {
                 dotstarLED(4, 20);    
-                dotstarStrip(4, 0, 11.5);
+                dotstarStrip(4.2, 0, 11.5);
             }
 
         translate([0, 0, M_PORT_CENTER])

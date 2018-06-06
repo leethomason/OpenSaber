@@ -86,11 +86,13 @@ module columnY(dx, dyFrom0, dz, diameter, baseDX=0, baseDZ=0)
     secure. Problematic is that it click together on the y
     axis so it's hard to run the wires.
 */
-module cylinderKeyJoint(dz)
+module cylinderKeyJoint(dz, do, di, trim)
 {
-    X0 = 18;
-    X1 = 10;
+    X0 = do/2 + 4;;
+    X1 = di/2 - 6;
     Y  = 7;
+    T = (di - di)/2;
+
     path = [
         [X0, 0], [X1, Y], [X1, -Y]
     ];
