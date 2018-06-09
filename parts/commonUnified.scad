@@ -27,21 +27,10 @@ Z_CRYSTAL           =  30.0;
 
 D_M2                = 1.7;
 
-OLED_R_DISPLAY_THREAD = 0.8; // M2 bolt, 2mm head
-OLED_DEPTH_DISPLAY_THREAD = 4;
-OLED_DISPLAY_W           = 23 + 1;
-OLED_DISPLAY_L           = 32 + 1;
-OLED_DISPLAY_MOUNT_W     = 17;
-OLED_DISPLAY_MOUNT_L     = 26;
-OLED_DY                  = -4;  // offset how far the holes/solder points
-                                // should be under the case. mesaured from y=0 on model.
-
 EPS = 0.01;
 EPS2 = EPS * 2;
 
 // Math ------------
-OLED_DISPLAY_INNER_W = (OLED_DISPLAY_W - OLED_DISPLAY_MOUNT_W)/2;
-OLED_DISPLAY_INNER_L = (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L)/2;
 
 function yAtX(x, r) = sqrt(r*r - x*x);
 
@@ -263,48 +252,6 @@ module speakerStd28(bass)
     }
 }
 
-module oledDisplayBolt() 
-{
-    // Pins are challenging to print small & accurate.
-    // Trying holes for M2 bolts instead.
-    translate([0, -OLED_DEPTH_DISPLAY_THREAD, 0]) {
-        rotate([-90, 0, 0]) cylinder(r=OLED_R_DISPLAY_THREAD, h=20);
-    }
-}
-
-module oledDisplayBolts()
-{
-    translate([OLED_DISPLAY_INNER_W, 0, OLED_DISPLAY_INNER_L])                            
-        oledDisplayBolt();
-    translate([OLED_DISPLAY_W - OLED_DISPLAY_INNER_W, 0, OLED_DISPLAY_INNER_L])                 
-        oledDisplayBolt();
-    translate([OLED_DISPLAY_W - OLED_DISPLAY_INNER_W, 0, OLED_DISPLAY_L - OLED_DISPLAY_INNER_L])    
-        oledDisplayBolt();
-    translate([OLED_DISPLAY_INNER_W, 0, OLED_DISPLAY_L - OLED_DISPLAY_INNER_L])                
-        oledDisplayBolt();
-}
-
-
-module oledDisplay()
-{
-    color("violet") translate([-OLED_DISPLAY_W/2, 0, 0]) {
-        cube(size=[OLED_DISPLAY_W, 10, OLED_DISPLAY_L]);
-        oledDisplayBolts();
-        
-        translate([0, -1, 6]) {
-            cube(size=[OLED_DISPLAY_W, 1, OLED_DISPLAY_L - 12]);
-        }
-    }
-    color("plum") translate([0, 0, 0]) {
-        X_CABLE = 12;
-        Y_CABLE = 2;
-        Z_CABLE = 3 + 1;    // cheat so we don't get a super thin piece in the locking ring.
-        translate([-X_CABLE/2, -Y_CABLE, -Z_CABLE]) {
-            cube(size=[X_CABLE, 10, Z_CABLE + 7]);
-        }
-    }    
-}
-
 // Intermediate parts -----------------
 
 module baffleHalfBridge(dz, t)
@@ -523,46 +470,6 @@ module baffleMCBattery( outer,          // outer diameter
     }
 }
 
-
-module oledColumn(outer)
-{
-    translate([0,0,-2]) {
-        polygonXY(4, [[-2,0], [-2,-2], [14,-20], [14,0]]);
-    } 
-}
-
-
-module oledHolder(outer, t, dz, dzToOled)
-{
-    yDisplay = yAtX((OLED_DISPLAY_W - OLED_DISPLAY_MOUNT_W)/2, outer/2) + OLED_DY;
-
-    difference() 
-    {
-        union() {
-            tube(h=dz, do=outer, di=outer-t);
-
-            intersection() {
-                cylinder(h=dz, d=outer);
-
-                color("plum") union() {
-                    translate([OLED_DISPLAY_W/2 - OLED_DISPLAY_INNER_W, yDisplay, dzToOled + OLED_DISPLAY_INNER_L])
-                        oledColumn();
-                    translate([-OLED_DISPLAY_W/2 + OLED_DISPLAY_INNER_W, yDisplay, dzToOled + OLED_DISPLAY_INNER_L])
-                        mirror([1,0,0]) oledColumn();
-                    translate([OLED_DISPLAY_W/2 - OLED_DISPLAY_INNER_W, yDisplay, dzToOled + OLED_DISPLAY_L - OLED_DISPLAY_INNER_L])
-                        oledColumn();
-                    translate([-OLED_DISPLAY_W/2 + OLED_DISPLAY_INNER_W, yDisplay, dzToOled + OLED_DISPLAY_L - OLED_DISPLAY_INNER_L])
-                        mirror([1,0,0]) oledColumn();                    
-                }
-            }
-        }
-        translate([0, yDisplay, dzToOled]) 
-            oledDisplay();
-        translate([0, -4, dzToOled + 6])
-            cube(size=[50, 50, OLED_DISPLAY_W - 3]);
-    }
-}
-
 module pcbButtress()
 {    
     BUTTRESS_T = 5;
@@ -631,4 +538,21 @@ module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount, makeSection=true)
         translate([-size[0]/2, dyPCB, dzToPCB]) 
             cube(size=[size[0], size[1], size[2]]);
     }
+}
+
+OLED_DISPLAY_W           = 23 + 1;
+OLED_DISPLAY_L           = 32 + 1;
+OLED_DISPLAY_MOUNT_W     = 17;
+OLED_DISPLAY_MOUNT_L     = 26;
+
+module oledHolder(outer, t, dz, dzToPCB, dyPCB)
+{
+    pcbHolder(outer, t, dz, dzToPCB, dyPCB, 
+              [OLED_DISPLAY_W, 20, OLED_DISPLAY_L],
+              [
+                [-OLED_DISPLAY_MOUNT_W/2, (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L)/2, "buttress" ],
+                [ OLED_DISPLAY_MOUNT_W/2, (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L)/2, "buttress" ],
+                [-OLED_DISPLAY_MOUNT_W/2, OLED_DISPLAY_MOUNT_L + (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L)/2, "buttress" ],
+                [ OLED_DISPLAY_MOUNT_W/2, OLED_DISPLAY_MOUNT_L + (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L)/2, "buttress" ]
+              ]);
 }

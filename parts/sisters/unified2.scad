@@ -6,7 +6,7 @@ $fn = 90;
 EPS = 0.01;
 EPS2 = EPS * 2;
 
-DRAW_AFT = true;
+DRAW_AFT = false;
 DRAW_FRONT = true;
 
 D_HEAT_SINK_THREAD = 20.2;  // 20.4 is loose (PHA), 20.1 tight (PLA)
@@ -27,10 +27,7 @@ if (DRAW_AFT) {
     }
 
     translate([0, 0, M_BAFFLE_FRONT]) {
-        intersection() {
-            tube(JUNCTION, do=D_AFT, di=D_AFT - T);
-            cylinderKeyJoint(JUNCTION - 0.5);
-        }
+        cylinderKeyJoint(JUNCTION, D_AFT, D_AFT - T, 0.5);
     }
 }
 
@@ -50,11 +47,13 @@ module heatSink()
 if (DRAW_FRONT) {
     // Transition part; in the aft section
     translate([0, 0, M_BAFFLE_FRONT]) {
-        difference() {
+        difference() 
+        {
             W = 14;
             DZ = M_TRANSITION - M_BAFFLE_FRONT;
             tube(h=DZ, do=D_AFT, di=D_AFT - T);
-            cylinderKeyJoint(JUNCTION);
+            // Doesn't fit: oledHolder(D_AFT, T, DZ, 1, 7);
+            cylinderKeyJoint(JUNCTION, D_AFT, D_AFT - T, 0);
         }
     }
 
