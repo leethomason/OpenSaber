@@ -6,8 +6,8 @@ $fn = 90;
 EPS = 0.01;
 EPS2 = EPS * 2;
 
-DRAW_AFT   = true;
-DRAW_FRONT = false;
+DRAW_AFT   = false;
+DRAW_FRONT = true;
 
 T = 4;
 JUNCTION = 4;
@@ -75,8 +75,14 @@ if (DRAW_FRONT) {
             heatSink();
 
             // The front body
-            translate([0, 0, M_TRANSITION]) 
+            translate([0, 0, M_TRANSITION])
                 tube(h=DZ, do=D_FORWARD, di=D_FORWARD_INNER);
+
+            intersection() {
+                cylinder(h=H_FAR, d=D_FORWARD);
+                translate([-10, D_FORWARD/2 - 5, M_TRANSITION - OVERLAP])
+                    cube(size=[20, 10, M_LED_HOLDER_BACK - M_TRANSITION + OVERLAP]);
+            }
 
             // overlap ring
             translate([0, 0, M_TRANSITION - OVERLAP]) {
@@ -95,10 +101,14 @@ if (DRAW_FRONT) {
             }
         }
 
+        // Bottom power port access
+        translate([0, 0, M_PORT_CENTER]) rotate([90, 0, 0])
+            cylinder(h=20, d=12);
+
         rotate([0, 0, 90])
             translate([0, 0, M_DOTSTAR]) {
                 dotstarLED(4, 20);    
-                dotstarStrip(4.2, 0, 11.5);
+                dotstarStrip(4, 0, 10.8);
             }
 
         translate([0, 0, M_PORT_CENTER])

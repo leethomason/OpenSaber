@@ -88,7 +88,7 @@ module cylinderKeyJoint(dz, do, di, trim)
     path2 = [
         [X1, 0], [X0, Y], [X0, -Y]
     ];
-    R = 22;
+    R = 26;
     intersection() {
         tube(h=dz, do=do, di=di); 
         union() {
@@ -150,8 +150,7 @@ module battery(outer) {
 
 DOTSTAR_XZ = 5.6;
 DOTSTAR_PITCH = 7;
-// FIXME: correct values for strip size.
-DOTSTAR_STRIP_XZ = 8;
+DOTSTAR_STRIP_XZ = 12.4;
 
 module dotstarLED(n, dy)
 {
