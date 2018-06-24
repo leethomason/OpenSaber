@@ -77,26 +77,12 @@ module columnY(dx, dyFrom0, dz, diameter, baseDX=0, baseDZ=0)
 */
 module cylinderKeyJoint(dz, do, di, trim)
 {
-    X0 = do/2 + 4;;
-    X1 = di/2 - 6;
-    Y  = 7;
-    T = (di - di)/2;
+    RATIO = 0.15; 
 
-    path = [
-        [X0, 0], [X1, Y], [X1, -Y]
-    ];
-    path2 = [
-        [X1, 0], [X0, Y], [X0, -Y]
-    ];
-    R = 22;
     intersection() {
-        tube(h=dz, do=do, di=di); 
-        union() {
-            rotate([0, 0, -R]) polygonXY(dz - trim, path);
-            rotate([0, 0,  R]) polygonXY(dz - trim, path2);
-            mirror([1,0,0]) rotate([0, 0,  -R]) polygonXY(dz - trim, path);
-            mirror([1,0,0]) rotate([0, 0,   R]) polygonXY(dz - trim, path2);
-        }       
+        tube(h=dz - trim, do=do, di=di);
+        translate([-do, -do*RATIO, 0])
+            cube(size=[do*2.0, do*RATIO*2, dz]);
     }
 }
 

@@ -16,16 +16,16 @@ N_BAFFLES = nBafflesNeeded(H_BUTTRESS);
 M_BAFFLE_FRONT = zLenOfBaffles(N_BAFFLES, H_BUTTRESS) + M_POMMEL_FRONT + EXTRA_BAFFLE;
 
 if (DRAW_AFT) {
-    translate([0, 0, M_POMMEL_FRONT]) {
-        baffleMCBattery(D_AFT, N_BAFFLES, H_BUTTRESS, D_AFT_RING, 5.5, EXTRA_BAFFLE);
+    difference() {
+        translate([0, 0, M_POMMEL_FRONT]) {
+            baffleMCBattery(D_AFT, N_BAFFLES, H_BUTTRESS, D_AFT_RING, 5.5, EXTRA_BAFFLE);
+        }
+        translate([0, 0, M_BAFFLE_FRONT - JUNCTION]) {
+            cylinderKeyJoint(JUNCTION + EPS, D_AFT + EPS, D_AFT - T, 0);
+        }
     }
-
     translate([0, 0, M_POMMEL_BACK]) {
         speakerHolder(D_POMMEL, M_POMMEL_FRONT - M_POMMEL_BACK, 2, "bass28");
-    }
-
-    translate([0, 0, M_BAFFLE_FRONT]) {
-        cylinderKeyJoint(JUNCTION, D_AFT, D_AFT - T, 0.2);
     }
 }
 
@@ -49,8 +49,6 @@ if (DRAW_FRONT) {
             W = 14;
             DZ = M_TRANSITION - M_BAFFLE_FRONT;
             tube(h=DZ, do=D_AFT, di=D_AFT - T);
-            translate([0, 0, -EPS])
-                cylinderKeyJoint(JUNCTION + EPS, D_AFT, D_AFT-T, 0);
 
             // Aesthetics and vents
             for(r=[0:3])
@@ -59,6 +57,9 @@ if (DRAW_FRONT) {
                         capsule(-20, 20, 3);
         }
     }
+
+    translate([0, 0, M_BAFFLE_FRONT - JUNCTION])
+        cylinderKeyJoint(JUNCTION, D_AFT, D_AFT-T, 0.1);
 
     // The adjustment to the inner radius
     // is so the dotstars can fit beside the heat
