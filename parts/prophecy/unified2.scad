@@ -43,6 +43,7 @@ module heatSink()
 
 
 if (DRAW_FRONT) {
+    
     // Transition part; in the aft section
     translate([0, 0, M_BAFFLE_FRONT]) {
         difference() {
@@ -65,7 +66,10 @@ if (DRAW_FRONT) {
     // is so the dotstars can fit beside the heat
     // sink thread. But since the dotstars live in 
     // an inset strip now, this can be larger.
-    D_FORWARD_INNER = D_FORWARD - T;
+
+    // In theory, di=D_AFT - T. But that results
+    // in weird extra supports when printing.
+    D_FORWARD_INNER = D_HEAT_SINK_THREAD;
 
     OVERLAP = 4;
 
@@ -76,8 +80,14 @@ if (DRAW_FRONT) {
             heatSink();
 
             // The front body
-            translate([0, 0, M_TRANSITION]) 
+            translate([0, 0, M_TRANSITION])
                 tube(h=DZ, do=D_FORWARD, di=D_FORWARD_INNER);
+
+            intersection() {
+                cylinder(h=H_FAR, d=D_FORWARD);
+                translate([-10, D_FORWARD/2 - 5, M_TRANSITION - OVERLAP])
+                    cube(size=[20, 10, M_LED_HOLDER_BACK - M_TRANSITION + OVERLAP]);
+            }
 
             // overlap ring
             translate([0, 0, M_TRANSITION - OVERLAP]) {
@@ -92,14 +102,18 @@ if (DRAW_FRONT) {
                 cube(size=[50, H, M_LED_HOLDER_BACK - M_TRANSITION + OVERLAP]);
                 mirror([1,0,0])
                 // Move this up so that there is space for the dotstar connector.
-                cube(size=[50, H, 31 + OVERLAP]);
+                cube(size=[50, H, 32 + OVERLAP]);
             }
         }
+
+        // Bottom power port access
+        translate([0, 0, M_PORT_CENTER]) rotate([90, 0, 0])
+            cylinder(h=20, d=12);
 
         rotate([0, 0, 90])
             translate([0, 0, M_DOTSTAR]) {
                 dotstarLED(4, 20);    
-                dotstarStrip(4.2, 0, 11.5);
+                dotstarStrip(3.8, 0, 10.8);
             }
 
         translate([0, 0, M_PORT_CENTER])

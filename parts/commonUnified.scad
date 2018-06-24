@@ -78,7 +78,6 @@ module columnY(dx, dyFrom0, dz, diameter, baseDX=0, baseDZ=0)
 module cylinderKeyJoint(dz, do, di, trim)
 {
     RATIO = 0.15; 
-
     intersection() {
         tube(h=dz - trim, do=do, di=di);
         translate([-do, -do*RATIO, 0])
@@ -136,8 +135,7 @@ module battery(outer) {
 
 DOTSTAR_XZ = 5.6;
 DOTSTAR_PITCH = 7;
-// FIXME: correct values for strip size.
-DOTSTAR_STRIP_XZ = 8;
+DOTSTAR_STRIP_XZ = 12.4;
 
 module dotstarLED(n, dy)
 {
