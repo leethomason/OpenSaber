@@ -109,8 +109,10 @@ bool CMDParser::push(int c)
         return false;
     }
     else {
+        //Serial.println(c);
         bool processed = false;
         if (c == '\n') {
+            //Serial.println("process");
             processed = processCMD();
         }
         else {

@@ -204,6 +204,38 @@ void writeHex(const uint8_t* color3, CStr<6>* str);
 
 bool TestHex();
 
+template<int CAP>
+class CQueue
+{
+public:
+    CQueue() {}
+
+    void push(int val) {
+        ASSERT(len < CAP);
+        int index = (head + len) % CAP;
+        data[index] = val;
+        ++len;
+    }
+
+    int pop() {
+        ASSERT(len > 0);
+        int result = data[head];
+        head = (head + 1) % CAP;
+        --len;
+        return result;
+    }
+
+    int empty() const { return len == 0; }
+
+private:
+    int len = 0;
+    int head = 0;
+    int data[CAP];
+};
+
+
+bool TestCQueue();
+
 // --- Range / Min / Max --- //
 template<class T>
 bool inRange(const T& a, const T& b, const T& c) {

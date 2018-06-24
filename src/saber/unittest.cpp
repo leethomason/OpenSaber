@@ -20,6 +20,7 @@ bool runUnitTests()
 	RUN_TEST(DotStarUI::Test);
     RUN_TEST(TestCrystalColor);
 	RUN_TEST(TestCStr);
+    RUN_TEST(TestCQueue);
 
 	//RUN_TEST(FailTest);
 

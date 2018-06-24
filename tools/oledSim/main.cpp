@@ -55,13 +55,6 @@ int main(int, char**) {
 	data.mVolts = 3219;
 	data.fontName = "Bespin";
 
-    /*
-	Timer2::Test();
-	DotStarUI::Test();
-	TestCStr();
-	TestHex();
-	TestUtil();
-    */
     runUnitTests();
 
 	SDL_Event e;
