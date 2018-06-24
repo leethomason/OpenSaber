@@ -324,6 +324,31 @@ bool TestHex()
 	return true;
 }
 
+
+bool TestCQueue()
+{
+    CQueue<4> queue;
+    TEST_IS_TRUE(queue.empty());
+    queue.push(1);
+    queue.push(2);
+    int r = queue.pop();
+    TEST_IS_EQ(r, 1);
+    TEST_IS_FALSE(queue.empty());
+    queue.push(3);
+    queue.push(4);
+    queue.push(5);
+    r = queue.pop();
+    TEST_IS_EQ(r, 2);
+    queue.push(6);
+    TEST_IS_EQ(queue.pop(), 3);
+    TEST_IS_EQ(queue.pop(), 4);
+    TEST_IS_EQ(queue.pop(), 5);
+    TEST_IS_EQ(queue.pop(), 6);
+    TEST_IS_TRUE(queue.empty());
+    return true;
+}
+
+
 int Timer2::tick(uint32_t delta)
 {
 	int fires = 0;

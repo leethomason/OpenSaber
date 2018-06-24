@@ -473,6 +473,13 @@ Pixel_7_5_UI::Pixel_7_5_UI()
 {
 }
 
+/*
+    ...X...
+    .X.X.X.
+    X..X..X
+    XX.X.XX
+    .XXXXX.
+*/
 void Pixel_7_5_UI::Draw(uint32_t time, UIMode mode, bool bladeIgnited, const UIRenderData* data)
 {
 	for (int i = 0; i < NCOLS; ++i)
@@ -480,21 +487,25 @@ void Pixel_7_5_UI::Draw(uint32_t time, UIMode mode, bool bladeIgnited, const UIR
 
 	switch (mode) {
 	case UIMode::NORMAL:
-		getGlypth_tomThumb5('0' + data->palette, col);
+		getGlypth_tomThumb5('0' + data->palette, col + 4);
 
-		DrawBar(col + 4, data->power);
-		DrawBar(col + 6, data->volume);
+		DrawBar(col + 0, data->power);
+		DrawBar(col + 2, data->volume);
 		break;
 
 	case UIMode::PALETTE:
-		getGlypth_tomThumb5('P', col);
-		getGlypth_tomThumb5('0' + data->palette, col + 4);
-		break;
+        getGlypth_tomThumb5('0' + data->palette, col + 0);
+        DrawBar(col + 4, data->color.r / 56);
+        DrawBar(col + 5, data->color.g / 56);
+        DrawBar(col + 6, data->color.b / 56);
+        break;
 
 	case UIMode::VOLUME:
 		getGlypth_tomThumb5('V', col);
 		getGlypth_tomThumb5('0' + data->volume, col + 4);
-		break;
+        getGlypth_tomThumb5('0' + data->volume, col + 5);
+        getGlypth_tomThumb5('0' + data->volume, col + 6);
+        break;
 
 	default:
 		break;
