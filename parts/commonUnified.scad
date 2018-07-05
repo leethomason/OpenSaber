@@ -132,6 +132,22 @@ module battery(outer) {
     }
 }
 
+function dynamicHeatSinkThread() = 20.2;  // 20.4 is loose (PHA), 20.1 tight (PLA)
+
+module dynamicHeatSinkHolder(diameter)
+{
+    DZ = 10;
+    D_HEAT_SINK_THREAD = dynamicHeatSinkThread();
+
+    difference() {
+        cylinder(h=DZ, d=diameter);
+        cylinder(h=DZ + EPS, d=D_HEAT_SINK_THREAD);
+    }
+}
+
+
+
+
 
 DOTSTAR_XZ = 5.6;
 DOTSTAR_PITCH = 7;

@@ -9,8 +9,6 @@ EPS2 = EPS * 2;
 DRAW_AFT = false;
 DRAW_FRONT = true;
 
-D_HEAT_SINK_THREAD = 20.2;  // 20.4 is loose (PHA), 20.1 tight (PLA)
-
 T = 4;
 JUNCTION = 6;
 EXTRA_BAFFLE = 2;
@@ -31,18 +29,20 @@ if (DRAW_AFT) {
     }
 }
 
-
-module heatSink()
+module horn()
 {
-    DZ = M_LED_HOLDER_FRONT - M_LED_HOLDER_BACK;
-    translate([0, 0, M_LED_HOLDER_BACK]) {
+    translate([0, 0, M_TRANSITION]) {
         difference() {
-            cylinder(h=DZ, d=D_FORWARD);
-            cylinder(h=DZ + EPS, d=D_HEAT_SINK_THREAD);
+            translate([-HORN_WIDTH/2, R_FORWARD - 1, 0])
+                cube(size=[HORN_WIDTH, R_AFT - R_FORWARD, 2]);
+            translate([0, 0, M_PORT_CENTER - M_TRANSITION]) {
+                rotate([-90, 0, 0]) {
+                    cylinder(h=20, d=10.4);
+                }
+            }
         }
-    }
+    }    
 }
-
 
 if (DRAW_FRONT) {
     // Transition part; in the aft section
@@ -61,7 +61,7 @@ if (DRAW_FRONT) {
     // is so the dotstars can fit beside the heat
     // sink thread. But since the dotstars live in 
     // an inset strip now, this can be larger.
-    D_FORWARD_INNER = D_FORWARD - T;
+    D_FORWARD_INNER = dynamicHeatSinkThread();
 
     OVERLAP = 4;
 
@@ -69,7 +69,7 @@ if (DRAW_FRONT) {
         DZ = M_LED_HOLDER_FRONT - M_TRANSITION;
         union() {              
             // Front heatsink holder.
-            heatSink();
+            translate([0, 0, M_LED_HOLDER_BACK]) dynamicHeatSinkHolder(D_FORWARD);
 
             // The front body
             translate([0, 0, M_TRANSITION]) 
@@ -77,8 +77,10 @@ if (DRAW_FRONT) {
 
             // overlap ring
             translate([0, 0, M_TRANSITION - OVERLAP]) {
-                tube(h=OVERLAP, do=D_AFT, di=D_FORWARD - T);
+                tube(h=OVERLAP, do=D_AFT, di=D_FORWARD_INNER);
             }
+
+            horn();
         }
         
         // Side access.
@@ -91,12 +93,6 @@ if (DRAW_FRONT) {
                 cube(size=[50, H, 31 + OVERLAP]);
             }
         }
-
-        rotate([0, 0, 90])
-            translate([0, 0, M_DOTSTAR]) {
-                dotstarLED(4, 20);    
-                dotstarStrip(4, 0, 11.5);
-            }
 
         translate([0, 0, M_PORT_CENTER])
             port(true);

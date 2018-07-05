@@ -6,12 +6,9 @@ M_FORWARD_PCB       = M_TRANSITION + 14;
 M_DOTSTAR			= M_TRANSITION + 12;
 
 // Celestia
-M_PORT_CENTER       = M_TRANSITION + 6;
-
-/*
+//M_PORT_CENTER       = M_TRANSITION + 6;
 // Luna
 M_PORT_CENTER       = M_TRANSITION + 5.5; // Luna
-*/
 
 M_SPKR_RING			= 15.5;		// Front of the speaker ring.
 M_RAIL_START        = 12;
