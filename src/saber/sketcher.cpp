@@ -298,7 +298,6 @@ bool DotStarUI::Draw(RGB* led, UIMode mode, bool ignited, const UIRenderData& da
 			led[3].set(MED_3);
 		}
 		break;
-
 		}
 	}
 	bool black = true;
