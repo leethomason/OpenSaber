@@ -44,6 +44,7 @@ SOFTWARE.
 #define SABER_MODEL_AHSOKA		   12
 #define SABER_MODEL_GREEN_SKY	   13
 #define SABER_MODEL_TANO_2 		   14   // Shield v4, Teensy 3.5, Dotstar UI
+#define SABER_MODEL_SISTER_2	   14   // Shield v4, Teensy 3.5
 
 
 #define SABER_SUB_MODEL_NONE		0
@@ -53,8 +54,8 @@ SOFTWARE.
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_TANO_2
+#define SERIAL_DEBUG 				1
+#define SABER_MODEL 				SABER_MODEL_SISTER_2
 #define SABER_SUB_MODEL				SABER_SUB_MODEL_STANDARD
 // ----------------------------------
 
@@ -520,8 +521,37 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 	#define SABER_UI_BRIGHTNESS		8
 
-	static const int32_t UVOLT_MULT = 6734;		
+	static const int32_t UVOLT_MULT = 6780; // 6734;		
 	#define ID_STR "Tano V2 Cree XPE2 RGB"
+
+	// Actually GREEN
+	static const int32_t RED_VF   = 3400;   // milli-volts
+	static const int32_t RED_I    = 400;    // milli-amps
+	static const int32_t RED_R    = 4700;   // milli-ohms
+
+	static const int32_t GREEN_VF = 3400;
+	static const int32_t GREEN_I  = 400;
+	static const int32_t GREEN_R  = 1000;
+
+	static const int32_t BLUE_VF  = 3100;
+	static const int32_t BLUE_I   = 400;
+	static const int32_t BLUE_R   = 1800;
+
+	static const int VOLUME_1 = 15;
+	static const int VOLUME_2 = 50;
+	static const int VOLUME_3 = 120;
+	static const int VOLUME_4 = 200;
+#elif (SABER_MODEL == SABER_MODEL_SISTER_2)
+	#define PCB_VERSION 			PCB_SHIELD_4
+	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
+	#define SABER_SOUND_ON 			SABER_SOUND_SD
+	#define SABER_VOLTMETER
+	#define SABER_INTEGRATED_SD
+ 
+	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
+	
+	static const int32_t UVOLT_MULT = 6780; // 6734;		
+	#define ID_STR "Sisters V2 Cree XPE2 RGB"
 
 	// Actually GREEN
 	static const int32_t RED_VF   = 3400;   // milli-volts
