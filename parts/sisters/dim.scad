@@ -10,6 +10,7 @@ M_DOTSTAR			= M_TRANSITION + 12;
 // Luna
 M_PORT_CENTER       = M_TRANSITION + 5.5; // Luna
 
+M_DISPLAY_CENTER    = 100;      // To center of display
 M_SPKR_RING			= 15.5;		// Front of the speaker ring.
 M_RAIL_START        = 12;
 M_POMMEL_FRONT      = 10;       // Where the pommel becomes aft

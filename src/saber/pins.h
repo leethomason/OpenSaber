@@ -77,6 +77,7 @@ SOFTWARE.
 #define PCB_VERSION_9				9   // Split PCB. Prop shield. Teensy 3.5.
 #define PCB_SHIELD_2			   12	// Grinliz shield + Teensy 3.5
 #define PCB_SHIELD_3			   13	
+#define PCB_SHIELD_4			   14	
 
 static const int EEPROM_SIZE = 512;
 

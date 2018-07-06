@@ -29,21 +29,6 @@ if (DRAW_AFT) {
     }
 }
 
-module horn()
-{
-    translate([0, 0, M_TRANSITION]) {
-        difference() {
-            translate([-HORN_WIDTH/2, R_FORWARD - 1, 0])
-                cube(size=[HORN_WIDTH, R_AFT - R_FORWARD, 2]);
-            translate([0, 0, M_PORT_CENTER - M_TRANSITION]) {
-                rotate([-90, 0, 0]) {
-                    cylinder(h=20, d=10.4);
-                }
-            }
-        }
-    }    
-}
-
 if (DRAW_FRONT) {
     // Transition part; in the aft section
     translate([0, 0, M_BAFFLE_FRONT]) {
@@ -51,7 +36,28 @@ if (DRAW_FRONT) {
         {
             W = 14;
             DZ = M_TRANSITION - M_BAFFLE_FRONT;
-            tube(h=DZ, do=D_AFT, di=D_AFT - T);
+            //tube(h=DZ, do=D_AFT, di=D_AFT - T);
+
+            PCB_DX = 26.94;
+            CUT_DX = 18.0;
+            PCB_DZ = 19.32;  
+            CUT_DZ = 8;
+            TO_PCB = M_DISPLAY_CENTER - M_BAFFLE_FRONT - CUT_DZ / 2;
+            DZ_FIX = (CUT_DZ - PCB_DZ) / 2;
+
+            pcbHolder(  D_AFT, T, DZ,
+                        TO_PCB,
+                        4,
+                        [CUT_DX, 50, CUT_DZ],
+                        [
+                            [PCB_DX/2 -  2.04, DZ_FIX + 16.01, "buttress"],
+                            [PCB_DX/2 - 24.90, DZ_FIX + 16.01, "buttress"],
+                            [PCB_DX/2 -  2.04, DZ_FIX +  3.31, "buttress"],
+                            [PCB_DX/2 - 24.90, DZ_FIX +  3.31, "buttress"],
+                        ],
+                        holeAccess = true
+            );
+
             // Doesn't fit: oledHolder(D_AFT, T, DZ, 1, 7);
             cylinderKeyJoint(JUNCTION, D_AFT, D_AFT - T, 0);
         }
@@ -79,8 +85,6 @@ if (DRAW_FRONT) {
             translate([0, 0, M_TRANSITION - OVERLAP]) {
                 tube(h=OVERLAP, do=D_AFT, di=D_FORWARD_INNER);
             }
-
-            horn();
         }
         
         // Side access.
@@ -94,11 +98,15 @@ if (DRAW_FRONT) {
             }
         }
 
-        translate([0, 0, M_PORT_CENTER])
+        translate([0, 0, M_PORT_CENTER]) {
             port(true);
+            portCounter();
+        }
 
-        translate([0, 0, M_SWITCH_CENTER])
+        translate([0, 0, M_SWITCH_CENTER]) {
             switch(D_FORWARD, true);
+            switchCounter();
+        }
     }
 }
 

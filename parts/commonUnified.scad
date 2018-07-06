@@ -198,6 +198,16 @@ module switch(outer, extend=false)
 }
 
 
+module switchCounter()
+{
+    color("yellow") {
+        rotate([90, 0, 0]) {
+            cylinder(h=30, d=12);
+        }
+    }
+}
+
+
 module mc(cutoutLow=false)
 {
     color("aqua") {
@@ -221,6 +231,14 @@ module port(extend=false)
     H = extend ? 30 : 21;
     rotate([-90, 0, 0]) {
         cylinder(h=H, d=D_PORT);
+    }
+}
+
+module portCounter()
+{
+    H = 30;
+    rotate([90, 0, 0]) {
+        cylinder(h=H, d=12);
     }
 }
 
@@ -500,8 +518,10 @@ module pcbPillar() {
         x location, z location, "pillar" or "buttress"
     makeSection: if true, this is a section of the saber, else
                  just the basic parts are generated.
+    sizePad: pad the size to make it fit more easily
 */
-module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount, makeSection=true)
+module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount, 
+    makeSection=true, sizePad=0, holeAccess=false)
 {
     difference() 
     {
@@ -510,7 +530,7 @@ module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount, makeSection=true)
                tube(h=dz, do=outer, di=outer-t);
 
             intersection() {
-                cylinder(h=dz, d=outer ? outer : 100);
+                translate([0, 0, -20]) cylinder(h=dz+40, d=outer ? outer : 100);
 
                 color("plum") union() {
                     for(m = mount) {
@@ -535,8 +555,17 @@ module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount, makeSection=true)
                 }
             }
         }
-        translate([-size[0]/2, dyPCB, dzToPCB]) 
-            cube(size=[size[0], size[1], size[2]]);
+        translate([-size[0]/2 - sizePad, dyPCB, dzToPCB - sizePad]) 
+            cube(size=[size[0] + 2 * sizePad, size[1], size[2] + 2 * sizePad]);
+        if (holeAccess == true) {
+            for(m = mount) {
+                x = m[0];
+                z = m[1];
+                translate([x, dyPCB, dzToPCB + z]) 
+                    rotate([-90, 0, 0])
+                        cylinder(h=50, d=4);
+            }
+        }
     }
 }
 
