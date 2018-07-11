@@ -41,7 +41,7 @@ if (DRAW_FRONT) {
             PCB_DX = 26.94;
             CUT_DX = 18.0;
             PCB_DZ = 19.32;  
-            CUT_DZ = 8;
+            CUT_DZ = 12;
             TO_PCB = M_DISPLAY_CENTER - M_BAFFLE_FRONT - CUT_DZ / 2;
             DZ_FIX = (CUT_DZ - PCB_DZ) / 2;
 
@@ -60,6 +60,10 @@ if (DRAW_FRONT) {
 
             // Doesn't fit: oledHolder(D_AFT, T, DZ, 1, 7);
             cylinderKeyJoint(JUNCTION, D_AFT, D_AFT - T, 0);
+
+            for(i=[0:3]) {
+                translate([0, 0, M_DISPLAY_CENTER - M_BAFFLE_FRONT + 6 - i*6]) capsule(-160, 160);
+            }
         }
     }
 
