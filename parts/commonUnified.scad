@@ -208,11 +208,17 @@ module switchCounter()
 }
 
 
-module mc(cutoutLow=false)
+module mc(widePart=0)
 {
     color("aqua") {
         translate([-X_MC/2, 0, 0])
             cube(size=[X_MC, Y_MC, Z_MC]);
+    
+        Y_OFFSET = 4;
+        if (widePart > 0) {
+            translate([-widePart/2, Y_OFFSET, 0])
+                cube(size=[widePart, Y_MC - Y_OFFSET, Z_MC]);
+        }
     }
 }
 
@@ -308,7 +314,8 @@ module oneBaffle(   d,
                     mcSpace=false,
                     dExtra=0,
                     scallop=false,
-                    cutout=true)
+                    cutout=true,
+                    mcWide=0)
 {
     yMC = -yAtX(X_MC/2, d/2) + 1.0;
 
@@ -318,7 +325,7 @@ module oneBaffle(   d,
             battery(d);
         if (mc) {
             translate([0, yMC, -EPS]) 
-                mc();
+                mc(widePart=mcWide);
         }
         if (mcSpace)
             translate([-X_MC/2, DY_MC, -EPS])
@@ -464,7 +471,9 @@ module baffleMCBattery( outer,          // outer diameter
                         dzButtress,     // thickness of the baffle
                         dFirst,         // make the back baffle this diameter
                         dzFirst,        // make the back baffle this thicknes 
-                        extraBaffle=0)  // add this much to the front baffle
+                        extraBaffle=0,  // add this much to the front baffle
+                        mcWide=0        // set this for a wide top board
+                    )
 {
     for(i=[0:n-1]) {
         translate([0, 0, i*dzButtress*2]) 
@@ -474,16 +483,16 @@ module baffleMCBattery( outer,          // outer diameter
                 // to bring it in.
                 intersection() {
                     cylinder(h=dzButtress*2, d=dFirst);
-                    oneBaffle(outer, dzFirst, dExtra=dFirst - outer);
+                    oneBaffle(outer, dzFirst, dExtra=dFirst - outer, mcWide=mcWide);
                 }
             }
             else {
-                oneBaffle(outer, dzButtress, bridge=(i < n-1));
+                oneBaffle(outer, dzButtress, bridge=(i < n-1), mcWide=mcWide);
             }
     }
     if (extraBaffle) {
         translate([0, 0, (n*2 - 1) * dzButtress]) {
-            oneBaffle(outer, extraBaffle, bridge=false);
+            oneBaffle(outer, extraBaffle, bridge=false, mcWide=mcWide);
         }
     }
 }

@@ -6,27 +6,31 @@ $fn = 90;
 EPS = 0.01;
 EPS2 = EPS * 2;
 
-DRAW_AFT = false;
-DRAW_FRONT = true;
+DRAW_AFT = true;
+DRAW_FRONT = false;
 
 T = 4;
 JUNCTION = 6;
 EXTRA_BAFFLE = 2;
+Z_AFT_RING = 5.5;       // also speaker holder
 N_BAFFLES = nBafflesNeeded(H_BUTTRESS);
-M_BAFFLE_FRONT = zLenOfBaffles(N_BAFFLES, H_BUTTRESS) + M_POMMEL_FRONT + EXTRA_BAFFLE;
+M_BAFFLE_FRONT = zLenOfBaffles(N_BAFFLES, H_BUTTRESS) 
+    + M_POMMEL_FRONT + EXTRA_BAFFLE + Z_AFT_RING;
 
 if (DRAW_AFT) {
-    translate([0, 0, M_POMMEL_FRONT]) {
-        baffleMCBattery(D_AFT, N_BAFFLES, H_BUTTRESS, D_AFT_RING, 5.5, EXTRA_BAFFLE);
+    translate([0, 0, M_POMMEL_FRONT + Z_AFT_RING]) {
+        baffleMCBattery(D_AFT, N_BAFFLES, H_BUTTRESS, 
+                        D_AFT, H_BUTTRESS, EXTRA_BAFFLE, mcWide=19.1);
     }
 
-    *translate([0, 0, M_POMMEL_BACK]) {
-        speakerHolder(D_POMMEL, M_POMMEL_FRONT - M_POMMEL_BACK, 2, "bass28");
+    translate([0, 0, M_POMMEL_FRONT]) {
+        speakerHolder(D_POMMEL, Z_AFT_RING, 1.5, "std28");
     }
 
     translate([0, 0, M_BAFFLE_FRONT]) {
         cylinderKeyJoint(JUNCTION, D_AFT, D_AFT - T, 0.5);
     }
+    *translate([0, 0, M_POMMEL_FRONT + Z_AFT_RING]) battery(D_AFT);
 }
 
 if (DRAW_FRONT) {

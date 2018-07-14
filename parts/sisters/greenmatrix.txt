@@ -1,0 +1,21 @@
+# Bridge board for green display matrix
+# Note that the shift-reg board sits under this,
+# and needs space on the left for wiring.
+#
+# +M 2.2
+#
+[   o o o o o o o   ]
+    | | | | | | |
+ M  | |         |  M 
+    | | | | | | |
+    e d c b a 9 8
+
+                
+
+                
+
+    1 2 3 4 5 6 7
+    | | | | |   |
+ M  |       |   |  M
+    | | | | |   |
+[   o o o o o o o   ]
