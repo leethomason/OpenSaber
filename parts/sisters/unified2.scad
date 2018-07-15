@@ -30,7 +30,7 @@ if (DRAW_AFT) {
     translate([0, 0, M_BAFFLE_FRONT]) {
         cylinderKeyJoint(JUNCTION, D_AFT, D_AFT - T, 0.5);
     }
-    *translate([0, 0, M_POMMEL_FRONT + Z_AFT_RING]) battery(D_AFT);
+    //translate([0, 0, M_POMMEL_FRONT + Z_AFT_RING]) battery(D_AFT);
 }
 
 if (DRAW_FRONT) {
