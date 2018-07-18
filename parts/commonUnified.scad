@@ -276,6 +276,15 @@ module speakerStd28(bass)
     }
 }
 
+module speakerCLS28()
+{
+    color("yellow") {
+        cylinder(h=3, d=28);
+        cylinder(h=4.5, d=26);
+        cylinder(h=7, d=16 + 1.0);
+    }
+}
+
 // Intermediate parts -----------------
 
 module baffleHalfBridge(dz, t)
@@ -315,7 +324,8 @@ module oneBaffle(   d,
                     dExtra=0,
                     scallop=false,
                     cutout=true,
-                    mcWide=0)
+                    mcWide=0, 
+                    cutoutHigh=true)
 {
     yMC = -yAtX(X_MC/2, d/2) + 1.0;
 
@@ -341,8 +351,11 @@ module oneBaffle(   d,
                     cylinder(h=dz + EPS2, d=d * TUNE_D);
         }
 
+        if (cutoutHigh) {
             translate([-TROUGH_0/2, 0, -EPS]) 
                 cube(size=[TROUGH_0, 30, dz + EPS2]);
+        }
+
         if (cutout) {
             translate([-TROUGH_1/2, -5, -EPS]) 
                 cube(size=[TROUGH_1, 5, dz + EPS2]);
@@ -376,6 +389,7 @@ module oneBaffle(   d,
         "bass22"
         "std28"
         "bass28"
+        "cls28"
  */
 module speakerHolder(outer, dz, dzToSpkrBack, type)
 {
@@ -393,6 +407,13 @@ module speakerHolder(outer, dz, dzToSpkrBack, type)
                     tube(h=dz, do=outer, di=24);
                     translate([0, 0, dzToSpkrBack])
                         speakerStd28(type == "bass28");
+                }
+            }
+            else if (type=="cls28") {
+                difference() {
+                    tube(h=dz, do=outer, di=24);
+                    translate([0, 0, dzToSpkrBack])
+                        speakerCLS28();
                 }
             }
             else
