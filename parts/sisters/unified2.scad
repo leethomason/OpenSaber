@@ -83,13 +83,8 @@ if (DRAW_FRONT) {
         }
     }
 
-    // The adjustment to the inner radius
-    // is so the dotstars can fit beside the heat
-    // sink thread. But since the dotstars live in 
-    // an inset strip now, this can be larger.
     D_FORWARD_INNER = dynamicHeatSinkThread();
-
-    OVERLAP = 4;
+    OVERLAP = (D_AFT - D_FORWARD_INNER) / 2 + 1;
 
     difference() {
         DZ = M_LED_HOLDER_FRONT - M_TRANSITION;
@@ -103,18 +98,21 @@ if (DRAW_FRONT) {
 
             // overlap ring
             translate([0, 0, M_TRANSITION - OVERLAP]) {
-                tube(h=OVERLAP, do=D_AFT, di=D_FORWARD_INNER);
+                difference() {
+                    cylinder(h=OVERLAP, d1=D_AFT - T, d2=D_AFT);
+                    cylinder(h=OVERLAP, d1=D_AFT, d2=D_FORWARD_INNER);
+                }
             }
         }
         
         // Side access.
         H = 14;
-        translate([0, 0, M_TRANSITION - OVERLAP]) {
+        translate([0, 0, M_TRANSITION]) {
             translate([0, -H/2, 0]) {
-                cube(size=[50, H, M_LED_HOLDER_BACK - M_TRANSITION + OVERLAP]);
+                cube(size=[50, H, M_LED_HOLDER_BACK - M_TRANSITION]);
                 mirror([1,0,0])
                 // Move this up so that there is space for the dotstar connector.
-                cube(size=[50, H, 31 + OVERLAP]);
+                cube(size=[50, H, 31]);
             }
         }
 
