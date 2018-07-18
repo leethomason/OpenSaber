@@ -607,15 +607,13 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_OLED_CLOCK    PIN_SPI_CLOCK
 
 	#define ACCEL_BLADE_DIRECTION 0	// x is in the blade direction
-#elif (PCB_VERSION == PCB_SHIELD_4)
+#elif (PCB_VERSION == PCB_SHIELD_4 || PCB_VERSION == PCB_SHIELD_5)
 	/* 
 	   Grinning Lizard Shield
 	   + dotstar optional
 	   + SPI optional
 	   Includes mounting for high-watt resistors
 	 */
-	#define PIN_RX1           0
-	#define PIN_TX1           1
 	#define PIN_AMP_EN        2 
 	#define PIN_SWITCH_A      3 
 	#define PIN_SWITCH_B	  4 
@@ -644,8 +642,11 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 	#define PIN_LATCH		  28
 	#define PIN_CLOCK 		  27
-	#define PIN_DATA  		  29
-
+	#if PCB_VERSION == PCB_SHIELD_4		
+		#define PIN_DATA  		  29
+	#elif PCB_VERSION == PCB_SHIELD_5
+		#define PIN_DATA  		  30
+	#endif
 	// FIXME: accelerometer is rotated
 	#define ACCEL_BLADE_DIRECTION 0	// x is in the blade direction
 #else
