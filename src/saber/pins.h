@@ -78,6 +78,7 @@ SOFTWARE.
 #define PCB_SHIELD_2			   12	// Grinliz shield + Teensy 3.5
 #define PCB_SHIELD_3			   13	
 #define PCB_SHIELD_4			   14	
+#define PCB_SHIELD_5			   15
 
 static const int EEPROM_SIZE = 512;
 
@@ -542,8 +543,9 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int VOLUME_2 = 50;
 	static const int VOLUME_3 = 120;
 	static const int VOLUME_4 = 200;
+
 #elif (SABER_MODEL == SABER_MODEL_SISTER_2)
-	#define PCB_VERSION 			PCB_SHIELD_4
+	#define PCB_VERSION 			PCB_SHIELD_5
 	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
 	#define SABER_SOUND_ON 			SABER_SOUND_SD
 	#define SABER_VOLTMETER
@@ -554,7 +556,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int32_t UVOLT_MULT = 6780; // 6734;		
 	#define ID_STR "Sisters V2 Cree XPE2 RGB"
 
-	// Actually GREEN
+	// FIXME: set the values
 	static const int32_t RED_VF   = 3400;   // milli-volts
 	static const int32_t RED_I    = 400;    // milli-amps
 	static const int32_t RED_R    = 4700;   // milli-ohms
@@ -613,6 +615,9 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	   + dotstar optional
 	   + SPI optional
 	   Includes mounting for high-watt resistors
+
+	   v4: ExpressPCB
+	   v5: DipTrace
 	 */
 	#define PIN_AMP_EN        2 
 	#define PIN_SWITCH_A      3 

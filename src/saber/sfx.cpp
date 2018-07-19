@@ -305,6 +305,10 @@ bool SFX::playSound(int sound, int mode, bool playIfOff)
         else {
             path = m_filename[track].c_str();
         }
+        if (m_savedVolume > 0) {
+            m_player->setVolume(m_savedVolume);
+            m_savedVolume = -1;
+        }
         m_player->play(path.c_str());
         m_currentSound = sound;
         m_lastSFX = sound;
@@ -369,6 +373,10 @@ bool SFX::playSound(const char* sfx)
 {
     if (!m_player) return false;
 
+    if (m_savedVolume > 0) {
+        m_player->setVolume(m_savedVolume);
+        m_savedVolume = -1;
+    }
     m_player->play(sfx);
     return true;
 }
