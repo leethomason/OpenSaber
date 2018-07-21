@@ -227,11 +227,11 @@ void setup() {
         shifted7.attachDigit(3, 15);
 
         shifted7.attachSegment(0, 6);   // a
-        shifted7.attachSegment(1, 5);  // b
+        shifted7.attachSegment(1, 5);   // b
         shifted7.attachSegment(2, 12);  // c
-        shifted7.attachSegment(3, 2);  // d
-        shifted7.attachSegment(4, 11);   // e
-        shifted7.attachSegment(5, 3);  // f
+        shifted7.attachSegment(3, 2);   // d
+        shifted7.attachSegment(4, 11);  // e
+        shifted7.attachSegment(5, 3);   // f
         shifted7.attachSegment(6, 1);   // g
         shifted7.attachSegment(7, 14);  // h-dp
         Log.p("Shifted seven digi init.").eol();

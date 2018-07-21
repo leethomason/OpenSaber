@@ -126,5 +126,51 @@ void ShiftedSevenSegment::loop(uint32_t micro, uint8_t* low, uint8_t* high)
 }
 
 
+ShiftedDotMatrix::ShiftedDotMatrix()
+{
+    for(int i=0; i<NUM_COLS; ++i) {
+        m_display[i] = 0;
+        m_colMap[i] = 0;
+    }
+    for(int i=0; i<NUM_ROWS; ++i) {
+        m_rowMap[i] = 0;
+    }
+}
 
 
+void ShiftedDotMatrix::loop(uint32_t micro, uint8_t* low, uint8_t* high) 
+{
+    uint32_t col = (micro / TIME_PER_DIGIT) % NUM_COLS;
+    uint8_t  b = m_display[col];
+
+    uint16_t out = 0xff;
+
+    // First turn on/off the columns.
+    for(unsigned i=0; i<NUM_COLS; ++i) {
+        bitWrite(out, m_colMap[i], i == col ? 1 : 0);
+    }
+
+    // And now the rows.
+    for(int i=0; i<NUM_ROWS; ++i) {
+        if (bitRead(b, i)) {
+            bitWrite(out, m_segmentMap[i], 0);
+        }
+    }
+    
+    *low  = lowByte(out);
+    *high = highByte(out);
+}
+
+
+void ShiftedDotMatrix::setFrom7_5(const uint8_t* pixel7_5ui)
+{
+    for(int i=0; i<NUM_COLS; ++i)
+        m_display[i] = 0;
+
+    for(int r=0; r<NUM_ROWS; ++r) {
+        for(int c=0; c<NUM_COLS; ++c) {
+            unsigned b = bitRead(pixel7_5ui[r], c);
+            bitWrite(m_display[c], r, b):
+        }
+    }
+}

@@ -78,7 +78,7 @@ if (DRAW_FRONT) {
             cylinderKeyJoint(JUNCTION, D_AFT, D_AFT - T, 0);
 
             for(i=[0:2]) {
-                translate([0, 0, M_DISPLAY_CENTER - M_BAFFLE_FRONT + 4 - i*6]) capsule(-160, 160);
+                translate([0, 0, M_DISPLAY_CENTER - M_BAFFLE_FRONT + 6 - i*6]) capsule(-160, 160);
             }
         }
     }
