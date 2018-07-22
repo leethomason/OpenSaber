@@ -60,11 +60,11 @@ int main(int, char**) {
 	SDL_Event e;
 	int scale = 4;
 	UIModeUtil mode;
-	mode.set(UIMode::MEDITATION);
+	mode.set(UIMode::NORMAL);
 	bool bladeOn = false;
 	int count = 0;
 	uint32_t lastUpdate = SDL_GetTicks();
-	bool oledMode = true;
+	bool oledMode = false;
 
 	const char* FONT_NAMES[8] = {
 		"Bespin", "Vader", "Vader", "ObiAni", "Bespin", "JainaSw", "Maul", "MAUL"
@@ -122,7 +122,13 @@ int main(int, char**) {
 			pixel75.Draw(t, mode.mode(), bladeOn, &data);
 		}
 
-		oled.Commit();
+        if (!oledMode) {
+            oled.Clear();
+            memcpy(oled.Buffer(), pixel75.Pixels(), 8);
+            oled.Commit();
+        }
+        
+        oled.Commit();
 
 		const SDL_Rect src = { 0, 0, WIDTH, HEIGHT };
 		SDL_Rect winRect;
@@ -130,12 +136,6 @@ int main(int, char**) {
 		const int w = WIDTH * scale;
 		const int h = HEIGHT * scale;
 		SDL_Rect dst = { (winRect.w - w) / 2, (winRect.h - h) / 2, w, h };
-
-		if (!oledMode) {
-			oled.Clear();
-			memcpy(oled.Buffer(), pixel75.Pixels(), 7);
-			oled.Commit();
-		}
 
 		SDL_RenderClear(ren);
 		SDL_UpdateTexture(texture, NULL, oled.Pixels(), WIDTH * 4);
