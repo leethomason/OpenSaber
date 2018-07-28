@@ -37,12 +37,12 @@ if (DRAW_AFT) {
             }
         }
         translate([0, 0, M_POMMEL_FRONT + 1])
-            speakerCLS28();
+            speakerCLS28(true);
     }
     *translate([0, 0, M_POMMEL_FRONT + Z_AFT_RING + 3]) 
         battery(D_AFT);
     *translate([0, 0, M_POMMEL_FRONT + 1])
-        speakerCLS28();
+        speakerCLS28(true);
 }
 
 if (DRAW_FRONT) {
