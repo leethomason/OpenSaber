@@ -6,8 +6,8 @@ $fn = 90;
 EPS = 0.01;
 EPS2 = EPS * 2;
 
-DRAW_AFT = false;
-DRAW_FRONT = true;
+DRAW_AFT = true;
+DRAW_FRONT = false;
 
 T = 4;
 JUNCTION = 6;
