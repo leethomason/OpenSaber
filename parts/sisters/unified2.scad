@@ -73,6 +73,10 @@ if (DRAW_FRONT) {
                         ],
                         holeAccess = true
             );
+            
+            // Space for the LED to slide in....
+            LED_X = 19;
+            translate([-LED_X/2, 0, 0]) cube(size=[LED_X, 11.5, CUT_DZ + DZ]);
 
             // Doesn't fit: oledHolder(D_AFT, T, DZ, 1, 7);
             cylinderKeyJoint(JUNCTION, D_AFT, D_AFT - T, 0);
