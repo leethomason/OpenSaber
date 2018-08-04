@@ -55,7 +55,6 @@ static const uint32_t INDICATOR_CYCLE         = 1000;
 static const uint32_t PING_PONG_INTERVAL      = 2400;
 static const uint32_t BREATH_TIME             = 1200;
 
-bool     paletteChange  = false;    // used to prevent sound fx on palette changes when in 2 button mode.
 uint32_t reflashTime    = 0;
 bool     flashOnClash   = false;
 float    maxGForce2     = 0.0f;
@@ -78,11 +77,7 @@ LEDManager  ledB(PIN_LED_B, false);
 
 UIRenderData uiRenderData;
 
-#ifdef SABER_TWO_BUTTON
-ButtonCB    buttonB(PIN_SWITCH_B);
-#else
 UIModeUtil  uiMode;
-#endif
 SaberDB     saberDB;
 Voltmeter   voltmeter;
 
@@ -123,7 +118,6 @@ Timer2      vbatTimer(VBAT_TIME_INTERVAL);
 Timer2      gforceDataTimer(110);
 
 Tester      tester;
-uint32_t    unlocked = 0;
 bool        wavSource = false;
 
 void setupSD()
@@ -181,18 +175,7 @@ void setup() {
     buttonA.setClickHandler(buttonAClickHandler);
     buttonA.setReleaseHandler(buttonAReleaseHandler);
 
-    #ifdef SABER_TWO_BUTTON
-        buttonB.setClickHandler(buttonBClickHandler);
-        buttonB.setReleaseHandler(buttonBReleaseHandler);
-        buttonB.setHoldHandler(buttonBHoldHandler);
-        buttonB.setPressHandler(buttonBPressHandler);
-    #endif
-
-    #ifdef SABER_TWO_BUTTON
-        tester.attach(&buttonA, &buttonB);
-    #else
-        tester.attach(&buttonA, 0);
-    #endif
+    tester.attach(&buttonA, 0);
     #ifdef SABER_UI_START
         tester.attachUI(leds + SABER_UI_START);
     #endif
@@ -273,11 +256,7 @@ void setup() {
     syncToDB();
     ledA.set(true); // "power on" light
 
-    #ifdef SABER_TWO_BUTTON
-    buttonB.setHoldRepeats(true);  // volume repeats
-    #else
     buttonA.setHoldRepeats(true);  // everything repeats!!
-    #endif
 
     #ifdef SABER_UI_BRIGHTNESS
         dotstarUI.SetBrightness(SABER_UI_BRIGHTNESS);
@@ -324,17 +303,6 @@ void buttonAReleaseHandler(const Button& b)
 {
     ledA.blink(0, 0);
     ledA.set(true); // power is on.
-
-    #ifdef SABER_LOCK
-        if (bladeState.bladeOn()) {
-            uint32_t holdTime = millis() - b.pressedTime();
-            //Log.p("holdTime: ").p(holdTime).eol();
-            if (holdTime >= b.holdThreshold()) {
-                unlocked = millis();
-                EventQ.event("[unlocked]");
-            }
-        }
-    #endif
 }
 
 bool setVolumeFromHoldCount(int count)
@@ -362,91 +330,6 @@ void retractBlade()
         sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
     }
 }
-
-#ifdef SABER_TWO_BUTTON
-
-void buttonAClickHandler(const Button&)
-{
-    //Log.p("buttonAClickHandler...");
-    // Special case: color switch.
-    if (bladeState.state() == BLADE_ON && buttonB.isDown()) {
-        //Log.p("palette change.").eol();
-        saberDB.nextPalette();
-        paletteChange = true;
-        syncToDB();
-    }
-    else {
-        #ifdef SABER_LOCK
-            if (millis() - unlocked <= Button::DEFAULT_HOLD_TIME) {
-                retractBlade();
-            }
-            else 
-        #endif
-            {
-                int32_t vbat = voltmeter.averagePower();
-                EventQ.event("[Vbat]", vbat);
-                ledA.blink(AveragePower::vbatToPowerLevel(vbat), INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
-            }
-    }
-}
-
-
-void buttonAHoldHandler(const Button&) {
-    //Log.p("buttonAHoldHandler").eol();
-    if (bladeState.state() == BLADE_OFF) {
-        igniteBlade();
-    }
-    else if (bladeState.state() != BLADE_RETRACT) {
-        #ifdef SABER_LOCK
-            // see buttonAReleaseHandler
-        #else
-            retractBlade();
-        #endif
-    }
-}
-
-void buttonBPressHandler(const Button&) {
-    paletteChange = false;
-}
-
-void buttonBHoldHandler(const Button& button) {
-    //Log.p("buttonBHoldHandler").eol();
-    if (bladeState.state() != BLADE_OFF) {
-        if (!paletteChange) {
-            bladeState.change(BLADE_FLASH);
-            sfx.playSound(SFX_USER_HOLD, SFX_OVERRIDE);
-            flashOnClash = true;
-            reflashTime = calcReflashTime();
-        }
-    }
-    else if (bladeState.state() == BLADE_OFF) {
-        bool on = setVolumeFromHoldCount(button.nHolds());
-        ledB.set(on);
-    }
-}
-
-void buttonBReleaseHandler(const Button& b) {
-    if (flashOnClash && bladeState.state() != BLADE_OFF) {
-        sfx.playSound(SFX_IDLE, SFX_OVERRIDE);
-    }
-    flashOnClash = false;
-    if (ledB.blinking()) {
-        ledB.blink(0, 0);
-    }
-    syncToDB();
-}
-
-void buttonBClickHandler(const Button&) {
-    //Log.p("buttonBClickHandler").eol();
-    if (bladeState.state() == BLADE_ON) {
-        if (!paletteChange) {
-            bladeState.change(BLADE_FLASH);
-            sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
-        }
-    }
-}
-
-#else
 
 bool setPaletteFromHoldCount(int count)
 {
@@ -527,15 +410,9 @@ void buttonAHoldHandler(const Button& button)
     }
 }
 
-#endif
-
 bool buttonsReleased()
 {
-    #ifdef SABER_TWO_BUTTON
-        return !buttonA.isDown() && !buttonB.isDown();
-    #else
-        return !buttonA.isDown();
-    #endif
+    return !buttonA.isDown();
 }
 
 void serialEvent() {
@@ -641,10 +518,6 @@ void loop() {
 
     buttonA.process();
     ledA.process();
-    #ifdef SABER_TWO_BUTTON
-    buttonB.process();
-    ledB.process();
-    #endif
     #ifdef SABER_COMRF24
     processCom(delta);
     #endif
