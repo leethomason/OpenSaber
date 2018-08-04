@@ -37,14 +37,14 @@ SOFTWARE.
 #define SABER_MODEL_BO				5	// 2 button prop shield
 //#define SABER_MODEL_PROTO 		6	// Burned out; never needed to rebuild.
 #define SABER_MODEL_TANO 			7
-#define SABER_MODEL_SISTER 			8	// Shield v3, Teensy 3.5
+//#define SABER_MODEL_SISTER 			8	// Shield v3, Teensy 3.5, RF24 communication
 #define SABER_MODEL_AQUATIC			9
 #define SABER_MODEL_SHOCK2		   10	// Shield v3, Teensy 3.5, Dotstar, Display (woh)
 #define SABER_MODEL_TALI		   11	// Shield v4, Teensy 3.5, Dotstar crystals, bubble display
 #define SABER_MODEL_AHSOKA		   12
 #define SABER_MODEL_GREEN_SKY	   13
 #define SABER_MODEL_TANO_2 		   14   // Shield v4, Teensy 3.5, Dotstar UI
-#define SABER_MODEL_SISTER_2	   14   // Shield v4, Teensy 3.5
+#define SABER_MODEL_SISTER_2	   14   // Shield v4, Teensy 3.5, 5x7 Display. Replaced the cool-but-useless wirelss communication
 
 
 #define SABER_SUB_MODEL_NONE		0

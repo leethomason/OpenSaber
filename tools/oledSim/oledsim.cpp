@@ -1,5 +1,6 @@
 #include "oledsim.h"
 #include <string.h>
+#include "../saber/rgb.h"
 
 OledSim::OledSim(int w, int h)
 {
@@ -36,11 +37,11 @@ void OledSim::Commit()
 }
 
 
-void OledSim::DrawRect(int x, int y, int size, bool on)
+void OledSim::DrawRect(int x, int y, int size, uint32_t c)
 {
     for (int j = y * size; j < (y + 1)*size - 1; j++) {
         for (int i = x * size; i < (x + 1)*size - 1; i++) {
-            pixels[j * width + i] = on ? 0x00ff00ff : 0x222222ff;
+            pixels[j * width + i] = c;
         }
     }
 }
@@ -56,8 +57,23 @@ void OledSim::CommitFrom5x7(const uint8_t* col)
     for (int y = 0; y < 5; ++y) {
         for (int x = 0; x < 7; ++x) {
             uint8_t mask = col[x] & (1 << y);
-            DrawRect(x, y, size, mask ? true : false);
+            DrawRect(x, y, size, mask ? 0x00ff00ff : 0x222222ff);
         }
+    }
+    //DrawRect(0, 0, size);
+    //DrawRect(1, 0, size);
+    //DrawRect(1, 1, size);
+}
+
+
+void OledSim::CommitFromDotstar(const RGB* dotstar, int n)
+{
+    memset(pixels, 0, width * height * sizeof(uint32_t));
+
+    int size = height / 8;
+
+    for(int i=0; i<n; ++i) {
+        DrawRect(i, 0, size, 0xff | (dotstar[i].get() << 8));
     }
     //DrawRect(0, 0, size);
     //DrawRect(1, 0, size);

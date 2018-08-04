@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+struct RGB;
+
 class OledSim
 {
 public:
@@ -13,10 +15,11 @@ public:
 	uint8_t* Buffer() { return buffer;}
 	void Commit();                          // copies the buffer TO the pixels
     void CommitFrom5x7(const uint8_t* src); // use this as a dot matrix renderer
+    void CommitFromDotstar(const RGB* dotstars, int n);
 	void Clear();
 
 private:
-    void DrawRect(int x, int y, int size, bool on);
+    void DrawRect(int x, int y, int size, uint32_t c);
 
 	int width;
 	int height;

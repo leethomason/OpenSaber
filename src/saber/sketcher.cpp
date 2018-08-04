@@ -307,7 +307,7 @@ bool DotStarUI::Draw(RGB* led, UIMode mode, bool ignited, const UIRenderData& da
 			black = false;
 		}
 	}
-	ASSERT(!black);
+	ASSERT((ignited && data.power == 0) || !black);
 	for(int i=0; i<4; ++i) {
 		if (currentLED[i] != led[i])
 			return true;
@@ -470,6 +470,8 @@ bool TestCrystalColor()
 
 Pixel_7_5_UI::Pixel_7_5_UI()
 {
+    for (int i = 0; i < ALLOCATED; ++i)
+        col[i] = 0;
 }
 
 /*

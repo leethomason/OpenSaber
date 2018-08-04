@@ -47,6 +47,8 @@ int main(int, char**) {
 	Renderer display;
 	display.Attach(WIDTH, HEIGHT, oled.Buffer());
 	Pixel_7_5_UI pixel75;
+    RGB dotstarLEDS[8];
+    DotStarUI dotstarUI;
 
 	SDL_SetRenderDrawColor(ren, 128, 128, 128, 255);
 
@@ -65,7 +67,14 @@ int main(int, char**) {
 	bool bladeOn = false;
 	int count = 0;
 	uint32_t lastUpdate = SDL_GetTicks();
-	bool oledMode = false;
+
+    enum {
+        RENDER_OLED,
+        RENDER_MATRIX,
+        RENDER_DOTSTAR,
+        NUM_RENDER_MODE
+    };
+	int renderMode = RENDER_OLED;
 
 	const char* FONT_NAMES[8] = {
 		"Bespin", "Tatoine", "Jaina", "Vader", "ObiAni", "Bespin", "JainaSw", "Sentinel"
@@ -93,15 +102,12 @@ int main(int, char**) {
 			if (e.key.keysym.sym >= SDLK_1 && e.key.keysym.sym <= SDLK_8) {
 				scale = e.key.keysym.sym - SDLK_0;
 			}
-			else if (e.key.keysym.sym == SDLK_SPACE) {
-				if (mode.mode() == UIMode::NORMAL && !bladeOn) {
-					bladeOn = true;
-				}
-				else {
-					bladeOn = false;
-					mode.nextMode();
-				}
-			}
+            else if (e.key.keysym.sym == SDLK_SPACE) {
+                mode.nextMode();
+            }
+            else if (e.key.keysym.sym == SDLK_i) {
+                bladeOn = !bladeOn;
+            }
 			else if (e.key.keysym.sym == SDLK_p) {
 				data.power = (data.power + 1) % 5;
 				data.mVolts = 3000 + data.power * 111;
@@ -110,7 +116,9 @@ int main(int, char**) {
 				data.volume = (data.volume + 1) % 5;
 			}
 			else if (e.key.keysym.sym == SDLK_o) {
-				oledMode = !oledMode;
+                renderMode++;
+                if (renderMode == NUM_RENDER_MODE)
+                    renderMode = 0;
 			}
 			else if (e.key.keysym.sym == SDLK_c) {
 				palette = (palette + 1) % 8;
@@ -125,9 +133,11 @@ int main(int, char**) {
 			lastUpdate = t;
 			uint8_t value = int(127.8 * (sin(count * 0.2) + 1.0));
 			++count;
+
 			sketcher.Push(value);
 			sketcher.Draw(&display, 100, mode.mode(), bladeOn, &data);
 			pixel75.Draw(t, mode.mode(), bladeOn, &data);
+            dotstarUI.Draw(dotstarLEDS, mode.mode(), bladeOn, data);
 		}
 
 		const SDL_Rect src = { 0, 0, WIDTH, HEIGHT };
@@ -137,11 +147,14 @@ int main(int, char**) {
 		const int h = HEIGHT * scale;
 		SDL_Rect dst = { (winRect.w - w) / 2, (winRect.h - h) / 2, w, h };
 
-        if (oledMode) {
+        if (renderMode == RENDER_OLED) {
             oled.Commit();
         }
-        else {
+        else if (renderMode == RENDER_MATRIX) {
             oled.CommitFrom5x7(pixel75.Pixels());
+        }
+        else if (renderMode == RENDER_DOTSTAR) {
+            oled.CommitFromDotstar(dotstarLEDS, 4);
         }
 
 		SDL_RenderClear(ren);
