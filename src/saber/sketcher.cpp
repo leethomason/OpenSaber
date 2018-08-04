@@ -473,11 +473,16 @@ Pixel_7_5_UI::Pixel_7_5_UI()
 }
 
 /*
-    ...X...
-    .X.X.X.
-    X..X..X
+    .x.X.x.
+    x..X..x
+    Xx.X.xX
     XX.X.XX
     .XXXXX.
+
+    cols: 01110 0x0c
+          11101 0x19
+          10000 0x10
+          11111 0x1f
 */
 void Pixel_7_5_UI::Draw(uint32_t time, UIMode mode, bool bladeIgnited, const UIRenderData* data)
 {
@@ -487,7 +492,6 @@ void Pixel_7_5_UI::Draw(uint32_t time, UIMode mode, bool bladeIgnited, const UIR
 	switch (mode) {
 	case UIMode::NORMAL:
 		getGlypth_tomThumb5('0' + data->palette, col + 0);
-
 		DrawBar(col + 4, data->power);
 		DrawBar(col + 6, data->volume);
 		break;
@@ -504,6 +508,13 @@ void Pixel_7_5_UI::Draw(uint32_t time, UIMode mode, bool bladeIgnited, const UIR
         DrawBar(col + 4, data->volume);
         DrawBar(col + 5, data->volume);
         DrawBar(col + 6, data->volume);
+        break;
+
+    case UIMode::MEDITATION:
+        col[0] = col[6] = 0x0e;
+        col[1] = col[5] = 0x19;
+        col[2] = col[4] = 0x10;
+        col[3]          = 0x1f;
         break;
 
 	default:

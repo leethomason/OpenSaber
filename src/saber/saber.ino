@@ -276,7 +276,6 @@ uint32_t calcReflashTime() {
     return millis() + random(500) + 200;
 }
 
-
 /*
    The saberDB is the source of truth. (The Model.)
    Bring other things in sync when it changes.

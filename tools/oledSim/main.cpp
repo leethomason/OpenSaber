@@ -11,6 +11,7 @@
 #include "assets.h"
 #include "sketcher.h"
 #include "../saber/unittest.h"
+#include "../saber/rgb.h"
 
 Sketcher sketcher;
 static const int WIDTH = 128;
@@ -67,10 +68,19 @@ int main(int, char**) {
 	bool oledMode = false;
 
 	const char* FONT_NAMES[8] = {
-		"Bespin", "Vader", "Vader", "ObiAni", "Bespin", "JainaSw", "Maul", "MAUL"
+		"Bespin", "Tatoine", "Jaina", "Vader", "ObiAni", "Bespin", "JainaSw", "Sentinel"
 	};
-	uint8_t COLORS[8] = { 0, 255, 100, 200, 255, 0, 20, 120 };
-	data.color.set(COLORS[0], COLORS[1], COLORS[2]);
+    RGB colors[8] = {
+        RGB(0, 255, 0),
+        RGB(0, 0, 255),
+        RGB(0, 255, 255),
+        RGB(255, 0, 0),
+        RGB(128, 0, 255),
+        RGB(255, 0, 255),
+        RGB(0, 255, 128),
+        RGB(255, 255, 0)
+    };
+    data.color = colors[0];
 
 	int palette = 0;
 
@@ -104,11 +114,9 @@ int main(int, char**) {
 			}
 			else if (e.key.keysym.sym == SDLK_c) {
 				palette = (palette + 1) % 8;
-				data.color.set(COLORS[(palette * 3 + 0) % 8],
-					COLORS[(palette * 2 + 1) % 8],
-					COLORS[(palette * 5 + 2) % 8]);
+                data.palette = palette;
+                data.color = colors[palette];
 				data.fontName = FONT_NAMES[palette];
-				data.palette = palette;
 			}
 		}
 
@@ -122,20 +130,19 @@ int main(int, char**) {
 			pixel75.Draw(t, mode.mode(), bladeOn, &data);
 		}
 
-        if (!oledMode) {
-            oled.Clear();
-            memcpy(oled.Buffer(), pixel75.Pixels(), 8);
-            oled.Commit();
-        }
-        
-        oled.Commit();
-
 		const SDL_Rect src = { 0, 0, WIDTH, HEIGHT };
 		SDL_Rect winRect;
 		SDL_GetWindowSize(win, &winRect.w, &winRect.h);
 		const int w = WIDTH * scale;
 		const int h = HEIGHT * scale;
 		SDL_Rect dst = { (winRect.w - w) / 2, (winRect.h - h) / 2, w, h };
+
+        if (oledMode) {
+            oled.Commit();
+        }
+        else {
+            oled.CommitFrom5x7(pixel75.Pixels());
+        }
 
 		SDL_RenderClear(ren);
 		SDL_UpdateTexture(texture, NULL, oled.Pixels(), WIDTH * 4);

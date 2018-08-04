@@ -45,6 +45,8 @@ public:
     Pixel_7_5_UI();
     void Draw(uint32_t time, UIMode mode, bool bladeIgnited, const UIRenderData* data);
 
+    // Returns columns.
+    // So this will a pointer to 7 bytes.
 	const uint8_t* Pixels() { return col; }
 
 private:
