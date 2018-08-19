@@ -6,7 +6,6 @@
 #include "DotStar.h"
 #include "Grinliz_Util.h"
 #include "saberUtil.h"
-#include "pixelmatrix.h"
 
 struct UIRenderData
 {
@@ -23,6 +22,7 @@ struct UIRenderData
 };
 
 
+/* Renders the UI to 4 RGB LEDs */
 class DotStarUI
 {
 public:
@@ -39,12 +39,17 @@ private:
 };
 
 
+/* Renders the UI to a 7x5 dot matrix (90 turn; usually they are 7 high, 
+   this uses them as 7 wide.)
+ */
 class Pixel_7_5_UI
 {
 public:
     Pixel_7_5_UI();
     void Draw(uint32_t time, UIMode mode, bool bladeIgnited, const UIRenderData* data);
 
+    // Returns columns.
+    // So this will a pointer to 7 bytes.
 	const uint8_t* Pixels() { return col; }
 
 private:
@@ -57,6 +62,7 @@ private:
 };
 
 
+/* Renders the UI to a 4 7-segment displays. */
 class Digit4UI
 {
 public:
