@@ -494,7 +494,7 @@ void Pixel_7_5_UI::Draw(uint32_t time, UIMode mode, bool bladeIgnited, const UIR
 	switch (mode) {
 	case UIMode::NORMAL:
 		getGlypth_tomThumb5('0' + data->palette, col + 0);
-		DrawBar(col + 4, data->power);
+		DrawBar(col + 5, data->power);
 		DrawBar(col + 6, data->volume);
 		break;
 
@@ -532,6 +532,12 @@ void Pixel_7_5_UI::DrawBar(uint8_t* c, int v)
 	for (int i = 0; i < v; ++i) {
 		*c |= (16 >> i);
 	}
+}
+
+
+void Pixel_7_5_UI::DrawDot(int x, int y)
+{
+	col[x] |= (16 >> y);
 }
 
 

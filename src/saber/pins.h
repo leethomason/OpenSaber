@@ -552,10 +552,9 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
 	#define SABER_DISPLAY			SABER_DISPLAY_7_5
- 
 	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 	
-	static const int32_t UVOLT_MULT = 6780; // 6734;		
+	static const int32_t UVOLT_MULT = 6730;	
 	#define ID_STR "Sisters V2 Cree XPE2 RGB"
 
 	// FIXME: set the values
@@ -654,8 +653,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#elif PCB_VERSION == PCB_SHIELD_5
 		#define PIN_DATA  		  30
 	#endif
-	// FIXME: accelerometer is rotated
-	#define ACCEL_BLADE_DIRECTION 0	// x is in the blade direction
+	#define ACCEL_BLADE_DIRECTION 0	// x is in the blade direction. not used for impact detection.
 #else
 	#error Pins not defined.
 #endif

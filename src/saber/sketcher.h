@@ -54,6 +54,7 @@ public:
 
 private:
 	void DrawBar(uint8_t* c, int v);
+	void DrawDot(int x, int y);
 
 	static const int NCOLS = 7;
 	static const int NROWS = 5;

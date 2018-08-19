@@ -213,7 +213,7 @@ void setup() {
         dotMatrix.attachCol(1, 1);
         dotMatrix.attachCol(2, 9);
         dotMatrix.attachCol(3, 15);
-        dotMatrix.attachRow(4, 14);
+        dotMatrix.attachCol(4, 14);
 
         dotMatrix.attachRow(0, 2);
         dotMatrix.attachRow(1, 13);
@@ -611,15 +611,13 @@ void loopDisplays(uint32_t msec, uint32_t delta)
             uint8_t a=0, b=0;
             dotMatrix.loop(micros(), &a, &b);
 
-            /*
             // For columns / anodes.
-            uint16_t bits = 0;  // all rows
+            //uint16_t bits = 0;  // all rows
             //bits |= (1<<5); // column 1
-            //bits |= (1<<1); // column 2
+            //bits |= (1<<1); // column 2qq
             //bits |= (1<<9); // column 3 - note the bit skip!! pin 8
             //bits |= (1<<15); // column 4
-            bits |= (1<<14); // column 5
-            */
+            //bits |= (1<<14); // column 5
 
             /*
             // For rows / cathodes.
@@ -632,15 +630,18 @@ void loopDisplays(uint32_t msec, uint32_t delta)
             //bits ^= (1<<11);
             bits ^= (1<<10);
             */
-            /*
-            a = bits & 0xff;
-            b = bits >> 8;  
-            */
+            
+            //a = bits & 0xff;
+            //b = bits >> 8;  
            
             digitalWrite(PIN_LATCH, LOW);
             shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, a);
             shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, b);
             digitalWrite(PIN_LATCH, HIGH);
+
+            // digitalWrite(PIN_LATCH, LOW);
+            // digitalWrite(PIN_CLOCK, LOW);
+            // digitalWrite(PIN_DATA, HIGH);
         }
     #elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
         {
