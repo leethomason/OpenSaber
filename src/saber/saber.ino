@@ -98,9 +98,12 @@ uint8_t oledBuffer[OLED_WIDTH * OLED_HEIGHT / 8] = {0};
 OLED_SSD1306 display(PIN_OLED_DC, PIN_OLED_RESET, PIN_OLED_CS);
 Sketcher    sketcher;
 Renderer    renderer;
-#elif SABER_DISPLAY == SABER_DISPLAY_7_5
+#elif SABER_DISPLAY == SABER_DISPLAY_7_5_DEPRECATED
 Pixel_7_5_UI display75;
 PixelMatrix pixelMatrix;
+#elif SABER_DISPLAY == SABER_DISPLAY_7_5
+Pixel_7_5_UI display75;
+ShiftedDotMatrix dotMatrix;
 #elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
 ShiftedSevenSegment shifted7;
 Digit4UI digit4UI;
@@ -197,8 +200,30 @@ void setup() {
         display.display(oledBuffer);
 
         Log.p("OLED display connected.").eol();
-    #elif SABER_DISPLAY == SABER_DISPLAY_7_5
+    #elif SABER_DISPLAY == SABER_DISPLAY_7_5_DEPRECATED
         Log.p("Pixel display init.").eol();
+    #elif SABER_DISPLAY == SABER_DISPLAY_7_5
+        pinMode(PIN_LATCH, OUTPUT);
+        pinMode(PIN_CLOCK, OUTPUT);
+        pinMode(PIN_DATA, OUTPUT);
+
+        // No pin 6
+        // Pin 7 - decimal point - not used
+        dotMatrix.attachCol(0, 5);        // col 1, pin 5
+        dotMatrix.attachCol(1, 1);
+        dotMatrix.attachCol(2, 9);
+        dotMatrix.attachCol(3, 15);
+        dotMatrix.attachRow(4, 14);
+
+        dotMatrix.attachRow(0, 2);
+        dotMatrix.attachRow(1, 13);
+        dotMatrix.attachRow(2, 3);
+        dotMatrix.attachRow(3, 4);
+        dotMatrix.attachRow(4, 12);
+        dotMatrix.attachRow(5, 11);
+        dotMatrix.attachRow(6, 10);
+
+        Log.p("Shifted dot matrix 5x7 init.").eol();
     #elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
         pinMode(PIN_LATCH, OUTPUT);
         pinMode(PIN_CLOCK, OUTPUT);
@@ -217,7 +242,7 @@ void setup() {
         shifted7.attachSegment(5, 3);   // f
         shifted7.attachSegment(6, 1);   // g
         shifted7.attachSegment(7, 14);  // h-dp
-        Log.p("Shifted seven digi init.").eol();
+        Log.p("Shifted seven digit init.").eol();
     #endif
 
     #if defined(SABER_NUM_LEDS)
@@ -564,8 +589,11 @@ void loopDisplays(uint32_t msec, uint32_t delta)
         #if SABER_DISPLAY == SABER_DISPLAY_128_32
             sketcher.Draw(&renderer, displayTimer.period(), uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
             display.display(oledBuffer);
+        #elif SABER_DISPLAY == SABER_DISPLAY_7_5_DEPRECATED
+            display75.Draw(msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
         #elif SABER_DISPLAY == SABER_DISPLAY_7_5
             display75.Draw(msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
+            dotMatrix.setFrom7_5(display75.Pixels());
         #elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
             digit4UI.Draw(uiMode.mode(), &uiRenderData);
             shifted7.set(digit4UI.Output().c_str());
@@ -576,8 +604,44 @@ void loopDisplays(uint32_t msec, uint32_t delta)
     }
 
     // Now loop() the specific display.
-    #if SABER_DISPLAY == SABER_DISPLAY_7_5
+    #if SABER_DISPLAY == SABER_DISPLAY_7_5_DEPRECATED
         pixelMatrix.loop(msec, display75.Pixels());
+    #elif SABER_DISPLAY == SABER_DISPLAY_7_5
+        {
+            uint8_t a=0, b=0;
+            dotMatrix.loop(micros(), &a, &b);
+
+            /*
+            // For columns / anodes.
+            uint16_t bits = 0;  // all rows
+            //bits |= (1<<5); // column 1
+            //bits |= (1<<1); // column 2
+            //bits |= (1<<9); // column 3 - note the bit skip!! pin 8
+            //bits |= (1<<15); // column 4
+            bits |= (1<<14); // column 5
+            */
+
+            /*
+            // For rows / cathodes.
+            uint16_t bits = ~((1<<1) | (1<<9) | (1<<15) | (1<<14));
+            //bits ^= (1<<2);
+            //bits ^= (1<<13);
+            //bits ^= (1<<3);
+            //bits ^= (1<<4);
+            //bits ^= (1<<12);
+            //bits ^= (1<<11);
+            bits ^= (1<<10);
+            */
+            /*
+            a = bits & 0xff;
+            b = bits >> 8;  
+            */
+           
+            digitalWrite(PIN_LATCH, LOW);
+            shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, a);
+            shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, b);
+            digitalWrite(PIN_LATCH, HIGH);
+        }
     #elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
         {
             uint8_t a=0, b=0;

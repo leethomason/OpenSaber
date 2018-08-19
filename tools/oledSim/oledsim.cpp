@@ -68,16 +68,17 @@ void OledSim::CommitFrom5x7(const uint8_t* col)
 
 void OledSim::CommitFromDotstar(const RGB* dotstar, int n)
 {
-    memset(pixels, 0, width * height * sizeof(uint32_t));
+    //memset(pixels, 0, width * height * sizeof(uint32_t));
+    const int s = width * height;
+    for (int i = 0; i < s; ++i) {
+        pixels[i] = 0x666666ff;
+    }
 
-    int size = height / 8;
+    int size = height / 4;
 
-    for(int i=0; i<n; ++i) {
+    for (int i = 0; i < n; ++i) {
         DrawRect(i, 0, size, 0xff | (dotstar[i].get() << 8));
     }
-    //DrawRect(0, 0, size);
-    //DrawRect(1, 0, size);
-    //DrawRect(1, 1, size);
 }
 
 
