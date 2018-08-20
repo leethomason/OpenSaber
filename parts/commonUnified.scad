@@ -75,13 +75,19 @@ module columnY(dx, dyFrom0, dz, diameter, baseDX=0, baseDZ=0)
     secure. Problematic is that it click together on the y
     axis so it's hard to run the wires.
 */
-module cylinderKeyJoint(dz, do, di, trim)
+module cylinderKeyJoint(dz, do, di, trim, angle=0)
 {
     RATIO = 0.15; 
     intersection() {
         tube(h=dz - trim, do=do, di=di);
-        translate([-do, -do*RATIO, 0])
-            cube(size=[do*2.0, do*RATIO*2, dz]);
+        union() {
+            rotate([0, 0, angle]) 
+                translate([0, -do*RATIO, 0])
+                    cube(size=[do*2.0, do*RATIO*2, dz]);
+            rotate([0, 0, 180-angle]) 
+                translate([0, -do*RATIO, 0])
+                    cube(size=[do*2.0, do*RATIO*2, dz]);
+        }
     }
 }
 

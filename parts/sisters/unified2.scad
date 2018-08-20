@@ -9,6 +9,7 @@ EPS2 = EPS * 2;
 DRAW_AFT = true;
 DRAW_FRONT = false;
 
+JOINT_ANGLE = -20;
 T = 4;
 JUNCTION = 6;
 EXTRA_BAFFLE = 2;
@@ -33,7 +34,7 @@ if (DRAW_AFT) {
             }
 
             translate([0, 0, M_BAFFLE_FRONT]) {
-                cylinderKeyJoint(JUNCTION, D_AFT, D_AFT - T, 0.5);
+                cylinderKeyJoint(JUNCTION, D_AFT, D_AFT - T, 0.5, JOINT_ANGLE);
             }
         }
         translate([0, 0, M_POMMEL_FRONT + 1])
@@ -71,15 +72,18 @@ if (DRAW_FRONT) {
                             [PCB_DX/2 -  2.04, DZ_FIX +  3.31, "buttress"],
                             [PCB_DX/2 - 24.90, DZ_FIX +  3.31, "buttress"],
                         ],
-                        holeAccess = true
+                        holeAccess = false
             );
+
+            CUT_DX_V2 = 24;
+            translate([-CUT_DX_V2/2, 4, 0]) cube(size=[CUT_DX_V2, 50, 20]);
             
             // Space for the LED to slide in....
-            LED_X = 19;
-            translate([-LED_X/2, 0, 0]) cube(size=[LED_X, 11.5, CUT_DZ + DZ]);
+            //LED_X = 19;
+            //translate([-LED_X/2, 0, 0]) cube(size=[LED_X, 12, CUT_DZ + DZ]);
 
             // Doesn't fit: oledHolder(D_AFT, T, DZ, 1, 7);
-            cylinderKeyJoint(JUNCTION, D_AFT, D_AFT - T, 0);
+            cylinderKeyJoint(JUNCTION, D_AFT, D_AFT - T, 0, JOINT_ANGLE);
 
             for(i=[0:2]) {
                 translate([0, 0, M_DISPLAY_CENTER - M_BAFFLE_FRONT + 6 - i*6]) capsule(-160, 160);
@@ -114,9 +118,7 @@ if (DRAW_FRONT) {
         translate([0, 0, M_TRANSITION]) {
             translate([0, -H/2, 0]) {
                 cube(size=[50, H, M_LED_HOLDER_BACK - M_TRANSITION]);
-                mirror([1,0,0])
-                // Move this up so that there is space for the dotstar connector.
-                cube(size=[50, H, 31]);
+                mirror([1,0,0]) cube(size=[50, H, 31]);
             }
         }
 
