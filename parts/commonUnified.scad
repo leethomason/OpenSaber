@@ -293,6 +293,8 @@ module speakerCLS28(extendY)
                 cylinder(h=7, d=16 + 1.0);
                 translate([0, -50, 0]) cylinder(h=7, d=16 + 1.0);
             }
+            ACCESS = 6;
+            translate([-ACCESS/2, 0, 0]) cube(size=[ACCESS, 20, 4]);
         }
         else {
             cylinder(h=7, d=16 + 1.0);

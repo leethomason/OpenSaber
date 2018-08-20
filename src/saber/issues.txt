@@ -2,7 +2,6 @@ Issues:
 High
 
 Low
-- circuit diagram based on Saber shield
 - Fix analogReference()
 
 Fixed

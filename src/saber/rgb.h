@@ -34,7 +34,7 @@ struct RGB {
 		return (uint32_t(r) << 16) | (uint32_t(g) << 8) | uint32_t(b);
 	}
 
-	uint8_t get(int index) const {
+    uint8_t get(int index) const {
 		return *(&r + index);
 	}
 

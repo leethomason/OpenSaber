@@ -147,14 +147,13 @@ void ShiftedDotMatrix::loop(uint32_t micro, uint8_t* low, uint8_t* high)
 
     // First turn on/off the columns.
     for(unsigned i=0; i<NUM_COLS; ++i) {
-        bitWrite(out, m_colMap[i], i == col ? 1 : 0);
+        // flip the columns. Not sure this is the correct spot. Origin (lower or upper) not well defined.
+        bitWrite(out, m_colMap[NUM_COLS - i - 1], i == col ? 1 : 0);    
     }
 
     // And now the rows.
     for(int i=0; i<NUM_ROWS; ++i) {
-        if (bitRead(b, i)) {
-            bitWrite(out, m_segmentMap[i], 0);
-        }
+        bitWrite(out, m_rowMap[i], bitRead(b, i) ? 0 : 1);
     }
     
     *low  = lowByte(out);
@@ -170,7 +169,7 @@ void ShiftedDotMatrix::setFrom7_5(const uint8_t* pixel7_5ui)
     for(int r=0; r<NUM_ROWS; ++r) {
         for(int c=0; c<NUM_COLS; ++c) {
             unsigned b = bitRead(pixel7_5ui[r], c);
-            bitWrite(m_display[c], r, b):
+            bitWrite(m_display[c], r, b);
         }
     }
 }

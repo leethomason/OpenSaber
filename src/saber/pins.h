@@ -37,14 +37,14 @@ SOFTWARE.
 #define SABER_MODEL_BO				5	// 2 button prop shield
 //#define SABER_MODEL_PROTO 		6	// Burned out; never needed to rebuild.
 #define SABER_MODEL_TANO 			7
-#define SABER_MODEL_SISTER 			8	// Shield v3, Teensy 3.5
+//#define SABER_MODEL_SISTER 			8	// Shield v3, Teensy 3.5, RF24 communication
 #define SABER_MODEL_AQUATIC			9
 #define SABER_MODEL_SHOCK2		   10	// Shield v3, Teensy 3.5, Dotstar, Display (woh)
 #define SABER_MODEL_TALI		   11	// Shield v4, Teensy 3.5, Dotstar crystals, bubble display
 #define SABER_MODEL_AHSOKA		   12
 #define SABER_MODEL_GREEN_SKY	   13
 #define SABER_MODEL_TANO_2 		   14   // Shield v4, Teensy 3.5, Dotstar UI
-#define SABER_MODEL_SISTER_2	   14   // Shield v4, Teensy 3.5
+#define SABER_MODEL_SISTER_2	   15   // Shield v4, Teensy 3.5, 5x7 Display. Replaced the cool-but-useless wirelss communication
 
 
 #define SABER_SUB_MODEL_NONE		0
@@ -68,8 +68,9 @@ SOFTWARE.
 #define SABER_SOUND_FLASH 			2
 
 #define SABER_DISPLAY_128_32		1
-#define SABER_DISPLAY_7_5			2
-#define SABER_DISPLAY_SEGMENT		3
+#define SABER_DISPLAY_7_5_DEPRECATED			2	// NON shifted. So many wires. So many.
+#define SABER_DISPLAY_SEGMENT		3	// Shifted
+#define SABER_DISPLAY_7_5 			4	// Shifted
 
 #define PCB_VERSION_1				1   // PCB, Teensy 3.2, external amp and accel
 #define PCB_VERSION_5				5   // PCB, Prop Shield, Teensy 3.2, OLED (VERIFY)
@@ -317,7 +318,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
 //	#define SABER_AUDIO_UI
-	#define SABER_DISPLAY			SABER_DISPLAY_7_5
+	#define SABER_DISPLAY			SABER_DISPLAY_7_5_DEPRECATED
 
 	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 
@@ -550,10 +551,10 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_SOUND_ON 			SABER_SOUND_SD
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
- 
+	#define SABER_DISPLAY			SABER_DISPLAY_7_5
 	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 	
-	static const int32_t UVOLT_MULT = 6780; // 6734;		
+	static const int32_t UVOLT_MULT = 6730;	
 	#define ID_STR "Sisters V2 Cree XPE2 RGB"
 
 	// FIXME: set the values
@@ -652,8 +653,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#elif PCB_VERSION == PCB_SHIELD_5
 		#define PIN_DATA  		  30
 	#endif
-	// FIXME: accelerometer is rotated
-	#define ACCEL_BLADE_DIRECTION 0	// x is in the blade direction
+	#define ACCEL_BLADE_DIRECTION 0	// x is in the blade direction. not used for impact detection.
 #else
 	#error Pins not defined.
 #endif

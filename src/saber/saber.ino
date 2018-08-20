@@ -55,7 +55,6 @@ static const uint32_t INDICATOR_CYCLE         = 1000;
 static const uint32_t PING_PONG_INTERVAL      = 2400;
 static const uint32_t BREATH_TIME             = 1200;
 
-bool     paletteChange  = false;    // used to prevent sound fx on palette changes when in 2 button mode.
 uint32_t reflashTime    = 0;
 bool     flashOnClash   = false;
 float    maxGForce2     = 0.0f;
@@ -78,11 +77,7 @@ LEDManager  ledB(PIN_LED_B, false);
 
 UIRenderData uiRenderData;
 
-#ifdef SABER_TWO_BUTTON
-ButtonCB    buttonB(PIN_SWITCH_B);
-#else
 UIModeUtil  uiMode;
-#endif
 SaberDB     saberDB;
 Voltmeter   voltmeter;
 
@@ -103,9 +98,12 @@ uint8_t oledBuffer[OLED_WIDTH * OLED_HEIGHT / 8] = {0};
 OLED_SSD1306 display(PIN_OLED_DC, PIN_OLED_RESET, PIN_OLED_CS);
 Sketcher    sketcher;
 Renderer    renderer;
-#elif SABER_DISPLAY == SABER_DISPLAY_7_5
+#elif SABER_DISPLAY == SABER_DISPLAY_7_5_DEPRECATED
 Pixel_7_5_UI display75;
 PixelMatrix pixelMatrix;
+#elif SABER_DISPLAY == SABER_DISPLAY_7_5
+Pixel_7_5_UI display75;
+ShiftedDotMatrix dotMatrix;
 #elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
 ShiftedSevenSegment shifted7;
 Digit4UI digit4UI;
@@ -123,7 +121,6 @@ Timer2      vbatTimer(VBAT_TIME_INTERVAL);
 Timer2      gforceDataTimer(110);
 
 Tester      tester;
-uint32_t    unlocked = 0;
 bool        wavSource = false;
 
 void setupSD()
@@ -181,18 +178,7 @@ void setup() {
     buttonA.setClickHandler(buttonAClickHandler);
     buttonA.setReleaseHandler(buttonAReleaseHandler);
 
-    #ifdef SABER_TWO_BUTTON
-        buttonB.setClickHandler(buttonBClickHandler);
-        buttonB.setReleaseHandler(buttonBReleaseHandler);
-        buttonB.setHoldHandler(buttonBHoldHandler);
-        buttonB.setPressHandler(buttonBPressHandler);
-    #endif
-
-    #ifdef SABER_TWO_BUTTON
-        tester.attach(&buttonA, &buttonB);
-    #else
-        tester.attach(&buttonA, 0);
-    #endif
+    tester.attach(&buttonA, 0);
     #ifdef SABER_UI_START
         tester.attachUI(leds + SABER_UI_START);
     #endif
@@ -214,8 +200,30 @@ void setup() {
         display.display(oledBuffer);
 
         Log.p("OLED display connected.").eol();
-    #elif SABER_DISPLAY == SABER_DISPLAY_7_5
+    #elif SABER_DISPLAY == SABER_DISPLAY_7_5_DEPRECATED
         Log.p("Pixel display init.").eol();
+    #elif SABER_DISPLAY == SABER_DISPLAY_7_5
+        pinMode(PIN_LATCH, OUTPUT);
+        pinMode(PIN_CLOCK, OUTPUT);
+        pinMode(PIN_DATA, OUTPUT);
+
+        // No pin 6
+        // Pin 7 - decimal point - not used
+        dotMatrix.attachCol(0, 5);        // col 1, pin 5
+        dotMatrix.attachCol(1, 1);
+        dotMatrix.attachCol(2, 9);
+        dotMatrix.attachCol(3, 15);
+        dotMatrix.attachCol(4, 14);
+
+        dotMatrix.attachRow(0, 2);
+        dotMatrix.attachRow(1, 13);
+        dotMatrix.attachRow(2, 3);
+        dotMatrix.attachRow(3, 4);
+        dotMatrix.attachRow(4, 12);
+        dotMatrix.attachRow(5, 11);
+        dotMatrix.attachRow(6, 10);
+
+        Log.p("Shifted dot matrix 5x7 init.").eol();
     #elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
         pinMode(PIN_LATCH, OUTPUT);
         pinMode(PIN_CLOCK, OUTPUT);
@@ -234,7 +242,7 @@ void setup() {
         shifted7.attachSegment(5, 3);   // f
         shifted7.attachSegment(6, 1);   // g
         shifted7.attachSegment(7, 14);  // h-dp
-        Log.p("Shifted seven digi init.").eol();
+        Log.p("Shifted seven digit init.").eol();
     #endif
 
     #if defined(SABER_NUM_LEDS)
@@ -273,11 +281,7 @@ void setup() {
     syncToDB();
     ledA.set(true); // "power on" light
 
-    #ifdef SABER_TWO_BUTTON
-    buttonB.setHoldRepeats(true);  // volume repeats
-    #else
     buttonA.setHoldRepeats(true);  // everything repeats!!
-    #endif
 
     #ifdef SABER_UI_BRIGHTNESS
         dotstarUI.SetBrightness(SABER_UI_BRIGHTNESS);
@@ -296,7 +300,6 @@ void setup() {
 uint32_t calcReflashTime() {
     return millis() + random(500) + 200;
 }
-
 
 /*
    The saberDB is the source of truth. (The Model.)
@@ -324,17 +327,6 @@ void buttonAReleaseHandler(const Button& b)
 {
     ledA.blink(0, 0);
     ledA.set(true); // power is on.
-
-    #ifdef SABER_LOCK
-        if (bladeState.bladeOn()) {
-            uint32_t holdTime = millis() - b.pressedTime();
-            //Log.p("holdTime: ").p(holdTime).eol();
-            if (holdTime >= b.holdThreshold()) {
-                unlocked = millis();
-                EventQ.event("[unlocked]");
-            }
-        }
-    #endif
 }
 
 bool setVolumeFromHoldCount(int count)
@@ -362,91 +354,6 @@ void retractBlade()
         sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
     }
 }
-
-#ifdef SABER_TWO_BUTTON
-
-void buttonAClickHandler(const Button&)
-{
-    //Log.p("buttonAClickHandler...");
-    // Special case: color switch.
-    if (bladeState.state() == BLADE_ON && buttonB.isDown()) {
-        //Log.p("palette change.").eol();
-        saberDB.nextPalette();
-        paletteChange = true;
-        syncToDB();
-    }
-    else {
-        #ifdef SABER_LOCK
-            if (millis() - unlocked <= Button::DEFAULT_HOLD_TIME) {
-                retractBlade();
-            }
-            else 
-        #endif
-            {
-                int32_t vbat = voltmeter.averagePower();
-                EventQ.event("[Vbat]", vbat);
-                ledA.blink(AveragePower::vbatToPowerLevel(vbat), INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
-            }
-    }
-}
-
-
-void buttonAHoldHandler(const Button&) {
-    //Log.p("buttonAHoldHandler").eol();
-    if (bladeState.state() == BLADE_OFF) {
-        igniteBlade();
-    }
-    else if (bladeState.state() != BLADE_RETRACT) {
-        #ifdef SABER_LOCK
-            // see buttonAReleaseHandler
-        #else
-            retractBlade();
-        #endif
-    }
-}
-
-void buttonBPressHandler(const Button&) {
-    paletteChange = false;
-}
-
-void buttonBHoldHandler(const Button& button) {
-    //Log.p("buttonBHoldHandler").eol();
-    if (bladeState.state() != BLADE_OFF) {
-        if (!paletteChange) {
-            bladeState.change(BLADE_FLASH);
-            sfx.playSound(SFX_USER_HOLD, SFX_OVERRIDE);
-            flashOnClash = true;
-            reflashTime = calcReflashTime();
-        }
-    }
-    else if (bladeState.state() == BLADE_OFF) {
-        bool on = setVolumeFromHoldCount(button.nHolds());
-        ledB.set(on);
-    }
-}
-
-void buttonBReleaseHandler(const Button& b) {
-    if (flashOnClash && bladeState.state() != BLADE_OFF) {
-        sfx.playSound(SFX_IDLE, SFX_OVERRIDE);
-    }
-    flashOnClash = false;
-    if (ledB.blinking()) {
-        ledB.blink(0, 0);
-    }
-    syncToDB();
-}
-
-void buttonBClickHandler(const Button&) {
-    //Log.p("buttonBClickHandler").eol();
-    if (bladeState.state() == BLADE_ON) {
-        if (!paletteChange) {
-            bladeState.change(BLADE_FLASH);
-            sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
-        }
-    }
-}
-
-#else
 
 bool setPaletteFromHoldCount(int count)
 {
@@ -527,15 +434,9 @@ void buttonAHoldHandler(const Button& button)
     }
 }
 
-#endif
-
 bool buttonsReleased()
 {
-    #ifdef SABER_TWO_BUTTON
-        return !buttonA.isDown() && !buttonB.isDown();
-    #else
-        return !buttonA.isDown();
-    #endif
+    return !buttonA.isDown();
 }
 
 void serialEvent() {
@@ -641,10 +542,6 @@ void loop() {
 
     buttonA.process();
     ledA.process();
-    #ifdef SABER_TWO_BUTTON
-    buttonB.process();
-    ledB.process();
-    #endif
     #ifdef SABER_COMRF24
     processCom(delta);
     #endif
@@ -692,8 +589,11 @@ void loopDisplays(uint32_t msec, uint32_t delta)
         #if SABER_DISPLAY == SABER_DISPLAY_128_32
             sketcher.Draw(&renderer, displayTimer.period(), uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
             display.display(oledBuffer);
+        #elif SABER_DISPLAY == SABER_DISPLAY_7_5_DEPRECATED
+            display75.Draw(msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
         #elif SABER_DISPLAY == SABER_DISPLAY_7_5
             display75.Draw(msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
+            dotMatrix.setFrom7_5(display75.Pixels());
         #elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
             digit4UI.Draw(uiMode.mode(), &uiRenderData);
             shifted7.set(digit4UI.Output().c_str());
@@ -704,8 +604,45 @@ void loopDisplays(uint32_t msec, uint32_t delta)
     }
 
     // Now loop() the specific display.
-    #if SABER_DISPLAY == SABER_DISPLAY_7_5
+    #if SABER_DISPLAY == SABER_DISPLAY_7_5_DEPRECATED
         pixelMatrix.loop(msec, display75.Pixels());
+    #elif SABER_DISPLAY == SABER_DISPLAY_7_5
+        {
+            uint8_t a=0, b=0;
+            dotMatrix.loop(micros(), &a, &b);
+
+            // For columns / anodes.
+            //uint16_t bits = 0;  // all rows
+            //bits |= (1<<5); // column 1
+            //bits |= (1<<1); // column 2qq
+            //bits |= (1<<9); // column 3 - note the bit skip!! pin 8
+            //bits |= (1<<15); // column 4
+            //bits |= (1<<14); // column 5
+
+            /*
+            // For rows / cathodes.
+            uint16_t bits = ~((1<<1) | (1<<9) | (1<<15) | (1<<14));
+            //bits ^= (1<<2);
+            //bits ^= (1<<13);
+            //bits ^= (1<<3);
+            //bits ^= (1<<4);
+            //bits ^= (1<<12);
+            //bits ^= (1<<11);
+            bits ^= (1<<10);
+            */
+            
+            //a = bits & 0xff;
+            //b = bits >> 8;  
+           
+            digitalWrite(PIN_LATCH, LOW);
+            shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, a);
+            shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, b);
+            digitalWrite(PIN_LATCH, HIGH);
+
+            // digitalWrite(PIN_LATCH, LOW);
+            // digitalWrite(PIN_CLOCK, LOW);
+            // digitalWrite(PIN_DATA, HIGH);
+        }
     #elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
         {
             uint8_t a=0, b=0;

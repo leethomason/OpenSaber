@@ -11,6 +11,7 @@
 #include "assets.h"
 #include "sketcher.h"
 #include "../saber/unittest.h"
+#include "../saber/rgb.h"
 
 Sketcher sketcher;
 static const int WIDTH = 128;
@@ -46,6 +47,8 @@ int main(int, char**) {
 	Renderer display;
 	display.Attach(WIDTH, HEIGHT, oled.Buffer());
 	Pixel_7_5_UI pixel75;
+    RGB dotstarLEDS[8];
+    DotStarUI dotstarUI;
 
 	SDL_SetRenderDrawColor(ren, 128, 128, 128, 255);
 
@@ -64,13 +67,29 @@ int main(int, char**) {
 	bool bladeOn = false;
 	int count = 0;
 	uint32_t lastUpdate = SDL_GetTicks();
-	bool oledMode = false;
+
+    enum {
+        RENDER_OLED,
+        RENDER_MATRIX,
+        RENDER_DOTSTAR,
+        NUM_RENDER_MODE
+    };
+	int renderMode = RENDER_OLED;
 
 	const char* FONT_NAMES[8] = {
-		"Bespin", "Vader", "Vader", "ObiAni", "Bespin", "JainaSw", "Maul", "MAUL"
+		"Bespin", "Tatoine", "Jaina", "Vader", "ObiAni", "Bespin", "JainaSw", "Sentinel"
 	};
-	uint8_t COLORS[8] = { 0, 255, 100, 200, 255, 0, 20, 120 };
-	data.color.set(COLORS[0], COLORS[1], COLORS[2]);
+    RGB colors[8] = {
+        RGB(0, 255, 0),
+        RGB(0, 0, 255),
+        RGB(0, 255, 255),
+        RGB(255, 0, 0),
+        RGB(128, 0, 255),
+        RGB(255, 0, 255),
+        RGB(0, 255, 128),
+        RGB(255, 255, 0)
+    };
+    data.color = colors[0];
 
 	int palette = 0;
 
@@ -83,15 +102,12 @@ int main(int, char**) {
 			if (e.key.keysym.sym >= SDLK_1 && e.key.keysym.sym <= SDLK_8) {
 				scale = e.key.keysym.sym - SDLK_0;
 			}
-			else if (e.key.keysym.sym == SDLK_SPACE) {
-				if (mode.mode() == UIMode::NORMAL && !bladeOn) {
-					bladeOn = true;
-				}
-				else {
-					bladeOn = false;
-					mode.nextMode();
-				}
-			}
+            else if (e.key.keysym.sym == SDLK_SPACE) {
+                mode.nextMode();
+            }
+            else if (e.key.keysym.sym == SDLK_i) {
+                bladeOn = !bladeOn;
+            }
 			else if (e.key.keysym.sym == SDLK_p) {
 				data.power = (data.power + 1) % 5;
 				data.mVolts = 3000 + data.power * 111;
@@ -100,15 +116,15 @@ int main(int, char**) {
 				data.volume = (data.volume + 1) % 5;
 			}
 			else if (e.key.keysym.sym == SDLK_o) {
-				oledMode = !oledMode;
+                renderMode++;
+                if (renderMode == NUM_RENDER_MODE)
+                    renderMode = 0;
 			}
 			else if (e.key.keysym.sym == SDLK_c) {
 				palette = (palette + 1) % 8;
-				data.color.set(COLORS[(palette * 3 + 0) % 8],
-					COLORS[(palette * 2 + 1) % 8],
-					COLORS[(palette * 5 + 2) % 8]);
+                data.palette = palette;
+                data.color = colors[palette];
 				data.fontName = FONT_NAMES[palette];
-				data.palette = palette;
 			}
 		}
 
@@ -117,18 +133,12 @@ int main(int, char**) {
 			lastUpdate = t;
 			uint8_t value = int(127.8 * (sin(count * 0.2) + 1.0));
 			++count;
+
 			sketcher.Push(value);
 			sketcher.Draw(&display, 100, mode.mode(), bladeOn, &data);
 			pixel75.Draw(t, mode.mode(), bladeOn, &data);
+            dotstarUI.Draw(dotstarLEDS, mode.mode(), bladeOn, data);
 		}
-
-        if (!oledMode) {
-            oled.Clear();
-            memcpy(oled.Buffer(), pixel75.Pixels(), 8);
-            oled.Commit();
-        }
-        
-        oled.Commit();
 
 		const SDL_Rect src = { 0, 0, WIDTH, HEIGHT };
 		SDL_Rect winRect;
@@ -136,6 +146,16 @@ int main(int, char**) {
 		const int w = WIDTH * scale;
 		const int h = HEIGHT * scale;
 		SDL_Rect dst = { (winRect.w - w) / 2, (winRect.h - h) / 2, w, h };
+
+        if (renderMode == RENDER_OLED) {
+            oled.Commit();
+        }
+        else if (renderMode == RENDER_MATRIX) {
+            oled.CommitFrom5x7(pixel75.Pixels());
+        }
+        else if (renderMode == RENDER_DOTSTAR) {
+            oled.CommitFromDotstar(dotstarLEDS, 4);
+        }
 
 		SDL_RenderClear(ren);
 		SDL_UpdateTexture(texture, NULL, oled.Pixels(), WIDTH * 4);
