@@ -69,8 +69,6 @@ bool AudioPlayer::play(const char* filename)
         ASSERT(okay);
     }
 
-    //Serial.print("AudioPlayer::play: "); Serial.println(filename);// Serial.print(" len(ms)="); Serial.println(playWav.lengthMillis());
-    // remember, about a 5ms warmup for header to be loaded and start playing.
     m_startPlayingTime = millis();
     setShutdown();
     return okay;

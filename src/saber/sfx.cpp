@@ -86,7 +86,6 @@ void SFX::scanFonts()
 {
     m_numFonts = 0;
  
-    //  Serial.println("scanFonts()");
 #if (SABER_SOUND_ON == SABER_SOUND_SD)
     // Scan for a sound font with a limited, reasonable set of files.
     static const int N = 4;
@@ -136,7 +135,6 @@ void SFX::scanFiles(uint8_t index)
     memset(m_location, 255, sizeof(SFXLocation)*NUM_SFX_TYPES);
     m_numFilenames = 0;
 
-    //  Serial.print("scanFiles "); Serial.println(index);
 #if (SABER_SOUND_ON == SABER_SOUND_SD)
     File root = SD.open(m_dirName[index].c_str());
     while (true) {
@@ -504,7 +502,6 @@ uint8_t SFX::getVolume204() const
 
 uint8_t SFX::setFont(uint8_t font)
 {
-    //Serial.print("setFont "); Serial.println(font);
 #if SABER_SOUND_ON == SABER_SOUND_FLASH
     font = 0;
 #endif

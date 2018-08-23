@@ -104,9 +104,11 @@ PixelMatrix pixelMatrix;
 #elif SABER_DISPLAY == SABER_DISPLAY_7_5
 Pixel_7_5_UI display75;
 ShiftedDotMatrix dotMatrix;
+#define SHIFTED_OUTPUT
 #elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
 ShiftedSevenSegment shifted7;
 Digit4UI digit4UI;
+#define SHIFTED_OUTPUT
 #endif
 
 #ifdef SABER_COMRF24
@@ -150,6 +152,23 @@ void setupSD()
 }
 
 void setup() {
+    #if defined(SHIFTED_OUTPUT)
+        // I'm a little concerned about power draw on the display, in some states.
+        // Do this first thing.
+        digitalWrite(PIN_LATCH, LOW);
+        digitalWrite(PIN_CLOCK, LOW);
+        digitalWrite(PIN_DATA, LOW);
+
+        pinMode(PIN_LATCH, OUTPUT);
+        pinMode(PIN_CLOCK, OUTPUT);
+        pinMode(PIN_DATA, OUTPUT);
+
+        digitalWrite(PIN_LATCH, LOW);
+        shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, 0);
+        shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, 0);
+        digitalWrite(PIN_LATCH, HIGH);
+    #endif
+
     Serial.begin(19200);  // still need to turn it on in case a command line is connected.
     #if SERIAL_DEBUG == 1
     {
@@ -171,7 +190,9 @@ void setup() {
     Log.p("setup()").eol(); 
 
     accel.begin();
+    delay(10);
     voltmeter.begin();
+    delay(10);
     blade.setRGB(RGB::BLACK);
 
     buttonA.setHoldHandler(buttonAHoldHandler);
@@ -183,6 +204,7 @@ void setup() {
         tester.attachUI(leds + SABER_UI_START);
     #endif
     tester.attachDB(&saberDB);
+    tester.attachAccel(&accel);
 
     #ifdef SABER_SOUND_ON
         if (wavSource) {
@@ -203,10 +225,6 @@ void setup() {
     #elif SABER_DISPLAY == SABER_DISPLAY_7_5_DEPRECATED
         Log.p("Pixel display init.").eol();
     #elif SABER_DISPLAY == SABER_DISPLAY_7_5
-        pinMode(PIN_LATCH, OUTPUT);
-        pinMode(PIN_CLOCK, OUTPUT);
-        pinMode(PIN_DATA, OUTPUT);
-
         // No pin 6
         // Pin 7 - decimal point - not used
         dotMatrix.attachCol(0, 5);        // col 1, pin 5
@@ -225,10 +243,6 @@ void setup() {
 
         Log.p("Shifted dot matrix 5x7 init.").eol();
     #elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
-        pinMode(PIN_LATCH, OUTPUT);
-        pinMode(PIN_CLOCK, OUTPUT);
-        pinMode(PIN_DATA, OUTPUT);
-
         shifted7.attachDigit(0, 10);
         shifted7.attachDigit(1, 4);
         shifted7.attachDigit(2, 13);
@@ -242,6 +256,7 @@ void setup() {
         shifted7.attachSegment(5, 3);   // f
         shifted7.attachSegment(6, 1);   // g
         shifted7.attachSegment(7, 14);  // h-dp
+
         Log.p("Shifted seven digit init.").eol();
     #endif
 

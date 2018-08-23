@@ -50,16 +50,16 @@ public:
 
     // Returns columns.
     // So this will a pointer to 7 bytes.
-	const uint8_t* Pixels() { return col; }
+	const uint8_t* Pixels() { return m_col; }
 
 private:
-	void DrawBar(uint8_t* c, int v);
+	void DrawBar(int x, int y);
 	void DrawDot(int x, int y);
 
-	static const int NCOLS = 7;
 	static const int NROWS = 5;
+	static const int NCOLS = 7;
     static const int ALLOCATED = NCOLS + 1;
-	uint8_t col[ALLOCATED];		// enough memory for writing the glyphs 4+4 bytes
+	uint8_t m_col[ALLOCATED];		// enough memory for writing the glyphs 4+4 bytes
 };
 
 

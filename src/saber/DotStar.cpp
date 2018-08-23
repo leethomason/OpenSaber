@@ -50,7 +50,6 @@ void DotStar::display()
 
 void DotStar::displaySPI()
 {
-	//Serial.print("display nLeds="); Serial.println(m_nLEDs);
 	SPI.beginTransaction(dotstarSettings);
 	if (m_enable != 255)
 		digitalWrite(m_enable, HIGH);
@@ -83,7 +82,6 @@ void DotStar::displaySPI()
 
 void DotStar::displaySW()
 {
-	//Serial.print("display nLeds="); Serial.println(m_nLEDs);
 	if (m_enable != 255)
 		digitalWrite(m_enable, HIGH);
 

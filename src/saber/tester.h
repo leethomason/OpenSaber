@@ -9,6 +9,7 @@ struct ButtonCBHandlers;
 class Tester;
 struct RGB;
 class SaberDB;
+class Accelerometer;
 
 class Test
 {
@@ -34,6 +35,7 @@ public:
 	void attach(Button* buttonA, Button* buttonB);
 	void attachUI(const RGB* uiLEDs) { leds = uiLEDs; }
 	void attachDB(SaberDB* _saberDB) { saberDB = _saberDB; }
+	void attachAccel(Accelerometer* _accel) { accel = _accel; }
 
 	void runTests();
 	void process();
@@ -47,6 +49,7 @@ public:
 	uint32_t getRandom() { return r.rand16(); }
 	const RGB* getLEDs() const { return leds; }
 	SaberDB* getSaberDB() { return saberDB; }
+	Accelerometer* getAccelerometer() { return accel; }
 
 	int getOrder() const { return order; }
 	void incrementOrder() { order++; }
@@ -68,6 +71,7 @@ private:
 	const RGB* leds = 0;
 	SaberDB* saberDB = 0;
 	int order = 0;
+	Accelerometer* accel = 0;
 
 	struct Press {
 		uint32_t start;
