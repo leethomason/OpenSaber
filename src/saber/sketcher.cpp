@@ -471,7 +471,7 @@ bool TestCrystalColor()
 Pixel_7_5_UI::Pixel_7_5_UI()
 {
     for (int i = 0; i < ALLOCATED; ++i)
-        col[i] = 0;
+        m_col[i] = 0;
 }
 
 /*
@@ -489,34 +489,34 @@ Pixel_7_5_UI::Pixel_7_5_UI()
 void Pixel_7_5_UI::Draw(uint32_t time, UIMode mode, bool bladeIgnited, const UIRenderData* data)
 {
 	for (int i = 0; i < ALLOCATED; ++i)
-		col[i] = 0;
+		m_col[i] = 0;
 
 	switch (mode) {
 	case UIMode::NORMAL:
-		getGlypth_tomThumb5('0' + data->palette, col + 0);
-		DrawBar(col + 5, data->power);
-		DrawBar(col + 6, data->volume);
+		getGlypth_tomThumb5('0' + data->palette, m_col + 0);
+		DrawBar(5, data->power);
+		DrawBar(6, data->volume);
 		break;
 
 	case UIMode::PALETTE:
-        getGlypth_tomThumb5('0' + data->palette, col + 4);
-        DrawBar(col + 0, data->color.r / 50);
-        DrawBar(col + 1, data->color.g / 50);
-        DrawBar(col + 2, data->color.b / 50);
+        getGlypth_tomThumb5('0' + data->palette, m_col + 4);
+        DrawBar(0, data->color.r / 50);
+        DrawBar(1, data->color.g / 50);
+        DrawBar(2, data->color.b / 50);
         break;
 
 	case UIMode::VOLUME:
-		getGlypth_tomThumb5('V', col);
-        DrawBar(col + 4, data->volume);
-        DrawBar(col + 5, data->volume);
-        DrawBar(col + 6, data->volume);
+		getGlypth_tomThumb5('V', m_col);
+        DrawBar(4, data->volume);
+        DrawBar(5, data->volume);
+        DrawBar(6, data->volume);
         break;
 
     case UIMode::MEDITATION:
-        col[0] = col[6] = 0x0e;
-        col[1] = col[5] = 0x19;
-        col[2] = col[4] = 0x10;
-        col[3]          = 0x1f;
+        m_col[0] = m_col[6] = 0x0e;
+        m_col[1] = m_col[5] = 0x19;
+        m_col[2] = m_col[4] = 0x10;
+        m_col[3]            = 0x1f;
         break;
 
 	default:
@@ -525,11 +525,11 @@ void Pixel_7_5_UI::Draw(uint32_t time, UIMode mode, bool bladeIgnited, const UIR
 }
 
 
-void Pixel_7_5_UI::DrawBar(uint8_t* c, int v)
+void Pixel_7_5_UI::DrawBar(int x, int y)
 {
-    if (v > 5) v = 5;
+	uint8_t* c = m_col + x;
 	*c = 0;
-	for (int i = 0; i < v; ++i) {
+	for (int i = 0; i < y; ++i) {
 		*c |= (16 >> i);
 	}
 }
@@ -537,7 +537,7 @@ void Pixel_7_5_UI::DrawBar(uint8_t* c, int v)
 
 void Pixel_7_5_UI::DrawDot(int x, int y)
 {
-	col[x] |= (16 >> y);
+	m_col[x] |= (16 >> y);
 }
 
 

@@ -189,11 +189,6 @@ bool SaberDB::readData() {
 
     EEPROM.get(headerAddr(), dataHeader);
     EEPROM.get(paletteAddr(dataHeader.currentPalette), palette);
-    /*
-    Serial.print(F("Data header. currentPalette=")); Serial.print(dataHeader.currentPalette);
-    Serial.print(F(" soundOn=")); Serial.println(dataHeader.soundOn);
-    Serial.print(F("RGB ")); Serial.print(palette.bladeColor[0]); Serial.print(" "); Serial.print(palette.bladeColor[1]); Serial.print(" "); Serial.println(palette.bladeColor[2]);
-    */
     setupInit();
     return true;
 }

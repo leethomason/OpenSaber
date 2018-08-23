@@ -8,6 +8,7 @@
 #include "voltmeter.h"
 #include "unittest.h"
 #include "saberdb.h"
+#include "accelerometer.h"
 
 #include "Button.h"
 #include "Grinliz_Arduino_Util.h"
@@ -285,6 +286,60 @@ public:
 };
 
 
+class AccelerometerTest : public Test
+{
+public:
+
+	static const int GOAL = 100;
+	int nSamples;
+    float ax, ay, az, g2, g2normal;
+    bool jitter;
+    Accelerometer* accel = 0;
+
+    virtual const char* name() const {
+        return "AccelerometerTest";
+    }
+
+    virtual void start(Tester* tester)
+    {
+        nSamples = 0;
+        accel = tester->getAccelerometer();
+        ASSERT(accel);
+        accel->read(&ax, &ay, &az, &g2, &g2normal);
+        jitter = false;
+    }
+
+    virtual int process(Tester* tester, EventQueue* queue)
+    {
+        delay(10);
+
+        EventQueue::Event e;
+        while (queue->hasEvent()) {
+         	e = queue->popEvent();
+        }
+        float _ax = 0, _ay = 0, _az = 0, _g2 = 0, _g2normal = 0;
+        accel->read(&_ax, &_ay, &_az, &_g2, &_g2normal);
+        if (ax != _ax || ay != _ay || az != _az) {
+            jitter = true;  // If all the values come back the same, can be a connection / wiring / short issue.
+        }
+        TEST_RANGE( 0.9f, 1.1f, g2);
+
+        ax = _ax;
+        ay = _ay;
+        az = _az;
+        g2 = _g2;
+        g2normal = _g2normal;
+
+        ++nSamples;
+        if (nSamples == GOAL) {
+            TEST_IS_TRUE(jitter);
+            return TEST_SUCCESS;
+        }
+        return TEST_CONTINUE;
+    }
+};
+
+
 class ButtonTest : public Test
 {
 public:
@@ -342,6 +397,7 @@ IgniteRetractTest igniteRetractTest;
 ChannelTest channelTest;
 BlasterTest blasterTest;
 AveragePowerTest averagePowerTest;
+AccelerometerTest accelerometerTest;
 
 Test* gTests[] = {
     &buttonTest,
@@ -349,6 +405,7 @@ Test* gTests[] = {
     &channelTest,
     &blasterTest,
     &averagePowerTest,
+    &accelerometerTest,
     0
 };
 

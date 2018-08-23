@@ -52,18 +52,6 @@ void Blade::setRGB(const RGB& input)
         color[i] = input[i];
         int32_t v = LED_RANGE * f1000[i] * int32_t(input[i]) / DIV;
         pwm[i] = constrain(v, 0, 255);  // just in case...
-
-#if SERIAL_DEBUG == 1
-        /*
-          Serial.print("setRGB:");
-          Serial.print(i);
-          Serial.print(" input:" ); Serial.print(input[i]);
-          Serial.print(" f:"); Serial.print(f1000[i]);
-          Serial.print(" v:"); Serial.print(v);
-          Serial.print(" div:"); Serial.print(DIV);
-          Serial.print(" output:"); Serial.println(prime);
-        */
-#endif
         analogWrite(pinRGB[i], pwm[i]);
     }
 }
