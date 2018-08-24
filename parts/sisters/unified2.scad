@@ -6,8 +6,8 @@ $fn = 90;
 EPS = 0.01;
 EPS2 = EPS * 2;
 
-DRAW_AFT = true;
-DRAW_FRONT = false;
+DRAW_AFT = false;
+DRAW_FRONT = true;
 
 JOINT_ANGLE = -20;
 T = 4;
@@ -98,11 +98,19 @@ if (DRAW_FRONT) {
         DZ = M_LED_HOLDER_FRONT - M_TRANSITION;
         union() {              
             // Front heatsink holder.
-            translate([0, 0, M_LED_HOLDER_BACK]) dynamicHeatSinkHolder(D_FORWARD);
+            translate([0, 0, M_LED_HOLDER_BACK]) 
+                dynamicHeatSinkHolder(D_FORWARD);
 
             // The front body
-            translate([0, 0, M_TRANSITION]) 
+            translate([0, 0, M_TRANSITION]) {
                 tube(h=DZ, do=D_FORWARD, di=D_FORWARD_INNER);
+            }
+
+            translate([0, 0, M_TRANSITION]) intersection() {
+                cylinder(h=DZ, d=D_FORWARD);
+                translate([-20, D_FORWARD/2 - 5, 0])
+                    cube(size=[40, 5, M_LED_HOLDER_BACK - M_TRANSITION]);
+            }
 
             // overlap ring
             translate([0, 0, M_TRANSITION - OVERLAP]) {

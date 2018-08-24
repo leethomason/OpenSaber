@@ -499,7 +499,6 @@ module switchRing(outer, t, dz, dzToSwitch)
     }
 }
 
-
 function nBafflesNeeded(dzButtress) = ceil(Z_PADDED_BATTERY / (dzButtress*2));
 
 function zLenOfBaffles(n, dzButtress) = n * dzButtress * 2 - dzButtress;
