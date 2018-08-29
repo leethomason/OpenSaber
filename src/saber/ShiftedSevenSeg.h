@@ -26,8 +26,15 @@ public:
 
     // Attach digit 0-3 to output 0-15 of the shift register.
     void attachDigit(int digit, int bit);
+    void attachDigit(int count, const uint8_t* bits) {
+        for(int i=0; i<count; ++i) attachDigit(i, int(bits[i]));
+    }
+
     // Attach segment 0-7 (a-h) to output 0-15 of the shift register.
     void attachSegment(int segment, int bit);
+    void attachSegment(int count, const uint8_t* bits) {
+        for(int i=0; i<count; ++i) attachSegment(i, int(bits[i]));
+    }
 
     void set(const char* str);
 
@@ -55,7 +62,13 @@ public:
 
     // Attach row/col to output 0-15 of the shift register.
     void attachRow(int row, int bit) { m_rowMap[row] = uint8_t(bit); }   // 7 rows, cathodes
+    void attachRow(int count, const uint8_t* rows) {
+        for(int i=0; i<count; ++i) attachRow(i, int(rows[i]));
+    }
     void attachCol(int col, int bit) { m_colMap[col] = uint8_t(bit); }   // 5 columns, anodes.
+    void attachCol(int count, const uint8_t* cols) {
+        for(int i=0; i<count; ++i) attachCol(i, int(cols[i]));
+    }
 
     void loop(uint32_t microSeconds, uint8_t* a, uint8_t* b);
 
