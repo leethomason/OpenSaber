@@ -75,8 +75,10 @@ if (DRAW_FRONT) {
                         holeAccess = false
             );
 
-            CUT_DX_V2 = 24;
+            CUT_DX_V2 = 28;
             translate([-CUT_DX_V2/2, 4, 0]) cube(size=[CUT_DX_V2, 50, 20]);
+            CUT_DX_V3 = 50;
+            translate([-CUT_DX_V3/2, 4 + 1.5, 0]) cube(size=[CUT_DX_V3, 50, 20]);
             
             // Space for the LED to slide in....
             //LED_X = 19;
