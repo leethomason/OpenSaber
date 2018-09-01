@@ -159,22 +159,22 @@ DOTSTAR_XZ = 5.6;
 DOTSTAR_PITCH = 7;
 DOTSTAR_STRIP_XZ = 12.4;
 
-module dotstarLED(n, dy)
+module dotstarLED(n, dy, pitch=DOTSTAR_PITCH)
 {
     for(i=[0:n-1]) {
-        translate([-DOTSTAR_XZ/2, 0, DOTSTAR_PITCH*i - DOTSTAR_XZ/2]) {
+        translate([-DOTSTAR_XZ/2, 0, pitch * i - DOTSTAR_XZ/2]) {
             cube(size=[DOTSTAR_XZ, dy, DOTSTAR_XZ]);
         }
     }
 }
 
 
-module dotstarStrip(n, y0=0, y1=1)
+module dotstarStrip(n, y0=0, y1=1, pitch=DOTSTAR_PITCH)
 {
     translate([-DOTSTAR_STRIP_XZ/2, y0, -DOTSTAR_STRIP_XZ/2]) {
         cube(size=[ DOTSTAR_STRIP_XZ, 
                     y1 - y0,
-                    DOTSTAR_STRIP_XZ + DOTSTAR_PITCH * (n-1)]);
+                    DOTSTAR_STRIP_XZ + pitch * (n-1)]);
     }
 }
 
