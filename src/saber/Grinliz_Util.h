@@ -342,14 +342,14 @@ Sin wave.
 Input: 0-255 (range will be clipped correctly.)
 Output: [-256, 256]
 */
-int16_t isin(uint16_t x);
+int16_t iSin(uint16_t x);
 
 /**
 Sin wave.
 Input: 0-255 (range will be clipped correctly.)
 Output: [0, 255]
 */
-uint8_t isin255(uint16_t x);
+uint8_t iSin255(uint16_t x);
 
 /* Generally try to keep Ardunino and Win332 code very separate.
 But a log class is useful to generalize, both for utility

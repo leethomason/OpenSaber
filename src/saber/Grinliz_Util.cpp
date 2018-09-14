@@ -27,24 +27,35 @@ bool TestUtil()
 	TEST_IS_EQ(lerpU8(0, 255, 0), 0);
 	TEST_IS_EQ(lerpU8(0, 255, 255), 255);
 
-	return true;
+    // iSin, iSin255 madness
+    TEST_IS_EQ(iSin(0), 0);
+    TEST_IS_EQ(iSin(64), 256);
+    TEST_IS_EQ(iSin(128), 0);
+    TEST_IS_EQ(iSin(192), -256);
+
+    TEST_IS_EQ(iSin255(0), 127);
+    TEST_IS_EQ(iSin255(64), 255);
+    TEST_IS_EQ(iSin255(128), 127);
+    TEST_IS_EQ(iSin255(192), 0);
+    
+    return true;
 }
 
-int16_t isin(uint16_t x)
+int16_t iSin(uint16_t x)
 {
 	if (gSinTable[64] == 0) {
 		for (int i = 0; i < 256; ++i) {
 			float x = 2 * 3.14159f * float(i) / 256.0f;
-			gSinTable[i] = int16_t(sin(x) * 256.0f);
+			gSinTable[i] = int16_t(sin(x) * 256.5f);    // add the 0.5 so that the rounding works
 		}
 	}
 	return gSinTable[x & 0xff];
 }
 
-uint8_t isin255(uint16_t x)
+uint8_t iSin255(uint16_t x)
 {
-	uint32_t s = uint32_t(isin(x) + 256);	// 0-512
-	s = s * uint32_t(255) / uint32_t(512);  // 0-255
+	uint32_t s = uint32_t(iSin(x) + 256);	// 0-512
+	s = (s * uint32_t(255)) >> 9;  // 0-255
 	return uint8_t(s);
 }
 

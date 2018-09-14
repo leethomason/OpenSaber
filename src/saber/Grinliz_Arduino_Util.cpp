@@ -70,7 +70,7 @@ void LEDManager::process()
             if (m_style == BLINK_BREATH) {
                 uint32_t dt = dMillis - (n * m_cycle);
                 uint32_t normal128 = uint32_t(128) * dt / m_cycle;  // [0, 128)
-                int16_t sinVal = isin(normal128);   // [0, -256]
+                int16_t sinVal = iSin(normal128);   // [0, -256]
                 int16_t val = 255 - sinVal;
                 if (val < 0) val = 0;
                 if (val > 255) val = 255;
