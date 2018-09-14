@@ -387,6 +387,8 @@ private:
 class EventQueue
 {
 public:
+    // Note that the event is stored *by pointer*, so the 
+    // string needs to be in static memory.
 	void event(const char* event, int data = 0);
 
 	struct Event {
@@ -396,10 +398,11 @@ public:
 
 	Event popEvent();
 	bool hasEvent() const { return m_nEvents > 0; }
-	void setEventLogging(bool enable) { m_eventLogging = enable; }
-
 	int numEvents() const			{ return m_nEvents; }
 	const Event& peek(int i) const;
+
+    // For testing.
+    void setEventLogging(bool enable) { m_eventLogging = enable; }
 
 private:
 	static const int NUM_EVENTS = 8;
