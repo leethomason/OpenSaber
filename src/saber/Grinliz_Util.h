@@ -277,25 +277,29 @@ inline void combSort(T* mem, int size)
 class Random
 {
 public:
-	Random() : s0(1234), s1(5678) {}
-	void setSeed(uint32_t s) {
-		s0 = s;
-		s1 = s + 5678;
+	Random() : s(1) {}
+
+	void setSeed(uint32_t seed) {
+		s = (seed > 0) ? seed : 1;
 	}
 
-	uint32_t rand16() {
-		s0 = (s0 * 10103) & 0xffff;
-		s1 = (s1 * 1103) & 0xffff;
-		return s0 ^ s1;
+	uint32_t rand() {
+		// Xorshift
+        // My new favorite P-RNG
+		s ^= s << 13;
+		s ^= s >> 17;
+		s ^= s << 5;
+		return s;
 	}
 
-	uint32_t rand16(uint32_t limit) {
-		return rand16() % limit;
+	uint32_t rand(uint32_t limit) {
+		return rand() % limit;
 	}
+
+    static bool Test();
 
 private:
-	uint32_t s0;
-	uint32_t s1;
+	uint32_t s;
 };
 
 

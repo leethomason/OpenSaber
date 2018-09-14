@@ -388,6 +388,30 @@ int Timer2::tick(uint32_t delta)
 	return true;
 }
 
+/* static */ bool Random::Test()
+{
+    static const int SAMPLES = 1000;
+    static const uint32_t SERIES[] = { 2, 16, 100, 1000, 0 };
+    Random r;
+
+    for (int s = 0; SERIES[s]; ++s) {
+        uint32_t range = SERIES[s];
+
+        const uint32_t half = range / 2;
+        int lessThanHalf = 0;
+        int greaterThanHalf = 0;
+
+        for (int i = 0; i < SAMPLES; ++i) {
+            uint32_t v = r.rand(range);
+            if (v < half) ++lessThanHalf;
+            else ++greaterThanHalf;
+        }
+        TEST_IS_TRUE(greaterThanHalf >= SAMPLES * 4 / 10);  // 40%
+        TEST_IS_TRUE(lessThanHalf >= SAMPLES * 4 / 10);
+    }
+    return true;
+}
+
 void EventQueue::event(const char* e, int data)
 {
 	ASSERT(e);

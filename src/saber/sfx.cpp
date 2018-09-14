@@ -289,7 +289,7 @@ bool SFX::playSound(int sound, int mode, bool playIfOff)
             || (mode == SFX_GREATER && sound > m_currentSound)
             || (mode == SFX_GREATER_OR_EQUAL && sound >= m_currentSound))
     {
-        int track = m_location[sound].start + random(m_location[sound].count);
+        int track = m_location[sound].start + m_random.rand(m_location[sound].count);
         ASSERT(track >= 0);
         ASSERT(track < m_numFilenames);
 

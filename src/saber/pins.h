@@ -54,7 +54,7 @@ SOFTWARE.
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
+#define SERIAL_DEBUG 				1
 #define SABER_MODEL 				SABER_MODEL_SISTER_2
 #define SABER_SUB_MODEL				SABER_SUB_MODEL_STANDARD
 // ----------------------------------
@@ -484,7 +484,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_VOLTMETER
 	#define SABER_AUDIO_UI
 	#define SABER_BOOT_SOUND
-	#define PINB_CRYSTAL
 	#define LED_TYPE 				LED_TYPE_GGC
 
 	#define SABER_BUTTON 			Button::INTERNAL_PULLUP

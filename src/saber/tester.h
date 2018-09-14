@@ -46,7 +46,6 @@ public:
 	void fire(const char* event);
 	void press(int button, uint32_t time);
 	void delayedPress(int button, uint32_t wait, uint32_t time);
-	uint32_t getRandom() { return r.rand16(); }
 	const RGB* getLEDs() const { return leds; }
 	SaberDB* getSaberDB() { return saberDB; }
 	Accelerometer* getAccelerometer() { return accel; }
@@ -78,7 +77,6 @@ private:
 		uint32_t end;
 		void reset() { start = end = 0; }
 	};
-	Random r;
 	Press pressState[2];
 	Button* button[2];
 
