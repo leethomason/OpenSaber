@@ -37,7 +37,7 @@ SOFTWARE.
 #define SABER_MODEL_BO				5	// 2 button prop shield
 //#define SABER_MODEL_PROTO 		6	// Burned out; never needed to rebuild.
 #define SABER_MODEL_TANO 			7
-//#define SABER_MODEL_SISTER 			8	// Shield v3, Teensy 3.5, RF24 communication
+//#define SABER_MODEL_SISTER 		8	// Shield v3, Teensy 3.5, RF24 communication
 #define SABER_MODEL_AQUATIC			9
 #define SABER_MODEL_SHOCK2		   10	// Shield v3, Teensy 3.5, Dotstar, Display (woh)
 #define SABER_MODEL_TALI		   11	// Shield v4, Teensy 3.5, Dotstar crystals, bubble display
@@ -54,7 +54,7 @@ SOFTWARE.
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
+#define SERIAL_DEBUG 				0	
 #define SABER_MODEL 				SABER_MODEL_SISTER_2
 #define SABER_SUB_MODEL				SABER_SUB_MODEL_STANDARD
 // ----------------------------------
