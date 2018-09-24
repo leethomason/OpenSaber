@@ -159,22 +159,22 @@ DOTSTAR_XZ = 5.6;
 DOTSTAR_PITCH = 7;
 DOTSTAR_STRIP_XZ = 12.4;
 
-module dotstarLED(n, dy)
+module dotstarLED(n, dy, pitch=DOTSTAR_PITCH)
 {
     for(i=[0:n-1]) {
-        translate([-DOTSTAR_XZ/2, 0, DOTSTAR_PITCH*i - DOTSTAR_XZ/2]) {
+        translate([-DOTSTAR_XZ/2, 0, pitch * i - DOTSTAR_XZ/2]) {
             cube(size=[DOTSTAR_XZ, dy, DOTSTAR_XZ]);
         }
     }
 }
 
 
-module dotstarStrip(n, y0=0, y1=1)
+module dotstarStrip(n, y0=0, y1=1, pitch=DOTSTAR_PITCH)
 {
     translate([-DOTSTAR_STRIP_XZ/2, y0, -DOTSTAR_STRIP_XZ/2]) {
         cube(size=[ DOTSTAR_STRIP_XZ, 
                     y1 - y0,
-                    DOTSTAR_STRIP_XZ + DOTSTAR_PITCH * (n-1)]);
+                    DOTSTAR_STRIP_XZ + pitch * (n-1)]);
     }
 }
 
@@ -630,4 +630,82 @@ module oledHolder(outer, t, dz, dzToPCB, dyPCB)
                 [-OLED_DISPLAY_MOUNT_W/2, OLED_DISPLAY_MOUNT_L + (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L)/2, "buttress" ],
                 [ OLED_DISPLAY_MOUNT_W/2, OLED_DISPLAY_MOUNT_L + (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L)/2, "buttress" ]
               ]);
+}
+
+
+/*
+    Render the front (1", typically) mount for the advanced LED,
+    port, and switch. Designed to be printed z-axis up, with
+    minimal support.
+*/
+module forwardAdvanced(d, dz, overlap, outer, dzToPort, dzToSwitch)
+{
+    LED_DZ = 10.0;    
+    D_INNER = dynamicHeatSinkThread();
+    DIAMETER = d;
+    T = 4;
+
+    difference() {
+        union() {              
+            // Front heatsink holder.
+            translate([0, 0, dz - LED_DZ]) 
+                dynamicHeatSinkHolder(DIAMETER);
+
+            // The front body
+            translate([0, 0, 0]) {
+                tube(h=dz, do=DIAMETER, di=D_INNER);
+            }
+
+            // Thicken top part.
+            {
+                MOUNT = 5.5;
+                
+                difference() 
+                {
+                    intersection() {
+                        cylinder(h=dz, d=DIAMETER);
+                        translate([-20, DIAMETER/2 - MOUNT, 0])
+                            cube(size=[40, MOUNT, dz - LED_DZ]);
+                    }
+                }
+            }
+
+            // overlap ring
+            translate([0, 0, -overlap]) {
+                difference() {
+                    cylinder(h=overlap, d=outer);
+                    //cylinder(h=overlap, d1=DIAMETER, d2=D_INNER);
+                }
+            }
+        }
+        
+        //D = DIAMETER - D_INNER;
+        translate([0, 0, -overlap]) cylinder(h=DIAMETER, d1=DIAMETER, d2=0);
+
+        // Side access.
+        {
+            H = 14;
+            OFFSET = 2;
+            translate([0, 0, 0]) {
+                translate([0, -H/2, OFFSET]) {
+                    cube(size=[50, H, dz - LED_DZ - OFFSET]);
+                    mirror([1,0,0]) cube(size=[50, H, dz - LED_DZ - OFFSET]);
+                }
+            }
+        }
+
+        if (dzToPort) {
+            translate([0, 0, dzToPort]) {
+                port(true);
+                portCounter();
+            }
+        }
+
+        if (dzToSwitch) {
+            translate([0, 0, dzToSwitch]) {
+                switch(DIAMETER, true);
+                switchCounter();
+            }
+        }
+    }
 }

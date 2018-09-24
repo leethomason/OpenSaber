@@ -322,7 +322,8 @@ public:
         if (ax != _ax || ay != _ay || az != _az) {
             jitter = true;  // If all the values come back the same, can be a connection / wiring / short issue.
         }
-        TEST_RANGE( 0.9f, 1.1f, g2);
+        // Surprisingly poor calibation on the accelerometer.
+        TEST_RANGE( 0.8f, 1.2f, g2);
 
         ax = _ax;
         ay = _ay;
@@ -449,7 +450,6 @@ void Tester::start()
 #	ifdef SABER_TWO_BUTTON
     TEST_EXISTS(button[1] != 0);
 #	endif
-    r.setSeed(0);
 
     Log.p("Test start: '").p(test->name()).p("'").eol();
     while(EventQ.hasEvent())

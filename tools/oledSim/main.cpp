@@ -59,7 +59,7 @@ int main(int, char**) {
 	data.fontName = "Bespin";
 
     runUnitTests();
-
+    
 	SDL_Event e;
 	int scale = 4;
 	UIModeUtil mode;

@@ -46,7 +46,6 @@
 #include "sketcher.h"
 #include "renderer.h"
 #include "saberUtil.h"
-#include "comrf24.h"
 #include "tester.h"
 #include "ShiftedSevenSeg.h"
 
@@ -154,14 +153,14 @@ void setupSD()
 void setup() {
     #if defined(SHIFTED_OUTPUT)
         // I'm a little concerned about power draw on the display, in some states.
-        // Do this first thing.
-        digitalWrite(PIN_LATCH, LOW);
-        digitalWrite(PIN_CLOCK, LOW);
-        digitalWrite(PIN_DATA, LOW);
-
+        // Do this first thing - set all the pins to ground so they don't short / draw.
         pinMode(PIN_LATCH, OUTPUT);
         pinMode(PIN_CLOCK, OUTPUT);
         pinMode(PIN_DATA, OUTPUT);
+
+        digitalWrite(PIN_LATCH, HIGH);
+        digitalWrite(PIN_CLOCK, LOW);
+        digitalWrite(PIN_DATA, LOW);
 
         digitalWrite(PIN_LATCH, LOW);
         shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, 0);
@@ -227,35 +226,17 @@ void setup() {
     #elif SABER_DISPLAY == SABER_DISPLAY_7_5
         // No pin 6
         // Pin 7 - decimal point - not used
-        dotMatrix.attachCol(0, 5);        // col 1, pin 5
-        dotMatrix.attachCol(1, 1);
-        dotMatrix.attachCol(2, 9);
-        dotMatrix.attachCol(3, 15);
-        dotMatrix.attachCol(4, 14);
-
-        dotMatrix.attachRow(0, 2);
-        dotMatrix.attachRow(1, 13);
-        dotMatrix.attachRow(2, 3);
-        dotMatrix.attachRow(3, 4);
-        dotMatrix.attachRow(4, 12);
-        dotMatrix.attachRow(5, 11);
-        dotMatrix.attachRow(6, 10);
+        const uint8_t cols[] = { 5, 1, 9, 15, 14};
+        dotMatrix.attachCol(5, cols);
+        const uint8_t rows[] = { 2, 13, 3, 4, 12, 11, 10};
+        dotMatrix.attachRow(7, rows);
 
         Log.p("Shifted dot matrix 5x7 init.").eol();
     #elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
-        shifted7.attachDigit(0, 10);
-        shifted7.attachDigit(1, 4);
-        shifted7.attachDigit(2, 13);
-        shifted7.attachDigit(3, 15);
-
-        shifted7.attachSegment(0, 6);   // a
-        shifted7.attachSegment(1, 5);   // b
-        shifted7.attachSegment(2, 12);  // c
-        shifted7.attachSegment(3, 2);   // d
-        shifted7.attachSegment(4, 11);  // e
-        shifted7.attachSegment(5, 3);   // f
-        shifted7.attachSegment(6, 1);   // g
-        shifted7.attachSegment(7, 14);  // h-dp
+        const uint8_t digit[] = {10, 4, 13, 15};
+        shifted7.attachDigit(4, digit);
+        const uint8_t segment[] = {6, 5, 12, 2, 11, 3, 1, 14};
+        shifted7.attachSegment(8, segment);
 
         Log.p("Shifted seven digit init.").eol();
     #endif

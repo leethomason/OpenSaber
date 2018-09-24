@@ -7,8 +7,8 @@ static int16_t gSinTable[256] = { 0 };
 
 uint8_t lerpU8(uint8_t a, uint8_t b, uint8_t t) 
 {
-    int32_t r = int32_t(a) + (int32_t(b) - int32_t(a)) * int32_t(t) / 255;
-    return uint8_t(clamp(r, int32_t(0), int32_t(255)));
+    int16_t r = int16_t(a) + (int16_t(b) - int16_t(a)) * int16_t(t) / 255;
+    return uint8_t(clamp(r, int16_t(0), int16_t(255)));
 }
 
 bool TestUtil()
@@ -27,24 +27,35 @@ bool TestUtil()
 	TEST_IS_EQ(lerpU8(0, 255, 0), 0);
 	TEST_IS_EQ(lerpU8(0, 255, 255), 255);
 
-	return true;
+    // iSin, iSin255 madness
+    TEST_IS_EQ(iSin(0), 0);
+    TEST_IS_EQ(iSin(64), 256);
+    TEST_IS_EQ(iSin(128), 0);
+    TEST_IS_EQ(iSin(192), -256);
+
+    TEST_IS_EQ(iSin255(0), 127);
+    TEST_IS_EQ(iSin255(64), 255);
+    TEST_IS_EQ(iSin255(128), 127);
+    TEST_IS_EQ(iSin255(192), 0);
+    
+    return true;
 }
 
-int16_t isin(uint16_t x)
+int16_t iSin(uint16_t x)
 {
 	if (gSinTable[64] == 0) {
 		for (int i = 0; i < 256; ++i) {
 			float x = 2 * 3.14159f * float(i) / 256.0f;
-			gSinTable[i] = int16_t(sin(x) * 256.0f);
+			gSinTable[i] = int16_t(sin(x) * 256.5f);    // add the 0.5 so that the rounding works
 		}
 	}
 	return gSinTable[x & 0xff];
 }
 
-uint8_t isin255(uint16_t x)
+uint8_t iSin255(uint16_t x)
 {
-	uint32_t s = uint32_t(isin(x) + 256);	// 0-512
-	s = s * uint32_t(255) / uint32_t(512);  // 0-255
+	uint32_t s = uint32_t(iSin(x) + 256);	// 0-512
+	s = (s * uint32_t(255)) >> 9;  // 0-255
 	return uint8_t(s);
 }
 
@@ -386,6 +397,30 @@ int Timer2::tick(uint32_t delta)
 	TEST_IS_EQ(t2.tick(100), 1);
 	TEST_IS_FALSE(t2.enabled());
 	return true;
+}
+
+/* static */ bool Random::Test()
+{
+    static const int SAMPLES = 1000;
+    static const uint32_t SERIES[] = { 2, 16, 100, 1000, 0 };
+    Random r;
+
+    for (int s = 0; SERIES[s]; ++s) {
+        uint32_t range = SERIES[s];
+
+        const uint32_t half = range / 2;
+        int lessThanHalf = 0;
+        int greaterThanHalf = 0;
+
+        for (int i = 0; i < SAMPLES; ++i) {
+            uint32_t v = r.rand(range);
+            if (v < half) ++lessThanHalf;
+            else ++greaterThanHalf;
+        }
+        TEST_IS_TRUE(greaterThanHalf >= SAMPLES * 4 / 10);  // 40%
+        TEST_IS_TRUE(lessThanHalf >= SAMPLES * 4 / 10);
+    }
+    return true;
 }
 
 void EventQueue::event(const char* e, int data)

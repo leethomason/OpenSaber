@@ -277,25 +277,29 @@ inline void combSort(T* mem, int size)
 class Random
 {
 public:
-	Random() : s0(1234), s1(5678) {}
-	void setSeed(uint32_t s) {
-		s0 = s;
-		s1 = s + 5678;
+	Random() : s(1) {}
+
+	void setSeed(uint32_t seed) {
+		s = (seed > 0) ? seed : 1;
 	}
 
-	uint32_t rand16() {
-		s0 = (s0 * 10103) & 0xffff;
-		s1 = (s1 * 1103) & 0xffff;
-		return s0 ^ s1;
+	uint32_t rand() {
+		// Xorshift
+        // My new favorite P-RNG
+		s ^= s << 13;
+		s ^= s >> 17;
+		s ^= s << 5;
+		return s;
 	}
 
-	uint32_t rand16(uint32_t limit) {
-		return rand16() % limit;
+	uint32_t rand(uint32_t limit) {
+		return rand() % limit;
 	}
+
+    static bool Test();
 
 private:
-	uint32_t s0;
-	uint32_t s1;
+	uint32_t s;
 };
 
 
@@ -338,14 +342,14 @@ Sin wave.
 Input: 0-255 (range will be clipped correctly.)
 Output: [-256, 256]
 */
-int16_t isin(uint16_t x);
+int16_t iSin(uint16_t x);
 
 /**
 Sin wave.
 Input: 0-255 (range will be clipped correctly.)
 Output: [0, 255]
 */
-uint8_t isin255(uint16_t x);
+uint8_t iSin255(uint16_t x);
 
 /* Generally try to keep Ardunino and Win332 code very separate.
 But a log class is useful to generalize, both for utility
@@ -383,6 +387,8 @@ private:
 class EventQueue
 {
 public:
+    // Note that the event is stored *by pointer*, so the 
+    // string needs to be in static memory.
 	void event(const char* event, int data = 0);
 
 	struct Event {
@@ -392,10 +398,11 @@ public:
 
 	Event popEvent();
 	bool hasEvent() const { return m_nEvents > 0; }
-	void setEventLogging(bool enable) { m_eventLogging = enable; }
-
 	int numEvents() const			{ return m_nEvents; }
 	const Event& peek(int i) const;
+
+    // For testing.
+    void setEventLogging(bool enable) { m_eventLogging = enable; }
 
 private:
 	static const int NUM_EVENTS = 8;

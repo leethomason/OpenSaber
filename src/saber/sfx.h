@@ -27,6 +27,7 @@ SOFTWARE.
 #include <SD.h>
 
 #include "Grinliz_Arduino_Util.h"
+#include "Grinliz_Util.h"
 
 // SFX in priority order!
 enum {            //  Max
@@ -128,6 +129,7 @@ private:
   uint32_t     m_retractTime;
   float        m_savedVolume = -1.f;  // negative means not in use.
 
+  Random       m_random;
   SFXLocation  m_location[NUM_SFX_TYPES];
   CStr<13>     m_filename[MAX_SFX_FILES];
   CStr<9>      m_dirName[MAX_FONTS];

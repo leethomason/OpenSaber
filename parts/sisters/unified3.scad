@@ -6,7 +6,7 @@ $fn = 90;
 EPS = 0.01;
 EPS2 = EPS * 2;
 
-DRAW_AFT = true;
+DRAW_AFT = false;
 DRAW_FRONT = true;
 
 JOINT_ANGLE = -20;
@@ -89,54 +89,15 @@ if (DRAW_FRONT) {
         }
     }
 
-    D_FORWARD_INNER = dynamicHeatSinkThread();
-    OVERLAP = (D_AFT - D_FORWARD_INNER) / 2 + 1;
+    OVERLAP = M_TRANSITION - M_BAFFLE_FRONT - 20.0;
 
-    difference() {
-        DZ = M_LED_HOLDER_FRONT - M_TRANSITION;
-        union() {              
-            // Front heatsink holder.
-            translate([0, 0, M_LED_HOLDER_BACK]) 
-                dynamicHeatSinkHolder(D_FORWARD);
-
-            // The front body
-            translate([0, 0, M_TRANSITION]) {
-                tube(h=DZ, do=D_FORWARD, di=D_FORWARD_INNER);
-            }
-
-            translate([0, 0, M_TRANSITION]) intersection() {
-                cylinder(h=DZ, d=D_FORWARD);
-                translate([-20, D_FORWARD/2 - 5, 0])
-                    cube(size=[40, 5, M_LED_HOLDER_BACK - M_TRANSITION]);
-            }
-
-            // overlap ring
-            translate([0, 0, M_TRANSITION - OVERLAP]) {
-                difference() {
-                    cylinder(h=OVERLAP, d1=D_AFT - T, d2=D_AFT);
-                    cylinder(h=OVERLAP, d1=D_AFT, d2=D_FORWARD_INNER);
-                }
-            }
-        }
-        
-        // Side access.
-        H = 14;
-        translate([0, 0, M_TRANSITION]) {
-            translate([0, -H/2, 0]) {
-                cube(size=[50, H, M_LED_HOLDER_BACK - M_TRANSITION]);
-                mirror([1,0,0]) cube(size=[50, H, 31]);
-            }
-        }
-
-        translate([0, 0, M_PORT_CENTER]) {
-            port(true);
-            portCounter();
-        }
-
-        translate([0, 0, M_SWITCH_CENTER]) {
-            switch(D_FORWARD, true);
-            switchCounter();
-        }
-    }
+    translate([0, 0, M_TRANSITION])
+        forwardAdvanced(D_FORWARD,                          // diameter
+                        M_LED_HOLDER_FRONT - M_TRANSITION,  // dz
+                        OVERLAP,                            // overlap
+                        D_AFT,                              // diameter to match up to
+                        M_PORT_CENTER - M_TRANSITION,       // port
+                        M_SWITCH_CENTER - M_TRANSITION      // switch
+                );
 }
 

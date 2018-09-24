@@ -21,6 +21,8 @@ bool runUnitTests()
     RUN_TEST(TestCrystalColor);
 	RUN_TEST(TestCStr);
     RUN_TEST(TestCQueue);
+    RUN_TEST(Random::Test);
+    RUN_TEST(TestUtil);
 
 	//RUN_TEST(FailTest);
 
