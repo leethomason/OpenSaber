@@ -9,3 +9,5 @@
 *.factory
 gcode
 *.nc
+gbr_*
+
