@@ -6,7 +6,7 @@ $fn = 90;
 EPS = 0.01;
 EPS2 = EPS * 2;
 
-DRAW_AFT = false;
+DRAW_AFT = true;
 DRAW_FRONT = true;
 
 JOINT_ANGLE = -20;
