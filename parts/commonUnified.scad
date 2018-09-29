@@ -506,15 +506,15 @@ function zLenOfBaffles(n, dzButtress) = n * dzButtress * 2 - dzButtress;
 module baffleMCBattery( outer,          // outer diameter 
                         n,              // number of baffles 
                         dzButtress,     // thickness of the baffle
-                        dFirst,         // make the back baffle this diameter
-                        dzFirst,        // make the back baffle this thicknes 
+                        dFirst=0,       // make the back baffle this diameter (0 to use standard)
+                        dzFirst=0,      // make the back baffle this thicknes  (0 to use standard)
                         extraBaffle=0,  // add this much to the front baffle
                         mcWide=0        // set this for a wide top board
                     )
 {
     for(i=[0:n-1]) {
         translate([0, 0, i*dzButtress*2]) 
-            if (i==0) {
+            if (i==0 && dFirst > 0 && dzFirst > 0) {
                 // First baffle can "overflow" decause of
                 // the larger diameter. Use an intersection()
                 // to bring it in.
