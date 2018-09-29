@@ -5,6 +5,8 @@ static const int SERIAL_SPEED = 115200;
 CStr<200> line;
 bool firstLine = true;
 int size = 0;
+int nRead = 0;
+int lastPercent = 0;
 
 void setup()
 {
@@ -40,10 +42,27 @@ void loop()
                     parseSize();
                     firstLine = false;
                 }
+                else {
+                    for(int i=0; i<line.size(); i+=2) {
+                        int v = hexToDec(line[i]) * 16;
+                        v += hexToDec(line[i+1]);
+                        Log.p(v).eol();
+                        ++nRead;
+                        if (nRead == size) {
+                            lastPercent = 10;
+                            Log.p("100%. Size=").p(nRead).p(" bytes read.").eol();
+                        }
+                        else {
+                            int percent = nRead * 10 / size;
+                            if (percent > lastPercent) {
+                                lastPercent = percent;
+                                Log.p(percent * 10).p("% done.").eol();
+                            }
+                        }
+                    }
+                }
             }
-            else {
-                // nothing for now.
-            }
+            line.clear();
         }
         else {
             line.append(b);
