@@ -246,6 +246,40 @@ bool TestCStr()
         TEST_IS_TRUE(buf[3] == '7');
         TEST_IS_TRUE(buf[4] == 0);
     }
+    {
+        CStr<4> a = "a";
+        CStr<5> b = "b";
+        TEST_IS_FALSE(a == b);
+        TEST_IS_TRUE(a != b);
+        a = b;
+        TEST_IS_TRUE(a == b);
+    }
+    {
+        CStrBuf<5> a("Hello");
+        CStrBuf<6> b("Hello");
+        CStr<10> c = "Hello";
+        CStr<10> d = "Goodbye";
+        CStrBuf<4> e = "Four";
+
+        TEST_IS_TRUE(a == b);
+        TEST_IS_TRUE(b == c);
+        TEST_IS_TRUE(a == c);
+        TEST_IS_TRUE(a != d);
+        TEST_IS_TRUE(b != d);
+
+        TEST_IS_TRUE(sizeof(e) == 4);
+        TEST_IS_TRUE(sizeof(a) >= 5 && sizeof(a) <= 8);
+    }
+    {
+        CStrBuf<4> a("Hello");
+        CStrBuf<5> b("Hello2");
+        TEST_IS_TRUE(a != b);
+    }
+    {
+        CStrBuf<6> a("Hello");
+        CStrBuf<6> b("Hello2");
+        TEST_IS_TRUE(a != b);
+    }
     return true;
 }
 

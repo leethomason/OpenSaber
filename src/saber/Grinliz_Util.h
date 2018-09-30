@@ -70,6 +70,10 @@ inline bool strEqual(const char* a, const char* b) {
 	return a && b && strcmp(a, b) == 0;
 }
 
+inline bool strEqual(const char* a, const char* b, int n) {
+    return a && b && strncmp(a, b, n);
+}
+
 /**
 * Returns 'true' if 'str' strarts with 'prefix'
 */
@@ -130,7 +134,7 @@ public:
 	bool operator==(const char* str) const {
 		return strEqual(buf, str);
 	}
-	
+
 	bool operator!=(const char* str) const {
 		return !strEqual(buf, str);
 	}
@@ -140,10 +144,14 @@ public:
 	}
 
 	template < class T > bool operator==(const T& str) const {
-		return strEqual(buf, str.buf);
+		return strEqual(this->c_str(), str.c_str());
 	}
 	
-	bool operator<(const CStr<ALLOCATE>& str) const {
+    template < class T > bool operator!=(const T& str) const {
+        return !strEqual(this->c_str(), str.c_str());
+    }
+
+    bool operator<(const CStr<ALLOCATE>& str) const {
 		return strcmp(buf, str.buf) < 0;
 	}
 
@@ -151,6 +159,10 @@ public:
 		clear();
 		append(src);
 	}
+
+    template< class T > void operator=(const T& str) {
+        *this = str.c_str();
+    }
 
 	void operator+=(const char* src) {
 		append(src);
@@ -180,6 +192,83 @@ private:
 	int len;
 	char buf[ALLOCATE];
 };
+
+
+/**
+* The CStrBuf. Wraps a buffer of characters, that doesn't have
+  to be null-terminated. Optimizes for space (the size of this structure
+  should just be ALLOCATE) vs. performance. Note also the abscence of the
+  c_str() method, since it can't be implemented without allocating memory.
+*/
+template< int ALLOCATE >
+class CStrBuf
+{
+public:
+    CStrBuf() { clear(); }
+
+    CStrBuf(const char* src) {
+        set(src);
+    }
+
+    CStrBuf(const CStrBuf<ALLOCATE>& other) {
+        memcpy(buf, other.buf, ALLOCATE);
+    }
+
+    ~CStrBuf() {}
+
+    int size() const {
+        for (int i = 0; i < ALLOCATE; i++) {
+            if (buf[i] == 0) return i;
+        }
+        return ALLOCATE;
+    }
+
+    bool empty() const {
+        return buf[0] == 0;
+    }
+
+    int capacity() const {
+        return ALLOCATE;
+    }
+
+    void clear() {
+        buf[0] = 0;
+    }
+
+    char operator[](int i) const {
+        return buf[i];
+    }
+
+    template < class T > bool operator==(const T& str) const {
+        const int s = this->size();
+        if (str.size() != s)
+            return false;
+
+        for (int i = 0; i < s; ++i) {
+            if ((*this)[i] != str[i])
+                return false;
+        }
+        return true;
+    }
+
+    template< class T > bool operator !=(const T& str) const {
+        // Somewhat forced syntax because I don't want to re-implement the operator==
+        return !(*this == str);
+    }
+
+    void set(const char* src) {
+        int i = 0; 
+        for (; i < ALLOCATE && src[i]; ++i) {
+            buf[i] = src[i];
+        }
+        if (i < ALLOCATE)
+            buf[i] = 0;
+    }
+
+private:
+    char buf[ALLOCATE];
+};
+
 
 bool TestCStr();
 
