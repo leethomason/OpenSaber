@@ -3,7 +3,7 @@ EPSILON = 0.1;
 PIN	    = 2.54;
 
 
-module tube(h, inner=0, outer=0, di=0, do=0) {
+module tube(h=1, inner=0, outer=0, di=0, do=0) {
     rInner = inner > 0 ? inner : di / 2;
     rOuter = outer > 0 ? outer : do / 2;
 
