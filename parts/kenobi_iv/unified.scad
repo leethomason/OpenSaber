@@ -32,7 +32,7 @@ if (DRAW_AFT) {
                     M_MID_FRONT - M_FRONT_BAFFLES,  // arbitrary; there is more space
                     1,  // dz PCB
                     5,  // dy PCB
-                    [16, 50, 22],        // fixme: guess
+                    [23.0, 50, 23.0],        // fixme: guess
                     []
                 );
         }
