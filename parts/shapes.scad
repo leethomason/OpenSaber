@@ -7,6 +7,8 @@ module tube(h=1, inner=0, outer=0, di=0, do=0) {
     rInner = inner > 0 ? inner : di / 2;
     rOuter = outer > 0 ? outer : do / 2;
 
+	if (rInner >= rOuter) echo("ERROR in tube. rOuter must be > rInner.");
+
 	difference() {
 		cylinder(h=h, r=rOuter);
 		translate([0,0,-EPSILON]) {

@@ -575,11 +575,12 @@ module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount,
             if (makeSection)
                tube(h=dz, do=outer, di=outer-t);
 
-            intersection() {
-                translate([0, 0, -20]) cylinder(h=dz+40, d=outer ? outer : 100);
 
-                color("plum") union() {
-                    for(m = mount) {
+            for(m = mount) {
+                intersection() {
+                    translate([0, 0, -20]) cylinder(h=dz+40, d=outer ? outer : 100);
+
+                    color("plum") union() {
                         x = m[0];
                         z = m[1];
                         type = m[2];

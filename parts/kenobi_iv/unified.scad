@@ -3,11 +3,14 @@ use <../shapes.scad>
 use <util.scad>
 use <../commonUnified.scad>
 
-$fn = 40;
+//$fn = 40;
+$fn = 90;
 
 DRAW_AFT = true;
 
 N_BAFFLES = nBafflesNeeded(DZ_BUTTRESS);
+DZ_BAFFLES = zLenOfBaffles(N_BAFFLES, DZ_BUTTRESS);
+T = 4;
 
 if (DRAW_AFT) {
     difference() {
@@ -18,33 +21,30 @@ if (DRAW_AFT) {
             translate([0, 0, M_AFT_BACK + DZ_SPKR_HOLDER])
                 baffleMCBattery(D_AFT_MID, N_BAFFLES, DZ_BUTTRESS);
 
-            //   oneBaffle(D_AFT, 6, battery=false, mc=true, useRods=false, bridge=true, cutoutHigh=false);
-            /*
-            translate([0, 0, M_POMMEL_FRONT + Z_AFT_RING]) {
-                oneBaffle(D_AFT, Z_SPACER, false, true, false, true, cutoutHigh=false);
-                translate([0, 0, Z_SPACER])
-                    baffleMCBattery(D_AFT, N_BAFFLES, H_BUTTRESS, 
-                                    D_AFT, H_BUTTRESS, EXTRA_BAFFLE, mcWide=19.5);
-            }
+            M_FRONT_BAFFLES =  M_AFT_BACK + DZ_SPKR_HOLDER + DZ_BAFFLES;
+            *translate([0, 0, M_FRONT_BAFFLES])
+                tube(h=1, do=D_AFT_MID, di=D_AFT_MID - T);
 
-            translate([0, 0, M_POMMEL_FRONT]) {
-                speakerHolder(D_AFT_RING, Z_AFT_RING, 1, "cls28");
-            }
-
-            translate([0, 0, M_BAFFLE_FRONT]) {
-                cylinderKeyJoint(JUNCTION, D_AFT, D_AFT - T, 0.5, JOINT_ANGLE);
-            }*/
+            translate([0, 0, M_FRONT_BAFFLES])
+                pcbHolder(
+                    D_AFT_MID, 
+                    T,                    
+                    M_MID_FRONT - M_FRONT_BAFFLES,  // arbitrary; there is more space
+                    1,  // dz PCB
+                    5,  // dy PCB
+                    [16, 50, 22],        // fixme: guess
+                    []
+                );
         }
-        //translate([0, 0, M_AFT_BACK + 1])
-        //    speakerCLS28(true);
     }
 }
 
 *inner();
-translate([0, 0, M_AFT_BACK + DZ_SPKR_HOLDER])
+*translate([0, 0, M_AFT_BACK + DZ_SPKR_HOLDER])
     battery(D_AFT_MID);
 
-translate([-PLATE_DX/2, 0, M_MID_CENTER - PLATE_MOUNT/2])
+*translate([-PLATE_DX/2, 0, M_MID_CENTER - PLATE_MOUNT/2])
     color("orange")
         cube(size=[PLATE_DX, 20, PLATE_MOUNT]);
 
+*translate([0, 0, M_MID_BACK]) cylinder(h=DZ_MID, d=D_AFT_MID);

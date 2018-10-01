@@ -1,12 +1,21 @@
+#include <Adafruit_SPIFlash.h>
+
 #include "Grinliz_Arduino_Util.h"
 #include "Grinliz_Util.h"
+
+#define FLASH_SS       SS1                    // Flash chip SS pin.
+#define FLASH_SPI_PORT SPI1                   // What SPI port is Flash on?
+Adafruit_SPIFlash spiFlash(FLASH_SS, &FLASH_SPI_PORT);     // Use hardware SPI 
 
 static const int SERIAL_SPEED = 115200;
 CStr<200> line;
 bool firstLine = true;
 int size = 0;
 int nRead = 0;
-int lastPercent = 0;
+static const int LOCAL_PAGESIZE = 256;
+uint8_t pageBuffer[LOCAL_PAGESIZE] = {0};
+uint32_t pageAddr = 0;
+int nPages = 0;
 
 void setup()
 {
@@ -17,6 +26,17 @@ void setup()
     Log.attachSerial(&Serial);
 
     Log.p("Serial started at ").p(SERIAL_SPEED).eol();
+
+    spiFlash.begin(SPIFLASHTYPE_W25Q16BV);
+
+    uint8_t manid, devid;
+    spiFlash.GetManufacturerInfo(&manid, &devid);
+    Log.p("Manufacturer: 0x").p(manid, HEX).eol();
+    Log.p("Device ID: 0x").p(devid, HEX).eol();
+    Log.p("Pagesize: ").p(spiFlash.pageSize()).p(" Page buffer: ").p(LOCAL_PAGESIZE).eol();
+    bool eraseOkay = spiFlash.eraseChip();
+    Log.p("Erase Chip=").p(eraseOkay ? "true" : "false").eol();
+
     Log.p("Waiting for file.").eol();
 }
 
@@ -32,6 +52,20 @@ void parseSize() {
     Log.p("Size=").p(size).eol();
 }
 
+void sendPage()
+{
+    uint32_t addr = LOCAL_PAGESIZE * nPages;
+    uint32_t nWritten = spiFlash.writePage(addr, pageBuffer, pageAddr);
+
+    Log.p("Page ").p(nPages).p(" written. nBytes=").p(nWritten).p("/").p(pageAddr)
+        .p(" ").p(nWritten == pageAddr ? "okay" : "ERROR").eol();
+
+    nPages++;
+    pageAddr = 0;
+    memset(pageBuffer, 0, LOCAL_PAGESIZE);
+}
+
+
 void loop()
 {
     while(Serial.available()) {
@@ -46,18 +80,17 @@ void loop()
                     for(int i=0; i<line.size(); i+=2) {
                         int v = hexToDec(line[i]) * 16;
                         v += hexToDec(line[i+1]);
-                        Log.p(v).eol();
+                        pageBuffer[pageAddr++] = v;
+                        if (pageAddr == LOCAL_PAGESIZE) {
+                            sendPage();
+                        }
+                        
                         ++nRead;
                         if (nRead == size) {
-                            lastPercent = 10;
-                            Log.p("100%. Size=").p(nRead).p(" bytes read.").eol();
-                        }
-                        else {
-                            int percent = nRead * 10 / size;
-                            if (percent > lastPercent) {
-                                lastPercent = percent;
-                                Log.p(percent * 10).p("% done.").eol();
+                            if (pageAddr) {
+                                sendPage();
                             }
+                            Log.p("100%. Size=").p(nRead).p(" bytes read.").eol();
                         }
                     }
                 }
