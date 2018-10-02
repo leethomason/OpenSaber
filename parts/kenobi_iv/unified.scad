@@ -13,6 +13,7 @@ DZ_BAFFLES = zLenOfBaffles(N_BAFFLES, DZ_BUTTRESS);
 T = 4;
 
 if (DRAW_AFT) {
+    DZ_PCB = 1;
     difference() {
         union() {
             translate([0, 0, M_AFT_BACK]) 
@@ -30,12 +31,20 @@ if (DRAW_AFT) {
                     D_AFT_MID, 
                     T,                    
                     M_MID_FRONT - M_FRONT_BAFFLES,  // arbitrary; there is more space
-                    1,  // dz PCB
+                    DZ_PCB,  // dz PCB
                     5,  // dy PCB
                     [23.0, 50, 23.0],        // fixme: guess
-                    []
+                    [
+                        [22.86 / 2 - 19.685, 4, "buttress"],
+                        [22.86 / 2 - 3.175,  4, "buttress"],
+                        [22.86 / 2 - 19.685, 19.685, "buttress"],
+                        [22.86 / 2 - 3.175,  19.685, "buttress"]
+                    ]
                 );
         }
+        translate([0, 0, DZ_MID/2 + M_MID_BACK]) rotate([0, 90, 0]) cylinder(h=100, d=4);    // fixme - tube outer D
+        translate([0, 0, DZ_MID/2 + M_MID_BACK]) rotate([0, -90, 0]) cylinder(h=100, d=4);    // fixme - tube outer D
+        translate([0, 0, M_MID_BACK + DZ_PCB + 8.89]) rotate([90, 0, 0]) cylinder(h=100, d=12);
     }
 }
 
