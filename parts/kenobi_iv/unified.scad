@@ -9,6 +9,9 @@ $fn = 90;
 DRAW_AFT = false;
 DRAW_MID = true;
 
+// part of mid
+DRAW_PLATE = true;
+
 N_BAFFLES = nBafflesNeeded(DZ_BUTTRESS);
 DZ_BAFFLES = zLenOfBaffles(N_BAFFLES, DZ_BUTTRESS);
 T = 4;
@@ -29,6 +32,8 @@ if (DRAW_AFT) {
 
 if (DRAW_MID) {
     DZ_PCB = 1;
+    DY_PCB = 5;
+
     difference() {
         translate([0, 0, M_FRONT_BAFFLES]) {
             pcbHolder(
@@ -36,7 +41,7 @@ if (DRAW_MID) {
                 T,                    
                 M_MID_FRONT - M_FRONT_BAFFLES,  // arbitrary; there is more space
                 DZ_PCB,  // dz PCB
-                5,  // dy PCB
+                DY_PCB,  // dy PCB
                 [23.0, 50, 23.0],        // fixme: guess
                 [
                     [22.86 / 2 - 19.685, 4, "buttress"],
@@ -52,6 +57,28 @@ if (DRAW_MID) {
         translate([0, 0, DZ_MID/2 + M_MID_BACK]) rotate([0, 90, 0]) cylinder(h=100, d=4);    // fixme - tube outer D
         translate([0, 0, DZ_MID/2 + M_MID_BACK]) rotate([0, -90, 0]) cylinder(h=100, d=4);    // fixme - tube outer D
         translate([0, 0, M_MID_BACK + DZ_PCB + 8.89]) rotate([90, 0, 0]) cylinder(h=100, d=12);
+    }
+
+    if (DRAW_PLATE) {
+        JUNCTION = 3;
+
+        translate([0, 0, M_MID_FRONT - JUNCTION]) {
+            difference() {
+                union() {
+                    translate([0, 0, JUNCTION - 1])
+                        cylinder(h=1, d=D_AFT_MID);
+                    intersection() {
+                        cylinder(h=JUNCTION, d=D_AFT_MID);
+                        translate([-20, -20, 0]) 
+                            cube(size=[40, 20 + DY_PCB - 1, JUNCTION]);
+                    }
+                }
+                translate([7, -7, 0]) cylinder(h=10, d=3);  // fixme rod
+                translate([-7,-7, 0]) cylinder(h=10, d=3);  // fixme rod
+                translate([0,  9, 0]) cylinder(h=10, d=3);  // fixme rod
+                translate([0,  0, 0]) cylinder(h=10, d=5);  // fixme tube
+            }
+        }
     }
 }
 
