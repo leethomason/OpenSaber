@@ -6,6 +6,9 @@ use <../shapes.scad>
 // TODO: add key to connect 2 parts
 // TODO: a little more space for the 'holder' battery stop
 
+DRAW_HOLDER = false;
+DRAW_BODY = true;
+
 $fn = 80;
 
 DZ_PCB = 27;
@@ -24,6 +27,7 @@ Y_TWEAK = -5;
 module key(out)
 {
     KL = 10;
+    
     intersection() 
     {
         tube(h=KL, do=D_AFT, di=out ? D_AFT-4 : 0);
@@ -32,7 +36,7 @@ module key(out)
     }
 }
 
-if (false) {
+if (DRAW_HOLDER) {
     difference() {
         intersection() {
             cylinder(h=DZ_PCB, d=D_AFT);
@@ -92,7 +96,7 @@ if (false) {
     translate([0, 0, DZ_PCB]) key(true);
 }
 
-if (true) {
+if (DRAW_BODY) {
     EXTRA_BAFFLE = 2;
     N_BAFFLES = nBafflesNeeded(H_BUTTRESS);
     N = N_BAFFLES + 1;
