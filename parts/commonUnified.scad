@@ -333,16 +333,15 @@ T_BRIDGE = 1.6;
 
 module oneBaffle(   d,
                     dz,
-                    battery=true, 
-                    mc=true,
-                    useRods=true, 
-                    bridge=true, 
-                    mcSpace=false,
-                    dExtra=0,
-                    scallop=false,
-                    cutout=true,
-                    mcWide=0, 
-                    cutoutHigh=true)
+                    battery=true,       // space for the battery
+                    mc=true,            // space for the microcontroller
+                    bridge=true,        // create a bridge to the next baffle. designed to print w/o support material. 
+                    mcSpace=false,      // lots of space for the microcontroller
+                    dExtra=0,           // additional diametr
+                    scallop=false,      // outside curves
+                    cutout=true,        // bottom cutout 
+                    mcWide=0,           // for mc with "wide" top, set the upper width
+                    cutoutHigh=true)    // open space to the top
 {
     yMC = -yAtX(X_MC/2, d/2) + 1.0;
 

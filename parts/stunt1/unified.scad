@@ -6,12 +6,11 @@ use <../shapes.scad>
 // TODO: add key to connect 2 parts
 // TODO: a little more space for the 'holder' battery stop
 
-DRAW_HOLDER = false;
+DRAW_HOLDER = true;
 DRAW_BODY = true;
 
-$fn = 80;
+$fn = 40;
 
-DZ_PCB = 27;
 Z_OFFSET = 3;
 
 DX_POWER = 11;
@@ -97,29 +96,34 @@ if (DRAW_HOLDER) {
 }
 
 if (DRAW_BODY) {
-    EXTRA_BAFFLE = 2;
-    N_BAFFLES = nBafflesNeeded(H_BUTTRESS);
-    N = N_BAFFLES + 1;
 
+    BATTERY_BAFFLES = nBafflesNeeded(H_BUTTRESS);
+    N_BAFFLES = floor(DZ_HOLDER / (H_BUTTRESS*2));
+
+    echo("Battery baffles=", BATTERY_BAFFLES);
+    echo("nBaffles=", N_BAFFLES);
+    
     difference() {
-        for(i=[0:N-1]) {
+        for(i=[0:N_BAFFLES-1]) {
             translate([0, 0, i*H_BUTTRESS*2 + DZ_PCB]) {
                 oneBaffle(
                     D_AFT,
                     H_BUTTRESS,
-                    battery=false,
+                    battery=(i < BATTERY_BAFFLES),
                     mc=true,
-                    bridge=(i < N-1),
-                    scallop=true,
-                    cutout=false
+                    bridge=(i < N_BAFFLES-1),
+                    scallop=false,
+                    cutout=false,
+                    mcSpace=(i >= BATTERY_BAFFLES)
                 );
             }
         }
-        translate([0, 0, DZ_PCB]) 
-            battery(D_AFT);
-        W = 10;
-        translate([-W/2, -5, 0])
-            cube(size=[W, 16, 120]);
+//        translate([0, 0, DZ_PCB]) 
+//            battery(D_AFT);
+
+//        W = 10;
+//        translate([-W/2, -5, 0])
+//            cube(size=[W, 16, 120]);
         
         // flat bottom
         translate([-20, -20, 0])
@@ -127,6 +131,7 @@ if (DRAW_BODY) {
         
         translate([0, 0, DZ_PCB]) key(false);
     }
+    /*
     DZAFT = (2*N - 1) * H_BUTTRESS;
     
 *    translate([0, 0, DZ_PCB]) {
@@ -139,6 +144,7 @@ if (DRAW_BODY) {
         }
     }
     
-    echo("Total len=", (2*N - 1) * H_BUTTRESS + DZ_PCB);
+    echo("Total len=", (2*N - 1) * H_BUTTRESS + DZ_PCB);*/
 }
 
+*color("yellow") translate([0, 0, DZ_PCB]) battery(D_AFT);
