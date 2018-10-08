@@ -337,7 +337,7 @@ module oneBaffle(   d,
                     mc=true,            // space for the microcontroller
                     bridge=true,        // create a bridge to the next baffle. designed to print w/o support material. 
                     mcSpace=false,      // lots of space for the microcontroller
-                    dExtra=0,           // additional diametr
+                    dExtra=0,           // additional diameter
                     scallop=false,      // outside curves
                     cutout=true,        // bottom cutout 
                     mcWide=0,           // for mc with "wide" top, set the upper width
