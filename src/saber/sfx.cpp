@@ -25,7 +25,7 @@
 
 #include "sfx.h"
 #include "pins.h"
-#include "AudioPlayer.h"
+//#include "AudioPlayer.h"
 #include "tester.h"
 
 #if SERIAL_DEBUG == 1
@@ -34,7 +34,7 @@
 
 SFX* SFX::m_instance = 0;
 
-SFX::SFX(AudioPlayer* audioPlayer)
+SFX::SFX(IAudio* audioPlayer)
 {
     m_instance = this;
 
@@ -453,11 +453,13 @@ bool SFX::readHeader(const char* filename, uint8_t* nChannels, uint32_t* nSample
     return false;
 }
 
+/*
 const uint32_t SFX::lengthMillis() const
 {
     if (!m_player) return 0;
     return m_player->lengthMillis();
 }
+*/
 
 void SFX::readIgniteRetract()
 {
@@ -544,7 +546,3 @@ const char* SFX::fontName(uint8_t font) const
     if (m_numFonts == 0) return "";
     return m_dirName[font % m_numFonts].c_str();
 }
-
-
-uint16_t SFX::nEnabled() const { return m_player ? m_player->nEnabled() : 0; }
-uint16_t SFX::nDisabled() const { return m_player ? m_player->nDisabled() : 0; }

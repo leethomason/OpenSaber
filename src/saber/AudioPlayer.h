@@ -2,13 +2,14 @@
 #define OPEN_SABER_AUDIO_INCLUDED
 
 #include <stdint.h>
+#include "iaudio.h"
 
 
 /*
    Lower level audio classe.
    Called from SFX, not directly.
 */
-class AudioPlayer
+class AudioPlayer : public IAudio
 {
 public:
     AudioPlayer();
@@ -18,7 +19,6 @@ public:
     bool play(const char* filename);
     void stop();
     bool isPlaying() const;
-    uint32_t lengthMillis() const;  // only valid if header read; else 0.
 
     void setVolume(float v);
     float volume() const { return m_volume; }

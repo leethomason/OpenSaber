@@ -124,8 +124,9 @@ void AudioPlayer::setVolume(float v) {
     setShutdown();
 }
 
-
+/*
 uint32_t AudioPlayer::lengthMillis() const
 {
     return playWav.lengthMillis();
 }
+*/
