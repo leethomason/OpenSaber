@@ -6,8 +6,10 @@ use <../commonUnified.scad>
 //$fn = 40;
 $fn = 90;
 
-DRAW_AFT = false;
+DRAW_AFT = true;
 DRAW_MID = true;
+DRAW_CAP = true;
+
 
 // part of mid
 DRAW_PLATE = true;
@@ -18,6 +20,19 @@ T = 4;
 M_FRONT_BAFFLES =  M_AFT_BACK + DZ_SPKR_HOLDER + DZ_BAFFLES;
 JOINT = 5;
 KEY_ANGLE = -20;
+
+module rods(forward)
+{
+    translate([7, -7, 0]) cylinder(h=10, d=3);  // fixme rod
+    translate([-7,-7, 0]) cylinder(h=10, d=3);  // fixme rod
+    translate([0,  9, 0]) cylinder(h=10, d=3);  // fixme rod
+
+    translate([0,  0, 0]) cylinder(h=10, d=4);  // fixme tube
+    if (forward)
+        cylinder(h=2, d=5);
+    else
+        translate([0, 0, 2]) cylinder(h=10, d=5);
+}
 
 if (DRAW_AFT) {
     translate([0, 0, M_AFT_BACK]) 
@@ -31,7 +46,7 @@ if (DRAW_AFT) {
 }
 
 if (DRAW_MID) {
-    DZ_PCB = 1;
+    DZ_PCB = 0;
     DY_PCB = 5;
 
     difference() {
@@ -39,7 +54,7 @@ if (DRAW_MID) {
             pcbHolder(
                 D_AFT_MID, 
                 T,                    
-                M_MID_FRONT - M_FRONT_BAFFLES,  // arbitrary; there is more space
+                M_MID_FRONT - M_FRONT_BAFFLES,
                 DZ_PCB,  // dz PCB
                 DY_PCB,  // dy PCB
                 [23.0, 50, 23.0],        // fixme: guess
@@ -73,11 +88,17 @@ if (DRAW_MID) {
                             cube(size=[40, 20 + DY_PCB - 1, JUNCTION]);
                     }
                 }
-                translate([7, -7, 0]) cylinder(h=10, d=3);  // fixme rod
-                translate([-7,-7, 0]) cylinder(h=10, d=3);  // fixme rod
-                translate([0,  9, 0]) cylinder(h=10, d=3);  // fixme rod
-                translate([0,  0, 0]) cylinder(h=10, d=5);  // fixme tube
+                rods(false);
             }
+        }
+    }
+}
+
+if (DRAW_CAP) {
+    translate([0, 0, M_FORE_BACK + 20]) {
+        difference() {
+            cylinder(h=DZ_BUTTRESS, d=D_FORE);
+            rods(true);
         }
     }
 }

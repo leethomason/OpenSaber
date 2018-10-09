@@ -1,14 +1,13 @@
 D_FORE = 29.0;
 DZ_FORE = 63.0;
 
-D_AFT_MID = 31.75;
 D_MID_OUTER = 36.8;
 DZ_MID = 25.6;          // inner length with the fore/aft attached
 DZ_MID_OUTER = 50.7;    // the length of the midsection on the outside
 
 D_AFT_MID = 31.75;
 DZ_AFT = 76.3;
-D_AFT_RING = 33.5;  // FIXME
+D_AFT_RING = 33.5;
 DZ_AFT_RING = 5.5;
 
 DZ_THREAD = 10.5;
