@@ -3,7 +3,7 @@ use <../commonUnified.scad>
 use <../shapes.scad>
 use <holder.scad>
 
-DRAW_HOLDER = true;
+DRAW_HOLDER = false;
 DRAW_BODY   = true;
 
 $fn = 80;
@@ -47,37 +47,40 @@ if (DRAW_BODY) {
     
     intersection() {
         union() {
-            cylinder(h=DZ_CHASSIS - DZ_PADDING, d=D_AFT);
+            cylinder(h=DZ_CHASSIS, d=D_AFT);
+            translate([0, 0, DZ_CHASSIS]) cylinder(h=20, d=D_FORWARD);
         }
         difference() {
             union() {
-                for(i=[0:BATTERY_BAFFLES-1]) {
+                for(i=[0:N_BAFFLES - 1]) {
                     translate([0, 0, i*H_BUTTRESS*2 + DZ_PCB]) {
                         oneBaffle(
                             D_AFT,
                             H_BUTTRESS,
-                            battery=true,
+                            battery=false,
                             mc=true,
-                            bridge=true,
+                            bridge=(i < N_BAFFLES-1) && (i != 7),
                             scallop=false,
                             cutout=false,
                             mcSpace=false
                         );
                     }
                 }
-                translate([0, 0, DZ_CHASSIS - H_BUTTRESS]) {
-                    oneBaffle(
-                        D_AFT,
-                        H_BUTTRESS,
-                        battery=false,
-                        mc=true,
-                        bridge=true,
-                        scallop=false,
-                        cutout=false,
-                        mcSpace=true
-                    );
-                }
+                // Side walls
+                D_BATTERY = 19.0;
+                translate([D_BATTERY/2, -10, DZ_CHASSIS - H_BUTTRESS]) cube(size=[10, 20, H_BUTTRESS*4]);
+                mirror([1, 0, 0]) translate([D_BATTERY/2, -10, DZ_CHASSIS - H_BUTTRESS]) cube(size=[10, 20, H_BUTTRESS*4]);
+
+                // Buff up the back.
+                Z = (N_BAFFLES * 2 - 2) * H_BUTTRESS + DZ_PCB;
+                translate([-20, 0, Z]) cube(size=[40, 40, H_BUTTRESS]);
             }
+            translate([0, 0, DZ_PCB])
+                battery(D_FORWARD);
+
+            // remove forward cruft
+             translate([-10, -20, DZ_CHASSIS]) cube(size=[20, 8, 100]);
+
             // flat bottom
             translate([-20, -20, 0])
                 cube(size=[40, 5, 100]);
@@ -89,4 +92,4 @@ if (DRAW_BODY) {
     }
 }
 
-*color("yellow") translate([0, 0, DZ_PCB]) battery(D_AFT);
+*color("yellow") translate([0, 0, DZ_PCB]) battery(D_FORWARD);

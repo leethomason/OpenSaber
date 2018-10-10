@@ -347,8 +347,15 @@ module oneBaffle(   d,
 
     difference() {
         cylinder(h=dz, d=d + dExtra);
-        if (battery)
+        if (battery) {
             battery(d);
+
+            // Debatable if this should be its
+            // own option. Removes area below battery.
+            translate([-TROUGH_1/2, -5, -EPS]) 
+                cube(size=[TROUGH_1, 5, dz + EPS2]);
+        }
+
         if (mc) {
             translate([0, yMC, -EPS]) 
                 mc(widePart=mcWide);
@@ -373,8 +380,6 @@ module oneBaffle(   d,
         }
 
         if (cutout) {
-            translate([-TROUGH_1/2, -5, -EPS]) 
-                cube(size=[TROUGH_1, 5, dz + EPS2]);
             translate([-TROUGH_2/2, -20, -EPS])
                 cube(size=[TROUGH_2, 15, dz + EPS2]);
         }

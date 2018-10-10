@@ -174,7 +174,6 @@ if (DRAW_FRONT) {
 if (DRAW_CAP) {
     D = D_AFT;
     H = 4;
-    //D1_CRYSTAL = 11;
     D2_CRYSTAL = 5;
 
     translate([0, 0, M_CAP]) {
