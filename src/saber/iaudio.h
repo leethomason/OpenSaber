@@ -9,8 +9,9 @@ public:
     virtual void stop() = 0;
     virtual bool isPlaying() const = 0;
 
-    virtual void setVolume(float v) = 0;
-    virtual float volume() const = 0;
+    // Volume 256 is "full" - can boost or cut from there.
+    virtual void setVolume(int v) = 0;
+    virtual int volume() const = 0;
 
     virtual void process() = 0;
 };

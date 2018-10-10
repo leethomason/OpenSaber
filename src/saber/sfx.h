@@ -123,7 +123,7 @@ private:
   uint8_t      m_currentFont;
   uint32_t     m_igniteTime;
   uint32_t     m_retractTime;
-  float        m_savedVolume = -1.f;  // negative means not in use.
+  int          m_savedVolume = -1;  // negative means not in use.
 
   Random       m_random;
   SFXLocation  m_location[NUM_SFX_TYPES];

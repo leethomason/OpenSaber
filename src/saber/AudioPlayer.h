@@ -20,8 +20,8 @@ public:
     void stop();
     bool isPlaying() const;
 
-    void setVolume(float v);
-    float volume() const { return m_volume; }
+    void setVolume(int v);
+    int volume() const { return int(m_volume * 256.0 + 0.5); }
 
     void process();
 

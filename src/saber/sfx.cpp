@@ -363,7 +363,7 @@ bool SFX::playUISound(const char* name, bool prepend)
         m_savedVolume = m_player->volume();
     }
 
-    m_player->setVolume(0.5);
+    m_player->setVolume(128);
     return m_player->play(path.c_str());
 }
 
@@ -483,13 +483,11 @@ void SFX::setVolume204(int vol)
     vol = constrain(vol, 0, 204);
     if (vol >= 204) {
         if (m_player)
-            m_player->setVolume(1.0f);
+            m_player->setVolume(256);
     }
     else {
-        static const float INV = 0.0049;
-        float v = float(vol) * INV;
         if (m_player)
-            m_player->setVolume(v);
+            m_player->setVolume(vol * 256 / 204);
     }
 }
 
@@ -497,7 +495,7 @@ void SFX::setVolume204(int vol)
 uint8_t SFX::getVolume204() const
 {
     if (m_player)
-        return m_player->volume() * 204.0f + 0.5f;
+        return m_player->volume() * 204 / 256;
     return 160;
 }
 
