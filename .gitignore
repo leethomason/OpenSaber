@@ -10,4 +10,13 @@
 gcode
 *.nc
 gbr_*
+~*
+*.gcode
+*.drl
+*.gbr
+Debug
+*.vcxproj.user
+*.VC.db
+.vscode
+
 
