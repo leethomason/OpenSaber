@@ -90,8 +90,9 @@ if (DRAW_MID) {
             cylinderKeyJoint(JOINT, D_AFT_MID, D_AFT_MID - T, 0.5, KEY_ANGLE);
 
         // Side holes
-        translate([0, 0, DZ_MID/2 + M_MID_BACK]) rotate([0, 90, 0]) cylinder(h=100, d=4);
-        translate([0, 0, DZ_MID/2 + M_MID_BACK]) rotate([0, -90, 0]) cylinder(h=100, d=4);
+        SIDE_TRIM = -0.8;
+        translate([0, 0, DZ_MID/2 + M_MID_BACK + SIDE_TRIM]) rotate([0, 90, 0]) cylinder(h=100, d=4);
+        translate([0, 0, DZ_MID/2 + M_MID_BACK + SIDE_TRIM]) rotate([0, -90, 0]) cylinder(h=100, d=4);
         // Bottom access
         translate([0, 0, M_MID_BACK + DZ_PCB + 8.89 + Z_OFFSET]) rotate([90, 0, 0]) cylinder(h=100, d=12);
 
