@@ -6,7 +6,7 @@ use <../commonUnified.scad>
 //$fn = 40;
 $fn = 90;
 
-DRAW_AFT = true;
+DRAW_AFT = false;
 DRAW_MID = true;
 DRAW_CAP = false;
 
@@ -131,7 +131,7 @@ if (DRAW_CAP) {
 
 
 *inner();
-translate([0, 0, M_AFT_BACK + DZ_SPKR_HOLDER])
+*translate([0, 0, M_AFT_BACK + DZ_SPKR_HOLDER])
     battery(D_AFT_MID);
 
 *translate([-PLATE_DX/2, 0, M_MID_CENTER - PLATE_MOUNT/2])
