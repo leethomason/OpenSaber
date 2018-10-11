@@ -70,23 +70,49 @@ module columnY(dx, dyFrom0, dz, diameter, baseDX=0, baseDZ=0)
     }
 }
 
+module tjoint(outer, dz, trim)
+{
+    RATIO = 0.40; 
+    DY = outer * RATIO;
+    HALFY = DY * 0.7;
+
+    translate([0, -HALFY/2 + trim, 0]) 
+        cube(size=[outer*2.0, HALFY - trim*2, dz]);
+    translate([0, -DY/2 + trim, dz/2 + trim/2]) 
+        cube(size=[outer*2.0, DY - trim*2, dz/2 - trim]);
+}
+
 /*
     The green-sky version of the key joint was large, but
     secure. Problematic is that it click together on the y
     axis so it's hard to run the wires.
 */
-module cylinderKeyJoint(dz, do, di, trim, angle=0)
+module cylinderKeyJoint(dz, do, di, trim, angle=0, tJoint=false)
 {
-    RATIO = 0.15; 
-    intersection() {
-        tube(h=dz - trim, do=do, di=di);
-        union() {
-            rotate([0, 0, angle]) 
-                translate([0, -do*RATIO, 0])
-                    cube(size=[do*2.0, do*RATIO*2, dz]);
-            rotate([0, 0, 180-angle]) 
-                translate([0, -do*RATIO, 0])
-                    cube(size=[do*2.0, do*RATIO*2, dz]);
+    if (tJoint) {
+        intersection() {
+            tube(h=dz - trim, do=do, di=di);
+            union() {
+                rotate([0, 0, angle]) 
+                    tjoint(do, dz, trim);
+                rotate([0, 0, 180-angle]) 
+                    tjoint(do, dz, trim);
+            }
+        }
+    }
+    else
+    {
+        RATIO = 0.15; 
+        intersection() {
+            tube(h=dz - trim, do=do, di=di);
+            union() {
+                rotate([0, 0, angle]) 
+                    translate([0, -do*RATIO, 0])
+                        cube(size=[do*2.0, do*RATIO*2, dz]);
+                rotate([0, 0, 180-angle]) 
+                    translate([0, -do*RATIO, 0])
+                        cube(size=[do*2.0, do*RATIO*2, dz]);
+            }
         }
     }
 }

@@ -6,8 +6,8 @@ use <../commonUnified.scad>
 //$fn = 40;
 $fn = 90;
 
-DRAW_AFT = false;
-DRAW_MID = true;
+DRAW_AFT = true;
+DRAW_MID = false;
 DRAW_CAP = false;
 
 
@@ -18,8 +18,8 @@ N_BAFFLES = nBafflesNeeded(DZ_BUTTRESS);
 DZ_BAFFLES = zLenOfBaffles(N_BAFFLES, DZ_BUTTRESS);
 T = 4;
 M_FRONT_BAFFLES =  M_AFT_BACK + DZ_SPKR_HOLDER + DZ_BAFFLES;
-JOINT = 5;
-KEY_ANGLE = -20;
+JOINT = 8;
+KEY_ANGLE = 0;
 
 module rods(forward)
 {
@@ -46,7 +46,8 @@ if (DRAW_AFT) {
         baffleMCBattery(D_AFT_MID, N_BAFFLES, DZ_BUTTRESS);
 
     translate([0, 0, M_FRONT_BAFFLES])
-        cylinderKeyJoint(JOINT, D_AFT_MID, D_AFT_MID - T, 0.5, KEY_ANGLE);
+        cylinderKeyJoint(JOINT, D_AFT_MID, D_AFT_MID - T, 
+                         0.2, KEY_ANGLE, true);
 }
 
 if (DRAW_MID) {
@@ -86,8 +87,10 @@ if (DRAW_MID) {
                 }
             }
         }
+        
         translate([0, 0, M_FRONT_BAFFLES])
-            cylinderKeyJoint(JOINT, D_AFT_MID, D_AFT_MID - T, 0.5, KEY_ANGLE);
+            cylinderKeyJoint(JOINT, D_AFT_MID, D_AFT_MID - T, 
+                             0, KEY_ANGLE, true);
 
         // Side holes
         translate([0, 0, DZ_MID/2 + M_MID_BACK]) rotate([0, 90, 0]) cylinder(h=100, d=4);
