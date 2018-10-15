@@ -7,10 +7,11 @@ import math
 import sys
 
 mat = init_material(sys.argv[1])
+cut_depth = float(sys.argv[2])
+
 tool_size = mat['tool_size']
 outer_d = 29.0 + tool_size
-cut_depth = -2.0
-inner_d = 22.0 + tool_size
+inner_d = 18.0 + tool_size
 
 outer_r = outer_d / 2
 inner_r = inner_d / 2
@@ -64,17 +65,19 @@ def path(g, z, dz):
 
 g.feed(mat['feed_rate'])
 g.absolute()
+g.feed(mat['feed_rate'])
 
 g.abs_move(z=CNC_TRAVEL_Z)
+for r in rods:
+    hole_abs(g, mat, cut_depth, r[2], r[0], r[1])
+g.abs_move(z=CNC_TRAVEL_Z)
+
 g_move(g, thetas[0], outer_r)
 g.spindle('CW', mat['spindle_speed'])
 g.abs_move(z=0)
 
 steps = calc_steps(cut_depth, -mat['pass_depth'])
 run_3_stages_abs(path, g, steps)
-
-for r in rods:
-    hole_abs(g, mat, cut_depth, r[2], r[0], r[1])
 
 g.move(z=CNC_TRAVEL_Z)
 g.spindle()
