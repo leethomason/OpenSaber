@@ -8,17 +8,17 @@ DZ_MID_OUTER = 50.7;                    // the length of the midsection on the o
 DZ_MID = DZ_MID_OUTER - DZ_THREAD * 2;  // inner length with the fore/aft attached
 
 D_AFT_MID = 31.75;
-DZ_AFT = 76.3;
+DZ_AFT = 77;
 D_AFT_RING = 33.5;
 DZ_AFT_RING = 5.5;
 
-DZ_SPKR_HOLDER = 8;
+DZ_SPKR_HOLDER = 8.5;
 DZ_BUTTRESS = 3;
 
 M_AFT_BACK = DZ_THREAD - DZ_AFT;
 M_AFT_FRONT = DZ_THREAD;
 M_MID_BACK = M_AFT_FRONT;
-M_MID_FRONT = M_MID_BACK + DZ_MID;
+M_MID_FRONT = M_MID_BACK + DZ_MID - 1.5;
 M_FORE_BACK = M_MID_FRONT;
 M_FORE_FRONT = M_FORE_BACK + DZ_FORE;
 

@@ -6,10 +6,9 @@ use <../commonUnified.scad>
 //$fn = 40;
 $fn = 90;
 
-DRAW_AFT = true;
-DRAW_MID = false;
+DRAW_AFT = false;
+DRAW_MID = true;
 DRAW_CAP = false;
-
 
 // part of mid
 DRAW_PLATE = true;
@@ -40,7 +39,7 @@ module rods(forward)
 
 if (DRAW_AFT) {
     translate([0, 0, M_AFT_BACK]) 
-        speakerHolder(D_AFT_MID, DZ_SPKR_HOLDER, 1, "cls28");
+        speakerHolder(D_AFT_MID, DZ_SPKR_HOLDER, 1.5, "cls28");
 
     translate([0, 0, M_AFT_BACK + DZ_SPKR_HOLDER])
         baffleMCBattery(D_AFT_MID, N_BAFFLES, DZ_BUTTRESS);
@@ -54,7 +53,7 @@ if (DRAW_MID) {
     JUNCTION = 3;
     TOP_JUNCTION = 1.5;
     DZ_PCB = 0;
-    DY_PCB = 5;
+    DY_PCB = 7;
     DZ_PCB_OPENING = M_MID_FRONT - M_FRONT_BAFFLES - TOP_JUNCTION - DZ_PCB;
     Z_OFFSET = 1.0;
     echo("DZ_PCB_OPENING", DZ_PCB_OPENING);
@@ -97,7 +96,7 @@ if (DRAW_MID) {
         translate([0, 0, DZ_MID/2 + M_MID_BACK + SIDE_TRIM]) rotate([0, 90, 0]) cylinder(h=100, d=4);
         translate([0, 0, DZ_MID/2 + M_MID_BACK + SIDE_TRIM]) rotate([0, -90, 0]) cylinder(h=100, d=4);
         // Bottom access
-        translate([0, 0, M_MID_BACK + DZ_PCB + 8.89 + Z_OFFSET]) rotate([90, 0, 0]) cylinder(h=100, d=12);
+        translate([0, 0, M_MID_BACK + DZ_PCB + 7.62 + Z_OFFSET]) rotate([90, 0, 0]) cylinder(h=100, d=12);
 
         // Hint of flatness
         translate([-20, -D_AFT_MID/2 - 1, M_FRONT_BAFFLES]) cube(size=[40, 1 + 0.5, M_MID_FRONT - M_FRONT_BAFFLES]);
