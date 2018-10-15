@@ -8,7 +8,7 @@ $fn = 90;
 
 DRAW_AFT = false;
 DRAW_MID = true;
-DRAW_CAP = false;
+DRAW_CAP = true;
 
 // part of mid
 DRAW_PLATE = true;
@@ -25,7 +25,7 @@ module rods(forward)
     D_ROD = 3.6;
     D_TUBE = 6;
     D_TUBE_CAP = 4.6;
-
+    /*
     translate([7, -7, 0]) cylinder(h=10, d=D_ROD);
     translate([-7,-7, 0]) cylinder(h=10, d=D_ROD);
     translate([0,  10, 0]) cylinder(h=10, d=D_ROD);
@@ -35,6 +35,11 @@ module rods(forward)
         cylinder(h=2, d=D_TUBE);
     else
         translate([0, 0, 2]) cylinder(h=10, d=D_TUBE);
+    */
+    translate([0, 0, 0]) cylinder(h=10, d=D_ROD);
+
+    //translate([0, -8, 0]) cylinder(h=10, d=D_TUBE_CAP);
+    translate([0, -9, 0]) cylinder(h=20, d=D_TUBE);
 }
 
 if (DRAW_AFT) {
@@ -123,11 +128,48 @@ if (DRAW_MID) {
     }
 }
 
+module wingedCylinder()
+{
+    cylinder(h=CAP_DZ, d=CAP_D_INNER);
+    difference() 
+    {
+        cylinder(h=CAP_DZ, d=D_FORE);
+        translate([0, 0, -1]) polygonXY(h=10, points=[
+            [0, 0],
+            [cos(180 - CAP_THETA) * 100, sin(180 - CAP_THETA) * 100],
+            [cos(CAP_THETA) * 100, sin(CAP_THETA) * 100],
+        ]);
+        translate([0, 0, -1]) polygonXY(h=10, points=[
+            [0, 0],
+            [cos(-CAP_THETA) * 100, sin(-CAP_THETA) * 100],
+            [cos(180 + CAP_THETA) * 100, sin(180 + CAP_THETA) * 100],
+        ]);
+    }
+}
+
 if (DRAW_CAP) {
-    translate([0, 0, M_FORE_BACK + 20]) {
+    *translate([0, 0, M_FORE_BACK + 20]) {
         difference() {
-            cylinder(h=DZ_BUTTRESS, d=D_FORE);
+            wingedCylinder();
+            // Space for brass
+            translate([0, 0, CAP_DZ - CAP_BRASS])
+                cylinder(h=10, d=CAP_D_INNER);
+
+            // Rods.
             rods(true);
+        }
+    }
+    translate([0, 0, M_FORE_BACK + 19])
+    {
+        difference() {
+            color("gold") {
+                cylinder(h=1, d=CAP_D_INNER);
+                difference() {
+                    cylinder(h=1, d=D_FORE);
+                    wingedCylinder();
+                }
+            }
+            rods();
         }
     }
 }
