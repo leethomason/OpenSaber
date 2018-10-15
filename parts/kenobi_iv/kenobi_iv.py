@@ -8,10 +8,11 @@ from rectangle import rectangle
 mat = init_material("np883-fr-1.0")
 tool_size = 1.0
 half_tool = tool_size / 2
-cut_depth = -5.0
+cut_depth = -2.5
 
 g = G(outfile='path.nc', aerotech_include=False, header=None, footer=None, print_lines=False)
 g.absolute()
+g.feed(mat['feed_rate'])
 g.move(z=CNC_TRAVEL_Z)
 g.spindle('CW', mat['spindle_speed'])
 
