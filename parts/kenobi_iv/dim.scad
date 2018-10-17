@@ -1,4 +1,4 @@
-D_FORE = 29.0;
+D_FORE = 29.0 - 0.4;    // bring the plastic in just a touch
 DZ_FORE = 63.0;
 
 D_MID_OUTER = 36.8;
@@ -33,7 +33,9 @@ BOX_Y = 5.0;
 
 D_POWER_PORT = 8.0;
 
-CAP_D_INNER = D_FORE - 12;
+D_ROD = 3.6;
+D_TUBE = 6;
+CAP_D_INNER = 18;
 CAP_THETA = 30.0;
-CAP_DZ = DZ_BUTTRESS;
+CAP_DZ = 4;
 CAP_BRASS = 1.0;                // fixme
