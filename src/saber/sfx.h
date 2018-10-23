@@ -28,6 +28,7 @@ SOFTWARE.
 
 #include "Grinliz_Arduino_Util.h"
 #include "Grinliz_Util.h"
+#include "iaudio.h"
 
 // SFX in priority order!
 enum {            //  Max
@@ -52,14 +53,13 @@ enum {
   SFX_OVERRIDE
 };
 
-class AudioPlayer;
 class SerialFlashFile;
 
 class SFX
 {
 public:
   // AudioPlayer can be null to avoid a bunch of #if/if
-  SFX(AudioPlayer* audioPlayer);
+  SFX(IAudio* audioPlayer);
   static SFX* instance() { return m_instance; }
 
   bool init();
@@ -79,9 +79,10 @@ public:
 
   const uint32_t getIgniteTime() const    { return m_igniteTime; }
   const uint32_t getRetractTime() const   { return m_retractTime; }
+
   // Get the length of the currently playing file. Will
   // return 0 if the file header isn't read yet.
-  const uint32_t lengthMillis() const;
+  //uint32_t lengthMillis() const;
 
   void setVolume204(int vol);
   uint8_t getVolume204() const;
@@ -93,11 +94,6 @@ public:
   const char* currentFontName() const;
 
   bool readHeader(const char* filename, uint8_t* nChannels, uint32_t* nSamplesPerSec, uint32_t* lengthMillis, bool logToConsole);
-
-  // testing
-  uint16_t nEnabled() const;
-  uint16_t nDisabled() const;
-
 
 private:
   void filePath(CStr<25>* str, int id);
@@ -118,7 +114,7 @@ private:
     const bool InUse() const { return start < 255 && count < 255; }
   };
 
-  AudioPlayer* m_player;
+  IAudio*      m_player;
   bool         m_bladeOn;
   uint8_t      m_numFonts;
   int8_t       m_numFilenames;
@@ -127,7 +123,7 @@ private:
   uint8_t      m_currentFont;
   uint32_t     m_igniteTime;
   uint32_t     m_retractTime;
-  float        m_savedVolume = -1.f;  // negative means not in use.
+  int          m_savedVolume = -1;  // negative means not in use.
 
   Random       m_random;
   SFXLocation  m_location[NUM_SFX_TYPES];

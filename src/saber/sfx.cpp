@@ -25,7 +25,7 @@
 
 #include "sfx.h"
 #include "pins.h"
-#include "AudioPlayer.h"
+//#include "AudioPlayer.h"
 #include "tester.h"
 
 #if SERIAL_DEBUG == 1
@@ -34,7 +34,7 @@
 
 SFX* SFX::m_instance = 0;
 
-SFX::SFX(AudioPlayer* audioPlayer)
+SFX::SFX(IAudio* audioPlayer)
 {
     m_instance = this;
 
@@ -363,7 +363,7 @@ bool SFX::playUISound(const char* name, bool prepend)
         m_savedVolume = m_player->volume();
     }
 
-    m_player->setVolume(0.5);
+    m_player->setVolume(128);
     return m_player->play(path.c_str());
 }
 
@@ -453,11 +453,13 @@ bool SFX::readHeader(const char* filename, uint8_t* nChannels, uint32_t* nSample
     return false;
 }
 
+/*
 const uint32_t SFX::lengthMillis() const
 {
     if (!m_player) return 0;
     return m_player->lengthMillis();
 }
+*/
 
 void SFX::readIgniteRetract()
 {
@@ -481,13 +483,11 @@ void SFX::setVolume204(int vol)
     vol = constrain(vol, 0, 204);
     if (vol >= 204) {
         if (m_player)
-            m_player->setVolume(1.0f);
+            m_player->setVolume(256);
     }
     else {
-        static const float INV = 0.0049;
-        float v = float(vol) * INV;
         if (m_player)
-            m_player->setVolume(v);
+            m_player->setVolume(vol * 256 / 204);
     }
 }
 
@@ -495,7 +495,7 @@ void SFX::setVolume204(int vol)
 uint8_t SFX::getVolume204() const
 {
     if (m_player)
-        return m_player->volume() * 204.0f + 0.5f;
+        return m_player->volume() * 204 / 256;
     return 160;
 }
 
@@ -544,7 +544,3 @@ const char* SFX::fontName(uint8_t font) const
     if (m_numFonts == 0) return "";
     return m_dirName[font % m_numFonts].c_str();
 }
-
-
-uint16_t SFX::nEnabled() const { return m_player ? m_player->nEnabled() : 0; }
-uint16_t SFX::nDisabled() const { return m_player ? m_player->nDisabled() : 0; }
