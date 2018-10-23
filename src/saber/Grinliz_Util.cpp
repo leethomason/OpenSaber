@@ -280,6 +280,12 @@ bool TestCStr()
         CStrBuf<6> b("Hello2");
         TEST_IS_TRUE(a != b);
     }
+    {
+        CStr<9> a;
+        a = "test";
+        a = (const unsigned char*) "test2";
+        a = (const char*) "test3";
+    }
     return true;
 }
 

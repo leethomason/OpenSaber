@@ -118,14 +118,10 @@ void AudioPlayer::setShutdown() {
     }
 }
 
-void AudioPlayer::setVolume(float v) {
+void AudioPlayer::setVolume(int vInt) {
+    float v = float(vInt) / 256.0f;
+
     m_volume = v;
     mixer.gain(0, m_volume);
     setShutdown();
-}
-
-
-uint32_t AudioPlayer::lengthMillis() const
-{
-    return playWav.lengthMillis();
 }
