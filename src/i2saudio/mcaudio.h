@@ -12,6 +12,10 @@
 #define NUM_AUDIO_BUFFERS 2
 
 class Adafruit_SPIFlash;
+class Adafruit_ZeroTimer;
+class Adafruit_ZeroI2S;
+class Adafruit_ZeroDMA;
+class SPIStream;
 
 enum {
     AUDBUF_EMPTY,
@@ -32,10 +36,48 @@ struct AudioBufferData {
     uint32_t dataAvailable = 0;
     int32_t* buffer = 0;
     
-    int fillBuffer(Adafruit_SPIFlash& flash, wav12::Expander& expander, int32_t volume);
+    int fillBuffer(wav12::Expander& expander, int32_t volume);
 
     void reset() { status = AUDBUF_EMPTY; dataAvailable = 0; }
 };
+
+
+class I2SAudio
+{
+public:
+    I2SAudio(Adafruit_ZeroI2S& i2s, Adafruit_ZeroTimer& timer, Adafruit_ZeroDMA& dma);
+
+    void initStream(SPIStream& stream);
+    virtual void init();
+
+    virtual bool play(const char* filename);
+    virtual void stop();
+    virtual bool isPlaying();
+
+    // Volume 256 is "full" - can boost or cut from there.
+    virtual void setVolume(int v) { volume256 = v; }
+    virtual int volume() const { return volume256; }
+
+    static uint32_t timerCallbacks;
+    static uint32_t timerCallbackHits;
+    static uint32_t callbackErrors;
+
+    static I2SAudio* instance() { return _instance; }
+
+private:
+    int32_t expandVolume() const { return this->volume() * 256; }
+
+    static I2SAudio* _instance;
+    static void dmaCallback(Adafruit_ZeroDMA *dma);
+    static void timerCallback();
+
+    static AudioBufferData audioBufferData[NUM_AUDIO_BUFFERS];     // Information about the state of audioBuffer0/1
+    Adafruit_ZeroI2S& i2s;
+    Adafruit_ZeroTimer& timer;
+    Adafruit_ZeroDMA& audioDMA;  
+    int volume256 = 256;
+};
+
 
 class SPIStream : public wav12::IStream
 {

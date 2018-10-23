@@ -7,8 +7,6 @@
 
 class Adafruit_SPIFlash;
 
-int fillBuffer(int id);
-
 struct MemUnit {
     static const int NAME_LEN = 8;
 
@@ -22,9 +20,6 @@ static_assert(sizeof(MemUnit) == 16, "correct size");
 struct MemImage {
     static const int NUM_DIR = 4;
     static const int NUM_FILES = 60;
-
-    // MemUnit dir[NUM_DIR];
-    // MemUnit file[NUM_FILES];
 };
 
 void readDir(Adafruit_SPIFlash&, MemUnit* dir);
