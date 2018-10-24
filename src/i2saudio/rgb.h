@@ -64,6 +64,8 @@ struct RGB {
 	bool operator!=(const RGB& rhs) const {
 		return !(rhs == *this);
 	}
+
+	int size() const { return 3; }
 };
 
 #endif
