@@ -9,7 +9,7 @@
 #include "mcaudio.h"
 #include "compress.h"
 
-#define SERIAL_SPEED 115200
+#define SERIAL_SPEED 19200 //115200
 #define LOCAL_PAGESIZE 256
 
 extern "C" char *sbrk(int i);
@@ -19,11 +19,11 @@ Adafruit_SPIFlash spiFlash(SS1, &SPI1);     // Use hardware SPI
 Adafruit_ZeroDMA audioDMA;
 SPIStream spiStream(spiFlash);
 Adafruit_ZeroTimer zt4(4);
-I2SAudio i2sAudio(i2s, zt4, audioDMA);
-
-int32_t volume = 30*1000; // loudest: 65536
+I2SAudio i2sAudio(i2s, zt4, audioDMA, spiFlash, spiStream);
+CStr<16> cmd;
 
 Timer2 statusTimer(1000);
+Timer2 playingTimer(833);
 uint32_t lastTime = 0;
 
 int FreeRam () {
@@ -74,13 +74,12 @@ void setup()
     Log.p("Device ID: 0x").p(devid, HEX).eol();
     Log.p("Pagesize: ").p(spiFlash.pageSize()).p(" Page buffer: ").p(LOCAL_PAGESIZE).eol();
 
-    i2sAudio.initStream(spiStream);
+    dumpImage(spiFlash);
+
     i2sAudio.init();
-    i2sAudio.setVolume(20);
+    i2sAudio.setVolume(100);
 
     Log.p("Free ram:").p(FreeRam()).eol();
-
-    dumpImage(spiFlash);
 
     //testReadRate(0);
     //testReadRate(1);
@@ -97,11 +96,52 @@ void setup()
     lastTime = millis();
 }
 
+CQueue<16> queue;
+
 void loop()
 {
     uint32_t t = millis();
     if (statusTimer.tick(t - lastTime)) {
-        Log.p(" callbacks=").p(I2SAudio::timerCallbacks).p(" hits=").p(I2SAudio::timerCallbackHits).p(" errors=").p(I2SAudio::callbackErrors).eol();
+        const I2STracker& t = I2SAudio::tracker;
+
+        bool doLog = t.timerErrors || t.dmaErrors || t.fillErrors;
+        if (doLog) {
+            Log.p("Timer calls=").p(t.timerCalls).p(" fills=").p(t.timerFills).p(" queues=").p(t.timerQueued).p(" err=").p(t.timerErrors)
+            .p(" DMA calls=").p(t.dmaCalls).p( " err=").p(t.dmaErrors)
+            .p(" Fill empty=").p(t.fillEmpty).p(" some=").p(t.fillSome).p(" err=").p(t.fillErrors)
+            .eol();
+        }
+        I2SAudio::tracker.reset();
     }
+    #if 0
+    if (playingTimer.tick(t-lastTime)) {
+        Log.p("isPlaying=").p(i2sAudio.isPlaying()).eol();
+    }
+    #endif
     lastTime = t;
+
+    if (!i2sAudio.isPlaying() && !queue.empty()) {
+        int id = queue.pop();
+        i2sAudio.play(id);
+    }
+
+    while (Serial.available()) {
+        int c = Serial.read();
+        if (c == '\n') {
+            Log.pt(cmd).eol();
+            if (cmd.size() == 2 && cmd[0] == 'p') {
+                i2sAudio.play(cmd[1] - '0');
+            }
+            else if (cmd.size() == 2 && cmd[0] == 'q') {
+                queue.push(cmd[1] - '0');
+            }
+            else if (cmd == "s") {
+                i2sAudio.stop();
+            }
+            cmd.clear();
+        }
+        else {
+            cmd.append(c);
+        }
+    }
 }

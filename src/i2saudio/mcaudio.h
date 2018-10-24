@@ -41,16 +41,36 @@ struct AudioBufferData {
     void reset() { status = AUDBUF_EMPTY; dataAvailable = 0; }
 };
 
+struct I2STracker
+{
+    uint32_t timerCalls;
+    uint32_t timerFills;
+    uint32_t timerQueued;
+    uint32_t timerErrors;
+
+    uint32_t dmaCalls;
+    uint32_t dmaErrors;
+
+    uint32_t fillEmpty;
+    uint32_t fillSome;
+    uint32_t fillErrors;
+
+    void reset() {
+        memset(this, 0, sizeof(*this));
+    }
+};
+
 
 class I2SAudio
 {
 public:
-    I2SAudio(Adafruit_ZeroI2S& i2s, Adafruit_ZeroTimer& timer, Adafruit_ZeroDMA& dma);
+    I2SAudio(Adafruit_ZeroI2S& i2s, Adafruit_ZeroTimer& timer, Adafruit_ZeroDMA& dma, Adafruit_SPIFlash& spiFlash, SPIStream& stream);
 
-    void initStream(SPIStream& stream);
     virtual void init();
 
+    bool play(int fileIndex);
     virtual bool play(const char* filename);
+
     virtual void stop();
     virtual bool isPlaying();
 
@@ -58,9 +78,7 @@ public:
     virtual void setVolume(int v) { volume256 = v; }
     virtual int volume() const { return volume256; }
 
-    static uint32_t timerCallbacks;
-    static uint32_t timerCallbackHits;
-    static uint32_t callbackErrors;
+    static I2STracker tracker;
 
     static I2SAudio* instance() { return _instance; }
 
@@ -72,9 +90,23 @@ private:
     static void timerCallback();
 
     static AudioBufferData audioBufferData[NUM_AUDIO_BUFFERS];     // Information about the state of audioBuffer0/1
-    Adafruit_ZeroI2S& i2s;
+    static int32_t audioBuffer0[STEREO_BUFFER_SAMPLES];
+    static int32_t audioBuffer1[STEREO_BUFFER_SAMPLES];
+
+    // Access from interupts disabled.
+    static bool isStreamQueued;
+    static uint32_t queued_addr;
+    static uint32_t queued_size;
+    static uint32_t queued_nSamples;
+    static int      queued_format;
+    // end interupt section
+
+    Adafruit_ZeroI2S&   i2s;
     Adafruit_ZeroTimer& timer;
-    Adafruit_ZeroDMA& audioDMA;  
+    Adafruit_ZeroDMA&   audioDMA;  
+    Adafruit_SPIFlash&  spiFlash;
+    SPIStream&          spiStream;
+
     int volume256 = 256;
 };
 

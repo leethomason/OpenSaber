@@ -314,6 +314,7 @@ public:
         return result;
     }
 
+	bool hasCap() const { return len < CAP; }
     int empty() const { return len == 0; }
 
 private:
