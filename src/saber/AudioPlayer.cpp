@@ -1,6 +1,8 @@
 #include "AudioPlayer.h"
 #include "pins.h"
 
+#ifdef CORE_TEENSY
+
 #include <Wire.h>
 #include <SPI.h>
 #include <SD.h>
@@ -125,3 +127,5 @@ void AudioPlayer::setVolume(int vInt) {
     mixer.gain(0, m_volume);
     setShutdown();
 }
+
+#endif // CORE_TEENSY

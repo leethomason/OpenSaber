@@ -21,13 +21,15 @@
 */
 
 // Arduino Libraries
+#ifdef CORE_TEENSY
 #include <EEPROM.h>
+#include <SerialFlash.h>
+#include <Audio.h>
+#endif
 #include <Wire.h>
 #include <SPI.h>
 #include <SD.h>
 #include <OLED_SSD1306.h>
-#include <SerialFlash.h>
-#include <Audio.h>
 #include "Button.h"
 #include "Grinliz_Arduino_Util.h"
 #include "DotStar.h"
@@ -696,3 +698,22 @@ void loopDisplays(uint32_t msec, uint32_t delta)
         dotstar.display();
     #endif    
 }
+
+
+#include "vprom.h"
+
+#if defined(ARDUINO_SAMD_ZERO)
+static const uint32_t BASE_ADDR = 2 * 1024 * 1024 - EEPROM_SIZE;   // 1k of "EEPROM" at the end.
+
+void vpromPutRaw(uint32_t addr, uint32_t size, const void* data)
+{
+    ASSERT(addr + size < EEPROM_SIZE);
+    spiFlash.writeBuffer(BASE_ADDR + addr, data, size);
+}
+
+void vpromGetRaw(uint32_t addr, uint32_t size, void* data)
+{
+    ASSERT(addr + size < EEPROM_SIZE);
+    spiFlash.readBuffer(BASE_ADDR + addr, data, size);
+}
+#endif

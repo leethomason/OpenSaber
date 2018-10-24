@@ -81,6 +81,9 @@ bool strStarts(const char* str, const char* prefix);
 bool istrStarts(const char* str, const char* prefix);
 void intToString(int value, char* str, int allocated, bool writeZero);
 
+// Hash suitible for short (8 char or so) strings.
+uint16_t hash8(const char* v, const char* end);
+
 /**
 * The CStr class is a "c string": a simple array of
 * char and an int size bound in a class. It allocates
@@ -184,6 +187,13 @@ public:
 		}
 	}
 
+	void append(const char* start, const char* end) {
+		while(start < end && *start) {
+			append(*start);
+			++start;
+		}
+	}
+
 	void append(char c) {
 		if (len < ALLOCATE - 1) {
 			buf[len] = c;
@@ -196,6 +206,10 @@ public:
 		clear();
 		intToString(value, buf, ALLOCATE, writeZero);
 		len = strlen(buf);
+	}
+
+	uint16_t hash8() const {
+		return ::hash8(buf, buf + len);
 	}
 
 private:
@@ -275,6 +289,10 @@ public:
             buf[i] = 0;
     }
 
+	uint16_t hash8() const {
+		return ::hash8(buf, buf + size());
+	}
+
 private:
     char buf[ALLOCATE];
 };
@@ -324,6 +342,7 @@ public:
         return result;
     }
 
+	bool hasCap() const { return len < CAP; }
     int empty() const { return len == 0; }
 
 private:
@@ -340,6 +359,12 @@ template<class T>
 bool inRange(const T& a, const T& b, const T& c) {
 	return a >= b && a <= c;
 }
+
+template<class T>
+T glMin(T a, T b) { return (a < b) ? a : b; }
+
+template<class T>
+T glMax(T a, T b) { return (a > b) ? a : b; }
 
 // --- Algorithm --- //
 
@@ -476,6 +501,11 @@ public:
 	const SPLog& p(unsigned long v, int p = DEC) const;
 	const SPLog& p(double v, int p = 2) const;
 	const SPLog& p(const RGB& rgb) const;
+	
+	template<class T> const SPLog& pt(const T& str) const {
+		for(int i=0; i<str.size(); ++i) (*this).p(str[i]);
+		return *this;
+	}
 	void eol() const;
 
 private:

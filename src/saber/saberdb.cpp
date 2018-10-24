@@ -21,11 +21,10 @@ SOFTWARE.
 */
 
 #include <Arduino.h>
-#include <EEPROM.h>
 #include "Grinliz_Arduino_Util.h"
 #include "saberdb.h"
 #include "sfx.h"  // bug fix; generally don't want a dependency on sfx
-
+#include "vprom.h"
 
 SaberDB::SaberDB() {
     STATIC_ASSERT(BASE_ADDR + NUM_PALETTES * sizeof(Palette) + sizeof(DataHeader) < EEPROM_SIZE);
@@ -168,7 +167,7 @@ bool SaberDB::writeDefaults()
     Log.p("Writing EEPROM default.").eol();
 
     DataHeader dataHeaderDefault;
-    EEPROM.put(headerAddr(), dataHeaderDefault);
+    vpromPut(headerAddr(), dataHeaderDefault);
 
     for (int i = 0; i < NUM_PALETTES; ++i) {
         Palette p = defPalette[i];
@@ -177,7 +176,7 @@ bool SaberDB::writeDefaults()
 #else
         p.soundFont = defNames[i];
 #endif
-        EEPROM.put(paletteAddr(i), p);
+        vpromPut(paletteAddr(i), p);
     }
     readData();
     Log.p("EEPROM default complete.").eol();
@@ -187,8 +186,8 @@ bool SaberDB::writeDefaults()
 
 bool SaberDB::readData() {
 
-    EEPROM.get(headerAddr(), dataHeader);
-    EEPROM.get(paletteAddr(dataHeader.currentPalette), palette);
+    vpromGet(headerAddr(), dataHeader);
+    vpromGet(paletteAddr(dataHeader.currentPalette), palette);
     setupInit();
     return true;
 }
@@ -212,27 +211,27 @@ void SaberDB::setPalette(int n)
     EventQ.event("[PALETTE]", dataHeader.currentPalette);
     //Log.p("Switch Palette to: ").p(dataHeader.currentPalette).eol();
 
-    EEPROM.put(headerAddr(), dataHeader);
-    EEPROM.get(paletteAddr(dataHeader.currentPalette), palette);
+    vpromPut(headerAddr(), dataHeader);
+    vpromGet(paletteAddr(dataHeader.currentPalette), palette);
 }
 
 
 void SaberDB::getPalette(int i, Palette* pal)
 {
-    EEPROM.get(paletteAddr(i), *pal);
+    vpromGet(paletteAddr(i), *pal);
 }
 
 
 void SaberDB::setupInit()
 {
     dataHeader.nSetup = dataHeader.nSetup + 1;
-    EEPROM.put(headerAddr(), dataHeader);
+    vpromPut(headerAddr(), dataHeader);
 }
 
 void SaberDB::setVolume(int v) {
     v = constrain(v, 0, 204);
     dataHeader.volume = v;
-    EEPROM.put(headerAddr(), dataHeader);
+    vpromPut(headerAddr(), dataHeader);
 }
 
 void SaberDB::setVolume4(int v)
@@ -270,27 +269,27 @@ uint8_t SaberDB::volume4() const
 void SaberDB::setMotion(float v) {
     v = constrain(v, 1.1, 10.0);
     dataHeader.motion = v;
-    EEPROM.put(headerAddr(), dataHeader);
+    vpromPut(headerAddr(), dataHeader);
 }
 
 void SaberDB::setImpact(float v) {
     v = constrain(v, 1.1, 10.0);
     dataHeader.impact = v;
-    EEPROM.put(headerAddr(), dataHeader);
+    vpromPut(headerAddr(), dataHeader);
 }
 
 void SaberDB::setBladeColor(const RGB& color) {
     palette.bladeColor = color;
-    EEPROM.put(paletteAddr(dataHeader.currentPalette), palette);
+    vpromPut(paletteAddr(dataHeader.currentPalette), palette);
 }
 
 void SaberDB::setImpactColor(const RGB& color) {
     palette.impactColor = color;
-    EEPROM.put(paletteAddr(dataHeader.currentPalette), palette);
+    vpromPut(paletteAddr(dataHeader.currentPalette), palette);
 }
 
 void SaberDB::setSoundFont(const char* v) {
     palette.soundFont = v;
-    EEPROM.put(paletteAddr(dataHeader.currentPalette), palette);
+    vpromPut(paletteAddr(dataHeader.currentPalette), palette);
 }
 

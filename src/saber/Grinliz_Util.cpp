@@ -114,6 +114,18 @@ bool istrStarts(const char* str, const char* prefix)
     return true;
 }
 
+uint16_t hash8(const char* v, const char* end)
+{
+	int shift = 0;
+	uint16_t h = 0;
+	while(v < end) {
+		h = ((*v) << shift) ^ h;
+		++shift;
+		++v;            
+	}
+	return h;
+}
+
 
 bool TestCStr()
 {

@@ -163,6 +163,16 @@ public:
 		append(src);
 	}
 
+	void operator=(char* const src) {
+		clear();
+		append((const char*)src);
+	}
+
+    void operator=(const unsigned char* src) {
+        clear();
+        append((const char*) src);
+    }
+
     template< class T > void operator=(const T& str) {
         *this = str.c_str();
     }

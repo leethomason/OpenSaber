@@ -20,12 +20,15 @@
   SOFTWARE.
 */
 
+#include "pins.h"
+
+#if SABER_SOUND_ON == SABER_SOUND_SD
 #include <SD.h>
 #include <SerialFlash.h>
+#elif SABER_SOUND_ON == SABER_SOUND_FLASH
+#include 
 
 #include "sfx.h"
-#include "pins.h"
-//#include "AudioPlayer.h"
 #include "tester.h"
 
 #if SERIAL_DEBUG == 1

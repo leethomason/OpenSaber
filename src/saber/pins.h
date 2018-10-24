@@ -64,8 +64,8 @@ SOFTWARE.
 #define LED_TYPE_WWG				3   // white-white-green
 #define LED_TYPE_GGC				4	// green-green-cyan
 
-#define SABER_SOUND_SD 				1
-#define SABER_SOUND_FLASH 			2
+#define SABER_SOUND_SD 				1	// external memory card
+#define SABER_SOUND_FLASH 			2	// M0 memory
 
 #define SABER_DISPLAY_128_32		1
 #define SABER_DISPLAY_7_5_DEPRECATED			2	// NON shifted. So many wires. So many.

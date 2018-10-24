@@ -1,6 +1,8 @@
 #ifndef OPEN_SABER_AUDIO_INCLUDED
 #define OPEN_SABER_AUDIO_INCLUDED
 
+#ifdef CORE_TEENSY
+
 #include <stdint.h>
 #include "iaudio.h"
 
@@ -39,4 +41,5 @@ private:
     float    m_volume;
 };
 
+#endif // CORE_TEENSY
 #endif // OPEN_SABER_AUDIO_INCLUDED
