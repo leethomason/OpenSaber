@@ -26,6 +26,20 @@ void readDir(Adafruit_SPIFlash&, MemUnit* dir);
 void readFile(Adafruit_SPIFlash& flash, int index, MemUnit* file);
 void readAudioInfo(Adafruit_SPIFlash& flash, const MemUnit& file, wav12::Wav12Header* header, uint32_t* dataAddr);
 
+class DirToIndex
+{
+public:
+    DirToIndex();
+
+    void scan(Adafruit_SPIFlash&);
+    int lookup(const char* path);
+
+private:
+    uint16_t dirHash[MemImage::NUM_DIR];
+    uint16_t fileHash[MemImage::NUM_FILES];
+    int dirStart[MemImage::NUM_DIR];
+};
+
 void dumpImage(Adafruit_SPIFlash&);
 
 #endif // MC_MEM_IMAGE 

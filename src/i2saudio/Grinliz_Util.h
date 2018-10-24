@@ -81,6 +81,9 @@ bool strStarts(const char* str, const char* prefix);
 bool istrStarts(const char* str, const char* prefix);
 void intToString(int value, char* str, int allocated, bool writeZero);
 
+// Hash suitible for short (8 char or so) strings.
+uint16_t hash8(const char* v, const char* end);
+
 /**
 * The CStr class is a "c string": a simple array of
 * char and an int size bound in a class. It allocates
@@ -174,6 +177,13 @@ public:
 		}
 	}
 
+	void append(const char* start, const char* end) {
+		while(start < end && *start) {
+			append(*start);
+			++start;
+		}
+	}
+
 	void append(char c) {
 		if (len < ALLOCATE - 1) {
 			buf[len] = c;
@@ -186,6 +196,10 @@ public:
 		clear();
 		intToString(value, buf, ALLOCATE, writeZero);
 		len = strlen(buf);
+	}
+	
+	uint16_t hash8() const {
+		return ::hash8(buf, buf + len);
 	}
 
 private:
@@ -264,6 +278,10 @@ public:
         if (i < ALLOCATE)
             buf[i] = 0;
     }
+
+	uint16_t hash8() const {
+		return ::hash8(buf, buf + size());
+	}
 
 private:
     char buf[ALLOCATE];

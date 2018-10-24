@@ -20,7 +20,6 @@ Adafruit_ZeroDMA audioDMA;
 SPIStream spiStream(spiFlash);
 Adafruit_ZeroTimer zt4(4);
 I2SAudio i2sAudio(i2s, zt4, audioDMA, spiFlash, spiStream);
-CStr<16> cmd;
 
 Timer2 statusTimer(1000);
 Timer2 playingTimer(833);
@@ -96,6 +95,7 @@ void setup()
     lastTime = millis();
 }
 
+CStr<32> cmd;
 CQueue<16> queue;
 
 void loop()
@@ -105,6 +105,7 @@ void loop()
         const I2STracker& t = I2SAudio::tracker;
 
         bool doLog = t.timerErrors || t.dmaErrors || t.fillErrors;
+        //doLog = true;
         if (doLog) {
             Log.p("Timer calls=").p(t.timerCalls).p(" fills=").p(t.timerFills).p(" queues=").p(t.timerQueued).p(" err=").p(t.timerErrors)
             .p(" DMA calls=").p(t.dmaCalls).p( " err=").p(t.dmaErrors)
@@ -132,8 +133,12 @@ void loop()
             if (cmd.size() == 2 && cmd[0] == 'p') {
                 i2sAudio.play(cmd[1] - '0');
             }
-            else if (cmd.size() == 2 && cmd[0] == 'q') {
-                queue.push(cmd[1] - '0');
+            else if (cmd[0] == 'p' && cmd.size() > 2) {
+                i2sAudio.play(cmd.c_str() + 2);
+            }
+            else if (cmd[0] == 'q') {
+                for(int i=1; i<cmd.size(); ++i)
+                    queue.push(cmd[i] - '0');
             }
             else if (cmd == "s") {
                 i2sAudio.stop();

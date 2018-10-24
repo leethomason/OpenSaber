@@ -74,6 +74,8 @@ public:
     virtual void stop();
     virtual bool isPlaying();
 
+    virtual void process() {}
+
     // Volume 256 is "full" - can boost or cut from there.
     virtual void setVolume(int v) { volume256 = v; }
     virtual int volume() const { return volume256; }

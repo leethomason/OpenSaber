@@ -27,6 +27,8 @@ I2SAudio* I2SAudio::_instance = 0;
 // Information about the state of audioBuffer0/1
 AudioBufferData I2SAudio::audioBufferData[NUM_AUDIO_BUFFERS];
 
+DirToIndex dirToIndex;
+
 volatile uint8_t dmaPlaybackBuffer = 0;
 
 bool I2SAudio::isStreamQueued = false;
@@ -99,11 +101,15 @@ void I2SAudio::init()
 {
     audioBufferData[0].buffer = audioBuffer0;
     audioBufferData[1].buffer = audioBuffer1;
-    ASSERT(audioBuffer0 == audioBufferData[0].buffer);
     audioBufferData[0].reset();
     audioBufferData[1].reset();
     ASSERT(audioBuffer0 == audioBufferData[0].buffer);
 
+    dirToIndex.scan(spiFlash);
+
+    //ASSERT(intptr_t(audioBuffer0) % 16 == 0); // Doesn't seem to matter. Perhaps only length of transfer?
+    //ASSERT(intptr_t(audioBuffer1) % 16 == 0);
+    #if 0
     MemUnit file;
     readFile(spiFlash, 0, &file);
     wav12::Wav12Header header;
@@ -125,6 +131,7 @@ void I2SAudio::init()
     }
     ASSERT(audioBuffer0 == audioBufferData[0].buffer);
     Log.p("Buffer fill check=").p(check).eol();
+    #endif
 
     Log.p("Configuring DMA trigger").eol();
     audioDMA.setTrigger(I2S_DMAC_ID_TX_0);
@@ -194,6 +201,10 @@ bool I2SAudio::play(int fileIndex)
 bool I2SAudio::play(const char* filename)
 {
     Log.p("play").eol();
+    int index = dirToIndex.lookup(filename);
+    if (index >= 0) {
+        play(index);
+    }
     return true;
 }
 
@@ -234,10 +245,12 @@ int AudioBufferData::fillBuffer(wav12::Expander& expander, int32_t volume)
     uint32_t MILLION2 = 2 * 1024 * 1024;
     if (expander.samples() < expander.pos()) {
         I2SAudio::tracker.fillErrors++;
+        status = AUDBUF_READY;
         return AUDERROR_SAMPLES_POS_OUT_OF_RANGE;
     }
     if (expander.samples() > MILLION2 || expander.pos() > MILLION2) {
         I2SAudio::tracker.fillErrors++;
+        status = AUDBUF_READY;
         return AUDERROR_SAMPLES_POS_OUT_OF_RANGE;
     }
 
