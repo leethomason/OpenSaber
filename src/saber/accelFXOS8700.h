@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+#include "pins.h"
+
+#if SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
+
 class AccelFXOS8700
 {
 public:
@@ -58,5 +62,5 @@ private:
 	uint8_t m_range = 2;
 	uint8_t m_address = 0x1f; 
 };
-
+#endif // SABER_ACCELEROMETER_NXP
 #endif

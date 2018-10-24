@@ -16,6 +16,7 @@ extern "C" char *sbrk(int i);
 
 Adafruit_ZeroI2S i2s(0, 1, 12, 2);
 Adafruit_SPIFlash spiFlash(SS1, &SPI1);     // Use hardware SPI 
+ConstMemImage MemImage(spiFlash);
 Adafruit_ZeroDMA audioDMA;
 SPIStream spiStream(spiFlash);
 Adafruit_ZeroTimer zt4(4);

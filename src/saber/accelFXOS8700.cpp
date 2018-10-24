@@ -1,4 +1,6 @@
 #include "accelFXOS8700.h"
+#if SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
+
 #include <Wire.h>
 #include <math.h>
 
@@ -200,3 +202,4 @@ AccelFXOS8700::ErrorCode AccelFXOS8700::read(float* v, float* gravitySquared, fl
 
 	return SUCCESS;
 }
+#endif // SABER_ACCELEROMETER_NXP

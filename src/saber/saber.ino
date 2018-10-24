@@ -41,7 +41,6 @@
 #include "accelerometer.h"
 #include "voltmeter.h"
 #include "sfx.h"
-#include "AudioPlayer.h"
 #include "saberdb.h"
 #include "cmdparser.h"
 #include "blade.h"
@@ -50,6 +49,12 @@
 #include "saberUtil.h"
 #include "tester.h"
 #include "ShiftedSevenSeg.h"
+
+#if SABER_SOUND_ON == SABER_SOUND_SD
+#include "AudioPlayer.h"
+#elif SABER_SOUND_ON == SABER_SOUND_FLASH
+#include "mcaudio.h"
+#endif
 
 static const uint32_t VBAT_TIME_INTERVAL      = 500;
 static const uint32_t INDICATOR_CYCLE         = 1000;
@@ -62,10 +67,21 @@ float    maxGForce2     = 0.0f;
 uint32_t lastMotionTime = 0;    
 uint32_t lastLoopTime   = 0;
 
-#ifdef SABER_SOUND_ON
-// First things first: disable that audio to avoid clicking.
+/* First up; initialize the audio system and all its 
+   resources. Also need to disable the amp to avoid
+   clicking.
+*/
+#if SABER_SOUND_ON == SABER_SOUND_SD
 AudioPlayer audioPlayer;
 SFX sfx(&audioPlayer);
+#elif SABER_SOUND_ON == SABER_SOUND_FLASH
+Adafruit_ZeroI2S i2s(0, 1, 12, 2);          // FIXME define pins
+Adafruit_SPIFlash spiFlash(SS1, &SPI1);     // Use hardware SPI 
+Adafruit_ZeroDMA audioDMA;
+SPIStream spiStream(spiFlash);              // FIXME global generic resource
+Adafruit_ZeroTimer zt4(4);
+I2SAudio audioPlayer(i2s, zt4, audioDMA, spiFlash, spiStream);
+
 #else
 SFX sfx(0);
 #endif

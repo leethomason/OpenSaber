@@ -45,7 +45,7 @@ SOFTWARE.
 #define SABER_MODEL_GREEN_SKY	   13
 #define SABER_MODEL_TANO_2 		   14   // Shield v4, Teensy 3.5, Dotstar UI
 #define SABER_MODEL_SISTER_2	   15   // Shield v4, Teensy 3.5, 5x7 Display. Replaced the cool-but-useless wirelss communication
-
+#define SABER_MODEL_KENOBI_IV	   16
 
 #define SABER_SUB_MODEL_NONE		0
 #define SABER_SUB_MODEL_LUNA		1
@@ -55,7 +55,7 @@ SOFTWARE.
 
 // ----------------------------------
 #define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_TALI
+#define SABER_MODEL 				SABER_MODEL_KENOBI_IV
 #define SABER_SUB_MODEL				SABER_SUB_MODEL_STANDARD
 // ----------------------------------
 
@@ -80,6 +80,7 @@ SOFTWARE.
 #define PCB_SHIELD_3			   13	
 #define PCB_SHIELD_4			   14	
 #define PCB_SHIELD_5			   15
+#define PCB_ITSY_1				   16
 
 static const int EEPROM_SIZE = 512;
 
@@ -576,6 +577,37 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int VOLUME_2 = 50;
 	static const int VOLUME_3 = 120;
 	static const int VOLUME_4 = 200;
+
+#elif (SABER_MODEL == SABER_MODEL_KENOBI_IV)
+	#define PCB_VERSION 			PCB_ITSY_1
+	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
+	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
+	#define SABER_VOLTMETER
+	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
+	
+	static const int32_t UVOLT_MULT = 6730;	
+	#define ID_STR "Sisters V2 Cree XPE2 RGB"
+
+	// Good cooling; short blades.
+	// Try 350mA
+	// Updated the RGB Vf from the Cree specs.
+
+	static const int32_t RED_VF   = 2200;   // milli-volts
+	static const int32_t RED_I    = 350;    // milli-amps
+	static const int32_t RED_R    = 4700;   // milli-ohms
+
+	static const int32_t GREEN_VF = 3200;
+	static const int32_t GREEN_I  = 350;
+	static const int32_t GREEN_R  = 1000;
+
+	static const int32_t BLUE_VF  = 3100;
+	static const int32_t BLUE_I   = 350;
+	static const int32_t BLUE_R   = 1800;
+
+	static const int VOLUME_1 = 15;
+	static const int VOLUME_2 = 50;
+	static const int VOLUME_3 = 120;
+	static const int VOLUME_4 = 200;
 #endif
 
 #if (PCB_VERSION == PCB_SHIELD_3)
@@ -656,6 +688,32 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 		#define PIN_DATA  		  30
 	#endif
 	#define ACCEL_BLADE_DIRECTION 0	// x is in the blade direction. not used for impact detection.
+#elif (PCB_VERSION == PCB_ITSY_1)
+	/* Grinning Lizard Shield for ItsyBitys M0.
+	   Integrated memory for sound.
+	   Neopixel support.
+	*/
+	#define PIN_VMETER        	A1
+	#define PIN_LED_A    	  	A2 
+	#define PIN_SWITCH_A	  	A3
+	// A4 exposed
+	// A5 exposed
+	// CLOCK	 
+	// MOSI
+	// MISO 
+	#define PIN_ACCEL_EN      	2
+	// LRCLCK - I2S
+	// BITCLK - I2S
+	// unused
+	// unused
+	#define PIN_NEOPIXEL_DATA 	5
+	// unused				  	7
+	#define PIN_EMITTER_RED   	9
+	#define PIN_EMITTER_GREEN 	10
+	#define PIN_EMITTER_BLUE   	11
+	// I2S
+	// 13 exposed
+	#define ACCEL_BLADE_DIRECTION 0	// FIXME test blade direction
 #else
 	#error Pins not defined.
 #endif
