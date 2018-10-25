@@ -27,8 +27,6 @@ I2SAudio* I2SAudio::_instance = 0;
 // Information about the state of audioBuffer0/1
 AudioBufferData I2SAudio::audioBufferData[NUM_AUDIO_BUFFERS];
 
-DirToIndex dirToIndex;
-
 volatile uint8_t dmaPlaybackBuffer = 0;
 
 bool I2SAudio::isStreamQueued = false;
@@ -93,19 +91,21 @@ I2SAudio::I2SAudio(Adafruit_ZeroI2S& _i2s, Adafruit_ZeroTimer& _timer, Adafruit_
     spiFlash(_spiFlash),
     spiStream(_stream)
 {
+    // As usual, do nothing in the constructor.
+    // The services aren't started yet.
     _instance = this;
 }
 
 
 void I2SAudio::init()
 {
+    Log.p("I2SAudio::init()").eol();
+
     audioBufferData[0].buffer = audioBuffer0;
     audioBufferData[1].buffer = audioBuffer1;
     audioBufferData[0].reset();
     audioBufferData[1].reset();
     ASSERT(audioBuffer0 == audioBufferData[0].buffer);
-
-    dirToIndex.scan(spiFlash);
 
     //ASSERT(intptr_t(audioBuffer0) % 16 == 0); // Doesn't seem to matter. Perhaps only length of transfer?
     //ASSERT(intptr_t(audioBuffer1) % 16 == 0);
@@ -138,9 +138,14 @@ void I2SAudio::init()
     audioDMA.setAction(DMA_TRIGGER_ACTON_BEAT);
 
     ZeroDMAstatus stat = audioDMA.allocate();
-    audioDMA.printStatus(stat);
+    if (stat == DMA_STATUS_OK) {
+        Log.p("DMA status OK.").eol();
+    }
+    else {
+        audioDMA.printStatus(stat);
+    }
 
-    Log.p("Setting up transfer").eol();
+    Log.p("DMA: Setting up transfer").eol();
     dmacDescriptor = audioDMA.addDescriptor(
         audioBuffer0,                   // move data from here
         (void *)(&I2S->DATA[0].reg),    // to here (M0+)
@@ -149,12 +154,14 @@ void I2SAudio::init()
         true,                           // increment source addr?
         false);
 
-    Log.p("Adding callback").eol();
+    Log.p("DMA: Adding callback").eol();
     audioDMA.setCallback(I2SAudio::dmaCallback);
 
+    Log.p("Starting I2S").eol();
     i2s.begin(I2S_32_BIT, AUDIO_FREQ);
     i2s.enableTx();
 
+    Log.p("Starting audio fill callback timer.").eol();
     // Clock: 48 000 000 / second
     // div 1024 = 46875 / second
     // 
@@ -166,13 +173,14 @@ void I2SAudio::init()
     static const uint32_t CLOCK = (48*1000*1000) / 1024;         // ticks / second
     static const uint32_t HZ = 1000 / MSEC_PER_AUDIO_BUFFER;
     static const uint32_t COUNTER = CLOCK / (HZ * 4);
-    Log.p("MSec/Buffer=").p(MSEC_PER_AUDIO_BUFFER).p(" Counter=").p(COUNTER).eol();
+    Log.p("Audio buffer: msec/buffer=").p(MSEC_PER_AUDIO_BUFFER).p(" counter=").p(COUNTER).eol();
     timer.setCompare(0, COUNTER);
 
     timer.setCallback(true, TC_CALLBACK_CC_CHANNEL0, I2SAudio::timerCallback);  // this one sets pin low
     timer.enable(true);
 
     stat = audioDMA.startJob();
+    Log.p("Audio init complete.").eol();
 }
 
 
@@ -184,7 +192,7 @@ bool I2SAudio::play(int fileIndex)
     uint32_t baseAddr = 0;
     readAudioInfo(spiFlash, file, &header, &baseAddr);
 
-    Log.p("Play [").p(fileIndex).p("]: lenInBytes=").p(header.lenInBytes).p(" nSamples=").p(header.nSamples).p(" format=").p(header.format).eol();
+    //Log.p("Play [").p(fileIndex).p("]: lenInBytes=").p(header.lenInBytes).p(" nSamples=").p(header.nSamples).p(" format=").p(header.format).eol();
 
     noInterrupts();
     I2SAudio::queued_addr = baseAddr;
@@ -200,8 +208,7 @@ bool I2SAudio::play(int fileIndex)
 
 bool I2SAudio::play(const char* filename)
 {
-    Log.p("play").eol();
-    int index = dirToIndex.lookup(filename);
+    int index = MemImage.lookup(filename);
     if (index >= 0) {
         play(index);
     }
@@ -211,7 +218,7 @@ bool I2SAudio::play(const char* filename)
 
 void I2SAudio::stop()
 {
-    Log.p("stop").eol();
+    //Log.p("stop").eol();
     noInterrupts();
     I2SAudio::queued_addr = 0;
     I2SAudio::queued_size = 0;
@@ -238,18 +245,17 @@ int AudioBufferData::fillBuffer(wav12::Expander& expander, int32_t volume)
 {
     if (status != AUDBUF_EMPTY) {
         I2SAudio::tracker.fillErrors++;
-        return AUDERROR_BUFFER_NOT_EMPTY;
     }
     status = AUDBUF_FILLING;
 
     uint32_t MILLION2 = 2 * 1024 * 1024;
     if (expander.samples() < expander.pos()) {
-        I2SAudio::tracker.fillErrors++;
+        I2SAudio::tracker.fillCritErrors++;
         status = AUDBUF_READY;
         return AUDERROR_SAMPLES_POS_OUT_OF_RANGE;
     }
     if (expander.samples() > MILLION2 || expander.pos() > MILLION2) {
-        I2SAudio::tracker.fillErrors++;
+        I2SAudio::tracker.fillCritErrors++;
         status = AUDBUF_READY;
         return AUDERROR_SAMPLES_POS_OUT_OF_RANGE;
     }

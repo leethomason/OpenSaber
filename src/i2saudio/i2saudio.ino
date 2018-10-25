@@ -8,6 +8,7 @@
 #include "mcmemimage.h"
 #include "mcaudio.h"
 #include "compress.h"
+#include "vprom.h"
 
 #define SERIAL_SPEED 19200 //115200
 #define LOCAL_PAGESIZE 256
@@ -16,15 +17,20 @@ extern "C" char *sbrk(int i);
 
 Adafruit_ZeroI2S i2s(0, 1, 12, 2);
 Adafruit_SPIFlash spiFlash(SS1, &SPI1);     // Use hardware SPI 
-ConstMemImage MemImage(spiFlash);
 Adafruit_ZeroDMA audioDMA;
 SPIStream spiStream(spiFlash);
 Adafruit_ZeroTimer zt4(4);
+
+ConstMemImage MemImage(spiFlash);
 I2SAudio i2sAudio(i2s, zt4, audioDMA, spiFlash, spiStream);
 
 Timer2 statusTimer(1000);
 Timer2 playingTimer(833);
 uint32_t lastTime = 0;
+
+Random randPlus;
+bool testMode = false;
+uint32_t testTime = 0;
 
 int FreeRam () {
   char stack_dummy = 0;
@@ -76,23 +82,16 @@ void setup()
 
     dumpImage(spiFlash);
 
+    int vVal = 113;
+    vpromPut(0, vVal);
+    vVal = 0;
+    vpromGet(0, vVal);
+    Log.p("VPROM test: ").p(vVal == 113 ? "success" : "ERROR").eol();
+
     i2sAudio.init();
-    i2sAudio.setVolume(100);
+    i2sAudio.setVolume(50);
 
     Log.p("Free ram:").p(FreeRam()).eol();
-
-    //testReadRate(0);
-    //testReadRate(1);
-
-#if 0
-    MemUnit file;
-    readFile(spiFlash, 1, &file);
-    wav12::Wav12Header header;
-    uint32_t baseAddr = 0;
-    readAudioInfo(spiFlash, file, &header, &baseAddr);
-
-    Log.p("Init: lenInBytes=").p(header.lenInBytes).p(" nSamples=").p(header.nSamples).p(" format=").p(header.format).eol();
-#endif
     lastTime = millis();
 }
 
@@ -110,7 +109,7 @@ void loop()
         if (doLog) {
             Log.p("Timer calls=").p(t.timerCalls).p(" fills=").p(t.timerFills).p(" queues=").p(t.timerQueued).p(" err=").p(t.timerErrors)
             .p(" DMA calls=").p(t.dmaCalls).p( " err=").p(t.dmaErrors)
-            .p(" Fill empty=").p(t.fillEmpty).p(" some=").p(t.fillSome).p(" err=").p(t.fillErrors)
+            .p(" Fill empty=").p(t.fillEmpty).p(" some=").p(t.fillSome).p(" err=").p(t.fillErrors).p(" errCrit=").p(t.fillCritErrors)
             .eol();
         }
         I2SAudio::tracker.reset();
@@ -125,6 +124,15 @@ void loop()
     if (!i2sAudio.isPlaying() && !queue.empty()) {
         int id = queue.pop();
         i2sAudio.play(id);
+    }
+
+    if (testMode) {
+        if (!i2sAudio.isPlaying()) 
+            i2sAudio.play(5);
+        if (testTime <= millis()) {
+            testTime = millis() + 500 + randPlus.rand(2000);
+            i2sAudio.play(randPlus.rand(5));
+        }
     }
 
     while (Serial.available()) {
@@ -143,6 +151,14 @@ void loop()
             }
             else if (cmd == "s") {
                 i2sAudio.stop();
+            }
+            else if (cmd == "t") {
+                testMode = !testMode;
+                testTime = 0;   // start w/ evil double play
+            }
+            else if (cmd[0] == 'v') {
+                int v = atoi(cmd.c_str() + 1);
+                i2sAudio.setVolume(v);
             }
             cmd.clear();
         }

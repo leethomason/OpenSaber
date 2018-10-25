@@ -54,6 +54,7 @@ struct I2STracker
     uint32_t fillEmpty;
     uint32_t fillSome;
     uint32_t fillErrors;
+    uint32_t fillCritErrors;
 
     void reset() {
         memset(this, 0, sizeof(*this));
@@ -103,11 +104,13 @@ private:
     static int      queued_format;
     // end interupt section
 
+    uint32_t guard0 = 0xdeadbeef;
     Adafruit_ZeroI2S&   i2s;
     Adafruit_ZeroTimer& timer;
     Adafruit_ZeroDMA&   audioDMA;  
     Adafruit_SPIFlash&  spiFlash;
     SPIStream&          spiStream;
+    uint32_t guard1 = 0xdeadbeef;
 
     int volume256 = 256;
 };
@@ -134,6 +137,3 @@ private:
 };
 
 #endif // MC_AUDIO_DEFINED
-
-
-
