@@ -32,7 +32,7 @@ public:
     bool isScanned() const { return dirHash[0] != 0; }
     void scan(Adafruit_SPIFlash&);
     
-    int lookup(const char* path);
+    int lookup(const char* path) const;
 
 private:
     uint16_t dirHash[MEM_IMAGE_NUM_DIR];
@@ -50,9 +50,11 @@ public:
     void begin();
 
     void readDir(int index, MemUnit* dir) const;
+    void readDir(const char* dirName, MemUnit* dir) const;
     void readFile(int index, MemUnit* file) const;
+    void readAduioInfo(int index, wav12::Wav12Header* header, uint32_t* dataAddr);
 
-    int lookup(const char* path);
+    int lookup(const char* path) const;
 
     int numDir() const { return m_numDir; }
     Adafruit_SPIFlash& getSPIFlash() const;

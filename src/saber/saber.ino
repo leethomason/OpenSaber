@@ -30,6 +30,7 @@
 #include <Adafruit_ZeroDMA.h>
 #include <Adafruit_ZeroTimer.h>
 #include <Adafruit_SPIFlash.h>
+#include "mcmemimage.h"
 #endif
 
 #include <Wire.h>
@@ -89,6 +90,7 @@ SPIStream spiStream(spiFlash);              // FIXME global generic resource
 Adafruit_ZeroTimer zt4(4);
 I2SAudio audioPlayer(i2s, zt4, audioDMA, spiFlash, spiStream);
 SFX sfx(&audioPlayer);
+ConstMemImage MemImage(spiFlash);
 
 #else
 SFX sfx(0);
@@ -149,6 +151,7 @@ Timer2      gforceDataTimer(110);
 Tester      tester;
 bool        wavSource = false;
 
+
 void setupSD()
 {
     #if (SABER_SOUND_ON == SABER_SOUND_SD)
@@ -176,9 +179,11 @@ void setupSD()
         Log.p("Device ID: 0x").p(devid, HEX).eol();
         Log.p("Pagesize: ").p(spiFlash.pageSize()).p(" Page buffer: ").p(LOCAL_PAGESIZE).eol();
 
+        MemImage.begin();
+
         audioPlayer.init();
         audioPlayer.setVolume(50);
-        Log.p("Free ram:").p(FreeRam()).eol();
+        //Log.p("Free ram:").p(FreeRam()).eol();
 
         wavSource = true;
     #endif

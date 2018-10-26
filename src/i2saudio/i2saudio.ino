@@ -130,7 +130,7 @@ void loop()
         if (!i2sAudio.isPlaying()) 
             i2sAudio.play(5);
         if (testTime <= millis()) {
-            testTime = millis() + 500 + randPlus.rand(2000);
+            testTime = millis() + randPlus.rand(3000);
             i2sAudio.play(randPlus.rand(5));
         }
     }

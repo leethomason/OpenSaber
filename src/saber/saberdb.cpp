@@ -171,11 +171,7 @@ bool SaberDB::writeDefaults()
 
     for (int i = 0; i < NUM_PALETTES; ++i) {
         Palette p = defPalette[i];
-#if SABER_SOUND_ON == SABER_SOUND_FLASH
-        p.soundFont = "<flash>";
-#else
         p.soundFont = defNames[i];
-#endif
         vpromPut(paletteAddr(i), p);
     }
     readData();

@@ -27,13 +27,29 @@ void ConstMemImage::readDir(int index, MemUnit* dir) const
     ::readDir(m_spiFlash, index, dir);
 }
 
+void ConstMemImage::readDir(const char* dirName, MemUnit* dir) const
+{
+    int index = dirToIndex.lookup(dirName);
+    if (index >= 0) {
+        readDir(index, dir);
+    }
+}
+
 void ConstMemImage::readFile(int index, MemUnit* file) const
 {
     ::readFile(m_spiFlash, index, file);
 }
 
 
-int ConstMemImage::lookup(const char* path)
+void ConstMemImage::readAudioInfo(int index, wav12::Wav12Header* header, uint32_t* dataAddr)
+{
+    MemUnit file;
+    ::readFile(m_spiFlash, index, &file);
+    ::readAudioInfo(m_spiFlash, file, header, dataAddr);
+}
+
+
+int ConstMemImage::lookup(const char* path) const
 {
     return dirToIndex.lookup(path);
 }
@@ -145,10 +161,20 @@ void DirToIndex::scan(Adafruit_SPIFlash& spiFlash)
 }
 
 
-int DirToIndex::lookup(const char* path)
+int DirToIndex::lookup(const char* path) const
 {
     const char* div = strchr(path, '/');
-    if (!div) return -1;
+    if (!div) {
+        // Just scan directories.
+        uint16_t dHash = hash8(path, path + strlen(path));
+        for(int i=0; i<ConstMemImage::NUM_DIR; i++) {
+            if (dirHash[i] == dHash) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     const char* end = path + strlen(path);
     
     #ifdef DEBUG_LOOKUP

@@ -161,8 +161,8 @@ void SFX::scanFiles(uint8_t index)
     root.close();
 #elif SABER_SOUND_ON == SABER_SOUND_FLASH
     MemUnit dir;
-    MemImage.readDir(m_dirName[index].c_str());
-    for(int i=0; i<dir.size; i++) {
+    MemImage.readDir(m_dirName[index].c_str(), &dir);
+    for(unsigned i=0; i<dir.size; i++) {
         MemUnit file;
         MemImage.readFile(i + dir.offset, &file);
         CStr<13> name;
@@ -460,7 +460,7 @@ bool SFX::readHeader(const char* filename, uint32_t* lengthMillis)
         MemImage.readFile(index, &file);
         uint32_t addr = 0;
         wav12::Wav12Header header;
-        MemImage.readAduioInfo(index, &header, &addr);
+        MemImage.readAudioInfo(index, &header, &addr);
         *lengthMillis = 1000U * header.nSamples / 22050U;
         return true;
     }
@@ -478,8 +478,6 @@ const uint32_t SFX::lengthMillis() const
 
 void SFX::readIgniteRetract()
 {
-    uint8_t nChannels = 0;
-    uint32_t samples = 0;
     CStr<25> path;
 
     if (m_location[SFX_POWER_ON].InUse()) {
