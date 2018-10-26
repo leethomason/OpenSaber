@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "compress.h"
+#include "iaudio.h"
 
 #define AUDIO_FREQ 22050
 #define AUDIO_BUFFER_SAMPLES 512
@@ -62,7 +63,7 @@ struct I2STracker
 };
 
 
-class I2SAudio
+class I2SAudio : public IAudio
 {
 public:
     I2SAudio(Adafruit_ZeroI2S& i2s, Adafruit_ZeroTimer& timer, Adafruit_ZeroDMA& dma, Adafruit_SPIFlash& spiFlash, SPIStream& stream);
@@ -105,13 +106,11 @@ private:
     static int      queued_format;
     // end interupt section
 
-    uint32_t guard0 = 0xdeadbeef;
     Adafruit_ZeroI2S&   i2s;
     Adafruit_ZeroTimer& timer;
     Adafruit_ZeroDMA&   audioDMA;  
     Adafruit_SPIFlash&  spiFlash;
     SPIStream&          spiStream;
-    uint32_t guard1 = 0xdeadbeef;
 
     int volume256 = 256;
 };

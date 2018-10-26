@@ -195,9 +195,6 @@ bool I2SAudio::play(int fileIndex)
 {
     MemUnit file;
 
-    // Protect both 1) access to SPI and 2) access to queue_ members.
-    noInterrupts();
-
     readFile(spiFlash, fileIndex, &file);
     wav12::Wav12Header header;
     uint32_t baseAddr = 0;
@@ -205,6 +202,11 @@ bool I2SAudio::play(int fileIndex)
 
     //Log.p("Play [").p(fileIndex).p("]: lenInBytes=").p(header.lenInBytes).p(" nSamples=").p(header.nSamples).p(" format=").p(header.format).eol();
 
+    // Queue members need to be in the no-interupt lock since
+    // it is read and modified by the timer callback. readFile()
+    // above will acquire and release the lock on its own.
+
+    noInterrupts();
     I2SAudio::queued_addr = baseAddr;
     I2SAudio::queued_size = header.lenInBytes;
     I2SAudio::queued_nSamples = header.nSamples;

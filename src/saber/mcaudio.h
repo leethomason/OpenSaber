@@ -69,6 +69,7 @@ public:
     I2SAudio(Adafruit_ZeroI2S& i2s, Adafruit_ZeroTimer& timer, Adafruit_ZeroDMA& dma, Adafruit_SPIFlash& spiFlash, SPIStream& stream);
 
     virtual void init();
+    bool isInitialized() const { return _instance != 0; }
 
     bool play(int fileIndex);
     virtual bool play(const char* filename);

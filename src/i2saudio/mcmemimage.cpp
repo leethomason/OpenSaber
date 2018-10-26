@@ -19,6 +19,7 @@ void ConstMemImage::begin()
         if (dir.name.empty()) break;
         m_numDir++;
     };
+    dirToIndex.scan(m_spiFlash);
 }
 
 void ConstMemImage::readDir(int index, MemUnit* dir) const
@@ -34,9 +35,6 @@ void ConstMemImage::readFile(int index, MemUnit* file) const
 
 int ConstMemImage::lookup(const char* path)
 {
-    if (!dirToIndex.isScanned()) {
-        dirToIndex.scan(m_spiFlash);
-    }
     return dirToIndex.lookup(path);
 }
 

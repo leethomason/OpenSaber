@@ -10,6 +10,13 @@
 #include "compress.h"
 #include "mcmemimage.h"
 
+/*
+    1. SPIStream not interupt safe? If not a problem now, will be.
+        a. Remove global support. Breaks virtual eeprom.
+        b. Interupt safe it - performance?
+        c. Lock it down at the MemImage level.
+*/
+
 // Two stereo buffers are ping-ponged between
 // filling and the DMA -> DAC.
 int32_t I2SAudio::audioBuffer0[STEREO_BUFFER_SAMPLES];            // stereo buffers. throwing away memory. *sigh*
@@ -187,12 +194,17 @@ void I2SAudio::init()
 bool I2SAudio::play(int fileIndex)
 {
     MemUnit file;
+
     readFile(spiFlash, fileIndex, &file);
     wav12::Wav12Header header;
     uint32_t baseAddr = 0;
     readAudioInfo(spiFlash, file, &header, &baseAddr);
 
     //Log.p("Play [").p(fileIndex).p("]: lenInBytes=").p(header.lenInBytes).p(" nSamples=").p(header.nSamples).p(" format=").p(header.format).eol();
+
+    // Queue members need to be in the no-interupt lock since
+    // it is read and modified by the timer callback. readFile()
+    // above will acquire and release the lock on its own.
 
     noInterrupts();
     I2SAudio::queued_addr = baseAddr;
@@ -280,6 +292,9 @@ int AudioBufferData::fillBuffer(wav12::Expander& expander, int32_t volume)
 
 uint32_t SPIStream::fetch(uint8_t* target, uint32_t nBytes)
 {
+    // Normally, the SPI would need to be locked.
+    // HOWEVER, this is only called by the interrupt, so 
+    // all should be well.
     uint32_t r = m_flash.readBuffer(
         m_addr + m_pos, 
         target,

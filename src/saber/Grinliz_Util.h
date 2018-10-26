@@ -174,7 +174,13 @@ public:
     }
 
     template< class T > void operator=(const T& str) {
-        *this = str.c_str();
+		// T is presumably a CStr of a different size or a CStrBuf
+		// Possibly on c_str() method.
+        //*this = str.c_str();
+		this->clear();
+		for(int i=0; i<str.size(); ++i) {
+			this->append(str[i]);
+		}
     }
 
 	void operator+=(const char* src) {

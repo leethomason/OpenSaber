@@ -93,7 +93,7 @@ public:
   int numFonts() const { return m_numFonts; }
   const char* currentFontName() const;
 
-  bool readHeader(const char* filename, uint8_t* nChannels, uint32_t* nSamplesPerSec, uint32_t* lengthMillis, bool logToConsole);
+  bool readHeader(const char* path, uint32_t* lengthMillis);
 
 private:
   void filePath(CStr<25>* str, int id);
@@ -103,6 +103,7 @@ private:
   void addFile(const char* filename, int index);
   int calcSlot(const char* filename); // -1 if not a supported file
   void readIgniteRetract();
+
   uint32_t readU32(File& file, int n);
   uint32_t readU32(SerialFlashFile& file, int n);
 

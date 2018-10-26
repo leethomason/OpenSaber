@@ -8,6 +8,10 @@
 ConstMemImage::ConstMemImage(Adafruit_SPIFlash& _spiFlash) :
     m_spiFlash(_spiFlash)
 {
+}
+
+void ConstMemImage::begin()
+{
     m_numDir = 0;
     while(m_numDir < NUM_DIR) {
         MemUnit dir;
@@ -15,6 +19,7 @@ ConstMemImage::ConstMemImage(Adafruit_SPIFlash& _spiFlash) :
         if (dir.name.empty()) break;
         m_numDir++;
     };
+    dirToIndex.scan(m_spiFlash);
 }
 
 void ConstMemImage::readDir(int index, MemUnit* dir) const
@@ -30,9 +35,6 @@ void ConstMemImage::readFile(int index, MemUnit* file) const
 
 int ConstMemImage::lookup(const char* path)
 {
-    if (!dirToIndex.isScanned()) {
-        dirToIndex.scan(m_spiFlash);
-    }
     return dirToIndex.lookup(path);
 }
 
@@ -43,55 +45,61 @@ Adafruit_SPIFlash& ConstMemImage::getSPIFlash() const
 }
 
 
-void readDir(Adafruit_SPIFlash& flash, int index, MemUnit* dir)
+void readDir(Adafruit_SPIFlash& spiFlash, int index, MemUnit* dir)
 {
     ASSERT(index >= 0 && index < ConstMemImage::NUM_DIR);
 
-    flash.readBuffer(
+    noInterrupts();
+    spiFlash.readBuffer(
         sizeof(MemUnit) * index, 
         (uint8_t*) dir, 
         sizeof(MemUnit));
+    interrupts();
 }
 
-void readFile(Adafruit_SPIFlash& flash, int index, MemUnit* file)
+void readFile(Adafruit_SPIFlash& spiFlash, int index, MemUnit* file)
 {
     ASSERT(index >= 0 && index < ConstMemImage::NUM_FILES);
 
-    flash.readBuffer(
+    noInterrupts();
+    spiFlash.readBuffer(
         sizeof(MemUnit) * (ConstMemImage::NUM_DIR + index),
         (uint8_t*) file,
         sizeof(MemUnit)
     );
+    interrupts();
 }
 
-void readAudioInfo(Adafruit_SPIFlash& flash, const MemUnit& file, wav12::Wav12Header* header, uint32_t* dataAddr)
+void readAudioInfo(Adafruit_SPIFlash& spiFlash, const MemUnit& file, wav12::Wav12Header* header, uint32_t* dataAddr)
 {
-    flash.readBuffer(
+    noInterrupts();
+    spiFlash.readBuffer(
         file.offset,
         (uint8_t*) header,
         sizeof(wav12::Wav12Header)
     );
     *dataAddr = file.offset + sizeof(wav12::Wav12Header);
+    interrupts();
 }
 
-void dumpImage(Adafruit_SPIFlash& flash)
+void dumpImage(Adafruit_SPIFlash& spiFlash)
 {
     MemUnit dir;
 
     Log.p("Memory image:").eol();
     for(int i=0; i<ConstMemImage::NUM_DIR; ++i) {
-        readDir(flash, i, &dir);
+        readDir(spiFlash, i, &dir);
         if (!dir.name.empty()) {
             Log.p("  ").pt(dir.name).p(" offset=").p(dir.offset).p(" size=").p(dir.size).eol();
 
             for(unsigned f=0; f<dir.size; ++f) {
                 MemUnit file;
                 int index = dir.offset + f;
-                readFile(flash, index, &file);
+                readFile(spiFlash, index, &file);
 
                 wav12::Wav12Header wavHeader;
                 uint32_t wavAddr = 0;
-                readAudioInfo(flash, file, &wavHeader, &wavAddr);
+                readAudioInfo(spiFlash, file, &wavHeader, &wavAddr);
 
                 Log.p("    ")
                     .pt(file.name).p(" [")
@@ -118,11 +126,11 @@ DirToIndex::DirToIndex()
     }
 }
 
-void DirToIndex::scan(Adafruit_SPIFlash& flash)
+void DirToIndex::scan(Adafruit_SPIFlash& spiFlash)
 {
     for(int i=0; i<ConstMemImage::NUM_DIR; ++i) {
         MemUnit dir;
-        readDir(flash, i, &dir);
+        readDir(spiFlash, i, &dir);
         dirHash[i] = dir.name.hash8();
         dirStart[i] = dir.offset;
         #ifdef DEBUG_LOOKUP
@@ -131,7 +139,7 @@ void DirToIndex::scan(Adafruit_SPIFlash& flash)
     }
     for(int i=0; i<ConstMemImage::NUM_FILES; ++i) {
         MemUnit file;
-        readFile(flash, i, &file);
+        readFile(spiFlash, i, &file);
         fileHash[i] = file.name.hash8();
     }
 }
@@ -183,14 +191,20 @@ static const uint32_t BASE_ADDR = MEM_IMAGE_SIZE - MEM_IMAGE_EEPROM;   // 1k of 
 void vpromPutRaw(uint32_t addr, size_t size, const void* data)
 {
     ASSERT(addr + size < MEM_IMAGE_EEPROM);
+
+    noInterrupts();  // Lock down the SPI
     Adafruit_SPIFlash& spiFlash = MemImage.getSPIFlash();
     spiFlash.writeBuffer(BASE_ADDR + addr, (uint8_t*)data, uint32_t(size));
+    interrupts();
 }
 
 void vpromGetRaw(uint32_t addr, size_t size, void* data)
 {
     ASSERT(addr + size < MEM_IMAGE_EEPROM);
+    
+    noInterrupts();  // Lock down the SPI
     Adafruit_SPIFlash& spiFlash = MemImage.getSPIFlash();
     spiFlash.readBuffer(BASE_ADDR + addr, (uint8_t*)data, uint32_t(size));
+    interrupts();
 }
 #endif

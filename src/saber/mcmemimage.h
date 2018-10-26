@@ -22,7 +22,7 @@ enum {
     MEM_IMAGE_NUM_DIR = 4,
     MEM_IMAGE_NUM_FILES = 60,
     MEM_IMAGE_SIZE = 2 * 1024 * 1024,   // fixme: should pick up from definition somewhere?
-    MEM_IMAGE_EEPROM = 1024,
+    MEM_IMAGE_EEPROM = 1024
 };
 
 class DirToIndex
@@ -47,9 +47,12 @@ public:
     static const int NUM_FILES = MEM_IMAGE_NUM_FILES;
 
     ConstMemImage(Adafruit_SPIFlash&);
+    void begin();
 
     void readDir(int index, MemUnit* dir) const;
+    void readDir(const char* dirName) const;
     void readFile(int index, MemUnit* file) const;
+    void readAduioInfo(int index, wav12::Wav12Header* header, uint32_t* dataAddr);
 
     int lookup(const char* path);
 

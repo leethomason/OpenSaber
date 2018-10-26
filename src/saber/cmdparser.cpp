@@ -329,10 +329,10 @@ bool CMDParser::processCMD()
     else if (action == PLAY) {
         printLead(action.c_str());        
         SFX* sfx = SFX::instance();
-        uint8_t nChannels = 0;
-        uint32_t samples = 0;
         uint32_t length = 0;
-        sfx->readHeader(value.c_str(), &nChannels, &samples, &length, true);
+        sfx->readHeader(value.c_str(), &length);
+        Serial.print("File length (msec)=");
+        Serial.println(length);
         sfx->playSound(value.c_str());
     }
     else if (action == TEST) {

@@ -160,14 +160,17 @@ void SFX::scanFiles(uint8_t index)
     }
     root.close();
 #elif SABER_SOUND_ON == SABER_SOUND_FLASH
-    SerialFlash.opendir();
-    char filename[64];
-    uint32_t filesize;
-    while (SerialFlash.readdir(filename, sizeof(filename), filesize)) {
-        //Log.p("SF: ").p(filename).eol();
-        int slot = calcSlot(filename);
+    MemUnit dir;
+    MemImage.readDir(m_dirName[index].c_str());
+    for(int i=0; i<dir.size; i++) {
+        MemUnit file;
+        MemImage.readFile(i + dir.offset, &file);
+        CStr<13> name;
+        name = file.name;   // explicity call operator=
+
+        int slot = calcSlot(name.c_str());
         if (slot >= 0 && m_numFilenames < MAX_SFX_FILES) {
-            m_filename[m_numFilenames++] = filename;
+            m_filename[m_numFilenames++] = name;
         }
     }
 #endif
@@ -411,6 +414,8 @@ void SFX::process()
     m_player->process();
 }
 
+
+#if (SABER_SOUND_ON == SABER_SOUND_SD)
 uint32_t SFX::readU32(File& file, int n) {
     uint32_t v = 0;
     for (int i = 0; i < n; ++i) {
@@ -430,32 +435,38 @@ uint32_t SFX::readU32(SerialFlashFile& file, int n) {
     return v;
 }
 
-bool SFX::readHeader(const char* filename, uint8_t* nChannels, uint32_t* nSamplesPerSec, uint32_t* lengthMillis, bool logToConsole)
+bool SFX::readHeader(const char* filename, uint32_t* lengthMillis)
 {
-#if (SABER_SOUND_ON == SABER_SOUND_SD)
     File file = SD.open(filename);
-#elif (SABER_SOUND_ON == SABER_SOUND_FLASH)
-    SerialFlashFile file = SerialFlash.open(filename);
-#else
-    File file;
-#endif    
     if (file) {
         Log.p(filename).eol();
 
         file.seek(22);
-        *nChannels = readU32(file, 2);
-        if (logToConsole) Log.p("channels:        ").p(*nChannels).eol();
-        *nSamplesPerSec = readU32(file, 4);
-        if (logToConsole) Log.p("nSamplesPerSec:  ").p(*nSamplesPerSec).eol();
+        uint32_t nChannels = readU32(file, 2);
+        uint32_t nSamplesPerSec = readU32(file, 4);
         uint32_t nAvgBytesPerSec = readU32(file, 4);
         *lengthMillis = (file.size() - 44u) * 1000u / (nAvgBytesPerSec);
-
-        if (logToConsole) Log.p("length millis:   ").p(*lengthMillis).eol();
         file.close();
         return true;
     }
     return false;
 }
+#elif SABER_SOUND_ON == SABER_SOUND_FLASH
+bool SFX::readHeader(const char* filename, uint32_t* lengthMillis)
+{
+    MemUnit file;
+    int index = MemImage.lookup(filename);
+    if (index >= 0) {
+        MemImage.readFile(index, &file);
+        uint32_t addr = 0;
+        wav12::Wav12Header header;
+        MemImage.readAduioInfo(index, &header, &addr);
+        *lengthMillis = 1000U * header.nSamples / 22050U;
+        return true;
+    }
+    return false;
+}
+#endif
 
 /*
 const uint32_t SFX::lengthMillis() const
@@ -473,11 +484,12 @@ void SFX::readIgniteRetract()
 
     if (m_location[SFX_POWER_ON].InUse()) {
         filePath(&path, m_location[SFX_POWER_ON].start);
-        readHeader(path.c_str(), &nChannels, &samples, &m_igniteTime, true);
+        readHeader(path.c_str(), &m_igniteTime);
     }
-    if (m_location[SFX_POWER_OFF].InUse())
+    if (m_location[SFX_POWER_OFF].InUse()) {
         filePath(&path, m_location[SFX_POWER_OFF].start);
-    readHeader(path.c_str(), &nChannels, &samples, &m_retractTime, true);
+        readHeader(path.c_str(), &m_retractTime);
+    }
 }
 
 
