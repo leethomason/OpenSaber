@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include "compress.h"
+#include "iaudio.h"
 
 #define AUDIO_FREQ 22050
 #define AUDIO_BUFFER_SAMPLES 512
@@ -54,6 +55,7 @@ struct I2STracker
     uint32_t fillEmpty;
     uint32_t fillSome;
     uint32_t fillErrors;
+    uint32_t fillCritErrors;
 
     void reset() {
         memset(this, 0, sizeof(*this));
@@ -61,7 +63,7 @@ struct I2STracker
 };
 
 
-class I2SAudio
+class I2SAudio : public IAudio
 {
 public:
     I2SAudio(Adafruit_ZeroI2S& i2s, Adafruit_ZeroTimer& timer, Adafruit_ZeroDMA& dma, Adafruit_SPIFlash& spiFlash, SPIStream& stream);
@@ -72,7 +74,7 @@ public:
     virtual bool play(const char* filename);
 
     virtual void stop();
-    virtual bool isPlaying();
+    virtual bool isPlaying() const;
 
     virtual void process() {}
 
@@ -134,6 +136,3 @@ private:
 };
 
 #endif // MC_AUDIO_DEFINED
-
-
-

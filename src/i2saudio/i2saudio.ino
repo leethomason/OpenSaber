@@ -1,7 +1,6 @@
 #include <Adafruit_ZeroI2S.h>
 #include <Adafruit_ZeroDMA.h>
 #include <Adafruit_ZeroTimer.h>
-#include "utility/dma.h"
 #include <Adafruit_SPIFlash.h>
 
 #include "Grinliz_Util.h"
@@ -80,6 +79,7 @@ void setup()
     Log.p("Device ID: 0x").p(devid, HEX).eol();
     Log.p("Pagesize: ").p(spiFlash.pageSize()).p(" Page buffer: ").p(LOCAL_PAGESIZE).eol();
 
+    MemImage.begin();
     dumpImage(spiFlash);
 
     int vVal = 113;

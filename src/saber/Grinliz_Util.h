@@ -207,7 +207,7 @@ public:
 		intToString(value, buf, ALLOCATE, writeZero);
 		len = strlen(buf);
 	}
-
+	
 	uint16_t hash8() const {
 		return ::hash8(buf, buf + len);
 	}

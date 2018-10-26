@@ -6,6 +6,7 @@
 #include "compress.h"
 
 class Adafruit_SPIFlash;
+class DirToIndex;
 
 struct MemUnit {
     static const int NAME_LEN = 8;
@@ -17,28 +18,57 @@ struct MemUnit {
 
 static_assert(sizeof(MemUnit) == 16, "correct size");
 
-struct MemImage {
-    static const int NUM_DIR = 4;
-    static const int NUM_FILES = 60;
+enum {
+    MEM_IMAGE_NUM_DIR = 4,
+    MEM_IMAGE_NUM_FILES = 60,
+    MEM_IMAGE_SIZE = 2 * 1024 * 1024,   // fixme: should pick up from definition somewhere?
+    MEM_IMAGE_EEPROM = 1024,
 };
-
-void readDir(Adafruit_SPIFlash&, MemUnit* dir);
-void readFile(Adafruit_SPIFlash& flash, int index, MemUnit* file);
-void readAudioInfo(Adafruit_SPIFlash& flash, const MemUnit& file, wav12::Wav12Header* header, uint32_t* dataAddr);
 
 class DirToIndex
 {
 public:
     DirToIndex();
-
+    bool isScanned() const { return dirHash[0] != 0; }
     void scan(Adafruit_SPIFlash&);
+    
     int lookup(const char* path);
 
 private:
-    uint16_t dirHash[MemImage::NUM_DIR];
-    uint16_t fileHash[MemImage::NUM_FILES];
-    int dirStart[MemImage::NUM_DIR];
+    uint16_t dirHash[MEM_IMAGE_NUM_DIR];
+    uint16_t fileHash[MEM_IMAGE_NUM_FILES];
+    int dirStart[MEM_IMAGE_NUM_DIR];
 };
+
+
+class ConstMemImage {
+public:
+    static const int NUM_DIR = MEM_IMAGE_NUM_DIR;
+    static const int NUM_FILES = MEM_IMAGE_NUM_FILES;
+
+    ConstMemImage(Adafruit_SPIFlash&);
+
+    void readDir(int index, MemUnit* dir) const;
+    void readFile(int index, MemUnit* file) const;
+
+    int lookup(const char* path);
+
+    int numDir() const { return m_numDir; }
+    Adafruit_SPIFlash& getSPIFlash() const;
+
+private:
+    Adafruit_SPIFlash& m_spiFlash;
+    int m_numDir;
+    DirToIndex dirToIndex;
+};
+
+// Needs to be declared in the ino with the resources.
+// Which is awkward.
+extern ConstMemImage MemImage;
+
+void readDir(Adafruit_SPIFlash&, int index, MemUnit* dir);
+void readFile(Adafruit_SPIFlash& flash, int index, MemUnit* file);
+void readAudioInfo(Adafruit_SPIFlash& flash, const MemUnit& file, wav12::Wav12Header* header, uint32_t* dataAddr);
 
 void dumpImage(Adafruit_SPIFlash&);
 

@@ -25,7 +25,13 @@
 #include <EEPROM.h>
 #include <SerialFlash.h>
 #include <Audio.h>
+#else 
+#include <Adafruit_ZeroI2S.h>
+#include <Adafruit_ZeroDMA.h>
+#include <Adafruit_ZeroTimer.h>
+#include <Adafruit_SPIFlash.h>
 #endif
+
 #include <Wire.h>
 #include <SPI.h>
 #include <SD.h>
@@ -74,6 +80,7 @@ uint32_t lastLoopTime   = 0;
 #if SABER_SOUND_ON == SABER_SOUND_SD
 AudioPlayer audioPlayer;
 SFX sfx(&audioPlayer);
+
 #elif SABER_SOUND_ON == SABER_SOUND_FLASH
 Adafruit_ZeroI2S i2s(0, 1, 12, 2);          // FIXME define pins
 Adafruit_SPIFlash spiFlash(SS1, &SPI1);     // Use hardware SPI 
@@ -81,6 +88,7 @@ Adafruit_ZeroDMA audioDMA;
 SPIStream spiStream(spiFlash);              // FIXME global generic resource
 Adafruit_ZeroTimer zt4(4);
 I2SAudio audioPlayer(i2s, zt4, audioDMA, spiFlash, spiStream);
+SFX sfx(&audioPlayer);
 
 #else
 SFX sfx(0);
@@ -90,7 +98,6 @@ BladeState  bladeState;
 
 ButtonCB    buttonA(PIN_SWITCH_A, SABER_BUTTON);
 LEDManager  ledA(PIN_LED_A, false);
-LEDManager  ledB(PIN_LED_B, false);
 
 UIRenderData uiRenderData;
 
@@ -160,10 +167,19 @@ void setupSD()
             Log.p("Unable to access the SD card").eol();
         }
     #elif (SABER_SOUND_ON == SABER_SOUND_FLASH)
-        while(!(SerialFlash.begin(PIN_MEMORY_CS))) {
-            Log.p("Unable to access SerialFlash memory.").eol();
-            delay(500);
-        }
+
+        spiFlash.begin(SPIFLASHTYPE_W25Q16BV);
+        uint8_t manid, devid;
+        spiFlash.GetManufacturerInfo(&manid, &devid);
+        Log.p("SPI Flash Memory").eol();
+        Log.p("Manufacturer: 0x").p(manid, HEX).eol();
+        Log.p("Device ID: 0x").p(devid, HEX).eol();
+        Log.p("Pagesize: ").p(spiFlash.pageSize()).p(" Page buffer: ").p(LOCAL_PAGESIZE).eol();
+
+        audioPlayer.init();
+        audioPlayer.setVolume(50);
+        Log.p("Free ram:").p(FreeRam()).eol();
+
         wavSource = true;
     #endif
 }
@@ -330,11 +346,6 @@ void syncToDB()
     uiRenderData.power = AveragePower::vbatToPowerLevel(voltmeter.averagePower());
     uiRenderData.mVolts = voltmeter.averagePower();
     uiRenderData.fontName = sfx.currentFontName();
-
-    // Only set ledB if not being used as UI
-    if (buttonsReleased()) {
-        ledB.set(saberDB.soundOn());
-    }
 }
 
 void buttonAReleaseHandler(const Button& b)

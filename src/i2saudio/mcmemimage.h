@@ -47,6 +47,7 @@ public:
     static const int NUM_FILES = MEM_IMAGE_NUM_FILES;
 
     ConstMemImage(Adafruit_SPIFlash&);
+    void begin();
 
     void readDir(int index, MemUnit* dir) const;
     void readFile(int index, MemUnit* file) const;

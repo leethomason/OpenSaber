@@ -26,7 +26,8 @@
 #include <SD.h>
 #include <SerialFlash.h>
 #elif SABER_SOUND_ON == SABER_SOUND_FLASH
-#include 
+#include "mcmemimage.h"
+#endif
 
 #include "sfx.h"
 #include "tester.h"
@@ -158,7 +159,7 @@ void SFX::scanFiles(uint8_t index)
         entry.close();
     }
     root.close();
-#else
+#elif SABER_SOUND_ON == SABER_SOUND_FLASH
     SerialFlash.opendir();
     char filename[64];
     uint32_t filesize;

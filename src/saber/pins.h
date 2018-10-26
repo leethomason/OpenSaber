@@ -713,7 +713,10 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_EMITTER_BLUE   	11
 	// I2S
 	// 13 exposed
+	
 	#define ACCEL_BLADE_DIRECTION 0	// FIXME test blade direction
+    #define LOCAL_PAGESIZE 		256
+
 #else
 	#error Pins not defined.
 #endif
