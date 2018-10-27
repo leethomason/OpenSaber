@@ -28,7 +28,6 @@
 #include "SFX.h"
 #include "Tester.h"
 #include "saberUtil.h"
-//#include "comrf24.h"
 #include "accelerometer.h"
 
 File streamFile;

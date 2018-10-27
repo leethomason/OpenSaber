@@ -1,10 +1,15 @@
 Issues:
 High
+- Support neopixel output
+- fix / test accelerometer
+- configure defaults correctly
 
 Low
 - Fix analogReference()
 
 Fixed
+x test on battery
+x Fix voltmeter
 x Sound based UI ("palette", "audio", "ready", 0-7)
 x Connect RF24
 x switch to new version

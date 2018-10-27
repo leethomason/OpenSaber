@@ -186,13 +186,16 @@ void setupSD()
 
         wavSource = true;
     #endif
+
     Log.p("SaberDB initialize.").eol();
     saberDB.readData();
 
+    #ifdef SABER_SOUND_ON
     if (wavSource) {
         audioPlayer.init();
         audioPlayer.setVolume(50);
     }
+    #endif
 }
 
 void setup() {
@@ -545,6 +548,8 @@ void processAccel(uint32_t msec)
         #ifdef SABER_SOUND_ON
         bool sfxOverDue = ((msec - lastMotionTime) > 1500) &&
                           ((sfx.lastSFX() == SFX_MOTION) || (sfx.lastSFX() == SFX_IMPACT));
+        #else
+        bool sfxOverDue = false;
         #endif
 
         if ((g2Normal >= impact * impact)) {

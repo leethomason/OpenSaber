@@ -461,6 +461,12 @@ bool SFX::readHeader(const char* filename, uint32_t* lengthMillis)
     }
     return false;
 }
+#else
+bool SFX::readHeader(const char* filename, uint32_t* lengthMillis)
+{
+    *lengthMillis = 1000;
+    return true;
+}
 #endif
 
 /*

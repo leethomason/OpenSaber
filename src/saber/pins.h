@@ -582,11 +582,12 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PCB_VERSION 			PCB_ITSY_1
 	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
 	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
-	#define SABER_VOLTMETER
+	#define SABER_VOLTMETER			
 	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 	
-	static const int32_t UVOLT_MULT = 6730;	
-	#define ID_STR "Sisters V2 Cree XPE2 RGB"
+
+	static const int32_t UVOLT_MULT = 5530;	
+	#define ID_STR "Kenoby IV Cree XPE2 RGB"
 
 	// Heat sink compound; copper TCSS heatsink.
 	// Updated the RGB Vf from the Cree specs.
