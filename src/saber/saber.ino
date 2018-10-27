@@ -154,6 +154,7 @@ bool        wavSource = false;
 
 void setupSD()
 {
+    Log.p("setupSD()").eol();
     #if (SABER_SOUND_ON == SABER_SOUND_SD)
         #ifdef SABER_INTEGRATED_SD
             Log.p("Connecting to built in SD...").eol();
@@ -180,13 +181,18 @@ void setupSD()
         Log.p("Pagesize: ").p(spiFlash.pageSize()).p(" Page buffer: ").p(LOCAL_PAGESIZE).eol();
 
         MemImage.begin();
-
-        audioPlayer.init();
-        audioPlayer.setVolume(50);
+        saberDB.writeDefaults(); // FIXME proper vprom emulation.
         //Log.p("Free ram:").p(FreeRam()).eol();
 
         wavSource = true;
     #endif
+    Log.p("SaberDB initialize.").eol();
+    saberDB.readData();
+
+    if (wavSource) {
+        audioPlayer.init();
+        audioPlayer.setVolume(50);
+    }
 }
 
 void setup() {
@@ -219,13 +225,11 @@ void setup() {
         Log.attachSerial(&Serial);
     }
     #endif
-    //TCNT1 = 0x7FFF; // set blue & green channels out of phase
-    // Database is the "source of truth".
-    // Set it up first.
-    saberDB.readData();
+
+    Log.p("setup()").eol(); 
+
     SPI.begin();
     setupSD();
-    Log.p("setup()").eol(); 
 
     accel.begin();
     delay(10);
@@ -330,6 +334,7 @@ void setup() {
     #elif defined(SABER_BOOT_SOUND) || defined(SABER_AUDIO_UI)
         SFX::instance()->playUISound("ready");
     #endif
+    Log.p("Setup() done.").eol();
 }
 
 uint32_t calcReflashTime() {
@@ -469,7 +474,7 @@ bool buttonsReleased()
     return !buttonA.isDown();
 }
 
-void serialEvent() {
+void processSerial() {
     while (Serial.available()) {
         int c = Serial.read();
         if (cmdParser.push(c)) {
@@ -564,6 +569,10 @@ void processAccel(uint32_t msec)
 }
 
 void loop() {
+    // Doesn't seem to get called on M0. Not sure why;
+    // Should be outside of loop, so before time calc.
+    processSerial();
+
     const uint32_t msec = millis();
     uint32_t delta = msec - lastLoopTime;
     lastLoopTime = msec;

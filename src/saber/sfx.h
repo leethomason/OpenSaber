@@ -34,10 +34,10 @@ SOFTWARE.
 enum {            //  Max
   SFX_IDLE,       //  1
   SFX_MOTION,     //  16
-  SFX_SPIN,       //  4  although not currently used
+  //SFX_SPIN,       //  4  although not currently used
   SFX_IMPACT,     //  16
   SFX_USER_TAP,   //  4
-  SFX_USER_HOLD,  //  1
+  //SFX_USER_HOLD,  //  1
   SFX_POWER_ON,   //  4
   SFX_POWER_OFF,  //  4
 

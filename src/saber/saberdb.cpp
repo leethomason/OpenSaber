@@ -152,6 +152,7 @@ bool SaberDB::writeDefaults()
             { 0x00ff44,  0x00ffaa,    0 }
         };
 
+        #ifdef CORE_TEENSY
         static const char* defNames[NUM_PALETTES] = {
             "BESPIN2",
             "OBIWAN",
@@ -162,6 +163,18 @@ bool SaberDB::writeDefaults()
             "JAINA",
             "ROGUE"
         };
+        #else
+        static const char* defNames[NUM_PALETTES] = {
+            "bespin2",
+            "bespin2",
+            "bespin2",
+            "bespin2",
+            "bespin2",
+            "bespin2",
+            "bespin2",
+            "bespin2"
+        };
+        #endif
     #endif
 
     Log.p("Writing EEPROM default.").eol();

@@ -58,8 +58,6 @@ SFX::SFX(IAudio* audioPlayer)
 bool SFX::init()
 {
     Log.p("SFX::init()").eol();
-    if (m_player)
-        m_player->init();
     scanFonts();
     return true;
 }
@@ -67,22 +65,18 @@ bool SFX::init()
 void SFX::filePath(CStr<25>* path, const char* dir, const char* file)
 {
     path->clear();
-#if SABER_SOUND_ON == SABER_SOUND_SD    
     *path = dir;
     path->append('/');
-#endif    
     path->append(file);
 }
 
 void SFX::filePath(CStr<25>* path, int index)
 {
     path->clear();
-#if SABER_SOUND_ON == SABER_SOUND_SD    
     if (m_numFonts > 0 && m_currentFont >= 0) {
         *path = m_dirName[m_currentFont].c_str();
         path->append('/');
     }
-#endif
     path->append(m_filename[index].c_str());
 }
 
@@ -119,8 +113,12 @@ void SFX::scanFonts()
     }
     root.close();
 #elif (SABER_SOUND_ON == SABER_SOUND_FLASH)
-    m_numFonts = 1;
-    m_dirName[0] = "<flash>";
+    m_numFonts = MemImage.numDir();
+    for(int i=0; i<m_numFonts; ++i) {
+        MemUnit dir;
+        MemImage.readDir(i, &dir);
+        m_dirName[i] = dir.name;
+    }
 #endif
 
     combSort(m_dirName, m_numFonts);
@@ -185,10 +183,10 @@ void SFX::scanFiles(uint8_t index)
     static const char* NAMES[NUM_SFX_TYPES] = {
         "Idle        ",
         "Motion      ",
-        "Spin        ",
+        //"Spin        ",
         "Impact      ",
         "User_Tap    ",
-        "User_Hold   ",
+        //"User_Hold   ",
         "Power_On    ",
         "Power_Off   "
     };
@@ -196,31 +194,26 @@ void SFX::scanFiles(uint8_t index)
         const int id = SFX_IDLE + i;
         Log.p(NAMES[i]).p("start=").p(m_location[id].start).p(" count=").p(m_location[id].count).eol();
 
-        /* really good debug code: move to command window??
+        #if 1
         Log.p("  ");
-        for(int j=0; j<m_location[ID[i]].count; ++j) {
-
-            uint8_t nChannels = 0;
-            uint32_t nSamplesPerSec = 0;
+        for(int j=0; j<m_location[id].count; ++j) {
             uint32_t length = 0;
 
-            int track = m_location[ID[i]].start + j;
+            int track = m_location[id].start + j;
             ASSERT(track >= 0);
             ASSERT(track < m_numFilenames);
 
             CStr<25> path;
             filePath(&path, track);
 
-            readHeader(path.c_str(), &nChannels, &nSamplesPerSec, &length, false);
-            Log.p(m_filename[track].c_str()).p(":").p(nChannels).p(":").p(nSamplesPerSec).p(":").p(length).p(" ");
-            ASSERT(nChannels == 1);
-            ASSERT(nSamplesPerSec == 44100);
+            readHeader(path.c_str(), &length);
+            Log.p(m_filename[track].c_str()).p(":").p(length).p(" ");
         }
         Log.eol();
-        */
+        #endif
     }
     readIgniteRetract();
-}
+}   
 
 int SFX::calcSlot(const char* name )
 {
@@ -233,9 +226,9 @@ int SFX::calcSlot(const char* name )
     else if (istrStarts(name, "IDLE")    || istrStarts(name, "HUM"))        slot = SFX_IDLE;
     else if (istrStarts(name, "IMPACT")  || istrStarts(name, "CLASH"))      slot = SFX_IMPACT;
     else if (istrStarts(name, "MOTION")  || istrStarts(name, "SWING"))      slot = SFX_MOTION;
-    else if (istrStarts(name, "USRHOLD") || istrStarts(name, "LOCKUP"))     slot = SFX_USER_HOLD;
+    //else if (istrStarts(name, "USRHOLD") || istrStarts(name, "LOCKUP"))     slot = SFX_USER_HOLD;
     else if (istrStarts(name, "USRTAP")  || istrStarts(name, "BLASTER"))    slot = SFX_USER_TAP;
-    else if (istrStarts(name, "SPIN"))                                      slot = SFX_SPIN;
+    //else if (istrStarts(name, "SPIN"))                                      slot = SFX_SPIN;
 
     return slot;
 }
@@ -306,6 +299,7 @@ bool SFX::playSound(int sound, int mode, bool playIfOff)
         CStr<25> path;
         if (m_numFonts > 0 && m_currentFont >= 0) {
             filePath(&path, m_dirName[m_currentFont].c_str(), m_filename[track].c_str());
+            Log.p("filePath current=").p(m_currentFont).p(" path=").p(path.c_str()).p(" dirname=").p(m_dirName[m_currentFont].c_str()).eol();
         }
         else {
             path = m_filename[track].c_str();
@@ -314,6 +308,7 @@ bool SFX::playSound(int sound, int mode, bool playIfOff)
             m_player->setVolume(m_savedVolume);
             m_savedVolume = -1;
         }
+        Log.p("Play: ").pt(path).eol();
         m_player->play(path.c_str());
         m_currentSound = sound;
         m_lastSFX = sound;
