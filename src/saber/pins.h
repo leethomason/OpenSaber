@@ -72,6 +72,9 @@ SOFTWARE.
 #define SABER_DISPLAY_SEGMENT		3	// Shifted
 #define SABER_DISPLAY_7_5 			4	// Shifted
 
+#define SABER_LED_NEOPIXEL			1
+#define SABER_LED_DOTSTAR			2
+
 #define PCB_VERSION_1				1   // PCB, Teensy 3.2, external amp and accel
 #define PCB_VERSION_5				5   // PCB, Prop Shield, Teensy 3.2, OLED (VERIFY)
 #define PCB_VERSION_7				7	// Split PCB. Prop shield. Teensy 3.5.
