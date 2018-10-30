@@ -583,7 +583,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 
 #elif (SABER_MODEL == SABER_MODEL_KENOBI_IV)
 	#define PCB_VERSION 			PCB_ITSY_1
-//	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
+	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
 	#define SABER_VOLTMETER			
 	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 	
@@ -718,7 +718,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	// I2S
 	// 13 exposed
 	
-	#define ACCEL_BLADE_DIRECTION 0	// FIXME test blade direction
+	#define ACCEL_BLADE_DIRECTION 0	// The x direction is the blade.
     #define LOCAL_PAGESIZE 		256
 
 #else

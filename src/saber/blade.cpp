@@ -50,7 +50,9 @@ void Blade::setRGB(const RGB& input)
     static const int32_t DIV = int32_t(255) * int32_t(1000);
     for (int i = 0; i < NCHANNELS; ++i ) {
         color[i] = input[i];
-        int32_t v = LED_RANGE * f1000[i] * int32_t(input[i]) / DIV;
+        int32_t v = int32_t(LED_RANGE) * f1000[i] * int32_t(input[i]) / DIV;
+        ASSERT(v >= 0);
+        ASSERT(v <= 255);
         pwm[i] = constrain(v, 0, 255);  // just in case...
         analogWrite(pinRGB[i], pwm[i]);
     }
