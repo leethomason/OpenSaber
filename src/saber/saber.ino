@@ -30,7 +30,6 @@
 #include <Adafruit_ZeroDMA.h>
 #include <Adafruit_ZeroTimer.h>
 #include <Adafruit_SPIFlash.h>
-#include <FastLED.h>
 #include "mcmemimage.h"
 #endif
 

@@ -14,6 +14,7 @@
 Adafruit_LIS3DH localAccel;
 #elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH_SPI
 Adafruit_LIS3DH localAccel(PIN_ACCEL_EN);
+//Adafruit_LIS3DH localAccel(PIN_ACCEL_EN, MOSI, MISO, SCK);;
 #elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_NXP
 AccelFXOS8700 localAccel;
 #else
@@ -27,8 +28,26 @@ Accelerometer::Accelerometer()
     _instance = this;
 }
 
+
 void Accelerometer::begin()
 {
+    digitalWrite(PIN_ACCEL_EN, HIGH);
+    pinMode(PIN_ACCEL_EN, OUTPUT);
+    
+    SPI.begin();
+    
+    #if 0
+    Log.p("Test accel").eol();
+    SPI.beginTransaction(SPISettings(500000, MSBFIRST, SPI_MODE0));
+    digitalWrite(PIN_ACCEL_EN, LOW);
+    uint8_t reg = LIS3DH_REG_WHOAMI;
+    SPI.transfer(reg | 0x80);
+    uint8_t deviceID = SPI.transfer(0);
+    digitalWrite(PIN_ACCEL_EN, HIGH);
+    SPI.endTransaction();              // release the SPI bus
+    Log.p("deviceid=").p(deviceID).eol();
+    #endif
+    
     m_range = 4.0;
 
     #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH
@@ -44,6 +63,8 @@ void Accelerometer::begin()
         }
     #elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH_SPI
         Log.p("LIS3DH Accelerometer starting: SPI mode").eol();
+        pinMode(PIN_ACCEL_EN, OUTPUT);
+        digitalWrite(PIN_ACCEL_EN, HIGH);
         bool success = false;
         for(int i=0; i<5; ++i) {
             // Buggy buggy buggy SPI code.
