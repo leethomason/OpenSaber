@@ -1,13 +1,13 @@
 Issues:
 High
-- Support neopixel output
-- fix / test accelerometer
 - configure defaults correctly
 
 Low
 - Fix analogReference()
 
 Fixed
+x Support neopixel output
+x fix / test accelerometer
 x test on battery
 x Fix voltmeter
 x Sound based UI ("palette", "audio", "ready", 0-7)
