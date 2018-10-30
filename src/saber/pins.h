@@ -696,6 +696,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	   Neopixel support.
 	*/
 	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
+	#define SABER_UI_LED			SABER_LED_NEOPIXEL
 
 	#define PIN_VMETER        	A1
 	#define PIN_LED_A    	  	A2 

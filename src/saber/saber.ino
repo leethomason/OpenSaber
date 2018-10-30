@@ -39,11 +39,19 @@
 #include <OLED_SSD1306.h>
 #include "Button.h"
 #include "Grinliz_Arduino_Util.h"
-#include "DotStar.h"
 
 // Includes
 // -- Must be first. Has configuration. -- //
 #include "pins.h"
+
+#ifdef SABER_NUM_LEDS
+    #if SABER_UI_LED == SABER_LED_DOTSTAR
+        #include "DotStar.h"
+    #elif SABER_UI_LED == SABER_LED_NEOPIXEL
+        #include <FastLED.h>
+    #endif
+#endif
+
 
 #include "accelerometer.h"
 #include "voltmeter.h"
@@ -108,9 +116,13 @@ SaberDB     saberDB;
 Voltmeter   voltmeter;
 
 #ifdef SABER_NUM_LEDS
-RGB leds[SABER_NUM_LEDS];
-DotStar dotstar;
-DotStarUI dotstarUI;
+    #if SABER_UI_LED == SABER_LED_DOTSTAR
+        RGB leds[SABER_NUM_LEDS];
+        DotStar dotstar;
+        DotStarUI dotstarUI;
+    #else
+        CRGB leds[SABER_NUM_LEDS];
+    #endif
 #endif
 
 Accelerometer accel;
@@ -288,14 +300,22 @@ void setup() {
     #endif
 
     #if defined(SABER_NUM_LEDS)
-        dotstar.beginSPI(PIN_DOTSTAR_EN);
-        dotstar.attachLEDs(leds, SABER_NUM_LEDS);
-        for(int i=0; i<SABER_NUM_LEDS; ++i) {
-            leds[i].set(0x010101);
-        }
-        dotstar.display();
-        dotstar.display();
-        Log.p("Crystal Dotstart initialized.").eol();
+        #if SABER_UI_LED == SABER_LED_DOTSTAR
+            dotstar.beginSPI(PIN_DOTSTAR_EN);
+            dotstar.attachLEDs(leds, SABER_NUM_LEDS);
+            for(int i=0; i<SABER_NUM_LEDS; ++i) {
+                leds[i].set(0x010101);
+            }
+            dotstar.display();
+            dotstar.display();
+            Log.p("Dotstar initialized.").eol();
+        #else
+            for(int i=0; i<SABER_NUM_LEDS; i++) 
+                leds[i].setRGB(1, 1, 1);
+            FastLED.addLeds<NEOPIXEL, PIN_NEOPIXEL_DATA>(leds, SABER_NUM_LEDS);
+            FastLED.show();
+            Log.p("Neopixel initialized.").eol();
+        #endif
     #endif
 
     #ifdef PINB_CRYSTAL
@@ -741,6 +761,10 @@ void loopDisplays(uint32_t msec, uint32_t delta)
         }
     #endif
     #ifdef SABER_NUM_LEDS
-        dotstar.display();
+        #if SABER_UI_LED == SABER_LED_DOTSTAR
+            dotstar.display();
+        #elif SABER_UI_LED == SABER_LED_NEOPIXEL
+            FastLED.show();
+        #endif
     #endif    
 }
