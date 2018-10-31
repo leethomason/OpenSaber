@@ -273,10 +273,15 @@ bool DotStarUI::Draw(RGB* led, UIMode mode, bool ignited, const UIRenderData& da
 
 		case UIMode::PALETTE:
 		{
-			led[0].set((data.palette & 1) ? PALETTE_ONE : 0);
-			led[1].set((data.palette & 2) ? PALETTE_ONE : 0);
-			led[2].set((data.palette & 4) ? PALETTE_ONE : 0);
-			led[3] = data.color;
+			#ifdef SABER_UI_V2
+				led[0] = led[3] = RGB::BLACK;
+				led[1] = led[2] = data.color;
+			#else
+				led[0].set((data.palette & 1) ? PALETTE_ONE : 0);
+				led[1].set((data.palette & 2) ? PALETTE_ONE : 0);
+				led[2].set((data.palette & 4) ? PALETTE_ONE : 0);
+				led[3] = data.color;
+			#endif
 		}
 		break;
 

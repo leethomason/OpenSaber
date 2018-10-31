@@ -515,10 +515,6 @@ uint8_t SFX::getVolume204() const
 
 uint8_t SFX::setFont(uint8_t font)
 {
-#if SABER_SOUND_ON == SABER_SOUND_FLASH
-    font = 0;
-#endif
-
     if (m_numFonts) {
         if (font != m_currentFont) {
             m_currentFont = font % m_numFonts;
@@ -534,13 +530,11 @@ uint8_t SFX::setFont(uint8_t font)
 uint8_t SFX::setFont(const char* name)
 {
     int i=0;
-#if SABER_SOUND_ON == SABER_SOUND_SD
     for(; i<m_numFonts; ++i) {
         if (strEqual(name, fontName(i))) {
             break;
         }
     }
-#endif
     return setFont(i);
 }
 

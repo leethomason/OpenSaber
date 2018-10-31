@@ -111,7 +111,7 @@ private:
         DataHeader() :
             currentPalette(0),
             soundOn(1),
-            volume(160),
+            volume(40),
             motion(DEFAULT_G_FORCE_MOTION),
             impact(DEFAULT_G_FORCE_IMPACT),
             nSetup(0)

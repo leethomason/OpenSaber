@@ -170,11 +170,11 @@ bool SaberDB::writeDefaults()
             "bespin2",
             "bespin2",
             "bespin2",
-            "bespin2",
-            "bespin2",
-            "bespin2",
-            "bespin2",
-            "bespin2"
+            "jaina",
+            "jaina",
+            "jaina",
+            "jaina",
+            "jaina"
         };
         #endif
     #endif

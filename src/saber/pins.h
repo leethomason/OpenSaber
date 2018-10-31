@@ -590,13 +590,13 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_NUM_LEDS 			4
 	#define SABER_UI_START			0
 	#define SABER_UI_BRIGHTNESS		8
+	#define SABER_UI_V2
 	
 	static const int32_t UVOLT_MULT = 5530;	
 	#define ID_STR "Kenoby IV Cree XPE2 RGB"
 
 	// Heat sink compound; copper TCSS heatsink.
 	// Updated the RGB Vf from the Cree specs.
-
 	static const int32_t RED_VF   = 2200;   // milli-volts
 	static const int32_t RED_I    = 400;    // milli-amps
 	static const int32_t RED_R    = 4700;   // milli-ohms
