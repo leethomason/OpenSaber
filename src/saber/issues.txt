@@ -1,11 +1,21 @@
 Issues:
 High
-- configure defaults correctly
+- correctly connect amp select pin
+
+Med
+- experiment w/ different timing & buffers
+- space out vias on board better
+- SPI is "over mutexed". there are 2 SPIs
+- trigger interupt from DMA? Remove timer?
 
 Low
+- Better audio compression
 - Fix analogReference()
 
 Fixed
+x compact resistors
+x extra capacitor for neopixels
+x configure defaults correctly
 x Support neopixel output
 x fix / test accelerometer
 x test on battery
