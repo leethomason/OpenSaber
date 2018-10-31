@@ -24,8 +24,9 @@
 #define BLADE_INCLUDED
 
 #include <stdint.h>
-#include "DotStar.h"
+
 #include "pins.h"
+#include "rgb.h"
 
 class Blade
 {
@@ -40,8 +41,8 @@ public:
         return vbat;
     }
 
-    bool setInterp(uint32_t delta, uint32_t effectTime, const RGB& startColor, const RGB& endColor);
-    void setRGB(const RGB& input);
+    bool setInterp(uint32_t delta, uint32_t effectTime, const osbr::RGB& startColor, const osbr::RGB& endColor);
+    void setRGB(const osbr::RGB& input);
 
     // power consumed by the main blade color, in milliAmps
     int32_t power() const;
@@ -54,17 +55,17 @@ public:
         return pwm[i];
     }
 
-    const RGB& getColor(uint8_t* c) {
+    const osbr::RGB& getColor() {
         return color;
     }
 
-    static RGB convertRawToPerceived(const RGB& raw);
+    static osbr::RGB convertRawToPerceived(const osbr::RGB& raw);
 
 private:
     static const int8_t pinRGB[NCHANNELS];
     static Blade* instance;
 
-    RGB color;
+    osbr::RGB color;
     uint8_t pwm[NCHANNELS];
     int32_t vbat;
     int32_t f1000[NCHANNELS];

@@ -60,6 +60,9 @@ struct I2STracker
     void reset() {
         memset(this, 0, sizeof(*this));
     }
+    bool hasErrors() const {
+        return timerErrors || dmaErrors || fillErrors || fillCritErrors;
+    }
 };
 
 
@@ -77,7 +80,7 @@ public:
     virtual void stop();
     virtual bool isPlaying() const;
 
-    virtual void process() {}
+    virtual void process();
 
     // Volume 256 is "full" - can boost or cut from there.
     virtual void setVolume(int v) { volume256 = v; }

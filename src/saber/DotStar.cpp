@@ -2,6 +2,8 @@
 #include <Arduino.h>
 #include <SPI.h>
 
+using namespace osbr;
+
 // 8 MHz seems to work for the prop shield.
 // With a level shifter, about 1 MHz is needed. (Possibly faster with testing.)
 static const SPISettings dotstarSettings(8000000, MSBFIRST, SPI_MODE0);

@@ -194,7 +194,7 @@ void SFX::scanFiles(uint8_t index)
         const int id = SFX_IDLE + i;
         Log.p(NAMES[i]).p("start=").p(m_location[id].start).p(" count=").p(m_location[id].count).eol();
 
-        #if 1
+        #if 0
         Log.p("  ");
         for(int j=0; j<m_location[id].count; ++j) {
             uint32_t length = 0;
@@ -299,7 +299,6 @@ bool SFX::playSound(int sound, int mode, bool playIfOff)
         CStr<25> path;
         if (m_numFonts > 0 && m_currentFont >= 0) {
             filePath(&path, m_dirName[m_currentFont].c_str(), m_filename[track].c_str());
-            Log.p("filePath current=").p(m_currentFont).p(" path=").p(path.c_str()).p(" dirname=").p(m_dirName[m_currentFont].c_str()).eol();
         }
         else {
             path = m_filename[track].c_str();
@@ -308,7 +307,6 @@ bool SFX::playSound(int sound, int mode, bool playIfOff)
             m_player->setVolume(m_savedVolume);
             m_savedVolume = -1;
         }
-        Log.p("Play: ").pt(path).eol();
         m_player->play(path.c_str());
         m_currentSound = sound;
         m_lastSFX = sound;
@@ -395,7 +393,7 @@ void SFX::process()
 
     if (!m_player->isPlaying()) {
         if (m_savedVolume >= 0) {
-            Log.p("restoring volume=").p(m_savedVolume).eol();
+            //Log.p("restoring volume=").p(m_savedVolume).eol();
             m_player->setVolume(m_savedVolume);
             m_savedVolume = -1;
         }

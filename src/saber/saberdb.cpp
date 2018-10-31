@@ -26,6 +26,8 @@ SOFTWARE.
 #include "sfx.h"  // bug fix; generally don't want a dependency on sfx
 #include "vprom.h"
 
+using namespace osbr;
+
 SaberDB::SaberDB() {
     STATIC_ASSERT(BASE_ADDR + NUM_PALETTES * sizeof(Palette) + sizeof(DataHeader) < EEPROM_SIZE);
 }

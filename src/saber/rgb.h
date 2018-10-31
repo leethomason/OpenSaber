@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+namespace osbr {
+
 struct RGB {
 	enum {
 		BLACK = 0
@@ -67,5 +69,5 @@ struct RGB {
 
 	int size() const { return 3; }
 };
-
+}	// namespace osbr
 #endif

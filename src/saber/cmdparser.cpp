@@ -30,6 +30,8 @@
 #include "saberUtil.h"
 #include "accelerometer.h"
 
+using namespace osbr;
+
 File streamFile;
 
 CMDParser::CMDParser(SaberDB* _db) {

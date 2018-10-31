@@ -48,7 +48,8 @@
     #if SABER_UI_LED == SABER_LED_DOTSTAR
         #include "DotStar.h"
     #elif SABER_UI_LED == SABER_LED_NEOPIXEL
-        #include <FastLED.h>
+        #include <Adafruit_NeoPixel.h>  // A poor design, but solid implementation.
+        //#include <FastLED.h>          // FastLED is a basically good design with and ENDLESS string of bugs and problems.
     #endif
 #endif
 
@@ -70,6 +71,8 @@
 #elif SABER_SOUND_ON == SABER_SOUND_FLASH
 #include "mcaudio.h"
 #endif
+
+using namespace osbr;
 
 static const uint32_t VBAT_TIME_INTERVAL      = 500;
 static const uint32_t INDICATOR_CYCLE         = 1000;
@@ -116,12 +119,14 @@ SaberDB     saberDB;
 Voltmeter   voltmeter;
 
 #ifdef SABER_NUM_LEDS
+    osbr::RGB leds[SABER_NUM_LEDS];
+    DotStarUI dotstarUI;        // It is the DotStarUI regardless of physical pixel protocol
+
     #if SABER_UI_LED == SABER_LED_DOTSTAR
-        RGB leds[SABER_NUM_LEDS];
         DotStar dotstar;
-        DotStarUI dotstarUI;
-    #else
-        CRGB leds[SABER_NUM_LEDS];
+    #elif SABER_UI_LED == SABER_LED_NEOPIXEL
+        osbr::RGB cachedLEDs[SABER_NUM_LEDS];
+        Adafruit_NeoPixel neoPixels(SABER_NUM_LEDS, PIN_NEOPIXEL_DATA, NEO_GRB + NEO_KHZ800);
     #endif
 #endif
 
@@ -300,20 +305,17 @@ void setup() {
     #endif
 
     #if defined(SABER_NUM_LEDS)
+        for(int i=0; i<SABER_NUM_LEDS; ++i) {
+            leds[i].set(0x010101);
+        }
         #if SABER_UI_LED == SABER_LED_DOTSTAR
             dotstar.beginSPI(PIN_DOTSTAR_EN);
             dotstar.attachLEDs(leds, SABER_NUM_LEDS);
-            for(int i=0; i<SABER_NUM_LEDS; ++i) {
-                leds[i].set(0x010101);
-            }
             dotstar.display();
             dotstar.display();
             Log.p("Dotstar initialized.").eol();
         #else
-            for(int i=0; i<SABER_NUM_LEDS; i++) 
-                leds[i].setRGB(1, 1, 1);
-            FastLED.addLeds<NEOPIXEL, PIN_NEOPIXEL_DATA>(leds, SABER_NUM_LEDS);
-            FastLED.show();
+            neoPixels.begin();
             Log.p("Neopixel initialized.").eol();
         #endif
     #endif
@@ -764,7 +766,19 @@ void loopDisplays(uint32_t msec, uint32_t delta)
         #if SABER_UI_LED == SABER_LED_DOTSTAR
             dotstar.display();
         #elif SABER_UI_LED == SABER_LED_NEOPIXEL
-            FastLED.show();
+            // Neopixels cause noise - but not errors - from the audio system.
+            // Haven't tracked down why. But rather than bang on it, simply
+            // only push new LEDs when something changes.
+            bool needsUpdate = false;
+            for(int i=0; i<SABER_NUM_LEDS; i++) {
+                if(leds[i] != cachedLEDs[i]) {
+                    neoPixels.setPixelColor(i, leds[i].get());
+                    cachedLEDs[i] = leds[i];
+                    needsUpdate = true;
+                }
+            }
+            if (needsUpdate)
+                neoPixels.show();
         #endif
     #endif    
 }

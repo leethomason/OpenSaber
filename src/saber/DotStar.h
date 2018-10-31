@@ -13,7 +13,7 @@ public:
 	void beginSPI(uint8_t enablePin);
 	void beginSW(uint8_t clockPin, uint8_t dataPin);
 
-	void attachLEDs(const RGB* leds, int nLEDs) {
+	void attachLEDs(const osbr::RGB* leds, int nLEDs) {
 		m_leds = leds;
 		m_nLEDs = nLEDs;
 	}
@@ -35,7 +35,7 @@ private:
 	uint8_t 	m_enable = 0;
 	uint8_t		m_clockPin = 0;
 	uint8_t		m_dataPin = 0;
-	const RGB* 	m_leds = 0;
+	const osbr::RGB* 	m_leds = 0;
 	int 		m_nLEDs = 0;
 	uint16_t 	m_brightness = 256;
 };

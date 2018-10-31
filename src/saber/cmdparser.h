@@ -47,10 +47,10 @@ public:
 private:
     bool processCMD();
     void tokenize();
-    void printHexColor(const RGB& color);
-    void parseHexColor(const char* str, RGB* c);
+    void printHexColor(const osbr::RGB& color);
+    void parseHexColor(const char* str, osbr::RGB* c);
     void printLead(const char* str);
-    void printMAmps(const RGB& color);
+    void printMAmps(const osbr::RGB& color);
     void upload(const char* path, uint32_t size);
 
     uint32_t m_streamBytes = 0;

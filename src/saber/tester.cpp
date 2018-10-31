@@ -13,6 +13,8 @@
 #include "Button.h"
 #include "Grinliz_Arduino_Util.h"
 
+using namespace osbr;
+
 Tester* Tester::s_instance = 0;
 
 static const int HOLD_TIME = Button::DEFAULT_HOLD_TIME + 100;

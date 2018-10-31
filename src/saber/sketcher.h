@@ -3,9 +3,9 @@
 
 #include <stdint.h>
 #include "renderer.h"
-#include "DotStar.h"
 #include "Grinliz_Util.h"
 #include "saberUtil.h"
+#include "rgb.h"
 
 struct UIRenderData
 {
@@ -15,7 +15,7 @@ struct UIRenderData
 	uint32_t mVolts = 0;
     const char* fontName = 0;
 
-	RGB color;	// NOT the RGB of the LED. An GGB LED would be
+	osbr::RGB color;	// NOT the RGB of the LED. An GGB LED would be
 				// green if set to (1, 0, 0), so the bladeColor
 				// should be (0, 1, 0)
     UIRenderData() {}
@@ -27,7 +27,7 @@ class DotStarUI
 {
 public:
 	// Returns true if changed.
-    bool Draw(RGB* uiLedStart, UIMode mode, bool bladeIgnited, const UIRenderData& data);
+    bool Draw(osbr::RGB* uiLedStart, UIMode mode, bool bladeIgnited, const UIRenderData& data);
 
 	void SetBrightness(uint16_t v) { m_brightness = v; }
 	uint16_t Brightness() const { return m_brightness; }
@@ -116,7 +116,7 @@ private:
 	uint8_t  accelData[DATA_WIDTH];
 };
 
-void calcCrystalColor(uint32_t msec, int32_t lowVariation, int32_t highVariation, const RGB& base, RGB* out);
+void calcCrystalColor(uint32_t msec, int32_t lowVariation, int32_t highVariation, const osbr::RGB& base, osbr::RGB* out);
 
 uint8_t calcSingleCrystalColor(uint32_t msec);
 

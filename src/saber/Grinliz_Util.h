@@ -9,7 +9,9 @@
 #include "pins.h" // ONLY for the debug status, to control the ASSERT
 #endif
 
+namespace osbr {
 struct RGB;
+}
 class Stream;
 
 template<bool> struct CompileTimeAssert;
@@ -510,7 +512,7 @@ public:
 	const SPLog& p(long v, int p = DEC) const;
 	const SPLog& p(unsigned long v, int p = DEC) const;
 	const SPLog& p(double v, int p = 2) const;
-	const SPLog& p(const RGB& rgb) const;
+	const SPLog& p(const osbr::RGB& rgb) const;
 	
 	template<class T> const SPLog& pt(const T& str) const {
 		for(int i=0; i<str.size(); ++i) (*this).p(str[i]);

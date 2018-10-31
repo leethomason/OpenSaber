@@ -4,6 +4,8 @@
 
 #include <math.h>
 
+using namespace osbr;
+
 Sketcher::Sketcher()
 {
 	for (int i = 0; i < DATA_WIDTH; ++i) {
@@ -301,6 +303,7 @@ bool DotStarUI::Draw(RGB* led, UIMode mode, bool ignited, const UIRenderData& da
 		}
 	}
 	bool black = true;
+	(void)black;
 	for (int i = 0; i < 4; ++i) {
 		led[i].scale(m_brightness);
 		if (led[i].get()) {

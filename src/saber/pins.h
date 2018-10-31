@@ -54,7 +54,7 @@ SOFTWARE.
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
+#define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_KENOBI_IV
 #define SABER_SUB_MODEL				SABER_SUB_MODEL_STANDARD
 // ----------------------------------
@@ -587,7 +587,10 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_VOLTMETER			
 	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 	
-
+	#define SABER_NUM_LEDS 			4
+	#define SABER_UI_START			0
+	#define SABER_UI_BRIGHTNESS		8
+	
 	static const int32_t UVOLT_MULT = 5530;	
 	#define ID_STR "Kenoby IV Cree XPE2 RGB"
 
@@ -609,7 +612,7 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	static const int VOLUME_1 = 15;
 	static const int VOLUME_2 = 50;
 	static const int VOLUME_3 = 120;
-	static const int VOLUME_4 = 200;
+	static const int VOLUME_4 = 204;
 #endif
 
 #if (PCB_VERSION == PCB_SHIELD_3)

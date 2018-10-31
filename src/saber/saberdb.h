@@ -25,8 +25,8 @@ SOFTWARE.
 
 #include <stdint.h>
 #include "Grinliz_Arduino_Util.h"
-#include "DotStar.h"
 #include "pins.h"
+#include "rgb.h"
 
 class SaberDB
 {
@@ -69,15 +69,15 @@ public:
     }
 
     // Palette
-    const RGB& bladeColor() const   {
+    const osbr::RGB& bladeColor() const   {
         return palette.bladeColor;
     }
-    void setBladeColor(const RGB& color);
+    void setBladeColor(const osbr::RGB& color);
 
-    const RGB& impactColor() const  {
+    const osbr::RGB& impactColor() const  {
         return palette.impactColor;
     }
-    void setImpactColor(const RGB& color);
+    void setImpactColor(const osbr::RGB& color);
 
     const char* soundFont() const {
         return palette.soundFont.c_str();
@@ -87,16 +87,16 @@ public:
     static const int NUM_PALETTES = 8;
 
     // Testing (not saved)
-    void setCrystalColor(const RGB& color) {
+    void setCrystalColor(const osbr::RGB& color) {
         m_crystalColor = color;
     }
-    const RGB& crystalColor() const {
+    const osbr::RGB& crystalColor() const {
         return m_crystalColor;
     }
 
     struct Palette {
-        RGB bladeColor;
-        RGB impactColor;
+        osbr::RGB bladeColor;
+        osbr::RGB impactColor;
         CStr<9> soundFont;
     };
 
@@ -132,7 +132,7 @@ private:
         return BASE_ADDR + sizeof(DataHeader) + sizeof(Palette) * i;
     }
 
-    RGB     m_crystalColor;
+    osbr::RGB     m_crystalColor;
     DataHeader	dataHeader;
     Palette 		palette;
 };

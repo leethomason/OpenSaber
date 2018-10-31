@@ -20,10 +20,13 @@
   SOFTWARE.
 */
 
-#include "blade.h"
-#include "pins.h"
-#include "Grinliz_Util.h"
 #include <Arduino.h>
+
+#include "pins.h"
+#include "blade.h"
+#include "Grinliz_Util.h"
+
+using namespace osbr;
 
 const int8_t Blade::pinRGB[NCHANNELS] = { PIN_EMITTER_RED, PIN_EMITTER_GREEN, PIN_EMITTER_BLUE };
 Blade* Blade::instance = 0;

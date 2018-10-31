@@ -5,6 +5,7 @@
 #include "sfx.h"
 
 //#define USE_PS_NXP
+using namespace osbr;
 
 void BladeState::change(uint8_t state)
 {

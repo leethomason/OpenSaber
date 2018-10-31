@@ -252,6 +252,27 @@ bool I2SAudio::isPlaying() const
 }
 
 
+void I2SAudio::process()
+{
+    if(tracker.hasErrors()) {
+        Log.p("Audio tracker error.").eol();
+        Log.p(" Timer calls:").p(tracker.timerCalls)
+           .p(" fills:").p(tracker.timerFills)
+           .p(" queue:").p(tracker.timerQueued)
+           .p(" errors:").p(tracker.timerErrors)
+           .eol();
+        Log.p(" DMA calls:").p(tracker.dmaCalls)
+           .p(" errors:").p(tracker.dmaErrors)
+           .eol();
+        Log.p(" Fill empty:").p(tracker.fillEmpty)
+           .p(" some:").p(tracker.fillSome)
+           .p(" errors:").p(tracker.fillErrors)
+           .p(" crit errors:").p(tracker.fillCritErrors)
+           .eol();
+        tracker.reset();
+    }
+}
+
 
 int AudioBufferData::fillBuffer(wav12::Expander& expander, int32_t volume)
 {
