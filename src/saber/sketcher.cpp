@@ -235,7 +235,7 @@ void Sketcher::DrawMeditationMode(Renderer* d, uint32_t time, const UIRenderData
 }
 
 
-bool DotStarUI::Draw(RGB* led, UIMode mode, bool ignited, const UIRenderData& data)
+bool DotStarUI::Draw(osbr::RGB* led, UIMode mode, bool ignited, const UIRenderData& data)
 {
 	static const uint32_t COLOR_AUDIO_ON 	= 0x0000FF;
 	static const uint32_t COLOR_AUDIO_OFF 	= 0xFFD800;
@@ -245,7 +245,7 @@ bool DotStarUI::Draw(RGB* led, UIMode mode, bool ignited, const UIRenderData& da
 	static const uint32_t MED_2				= 0x00a05F;
 	static const uint32_t MED_3				= 0x00FF00;
 
-	RGB currentLED[4];
+	osbr::RGB currentLED[4];
 	for(int i=0; i<4; ++i) {
 		currentLED[i] = led[i];
 	}
@@ -326,7 +326,7 @@ bool DotStarUI::Draw(RGB* led, UIMode mode, bool ignited, const UIRenderData& da
 
 bool DotStarUI::Test()
 {
-	RGB leds[6];
+	osbr::RGB leds[6];
 
 	UIRenderData data;
 	data.power = 2;
@@ -357,12 +357,21 @@ bool DotStarUI::Test()
 		ASSERT(leds[5].get() == 0);			// memory check
 
 		dotstar.Draw(&leds[1], UIMode::PALETTE, false, data);
+		#ifdef SABER_UI_V2
+		ASSERT(leds[0].get() == 0);			// check memory
+		ASSERT(leds[1].get() == 0);
+		ASSERT(leds[2] == data.color);
+		ASSERT(leds[3] == data.color);
+		ASSERT(leds[4].get() == 0);
+		ASSERT(leds[5].get() == 0);			// memory check
+		#else
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1].get() == 0xffffff);
 		ASSERT(leds[2].get() == 0xffffff);
 		ASSERT(leds[3].get() == 0xffffff);
 		ASSERT(leds[4] == data.color);
 		ASSERT(leds[5].get() == 0);			// memory check
+		#endif
 
 		dotstar.Draw(&leds[1], UIMode::VOLUME, false, data);
 		ASSERT(leds[0].get() == 0);			// check memory
@@ -375,7 +384,7 @@ bool DotStarUI::Test()
 	{
 		DotStarUI dotstar;
 		dotstar.SetBrightness(128);
-		RGB c2 = data.color;
+		osbr::RGB c2 = data.color;
 		c2.scale(128);
 
 		dotstar.Draw(&leds[1], UIMode::NORMAL, false, data);
@@ -395,12 +404,21 @@ bool DotStarUI::Test()
 		ASSERT(leds[5].get() == 0);			// memory check
 
 		dotstar.Draw(&leds[1], UIMode::PALETTE, false, data);
+		#ifdef SABER_UI_V2
+		ASSERT(leds[0].get() == 0);			// check memory
+		ASSERT(leds[1].get() == 0);
+		ASSERT(leds[2] == c2);
+		ASSERT(leds[3] == c2);
+		ASSERT(leds[4].get() == 0);
+		ASSERT(leds[5].get() == 0);			// memory check
+		#else
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1].get() == 0x7f7f7f);
 		ASSERT(leds[2].get() == 0x7f7f7f);
 		ASSERT(leds[3].get() == 0x7f7f7f);
 		ASSERT(leds[4] == c2);
 		ASSERT(leds[5].get() == 0);			// memory check
+		#endif
 
 		dotstar.Draw(&leds[1], UIMode::VOLUME, false, data);
 		ASSERT(leds[0].get() == 0);			// check memory
