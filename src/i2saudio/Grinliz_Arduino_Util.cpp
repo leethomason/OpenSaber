@@ -3,7 +3,7 @@
 #include <SPI.h>
 #include "rgb.h"
 
-//SPClass SPrint;
+using namespace osbr;
 
 LEDManager::LEDManager(uint8_t pin, bool on)
 {
@@ -34,7 +34,7 @@ bool LEDManager::isOn() const
 void LEDManager::blink(uint8_t n, uint32_t cycle, BlinkHandler h, uint8_t style)
 {
     //SPrint.p("blink n=").p(n).p(" cycle=").p(cycle).eol();
-
+    
     m_handler = 0;
     m_nCallbacks = 0;
     m_style = style;

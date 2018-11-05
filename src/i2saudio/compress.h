@@ -10,7 +10,15 @@
 namespace wav12 {
 
     template<class T> 
-    T wmin(T a, T b) { return a < b ? a : b; }
+    T min(T a, T b) { return a < b ? a : b; }
+    template<class T>
+    T max(T a, T b) { return a > b ? a : b; }
+    template<class T>
+    T clamp(T x, T a, T b) {
+        if (x < a) return a;
+        if (x > b) return b;
+        return x;
+    }
 
     struct Wav12Header
     {

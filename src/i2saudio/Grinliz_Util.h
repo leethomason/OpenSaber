@@ -6,9 +6,12 @@
 
 #ifndef _WIN32
 #include <Arduino.h>
+#include "pins.h" // ONLY for the debug status, to control the ASSERT
 #endif
 
+namespace osbr {
 struct RGB;
+}
 class Stream;
 
 template<bool> struct CompileTimeAssert;
@@ -18,9 +21,12 @@ template<> struct CompileTimeAssert <true> {};
 #if defined(_MSC_VER)
 #	define ASSERT( x )	if ( !(x)) { _asm { int 3 } }
 #else
-	void AssertOut(const char* message, const char* file, int line);
-	#define ASSERT( x ) 	if (!(x)) { AssertOut(#x, __FILE__, __LINE__); }
-	//#define ASSERT( x ) 	if (!(x)) { AssertOut(#x, __FILE__, __LINE__); while(true) {} }
+#	if SERIAL_DEBUG == 1
+		void AssertOut(const char* message, const char* file, int line);
+		#define ASSERT( x ) 	if (!(x)) { AssertOut(#x, __FILE__, __LINE__); while(true) {} }
+#	else
+		#define ASSERT( x )		{}
+#	endif
 #endif
 
 #define TEST_IS_TRUE(x) {         \
@@ -506,7 +512,7 @@ public:
 	const SPLog& p(long v, int p = DEC) const;
 	const SPLog& p(unsigned long v, int p = DEC) const;
 	const SPLog& p(double v, int p = 2) const;
-	const SPLog& p(const RGB& rgb) const;
+	const SPLog& p(const osbr::RGB& rgb) const;
 	
 	template<class T> const SPLog& pt(const T& str) const {
 		for(int i=0; i<str.size(); ++i) (*this).p(str[i]);
