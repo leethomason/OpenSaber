@@ -8,10 +8,6 @@
 #include <string.h>
 
 namespace wav12 {
-
-    template<class T> 
-    T wmin(T a, T b) { return a < b ? a : b; }
-
     struct Wav12Header
     {
         char id[4];             // 'wv12'
@@ -22,6 +18,7 @@ namespace wav12 {
     };
 
     void compress(const int16_t* data, int32_t nSamples, uint8_t** compressed, uint32_t* nCompressed);
+    bool compress8(const int16_t* data, int32_t nSamples, uint8_t** compressed, uint32_t* nCompressed, float* errorRatio);
     
     class MemStream : public wav12::IStream
     {

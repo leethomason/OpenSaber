@@ -3,7 +3,7 @@
 #include <SPI.h>
 #include "rgb.h"
 
-//SPClass SPrint;
+using namespace osbr;
 
 LEDManager::LEDManager(uint8_t pin, bool on)
 {
@@ -186,7 +186,7 @@ const SPLog& SPLog::p(double v, int p) const
   return *this;  
 }
 
-const SPLog& SPLog::p(const RGB& rgb) const
+const SPLog& SPLog::p(const osbr::RGB& rgb) const
 {
   if (serialStream) {
     serialStream->print("[");

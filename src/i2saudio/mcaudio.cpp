@@ -140,6 +140,11 @@ void I2SAudio::init()
     Log.p("Buffer fill check=").p(check).eol();
     #endif
 
+#   if 1
+    for (int i=0; i<2; ++i)
+        testReadRate(i);
+#   endif
+
     Log.p("Configuring DMA trigger").eol();
     audioDMA.setTrigger(I2S_DMAC_ID_TX_0);
     audioDMA.setAction(DMA_TRIGGER_ACTON_BEAT);
@@ -188,6 +193,31 @@ void I2SAudio::init()
 
     stat = audioDMA.startJob();
     Log.p("Audio init complete.").eol();
+}
+
+
+void I2SAudio::testReadRate(int index)
+{
+    MemUnit file;
+    readFile(spiFlash, index, &file);
+    wav12::Wav12Header header;
+    uint32_t baseAddr = 0;
+    readAudioInfo(spiFlash, file, &header, &baseAddr);
+
+    Log.p("Test: lenInBytes=").p(header.lenInBytes).p(" nSamples=").p(header.nSamples).p(" format=").p(header.format).eol();
+    spiStream.init(baseAddr, header.lenInBytes);
+    expander.init(&spiStream, header.nSamples, header.format);
+    int volume = 1000;
+
+    uint32_t start = millis();
+    while(expander.pos() < expander.samples()) {
+        audioBufferData[0].reset();
+        audioBufferData[0].fillBuffer(expander, volume);
+    }
+    uint32_t end = millis();
+    Log.p("Index ").p(index).p( " samples/second=").p((expander.samples()*uint32_t(1000))/(end - start)).eol();
+
+    audioBufferData[0].reset();
 }
 
 
@@ -251,6 +281,27 @@ bool I2SAudio::isPlaying() const
     return isQueued || hasSamples;
 }
 
+
+void I2SAudio::process()
+{
+    if(tracker.hasErrors()) {
+        Log.p("Audio tracker error.").eol();
+        Log.p(" Timer calls:").p(tracker.timerCalls)
+           .p(" fills:").p(tracker.timerFills)
+           .p(" queue:").p(tracker.timerQueued)
+           .p(" errors:").p(tracker.timerErrors)
+           .eol();
+        Log.p(" DMA calls:").p(tracker.dmaCalls)
+           .p(" errors:").p(tracker.dmaErrors)
+           .eol();
+        Log.p(" Fill empty:").p(tracker.fillEmpty)
+           .p(" some:").p(tracker.fillSome)
+           .p(" errors:").p(tracker.fillErrors)
+           .p(" crit errors:").p(tracker.fillCritErrors)
+           .eol();
+        tracker.reset();
+    }
+}
 
 
 int AudioBufferData::fillBuffer(wav12::Expander& expander, int32_t volume)

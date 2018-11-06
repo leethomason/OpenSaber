@@ -36,31 +36,6 @@ int FreeRam () {
   return &stack_dummy - sbrk(0);
 }
 
-#if 0
-void testReadRate(int index)
-{
-    MemUnit file;
-    readFile(spiFlash, index, &file);
-    wav12::Wav12Header header;
-    uint32_t baseAddr = 0;
-    readAudioInfo(spiFlash, file, &header, &baseAddr);
-
-    Log.p("Test: lenInBytes=").p(header.lenInBytes).p(" nSamples=").p(header.nSamples).p(" format=").p(header.format).eol();
-    spiStream.init(baseAddr, header.lenInBytes);
-    expander.init(&spiStream, header.nSamples, header.format);
-
-    uint32_t start = millis();
-    while(expander.pos() < expander.samples()) {
-        audioBufferData[0].reset();
-        audioBufferData[0].fillBuffer(spiFlash, expander, volume);
-    }
-    uint32_t end = millis();
-    Log.p("Index ").p(index).p( " samples/second=").p((expander.samples()*uint32_t(1000))/(end - start)).eol();
-
-    audioBufferData[0].reset();
-}
-#endif
-
 
 void setup()
 {
@@ -92,6 +67,7 @@ void setup()
     i2sAudio.setVolume(50);
 
     Log.p("Free ram:").p(FreeRam()).eol();
+
     lastTime = millis();
 }
 

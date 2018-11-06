@@ -3,13 +3,13 @@ High
 - correctly connect amp select pin
 
 Med
+- dotstar support in itsy
 - experiment w/ different timing & buffers
 - space out vias on board better
 - SPI is "over mutexed". there are 2 SPIs
 - trigger interupt from DMA? Remove timer?
 - blade flash on retract
 - sound stutter
-- no way to know power level w/ kenobi interface
 - neopixels create noise
 
 Low

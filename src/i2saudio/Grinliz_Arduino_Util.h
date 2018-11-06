@@ -8,7 +8,9 @@ class SPISettings;
 
 class LEDManager;
 typedef void (*BlinkHandler)(const LEDManager&);
+namespace osbr {
 struct RGB;
+}
 
 class LEDManager
 {

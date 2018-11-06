@@ -8,7 +8,9 @@
 #include <Arduino.h>
 #endif
 
-struct RGB;
+namespace osbr {
+	struct RGB;
+}
 class Stream;
 
 template<bool> struct CompileTimeAssert;
@@ -368,9 +370,14 @@ bool inRange(const T& a, const T& b, const T& c) {
 
 template<class T>
 T glMin(T a, T b) { return (a < b) ? a : b; }
-
 template<class T>
 T glMax(T a, T b) { return (a > b) ? a : b; }
+template<class T>
+T glClamp(T x, T a, T b) {
+	if (x < a) return a;
+	if (x > b) return b;
+	return x;
+}
 
 // --- Algorithm --- //
 
@@ -506,7 +513,7 @@ public:
 	const SPLog& p(long v, int p = DEC) const;
 	const SPLog& p(unsigned long v, int p = DEC) const;
 	const SPLog& p(double v, int p = 2) const;
-	const SPLog& p(const RGB& rgb) const;
+	const SPLog& p(const osbr::RGB& rgb) const;
 	
 	template<class T> const SPLog& pt(const T& str) const {
 		for(int i=0; i<str.size(); ++i) (*this).p(str[i]);
