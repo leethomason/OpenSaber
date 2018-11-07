@@ -77,18 +77,11 @@ CQueue<16> queue;
 void loop()
 {
     uint32_t t = millis();
+    i2sAudio.process();
     if (statusTimer.tick(t - lastTime)) {
-        const I2STracker& t = I2SAudio::tracker;
-
-        bool doLog = t.timerErrors || t.dmaErrors || t.fillErrors;
-        //doLog = true;
-        if (doLog) {
-            Log.p("Timer calls=").p(t.timerCalls).p(" fills=").p(t.timerFills).p(" queues=").p(t.timerQueued).p(" err=").p(t.timerErrors)
-            .p(" DMA calls=").p(t.dmaCalls).p( " err=").p(t.dmaErrors)
-            .p(" Fill empty=").p(t.fillEmpty).p(" some=").p(t.fillSome).p(" err=").p(t.fillErrors).p(" errCrit=").p(t.fillCritErrors)
-            .eol();
-        }
-        I2SAudio::tracker.reset();
+        bool error = i2sAudio.tracker.hasErrors();
+        i2sAudio.dumpStatus();
+        while (error) {}
     }
     #if 0
     if (playingTimer.tick(t-lastTime)) {

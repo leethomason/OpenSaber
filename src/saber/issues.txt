@@ -4,19 +4,19 @@ High
 
 Med
 - dotstar support in itsy
-- experiment w/ different timing & buffers
 - space out vias on board better
-- SPI is "over mutexed". there are 2 SPIs
 - trigger interupt from DMA? Remove timer?
-- blade flash on retract
-- sound stutter
+- blade flash on retract (neopixel???)
 - neopixels create noise
 
 Low
-- Better audio compression
 - Fix analogReference()
 
 Fixed
+x sound stutter
+x experiment w/ different timing & buffers
+x SPI is "over mutexed". there are 2 SPIs
+x Better audio compression
 x compact resistors
 x extra capacitor for neopixels
 x configure defaults correctly
