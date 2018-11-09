@@ -1,7 +1,8 @@
-#include "AudioPlayer.h"
-#include "pins.h"
+#include <Arduino.h>
 
 #ifdef CORE_TEENSY
+#include "AudioPlayer.h"
+#include "pins.h"
 
 #include <Wire.h>
 #include <SPI.h>

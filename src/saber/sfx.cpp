@@ -435,8 +435,8 @@ bool SFX::readHeader(const char* filename, uint32_t* lengthMillis)
         Log.p(filename).eol();
 
         file.seek(22);
-        uint32_t nChannels = readU32(file, 2);
-        uint32_t nSamplesPerSec = readU32(file, 4);
+        //uint32_t nChannels = readU32(file, 2);
+        //uint32_t nSamplesPerSec = readU32(file, 4);
         uint32_t nAvgBytesPerSec = readU32(file, 4);
         *lengthMillis = (file.size() - 44u) * 1000u / (nAvgBytesPerSec);
         file.close();

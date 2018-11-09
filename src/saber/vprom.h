@@ -2,12 +2,15 @@
 #define VPROM_INCLUDED
 
 #include <stdint.h>
+#include <Arduino.h>
 
 /* Virtual EEPROM support. */
 
 #ifdef CORE_TEENSY
+#include <EEPROM.h>
+
 template<class T>
-void vpromPut(uint32_t addr, const T& t) { EEPROM.put(addr, t); )}
+void vpromPut(uint32_t addr, const T& t) { EEPROM.put(addr, t); }
 template <class T>
 void vpromGet(uint32_t addr, T& t) { EEPROM.get(addr, t); }
 

@@ -1,9 +1,7 @@
 Issues:
 High
-- correctly connect amp select pin
 
 Med
-- dotstar support in itsy
 - space out vias on board better
 - trigger interupt from DMA? Remove timer?
 - blade flash on retract (neopixel???)
@@ -13,6 +11,9 @@ Low
 - Fix analogReference()
 
 Fixed
+x correctly connect amp select pin. Luck on my side, should be correctly setting left channel.
+x enable shutdown pin on amp? 2-3mA draw. Basically an LED.
+x dotstar support in itsy
 x sound stutter
 x experiment w/ different timing & buffers
 x SPI is "over mutexed". there are 2 SPIs

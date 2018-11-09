@@ -1,9 +1,10 @@
+#include <Arduino.h>    
+#ifndef CORE_TEENSY
+
 #include <Adafruit_SPIFlash.h>
 #include <Adafruit_ZeroTimer.h>
 #include <Adafruit_ZeroI2S.h>
 #include <Adafruit_ZeroDMA.h>
-
-#include <Arduino.h>    
 
 #include "mcaudio.h"
 #include "Grinliz_Util.h"
@@ -323,3 +324,4 @@ uint32_t SPIStream::fetch(uint8_t* target, uint32_t nBytes)
     m_pos += nBytes;
     return r;
 }
+#endif
