@@ -6,7 +6,7 @@
 #include "iaudio.h"
 
 #define AUDIO_FREQ 22050
-#define AUDIO_BUFFER_SAMPLES 512
+#define AUDIO_BUFFER_SAMPLES 384
 #define STEREO_BUFFER_SAMPLES (AUDIO_BUFFER_SAMPLES*2)
 #define MSEC_PER_AUDIO_BUFFER (1000 * AUDIO_BUFFER_SAMPLES / AUDIO_FREQ)
 #define AUDIO_SUB_BUFFER 512
@@ -80,14 +80,16 @@ public:
     virtual void stop();
     virtual bool isPlaying() const;
 
-    virtual void process();
+    virtual void process();     // checks for errors
+    void dumpStatus();
 
     // Volume 256 is "full" - can boost or cut from there.
     virtual void setVolume(int v) { volume256 = v; }
     virtual int volume() const { return volume256; }
 
-    static I2STracker tracker;
+    void testReadRate(int index);
 
+    static I2STracker tracker;
     static I2SAudio* instance() { return _instance; }
 
 private:

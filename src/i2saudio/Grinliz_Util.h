@@ -10,7 +10,7 @@
 #endif
 
 namespace osbr {
-struct RGB;
+	struct RGB;
 }
 class Stream;
 
@@ -374,9 +374,14 @@ bool inRange(const T& a, const T& b, const T& c) {
 
 template<class T>
 T glMin(T a, T b) { return (a < b) ? a : b; }
-
 template<class T>
 T glMax(T a, T b) { return (a > b) ? a : b; }
+template<class T>
+T glClamp(T x, T a, T b) {
+	if (x < a) return a;
+	if (x > b) return b;
+	return x;
+}
 
 // --- Algorithm --- //
 

@@ -114,31 +114,10 @@ void I2SAudio::init()
     audioBufferData[1].reset();
     ASSERT(audioBuffer0 == audioBufferData[0].buffer);
 
-    //ASSERT(intptr_t(audioBuffer0) % 16 == 0); // Doesn't seem to matter. Perhaps only length of transfer?
-    //ASSERT(intptr_t(audioBuffer1) % 16 == 0);
-    #if 0
-    MemUnit file;
-    readFile(spiFlash, 0, &file);
-    wav12::Wav12Header header;
-    uint32_t baseAddr = 0;
-    readAudioInfo(spiFlash, file, &header, &baseAddr);
-
-    spiStream.init(baseAddr, header.lenInBytes);
-    expander.init(&spiStream, header.nSamples, header.format);
-    ASSERT(audioBuffer0 == audioBufferData[0].buffer);
-    audioBufferData[0].fillBuffer(expander, expandVolume());
-    ASSERT(audioBuffer0 == audioBufferData[0].buffer);
-
-    Log.p("-----------").eol();
-    Log.p("Expander: samples=").p(expander.samples()).p(" pos=").p(expander.pos()).eol();
-    Log.p("addr=").p(baseAddr).p(" nBytes=").p(header.lenInBytes).p(" nSamples=").p(header.nSamples).p(" format=").p(header.format).eol();
-    uint32_t check = 0;
-    for(int i=0; i<STEREO_BUFFER_SAMPLES; i+=2) {
-        check += abs(audioBuffer0[i]);
-    }
-    ASSERT(audioBuffer0 == audioBufferData[0].buffer);
-    Log.p("Buffer fill check=").p(check).eol();
-    #endif
+#   if 0
+    for (int i=0; i<2; ++i)
+        testReadRate(i);
+#   endif
 
     Log.p("Configuring DMA trigger").eol();
     audioDMA.setTrigger(I2S_DMAC_ID_TX_0);
@@ -188,6 +167,31 @@ void I2SAudio::init()
 
     stat = audioDMA.startJob();
     Log.p("Audio init complete.").eol();
+}
+
+
+void I2SAudio::testReadRate(int index)
+{
+    MemUnit file;
+    readFile(spiFlash, index, &file);
+    wav12::Wav12Header header;
+    uint32_t baseAddr = 0;
+    readAudioInfo(spiFlash, file, &header, &baseAddr);
+
+    Log.p("Test: lenInBytes=").p(header.lenInBytes).p(" nSamples=").p(header.nSamples).p(" format=").p(header.format).eol();
+    spiStream.init(baseAddr, header.lenInBytes);
+    expander.init(&spiStream, header.nSamples, header.format);
+    int volume = 1000;
+
+    uint32_t start = millis();
+    while(expander.pos() < expander.samples()) {
+        audioBufferData[0].reset();
+        audioBufferData[0].fillBuffer(expander, volume);
+    }
+    uint32_t end = millis();
+    Log.p("Index ").p(index).p( " samples/second=").p((expander.samples()*uint32_t(1000))/(end - start)).eol();
+
+    audioBufferData[0].reset();
 }
 
 
@@ -255,22 +259,30 @@ bool I2SAudio::isPlaying() const
 void I2SAudio::process()
 {
     if(tracker.hasErrors()) {
-        Log.p("Audio tracker error.").eol();
-        Log.p(" Timer calls:").p(tracker.timerCalls)
-           .p(" fills:").p(tracker.timerFills)
-           .p(" queue:").p(tracker.timerQueued)
-           .p(" errors:").p(tracker.timerErrors)
-           .eol();
-        Log.p(" DMA calls:").p(tracker.dmaCalls)
-           .p(" errors:").p(tracker.dmaErrors)
-           .eol();
-        Log.p(" Fill empty:").p(tracker.fillEmpty)
-           .p(" some:").p(tracker.fillSome)
-           .p(" errors:").p(tracker.fillErrors)
-           .p(" crit errors:").p(tracker.fillCritErrors)
-           .eol();
-        tracker.reset();
+        dumpStatus();
     }
+}
+
+
+void I2SAudio::dumpStatus()
+{
+    if (tracker.hasErrors())
+        Log.p("Audio tracker ERROR.").eol();
+
+    Log.p(" Timer calls:").p(tracker.timerCalls)
+        .p(" fills:").p(tracker.timerFills)
+        .p(" queue:").p(tracker.timerQueued)
+        .p(" errors:").p(tracker.timerErrors)
+
+        .p(" DMA calls:").p(tracker.dmaCalls)
+        .p(" errors:").p(tracker.dmaErrors)
+        
+        .p(" Fill empty:").p(tracker.fillEmpty)
+        .p(" some:").p(tracker.fillSome)
+        .p(" errors:").p(tracker.fillErrors)
+        .p(" crit errors:").p(tracker.fillCritErrors)
+        .eol();
+    tracker.reset();
 }
 
 
