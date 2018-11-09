@@ -704,8 +704,12 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define PIN_VMETER        	A1
 	#define PIN_LED_A    	  	A2 
 	#define PIN_SWITCH_A	  	A3
+	#if (PCB_VERSION == PCB_ITSY_1B)
+	#define PIN_DOTSTAR_EN		A4
+	#else
 	// A4 exposed
 	// A5 exposed
+	#endif
 	// CLOCK	 
 	// MOSI
 	// MISO 

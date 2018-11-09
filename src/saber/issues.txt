@@ -1,5 +1,8 @@
 Issues:
 High
+- power accelerometer
+- clean up amp pins
+- re-do ratline
 
 Med
 - space out vias on board better
