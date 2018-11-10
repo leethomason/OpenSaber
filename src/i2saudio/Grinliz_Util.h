@@ -6,7 +6,6 @@
 
 #ifndef _WIN32
 #include <Arduino.h>
-#include "pins.h" // ONLY for the debug status, to control the ASSERT
 #endif
 
 namespace osbr {
@@ -21,12 +20,8 @@ template<> struct CompileTimeAssert <true> {};
 #if defined(_MSC_VER)
 #	define ASSERT( x )	if ( !(x)) { _asm { int 3 } }
 #else
-#	if SERIAL_DEBUG == 1
-		void AssertOut(const char* message, const char* file, int line);
-		#define ASSERT( x ) 	if (!(x)) { AssertOut(#x, __FILE__, __LINE__); while(true) {} }
-#	else
-		#define ASSERT( x )		{}
-#	endif
+	void AssertOut(const char* message, const char* file, int line);
+	#define ASSERT( x ) 	if (!(x)) { AssertOut(#x, __FILE__, __LINE__); while(true) {} }
 #endif
 
 #define TEST_IS_TRUE(x) {         \

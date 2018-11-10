@@ -1,5 +1,4 @@
 #include <Adafruit_SPIFlash.h>
-#include <Adafruit_ZeroTimer.h>
 #include <Adafruit_ZeroI2S.h>
 #include <Adafruit_ZeroDMA.h>
 
@@ -42,11 +41,7 @@ uint32_t I2SAudio::queued_size = 0;
 uint32_t I2SAudio::queued_nSamples = 0;
 int      I2SAudio::queued_format = 0;
 
-void TC4_Handler(){
-    Adafruit_ZeroTimer::timerHandler(4);
-}
-
-void I2SAudio::timerCallback()
+void I2SAudio::timerCallback(int id)
 {
     I2SAudio::tracker.timerCalls++;
 
@@ -58,16 +53,14 @@ void I2SAudio::timerCallback()
         expander.init(&spiStream, I2SAudio::queued_nSamples, I2SAudio::queued_format);
     }
 
-    for(int i=0; i<NUM_AUDIO_BUFFERS; ++i) {
-        if (audioBufferData[i].status == AUDBUF_EMPTY) {
-            ASSERT(audioBuffer0 == audioBufferData[0].buffer);
-            ASSERT(audioBuffer1 == audioBufferData[1].buffer);
-            I2SAudio::tracker.timerFills++;
-            int rc = audioBufferData[i].fillBuffer(expander, I2SAudio::instance()->expandVolume());
-            if (rc != 0) {
-                I2SAudio::tracker.timerErrors++;
-            }
-        }
+    if (audioBufferData[id].status != AUDBUF_EMPTY)
+        I2SAudio::tracker.timerErrors++;
+
+    ASSERT(audioBuffer0 == audioBufferData[0].buffer);
+    ASSERT(audioBuffer1 == audioBufferData[1].buffer);
+    int rc = audioBufferData[id].fillBuffer(expander, I2SAudio::instance()->expandVolume());
+    if (rc != 0) {
+        I2SAudio::tracker.timerErrors++;
     }
 }
 
@@ -89,11 +82,13 @@ void I2SAudio::dmaCallback(Adafruit_ZeroDMA* dma)
         (void *)(&I2S->DATA[0].reg),    // to here (M0+)
         STEREO_BUFFER_SAMPLES);         // this many...
     dma->startJob();
+
+    // Fill up the next buffer while this one is being played.
+    timerCallback((dmaPlaybackBuffer + 1) % NUM_AUDIO_BUFFERS);
 }
 
-I2SAudio::I2SAudio(Adafruit_ZeroI2S& _i2s, Adafruit_ZeroTimer& _timer, Adafruit_ZeroDMA& _dma, Adafruit_SPIFlash& _spiFlash, SPIStream& _stream) : 
+I2SAudio::I2SAudio(Adafruit_ZeroI2S& _i2s, Adafruit_ZeroDMA& _dma, Adafruit_SPIFlash& _spiFlash, SPIStream& _stream) : 
     i2s(_i2s),
-    timer(_timer),
     audioDMA(_dma),
     spiFlash(_spiFlash),
     spiStream(_stream)
@@ -147,24 +142,11 @@ void I2SAudio::init()
     i2s.begin(I2S_32_BIT, AUDIO_FREQ);
     i2s.enableTx();
 
-    Log.p("Starting audio fill callback timer.").eol();
-    // Clock: 48 000 000 / second
-    // div 1024 = 46875 / second
-    // 
-    timer.configure( TC_CLOCK_PRESCALER_DIV1024,    // prescaler
-                  TC_COUNTER_SIZE_16BIT,         // bit width of timer/counter
-                  TC_WAVE_GENERATION_MATCH_PWM   // frequency or PWM mode
-                 );
+    I2SAudio::timerCallback(0);     
+    Log.p("Buffer 0 status=").p(audioBufferData[0].status == AUDBUF_READY ? "ready" : "ERROR")
+       .p(" dmaPlaybackBuffer=").p(dmaPlaybackBuffer).eol();
 
-    static const uint32_t CLOCK = (48*1000*1000) / 1024;         // ticks / second
-    static const uint32_t HZ = 1000 / MSEC_PER_AUDIO_BUFFER;
-    static const uint32_t COUNTER = CLOCK / (HZ * 4);
-    Log.p("Audio buffer: msec/buffer=").p(MSEC_PER_AUDIO_BUFFER).p(" counter=").p(COUNTER).eol();
-    timer.setCompare(0, COUNTER);
-
-    timer.setCallback(true, TC_CALLBACK_CC_CHANNEL0, I2SAudio::timerCallback);  // this one sets pin low
-    timer.enable(true);
-
+    dmaPlaybackBuffer = 1;  // seed to the first, so the dma will switch back to 0.
     stat = audioDMA.startJob();
     Log.p("Audio init complete.").eol();
 }
@@ -260,6 +242,7 @@ void I2SAudio::process()
 {
     if(tracker.hasErrors()) {
         dumpStatus();
+        ASSERT(false);
     }
 }
 
@@ -270,7 +253,6 @@ void I2SAudio::dumpStatus()
         Log.p("Audio tracker ERROR.").eol();
 
     Log.p(" Timer calls:").p(tracker.timerCalls)
-        .p(" fills:").p(tracker.timerFills)
         .p(" queue:").p(tracker.timerQueued)
         .p(" errors:").p(tracker.timerErrors)
 

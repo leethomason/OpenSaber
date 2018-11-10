@@ -13,7 +13,6 @@
 #define NUM_AUDIO_BUFFERS 2
 
 class Adafruit_SPIFlash;
-class Adafruit_ZeroTimer;
 class Adafruit_ZeroI2S;
 class Adafruit_ZeroDMA;
 class SPIStream;
@@ -45,7 +44,6 @@ struct AudioBufferData {
 struct I2STracker
 {
     uint32_t timerCalls;
-    uint32_t timerFills;
     uint32_t timerQueued;
     uint32_t timerErrors;
 
@@ -69,7 +67,7 @@ struct I2STracker
 class I2SAudio : public IAudio
 {
 public:
-    I2SAudio(Adafruit_ZeroI2S& i2s, Adafruit_ZeroTimer& timer, Adafruit_ZeroDMA& dma, Adafruit_SPIFlash& spiFlash, SPIStream& stream);
+    I2SAudio(Adafruit_ZeroI2S& i2s, Adafruit_ZeroDMA& dma, Adafruit_SPIFlash& spiFlash, SPIStream& stream);
 
     virtual void init();
     bool isInitialized() const { return _instance != 0; }
@@ -97,7 +95,7 @@ private:
 
     static I2SAudio* _instance;
     static void dmaCallback(Adafruit_ZeroDMA *dma);
-    static void timerCallback();
+    static void timerCallback(int id);
 
     static AudioBufferData audioBufferData[NUM_AUDIO_BUFFERS];     // Information about the state of audioBuffer0/1
     static int32_t audioBuffer0[STEREO_BUFFER_SAMPLES];
@@ -112,7 +110,6 @@ private:
     // end interupt section
 
     Adafruit_ZeroI2S&   i2s;
-    Adafruit_ZeroTimer& timer;
     Adafruit_ZeroDMA&   audioDMA;  
     Adafruit_SPIFlash&  spiFlash;
     SPIStream&          spiStream;

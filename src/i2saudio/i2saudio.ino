@@ -21,7 +21,7 @@ SPIStream spiStream(spiFlash);
 Adafruit_ZeroTimer zt4(4);
 
 ConstMemImage MemImage(spiFlash);
-I2SAudio i2sAudio(i2s, zt4, audioDMA, spiFlash, spiStream);
+I2SAudio i2sAudio(i2s, audioDMA, spiFlash, spiStream);
 
 Timer2 statusTimer(1000);
 Timer2 playingTimer(833);
