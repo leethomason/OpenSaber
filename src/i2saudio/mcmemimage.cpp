@@ -1,5 +1,7 @@
-#include "mcmemimage.h"
+#include <Arduino.h>
+#ifndef CORE_TEENSY
 
+#include "mcmemimage.h"
 #include <Adafruit_SPIFlash.h>
 
 #include "Grinliz_Util.h"
@@ -210,6 +212,8 @@ int DirToIndex::lookup(const char* path) const
     }
     return -1;
 }
+#endif // !CORE_TEENSY
+
 
 #ifndef CORE_TEENSY
 uint8_t vpromBuffer[MEM_IMAGE_EEPROM] = { 0 };

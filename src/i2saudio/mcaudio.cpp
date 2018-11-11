@@ -1,3 +1,7 @@
+#include <Arduino.h> 
+
+#ifndef CORE_TEENSY
+
 #include <Adafruit_SPIFlash.h>
 #include <Adafruit_ZeroI2S.h>
 #include <Adafruit_ZeroDMA.h>
@@ -317,3 +321,6 @@ uint32_t SPIStream::fetch(uint8_t* target, uint32_t nBytes)
     m_pos += nBytes;
     return r;
 }
+
+#endif // !CORE_TEENSY
+

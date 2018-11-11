@@ -1,5 +1,4 @@
 #include "compress.h"
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -40,9 +39,13 @@ bool wav12::compress8(
     uint8_t* p = *compressed;
 
     for(int i=0; i<nSamples; i += FRAME) {
-        memset(samples12, 0, sizeof(int16_t) * FRAME);
+        //memset(samples12, 0, sizeof(int16_t) * FRAME);
         for (int j = 0; j < FRAME && (i + j) < nSamples; ++j) {
             samples12[j] = data[i + j] / DIV;
+        }
+        // Pad the end w/ a repeating value so the delta will be 0.
+        for (int j = nSamples - i; j < FRAME; ++j) {
+            samples12[j] = data[nSamples - 1] / DIV;
         }
         
         // Scan frame.
@@ -65,7 +68,7 @@ bool wav12::compress8(
         int downScale = 1;
         while (maxInc > 127 * upScale)
             upScale++;
-        while (-maxDec < -128 * downScale)
+        while (maxDec < -128 * downScale)
             downScale++;
 
         scale = wav12Max(upScale, downScale);
@@ -91,6 +94,7 @@ bool wav12::compress8(
             deltaToWrite = wav12Clamp(deltaToWrite, -128, 127);
             int deltaPrime = deltaToWrite * scale;
             current += deltaPrime;
+            assert(abs(current - samples12[j]) < 256 * scale);
 
             *p++ = (uint8_t)(int8_t(deltaToWrite));
         }

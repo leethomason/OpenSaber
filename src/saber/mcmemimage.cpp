@@ -37,7 +37,6 @@ void ConstMemImage::readDir(const char* dirName, MemUnit* dir) const
     }
 }
 
-
 void ConstMemImage::readFile(int index, MemUnit* file) const
 {
     ::readFile(m_spiFlash, index, file);

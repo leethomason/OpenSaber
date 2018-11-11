@@ -28,7 +28,6 @@
 #else 
 #include <Adafruit_ZeroI2S.h>
 #include <Adafruit_ZeroDMA.h>
-#include <Adafruit_ZeroTimer.h>
 #include <Adafruit_SPIFlash.h>
 #include "mcmemimage.h"
 #endif
@@ -98,8 +97,7 @@ Adafruit_ZeroI2S i2s(0, 1, 12, 2);          // FIXME define pins
 Adafruit_SPIFlash spiFlash(SS1, &SPI1);     // Use hardware SPI 
 Adafruit_ZeroDMA audioDMA;
 SPIStream spiStream(spiFlash);              // FIXME global generic resource
-Adafruit_ZeroTimer zt4(4);
-I2SAudio audioPlayer(i2s, zt4, audioDMA, spiFlash, spiStream);
+I2SAudio audioPlayer(i2s, audioDMA, spiFlash, spiStream);
 SFX sfx(&audioPlayer);
 ConstMemImage MemImage(spiFlash);
 
