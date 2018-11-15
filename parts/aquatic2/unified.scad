@@ -6,132 +6,140 @@ $fn = 80;
 
 T = 4;
 FRONT_T = 4;
-JUNCTION = 5;
+JUNCTION = 8;
 EPS = 0.01;
 EPS2 = 2 * EPS;
 
 DRAW_AFT   = false;
 DRAW_FRONT = true;
+DRAW_GRIP_ALIGNMENT = false;
 
-EXTRA_BAFFLE = 2;
-N_BAFFLES = nBafflesNeeded(H_BUTTRESS);
-M_BAFFLE_FRONT = zLenOfBaffles(N_BAFFLES, H_BUTTRESS) + M_POMMEL_FRONT + EXTRA_BAFFLE;
+N_BATT_BAFFLES = nBafflesNeeded(H_BUTTRESS);
+DZ_SPKR = 3;
+EXTRA_BAFFLE = 4;
+M_BAFFLE_FRONT = M_POMMEL_FRONT + zLenOfBaffles(N_BATT_BAFFLES, H_BUTTRESS) + EXTRA_BAFFLE;
 
-
-if (DRAW_AFT) {
-    translate([0, 0, M_POMMEL_FRONT]) {
-        baffleMCBattery(D_AFT, N_BAFFLES, H_BUTTRESS, D_AFT_RING, 5.5);
-    }
-    translate([0, 0, M_BAFFLE_FRONT - EXTRA_BAFFLE]) {
-        oneBaffle(D_AFT, EXTRA_BAFFLE, bridge=false);
-    }
-
-    translate([0, 0, M_POMMEL_BACK]) {
-        speakerHolder(D_POMMEL, M_POMMEL_FRONT - M_POMMEL_BACK, 2, "bass28");
-    }
-
-    translate([0, 0, M_BAFFLE_FRONT]) {
-        intersection() {
-            tube(JUNCTION, do=D_AFT, di=D_AFT - T);
-            cylinderKeyJoint(JUNCTION - 0.5);
+if (DRAW_GRIP_ALIGNMENT) {
+    color("red") {
+        translate([-D_SABER_OUTER/2, -1, M_GRIP_BACK]) {
+            cube(size=[D_SABER_OUTER, 2, M_FRONT - M_GRIP_BACK]);
         }
+        echo("Crystal space=", M_GRIP_BACK - M_BAFFLE_FRONT - H_BUTTRESS);
     }
 }
 
+if (DRAW_AFT) {
+    translate([0, 0, M_POMMEL_BACK]) {
+        // Speaker holder locking ring.
+        speakerHolder(D_AFT_RING, M_POMMEL_FRONT - M_POMMEL_BACK, DZ_SPKR, "cls28");
+    }
+    translate([0, 0, M_POMMEL_FRONT]) {
+        baffleMCBattery(D_AFT, N_BATT_BAFFLES, H_BUTTRESS, dFirst=D_AFT_RING, dzFirst=DZ_AFT_RING, extraBaffle=EXTRA_BAFFLE);
+    }
+    translate([0, 0, M_BAFFLE_FRONT]) {
+        cylinderKeyJoint(JUNCTION, D_AFT, D_AFT - T, -0.5, tJoint=true);
+    }
+
+    *color("yellow") translate([0, 0, M_POMMEL_FRONT])
+        battery(D_AFT);
+}
+
+X_CRYSTAL           =  11;
+Y_CRYSTAL           =   8.5;
+Z_CRYSTAL           =  34.0;
+Y_CRYSTAL_TR = R_AFT - 2 - Y_CRYSTAL/2;
+N_CRYSTAL_BAFFLES = 4;
+
+
+module rods() {
+    RX = 8;
+    RY = 4;
+    translate([RX, RY, M_BAFFLE_FRONT]) {
+        cylinder(h=(N_CRYSTAL_BAFFLES+1) * H_BUTTRESS * 2, d=3.4);
+    }
+    mirror([-1, 0, 0]) translate([RX, RY, M_BAFFLE_FRONT]) {
+        cylinder(h=(N_CRYSTAL_BAFFLES+1) * H_BUTTRESS * 2, d=3.4);
+    }
+}
 
 if (DRAW_FRONT) {
-    /*
-        Assuming 3 things on PCB:
-        1. power port
-        2. switch
-        3. segment display
-    */
-    RING_T = 4 - EXTRA_BAFFLE;
-
-    /*
-        FIXME
-        Overall: 35.1
-        Lip 3.8
-        Total bottom 17.8
-        Delta Y: 4.1 (fr) or 5.3 (solder)
-
-        Top:
-        Hole (hole): d = 2.2  pos = 21.59, 17.78
-            Power: Hole (hole): d = 8.0  pos = 20.32, 10.16
-        Hole (mark): d = 0.0  pos = 29.21, 10.16
-        Hole (hole): d = 2.2  pos = 21.59, 2.54
-        Number of drill =32
-        rows/cols = 27,17
-        size (after cut) = 32.02, 19.32
-    */
-    C = 19.32/2;    // center for coordinate conversion
-    DYPCB = 7.5;
-    MOUNT_DZ = 4.5;  // offset for the PCB mounting holes
-    DZ_PCB = RING_T; // + 2.5;
+    *translate([0, Y_CRYSTAL_TR, M_BAFFLE_FRONT + H_BUTTRESS]) {
+        crystal(X_CRYSTAL, Y_CRYSTAL, Z_CRYSTAL);
+    }
 
     difference() {
-        translate([0, 0, M_BAFFLE_FRONT]) {
-            LENZ = M_CHAMBER - M_BAFFLE_FRONT - FRONT_T;
-            pcbHolder(  D_AFT, T, 
-                        LENZ + EPS2,    // dz 
-                        RING_T,         // dzToPCB
-                        DYPCB,          // dyPCB
-                    [22, 100, 50],      // FIXME 
-                    [
-                        // remember axis are flipped from nanopcb
-                        // and x is re-oriented. *sigh*
-                        [17.28 - C, 21.59 + MOUNT_DZ, "buttress"],
-                        [ 2.04 - C, 21.59 + MOUNT_DZ, "buttress"]
-                    ]);
+        // "wall" for back of crystal and dotstar
+        intersection() {
+            cylinder(h=H_FAR, d=D_AFT);
+            translate([-50, 5, M_BAFFLE_FRONT + H_BUTTRESS/2]) {
+                cube(size=[100, 100, H_BUTTRESS/2]);
+            }
+        }
 
+        // Punch out the dotstar holder.
+        DOT = 5.8;
+        translate([-DOT/2, Y_CRYSTAL_TR-DOT/2, M_BAFFLE_FRONT]) {
+            cube(size=[DOT, DOT, 10]);
+        }
+        rods();
+    }
+
+    difference() 
+    {
+        union() {
+            translate([0, 0, M_BAFFLE_FRONT]) {
+                oneBaffle(D_AFT, H_BUTTRESS, battery=false, cutout=false);
+            }
+            for(i=[1:N_CRYSTAL_BAFFLES]) {
+                translate([0, 0, M_BAFFLE_FRONT + H_BUTTRESS*2*i]) {
+                    oneBaffle(D_AFT, H_BUTTRESS, battery=false, cutout=false, cutoutHigh=false);
+                }
+            }
+            // Side parts for key-joint to connect.
             intersection() {
-                cylinder(h=H_FAR, d=D_AFT + EPS2);
                 union() {
-                    translate([0, -D_AFT/2, MOUNT_DZ + RING_T + 6]) {
-                        difference() {
-                            color("olive") 
-                                bridge(D_AFT, D_AFT/2 + DYPCB - 4.1, 4, 10);
-                        }
-                    }
-                    translate([0, -D_AFT/2, MOUNT_DZ + RING_T + 26]) {
-                        bridge(D_AFT, D_AFT/2 + DYPCB, 4, 10);
+                    translate([D_AFT/2 - 4, -50, M_BAFFLE_FRONT]) cube(size=[100, 100, H_BUTTRESS*3]);
+                    mirror([-1, 0, 0]) translate([D_AFT/2 - 4, -50, M_BAFFLE_FRONT]) cube(size=[100, 100, H_BUTTRESS*3]);
+                }
+                cylinder(h=H_FAR, d=D_AFT);
+            }
+        }
+        // space for dotstar:
+        translate([-8, 0, M_BAFFLE_FRONT-EPS]) {
+            cube(size=[16, 100, H_BUTTRESS/2+EPS]);
+        }
+
+        rods();
+
+        translate([0, Y_CRYSTAL_TR, M_BAFFLE_FRONT + H_BUTTRESS]) {
+            crystal(X_CRYSTAL, Y_CRYSTAL, Z_CRYSTAL);
+        }
+        W = 8;
+        translate([-W/2, Y_CRYSTAL_TR, M_BAFFLE_FRONT + H_BUTTRESS]) {
+            cube(size=[W, 100, Z_CRYSTAL]);
+        }
+        translate([0, 0, M_BAFFLE_FRONT]) {
+            cylinderKeyJoint(JUNCTION, D_AFT, D_AFT - T, 0, tJoint=true);
+        }
+    }
+
+    // FIXME: adjust origin to give crystal space, if needed.
+    translate([0, 0, M_GRIP_BACK + 3]) {
+        difference() {
+            union() {
+                oneBaffle(D_AFT, H_BUTTRESS, 
+                        battery=true,       // for aesthetics
+                        cutout=true, 
+                        cutoutHigh=true,
+                        bridge=false);
+        
+                translate([0, 0, H_BUTTRESS]) {
+                    switchRing(D_AFT, 2, 20, 10);
+                    translate([0, 0, 20]) {
+                        powerPortRing(D_AFT, 2, 16, 5);
                     }
                 }
             }
-            tube(RING_T, do=D_AFT - T, di=D_AFT - 2 * T);
         }
-        translate([0, 0 , M_BAFFLE_FRONT - EPS])
-        intersection() {
-            tube(JUNCTION, do=D_AFT+EPS, di=D_AFT - T - EPS);
-            cylinderKeyJoint(JUNCTION);
-        }
-
-        // Flat bottom for printing
-        translate([-50, -D_AFT/2, M_BAFFLE_FRONT]) 
-            cube(size=[100, 0.5, 100]);
-
-        // Aesthetics
-        /*
-        translate([0, 0, M_BAFFLE_FRONT + 8 ]) 
-            capsule(-110, -80, 2, true);
-        translate([0, 0, M_BAFFLE_FRONT + 20 ]) 
-            capsule(-110, -80, 2, true);
-        translate([0, 0, M_BAFFLE_FRONT + 40 ]) 
-            capsule(-110, -80, 2, true);
-        for(i=[0:4]) {
-            translate([0, 0, M_BAFFLE_FRONT + 8 + i*6])
-                capsule(-170, 170, 2);
-        }
-        */
-        // FIXME
-        rotate([0, 0, 180]) translate([0, D_AFT/2 - 5, 50]) {
-            dotstarLED(8, 10, 10.0);
-            dotstarStrip(8, pitch=10.0);    // fixme
-        }
-
     }
 }
-
-
-*color("red") translate([0, 0, M_POMMEL_FRONT])
-    battery(D_AFT);

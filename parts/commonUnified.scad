@@ -178,9 +178,6 @@ module dynamicHeatSinkHolder(diameter)
 }
 
 
-
-
-
 DOTSTAR_XZ = 5.6;
 DOTSTAR_PITCH = 7;
 DOTSTAR_STRIP_XZ = 12.4;
@@ -539,7 +536,8 @@ module baffleMCBattery( outer,          // outer diameter
                         dFirst=0,       // make the back baffle this diameter (0 to use standard)
                         dzFirst=0,      // make the back baffle this thicknes  (0 to use standard)
                         extraBaffle=0,  // add this much to the front baffle
-                        mcWide=0        // set this for a wide top board
+                        mcWide=0,       // set this for a wide top board
+                        bridgeInFront=false,    // set true to contiue bridge. Useful for attaching to a cap.
                     )
 {
     for(i=[0:n-1]) {
@@ -554,7 +552,7 @@ module baffleMCBattery( outer,          // outer diameter
                 }
             }
             else {
-                oneBaffle(outer, dzButtress, bridge=(i < n-1), mcWide=mcWide);
+                oneBaffle(outer, dzButtress, bridge=bridgeInFront || (i < n-1), mcWide=mcWide);
             }
     }
     if (extraBaffle) {
