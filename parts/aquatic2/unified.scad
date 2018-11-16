@@ -10,7 +10,7 @@ JUNCTION = 8;
 EPS = 0.01;
 EPS2 = 2 * EPS;
 
-DRAW_AFT   = false;
+DRAW_AFT   = true;
 DRAW_FRONT = true;
 DRAW_GRIP_ALIGNMENT = false;
 
@@ -43,7 +43,7 @@ if (DRAW_AFT) {
         baffleMCBattery(D_AFT, N_BATT_BAFFLES, H_BUTTRESS, dFirst=D_AFT_RING, dzFirst=DZ_AFT_RING, extraBaffle=EXTRA_BAFFLE);
     }
     translate([0, 0, M_BAFFLE_FRONT]) {
-        cylinderKeyJoint(JUNCTION, D_AFT, D_AFT - T, -0.5, tJoint=true);
+        cylinderKeyJoint(JUNCTION, D_AFT, D_AFT - T, 0.5, tJoint=true);
     }
 
     *color("yellow") translate([0, 0, M_POMMEL_FRONT])
