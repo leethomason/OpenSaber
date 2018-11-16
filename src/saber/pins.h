@@ -45,7 +45,8 @@ SOFTWARE.
 #define SABER_MODEL_GREEN_SKY	   13
 #define SABER_MODEL_TANO_2 		   14   // Shield v4, Teensy 3.5, Dotstar UI
 #define SABER_MODEL_SISTER_2	   15   // Shield v4, Teensy 3.5, 5x7 Display. Replaced the cool-but-useless wirelss communication
-#define SABER_MODEL_KENOBI_IV	   16
+#define SABER_MODEL_KENOBI_IV	   16   // ItsyBitsy, Shield v1,Neopixel
+#define SABER_MODEL_AQUATIC_2	   17   // ItsyBitsy, Shield v1c, Dotstar
 
 #define SABER_SUB_MODEL_NONE		0
 #define SABER_SUB_MODEL_LUNA		1
@@ -54,8 +55,8 @@ SOFTWARE.
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_KENOBI_IV
+#define SERIAL_DEBUG 				1
+#define SABER_MODEL 				SABER_MODEL_AQUATIC_2
 #define SABER_SUB_MODEL				SABER_SUB_MODEL_STANDARD
 // ----------------------------------
 
@@ -84,6 +85,7 @@ SOFTWARE.
 #define PCB_SHIELD_4			   14	
 #define PCB_SHIELD_5			   15
 #define PCB_ITSY_1				   16
+#define PCB_ITSY_1C				   17	// 1B was a bad run, 1C adds dotstar support
 
 static const int EEPROM_SIZE = 512;
 
@@ -586,8 +588,43 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
 	#define SABER_VOLTMETER			
 	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
+	#define SABER_UI_LED			SABER_LED_NEOPIXEL
 	
 	#define SABER_NUM_LEDS 			4
+	#define SABER_UI_START			0
+	#define SABER_UI_BRIGHTNESS		8
+	#define SABER_UI_V2
+	
+	static const int32_t UVOLT_MULT = 5530;	
+	#define ID_STR "Kenoby IV Cree XPE2 RGB"
+
+	// Heat sink compound; copper TCSS heatsink.
+	// Updated the RGB Vf from the Cree specs.
+	static const int32_t RED_VF   = 2200;   // milli-volts
+	static const int32_t RED_I    = 400;    // milli-amps
+	static const int32_t RED_R    = 4700;   // milli-ohms
+
+	static const int32_t GREEN_VF = 3200;
+	static const int32_t GREEN_I  = 400;
+	static const int32_t GREEN_R  = 1000;
+
+	static const int32_t BLUE_VF  = 3100;
+	static const int32_t BLUE_I   = 400;
+	static const int32_t BLUE_R   = 1800;
+
+	static const int VOLUME_1 = 15;
+	static const int VOLUME_2 = 50;
+	static const int VOLUME_3 = 120;
+	static const int VOLUME_4 = 204;
+
+#elif (SABER_MODEL == SABER_MODEL_AQUATIC_2)
+	#define PCB_VERSION 			PCB_ITSY_1C
+	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
+	#define SABER_VOLTMETER			
+	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
+	#define SABER_UI_LED			SABER_LED_DOTSTAR
+	
+	#define SABER_NUM_LEDS 			5
 	#define SABER_UI_START			0
 	#define SABER_UI_BRIGHTNESS		8
 	#define SABER_UI_V2
@@ -693,18 +730,17 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 		#define PIN_DATA  		  30
 	#endif
 	#define ACCEL_BLADE_DIRECTION 0	// x is in the blade direction. not used for impact detection.
-#elif (PCB_VERSION == PCB_ITSY_1)
+#elif (PCB_VERSION == PCB_ITSY_1 || PCB_VERSION == PCB_ITSY_1C)
 	/* Grinning Lizard Shield for ItsyBitys M0.
 	   Integrated memory for sound.
 	   Neopixel support.
 	*/
 	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
-	#define SABER_UI_LED			SABER_LED_NEOPIXEL
 
 	#define PIN_VMETER        	A1
 	#define PIN_LED_A    	  	A2 
 	#define PIN_SWITCH_A	  	A3
-	#if (PCB_VERSION == PCB_ITSY_1B)
+	#if (PCB_VERSION == PCB_ITSY_1C)
 	#define PIN_DOTSTAR_EN		A4
 	#else
 	// A4 exposed
