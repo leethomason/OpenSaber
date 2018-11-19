@@ -87,7 +87,7 @@ module tjoint(outer, dz, trim)
     secure. Problematic is that it click together on the y
     axis so it's hard to run the wires.
 */
-module cylinderKeyJoint(dz, do, di, trim, angle=0, tJoint=false)
+module keyJoint(dz, do, di, trim, angle=0, tJoint=false)
 {
     if (tJoint) {
         intersection() {
@@ -117,6 +117,30 @@ module cylinderKeyJoint(dz, do, di, trim, angle=0, tJoint=false)
     }
 }
 
+
+module cJoint(dz, dOuter, trim)
+{
+    XC = dOuter * 0.35;
+    XT = dOuter * 0.08;
+    D  = dOuter * 0.12;
+
+    translate([XC - XT/2, -50, 0])
+        cube(size=[XT, 100, dz]);
+    translate([XC, -50, dz])
+        rotate([-90, 0, 0])
+            cylinder(d=D - trim, h=100);
+}
+
+module columnJoint(dz, dOuter, trim)
+{
+    intersection() {
+        cylinder(h=100, d=dOuter);
+        union() {
+            cJoint(dz, dOuter, trim);
+            mirror([-1, 0, 0]) cJoint(dz, dOuter, trim);
+        }
+    }
+}
 
 module bridge(dx, dy, dz, inset=0)
 {

@@ -40,7 +40,7 @@ if (DRAW_AFT) {
     translate([0, 0, M_BAFFLE_FRONT]) {
         intersection() {
             tube(JUNCTION, do=D_AFT, di=D_AFT - T);
-            cylinderKeyJoint(JUNCTION - 0.5);
+            keyJoint(JUNCTION - 0.5);
         }
     }
 }
@@ -132,7 +132,7 @@ if (DRAW_FRONT) {
         translate([0, 0 , M_BAFFLE_FRONT - EPS])
         intersection() {
             tube(JUNCTION, do=D_AFT+EPS, di=D_AFT - T - EPS);
-            cylinderKeyJoint(JUNCTION);
+            keyJoint(JUNCTION);
         }
         NUT_T = 5;
         translate([0, 0, M_CHAMBER - FRONT_T - NUT_T])

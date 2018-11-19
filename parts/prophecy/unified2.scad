@@ -21,7 +21,7 @@ if (DRAW_AFT) {
             baffleMCBattery(D_AFT, N_BAFFLES, H_BUTTRESS, D_AFT_RING, 5.5, EXTRA_BAFFLE);
         }
         translate([0, 0, M_BAFFLE_FRONT - JUNCTION]) {
-            cylinderKeyJoint(JUNCTION + EPS, D_AFT + EPS, D_AFT - T, 0);
+            keyJoint(JUNCTION + EPS, D_AFT + EPS, D_AFT - T, 0);
         }
     }
     translate([0, 0, M_POMMEL_BACK]) {
@@ -60,7 +60,7 @@ if (DRAW_FRONT) {
     }
 
     translate([0, 0, M_BAFFLE_FRONT - JUNCTION])
-        cylinderKeyJoint(JUNCTION, D_AFT, D_AFT-T, 0.1);
+        keyJoint(JUNCTION, D_AFT, D_AFT-T, 0.1);
 
     // The adjustment to the inner radius
     // is so the dotstars can fit beside the heat

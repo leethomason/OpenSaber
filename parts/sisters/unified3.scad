@@ -34,7 +34,7 @@ if (DRAW_AFT) {
             }
 
             translate([0, 0, M_BAFFLE_FRONT]) {
-                cylinderKeyJoint(JUNCTION, D_AFT, D_AFT - T, 0.5, JOINT_ANGLE);
+                keyJoint(JUNCTION, D_AFT, D_AFT - T, 0.5, JOINT_ANGLE);
             }
         }
         translate([0, 0, M_POMMEL_FRONT + 1])
@@ -81,7 +81,7 @@ if (DRAW_FRONT) {
             translate([-CUT_DX_V3/2, 4 + 1.5, 0]) cube(size=[CUT_DX_V3, 50, 20]);
             
             // Doesn't fit: oledHolder(D_AFT, T, DZ, 1, 7);
-            cylinderKeyJoint(JUNCTION, D_AFT, D_AFT - T, 0, JOINT_ANGLE);
+            keyJoint(JUNCTION, D_AFT, D_AFT - T, 0, JOINT_ANGLE);
 
             for(i=[0:2]) {
                 translate([0, 0, M_DISPLAY_CENTER - M_BAFFLE_FRONT + 6 - i*6]) capsule(-160, 160);
