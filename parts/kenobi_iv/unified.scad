@@ -63,7 +63,7 @@ if (DRAW_AFT) {
         baffleMCBattery(D_AFT_MID, N_BAFFLES, DZ_BUTTRESS);
 
     translate([0, 0, M_FRONT_BAFFLES])
-        cylinderKeyJoint(JOINT, D_AFT_MID, D_AFT_MID - T, 
+        keyJoint(JOINT, D_AFT_MID, D_AFT_MID - T, 
                          0.2, KEY_ANGLE, true);
 }
 
@@ -106,7 +106,7 @@ if (DRAW_MID) {
         }
         
         translate([0, 0, M_FRONT_BAFFLES])
-            cylinderKeyJoint(JOINT, D_AFT_MID, D_AFT_MID - T, 
+            keyJoint(JOINT, D_AFT_MID, D_AFT_MID - T, 
                              0, KEY_ANGLE, true);
 
         // Side holes

@@ -10,6 +10,7 @@ Low
 - Fix analogReference()
 
 Fixed
+x access to general pins
 x power accelerometer
 x clean up amp pins
 x re-do ratline
