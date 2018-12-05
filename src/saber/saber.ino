@@ -376,7 +376,6 @@ void syncToDB()
     uiRenderData.volume = saberDB.volume4();
     uiRenderData.color = Blade::convertRawToPerceived(saberDB.bladeColor());
     uiRenderData.palette = saberDB.paletteIndex();
-    uiRenderData.power = AveragePower::vbatToPowerLevel(voltmeter.averagePower());
     uiRenderData.mVolts = voltmeter.averagePower();
     uiRenderData.fontName = sfx.currentFontName();
 }
@@ -435,7 +434,7 @@ void buttonAClickHandler(const Button&)
         // the modes are cycled. But haven't yet
         // figured out a better option.
         if (uiMode.mode() == UIMode::NORMAL) {
-            int power = AveragePower::vbatToPowerLevel(voltmeter.averagePower());
+            int power = AveragePower::vbatToPowerLevel(voltmeter.averagePower(), 4);
             ledA.blink(power, INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
         }
     }
@@ -618,7 +617,6 @@ void loop() {
         voltmeter.takeSample();
         blade.setVoltage(voltmeter.averagePower());
         uiRenderData.mVolts = voltmeter.averagePower();
-        uiRenderData.power = AveragePower::vbatToPowerLevel(voltmeter.averagePower());
     }
 
     if (gforceDataTimer.tick(delta)) {
@@ -664,7 +662,7 @@ void loopDisplays(uint32_t msec, uint32_t delta)
             shifted7.set(digit4UI.Output().c_str());
         #endif
         #ifdef SABER_UI_START
-            ledsNeedUpdate = dotstarUI.Draw(leds + SABER_UI_START, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
+            ledsNeedUpdate = dotstarUI.Draw(leds + SABER_UI_START, 4, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
         #endif
     }
 

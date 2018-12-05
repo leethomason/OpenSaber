@@ -1,16 +1,13 @@
 #ifndef CSTR_INCLUDED
 #define CSTR_INCLUDED
 
-#include "Grinliz_Util.h"
 #include <Arduino.h>
+#include "Grinliz_Util.h"
 
 class SPISettings;
 
 class LEDManager;
 typedef void (*BlinkHandler)(const LEDManager&);
-namespace osbr {
-struct RGB;
-}
 
 class LEDManager
 {
