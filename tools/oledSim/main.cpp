@@ -54,7 +54,6 @@ int main(int, char**) {
 
 	UIRenderData data;
 	data.volume = 2;
-	data.power = 3;
 	data.mVolts = 3219;
 	data.fontName = "Bespin";
 
@@ -109,8 +108,10 @@ int main(int, char**) {
                 bladeOn = !bladeOn;
             }
 			else if (e.key.keysym.sym == SDLK_p) {
-				data.power = (data.power + 1) % 5;
-				data.mVolts = 3000 + data.power * 111;
+                data.mVolts += 100;
+                if (data.mVolts > 4200)
+                    data.mVolts = 3300;
+                printf("mVolts=%d\n", data.mVolts);
 			}
 			else if (e.key.keysym.sym == SDLK_v) {
 				data.volume = (data.volume + 1) % 5;
@@ -137,7 +138,7 @@ int main(int, char**) {
 			sketcher.Push(value);
 			sketcher.Draw(&display, 100, mode.mode(), bladeOn, &data);
 			pixel75.Draw(t, mode.mode(), bladeOn, &data);
-            dotstarUI.Draw(dotstarLEDS, mode.mode(), bladeOn, data);
+            dotstarUI.Draw(dotstarLEDS, 4, mode.mode(), bladeOn, data);
 		}
 
 		const SDL_Rect src = { 0, 0, WIDTH, HEIGHT };

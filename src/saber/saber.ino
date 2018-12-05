@@ -123,7 +123,6 @@ Voltmeter   voltmeter;
     #if SABER_UI_LED == SABER_LED_DOTSTAR
         DotStar dotstar;
     #elif SABER_UI_LED == SABER_LED_NEOPIXEL
-        osbr::RGB cachedLEDs[SABER_NUM_LEDS];
         Adafruit_NeoPixel neoPixels(SABER_NUM_LEDS, PIN_NEOPIXEL_DATA, NEO_GRB + NEO_KHZ800);
     #endif
 #endif
@@ -648,6 +647,7 @@ void loop() {
 void loopDisplays(uint32_t msec, uint32_t delta)
 {
     // General display state processing. Draw to the current supported display.
+    bool ledsNeedUpdate = false;
     if (displayTimer.tick(delta)) {
         uiRenderData.color = Blade::convertRawToPerceived(saberDB.bladeColor());
 
@@ -664,7 +664,7 @@ void loopDisplays(uint32_t msec, uint32_t delta)
             shifted7.set(digit4UI.Output().c_str());
         #endif
         #ifdef SABER_UI_START
-            dotstarUI.Draw(leds + SABER_UI_START, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
+            ledsNeedUpdate = dotstarUI.Draw(leds + SABER_UI_START, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
         #endif
     }
 
@@ -768,15 +768,7 @@ void loopDisplays(uint32_t msec, uint32_t delta)
             // Neopixels cause noise - but not errors - from the audio system.
             // Haven't tracked down why. But rather than bang on it, simply
             // only push new LEDs when something changes.
-            bool needsUpdate = false;
-            for(int i=0; i<SABER_NUM_LEDS; i++) {
-                if(leds[i] != cachedLEDs[i]) {
-                    neoPixels.setPixelColor(i, leds[i].get());
-                    cachedLEDs[i] = leds[i];
-                    needsUpdate = true;
-                }
-            }
-            if (needsUpdate)
+            if (ledsNeedUpdate)
                 neoPixels.show();
         #endif
     #endif    
