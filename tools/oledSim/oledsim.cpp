@@ -66,7 +66,7 @@ void OledSim::CommitFrom5x7(const uint8_t* col)
 }
 
 
-void OledSim::CommitFromDotstar(const RGB* dotstar, int n)
+void OledSim::CommitFromDotstar(const osbr::RGB* dotstar, int n)
 {
     //memset(pixels, 0, width * height * sizeof(uint32_t));
     const int s = width * height;

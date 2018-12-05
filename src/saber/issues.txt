@@ -1,19 +1,20 @@
 Issues:
 High
-- power accelerometer
-- clean up amp pins
-- re-do ratline
 
 Med
-- space out vias on board better
-- trigger interupt from DMA? Remove timer?
 - blade flash on retract (neopixel???)
 - neopixels create noise
+- can reduce sub-buffer size? effect on perf? encapselation?
 
 Low
 - Fix analogReference()
 
 Fixed
+x power accelerometer
+x clean up amp pins
+x re-do ratline
+x space out vias on board better
+x trigger interupt from DMA? Remove timer?
 x correctly connect amp select pin. Luck on my side, should be correctly setting left channel.
 x enable shutdown pin on amp? 2-3mA draw. Basically an LED.
 x dotstar support in itsy

@@ -47,7 +47,7 @@ int main(int, char**) {
 	Renderer display;
 	display.Attach(WIDTH, HEIGHT, oled.Buffer());
 	Pixel_7_5_UI pixel75;
-    RGB dotstarLEDS[8];
+    osbr::RGB dotstarLEDS[8];
     DotStarUI dotstarUI;
 
 	SDL_SetRenderDrawColor(ren, 128, 128, 128, 255);
@@ -79,15 +79,15 @@ int main(int, char**) {
 	const char* FONT_NAMES[8] = {
 		"Bespin", "Tatoine", "Jaina", "Vader", "ObiAni", "Bespin", "JainaSw", "Sentinel"
 	};
-    RGB colors[8] = {
-        RGB(0, 255, 0),
-        RGB(0, 0, 255),
-        RGB(0, 255, 255),
-        RGB(255, 0, 0),
-        RGB(128, 0, 255),
-        RGB(255, 0, 255),
-        RGB(0, 255, 128),
-        RGB(255, 255, 0)
+    osbr::RGB colors[8] = {
+        osbr::RGB(0, 255, 0),
+        osbr::RGB(0, 0, 255),
+        osbr::RGB(0, 255, 255),
+        osbr::RGB(255, 0, 0),
+        osbr::RGB(128, 0, 255),
+        osbr::RGB(255, 0, 255),
+        osbr::RGB(0, 255, 128),
+        osbr::RGB(255, 255, 0)
     };
     data.color = colors[0];
 

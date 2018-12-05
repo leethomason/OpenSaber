@@ -498,7 +498,6 @@ and testing. Therefore put up with some #define nonsense here.
 */
 #ifdef _WIN32
 class Stream;
-struct RGB;
 static const int DEC = 1;	// fixme: use correct values
 static const int HEX = 2;
 #endif
@@ -517,7 +516,6 @@ public:
 	const SPLog& p(long v, int p = DEC) const;
 	const SPLog& p(unsigned long v, int p = DEC) const;
 	const SPLog& p(double v, int p = 2) const;
-	const SPLog& p(const osbr::RGB& rgb) const;
 	
 	template<class T> const SPLog& pt(const T& str) const {
 		for(int i=0; i<str.size(); ++i) (*this).p(str[i]);

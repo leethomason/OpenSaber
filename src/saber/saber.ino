@@ -131,6 +131,7 @@ Voltmeter   voltmeter;
 Accelerometer accel;
 
 Timer2 displayTimer(100);
+
 #if SABER_DISPLAY == SABER_DISPLAY_128_32
 static const int OLED_WIDTH = 128;
 static const int OLED_HEIGHT = 32;

@@ -274,7 +274,7 @@ bool DotStarUI::Draw(osbr::RGB* led, UIMode mode, bool ignited, const UIRenderDa
 		case UIMode::PALETTE:
 		{
 			#ifdef SABER_UI_V2
-				led[0] = led[3] = RGB::BLACK;
+				led[0] = led[3] = osbr::RGB::BLACK;
 				led[1] = led[2] = data.color;
 			#else
 				led[0].set((data.palette & 1) ? PALETTE_ONE : 0);
@@ -432,7 +432,7 @@ bool DotStarUI::Test()
 }
 
 
-void calcCrystalColor(uint32_t t, int32_t lowVariation, int32_t highVariation, const RGB& base, RGB* out)
+void calcCrystalColor(uint32_t t, int32_t lowVariation, int32_t highVariation, const osbr::RGB& base, osbr::RGB* out)
 {
 	uint32_t tc[3] = { t / 79UL, t / 101UL, t / 137UL };
 
@@ -467,8 +467,8 @@ uint8_t calcSingleCrystalColor(uint32_t t)
 bool TestCrystalColor()
 {
 	{
-		const RGB base(200, 200, 200);
-		RGB out;
+		const osbr::RGB base(200, 200, 200);
+        osbr::RGB out;
 
 		for (uint32_t t = 0; t < 2000; ++t) {
 			calcCrystalColor(t, 20, 20, base, &out);
@@ -479,8 +479,8 @@ bool TestCrystalColor()
 		}
 	}
 	{
-		const RGB base(0, 0, 255);
-		RGB out;
+		const osbr::RGB base(0, 0, 255);
+        osbr::RGB out;
 
 		for (uint32_t t = 0; t < 10*1000; t += 10) {
 			calcCrystalColor(t, 100, 100, base, &out);
