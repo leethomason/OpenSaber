@@ -4,6 +4,7 @@ High
 Med
 - blade flash on retract (neopixel???)
 - neopixels create noise
+- can reduce sub-buffer size? effect on perf? encapselation?
 
 Low
 - Fix analogReference()

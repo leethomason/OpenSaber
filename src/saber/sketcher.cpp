@@ -1,10 +1,17 @@
 #include "sketcher.h"
 #include "renderer.h"
 #include "assets.h"
+#include "voltmeter.h"
 
 #include <math.h>
 
 using namespace osbr;
+
+int UIRenderData::powerLevel(int maxLevel) const
+{
+    return AveragePower::vbatToPowerLevel(mVolts, maxLevel);
+}
+
 
 Sketcher::Sketcher()
 {
@@ -105,7 +112,7 @@ void Sketcher::Draw(Renderer* d, uint32_t delta, UIMode mode, bool ignited, cons
 
 void Sketcher::DrawDials(Renderer* d, const UIRenderData* data, bool labels)
 {
-	d->DrawBitmap(X0, 0, GetDial(data->power));
+	d->DrawBitmap(X0, 0, GetDial(data->powerLevel(4)));
 	d->DrawBitmap(X1 - DIAL_WIDTH, 0, GetDial(data->volume), Renderer::FLIP_X);
 	if (labels) {
 		d->DrawStr("P", X0 + 23, 12, getGlypth_aurekBesh6);
@@ -235,92 +242,95 @@ void Sketcher::DrawMeditationMode(Renderer* d, uint32_t time, const UIRenderData
 }
 
 
-bool DotStarUI::Draw(osbr::RGB* led, UIMode mode, bool ignited, const UIRenderData& data)
+bool DotStarUI::Draw(osbr::RGB* led, int nLED, UIMode mode, bool ignited, const UIRenderData& data) const
 {
-	static const uint32_t COLOR_AUDIO_ON 	= 0x0000FF;
-	static const uint32_t COLOR_AUDIO_OFF 	= 0xFFD800;
-	static const uint32_t PALETTE_ONE 		= 0xFFFFFF;
-	static const uint32_t MED_0				= 0x0000FF;
-	static const uint32_t MED_1				= 0x0050a0;
-	static const uint32_t MED_2				= 0x00a05F;
-	static const uint32_t MED_3				= 0x00FF00;
+    static const uint32_t COLOR_AUDIO_ON = 0x0000FF;
+    static const uint32_t COLOR_AUDIO_OFF = 0xFFD800;
+    static const uint32_t PALETTE_ONE = 0xFFFFFF;
+    static const uint32_t MED_0 = 0x0000FF;
+    static const uint32_t MED_1 = 0x0050a0;
+    static const uint32_t MED_2 = 0x00a05F;
+    static const uint32_t MED_3 = 0x00FF00;
 
-	osbr::RGB currentLED[4];
-	for(int i=0; i<4; ++i) {
-		currentLED[i] = led[i];
-	}
+    ASSERT(nLED == 4 || nLED == 6);
+    osbr::RGB currentLED[6];
+    for (int i = 0; i < nLED; ++i) {
+        currentLED[i] = led[i];
+    }
 
-	if (ignited) {
-		// Set the power level.
-		int i = 0;
-		for (; i < data.power && i < 4; ++i) {
-			led[i] = data.color;
-		}
-		for (; i < 4; ++i) {
-			led[i].set(0);
-		}
-	}
-	else {
-		switch (mode) {
-		case UIMode::NORMAL:
-		{
-			led[0].set(data.volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
-			led[1].set(data.volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
-			led[2].set(0);
-			led[3] = data.color;
-		}
-		break;
+    if (ignited) {
+        // Set the power level.
+        int i = 0;
+        int powerLevel = data.powerLevel(nLED);
+        for (; i < powerLevel && i < nLED; ++i) {
+            led[i] = data.color;
+        }
+        for (; i < nLED; ++i) {
+            led[i].set(0);
+        }
+    }
+    else {
+        switch (mode) {
+        case UIMode::NORMAL:
+        {
+            if (nLED == 4) {
+                led[0].set(data.volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
+                led[1].set(data.volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
+            }
+            else {
+                // Not really recursvie; used to draw the 4-LED variant in 6-LED mode.
+                this->Draw(led, 4, UIMode::VOLUME, ignited, data);
+            }
+            led[nLED - 2].set(0);
+            led[nLED - 1] = data.color;
+        }
+        break;
 
-		case UIMode::PALETTE:
-		{
-			#ifdef SABER_UI_V2
-				led[0] = led[3] = RGB::BLACK;
-				led[1] = led[2] = data.color;
-			#else
-				led[0].set((data.palette & 1) ? PALETTE_ONE : 0);
-				led[1].set((data.palette & 2) ? PALETTE_ONE : 0);
-				led[2].set((data.palette & 4) ? PALETTE_ONE : 0);
-				led[3] = data.color;
-			#endif
-		}
-		break;
+        case UIMode::PALETTE:
+        {
+            led[0] = led[nLED - 1] = osbr::RGB::BLACK;
+            for (int i = 1; i < nLED - 1; ++i) {
+                led[i] = data.color;
+            }
+        }
+        break;
 
-		case UIMode::VOLUME:
-		{
-			int i = 0;
-			for (; i < data.volume && i < 4; ++i) {
-				led[i].set(COLOR_AUDIO_ON);
-			}
-			for (; i < 4; ++i) {
-				led[i].set(COLOR_AUDIO_OFF);
-			}
-		}
-		break;
+        case UIMode::VOLUME:
+        {
+            int i = 0;
+            for (; i < data.volume && i < 4; ++i) {
+                led[i].set(COLOR_AUDIO_ON);
+            }
+            for (; i < 4; ++i) {
+                led[i].set(COLOR_AUDIO_OFF);
+            }
+            for (; i < nLED; ++i) {
+                led[i].set(0);
+            }
+        }
+        break;
 
-		case UIMode::MEDITATION:
-		{
-			led[0].set(MED_0);
-			led[1].set(MED_1);
-			led[2].set(MED_2);
-			led[3].set(MED_3);
-		}
-		break;
-		}
-	}
-	bool black = true;
-	(void)black;
-	for (int i = 0; i < 4; ++i) {
-		led[i].scale(m_brightness);
-		if (led[i].get()) {
-			black = false;
-		}
-	}
-	ASSERT((ignited && data.power == 0) || !black);
-	for(int i=0; i<4; ++i) {
-		if (currentLED[i] != led[i])
-			return true;
-	}
-	return false;
+        case UIMode::MEDITATION:
+        {
+            led[0].set(MED_0);
+            led[1].set(MED_1);
+            led[2].set(MED_2);
+            led[3].set(MED_3);
+            if (nLED > 4) led[4].set(MED_0);
+            if (nLED > 5) led[5].set(MED_1);
+        }
+        break;
+        }
+    }
+
+    for (int i = 0; i < nLED; ++i) {
+        led[i].scale(m_brightness);
+    }
+    for (int i = 0; i < nLED; ++i) {
+        if (currentLED[i] != led[i])
+            return true;
+    }
+    return false;
 }
 
 
@@ -329,7 +339,6 @@ bool DotStarUI::Test()
 	osbr::RGB leds[6];
 
 	UIRenderData data;
-	data.power = 2;
 	data.mVolts = 3700;
 	data.volume = 1;
 	data.palette = 7;
@@ -340,7 +349,7 @@ bool DotStarUI::Test()
 	{
 		DotStarUI dotstar;
 		
-		dotstar.Draw(&leds[1], UIMode::NORMAL, false, data);
+		dotstar.Draw(&leds[1], 4, UIMode::NORMAL, false, data);
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1].get() == 0x0000ff);	// sound on
 		ASSERT(leds[2].get() == 0x0000ff);	// sound on
@@ -348,7 +357,7 @@ bool DotStarUI::Test()
 		ASSERT(leds[4].get() == 0xff0000);	// blade color
 		ASSERT(leds[5].get() == 0);			// memory check
 
-		dotstar.Draw(&leds[1], UIMode::NORMAL, true, data);
+		dotstar.Draw(&leds[1], 4, UIMode::NORMAL, true, data);
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1] == data.color);	
 		ASSERT(leds[2] == data.color);
@@ -356,24 +365,15 @@ bool DotStarUI::Test()
 		ASSERT(leds[4].get() == 0);			
 		ASSERT(leds[5].get() == 0);			// memory check
 
-		dotstar.Draw(&leds[1], UIMode::PALETTE, false, data);
-		#ifdef SABER_UI_V2
+		dotstar.Draw(&leds[1], 4, UIMode::PALETTE, false, data);
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1].get() == 0);
 		ASSERT(leds[2] == data.color);
 		ASSERT(leds[3] == data.color);
 		ASSERT(leds[4].get() == 0);
 		ASSERT(leds[5].get() == 0);			// memory check
-		#else
-		ASSERT(leds[0].get() == 0);			// check memory
-		ASSERT(leds[1].get() == 0xffffff);
-		ASSERT(leds[2].get() == 0xffffff);
-		ASSERT(leds[3].get() == 0xffffff);
-		ASSERT(leds[4] == data.color);
-		ASSERT(leds[5].get() == 0);			// memory check
-		#endif
 
-		dotstar.Draw(&leds[1], UIMode::VOLUME, false, data);
+		dotstar.Draw(&leds[1], 4, UIMode::VOLUME, false, data);
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1].get() == 0x0000ff);
 		ASSERT(leds[2].get() == 0xFFD800);
@@ -387,7 +387,7 @@ bool DotStarUI::Test()
 		osbr::RGB c2 = data.color;
 		c2.scale(128);
 
-		dotstar.Draw(&leds[1], UIMode::NORMAL, false, data);
+		dotstar.Draw(&leds[1], 4, UIMode::NORMAL, false, data);
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1].get() == 0x00007f);	// sound on
 		ASSERT(leds[2].get() == 0x00007f);	// sound on
@@ -395,7 +395,7 @@ bool DotStarUI::Test()
 		ASSERT(leds[4].get() == 0x7f0000);	// blade color
 		ASSERT(leds[5].get() == 0);			// memory check
 
-		dotstar.Draw(&leds[1], UIMode::NORMAL, true, data);
+		dotstar.Draw(&leds[1], 4, UIMode::NORMAL, true, data);
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1] == c2);
 		ASSERT(leds[2] == c2);
@@ -403,24 +403,15 @@ bool DotStarUI::Test()
 		ASSERT(leds[4].get() == 0);
 		ASSERT(leds[5].get() == 0);			// memory check
 
-		dotstar.Draw(&leds[1], UIMode::PALETTE, false, data);
-		#ifdef SABER_UI_V2
+		dotstar.Draw(&leds[1], 4, UIMode::PALETTE, false, data);
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1].get() == 0);
 		ASSERT(leds[2] == c2);
 		ASSERT(leds[3] == c2);
 		ASSERT(leds[4].get() == 0);
 		ASSERT(leds[5].get() == 0);			// memory check
-		#else
-		ASSERT(leds[0].get() == 0);			// check memory
-		ASSERT(leds[1].get() == 0x7f7f7f);
-		ASSERT(leds[2].get() == 0x7f7f7f);
-		ASSERT(leds[3].get() == 0x7f7f7f);
-		ASSERT(leds[4] == c2);
-		ASSERT(leds[5].get() == 0);			// memory check
-		#endif
 
-		dotstar.Draw(&leds[1], UIMode::VOLUME, false, data);
+		dotstar.Draw(&leds[1], 4, UIMode::VOLUME, false, data);
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1].get() == 0x00007f);
 		ASSERT(leds[2].get() == 0x7F6c00);
@@ -432,7 +423,7 @@ bool DotStarUI::Test()
 }
 
 
-void calcCrystalColor(uint32_t t, int32_t lowVariation, int32_t highVariation, const RGB& base, RGB* out)
+void calcCrystalColor(uint32_t t, int32_t lowVariation, int32_t highVariation, const osbr::RGB& base, osbr::RGB* out)
 {
 	uint32_t tc[3] = { t / 79UL, t / 101UL, t / 137UL };
 
@@ -467,8 +458,8 @@ uint8_t calcSingleCrystalColor(uint32_t t)
 bool TestCrystalColor()
 {
 	{
-		const RGB base(200, 200, 200);
-		RGB out;
+		const osbr::RGB base(200, 200, 200);
+        osbr::RGB out;
 
 		for (uint32_t t = 0; t < 2000; ++t) {
 			calcCrystalColor(t, 20, 20, base, &out);
@@ -479,8 +470,8 @@ bool TestCrystalColor()
 		}
 	}
 	{
-		const RGB base(0, 0, 255);
-		RGB out;
+		const osbr::RGB base(0, 0, 255);
+        osbr::RGB out;
 
 		for (uint32_t t = 0; t < 10*1000; t += 10) {
 			calcCrystalColor(t, 100, 100, base, &out);
@@ -520,7 +511,7 @@ void Pixel_7_5_UI::Draw(uint32_t time, UIMode mode, bool bladeIgnited, const UIR
 	switch (mode) {
 	case UIMode::NORMAL:
 		getGlypth_tomThumb5('0' + data->palette, m_col + 0);
-		DrawBar(5, data->power);
+		DrawBar(5, data->powerLevel(4));
 		DrawBar(6, data->volume);
 		break;
 

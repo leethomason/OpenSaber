@@ -47,14 +47,14 @@ int main(int, char**) {
 	Renderer display;
 	display.Attach(WIDTH, HEIGHT, oled.Buffer());
 	Pixel_7_5_UI pixel75;
-    RGB dotstarLEDS[8];
+    osbr::RGB dotstar4[4];
+    osbr::RGB dotstar6[6];
     DotStarUI dotstarUI;
 
 	SDL_SetRenderDrawColor(ren, 128, 128, 128, 255);
 
 	UIRenderData data;
 	data.volume = 2;
-	data.power = 3;
 	data.mVolts = 3219;
 	data.fontName = "Bespin";
 
@@ -71,7 +71,8 @@ int main(int, char**) {
     enum {
         RENDER_OLED,
         RENDER_MATRIX,
-        RENDER_DOTSTAR,
+        RENDER_DOTSTAR_4,
+        RENDER_DOTSTAR_6,
         NUM_RENDER_MODE
     };
 	int renderMode = RENDER_OLED;
@@ -79,15 +80,15 @@ int main(int, char**) {
 	const char* FONT_NAMES[8] = {
 		"Bespin", "Tatoine", "Jaina", "Vader", "ObiAni", "Bespin", "JainaSw", "Sentinel"
 	};
-    RGB colors[8] = {
-        RGB(0, 255, 0),
-        RGB(0, 0, 255),
-        RGB(0, 255, 255),
-        RGB(255, 0, 0),
-        RGB(128, 0, 255),
-        RGB(255, 0, 255),
-        RGB(0, 255, 128),
-        RGB(255, 255, 0)
+    osbr::RGB colors[8] = {
+        osbr::RGB(0, 255, 0),
+        osbr::RGB(0, 0, 255),
+        osbr::RGB(0, 255, 255),
+        osbr::RGB(255, 0, 0),
+        osbr::RGB(128, 0, 255),
+        osbr::RGB(255, 0, 255),
+        osbr::RGB(0, 255, 128),
+        osbr::RGB(255, 255, 0)
     };
     data.color = colors[0];
 
@@ -109,8 +110,10 @@ int main(int, char**) {
                 bladeOn = !bladeOn;
             }
 			else if (e.key.keysym.sym == SDLK_p) {
-				data.power = (data.power + 1) % 5;
-				data.mVolts = 3000 + data.power * 111;
+                data.mVolts += 100;
+                if (data.mVolts > 4200)
+                    data.mVolts = 3300;
+                printf("mVolts=%d\n", data.mVolts);
 			}
 			else if (e.key.keysym.sym == SDLK_v) {
 				data.volume = (data.volume + 1) % 5;
@@ -137,7 +140,8 @@ int main(int, char**) {
 			sketcher.Push(value);
 			sketcher.Draw(&display, 100, mode.mode(), bladeOn, &data);
 			pixel75.Draw(t, mode.mode(), bladeOn, &data);
-            dotstarUI.Draw(dotstarLEDS, mode.mode(), bladeOn, data);
+            dotstarUI.Draw(dotstar4, 4, mode.mode(), bladeOn, data);
+            dotstarUI.Draw(dotstar6, 6, mode.mode(), bladeOn, data);
 		}
 
 		const SDL_Rect src = { 0, 0, WIDTH, HEIGHT };
@@ -153,8 +157,11 @@ int main(int, char**) {
         else if (renderMode == RENDER_MATRIX) {
             oled.CommitFrom5x7(pixel75.Pixels());
         }
-        else if (renderMode == RENDER_DOTSTAR) {
-            oled.CommitFromDotstar(dotstarLEDS, 4);
+        else if (renderMode == RENDER_DOTSTAR_4) {
+            oled.CommitFromDotstar(dotstar4, 4);
+        }
+        else if (renderMode == RENDER_DOTSTAR_6) {
+            oled.CommitFromDotstar(dotstar6, 6);
         }
 
 		SDL_RenderClear(ren);

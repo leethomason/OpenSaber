@@ -89,9 +89,9 @@ SOFTWARE.
 
 static const int EEPROM_SIZE = 512;
 
-static const int32_t NOMINAL_VOLTAGE 	= 3700;
-static const int32_t HIGH_VOLTAGE 		= 4200;
-static const int32_t LOW_VOLTAGE 		= 3500;
+static const int32_t HIGH_VOLTAGE 		= 4000;		// "full charge" at 4.0v or above
+static const int32_t NOMINAL_VOLTAGE    = 3700;
+static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're weird.
 
 #define SABER_ACCELEROMETER_NONE 	0
 #define SABER_ACCELEROMETER_LIS3DH	1
@@ -593,7 +593,6 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_NUM_LEDS 			4
 	#define SABER_UI_START			0
 	#define SABER_UI_BRIGHTNESS		8
-	#define SABER_UI_V2
 	
 	static const int32_t UVOLT_MULT = 5530;	
 	#define ID_STR "Kenoby IV Cree XPE2 RGB"
@@ -624,18 +623,9 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 	#define SABER_UI_LED			SABER_LED_DOTSTAR
 
-	// Testing
 	#define SABER_NUM_LEDS 			4
 	#define SABER_UI_START			0
 	#define SABER_UI_BRIGHTNESS		16
-	#define SABER_UI_V2
-
-	/*
-	#define SABER_NUM_LEDS 			5
-	#define SABER_UI_START			0
-	#define SABER_UI_BRIGHTNESS		8
-	#define SABER_UI_V2
-	*/
 
 	static const int32_t UVOLT_MULT = 5530;	
 	#define ID_STR "Aquatic 2 Cree XPE2 RGB"

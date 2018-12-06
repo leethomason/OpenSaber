@@ -3,7 +3,9 @@
 
 #include <stdint.h>
 
-struct RGB;
+namespace osbr {
+    struct RGB;
+}
 
 class OledSim
 {
@@ -15,7 +17,7 @@ public:
 	uint8_t* Buffer() { return buffer;}
 	void Commit();                          // copies the buffer TO the pixels
     void CommitFrom5x7(const uint8_t* src); // use this as a dot matrix renderer
-    void CommitFromDotstar(const RGB* dotstars, int n);
+    void CommitFromDotstar(const osbr::RGB* dotstars, int n);
 	void Clear();
 
 private:

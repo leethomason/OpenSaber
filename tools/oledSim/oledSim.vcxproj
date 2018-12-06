@@ -74,6 +74,7 @@
     <ClCompile Include="..\..\src\saber\renderer.cpp" />
     <ClCompile Include="..\..\src\saber\sketcher.cpp" />
     <ClCompile Include="..\..\src\saber\unittest.cpp" />
+    <ClCompile Include="..\..\src\saber\voltmeter.cpp" />
     <ClCompile Include="..\WinUtil.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="oledsim.cpp" />

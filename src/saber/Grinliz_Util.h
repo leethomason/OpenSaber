@@ -9,9 +9,6 @@
 #include "pins.h" // ONLY for the debug status, to control the ASSERT
 #endif
 
-namespace osbr {
-	struct RGB;
-}
 class Stream;
 
 template<bool> struct CompileTimeAssert;
@@ -498,7 +495,6 @@ and testing. Therefore put up with some #define nonsense here.
 */
 #ifdef _WIN32
 class Stream;
-struct RGB;
 static const int DEC = 1;	// fixme: use correct values
 static const int HEX = 2;
 #endif
@@ -517,10 +513,16 @@ public:
 	const SPLog& p(long v, int p = DEC) const;
 	const SPLog& p(unsigned long v, int p = DEC) const;
 	const SPLog& p(double v, int p = 2) const;
-	const SPLog& p(const osbr::RGB& rgb) const;
 	
 	template<class T> const SPLog& pt(const T& str) const {
-		for(int i=0; i<str.size(); ++i) (*this).p(str[i]);
+		(*this).p("[");
+		for(int i=0; i<str.size(); ++i) {
+			(*this).p(str[i]);
+			if (i != str.size() - 1) {
+				(*this).p(",");
+			}
+		}
+		(*this).p("]");
 		return *this;
 	}
 	void eol() const;

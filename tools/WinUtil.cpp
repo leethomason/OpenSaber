@@ -115,14 +115,6 @@ const SPLog& SPLog::p(double v, int p) const
 }
 
 
-const SPLog& SPLog::p(const RGB& rgb) const
-{
-	dprintf("[%0x2,%02x,%02x]", rgb.r, rgb.g, rgb.b);
-	return *this;
-}
-
-
-
 void SPLog::eol() const
 {
 	dprintf("\n");

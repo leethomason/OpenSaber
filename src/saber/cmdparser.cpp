@@ -203,9 +203,9 @@ bool CMDParser::processCMD()
             Log.p(i).p(": ")
                .p(pal.soundFont.c_str())
                .p(" ")
-               .p(pal.bladeColor)
+               .pt(pal.bladeColor)
                .p(" ")
-               .p(pal.impactColor)
+               .pt(pal.impactColor)
                .eol();
         }
     }

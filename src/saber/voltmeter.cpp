@@ -1,8 +1,11 @@
+#ifndef _WIN32
 #include <Arduino.h>
+#include "Grinliz_Arduino_Util.h"
+#endif
 
+#include "Grinliz_Util.h"
 #include "pins.h"
 #include "voltmeter.h"
-#include "Grinliz_Arduino_Util.h"
 
 AveragePower::AveragePower()
 {
@@ -23,6 +26,7 @@ void AveragePower::push(uint32_t milliVolts)
     m_power = total / NUM_SAMPLES;
 }
 
+#ifndef _WIN32
 void Voltmeter::begin()
 {
     #ifdef SABER_VOLTMETER
@@ -58,19 +62,19 @@ uint32_t Voltmeter::readVBat()
     #endif
 }
 
-
 void Voltmeter::takeSample()
 {
     m_averagePower.push(readVBat());
 }
+#endif
 
 
-int AveragePower::vbatToPowerLevel(int32_t vbat)
+int AveragePower::vbatToPowerLevel(int32_t vbat, int maxLevel)
 {
-    int level = 0;
-    if      (vbat > 3950) level = 4;
-    else if (vbat > 3800) level = 3;
-    else if (vbat > 3650) level = 2;
-    else if (vbat > LOW_VOLTAGE) level = 1;
+    const int32_t round = (HIGH_VOLTAGE - LOW_VOLTAGE) / (2 * maxLevel);
+    int32_t level = maxLevel * (round + vbat - LOW_VOLTAGE) / (HIGH_VOLTAGE - LOW_VOLTAGE);
+
+    if (level < 0) level = 0;
+    if (level > maxLevel) level = maxLevel;
     return level;
 }
