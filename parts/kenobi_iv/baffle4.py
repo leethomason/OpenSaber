@@ -63,7 +63,6 @@ def path(g, z, dz):
         g_move(g, thetas[i+1], outer_r)
         g_arc(g, thetas[(i+2)%len(thetas)], outer_r, 'CCW', z + dz * (i + 1) / len(thetas))
 
-g.feed(mat['feed_rate'])
 g.absolute()
 g.feed(mat['feed_rate'])
 
