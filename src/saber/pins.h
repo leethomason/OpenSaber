@@ -623,14 +623,22 @@ static const int32_t LOW_VOLTAGE 		= 3500;
 	#define SABER_VOLTMETER			
 	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 	#define SABER_UI_LED			SABER_LED_DOTSTAR
-	
+
+	// Testing
+	#define SABER_NUM_LEDS 			4
+	#define SABER_UI_START			0
+	#define SABER_UI_BRIGHTNESS		16
+	#define SABER_UI_V2
+
+	/*
 	#define SABER_NUM_LEDS 			5
 	#define SABER_UI_START			0
 	#define SABER_UI_BRIGHTNESS		8
 	#define SABER_UI_V2
-	
+	*/
+
 	static const int32_t UVOLT_MULT = 5530;	
-	#define ID_STR "Kenoby IV Cree XPE2 RGB"
+	#define ID_STR "Aquatic 2 Cree XPE2 RGB"
 
 	// Heat sink compound; copper TCSS heatsink.
 	// Updated the RGB Vf from the Cree specs.
