@@ -7,9 +7,9 @@
 
 using namespace osbr;
 
-int UIRenderData::powerLevel(int nLevels) const
+int UIRenderData::powerLevel(int maxLevel) const
 {
-    return AveragePower::vbatToPowerLevel(mVolts, nLevels);
+    return AveragePower::vbatToPowerLevel(mVolts, maxLevel);
 }
 
 
@@ -242,85 +242,95 @@ void Sketcher::DrawMeditationMode(Renderer* d, uint32_t time, const UIRenderData
 }
 
 
-bool DotStarUI::Draw(osbr::RGB* led, int nLED, UIMode mode, bool ignited, const UIRenderData& data)
+bool DotStarUI::Draw(osbr::RGB* led, int nLED, UIMode mode, bool ignited, const UIRenderData& data) const
 {
-	static const uint32_t COLOR_AUDIO_ON 	= 0x0000FF;
-	static const uint32_t COLOR_AUDIO_OFF 	= 0xFFD800;
-	static const uint32_t PALETTE_ONE 		= 0xFFFFFF;
-	static const uint32_t MED_0				= 0x0000FF;
-	static const uint32_t MED_1				= 0x0050a0;
-	static const uint32_t MED_2				= 0x00a05F;
-	static const uint32_t MED_3				= 0x00FF00;
+    static const uint32_t COLOR_AUDIO_ON = 0x0000FF;
+    static const uint32_t COLOR_AUDIO_OFF = 0xFFD800;
+    static const uint32_t PALETTE_ONE = 0xFFFFFF;
+    static const uint32_t MED_0 = 0x0000FF;
+    static const uint32_t MED_1 = 0x0050a0;
+    static const uint32_t MED_2 = 0x00a05F;
+    static const uint32_t MED_3 = 0x00FF00;
 
-	osbr::RGB currentLED[6];
-	for(int i=0; i<nLED; ++i) {
-		currentLED[i] = led[i];
-	}
+    ASSERT(nLED == 4 || nLED == 6);
+    osbr::RGB currentLED[6];
+    for (int i = 0; i < nLED; ++i) {
+        currentLED[i] = led[i];
+    }
 
-	if (ignited) {
-		// Set the power level.
-		int i = 0;
-		for (; i < data.powerLevel(4) && i < 4; ++i) {
-			led[i] = data.color;
-		}
-		for (; i < 4; ++i) {
-			led[i].set(0);
-		}
-	}
-	else {
-		switch (mode) {
-		case UIMode::NORMAL:
-		{
-			led[0].set(data.volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
-			led[1].set(data.volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
-			led[2].set(0);
-			led[3] = data.color;
-		}
-		break;
+    if (ignited) {
+        // Set the power level.
+        int i = 0;
+        int powerLevel = data.powerLevel(nLED);
+        for (; i < powerLevel && i < nLED; ++i) {
+            led[i] = data.color;
+        }
+        for (; i < nLED; ++i) {
+            led[i].set(0);
+        }
+    }
+    else {
+        switch (mode) {
+        case UIMode::NORMAL:
+        {
+            if (nLED == 4) {
+                led[0].set(data.volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
+                led[1].set(data.volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
+            }
+            else {
+                // Not really recursvie; used to draw the 4-LED variant in 6-LED mode.
+                this->Draw(led, 4, UIMode::VOLUME, ignited, data);
+            }
+            led[nLED - 2].set(0);
+            led[nLED - 1] = data.color;
+        }
+        break;
 
-		case UIMode::PALETTE:
-		{
-			led[0] = led[3] = osbr::RGB::BLACK;
-			led[1] = led[2] = data.color;
-		}
-		break;
+        case UIMode::PALETTE:
+        {
+            led[0] = led[nLED - 1] = osbr::RGB::BLACK;
+            for (int i = 1; i < nLED - 1; ++i) {
+                led[i] = data.color;
+            }
+        }
+        break;
 
-		case UIMode::VOLUME:
-		{
-			int i = 0;
-			for (; i < data.volume && i < 4; ++i) {
-				led[i].set(COLOR_AUDIO_ON);
-			}
-			for (; i < 4; ++i) {
-				led[i].set(COLOR_AUDIO_OFF);
-			}
-		}
-		break;
+        case UIMode::VOLUME:
+        {
+            int i = 0;
+            for (; i < data.volume && i < 4; ++i) {
+                led[i].set(COLOR_AUDIO_ON);
+            }
+            for (; i < 4; ++i) {
+                led[i].set(COLOR_AUDIO_OFF);
+            }
+            for (; i < nLED; ++i) {
+                led[i].set(0);
+            }
+        }
+        break;
 
-		case UIMode::MEDITATION:
-		{
-			led[0].set(MED_0);
-			led[1].set(MED_1);
-			led[2].set(MED_2);
-			led[3].set(MED_3);
-		}
-		break;
-		}
-	}
-	bool black = true;
-	(void)black;
-	for (int i = 0; i < 4; ++i) {
-		led[i].scale(m_brightness);
-		if (led[i].get()) {
-			black = false;
-		}
-	}
-	ASSERT((ignited && data.powerLevel(4) == 0) || !black);
-	for(int i=0; i<4; ++i) {
-		if (currentLED[i] != led[i])
-			return true;
-	}
-	return false;
+        case UIMode::MEDITATION:
+        {
+            led[0].set(MED_0);
+            led[1].set(MED_1);
+            led[2].set(MED_2);
+            led[3].set(MED_3);
+            if (nLED > 4) led[4].set(MED_0);
+            if (nLED > 5) led[5].set(MED_1);
+        }
+        break;
+        }
+    }
+
+    for (int i = 0; i < nLED; ++i) {
+        led[i].scale(m_brightness);
+    }
+    for (int i = 0; i < nLED; ++i) {
+        if (currentLED[i] != led[i])
+            return true;
+    }
+    return false;
 }
 
 

@@ -47,7 +47,8 @@ int main(int, char**) {
 	Renderer display;
 	display.Attach(WIDTH, HEIGHT, oled.Buffer());
 	Pixel_7_5_UI pixel75;
-    osbr::RGB dotstarLEDS[8];
+    osbr::RGB dotstar4[4];
+    osbr::RGB dotstar6[6];
     DotStarUI dotstarUI;
 
 	SDL_SetRenderDrawColor(ren, 128, 128, 128, 255);
@@ -70,7 +71,8 @@ int main(int, char**) {
     enum {
         RENDER_OLED,
         RENDER_MATRIX,
-        RENDER_DOTSTAR,
+        RENDER_DOTSTAR_4,
+        RENDER_DOTSTAR_6,
         NUM_RENDER_MODE
     };
 	int renderMode = RENDER_OLED;
@@ -138,7 +140,8 @@ int main(int, char**) {
 			sketcher.Push(value);
 			sketcher.Draw(&display, 100, mode.mode(), bladeOn, &data);
 			pixel75.Draw(t, mode.mode(), bladeOn, &data);
-            dotstarUI.Draw(dotstarLEDS, 4, mode.mode(), bladeOn, data);
+            dotstarUI.Draw(dotstar4, 4, mode.mode(), bladeOn, data);
+            dotstarUI.Draw(dotstar6, 6, mode.mode(), bladeOn, data);
 		}
 
 		const SDL_Rect src = { 0, 0, WIDTH, HEIGHT };
@@ -154,8 +157,11 @@ int main(int, char**) {
         else if (renderMode == RENDER_MATRIX) {
             oled.CommitFrom5x7(pixel75.Pixels());
         }
-        else if (renderMode == RENDER_DOTSTAR) {
-            oled.CommitFromDotstar(dotstarLEDS, 4);
+        else if (renderMode == RENDER_DOTSTAR_4) {
+            oled.CommitFromDotstar(dotstar4, 4);
+        }
+        else if (renderMode == RENDER_DOTSTAR_6) {
+            oled.CommitFromDotstar(dotstar6, 6);
         }
 
 		SDL_RenderClear(ren);
