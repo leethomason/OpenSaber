@@ -516,6 +516,13 @@ public:
 	const SPLog& p(double v, int p = 2) const;
 	
 	template<class T> const SPLog& pt(const T& str) const {
+		for(int i=0; i<str.size(); ++i) {
+			(*this).p(str[i]);
+		}
+		return *this;
+	}
+
+	template<class T> const SPLog& ptc(const T& str) const {
 		(*this).p("[");
 		for(int i=0; i<str.size(); ++i) {
 			(*this).p(str[i]);
@@ -526,6 +533,7 @@ public:
 		(*this).p("]");
 		return *this;
 	}
+
 	void eol() const;
 
 private:

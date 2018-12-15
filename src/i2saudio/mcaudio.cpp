@@ -1,5 +1,4 @@
-#include <Arduino.h> 
-
+#include <Arduino.h>    
 #ifndef CORE_TEENSY
 
 #include <Adafruit_SPIFlash.h>

@@ -8,9 +8,6 @@
 #include <Arduino.h>
 #endif
 
-namespace osbr {
-	struct RGB;
-}
 class Stream;
 
 template<bool> struct CompileTimeAssert;
@@ -18,10 +15,15 @@ template<> struct CompileTimeAssert <true> {};
 #define STATIC_ASSERT(e) (CompileTimeAssert <(e) != 0>())
 
 #if defined(_MSC_VER)
-#	define ASSERT( x )	if ( !(x)) { _asm { int 3 } }
+#   include <assert.h>
+#	define ASSERT assert
 #else
-	void AssertOut(const char* message, const char* file, int line);
-	#define ASSERT( x ) 	if (!(x)) { AssertOut(#x, __FILE__, __LINE__); while(true) {} }
+#	if SERIAL_DEBUG == 1
+		void AssertOut(const char* message, const char* file, int line);
+		#define ASSERT( x ) 	if (!(x)) { AssertOut(#x, __FILE__, __LINE__); while(true) {} }
+#	else
+		#define ASSERT( x )		{}
+#	endif
 #endif
 
 #define TEST_IS_TRUE(x) {         \
@@ -212,7 +214,7 @@ public:
 	void setFromNum(uint32_t value, bool writeZero) {
 		clear();
 		intToString(value, buf, ALLOCATE, writeZero);
-		len = strlen(buf);
+		len = (int) strlen(buf);
 	}
 	
 	uint16_t hash8() const {
@@ -493,7 +495,6 @@ and testing. Therefore put up with some #define nonsense here.
 */
 #ifdef _WIN32
 class Stream;
-struct RGB;
 static const int DEC = 1;	// fixme: use correct values
 static const int HEX = 2;
 #endif
@@ -512,12 +513,28 @@ public:
 	const SPLog& p(long v, int p = DEC) const;
 	const SPLog& p(unsigned long v, int p = DEC) const;
 	const SPLog& p(double v, int p = 2) const;
-	const SPLog& p(const osbr::RGB& rgb) const;
 	
+	// Templated print, generally of alternate string class.
 	template<class T> const SPLog& pt(const T& str) const {
-		for(int i=0; i<str.size(); ++i) (*this).p(str[i]);
+		for(int i=0; i<str.size(); ++i) {
+			(*this).p(str[i]);
+		}
 		return *this;
 	}
+
+	// Templated print, with commas.
+	template<class T> const SPLog& ptc(const T& str) const {
+		(*this).p("[");
+		for(int i=0; i<str.size(); ++i) {
+			(*this).p(str[i]);
+			if (i != str.size() - 1) {
+				(*this).p(",");
+			}
+		}
+		(*this).p("]");
+		return *this;
+	}
+
 	void eol() const;
 
 private:

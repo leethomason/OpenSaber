@@ -186,30 +186,6 @@ const SPLog& SPLog::p(double v, int p) const
   return *this;  
 }
 
-const SPLog& SPLog::p(const osbr::RGB& rgb) const
-{
-  if (serialStream) {
-    serialStream->print("[");
-    serialStream->print(rgb.r); 
-    serialStream->print(",");
-    serialStream->print(rgb.g); 
-    serialStream->print(",");
-    serialStream->print(rgb.b); 
-    serialStream->print("]");
-  }
-  if (logStream) {
-    logStream->print("[");
-    logStream->print(rgb.r); 
-    logStream->print(",");
-    logStream->print(rgb.g); 
-    logStream->print(",");
-    logStream->print(rgb.b); 
-    logStream->print("]");
-  }
-  return *this;
-}
-
-
 
 void SPLog::eol() const
 {
