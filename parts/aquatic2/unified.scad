@@ -10,9 +10,9 @@ JUNCTION = 8;
 EPS = 0.01;
 EPS2 = 2 * EPS;
 
-DRAW_AFT     = false;
-DRAW_CRYSTAL = true;
-DRAW_FRONT   = true;
+DRAW_AFT     = true;
+DRAW_CRYSTAL = false;
+DRAW_FRONT   = false;
 DRAW_GRIP_ALIGNMENT = false;
 
 N_BATT_BAFFLES = nBafflesNeeded(H_BUTTRESS);
@@ -58,7 +58,7 @@ if (DRAW_AFT) {
         battery(D_AFT);
 }
 
-X_CRYSTAL           =  11;
+X_CRYSTAL           =  12;
 Y_CRYSTAL           =   8.5;
 Z_CRYSTAL           =  34.0;
 Y_CRYSTAL_TR = R_AFT - 2 - Y_CRYSTAL/2;
@@ -160,14 +160,15 @@ if (DRAW_CRYSTAL) {
 if (DRAW_FRONT) {
     difference() { // top level, holes & bottom cut from here.
         union() {
-            F_START = M_GRIP_BACK + 2 + H_BUTTRESS;
-            DZ_SWITCH_SECTION = 21;
+            M_START = M_GRIP_BACK + 2 + H_BUTTRESS;
+            DZ_POWER = (M_POWER + 7) - M_START;
+            DZ_SWITCH = M_FRONT - (M_START + DZ_POWER);
 
-            translate([0, 0, F_START]) {
-                switchRing(D_AFT, T, DZ_SWITCH_SECTION, M_SWITCH - F_START);
+            translate([0, 0, M_START]) {
+                powerPortRing(D_AFT, T, DZ_POWER, M_POWER - M_START);
             }
-            translate([0, 0, F_START + DZ_SWITCH_SECTION]) {
-                powerPortRing(D_AFT, T, 22, M_POWER - (F_START + DZ_SWITCH_SECTION));
+            translate([0, 0, M_START + DZ_POWER]) {
+                switchRing(D_AFT, T, DZ_SWITCH, M_SWITCH - (M_START + DZ_POWER));
             }
         }
         // Front part global removal:
@@ -185,21 +186,46 @@ if (DRAW_FRONT) {
             rotate([90, 0, 0]) cylinder(h=100, d=12);
         */
         // Side vents. Not mirrored so there can be an alignment slot.
-        for(i=[1:2]) {
+        *for(i=[1:2]) {
             translate([0, 0, M_GRIP_BACK + 14 + i*10]) {
                 capsule(60, 120, r=2, _mirror=(i >= 2));
             }
         }
 
+        
+
+        // Left side
         for(i=[0:2]) {
             THETA = 29;
             OFFSET = 0;
-            rotate([0, 0, -THETA + OFFSET + i*THETA]) 
-            translate([0, 0, M_GRIP_BACK + 18]) hull() {
-                BOLT = 3; // FIXME: lookup bolt size
-                rotate([0, 90, 0]) cylinder(h=100, d=BOLT);        
-                translate([0, 0, 8]) {
-                    rotate([0, 90, 0]) cylinder(h=100, d=BOLT);
+            BOLT = 3.2;
+
+            rotate([0, 0, 180 + -THETA + OFFSET + i*THETA]) {
+                translate([0, 0, M_GRIP_BACK + 22]) {
+                    hull() {
+                        rotate([0, 90, 0]) cylinder(h=100, d=BOLT);        
+                        translate([0, 0, 16]) {
+                            rotate([0, 90, 0]) cylinder(h=100, d=BOLT);
+                        }
+                    }
+                }
+                *translate([0, 0, M_GRIP_BACK + 32]) {
+                    hull() {
+                        rotate([0, 90, 0]) cylinder(h=100, d=BOLT);        
+                        translate([0, 0, 10]) {
+                            rotate([0, 90, 0]) cylinder(h=100, d=BOLT);
+                        }
+                    }
+                }
+            }
+            rotate([0, 0, -THETA + OFFSET + i*THETA]) {
+                translate([0, 0, M_GRIP_BACK + 22]) {
+                    hull() {
+                        rotate([0, 90, 0]) cylinder(h=100, d=BOLT);        
+                        translate([0, 0, 16]) {
+                            rotate([0, 90, 0]) cylinder(h=100, d=BOLT);
+                        }
+                    }
                 }
             }
         }
@@ -208,4 +234,6 @@ if (DRAW_FRONT) {
             cube(size=[100, 10, 100]);
         dotstars();
     }
+    // Bolt mark
+    *color("red") translate([0, 0, M_GRIP_BACK + 58.5 / 2]) rotate([0, -90, 0]) cylinder(h=20, d=3.2);
 }
