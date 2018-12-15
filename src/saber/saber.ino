@@ -73,7 +73,6 @@
 
 using namespace osbr;
 
-static const uint32_t VBAT_TIME_INTERVAL      = 500;
 static const uint32_t INDICATOR_CYCLE         = 1000;
 static const uint32_t PING_PONG_INTERVAL      = 2400;
 static const uint32_t BREATH_TIME             = 1200;
@@ -160,7 +159,7 @@ Timer2      pingPongTimer(PING_PONG_INTERVAL);
 
 CMDParser   cmdParser(&saberDB);
 Blade       blade;
-Timer2      vbatTimer(VBAT_TIME_INTERVAL);
+Timer2      vbatTimer(AveragePower::SAMPLE_INTERVAL);
 Timer2      gforceDataTimer(110);
 
 Tester      tester;

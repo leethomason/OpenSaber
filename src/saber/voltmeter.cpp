@@ -7,6 +7,7 @@
 #include "pins.h"
 #include "voltmeter.h"
 
+
 AveragePower::AveragePower()
 {
     for(int i=0; i<NUM_SAMPLES; ++i) {
@@ -15,16 +16,27 @@ AveragePower::AveragePower()
     m_power = NOMINAL_VOLTAGE;
 }
 
+
 void AveragePower::push(uint32_t milliVolts)
 {
-    uint32_t total = milliVolts;
-    for(int i=0; i<NUM_SAMPLES-1; ++i) {
-        m_sample[i] = m_sample[i+1];
-        total += m_sample[i];
-    }
-    m_sample[NUM_SAMPLES-1] = milliVolts;
-    m_power = total / NUM_SAMPLES;
+    m_sample[m_pos] = milliVolts;
+    m_pos = (m_pos + 1) % NUM_SAMPLES;
+    m_power = 0;
 }
+ 
+
+uint32_t AveragePower::power() const
+{
+    if (m_power == 0) {
+        uint32_t total = 0;
+        for (int i = 0; i < NUM_SAMPLES; ++i) {
+            total += m_sample[i];
+        }
+        m_power = total / NUM_SAMPLES;
+    }
+    return m_power;
+}
+
 
 #ifndef _WIN32
 void Voltmeter::begin()
@@ -78,3 +90,4 @@ int AveragePower::vbatToPowerLevel(int32_t vbat, int maxLevel)
     if (level > maxLevel) level = maxLevel;
     return level;
 }
+

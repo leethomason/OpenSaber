@@ -11,7 +11,7 @@
 static const int WIDTH = 256;
 static const int HEIGHT = 192;
 
-RGB baseColors[6];
+osbr::RGB baseColors[6];
 
 int main(int, char**) {
 	baseColors[0].set(0x00ff00);
@@ -71,8 +71,8 @@ int main(int, char**) {
 			{ WIDTH / 4 - GAP - D, HEIGHT / 2 - D / 2, D, D},
 			{ WIDTH * 3 / 4 + GAP, HEIGHT / 2 - D / 2, D, D }
 		};
-		RGB c;
-		RGB base(baseColors[currentBase].r, baseColors[currentBase].g, baseColors[currentBase].b);
+        osbr::RGB c;
+        osbr::RGB base(baseColors[currentBase].r, baseColors[currentBase].g, baseColors[currentBase].b);
 
 		if (rgbCrystal) {
 			calcCrystalColor(SDL_GetTicks() - baseTime, 20, 80, base, &c);

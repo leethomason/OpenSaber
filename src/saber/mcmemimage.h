@@ -19,10 +19,10 @@ struct MemUnit {
 static_assert(sizeof(MemUnit) == 16, "correct size");
 
 enum {
-    MEM_IMAGE_NUM_DIR = 4,
+    MEM_IMAGE_NUM_DIR   = 4,
     MEM_IMAGE_NUM_FILES = 60,
-    MEM_IMAGE_SIZE = 2 * 1024 * 1024,   // fixme: should pick up from definition somewhere?
-    MEM_IMAGE_EEPROM = 512
+    MEM_IMAGE_SIZE      = 2 * 1024 * 1024,   // fixme: should pick up from definition somewhere?
+    MEM_IMAGE_EEPROM    = 512
 };
 
 class DirToIndex

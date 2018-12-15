@@ -3,13 +3,14 @@ High
 
 Med
 - blade flash on retract (neopixel???)
-- neopixels create noise
 - can reduce sub-buffer size? effect on perf? encapselation?
+- drop vbat sample time, increase samples. move timing const into AveragePower class
 
 Low
 - Fix analogReference()
 
 Fixed
+x neopixels create noise: not fixed, but confirmed. neopixels throw off timers? But create noise. Dotstar does not.
 x access to general pins
 x power accelerometer
 x clean up amp pins

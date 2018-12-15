@@ -12,16 +12,17 @@ class AveragePower
 {
 public:
     AveragePower();
-    void push(uint32_t milliVolts);
-    uint32_t power() {
-        return m_power;
-    }
-    enum { NUM_SAMPLES = 8};
+    void push(uint32_t milliVolts);     // circular buffer of samples; seeded with nominal
+
+    uint32_t power() const;
+    enum { NUM_SAMPLES = 16 };
+    enum { SAMPLE_INTERVAL = 67 };
 
     static int vbatToPowerLevel(int32_t vbat, int nLevels);
 
 private:
-    uint32_t m_power;
+    mutable uint32_t m_power = 0;
+    int m_pos = 0;
     uint32_t m_sample[NUM_SAMPLES];
 };
 

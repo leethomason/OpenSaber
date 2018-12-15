@@ -114,12 +114,19 @@ bool istrStarts(const char* str, const char* prefix)
     return true;
 }
 
+
+/*
+    This algorithm is ad-hoc. Need a consistent, fast
+    hash for storing filenames as 16-bit ints instead
+    of strings. The strings are capped at 8 length,
+    which lets a super-simple approach probably stand.
+*/
 uint16_t hash8(const char* v, const char* end)
 {
-	int shift = 0;
+	unsigned shift = 0;
 	uint16_t h = 0;
 	while(v < end) {
-		h = ((*v) << shift) ^ h;
+		h = ((*v) << (shift & 7)) ^ h;
 		++shift;
 		++v;            
 	}
@@ -297,6 +304,28 @@ bool TestCStr()
         a = "test";
         a = (const unsigned char*) "test2";
         a = (const char*) "test3";
+    }
+    {
+        static const int NUM = 15;
+        const char* tests[NUM] = {
+            "clash", "clash0", "clash1", "clash2", "clash3", "clash4",
+            "hum", "poweron", "poweroff",
+            "swing", "swing0", "swing1", "swing2", "swing3", "swing4"
+        };
+        uint16_t result[NUM] = { 0 };
+        for (int i = 0; i < NUM; ++i) {
+            uint16_t v = hash8(tests[i], tests[i] + strlen(tests[i]));
+            TEST_IS_TRUE(v > 0);
+            for (int j = 0; j < i; ++j) {
+                TEST_IS_TRUE(result[j] != v);
+            }
+            result[i] = v;
+        }
+        /*
+        for (int i = 0; i < NUM; ++i) {
+            Log.p(tests[i]).p(" ").p(result[i]).eol();
+        }
+        */
     }
     return true;
 }

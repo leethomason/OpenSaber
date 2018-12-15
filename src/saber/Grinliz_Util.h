@@ -16,7 +16,8 @@ template<> struct CompileTimeAssert <true> {};
 #define STATIC_ASSERT(e) (CompileTimeAssert <(e) != 0>())
 
 #if defined(_MSC_VER)
-#	define ASSERT( x )	if ( !(x)) { _asm { int 3 } }
+#   include <assert.h>
+#	define ASSERT assert
 #else
 #	if SERIAL_DEBUG == 1
 		void AssertOut(const char* message, const char* file, int line);
@@ -214,7 +215,7 @@ public:
 	void setFromNum(uint32_t value, bool writeZero) {
 		clear();
 		intToString(value, buf, ALLOCATE, writeZero);
-		len = strlen(buf);
+		len = (int) strlen(buf);
 	}
 	
 	uint16_t hash8() const {
