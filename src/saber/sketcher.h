@@ -30,6 +30,7 @@ public:
 	// Returns true if changed.
     bool Draw(osbr::RGB* uiLedStart,    // target LEDs
               int nLED,                 // must be 4 or 6
+              uint32_t time, 
               UIMode mode, bool bladeIgnited, const UIRenderData& data) const;
 
 	void SetBrightness(uint16_t v) { m_brightness = v; }

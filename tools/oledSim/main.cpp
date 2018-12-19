@@ -140,8 +140,8 @@ int main(int, char**) {
 			sketcher.Push(value);
 			sketcher.Draw(&display, 100, mode.mode(), bladeOn, &data);
 			pixel75.Draw(t, mode.mode(), bladeOn, &data);
-            dotstarUI.Draw(dotstar4, 4, mode.mode(), bladeOn, data);
-            dotstarUI.Draw(dotstar6, 6, mode.mode(), bladeOn, data);
+            dotstarUI.Draw(dotstar4, 4, t, mode.mode(), bladeOn, data);
+            dotstarUI.Draw(dotstar6, 6, t, mode.mode(), bladeOn, data);
 		}
 
 		const SDL_Rect src = { 0, 0, WIDTH, HEIGHT };
