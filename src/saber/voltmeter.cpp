@@ -74,9 +74,11 @@ uint32_t Voltmeter::readVBat()
     #endif
 }
 
-void Voltmeter::takeSample()
+uint32_t Voltmeter::takeSample()
 {
-    m_averagePower.push(readVBat());
+    uint32_t sample = readVBat();
+    m_averagePower.push(sample);
+    return sample;
 }
 #endif
 

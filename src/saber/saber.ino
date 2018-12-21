@@ -613,7 +613,9 @@ void loop() {
     sfx.process();
 
     if (vbatTimer.tick(delta)) {
-        voltmeter.takeSample();
+        uint32_t sample = voltmeter.takeSample();
+        //Log.p("vsample=").p(sample).eol();
+        //Log.p("ave power=").p(voltmeter.averagePower()).eol();
         blade.setVoltage(voltmeter.averagePower());
         uiRenderData.mVolts = voltmeter.averagePower();
     }
@@ -663,7 +665,7 @@ void loopDisplays(uint32_t msec, uint32_t delta)
             shifted7.set(digit4UI.Output().c_str());
         #endif
         #ifdef SABER_UI_START
-            ledsNeedUpdate = dotstarUI.Draw(leds + SABER_UI_START, 4, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
+            ledsNeedUpdate = dotstarUI.Draw(leds + SABER_UI_START, SABER_NUM_LEDS, msec, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
         #endif
     }
 

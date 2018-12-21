@@ -85,6 +85,7 @@ void Blade::setVoltage(int milliVolts) {
     static const int32_t amps[NCHANNELS] = { RED_I,  GREEN_I,  BLUE_I };
     static const int32_t res[NCHANNELS]  = { RED_R,  GREEN_R,  BLUE_R };
 
+    m_vbat = milliVolts;
     for (int i = 0; i < NCHANNELS; ++i) {
         m_f1000[i] = amps[i] * res[i] / (m_vbat - vF[i]);
         m_f1000[i] = clamp(m_f1000[i], int32_t(0), int32_t(1000));

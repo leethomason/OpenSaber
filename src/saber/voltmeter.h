@@ -40,7 +40,7 @@ public:
     uint32_t averagePower() { return m_averagePower.power(); }
 
     /// Add a sample to the average power.
-    void takeSample();
+    uint32_t takeSample();
 
 private:
     AveragePower m_averagePower;

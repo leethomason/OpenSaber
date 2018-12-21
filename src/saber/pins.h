@@ -626,8 +626,10 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define SABER_NUM_LEDS 			4
 	#define SABER_UI_START			0
 	#define SABER_UI_BRIGHTNESS		16
+	//#define SABER_CRYSTAL			80
+	//#define SABER_CRYSTAL_LOW		24
 
-	static const int32_t UVOLT_MULT = 5530;	
+	static const int32_t UVOLT_MULT = 5019;	
 	#define ID_STR "Aquatic 2 Cree XPE2 RGB"
 
 	// Heat sink compound; copper TCSS heatsink.

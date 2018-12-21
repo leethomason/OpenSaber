@@ -254,11 +254,6 @@ bool DotStarUI::Draw(osbr::RGB* led, int nLED, uint32_t time,
 {
     static const uint32_t COLOR_AUDIO_ON = 0x0000FF;
     static const uint32_t COLOR_AUDIO_OFF = 0xFFD800;
-    static const uint32_t PALETTE_ONE = 0xFFFFFF;
-    static const uint32_t MED_0 = 0x0000FF;
-    static const uint32_t MED_1 = 0x0050a0;
-    static const uint32_t MED_2 = 0x00a05F;
-    static const uint32_t MED_3 = 0x00FF00;
 
     ASSERT(nLED == 4 || nLED == 6);
     osbr::RGB currentLED[6];
@@ -320,10 +315,12 @@ bool DotStarUI::Draw(osbr::RGB* led, int nLED, uint32_t time,
 
         case UIMode::MEDITATION:
         {
+			/*
             static const uint32_t TIME_STEP = 800;
             for (int i = 0; i < nLED; ++i) {
                 calcCrystalColor(time + TIME_STEP * i, SABER_CRYSTAL_LOW, SABER_CRYSTAL, data.color, &led[i]);
             }
+			*/
         }
         break;
         }
@@ -474,7 +471,7 @@ uint8_t calcSingleCrystalColor(uint32_t t)
 
 bool TestCrystalColor()
 {
-	{
+/*	{
 		const osbr::RGB base(200, 200, 200);
         osbr::RGB out;
 
@@ -497,7 +494,7 @@ bool TestCrystalColor()
 				ASSERT(out[i] <= 255);
 			}
 		}
-	}
+	}*/
 	return true;
 }
 
