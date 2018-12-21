@@ -3,6 +3,13 @@
 #include "assets.h"
 #include "voltmeter.h"
 
+#ifdef  _WIN32
+#   define SABER_CRYSTAL			100
+#   define SABER_CRYSTAL_LOW		60
+#else
+#   include "pins.h"
+#endif
+
 #include <math.h>
 
 using namespace osbr;
@@ -242,7 +249,8 @@ void Sketcher::DrawMeditationMode(Renderer* d, uint32_t time, const UIRenderData
 }
 
 
-bool DotStarUI::Draw(osbr::RGB* led, int nLED, UIMode mode, bool ignited, const UIRenderData& data) const
+bool DotStarUI::Draw(osbr::RGB* led, int nLED, uint32_t time,
+                     UIMode mode, bool ignited, const UIRenderData& data) const
 {
     static const uint32_t COLOR_AUDIO_ON = 0x0000FF;
     static const uint32_t COLOR_AUDIO_OFF = 0xFFD800;
@@ -279,7 +287,7 @@ bool DotStarUI::Draw(osbr::RGB* led, int nLED, UIMode mode, bool ignited, const 
             }
             else {
                 // Not really recursvie; used to draw the 4-LED variant in 6-LED mode.
-                this->Draw(led, 4, UIMode::VOLUME, ignited, data);
+                this->Draw(led, 4, time, UIMode::VOLUME, ignited, data);
             }
             led[nLED - 2].set(0);
             led[nLED - 1] = data.color;
@@ -312,12 +320,10 @@ bool DotStarUI::Draw(osbr::RGB* led, int nLED, UIMode mode, bool ignited, const 
 
         case UIMode::MEDITATION:
         {
-            led[0].set(MED_0);
-            led[1].set(MED_1);
-            led[2].set(MED_2);
-            led[3].set(MED_3);
-            if (nLED > 4) led[4].set(MED_0);
-            if (nLED > 5) led[5].set(MED_1);
+            static const uint32_t TIME_STEP = 800;
+            for (int i = 0; i < nLED; ++i) {
+                calcCrystalColor(time + TIME_STEP * i, SABER_CRYSTAL_LOW, SABER_CRYSTAL, data.color, &led[i]);
+            }
         }
         break;
         }
@@ -349,7 +355,7 @@ bool DotStarUI::Test()
 	{
 		DotStarUI dotstar;
 		
-		dotstar.Draw(&leds[1], 4, UIMode::NORMAL, false, data);
+		dotstar.Draw(&leds[1], 4, 0, UIMode::NORMAL, false, data);
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1].get() == 0x0000ff);	// sound on
 		ASSERT(leds[2].get() == 0x0000ff);	// sound on
@@ -357,7 +363,7 @@ bool DotStarUI::Test()
 		ASSERT(leds[4].get() == 0xff0000);	// blade color
 		ASSERT(leds[5].get() == 0);			// memory check
 
-		dotstar.Draw(&leds[1], 4, UIMode::NORMAL, true, data);
+		dotstar.Draw(&leds[1], 4, 0, UIMode::NORMAL, true, data);
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1] == data.color);	
 		ASSERT(leds[2] == data.color);
@@ -365,7 +371,7 @@ bool DotStarUI::Test()
 		ASSERT(leds[4].get() == 0);			
 		ASSERT(leds[5].get() == 0);			// memory check
 
-		dotstar.Draw(&leds[1], 4, UIMode::PALETTE, false, data);
+		dotstar.Draw(&leds[1], 4, 0, UIMode::PALETTE, false, data);
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1].get() == 0);
 		ASSERT(leds[2] == data.color);
@@ -373,7 +379,7 @@ bool DotStarUI::Test()
 		ASSERT(leds[4].get() == 0);
 		ASSERT(leds[5].get() == 0);			// memory check
 
-		dotstar.Draw(&leds[1], 4, UIMode::VOLUME, false, data);
+		dotstar.Draw(&leds[1], 4, 0, UIMode::VOLUME, false, data);
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1].get() == 0x0000ff);
 		ASSERT(leds[2].get() == 0xFFD800);
@@ -387,7 +393,7 @@ bool DotStarUI::Test()
 		osbr::RGB c2 = data.color;
 		c2.scale(128);
 
-		dotstar.Draw(&leds[1], 4, UIMode::NORMAL, false, data);
+		dotstar.Draw(&leds[1], 4, 0, UIMode::NORMAL, false, data);
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1].get() == 0x00007f);	// sound on
 		ASSERT(leds[2].get() == 0x00007f);	// sound on
@@ -395,7 +401,7 @@ bool DotStarUI::Test()
 		ASSERT(leds[4].get() == 0x7f0000);	// blade color
 		ASSERT(leds[5].get() == 0);			// memory check
 
-		dotstar.Draw(&leds[1], 4, UIMode::NORMAL, true, data);
+		dotstar.Draw(&leds[1], 4, 0, UIMode::NORMAL, true, data);
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1] == c2);
 		ASSERT(leds[2] == c2);
@@ -403,7 +409,7 @@ bool DotStarUI::Test()
 		ASSERT(leds[4].get() == 0);
 		ASSERT(leds[5].get() == 0);			// memory check
 
-		dotstar.Draw(&leds[1], 4, UIMode::PALETTE, false, data);
+		dotstar.Draw(&leds[1], 4, 0, UIMode::PALETTE, false, data);
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1].get() == 0);
 		ASSERT(leds[2] == c2);
@@ -411,7 +417,7 @@ bool DotStarUI::Test()
 		ASSERT(leds[4].get() == 0);
 		ASSERT(leds[5].get() == 0);			// memory check
 
-		dotstar.Draw(&leds[1], 4, UIMode::VOLUME, false, data);
+		dotstar.Draw(&leds[1], 4, 0, UIMode::VOLUME, false, data);
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1].get() == 0x00007f);
 		ASSERT(leds[2].get() == 0x7F6c00);
@@ -427,16 +433,27 @@ void calcCrystalColor(uint32_t t, int32_t lowVariation, int32_t highVariation, c
 {
 	uint32_t tc[3] = { t / 79UL, t / 101UL, t / 137UL };
 
+    /*
     for (int i = 0; i < 3; ++i) {
     	
     	const int32_t VARIATION = base[i] > 128 ? highVariation : lowVariation;
 		const int32_t INV = 256 - VARIATION;
 
-		int32_t s = iSin(tc[i]);
-		int32_t scaledColor = (int32_t(base[i]) * INV + s * VARIATION) / int32_t(256);
+		int32_t isin = iSin(tc[i]);
+		int32_t scaledColor = (int32_t(base[i]) * INV + isin * VARIATION) / int32_t(256);
 		if (scaledColor > 255) scaledColor = 255;
 		if (scaledColor < 0) scaledColor = 0;
 		out->set(i, uint8_t(scaledColor));
+    }
+    */
+    for (int i = 0; i < 3; ++i) {
+        int32_t isin = iSin(tc[i]);         // output [-256, 256]
+        int32_t ibase = base[i];
+
+        int32_t cPrime = ibase + isin * ibase / int32_t(256 * 2);
+        if (cPrime > 255) cPrime = 255;
+        if (cPrime < 0)   cPrime = 0;
+        out->set(i, uint8_t(cPrime));
     }
 }
 
