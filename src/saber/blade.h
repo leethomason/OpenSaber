@@ -37,26 +37,24 @@ public:
     }
 
     void setVoltage(int milliVolts);
-    int voltage() const {
-        return vbat;
-    }
+    int32_t voltage() const { return m_vbat; }
 
     bool setInterp(uint32_t delta, uint32_t effectTime, const osbr::RGB& startColor, const osbr::RGB& endColor);
     void setRGB(const osbr::RGB& input);
 
-    // power consumed by the main blade color, in milliAmps
-    int32_t power() const;
     // power utilization, from 0-100 for a channel
     int util(int i) const   {
-        return (f1000[i] + 5) / 10;
+        return (m_f1000[i] + 5) / 10;
     }
+    
     // The actual PWM setting, per channel.
     uint8_t pwmVal(int i) const {
-        return pwm[i];
+        return m_pwm[i];
     }
 
+    // Current color of the blade.
     const osbr::RGB& getColor() {
-        return color;
+        return m_color;
     }
 
     static osbr::RGB convertRawToPerceived(const osbr::RGB& raw);
@@ -65,10 +63,10 @@ private:
     static const int8_t pinRGB[NCHANNELS];
     static Blade* instance;
 
-    osbr::RGB color;
-    uint8_t pwm[NCHANNELS];
-    int32_t vbat;
-    int32_t f1000[NCHANNELS];
+    osbr::RGB m_color;
+    uint8_t m_pwm[NCHANNELS];
+    int32_t m_vbat;
+    int32_t m_f1000[NCHANNELS];
 };
 
 #endif // BLADE_INCLUDED

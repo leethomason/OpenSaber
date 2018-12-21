@@ -36,13 +36,13 @@ Blade::Blade() {
     for (int i = 0; i < NCHANNELS; ++i) {
         pinMode(pinRGB[i], OUTPUT);
         digitalWrite(pinRGB[i], LOW);
-        pwm[i] = 0;
+        m_pwm[i] = 0;
     }
 
-    vbat   = NOMINAL_VOLTAGE;
+    m_vbat = NOMINAL_VOLTAGE;
     for (int i = 0; i < NCHANNELS; ++i) {
-        f1000[i] = 1000;
-        color[i] = 0;
+        m_f1000[i] = 1000;
+        m_color[i] = 0;
     }
     instance = this;
 }
@@ -52,12 +52,12 @@ void Blade::setRGB(const RGB& input)
 {
     static const int32_t DIV = int32_t(255) * int32_t(1000);
     for (int i = 0; i < NCHANNELS; ++i ) {
-        color[i] = input[i];
-        int32_t v = int32_t(LED_RANGE) * f1000[i] * int32_t(input[i]) / DIV;
+        m_color[i] = input[i];
+        int32_t v = int32_t(LED_RANGE) * m_f1000[i] * int32_t(input[i]) / DIV;
         ASSERT(v >= 0);
         ASSERT(v <= 255);
-        pwm[i] = constrain(v, 0, 255);  // just in case...
-        analogWrite(pinRGB[i], pwm[i]);
+        m_pwm[i] = constrain(v, 0, 255);  // just in case...
+        analogWrite(pinRGB[i], m_pwm[i]);
     }
 }
 
@@ -81,39 +81,15 @@ bool Blade::setInterp(uint32_t delta, uint32_t effectTime, const RGB& startColor
 
 
 void Blade::setVoltage(int milliVolts) {
-    // If a driver is in use, just use straight PWM, and
-    // leave f1000 = 1000. If a resistor is in use,
-    // account for the voltage being above design voltage.
-
-    static const int32_t f = 256;   // 256 is "use new value"
-    static const int32_t m = 256 - f;
-    int32_t vF[NCHANNELS]   = { RED_VF, GREEN_VF, BLUE_VF };
-    int32_t amps[NCHANNELS] = { RED_I,  GREEN_I,  BLUE_I };
-    int32_t res[NCHANNELS]  = { RED_R,  GREEN_R,  BLUE_R };
-
-    vbat = (int32_t(milliVolts) * f + vbat * m) / int32_t(256);
+    static const int32_t vF[NCHANNELS]   = { RED_VF, GREEN_VF, BLUE_VF };
+    static const int32_t amps[NCHANNELS] = { RED_I,  GREEN_I,  BLUE_I };
+    static const int32_t res[NCHANNELS]  = { RED_R,  GREEN_R,  BLUE_R };
 
     for (int i = 0; i < NCHANNELS; ++i) {
-        f1000[i] = amps[i] * res[i] / (vbat - vF[i]);
-        f1000[i] = clamp(f1000[i], int32_t(0), int32_t(1000));
+        m_f1000[i] = amps[i] * res[i] / (m_vbat - vF[i]);
+        m_f1000[i] = clamp(m_f1000[i], int32_t(0), int32_t(1000));
     }
-    setRGB(color);
-}
-
-
-int32_t Blade::power() const {
-    int32_t amps = 0;
-
-    static const int32_t cV[NCHANNELS] = { RED_VF, GREEN_VF, BLUE_VF };
-    static const int32_t cR[NCHANNELS] = { RED_R, GREEN_R, BLUE_R };
-
-    for (int i = 0; i < NCHANNELS; ++i) {
-        int32_t cI = int32_t(1000) * (NOMINAL_VOLTAGE - cV[i]) / cR[i];
-
-        int32_t aChannel = int32_t(LED_RANGE) * cI * int32_t(color[i]) / int32_t(65025);
-        amps += aChannel;
-    }
-    return amps;
+    setRGB(m_color);
 }
 
 

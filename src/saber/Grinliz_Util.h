@@ -515,6 +515,7 @@ public:
 	const SPLog& p(unsigned long v, int p = DEC) const;
 	const SPLog& p(double v, int p = 2) const;
 	
+	// Templated print, generally of alternate string class.
 	template<class T> const SPLog& pt(const T& str) const {
 		for(int i=0; i<str.size(); ++i) {
 			(*this).p(str[i]);
@@ -522,6 +523,7 @@ public:
 		return *this;
 	}
 
+	// Templated print, with commas.
 	template<class T> const SPLog& ptc(const T& str) const {
 		(*this).p("[");
 		for(int i=0; i<str.size(); ++i) {
