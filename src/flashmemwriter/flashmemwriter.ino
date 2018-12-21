@@ -16,10 +16,11 @@ static const int LOCAL_PAGESIZE = 256;
 uint8_t pageBuffer[LOCAL_PAGESIZE] = {0};
 uint32_t pageAddr = 0;
 int nPages = 0;
+bool userConfirmed = false;
 
 void setup()
 {
-    Serial.begin(115200);  // still need to turn it on in case a command line is connected.
+    Serial.begin(115200);
     while (!Serial) {
         delay(200);
     }
@@ -34,9 +35,14 @@ void setup()
     Log.p("Manufacturer: 0x").p(manid, HEX).eol();
     Log.p("Device ID: 0x").p(devid, HEX).eol();
     Log.p("Pagesize: ").p(spiFlash.pageSize()).p(" Page buffer: ").p(LOCAL_PAGESIZE).eol();
+
+    Log.p("Enter 'y' to erase chip and begin upload.").eol();
+}
+
+void eraseChip()
+{
     bool eraseOkay = spiFlash.eraseChip();
     Log.p("Erase Chip=").p(eraseOkay ? "true" : "false").eol();
-
     Log.p("Waiting for file.").eol();
 }
 
@@ -72,7 +78,13 @@ void loop()
         int b = Serial.read();
         if (b == '\n' || b=='\r') {
             if (!line.empty()) {
-                if (firstLine) {
+                if (!userConfirmed) {
+                    if (line == "y" || line == "Y") {
+                        userConfirmed = true;
+                        eraseChip();
+                    }
+                }
+                else if (firstLine) {
                     parseSize();
                     firstLine = false;
                 }

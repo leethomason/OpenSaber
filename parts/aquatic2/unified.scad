@@ -58,9 +58,9 @@ if (DRAW_AFT) {
         battery(D_AFT);
 }
 
-X_CRYSTAL           =  12;
+X_CRYSTAL           =  13;
 Y_CRYSTAL           =   8.5;
-Z_CRYSTAL           =  34.0;
+Z_CRYSTAL           =  39.0;
 Y_CRYSTAL_TR = R_AFT - 2 - Y_CRYSTAL/2;
 N_CRYSTAL_BAFFLES = 4;
 
