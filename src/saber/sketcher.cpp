@@ -320,7 +320,7 @@ bool DotStarUI::Draw(osbr::RGB* led, int nLED, uint32_t time,
 
         case UIMode::MEDITATION:
         {
-            static const int TIME_STEP = 800;
+            static const uint32_t TIME_STEP = 800;
             for (int i = 0; i < nLED; ++i) {
                 calcCrystalColor(time + TIME_STEP * i, SABER_CRYSTAL_LOW, SABER_CRYSTAL, data.color, &led[i]);
             }
@@ -433,6 +433,7 @@ void calcCrystalColor(uint32_t t, int32_t lowVariation, int32_t highVariation, c
 {
 	uint32_t tc[3] = { t / 79UL, t / 101UL, t / 137UL };
 
+    /*
     for (int i = 0; i < 3; ++i) {
     	
     	const int32_t VARIATION = base[i] > 128 ? highVariation : lowVariation;
@@ -443,6 +444,16 @@ void calcCrystalColor(uint32_t t, int32_t lowVariation, int32_t highVariation, c
 		if (scaledColor > 255) scaledColor = 255;
 		if (scaledColor < 0) scaledColor = 0;
 		out->set(i, uint8_t(scaledColor));
+    }
+    */
+    for (int i = 0; i < 3; ++i) {
+        int32_t isin = iSin(tc[i]);         // output [-256, 256]
+        int32_t ibase = base[i];
+
+        int32_t cPrime = ibase + isin * ibase / int32_t(256 * 2);
+        if (cPrime > 255) cPrime = 255;
+        if (cPrime < 0)   cPrime = 0;
+        out->set(i, uint8_t(cPrime));
     }
 }
 

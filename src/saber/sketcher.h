@@ -120,7 +120,10 @@ private:
 	uint8_t  accelData[DATA_WIDTH];
 };
 
-void calcCrystalColor(uint32_t msec, int32_t lowVariation, int32_t highVariation, const osbr::RGB& base, osbr::RGB* out);
+void calcCrystalColor(uint32_t msec, 
+    int32_t lowVariation,       // how much variation around dim color channels
+    int32_t highVariation,      // how much variation around bright color channels
+    const osbr::RGB& base, osbr::RGB* out);
 
 uint8_t calcSingleCrystalColor(uint32_t msec);
 
