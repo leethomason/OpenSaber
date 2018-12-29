@@ -129,6 +129,4 @@ void calcCrystalColorHSV(uint32_t msec, const osbr::RGB& base, osbr::RGB* out);
 
 uint8_t calcSingleCrystalColor(uint32_t msec);
 
-bool TestCrystalColor();
-
 #endif // SKETCHER_INCLUDED

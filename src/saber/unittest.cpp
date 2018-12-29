@@ -14,11 +14,9 @@ bool runUnitTests()
     bool pass = true;
     bool allPass = true;
 
-    RUN_TEST(TestCrystalColor);
     RUN_TEST(TestHexDec);
     RUN_TEST(TestEvent);
 	RUN_TEST(DotStarUI::Test);
-    RUN_TEST(TestCrystalColor);
 	RUN_TEST(TestCStr);
     RUN_TEST(TestCQueue);
     RUN_TEST(Random::Test);

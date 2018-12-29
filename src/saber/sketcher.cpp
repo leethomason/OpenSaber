@@ -498,36 +498,6 @@ uint8_t calcSingleCrystalColor(uint32_t t)
 }
 
 
-bool TestCrystalColor()
-{
-/*	{
-		const osbr::RGB base(200, 200, 200);
-        osbr::RGB out;
-
-		for (uint32_t t = 0; t < 2000; ++t) {
-			calcCrystalColor(t, 20, 20, base, &out);
-			for (int i = 0; i < 3; ++i) {
-				ASSERT(out[i] >= base[i] - 20);
-				ASSERT(out[i] <= base[i] + 20);
-			}
-		}
-	}
-	{
-		const osbr::RGB base(0, 0, 255);
-        osbr::RGB out;
-
-		for (uint32_t t = 0; t < 10*1000; t += 10) {
-			calcCrystalColor(t, 100, 100, base, &out);
-			for (int i = 0; i < 3; ++i) {
-				ASSERT(out[i] >= base[i] - 100);
-				ASSERT(out[i] <= 255);
-			}
-		}
-	}*/
-	return true;
-}
-
-
 Pixel_7_5_UI::Pixel_7_5_UI()
 {
     for (int i = 0; i < ALLOCATED; ++i)
