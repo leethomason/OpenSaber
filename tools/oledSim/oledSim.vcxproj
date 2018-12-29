@@ -72,6 +72,7 @@
     <ClCompile Include="..\..\src\saber\assets.cpp" />
     <ClCompile Include="..\..\src\saber\Grinliz_Util.cpp" />
     <ClCompile Include="..\..\src\saber\renderer.cpp" />
+    <ClCompile Include="..\..\src\saber\rgb2hsv.cpp" />
     <ClCompile Include="..\..\src\saber\sketcher.cpp" />
     <ClCompile Include="..\..\src\saber\unittest.cpp" />
     <ClCompile Include="..\..\src\saber\voltmeter.cpp" />
@@ -83,6 +84,7 @@
     <ClInclude Include="..\..\src\saber\assets.h" />
     <ClInclude Include="..\..\src\saber\Grinliz_Util.h" />
     <ClInclude Include="..\..\src\saber\renderer.h" />
+    <ClInclude Include="..\..\src\saber\rgb2hsv.h" />
     <ClInclude Include="..\..\src\saber\sketcher.h" />
     <ClInclude Include="..\..\src\saber\unittest.h" />
     <ClInclude Include="oledsim.h" />

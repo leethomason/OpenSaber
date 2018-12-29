@@ -125,6 +125,8 @@ void calcCrystalColor(uint32_t msec,
     int32_t highVariation,      // how much variation around bright color channels
     const osbr::RGB& base, osbr::RGB* out);
 
+void calcCrystalColorHSV(uint32_t msec, const osbr::RGB& base, osbr::RGB* out);
+
 uint8_t calcSingleCrystalColor(uint32_t msec);
 
 bool TestCrystalColor();

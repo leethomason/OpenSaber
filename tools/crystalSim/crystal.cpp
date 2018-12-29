@@ -75,7 +75,8 @@ int main(int, char**) {
         osbr::RGB base(baseColors[currentBase].r, baseColors[currentBase].g, baseColors[currentBase].b);
 
 		if (rgbCrystal) {
-			calcCrystalColor(SDL_GetTicks() - baseTime, 20, 80, base, &c);
+			//calcCrystalColor(SDL_GetTicks() - baseTime, 20, 80, base, &c);
+            calcCrystalColorHSV(SDL_GetTicks() - baseTime, base, &c);
 		}
 		else {
 			uint8_t v = calcSingleCrystalColor(SDL_GetTicks() - baseTime);
