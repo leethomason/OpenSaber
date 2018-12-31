@@ -10,9 +10,9 @@ JUNCTION = 8;
 EPS = 0.01;
 EPS2 = 2 * EPS;
 
-DRAW_AFT     = true;
+DRAW_AFT     = false;
 DRAW_CRYSTAL = false;
-DRAW_FRONT   = false;
+DRAW_FRONT   = true;
 DRAW_GRIP_ALIGNMENT = false;
 
 N_BATT_BAFFLES = nBafflesNeeded(H_BUTTRESS);
@@ -182,37 +182,22 @@ if (DRAW_FRONT) {
         /*
         translate([0, 0, M_SWITCH]) 
             rotate([90, 0, 0]) cylinder(h=100, d=12);
-        translate([0, 0, M_POWER]) 
-            rotate([90, 0, 0]) cylinder(h=100, d=12);
         */
-        // Side vents. Not mirrored so there can be an alignment slot.
-        *for(i=[1:2]) {
-            translate([0, 0, M_GRIP_BACK + 14 + i*10]) {
-                capsule(60, 120, r=2, _mirror=(i >= 2));
-            }
+        translate([0, 0, M_POWER]) {
+            rotate([90, 0, 0]) cylinder(h=100, d=12);
         }
 
-        
-
-        // Left side
+        // Side vents
         for(i=[0:2]) {
             THETA = 29;
             OFFSET = 0;
-            BOLT = 3.2;
+            BOLT = 3.4;
 
-            rotate([0, 0, 180 + -THETA + OFFSET + i*THETA]) {
+            if (i == 1) rotate([0, 0, 180 + -THETA + OFFSET + i*THETA]) {
                 translate([0, 0, M_GRIP_BACK + 22]) {
                     hull() {
                         rotate([0, 90, 0]) cylinder(h=100, d=BOLT);        
                         translate([0, 0, 16]) {
-                            rotate([0, 90, 0]) cylinder(h=100, d=BOLT);
-                        }
-                    }
-                }
-                *translate([0, 0, M_GRIP_BACK + 32]) {
-                    hull() {
-                        rotate([0, 90, 0]) cylinder(h=100, d=BOLT);        
-                        translate([0, 0, 10]) {
                             rotate([0, 90, 0]) cylinder(h=100, d=BOLT);
                         }
                     }
