@@ -11,8 +11,8 @@ EPS = 0.01;
 EPS2 = 2 * EPS;
 
 DRAW_AFT     = false;
-DRAW_CRYSTAL = false;
-DRAW_FRONT   = true;
+DRAW_CRYSTAL = true;
+DRAW_FRONT   = false;
 DRAW_GRIP_ALIGNMENT = false;
 
 N_BATT_BAFFLES = nBafflesNeeded(H_BUTTRESS);
@@ -58,7 +58,7 @@ if (DRAW_AFT) {
         battery(D_AFT);
 }
 
-X_CRYSTAL           =  13;
+X_CRYSTAL           =  12;
 Y_CRYSTAL           =   8.5;
 Z_CRYSTAL           =  39.0;
 Y_CRYSTAL_TR = R_AFT - 2 - Y_CRYSTAL/2;
@@ -70,9 +70,11 @@ module rods() {
     RY = 4;
     translate([RX, RY, M_BAFFLE_FRONT]) {
         cylinder(h=(N_CRYSTAL_BAFFLES+1) * H_BUTTRESS * 2, d=3.4);
+        cylinder(h=2, d=8);
     }
     mirror([-1, 0, 0]) translate([RX, RY, M_BAFFLE_FRONT]) {
         cylinder(h=(N_CRYSTAL_BAFFLES+1) * H_BUTTRESS * 2, d=3.4);
+        cylinder(h=2, d=8);
     }
 }
 

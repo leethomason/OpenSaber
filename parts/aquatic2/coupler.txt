@@ -1,0 +1,17 @@
+# Couple the emitter to a mount.
+# part radius is 20mm
+[        ]
+
+   r---r
+
+   g---g
+
+   b---b
+
+   v---v
+   +++++
+   v---v
+   +++++
+   v---v
+
+[        ]
