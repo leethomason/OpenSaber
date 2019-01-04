@@ -1,4 +1,4 @@
-include <dim.scad>
+'include <dim.scad>
 use <../commonUnified.scad>
 use <../shapes.scad>
 
@@ -11,8 +11,12 @@ EPS = 0.01;
 EPS2 = 2 * EPS;
 
 DRAW_AFT     = false;
-DRAW_CRYSTAL = true;
-DRAW_FRONT   = false;
+DRAW_CRYSTAL = false;
+DRAW_FRONT   = true;
+
+BOTTOM_SPLIT = false;
+TOP_SPLIT = true;
+
 DRAW_GRIP_ALIGNMENT = false;
 
 N_BATT_BAFFLES = nBafflesNeeded(H_BUTTRESS);
@@ -27,10 +31,16 @@ module flatBottom() {
 }
 
 module dotstars() {
+    W = 13;
     rotate([0, 0, 180]) translate([0, 8, M_DOTSTARS]) {
         dotstarLED(N_DOTSTARS, 20);
-        dotstarStrip(N_DOTSTARS+1, 4, 5.2);
+        dotstarStrip(N_DOTSTARS+1, 4, 4);
     }
+    Y = -13.5;
+    translate([-W/2, Y, M_DOTSTARS - 8])
+        cube(size=[W, 2, 6]);
+    translate([-W/2, Y, M_DOTSTARS + 37])
+        cube(size=[W, 2, 6]);
 }
 
 if (DRAW_GRIP_ALIGNMENT) {
@@ -159,7 +169,10 @@ if (DRAW_CRYSTAL) {
     }
 }
 
-if (DRAW_FRONT) {
+BOTTOM_INSERT_X = 14;
+
+module drawFront()
+{
     difference() { // top level, holes & bottom cut from here.
         union() {
             M_START = M_GRIP_BACK + 2 + H_BUTTRESS;
@@ -172,21 +185,19 @@ if (DRAW_FRONT) {
             translate([0, 0, M_START + DZ_POWER]) {
                 switchRing(D_AFT, T, DZ_SWITCH, M_SWITCH - (M_START + DZ_POWER));
             }
+
+            // Build up bottom for dotstar strip and insertable piece.
+            intersection() {
+                cylinder(h=H_FAR, d=D_AFT);
+                translate([-BOTTOM_INSERT_X/2, -R_AFT, M_START])
+                    cube(size=[BOTTOM_INSERT_X, 3.5, M_FRONT - M_START]);
+            }
         }
         // Front part global removal:
         flatBottom();
         rods();
         translate([0, 0, M_GRIP_BACK + 2 + H_BUTTRESS]) {
             columnJoint(JUNCTION-2, D_AFT, 0);
-        }
-
-        // Bottom access.
-        /*
-        translate([0, 0, M_SWITCH]) 
-            rotate([90, 0, 0]) cylinder(h=100, d=12);
-        */
-        translate([0, 0, M_POWER]) {
-            rotate([90, 0, 0]) cylinder(h=100, d=12);
         }
 
         // Side vents
@@ -198,7 +209,7 @@ if (DRAW_FRONT) {
             if (i == 1) rotate([0, 0, 180 + -THETA + OFFSET + i*THETA]) {
                 translate([0, 0, M_GRIP_BACK + 22]) {
                     hull() {
-                        rotate([0, 90, 0]) cylinder(h=100, d=BOLT);        
+                        rotate([0, 90, 0]) cylinder(h=100, d=BOLT);
                         translate([0, 0, 16]) {
                             rotate([0, 90, 0]) cylinder(h=100, d=BOLT);
                         }
@@ -208,7 +219,7 @@ if (DRAW_FRONT) {
             rotate([0, 0, -THETA + OFFSET + i*THETA]) {
                 translate([0, 0, M_GRIP_BACK + 22]) {
                     hull() {
-                        rotate([0, 90, 0]) cylinder(h=100, d=BOLT);        
+                        rotate([0, 90, 0]) cylinder(h=100, d=BOLT);
                         translate([0, 0, 16]) {
                             rotate([0, 90, 0]) cylinder(h=100, d=BOLT);
                         }
@@ -219,8 +230,40 @@ if (DRAW_FRONT) {
         // Flat top. Still debating this one.
         translate([-50, D_AFT/2 - 1, M_GRIP_BACK])
             cube(size=[100, 10, 100]);
+
         dotstars();
     }
     // Bolt mark
     *color("red") translate([0, 0, M_GRIP_BACK + 58.5 / 2]) rotate([0, -90, 0]) cylinder(h=20, d=3.2);
+}
+
+module cutout()
+{
+    DHX = 4;
+    DY = -R_AFT + 2.5;
+    D = 5;
+
+    hull() {
+        translate([-DHX, DY, M_GRIP_BACK - 10])
+            cylinder(h=M_FRONT - M_GRIP_BACK + 20, d=D);
+        translate([DHX, DY, M_GRIP_BACK - 10])
+            cylinder(h=M_FRONT - M_GRIP_BACK + 20, d=D);
+    }
+}
+
+if (DRAW_FRONT) {
+    if (BOTTOM_SPLIT) {
+        intersection()
+        {
+            cutout();
+            drawFront();
+        }
+    }
+    if (TOP_SPLIT) {
+        difference()
+        {
+            drawFront();
+            cutout();
+        }
+    }
 }
