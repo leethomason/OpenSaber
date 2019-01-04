@@ -426,7 +426,7 @@ bool DotStarUI::Test()
 }
 
 
-void calcCrystalColor(uint32_t t, int32_t lowVariation, int32_t highVariation, const osbr::RGB& base, osbr::RGB* out)
+void calcCrystalColorRGB(uint32_t t, int32_t lowVariation, int32_t highVariation, const osbr::RGB& base, osbr::RGB* out)
 {
 	uint32_t tc[3] = { t / 79UL, t / 101UL, t / 137UL };
 
@@ -461,7 +461,7 @@ void calcCrystalColorHSV(uint32_t msec, const osbr::RGB& base, osbr::RGB* out)
 
     // Hue & Saturation.
     static const int H_VAR = 20;
-    static int32_t SAT_VAR = 100;
+    //static const int32_t SAT_VAR = 100;
 
     uint32_t hueTime = msec / HUE_DIV;
     int32_t deltaH = H_VAR * iSin(hueTime) / 256;

@@ -613,7 +613,8 @@ void loop() {
     sfx.process();
 
     if (vbatTimer.tick(delta)) {
-        uint32_t sample = voltmeter.takeSample();
+        //uint32_t sample = 
+        voltmeter.takeSample();
         //Log.p("vsample=").p(sample).eol();
         //Log.p("ave power=").p(voltmeter.averagePower()).eol();
         blade.setVoltage(voltmeter.averagePower());
@@ -725,16 +726,16 @@ void loopDisplays(uint32_t msec, uint32_t delta)
     {
         if (saberDB.crystalColor().get()) {
             // It has been set on the command line for testing.
-            leds[0] = saberDB.crystalColor();
+            leds[SABER_CRYSTAL_START] = saberDB.crystalColor();
         }
         else {
             // Use the blade color or the breathing color.
             const RGB bladeColor = saberDB.bladeColor();
             if (bladeState.state() == BLADE_OFF && (uiMode.mode() == UIMode::NORMAL)) {
-                calcCrystalColor(msec, SABER_CRYSTAL_LOW, SABER_CRYSTAL, bladeColor, &leds[0]);
+                calcCrystalColorHSV(msec, bladeColor, &leds[SABER_CRYSTAL_START]);
             }
             else {
-                leds[0] = bladeColor;
+                leds[SABER_CRYSTAL_START] = bladeColor;
             }
         }
     }

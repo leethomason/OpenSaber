@@ -1,4 +1,4 @@
-'include <dim.scad>
+include <dim.scad>
 use <../commonUnified.scad>
 use <../shapes.scad>
 
@@ -14,8 +14,8 @@ DRAW_AFT     = false;
 DRAW_CRYSTAL = false;
 DRAW_FRONT   = true;
 
-BOTTOM_SPLIT = false;
-TOP_SPLIT = true;
+BOTTOM_SPLIT = true;
+TOP_SPLIT = false;
 
 DRAW_GRIP_ALIGNMENT = false;
 
