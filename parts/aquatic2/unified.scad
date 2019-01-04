@@ -1,4 +1,4 @@
-include <dim.scad>
+'include <dim.scad>
 use <../commonUnified.scad>
 use <../shapes.scad>
 
@@ -14,7 +14,7 @@ DRAW_AFT     = false;
 DRAW_CRYSTAL = false;
 DRAW_FRONT   = true;
 
-BOTTOM_SPLIT = true;
+BOTTOM_SPLIT = false;
 TOP_SPLIT = true;
 
 DRAW_GRIP_ALIGNMENT = false;
@@ -68,7 +68,7 @@ if (DRAW_AFT) {
         battery(D_AFT);
 }
 
-X_CRYSTAL           =  13;
+X_CRYSTAL           =  12;
 Y_CRYSTAL           =   8.5;
 Z_CRYSTAL           =  39.0;
 Y_CRYSTAL_TR = R_AFT - 2 - Y_CRYSTAL/2;
@@ -80,9 +80,11 @@ module rods() {
     RY = 4;
     translate([RX, RY, M_BAFFLE_FRONT]) {
         cylinder(h=(N_CRYSTAL_BAFFLES+1) * H_BUTTRESS * 2, d=3.4);
+        cylinder(h=2, d=8);
     }
     mirror([-1, 0, 0]) translate([RX, RY, M_BAFFLE_FRONT]) {
         cylinder(h=(N_CRYSTAL_BAFFLES+1) * H_BUTTRESS * 2, d=3.4);
+        cylinder(h=2, d=8);
     }
 }
 
@@ -198,41 +200,17 @@ module drawFront()
             columnJoint(JUNCTION-2, D_AFT, 0);
         }
 
-        // Bottom access.
-        /*
-        translate([0, 0, M_SWITCH])
-            rotate([90, 0, 0]) cylinder(h=100, d=12);
-        translate([0, 0, M_POWER])
-            rotate([90, 0, 0]) cylinder(h=100, d=12);
-        */
-        // Side vents. Not mirrored so there can be an alignment slot.
-        *for(i=[1:2]) {
-            translate([0, 0, M_GRIP_BACK + 14 + i*10]) {
-                capsule(60, 120, r=2, _mirror=(i >= 2));
-            }
-        }
-
-
-
-        // Left side
+        // Side vents
         for(i=[0:2]) {
             THETA = 29;
             OFFSET = 0;
-            BOLT = 3.2;
+            BOLT = 3.4;
 
-            rotate([0, 0, 180 + -THETA + OFFSET + i*THETA]) {
+            if (i == 1) rotate([0, 0, 180 + -THETA + OFFSET + i*THETA]) {
                 translate([0, 0, M_GRIP_BACK + 22]) {
                     hull() {
                         rotate([0, 90, 0]) cylinder(h=100, d=BOLT);
                         translate([0, 0, 16]) {
-                            rotate([0, 90, 0]) cylinder(h=100, d=BOLT);
-                        }
-                    }
-                }
-                *translate([0, 0, M_GRIP_BACK + 32]) {
-                    hull() {
-                        rotate([0, 90, 0]) cylinder(h=100, d=BOLT);
-                        translate([0, 0, 10]) {
                             rotate([0, 90, 0]) cylinder(h=100, d=BOLT);
                         }
                     }
