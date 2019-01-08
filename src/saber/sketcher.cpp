@@ -448,21 +448,21 @@ void calcCrystalColorHSV(uint32_t msec, const osbr::RGB& base, osbr::RGB* out)
 {
     uint8_t h = 0, s = 0, v = 0;
     rgb2hsv(base.r, base.g, base.b, &h, &s, &v);
-    
+
+    static const uint32_t BREATH_DIV = 40;
+    static const uint32_t HUE_DIV = 83;
+    static const uint32_t SAT_DIV = 67;
+
     // "breathing" - v
     static const int32_t BASE = 256;
     static const int32_t RANGE = 256 + 512;
-    static uint32_t HUE_DIV = 83;
-    static uint32_t BREATH_DIV = 40;
 
     uint32_t breathTime = msec / BREATH_DIV;
     int32_t breathScale = BASE + iSin(breathTime) + 256;
     v = uint8_t(breathScale * v / RANGE);
 
-    // Hue & Saturation.
+    // Hue
     static const int H_VAR = 20;
-    static int32_t SAT_VAR = 100;
-
     uint32_t hueTime = msec / HUE_DIV;
     int32_t deltaH = H_VAR * iSin(hueTime) / 256;
     int32_t hPrime = h + deltaH;
@@ -470,14 +470,15 @@ void calcCrystalColorHSV(uint32_t msec, const osbr::RGB& base, osbr::RGB* out)
     while (hPrime < 0) hPrime += 180;
     h = uint8_t(hPrime);
     
-    /*
-    uint32_t satTime = msec / (HUE_DIV * 2);
-    int32_t sPrime = int32_t(s) - SAT_VAR * (iSin(satTime) + 256) / 512;
+    // Saturation
+    static const int32_t SAT_AMOUNT = 64;
+
+    uint32_t satTime = msec / SAT_DIV;
+    int32_t sPrime = int32_t(s) * (256 + iSin(satTime)) / 512;
     if (sPrime < 0) sPrime = 0;
     if (sPrime > 255) sPrime = 255;
 
-    s = (uint8_t)sPrime;
-    */
+    s = (uint8_t)lerp(int32_t(s), sPrime, SAT_AMOUNT);
 
     hsv2rgb(h, s, v, &out->r, &out->g, &out->b);
 }

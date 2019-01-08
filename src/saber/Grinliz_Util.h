@@ -62,6 +62,10 @@ T clamp(T value, T lower, T upper) {
 }
 
 uint8_t lerpU8(uint8_t a, uint8_t b, uint8_t t);
+template<class T>
+T lerp(T a, T b, T t256) {
+    return (a * (256 - t256) + b * t256) / 256;
+}
 
 bool TestUtil();
 
