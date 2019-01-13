@@ -55,7 +55,7 @@ SOFTWARE.
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
+#define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_AQUATIC_2
 #define SABER_SUB_MODEL				SABER_SUB_MODEL_STANDARD
 // ----------------------------------
@@ -98,7 +98,7 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 #define SABER_ACCELEROMETER_NXP		2
 #define SABER_ACCELEROMETER_LIS3DH_SPI 3
 
-#define SABER_SOUND_DEF_GRAFLEX_ROGUE 1
+#define SABER_SOUND_DEF_BESPIN_ROGUE  1
 #define SABER_SOUND_DEF_BESPIN_JAINA  2
 
 #if SABER_MODEL == SABER_MODEL_GECKO
@@ -639,7 +639,7 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define SABER_CRYSTAL_START	    6
 	#define SABER_CRYSTAL_BRIGHTNESS 64
 
-	#define SABER_SOUND_DEF SABER_SOUND_DEF_GRAFLEX_ROGUE
+	#define SABER_SOUND_DEF SABER_SOUND_DEF_BESPIN_ROGUE
 
 	static const int32_t UVOLT_MULT = 5019;	
 	#define ID_STR "Aquatic 2 Cree XPE2 RGB"

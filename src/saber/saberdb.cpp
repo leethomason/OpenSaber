@@ -177,11 +177,11 @@ bool SaberDB::writeDefaults()
                     "jaina",
                     "jaina"
                 };
-            #elif (SABER_SOUND_DEF == SABER_SOUND_DEF_GRAFLEX_ROGUE)
+            #elif (SABER_SOUND_DEF == SABER_SOUND_DEF_BESPIN_ROGUE)
                 static const char* defNames[NUM_PALETTES] = {
-                    "graflex",
-                    "graflex",
-                    "graflex",
+                    "bespin2",
+                    "bespin2",
+                    "bespin2",
                     "rogue",
                     "rogue",
                     "rogue",
