@@ -34,13 +34,13 @@ SOFTWARE.
 #define SABER_MODEL_BLACK			2	// PCB, Prop Shield, Teensy 3, Dotstar UI
 //#define SABER_MODEL_SHOCK			3	// PCB, Prop Shield, Teensy 3, OLED. Dropped; heatsink crushed carriage when I dropped it. Become SHOCK2.
 #define SABER_MODEL_SILVER_SHOCK	4	// PCB, Prop Shield, Teensy 3
-#define SABER_MODEL_BO				5	// 2 button prop shield
+//#define SABER_MODEL_BO			5	// 2 button prop shield Never finished
 //#define SABER_MODEL_PROTO 		6	// Burned out; never needed to rebuild.
 #define SABER_MODEL_TANO 			7
 //#define SABER_MODEL_SISTER 		8	// Shield v3, Teensy 3.5, RF24 communication
 #define SABER_MODEL_AQUATIC			9
 #define SABER_MODEL_SHOCK2		   10	// Shield v3, Teensy 3.5, Dotstar, Display (woh)
-#define SABER_MODEL_TALI		   11	// Shield v4, Teensy 3.5, Dotstar crystals, bubble display AKA Vigilance
+#define SABER_MODEL_VIGILANCE	   11	// Shield v4, Teensy 3.5, Dotstar crystals, bubble display AKA Tali
 #define SABER_MODEL_AHSOKA		   12
 #define SABER_MODEL_GREEN_SKY	   13
 #define SABER_MODEL_TANO_2 		   14   // Shield v4, Teensy 3.5, Dotstar UI
@@ -97,6 +97,9 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 #define SABER_ACCELEROMETER_LIS3DH	1
 #define SABER_ACCELEROMETER_NXP		2
 #define SABER_ACCELEROMETER_LIS3DH_SPI 3
+
+#define SABER_SOUND_DEF_GRAFLEX_ROGUE 1
+#define SABER_SOUND_DEF_BESPIN_JAINA  2
 
 #if SABER_MODEL == SABER_MODEL_GECKO
 	#define PCB_VERSION 				PCB_VERSION_1
@@ -397,13 +400,12 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	static const int VOLUME_3 = 120;
 	static const int VOLUME_4 = 200;
 
-#elif (SABER_MODEL == SABER_MODEL_TALI)
+#elif (SABER_MODEL == SABER_MODEL_VIGILANCE)
 	#define PCB_VERSION 			PCB_SHIELD_4
 	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
 	#define SABER_SOUND_ON 			SABER_SOUND_SD
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
-	//#define SABER_LOWPASS_FILTER	1
 
 	#define OVERRIDE_BOOT_SOUND		"mesfx/Blip"
 	#define OVERRIDE_READY_SOUND	"mesfx/Blip"
@@ -592,8 +594,11 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	
 	#define SABER_NUM_LEDS 			4
 	#define SABER_UI_START			0
+	#define SABER_UI_COUNT			4
 	#define SABER_UI_BRIGHTNESS		8
-	
+
+	#define SABER_SOUND_DEF SABER_SOUND_DEF_BESPIN_JAINA
+
 	static const int32_t UVOLT_MULT = 5530;	
 	#define ID_STR "Kenoby IV Cree XPE2 RGB"
 
@@ -625,15 +630,21 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 
 	#define SABER_NUM_LEDS 			7
 	#define SABER_UI_START			0
+	#define SABER_UI_COUNT			6
 	#define SABER_UI_BRIGHTNESS		16
+
+	#define SABER_UI_IDLE_MEDITATION
+
 	#define SABER_CRYSTAL			80
 	#define SABER_CRYSTAL_START	    6
+	#define SABER_CRYSTAL_BRIGHTNESS 64
+
+	#define SABER_SOUND_DEF SABER_SOUND_DEF_GRAFLEX_ROGUE
 
 	static const int32_t UVOLT_MULT = 5019;	
 	#define ID_STR "Aquatic 2 Cree XPE2 RGB"
 
 	// Heat sink compound; copper TCSS heatsink.
-	// Updated the RGB Vf from the Cree specs.
 	static const int32_t RED_VF   = 2200;   // milli-volts
 	static const int32_t RED_I    = 400;    // milli-amps
 	static const int32_t RED_R    = 4700;   // milli-ohms
@@ -777,7 +788,7 @@ enum {
 };
 
 static const float DEFAULT_G_FORCE_MOTION = 1.3f;
-static const float DEFAULT_G_FORCE_IMPACT = 2.8f;
+static const float DEFAULT_G_FORCE_IMPACT = 3.0f;	// Was 2.3. Testing.
 
 #endif // PINS_HEADER
 

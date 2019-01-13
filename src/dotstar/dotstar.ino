@@ -1,17 +1,17 @@
 #include <DotStar.h>
-#define NUM_LEDS 4
+#define NUM_LEDS 7
 RGB leds[NUM_LEDS];
 DotStar dotstar;
 
 void setup() 
 {
     
-  Serial.begin(19200);
+/*  Serial.begin(19200);
   while(!Serial) {
     delay(100);
   }
   Serial.println("Hello DotStar!!");
-
+*/
   leds[0].set(0xff0000);
   #if NUM_LEDS > 1
     leds[1].set(0x00ff00);
@@ -22,9 +22,11 @@ void setup()
   #if NUM_LEDS > 3
     leds[3].set(0x00ffff);
   #endif
+  for(int i=4; i<NUM_LEDS; ++i) {
+    leds[i].set(0x446688);
+  }
 
- // dotstar.beginSW(5, 4);
- dotstar.beginSPI(7);   // enable pin
+ dotstar.beginSPI(A4);   // enable pin
  
   /*
   digitalWrite(dotstar.swClockPin(), LOW);

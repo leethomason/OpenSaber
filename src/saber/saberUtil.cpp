@@ -102,6 +102,23 @@ void BladeState::process(Blade* blade, const SaberDB& saberDB, uint32_t time)
 }
 
 
+UIModeUtil::UIModeUtil()
+{
+    lastActive = millis();
+}
+
+void UIModeUtil::setActive()
+{
+    lastActive = millis();
+}
+
+bool UIModeUtil::isIdle()
+{
+    if (millis() - lastActive > IDLE_TIME)
+        return true;
+    return false;
+}
+
 void UIModeUtil::nextMode()
 {
     SFX* sfx = 0;

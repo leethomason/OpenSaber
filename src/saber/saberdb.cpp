@@ -154,7 +154,7 @@ bool SaberDB::writeDefaults()
             { 0x00ff44,  0x00ffaa,    0 }
         };
 
-        #ifdef CORE_TEENSY
+        #ifndef SABER_SOUND_FLASH
         static const char* defNames[NUM_PALETTES] = {
             "BESPIN2",
             "OBIWAN",
@@ -166,16 +166,31 @@ bool SaberDB::writeDefaults()
             "ROGUE"
         };
         #else
-        static const char* defNames[NUM_PALETTES] = {
-            "bespin2",
-            "bespin2",
-            "bespin2",
-            "jaina",
-            "jaina",
-            "jaina",
-            "jaina",
-            "jaina"
-        };
+            #if (SABER_SOUND_DEF == SABER_SOUND_DEF_BESPIN_JAINA)
+                static const char* defNames[NUM_PALETTES] = {
+                    "bespin2",
+                    "bespin2",
+                    "bespin2",
+                    "jaina",
+                    "jaina",
+                    "jaina",
+                    "jaina",
+                    "jaina"
+                };
+            #elif (SABER_SOUND_DEF == SABER_SOUND_DEF_GRAFLEX_ROGUE)
+                static const char* defNames[NUM_PALETTES] = {
+                    "graflex",
+                    "graflex",
+                    "graflex",
+                    "rogue",
+                    "rogue",
+                    "rogue",
+                    "rogue",
+                    "rogue"
+                };
+            #else
+                #error SABER_SOUND_DEF not defined.
+            #endif 
         #endif
     #endif
 

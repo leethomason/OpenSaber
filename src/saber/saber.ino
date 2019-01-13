@@ -317,11 +317,6 @@ void setup() {
         #endif
     #endif
 
-    #ifdef PINB_CRYSTAL
-        analogWrite(PIN_LED_B, 0);
-        pinMode(PIN_LED_B, OUTPUT);
-    #endif
-
     #ifdef SABER_COMRF24 
         #if SABER_SUB_MODEL == SABER_SUB_MODEL_LUNA
             const int role = 0;
@@ -343,10 +338,6 @@ void setup() {
     ledA.set(true); // "power on" light
 
     buttonA.setHoldRepeats(true);  // everything repeats!!
-
-    #ifdef SABER_UI_BRIGHTNESS
-        dotstarUI.SetBrightness(SABER_UI_BRIGHTNESS);
-    #endif
 
     EventQ.event("[saber start]");
     lastLoopTime = millis();    // so we don't get a big jump on the first loop()
@@ -424,6 +415,8 @@ bool setPaletteFromHoldCount(int count)
 // One button case.
 void buttonAClickHandler(const Button&)
 {
+    uiMode.setActive();
+
     //Log.p("buttonAClickHandler").eol();
     if (bladeState.bladeOff()) {
         uiMode.nextMode();
@@ -445,6 +438,7 @@ void buttonAClickHandler(const Button&)
 
 void buttonAHoldHandler(const Button& button)
 {
+    uiMode.setActive();
     //Log.p("buttonAHoldHandler nHolds=").p(button.nHolds()).eol();
     
     if (bladeState.state() == BLADE_OFF) {
@@ -592,8 +586,9 @@ void processAccel(uint32_t msec)
 }
 
 void loop() {
-    // Doesn't seem to get called on M0. Not sure why;
-    // Should be outside of loop, so before time calc.
+    // Doesn't seem to get called on M0 / ItsyBitsy. Not sure why.
+    // processSerial() is intended to be "out of loop". Call it
+    // first in the loop to try to preserve current behavior.
     processSerial();
 
     const uint32_t msec = millis();
@@ -666,7 +661,22 @@ void loopDisplays(uint32_t msec, uint32_t delta)
             shifted7.set(digit4UI.Output().c_str());
         #endif
         #ifdef SABER_UI_START
-            ledsNeedUpdate = dotstarUI.Draw(leds + SABER_UI_START, SABER_NUM_LEDS, msec, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
+            #ifdef SABER_UI_IDLE_MEDITATION
+                if (uiMode.mode() == UIMode::NORMAL && bladeState.state() == BLADE_OFF && uiMode.isIdle()) {
+                    ledsNeedUpdate = dotstarUI.Draw(leds + SABER_UI_START, SABER_UI_COUNT, msec, UIMode::MEDITATION, !bladeState.bladeOff(), uiRenderData);
+                    leds[SABER_UI_START + SABER_UI_COUNT - 1] = uiRenderData.color;
+                }
+                else {
+                    ledsNeedUpdate = dotstarUI.Draw(leds + SABER_UI_START, SABER_UI_COUNT, msec, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
+                }
+            #else
+                ledsNeedUpdate = dotstarUI.Draw(leds + SABER_UI_START, SABER_UI_COUNT, msec, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
+            #endif
+
+            // Scale just the UI. The crystal may have a different brightness.
+            for(int i=SABER_UI_START; i < SABER_UI_START + SABER_UI_COUNT; ++i) {
+                leds[i].scale(SABER_UI_BRIGHTNESS);
+            }
         #endif
     }
 
@@ -729,7 +739,6 @@ void loopDisplays(uint32_t msec, uint32_t delta)
             leds[SABER_CRYSTAL_START] = saberDB.crystalColor();
         }
         else {
-            // Use the blade color or the breathing color.
             const RGB bladeColor = saberDB.bladeColor();
             if (bladeState.state() == BLADE_OFF && (uiMode.mode() == UIMode::NORMAL)) {
                 calcCrystalColorHSV(msec, bladeColor, &leds[SABER_CRYSTAL_START]);
@@ -737,6 +746,7 @@ void loopDisplays(uint32_t msec, uint32_t delta)
             else {
                 leds[SABER_CRYSTAL_START] = bladeColor;
             }
+            leds[SABER_CRYSTAL_START].scale(SABER_CRYSTAL_BRIGHTNESS);
         }
     }
     #endif
@@ -748,21 +758,6 @@ void loopDisplays(uint32_t msec, uint32_t delta)
         leds[SABER_FLASH_LED] = bladeState.state() == BLADE_FLASH ? flashColor : RGB::BLACK;
     #endif
 
-    #if defined(PINB_CRYSTAL)
-        if (saberDB.crystalColor().get()) {
-            // It has been set on the command line for testing.
-           analogWrite(PIN_LED_B, saberDB.crystalColor().average());
-        }
-        else {
-            if (bladeState.state() == BLADE_OFF && (uiMode.mode() == UIMode::NORMAL)) {
-                uint8_t c = calcSingleCrystalColor(msec);
-                analogWrite(PIN_LED_B, c);
-            }
-            else {
-                analogWrite(PIN_LED_B, 255);
-            }
-        }
-    #endif
     #ifdef SABER_NUM_LEDS
         #if SABER_UI_LED == SABER_LED_DOTSTAR
             dotstar.display();

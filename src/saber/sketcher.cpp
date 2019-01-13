@@ -282,9 +282,14 @@ bool DotStarUI::Draw(osbr::RGB* led, int nLED, uint32_t time,
                 led[1].set(data.volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
             }
             else {
-                // Not really recursvie; used to draw the 4-LED variant in 6-LED mode.
-                this->Draw(led, 4, time, UIMode::VOLUME, ignited, data);
-            }
+				int i = 0;
+				for (; i < data.volume && i < 4; ++i) {
+					led[i].set(COLOR_AUDIO_ON);
+				}
+				for (; i < 4; ++i) {
+					led[i].set(COLOR_AUDIO_OFF);
+				}            
+			}
             led[nLED - 2].set(0);
             led[nLED - 1] = data.color;
         }
@@ -318,7 +323,6 @@ bool DotStarUI::Draw(osbr::RGB* led, int nLED, uint32_t time,
         {
             static const uint32_t TIME_STEP = 800;
             for (int i = 0; i < nLED; ++i) {
-                //calcCrystalColor(time + TIME_STEP * i, SABER_CRYSTAL_LOW, SABER_CRYSTAL, data.color, &led[i]);
                 calcCrystalColorHSV(time + TIME_STEP * i, data.color, &led[i]);
             }
         }
@@ -450,19 +454,17 @@ void calcCrystalColorHSV(uint32_t msec, const osbr::RGB& base, osbr::RGB* out)
     rgb2hsv(base.r, base.g, base.b, &h, &s, &v);
     
     // "breathing" - v
-    static const int32_t BASE = 256;
-    static const int32_t RANGE = 256 + 512;
-    static uint32_t HUE_DIV = 83;
-    static uint32_t BREATH_DIV = 40;
+    static const int32_t BASE = 64;
+    static const int32_t RANGE = BASE + 512;
+    static uint32_t HUE_DIV = 167;
+    static uint32_t BREATH_DIV = 60;
 
     uint32_t breathTime = msec / BREATH_DIV;
     int32_t breathScale = BASE + iSin(breathTime) + 256;
     v = uint8_t(breathScale * v / RANGE);
-
-    // Hue & Saturation.
+	
+	// Hue & Saturation.
     static const int H_VAR = 20;
-    //static const int32_t SAT_VAR = 100;
-
     uint32_t hueTime = msec / HUE_DIV;
     int32_t deltaH = H_VAR * iSin(hueTime) / 256;
     int32_t hPrime = h + deltaH;
@@ -471,6 +473,7 @@ void calcCrystalColorHSV(uint32_t msec, const osbr::RGB& base, osbr::RGB* out)
     h = uint8_t(hPrime);
     
     /*
+    //static const int32_t SAT_VAR = 100;
     uint32_t satTime = msec / (HUE_DIV * 2);
     int32_t sPrime = int32_t(s) - SAT_VAR * (iSin(satTime) + 256) / 512;
     if (sPrime < 0) sPrime = 0;

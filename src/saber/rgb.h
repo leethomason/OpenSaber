@@ -46,9 +46,9 @@ struct RGB {
 
 	// From 0-256
     void scale(uint16_t s) {
-        r = (uint16_t(r) * uint16_t(s)) >> 8;
-        g = (uint16_t(g) * uint16_t(s)) >> 8;
-        b = (uint16_t(b) * uint16_t(s)) >> 8;
+        r = (uint16_t(r) * s) >> 8;
+        g = (uint16_t(g) * s) >> 8;
+        b = (uint16_t(b) * s) >> 8;
     }
 
 	uint8_t operator[](const int index) const {

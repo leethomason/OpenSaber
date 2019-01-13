@@ -56,10 +56,15 @@ enum class UIMode {
 class UIModeUtil
 {
 public:
-	UIModeUtil() {}
+    static const uint32_t IDLE_TIME = 10 * 1000;
+
+	UIModeUtil();
 
 	void set(UIMode mode) { m_mode = mode; }
     void nextMode();
+
+    void setActive();
+    bool isIdle();
     
     const UIMode mode() const {
         return m_mode;
@@ -67,6 +72,7 @@ public:
 
 private:
     UIMode m_mode = UIMode::NORMAL;
+    uint32_t lastActive = 0;
 };
 
 
