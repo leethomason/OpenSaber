@@ -29,7 +29,16 @@ bool TestFixed()
         TEST_IS_TRUE(d == 5);
     }
     {
+        FixedNorm a(5, 2);
+        TEST_IS_TRUE(a.getInt() == 2);
+        TEST_IS_TRUE(a.getDec() == 65536 / 2);
 
+        FixedNorm b;
+        b = 2;
+        FixedNorm c(1, 2);
+
+        FixedNorm d = a + b + c;
+        TEST_IS_TRUE(d == 5);
     }
     return true;
 }
