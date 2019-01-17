@@ -116,13 +116,15 @@ SaberDB     saberDB;
 Voltmeter   voltmeter;
 
 #ifdef SABER_NUM_LEDS
-    osbr::RGB leds[SABER_NUM_LEDS];
     DotStarUI dotstarUI;        // It is the DotStarUI regardless of physical pixel protocol
+    osbr::RGB leds[SABER_NUM_LEDS];
+    osbr::RGBA rgbaLEDs[SABER_NUM_LEDS];
 
     #if SABER_UI_LED == SABER_LED_DOTSTAR
         DotStar dotstar;
     #elif SABER_UI_LED == SABER_LED_NEOPIXEL
         Adafruit_NeoPixel neoPixels(SABER_NUM_LEDS, PIN_NEOPIXEL_DATA, NEO_GRB + NEO_KHZ800);
+        neoPixels.setBrightness(SABER_UI_BRIGHTNESS);
     #endif
 #endif
 
@@ -307,9 +309,8 @@ void setup() {
         }
         #if SABER_UI_LED == SABER_LED_DOTSTAR
             dotstar.beginSPI(PIN_DOTSTAR_EN);
-            dotstar.attachLEDs(leds, SABER_NUM_LEDS);
-            dotstar.display();
-            dotstar.display();
+            dotstar.display(rgbaLEDs, SABER_NUM_LEDS);
+            dotstar.display(rgbaLEDs, SABER_NUM_LEDS);
             Log.p("Dotstar initialized.").eol();
         #else
             neoPixels.begin();
@@ -672,11 +673,6 @@ void loopDisplays(uint32_t msec, uint32_t delta)
             #else
                 ledsNeedUpdate = dotstarUI.Draw(leds + SABER_UI_START, SABER_UI_COUNT, msec, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
             #endif
-
-            // Scale just the UI. The crystal may have a different brightness.
-            for(int i=SABER_UI_START; i < SABER_UI_START + SABER_UI_COUNT; ++i) {
-                leds[i].scale(SABER_UI_BRIGHTNESS);
-            }
         #endif
     }
 
@@ -732,7 +728,7 @@ void loopDisplays(uint32_t msec, uint32_t delta)
         }
     #endif
 
-    #if defined(SABER_CRYSTAL)
+    #if defined(SABER_CRYSTAL_START)
     {
         if (saberDB.crystalColor().get()) {
             // It has been set on the command line for testing.
@@ -746,7 +742,6 @@ void loopDisplays(uint32_t msec, uint32_t delta)
             else {
                 leds[SABER_CRYSTAL_START] = bladeColor;
             }
-            leds[SABER_CRYSTAL_START].scale(SABER_CRYSTAL_BRIGHTNESS);
         }
     }
     #endif
@@ -754,13 +749,29 @@ void loopDisplays(uint32_t msec, uint32_t delta)
     #if defined(SABER_FLASH_LED)
         // Flashes a secondary LED with the flash on clash color.
         RGB flashColor = saberDB.impactColor();
-        flashColor.scale(SABER_CRYSTAL);
+        flashColor.scale(SABER_CRYSTAL_FLASH_BRIGHTNESS);
         leds[SABER_FLASH_LED] = bladeState.state() == BLADE_FLASH ? flashColor : RGB::BLACK;
     #endif
 
     #ifdef SABER_NUM_LEDS
         #if SABER_UI_LED == SABER_LED_DOTSTAR
-            dotstar.display();
+            osbr::RGBA rgba[SABER_NUM_LEDS];
+            for(int i=0; i<SABER_NUM_LEDS; ++i) {
+                rgba[i].set(leds[i].r, leds[i].g, leds[i].b, 255);
+            }
+
+            // Dotstars carry brightness in the alpha channel. Assign that here.
+            #ifdef SABER_UI_START
+                for(int i=SABER_UI_START; i < SABER_UI_START + SABER_UI_COUNT; ++i) {
+                    rgba[i][RGBA::ALPHA] = SABER_UI_BRIGHTNESS;
+                }
+            #endif
+            #ifdef SABER_CRYSTAL_START
+                rgba[SABER_CRYSTAL_START][RGBA::ALPHA] = SABER_UI_BRIGHTNESS;
+            #endif
+
+            dotstar.display(rgba, SABER_NUM_LEDS);
+
         #elif SABER_UI_LED == SABER_LED_NEOPIXEL
             // Neopixels cause noise - but not errors - from the audio system.
             // Haven't tracked down why. But rather than bang on it, simply

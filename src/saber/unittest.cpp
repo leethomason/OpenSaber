@@ -1,6 +1,7 @@
 #include "unittest.h"
 #include "Grinliz_Util.h"
 #include "sketcher.h"
+#include "fixed.h"
 
 #define RUN_TEST(T)     \
     pass = T();         \
@@ -21,6 +22,7 @@ bool runUnitTests()
     RUN_TEST(TestCQueue);
     RUN_TEST(Random::Test);
     RUN_TEST(TestUtil);
+//    RUN_TEST(TestFixed);
 
 	//RUN_TEST(FailTest);
 

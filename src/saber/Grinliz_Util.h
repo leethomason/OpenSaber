@@ -9,6 +9,8 @@
 #include "pins.h" // ONLY for the debug status, to control the ASSERT
 #endif
 
+#include "fixed.h"
+
 class Stream;
 
 template<bool> struct CompileTimeAssert;
@@ -480,19 +482,7 @@ private:
 	bool m_enable;
 };
 
-/**
-Sin wave.
-Input: 0-255 (range will be clipped correctly.)
-Output: [-256, 256]
-*/
-int16_t iSin(uint16_t x);
-
-/**
-Sin wave.
-Input: 0-255 (range will be clipped correctly.)
-Output: [0, 255]
-*/
-uint8_t iSin255(uint16_t x);
+FixedNorm iSin(FixedNorm x);
 
 /* Generally try to keep Ardunino and Win332 code very separate.
 But a log class is useful to generalize, both for utility

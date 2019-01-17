@@ -156,6 +156,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\src\saber\assets.cpp" />
+    <ClCompile Include="..\..\..\src\saber\fixed.cpp" />
     <ClCompile Include="..\..\..\src\saber\Grinliz_Util.cpp" />
     <ClCompile Include="..\..\..\src\saber\renderer.cpp" />
     <ClCompile Include="..\..\..\src\saber\rgb2hsv.cpp" />
@@ -167,6 +168,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\saber\assets.h" />
+    <ClInclude Include="..\..\..\src\saber\fixed.h" />
     <ClInclude Include="..\..\..\src\saber\Grinliz_Util.h" />
     <ClInclude Include="..\..\..\src\saber\renderer.h" />
     <ClInclude Include="..\..\..\src\saber\rgb2hsv.h" />

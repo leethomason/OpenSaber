@@ -42,6 +42,9 @@
     <ClCompile Include="..\..\..\src\saber\rgb2hsv.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\src\saber\fixed.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\src\saber\renderer.h">
@@ -63,6 +66,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\..\src\saber\rgb2hsv.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\saber\fixed.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -79,8 +79,8 @@ int main(int, char**) {
             calcCrystalColorHSV(SDL_GetTicks() - baseTime, base, &c);
 		}
 		else {
-			uint8_t v = calcSingleCrystalColor(SDL_GetTicks() - baseTime);
-			c.r = c.g = c.b = v;
+//			uint8_t v = calcSingleCrystalColor(SDL_GetTicks() - baseTime);
+	//		c.r = c.g = c.b = v;
 		}
 
 		SDL_SetRenderDrawColor(ren, c[0], c[1], c[2], 255);

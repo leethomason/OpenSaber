@@ -31,6 +31,33 @@ void DotStar::beginSW(uint8_t clockPin, uint8_t dataPin)
 	digitalWrite(m_clockPin, LOW);	
 }
 
+void DotStar::begin()
+{
+    if (swMode()) {
+    }
+    else {
+        SPI.beginTransaction(dotstarSettings);
+    }
+}
+
+
+void DotStar::transfer(uint8_t data)
+{
+    if (swMode()) swOut(data);
+    else SPI.transfer(data);
+}
+
+
+void DotStar::end()
+{
+    if (swMode()) {
+    }
+    else {
+        SPI.endTransaction();
+    }
+}
+
+
 void DotStar::swOut(uint8_t n) 
 {
 	for(uint8_t i=8; i--; n <<= 1) {
@@ -44,71 +71,76 @@ void DotStar::swOut(uint8_t n)
 	}
 }
 
-void DotStar::display()
+void DotStar::display(const osbr::RGB* led, int nLEDs, uint16_t brightness)
 {
-	if (swMode()) displaySW();
-	else displaySPI();
-}
-
-void DotStar::displaySPI()
-{
-	SPI.beginTransaction(dotstarSettings);
+    begin();
 	if (m_enable != 255)
 		digitalWrite(m_enable, HIGH);
 
 	// Frame marker.
 	for(int i=0; i<4; ++i) {
-		SPI.transfer(0);
+        transfer(0);
 	}
 
-	const RGB* led = m_leds;
-	for(int i=0; i<m_nLEDs; ++i, ++led) {
-		// Pixel start:
-		SPI.transfer(0xff);
+    // RGB, global brightness.
+    // Brightness is 5 bits; 0-31
+    // Will be fully on at either 255 or 256
+    const uint8_t bright = (brightness * 31 / 255) | 0xE0;
 
-		// Value:
-		SPI.transfer((uint16_t(led->b) * m_brightness) >> 8);
-		SPI.transfer((uint16_t(led->g) * m_brightness) >> 8);
-		SPI.transfer((uint16_t(led->r) * m_brightness) >> 8);
-	}
-	// End frame.
+    for (int i = 0; i < nLEDs; ++i, ++led) {
+        // Brightness
+        transfer(bright);
+
+        // Color
+        transfer(led->b);
+        transfer(led->g);
+        transfer(led->r);
+    }
+	
+    // End frame.
 	for(int i=0; i<4; ++i) {
-		SPI.transfer(0xff);
+		transfer(0xff);
 	}
 
 	if (m_enable != 255)
 		digitalWrite(m_enable, LOW);
-    SPI.endTransaction();
+    end();
 }
 
 
-void DotStar::displaySW()
+void DotStar::display(const osbr::RGBA* led, int nLEDs)
 {
+    begin();
 	if (m_enable != 255)
 		digitalWrite(m_enable, HIGH);
 
 	// Frame marker.
 	for(int i=0; i<4; ++i) {
-		swOut(0);
+        transfer(0);
 	}
 
-	const RGB* led = m_leds;
-	for(int i=0; i<m_nLEDs; ++i, ++led) {
-		// Pixel start:
-		swOut(0xff);
+    // RGBA, per-LED brightness.
+    for (int i = 0; i < nLEDs; ++i, ++led) {
+        // Brightness is 5 bits; 0-31
+        // Will be fully on at either 255 or 256
+        uint8_t bright = led->a * 31 / 255;
+        // High bits are always set.
+        bright |= 0xE0;
+        // Brightness
+        transfer(bright);
 
-		// Value:
-		swOut((uint16_t(led->b) * m_brightness) >> 8);
-		swOut((uint16_t(led->g) * m_brightness) >> 8);
-		swOut((uint16_t(led->r) * m_brightness) >> 8);
-	}
+        // Color
+        transfer(led->b);
+        transfer(led->g);
+        transfer(led->r);
+    }
+
 	// End frame.
 	for(int i=0; i<4; ++i) {
-		swOut(0xff);
+		transfer(0xff);
 	}
 
 	if (m_enable != 255)
 		digitalWrite(m_enable, LOW);
+    end();
 }
-
-

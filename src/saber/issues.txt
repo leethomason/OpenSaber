@@ -1,8 +1,11 @@
 Issues:
 High
+- blade flash on retract. Neopixel not the issue. Add assert?
+- high res mode for crystal / color.
+  - fixed point coputation
+  - PWM for dotstar
 
 Med
-- blade flash on retract (not neopixel)
 
 Low
 - Fix analogReference()

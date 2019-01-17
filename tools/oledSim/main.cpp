@@ -17,6 +17,11 @@ Sketcher sketcher;
 static const int WIDTH = 128;
 static const int HEIGHT = 32;
 
+UIModeUtil::UIModeUtil()
+{
+    lastActive = 0;
+}
+
 void UIModeUtil::nextMode()
 {
 	static const int NUM = (int)UIMode::MEDITATION + 1;
@@ -138,7 +143,7 @@ int main(int, char**) {
 			++count;
 
 			sketcher.Push(value);
-			sketcher.Draw(&display, 100, mode.mode(), bladeOn, &data);
+			sketcher.Draw(&display, t, mode.mode(), bladeOn, &data);
 			pixel75.Draw(t, mode.mode(), bladeOn, &data);
             dotstarUI.Draw(dotstar4, 4, t, mode.mode(), bladeOn, data);
             dotstarUI.Draw(dotstar6, 6, t, mode.mode(), bladeOn, data);

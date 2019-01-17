@@ -635,7 +635,6 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 
 	#define SABER_UI_IDLE_MEDITATION
 
-	#define SABER_CRYSTAL			80
 	#define SABER_CRYSTAL_START	    6
 	#define SABER_CRYSTAL_BRIGHTNESS 64
 

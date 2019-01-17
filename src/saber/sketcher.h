@@ -127,6 +127,6 @@ void calcCrystalColorRGB(uint32_t msec,
 
 void calcCrystalColorHSV(uint32_t msec, const osbr::RGB& base, osbr::RGB* out);
 
-uint8_t calcSingleCrystalColor(uint32_t msec);
+void timeScaleRGB(uint32_t msec, uint32_t timeSpan, uint32_t scale, const osbr::RGB& base, osbr::RGB* out);
 
 #endif // SKETCHER_INCLUDED
