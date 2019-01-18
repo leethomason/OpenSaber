@@ -27,19 +27,13 @@ struct UIRenderData
 class DotStarUI
 {
 public:
-	// Returns true if changed.
-    bool Draw(osbr::RGB* uiLedStart,    // target LEDs
+    void Draw(osbr::RGB* uiLedStart,    // target LEDs
               int nLED,                 // must be 4 or 6
               uint32_t time, 
               UIMode mode, bool bladeIgnited, const UIRenderData& data) const;
 
-	void SetBrightness(uint16_t v) { m_brightness = v; }
-	uint16_t Brightness() const { return m_brightness; }
-
 	static bool Test();
-
 private:
-	uint16_t m_brightness = 256;
 };
 
 

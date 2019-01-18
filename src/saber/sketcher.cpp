@@ -250,7 +250,7 @@ void Sketcher::DrawMeditationMode(Renderer* d, uint32_t time, const UIRenderData
 }
 
 
-bool DotStarUI::Draw(osbr::RGB* led, int nLED, uint32_t time,
+void DotStarUI::Draw(osbr::RGB* led, int nLED, uint32_t time,
                      UIMode mode, bool ignited, const UIRenderData& data) const
 {
     static const uint32_t COLOR_AUDIO_ON = 0x0000FF;
@@ -329,15 +329,6 @@ bool DotStarUI::Draw(osbr::RGB* led, int nLED, uint32_t time,
         break;
         }
     }
-
-    for (int i = 0; i < nLED; ++i) {
-        led[i].scale(m_brightness);
-    }
-    for (int i = 0; i < nLED; ++i) {
-        if (currentLED[i] != led[i])
-            return true;
-    }
-    return false;
 }
 
 
@@ -386,44 +377,6 @@ bool DotStarUI::Test()
 		ASSERT(leds[2].get() == 0xFFD800);
 		ASSERT(leds[3].get() == 0xFFD800);
 		ASSERT(leds[4].get() == 0xFFD800);
-		ASSERT(leds[5].get() == 0);			// memory check
-	}
-	{
-		DotStarUI dotstar;
-		dotstar.SetBrightness(128);
-		osbr::RGB c2 = data.color;
-		c2.scale(128);
-
-		dotstar.Draw(&leds[1], 4, 0, UIMode::NORMAL, false, data);
-		ASSERT(leds[0].get() == 0);			// check memory
-		ASSERT(leds[1].get() == 0x00007f);	// sound on
-		ASSERT(leds[2].get() == 0x00007f);	// sound on
-		ASSERT(leds[3].get() == 0);			// off
-		ASSERT(leds[4].get() == 0x7f0000);	// blade color
-		ASSERT(leds[5].get() == 0);			// memory check
-
-		dotstar.Draw(&leds[1], 4, 0, UIMode::NORMAL, true, data);
-		ASSERT(leds[0].get() == 0);			// check memory
-		ASSERT(leds[1] == c2);
-		ASSERT(leds[2] == c2);
-		ASSERT(leds[3].get() == 0);
-		ASSERT(leds[4].get() == 0);
-		ASSERT(leds[5].get() == 0);			// memory check
-
-		dotstar.Draw(&leds[1], 4, 0, UIMode::PALETTE, false, data);
-		ASSERT(leds[0].get() == 0);			// check memory
-		ASSERT(leds[1].get() == 0);
-		ASSERT(leds[2] == c2);
-		ASSERT(leds[3] == c2);
-		ASSERT(leds[4].get() == 0);
-		ASSERT(leds[5].get() == 0);			// memory check
-
-		dotstar.Draw(&leds[1], 4, 0, UIMode::VOLUME, false, data);
-		ASSERT(leds[0].get() == 0);			// check memory
-		ASSERT(leds[1].get() == 0x00007f);
-		ASSERT(leds[2].get() == 0x7F6c00);
-		ASSERT(leds[3].get() == 0x7F6c00);
-		ASSERT(leds[4].get() == 0x7F6c00);
 		ASSERT(leds[5].get() == 0);			// memory check
 	}
 	return true;

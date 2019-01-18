@@ -103,8 +103,20 @@ struct RGBA {
         a = (c & 0xff000000) >> 24;
     }
 
+    void set(const RGB& rgb, uint8_t alpha) {
+        r = rgb.r;
+        g = rgb.g;
+        b = rgb.b;
+        a = alpha;
+    }
+
     uint32_t get() const {
         return (uint32_t(r) << 16) | (uint32_t(g) << 8) | uint32_t(b) | (uint32_t(a) << 24);
+    }
+
+    RGB rgb() const {
+        RGB c(r, g, b);
+        return c;
     }
 
     // From 0-256

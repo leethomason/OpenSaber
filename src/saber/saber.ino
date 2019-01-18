@@ -116,15 +116,14 @@ SaberDB     saberDB;
 Voltmeter   voltmeter;
 
 #ifdef SABER_NUM_LEDS
-    DotStarUI dotstarUI;        // It is the DotStarUI regardless of physical pixel protocol
-    osbr::RGB leds[SABER_NUM_LEDS];
-    osbr::RGBA rgbaLEDs[SABER_NUM_LEDS];
+    DotStarUI dotstarUI;                // It is the DotStarUI regardless of physical pixel protocol
+    osbr::RGBA leds[SABER_NUM_LEDS];    // This file computes w/ brightness. Sketcher uses RGB, so there is some conversion.
 
     #if SABER_UI_LED == SABER_LED_DOTSTAR
         DotStar dotstar;
     #elif SABER_UI_LED == SABER_LED_NEOPIXEL
         Adafruit_NeoPixel neoPixels(SABER_NUM_LEDS, PIN_NEOPIXEL_DATA, NEO_GRB + NEO_KHZ800);
-        neoPixels.setBrightness(SABER_UI_BRIGHTNESS);
+        RGB neoPixelCache[SABER_NUM_LEDS];
     #endif
 #endif
 
@@ -261,9 +260,6 @@ void setup() {
     buttonA.setReleaseHandler(buttonAReleaseHandler);
 
     tester.attach(&buttonA, 0);
-    #ifdef SABER_UI_START
-        tester.attachUI(leds + SABER_UI_START);
-    #endif
     tester.attachDB(&saberDB);
     tester.attachAccel(&accel);
 
@@ -305,15 +301,16 @@ void setup() {
 
     #if defined(SABER_NUM_LEDS)
         for(int i=0; i<SABER_NUM_LEDS; ++i) {
-            leds[i].set(0x010101);
+            leds[i].set(2, 2, 2, 255);
         }
         #if SABER_UI_LED == SABER_LED_DOTSTAR
             dotstar.beginSPI(PIN_DOTSTAR_EN);
-            dotstar.display(rgbaLEDs, SABER_NUM_LEDS);
-            dotstar.display(rgbaLEDs, SABER_NUM_LEDS);
+            dotstar.display(leds, SABER_NUM_LEDS);
+            dotstar.display(leds, SABER_NUM_LEDS);
             Log.p("Dotstar initialized.").eol();
         #else
             neoPixels.begin();
+            neoPixels.setBrightness(SABER_UI_BRIGHTNESS);
             Log.p("Neopixel initialized.").eol();
         #endif
     #endif
@@ -643,8 +640,6 @@ void loop() {
 void loopDisplays(uint32_t msec, uint32_t delta)
 {
     // General display state processing. Draw to the current supported display.
-    bool ledsNeedUpdate = false;
-    (void) ledsNeedUpdate;
 
     if (displayTimer.tick(delta)) {
         uiRenderData.color = Blade::convertRawToPerceived(saberDB.bladeColor());
@@ -662,17 +657,24 @@ void loopDisplays(uint32_t msec, uint32_t delta)
             shifted7.set(digit4UI.Output().c_str());
         #endif
         #ifdef SABER_UI_START
+            osbr::RGB rgb[SABER_UI_COUNT];
+
             #ifdef SABER_UI_IDLE_MEDITATION
                 if (uiMode.mode() == UIMode::NORMAL && bladeState.state() == BLADE_OFF && uiMode.isIdle()) {
-                    ledsNeedUpdate = dotstarUI.Draw(leds + SABER_UI_START, SABER_UI_COUNT, msec, UIMode::MEDITATION, !bladeState.bladeOff(), uiRenderData);
-                    leds[SABER_UI_START + SABER_UI_COUNT - 1] = uiRenderData.color;
+                    dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, UIMode::MEDITATION, !bladeState.bladeOff(), uiRenderData);
+                    rgb[SABER_UI_START + SABER_UI_COUNT - 1] = uiRenderData.color;
                 }
                 else {
-                    ledsNeedUpdate = dotstarUI.Draw(leds + SABER_UI_START, SABER_UI_COUNT, msec, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
+                    dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
                 }
             #else
-                ledsNeedUpdate = dotstarUI.Draw(leds + SABER_UI_START, SABER_UI_COUNT, msec, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
+                dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
             #endif
+
+            // Copy back from Draw(RGB) to Dotstar(RGBA)
+            for(int i=0; i<SABER_UI_COUNT; ++i) {
+                leds[SABER_UI_START + i].set(rgb[i], SABER_UI_BRIGHTNESS);
+            }
         #endif
     }
 
@@ -732,15 +734,17 @@ void loopDisplays(uint32_t msec, uint32_t delta)
     {
         if (saberDB.crystalColor().get()) {
             // It has been set on the command line for testing.
-            leds[SABER_CRYSTAL_START] = saberDB.crystalColor();
+            leds[SABER_CRYSTAL_START].set(saberDB.crystalColor(), SABER_CRYSTAL_BRIGHTNESS);
         }
         else {
             const RGB bladeColor = saberDB.bladeColor();
             if (bladeState.state() == BLADE_OFF && (uiMode.mode() == UIMode::NORMAL)) {
-                calcCrystalColorHSV(msec, bladeColor, &leds[SABER_CRYSTAL_START]);
+                osbr::RGB rgb;
+                calcCrystalColorHSV(msec, bladeColor, &rgb);
+                leds[SABER_CRYSTAL_START].set(rgb, SABER_CRYSTAL_BRIGHTNESS);
             }
             else {
-                leds[SABER_CRYSTAL_START] = bladeColor;
+                leds[SABER_CRYSTAL_START].set(bladeColor, SABER_CRYSTAL_BRIGHTNESS);
             }
         }
     }
@@ -749,35 +753,30 @@ void loopDisplays(uint32_t msec, uint32_t delta)
     #if defined(SABER_FLASH_LED)
         // Flashes a secondary LED with the flash on clash color.
         RGB flashColor = saberDB.impactColor();
-        flashColor.scale(SABER_CRYSTAL_FLASH_BRIGHTNESS);
-        leds[SABER_FLASH_LED] = bladeState.state() == BLADE_FLASH ? flashColor : RGB::BLACK;
+        leds[SABER_FLASH_LED] = ((bladeState.state() == BLADE_FLASH) ? flashColor : RGBA::BLACK, 255);
     #endif
 
     #ifdef SABER_NUM_LEDS
         #if SABER_UI_LED == SABER_LED_DOTSTAR
-            osbr::RGBA rgba[SABER_NUM_LEDS];
-            for(int i=0; i<SABER_NUM_LEDS; ++i) {
-                rgba[i].set(leds[i].r, leds[i].g, leds[i].b, 255);
-            }
-
-            // Dotstars carry brightness in the alpha channel. Assign that here.
-            #ifdef SABER_UI_START
-                for(int i=SABER_UI_START; i < SABER_UI_START + SABER_UI_COUNT; ++i) {
-                    rgba[i][RGBA::ALPHA] = SABER_UI_BRIGHTNESS;
-                }
-            #endif
-            #ifdef SABER_CRYSTAL_START
-                rgba[SABER_CRYSTAL_START][RGBA::ALPHA] = SABER_UI_BRIGHTNESS;
-            #endif
-
-            dotstar.display(rgba, SABER_NUM_LEDS);
+            dotstar.display(leds, SABER_NUM_LEDS);
 
         #elif SABER_UI_LED == SABER_LED_NEOPIXEL
             // Neopixels cause noise - but not errors - from the audio system.
             // Haven't tracked down why. But rather than bang on it, simply
             // only push new LEDs when something changes.
-            if (ledsNeedUpdate)
+            bool ledsNeedUpdate = false;
+            for(int i=0; i<SABER_NUM_LEDS; ++i) {
+                if (neoPixelCache[i] != leds[i].rgb()) {
+                    neoPixelCache[i] = leds[i].rgb();
+                    ledsNeedUpdate = true;
+                }
+            }
+            if (ledsNeedUpdate) {
+                for(int i=0; i<SABER_NUM_LEDS; ++i) {
+                    neoPixels.setPixelColor(i, leds[i].r, leds[i].g, leds[i].b);
+                }
                 neoPixels.show();
+            }
         #endif
     #endif    
 }

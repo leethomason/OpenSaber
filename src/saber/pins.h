@@ -137,7 +137,7 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define SABER_ACCELEROMETER 		SABER_ACCELEROMETER_NXP
 	#define SABER_SOUND_ON 				SABER_SOUND_SD
 	#define SABER_VOLTMETER
-	#define SABER_UI_BRIGHTNESS			4
+	#define SABER_UI_BRIGHTNESS			8
 
 	static const int32_t UVOLT_MULT = 6680;
 	#define ID_STR "Black Knight RGB Cree XPE2"
@@ -631,7 +631,8 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define SABER_NUM_LEDS 			7
 	#define SABER_UI_START			0
 	#define SABER_UI_COUNT			6
-	#define SABER_UI_BRIGHTNESS		16
+	// There are 32 leves of brightness, expressed from 0-256 in a step size of 8.
+	#define SABER_UI_BRIGHTNESS		16		
 
 	#define SABER_UI_IDLE_MEDITATION
 
