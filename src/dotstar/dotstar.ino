@@ -1,5 +1,5 @@
 #include <DotStar.h>
-#define NUM_LEDS 7
+#define NUM_LEDS 4
 RGB leds[NUM_LEDS];
 DotStar dotstar;
 
