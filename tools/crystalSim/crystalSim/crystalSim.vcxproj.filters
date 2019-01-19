@@ -71,5 +71,8 @@
     <ClInclude Include="..\..\..\src\saber\fixed.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\src\saber\grinliz_assert.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

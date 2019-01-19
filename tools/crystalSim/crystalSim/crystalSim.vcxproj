@@ -169,6 +169,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\..\src\saber\assets.h" />
     <ClInclude Include="..\..\..\src\saber\fixed.h" />
+    <ClInclude Include="..\..\..\src\saber\grinliz_assert.h" />
     <ClInclude Include="..\..\..\src\saber\Grinliz_Util.h" />
     <ClInclude Include="..\..\..\src\saber\renderer.h" />
     <ClInclude Include="..\..\..\src\saber\rgb2hsv.h" />

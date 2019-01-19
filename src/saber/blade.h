@@ -24,6 +24,7 @@
 #define BLADE_INCLUDED
 
 #include <stdint.h>
+#include "fixed.h"
 
 #include "pins.h"
 #include "rgb.h"
@@ -43,9 +44,7 @@ public:
     void setRGB(const osbr::RGB& input);
 
     // power utilization, from 0-100 for a channel
-    int util(int i) const   {
-        return (m_f1000[i] + 5) / 10;
-    }
+    int32_t util(int i) const   { return m_throttle[i].scale(100); }
     
     // The actual PWM setting, per channel.
     uint8_t pwmVal(int i) const {
@@ -60,13 +59,16 @@ public:
     static osbr::RGB convertRawToPerceived(const osbr::RGB& raw);
 
 private:
+    void setThrottledRGB(const osbr::RGB& input);
+
     static const int8_t pinRGB[NCHANNELS];
     static Blade* instance;
 
     osbr::RGB m_color;
-    uint8_t m_pwm[NCHANNELS];
     int32_t m_vbat;
-    int32_t m_f1000[NCHANNELS];
+    FixedNorm m_throttle[NCHANNELS];  // throttle = f(vbat).
+    uint8_t m_pwm[NCHANNELS];         // pwm = f(color, throttle)
+    bool m_interpMode;
 };
 
 #endif // BLADE_INCLUDED

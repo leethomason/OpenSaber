@@ -269,8 +269,9 @@ void setup() {
             Log.p("sfx initialized.").eol();
         }
     #endif
-
+    Log.p(__LINE__).eol();
     blade.setVoltage(voltmeter.averagePower());
+    Log.p(__LINE__).eol();
 
     #if SABER_DISPLAY == SABER_DISPLAY_128_32
         display.begin(OLED_WIDTH, OLED_HEIGHT, SSD1306_SWITCHCAPVCC);
@@ -300,9 +301,11 @@ void setup() {
     #endif
 
     #if defined(SABER_NUM_LEDS)
+        Log.p(__LINE__).eol();
         for(int i=0; i<SABER_NUM_LEDS; ++i) {
             leds[i].set(2, 2, 2, 255);
         }
+        Log.p(__LINE__).eol();
         #if SABER_UI_LED == SABER_LED_DOTSTAR
             dotstar.beginSPI(PIN_DOTSTAR_EN);
             dotstar.display(leds, SABER_NUM_LEDS);

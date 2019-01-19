@@ -1,9 +1,11 @@
 Issues:
 High
 - blade flash on retract. Neopixel not the issue. Add assert?
-- high res mode for crystal / color.
-  - fixed point coputation
-  - PWM for dotstar
+    - range checks in fixed
+    - start / end checks on interp
+x high res mode for crystal / color.
+  x fixed point coputation
+  x PWM for dotstar
 
 Med
 

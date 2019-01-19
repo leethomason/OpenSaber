@@ -4,57 +4,10 @@
 #include <string.h>
 #include <stdint.h>
 
-#ifndef _WIN32
-#include <Arduino.h>
-#include "pins.h" // ONLY for the debug status, to control the ASSERT
-#endif
-
-#include "fixed.h"
-
 class Stream;
 
-template<bool> struct CompileTimeAssert;
-template<> struct CompileTimeAssert <true> {};
-#define STATIC_ASSERT(e) (CompileTimeAssert <(e) != 0>())
-
-#if defined(_MSC_VER)
-#   include <assert.h>
-#	define ASSERT assert
-#else
-#	if SERIAL_DEBUG == 1
-		void AssertOut(const char* message, const char* file, int line);
-		#define ASSERT( x ) 	if (!(x)) { AssertOut(#x, __FILE__, __LINE__); while(true) {} }
-#	else
-		#define ASSERT( x )		{}
-#	endif
-#endif
-
-#define TEST_IS_TRUE(x) {         \
-    if((x)) {                     \
-    }                             \
-    else {                        \
-        ASSERT(false);            \
-        return false;             \
-    }                             \
-}
-
-#define TEST_IS_FALSE(x) {        \
-    if(!(x)) {                    \
-    }                             \
-    else {                        \
-        ASSERT(false);            \
-        return false;             \
-    }                             \
-}
-
-#define TEST_IS_EQ(x, y) {        \
-    if((x) == (y)) {              \
-    }                             \
-    else {                        \
-        ASSERT(false);            \
-        return false;             \
-    }                             \
-}
+#include "grinliz_assert.h"
+#include "fixed.h"
 
 template<class T>
 T clamp(T value, T lower, T upper) {
@@ -64,6 +17,7 @@ T clamp(T value, T lower, T upper) {
 }
 
 uint8_t lerpU8(uint8_t a, uint8_t b, uint8_t t);
+
 template<class T>
 T lerp(T a, T b, T t256) {
     return (a * (256 - t256) + b * t256) / 256;

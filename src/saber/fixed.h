@@ -3,21 +3,67 @@
 
 #include <stdint.h>
 
+// Can't use this because auto-included Arduino headers
+// shoves min() and max() into the global preprocessor
+// namespace, so that the C++ namespace min() and max()
+// are overwritten. Arduino compilation tools suck.
+// #include <limits>
+
+#include <limits.h>
+#include <stdint.h>
+
+#define DEBUG_FIXED_OVERFLOW
+
+#ifdef DEBUG_FIXED_OVERFLOW
+#include "grinliz_assert.h"
+#endif
+
+template<class T> 
+struct Limit {
+};
+
+template<>
+struct Limit<int8_t> {
+    static intptr_t pos() { return SCHAR_MAX; }
+    static intptr_t neg() { return SCHAR_MIN; }
+};
+
+template<>
+struct Limit<int16_t> {
+    static intptr_t pos() { return SHRT_MAX; }
+    static intptr_t neg() { return SHRT_MIN; }
+};
+
+template<>
+struct Limit<int32_t> {
+    static intptr_t pos() { return INT_MAX; }
+    static intptr_t neg() { return INT_MIN; }
+};
+
 template<typename LONG, typename SHORT, int DECBITS>
 class FixedT
 {
 private:
+
     static inline SHORT FixedMul(SHORT a, SHORT b) {
+        static_assert(sizeof(LONG) >= sizeof(SHORT) * 2, "Long must have more bits that short.");
+
         LONG c = LONG(a) * LONG(b);
         return SHORT(c >> DECBITS);
     }
 
     static inline SHORT FixedDiv(SHORT a, SHORT b) {
+        static_assert(sizeof(LONG) >= sizeof(SHORT) * 2, "Long must have more bits that short.");
+        static_assert(DECBITS * 2 <= (sizeof(LONG) - sizeof(SHORT)) * 2, "Need enough space to shift for division");
+
         LONG c = (LONG(a) << (DECBITS*2)) / (LONG(b) << DECBITS);
         return SHORT(c);
     }
 
     static inline SHORT IntToFixed(int v) {
+        ASSERT((v << DECBITS) <= Limit<SHORT>::pos());
+        ASSERT((v << DECBITS) >= Limit<SHORT>::neg());
+
         return SHORT(v << DECBITS);
     }
     static const int FIXED_1 = 1 << DECBITS;
@@ -28,6 +74,14 @@ public:
     FixedT(const FixedT& f) : x(f.x) {}
     FixedT(int v) : x(v << DECBITS) {}
     FixedT(int32_t num, int32_t den) {
+        const int32_t o_num = num;
+        const int32_t o_den = den;
+        while(num > Limit<SHORT>::pos() || num < Limit<SHORT>::neg()) {
+            num /= 2;
+            den /= 2;
+        }
+        ASSERT2(den > 0, o_num, o_den);
+        if (den == 0) den = 1;
         x = FIXED_1 * num / den;
     }
     FixedT(float v) : x(SHORT(FIXED_1 * v)) {}
@@ -37,7 +91,11 @@ public:
     void set(double v) { x = SHORT(v * FIXED_1); }
 
     // Scale up to an int, potentially out of the range of this fixed.
-    int32_t scale(int32_t s) { int32_t r = s * x / FIXED_1; return r; }
+    int32_t scale(int32_t s) const { 
+        int32_t r = s * x / FIXED_1; 
+        return r; 
+    }
+
     // Return the floor part (as a copy).
     FixedT getFloor() const { 
         int fraction = x & ~(FIXED_1 - 1); 
@@ -123,6 +181,11 @@ public:
 };
 
 bool TestFixed();
+
+template<typename T, typename FIXED>
+T lerpFixed(T a, T b, FIXED t) {
+    return T(a + t.scale(b));
+}
 
 // Max: 127
 typedef FixedT<int32_t, int16_t, 8> Fixed88;

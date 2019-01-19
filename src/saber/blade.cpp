@@ -28,9 +28,10 @@
 
 using namespace osbr;
 
+#define DEBUG_DEEP
+
 const int8_t Blade::pinRGB[NCHANNELS] = { PIN_EMITTER_RED, PIN_EMITTER_GREEN, PIN_EMITTER_BLUE };
 Blade* Blade::instance = 0;
-static const int32_t LED_RANGE = 255;
 
 Blade::Blade() {
     for (int i = 0; i < NCHANNELS; ++i) {
@@ -41,7 +42,7 @@ Blade::Blade() {
 
     m_vbat = NOMINAL_VOLTAGE;
     for (int i = 0; i < NCHANNELS; ++i) {
-        m_f1000[i] = 1000;
+        m_throttle[i] = 1;
         m_color[i] = 0;
     }
     instance = this;
@@ -50,13 +51,22 @@ Blade::Blade() {
 
 void Blade::setRGB(const RGB& input)
 {
-    static const int32_t DIV = int32_t(255) * int32_t(1000);
+    ASSERT(!m_interpMode);      // blade ignite / retract can't be interupted
+    setThrottledRGB(input);
+}
+
+
+void Blade::setThrottledRGB(const osbr::RGB& input)
+{
+    m_color = input;
+
     for (int i = 0; i < NCHANNELS; ++i ) {
-        m_color[i] = input[i];
-        int32_t v = int32_t(LED_RANGE) * m_f1000[i] * int32_t(input[i]) / DIV;
-        ASSERT(v >= 0);
-        ASSERT(v <= 255);
-        m_pwm[i] = constrain(v, 0, 255);  // just in case...
+        int32_t pwm = m_throttle[i].scale(input[i]);
+        
+        ASSERT(pwm >= 0);
+        ASSERT(pwm <= 255);
+        m_pwm[i] = constrain(pwm, 0, 255);  // just in case...
+        
         analogWrite(pinRGB[i], m_pwm[i]);
     }
 }
@@ -65,16 +75,18 @@ void Blade::setRGB(const RGB& input)
 bool Blade::setInterp(uint32_t delta, uint32_t effectTime, const RGB& startColor, const RGB& endColor)
 {
     if (delta >= effectTime) {
-        setRGB(endColor);
+        setThrottledRGB(endColor);
+        m_interpMode = false;
         return true;
     }
     else {
-        uint8_t t = uint8_t(255 * delta / effectTime);
+        m_interpMode = true;
         RGB color;
+        uint8_t t = (delta * 256 / effectTime);
         for (int i = 0; i < NCHANNELS; ++i) {
             color[i] = lerpU8(startColor[i], endColor[i], t);
         }
-        setRGB(color);
+        setThrottledRGB(color);
     }
     return false;
 }
@@ -85,12 +97,28 @@ void Blade::setVoltage(int milliVolts) {
     static const int32_t amps[NCHANNELS] = { RED_I,  GREEN_I,  BLUE_I };
     static const int32_t res[NCHANNELS]  = { RED_R,  GREEN_R,  BLUE_R };
 
+    #ifdef DEBUG_DEEP
+        // Shouldn't see rapid change, and power should be averaged.
+        if(milliVolts == 3700 || (m_vbat == 3700) || (abs(milliVolts - m_vbat) < 100)) {
+            // all well.
+        } 
+        else {
+            Log.p("Blade::setVoltage() vBat=").p(m_vbat).p(" mV=").p(milliVolts).eol();
+            ASSERT(false);
+        }
+    #endif
+
     m_vbat = milliVolts;
     for (int i = 0; i < NCHANNELS; ++i) {
-        m_f1000[i] = amps[i] * res[i] / (m_vbat - vF[i]);
-        m_f1000[i] = clamp(m_f1000[i], int32_t(0), int32_t(1000));
+        // throttle = I * R / (Vbat - Vf)
+        // Denominator x1000 corrects for units (mAmps, mOhms, mVolts)
+        m_throttle[i] = FixedNorm(amps[i] * res[i] / 1000, m_vbat - vF[i] );
     }
-    setRGB(m_color);
+    // This bug took forever to find. But obivous here: don't set the color
+    // if the color in currently changing!
+    if (!m_interpMode) {
+        setRGB(m_color);
+    }
 }
 
 
