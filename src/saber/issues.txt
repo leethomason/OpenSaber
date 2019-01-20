@@ -1,18 +1,17 @@
 Issues:
 High
-- blade flash on retract. Neopixel not the issue. Add assert?
-    - range checks in fixed
-    - start / end checks on interp
-x high res mode for crystal / color.
-  x fixed point coputation
-  x PWM for dotstar
-
 Med
 
 Low
 - Fix analogReference()
 
 Fixed
+x blade flash on retract. Neopixel not the issue. Add assert?
+    x range checks in fixed
+    x start / end checks on interp
+x high res mode for crystal / color.
+  x fixed point coputation
+  x PWM for dotstar
 x can reduce sub-buffer size? effect on perf? encapselation?
 x drop vbat sample time, increase samples. move timing const into AveragePower class
 x neopixels create noise: not fixed, but confirmed. neopixels throw off timers? But create noise. Dotstar does not.
