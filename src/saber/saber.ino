@@ -759,6 +759,12 @@ void loopDisplays(uint32_t msec, uint32_t delta)
         leds[SABER_FLASH_LED] = ((bladeState.state() == BLADE_FLASH) ? flashColor : RGBA::BLACK, 255);
     #endif
 
+    #if defined(SABER_BLACK_START)
+        for(int i=SABER_BLACK_START; i<SABER_BLACK_START + SABER_BLACK_COUNT; ++i) {
+            leds[i].set(0);
+        }
+    #endif
+
     #ifdef SABER_NUM_LEDS
         #if SABER_UI_LED == SABER_LED_DOTSTAR
             dotstar.display(leds, SABER_NUM_LEDS);
