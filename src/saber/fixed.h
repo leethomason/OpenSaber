@@ -76,6 +76,9 @@ public:
     FixedT(int32_t num, int32_t den) {
         const int32_t o_num = num;
         const int32_t o_den = den;
+        (void) o_num;
+        (void) o_den;
+
         while(num > Limit<SHORT>::pos() || num < Limit<SHORT>::neg()) {
             num /= 2;
             den /= 2;

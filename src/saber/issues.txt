@@ -1,11 +1,11 @@
 Issues:
+
 High
 Med
-
 Low
-- Fix analogReference()
 
 Fixed
+x Fix analogReference(), deprecated by i2s audio
 x blade flash on retract. Neopixel not the issue. Add assert?
     x range checks in fixed
     x start / end checks on interp

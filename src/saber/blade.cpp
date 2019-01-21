@@ -20,6 +20,22 @@
   SOFTWARE.
 */
 
+/*
+    Blade flash bug:
+    x is it voltmeter?
+        NO. with volt setting turned off, still see flicker, specially at high-t during retract
+    - is it fixed point?        
+        Unlikely; bug existed before fixed.
+    - is it LERP?
+        Unlikely; test okay.
+    - is it interupting calls?
+        Unlikely; this has been addressed.
+        Weirness: bug (set volts calling setRGB was fixed - should have caused then fixed issue)
+    - PWM hardware?
+        Maybe? but setting different values doesn't seem to matter.
+    x interrupts don't matter
+*/
+
 #include <Arduino.h>
 
 #include "pins.h"
@@ -51,7 +67,7 @@ Blade::Blade() {
 
 void Blade::setRGB(const RGB& input)
 {
-    ASSERT(!m_interpMode);      // blade ignite / retract can't be interupted
+    ASSERT(m_interpMode == NO_INTERP);      // blade ignite / retract can't be interupted
     setThrottledRGB(input);
 }
 
@@ -63,10 +79,12 @@ void Blade::setThrottledRGB(const osbr::RGB& input)
     for (int i = 0; i < NCHANNELS; ++i ) {
         int32_t pwm = m_throttle[i].scale(input[i]);
         
+        ASSERT(m_throttle[i] > 0);
+        ASSERT(m_throttle[i] <= 1);
         ASSERT(pwm >= 0);
         ASSERT(pwm <= 255);
-        m_pwm[i] = constrain(pwm, 0, 255);  // just in case...
-        
+
+        m_pwm[i] =clamp<int32_t>(pwm, 0, 255);  // just in case...
         analogWrite(pinRGB[i], m_pwm[i]);
     }
 }
@@ -76,16 +94,35 @@ bool Blade::setInterp(uint32_t delta, uint32_t effectTime, const RGB& startColor
 {
     if (delta >= effectTime) {
         setThrottledRGB(endColor);
-        m_interpMode = false;
+        m_interpMode = NO_INTERP;
         return true;
     }
     else {
-        m_interpMode = true;
+        m_interpMode = (startColor.sum() < endColor.sum() ? IGNITE : RETRACT);
         RGB color;
-        uint8_t t = (delta * 256 / effectTime);
+
+        int32_t t = (delta * uint32_t(1024) / effectTime);
+        ASSERT(t >= 0);
+        ASSERT(t < 1024);
+
         for (int i = 0; i < NCHANNELS; ++i) {
-            color[i] = lerpU8(startColor[i], endColor[i], t);
+            int32_t c = lerp1024<int32_t>(startColor[i], endColor[i], t);
+            ASSERT(inRange(c, glMin<int32_t>(startColor[i], endColor[i]), glMax<int32_t>(startColor[i], endColor[i])));
+            c = clamp<int32_t>(c, 0, 255);
+            color[i] = uint8_t(c);
         }
+        #if SERIAL_DEBUG == 1
+            if (m_interpMode == IGNITE) {
+                ASSERT(color.r >= m_color.r);
+                ASSERT(color.g >= m_color.g);
+                ASSERT(color.b >= m_color.b);
+            }
+            else {
+                ASSERT(color.r <= m_color.r);
+                ASSERT(color.g <= m_color.g);
+                ASSERT(color.b <= m_color.b);
+            }
+        #endif
         setThrottledRGB(color);
     }
     return false;
@@ -113,10 +150,14 @@ void Blade::setVoltage(int milliVolts) {
         // throttle = I * R / (Vbat - Vf)
         // Denominator x1000 corrects for units (mAmps, mOhms, mVolts)
         m_throttle[i] = FixedNorm(amps[i] * res[i] / 1000, m_vbat - vF[i] );
+        ASSERT(m_throttle[i] >= 0);
+        // Want more power than we have as the battery goes down:
+        if (m_throttle[i] > 1)
+            m_throttle[i] = 1;
     }
     // This bug took forever to find. But obivous here: don't set the color
     // if the color in currently changing!
-    if (!m_interpMode) {
+    if (m_interpMode == NO_INTERP) {
         setRGB(m_color);
     }
 }

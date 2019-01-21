@@ -8,8 +8,8 @@ static FixedNorm gSinTable[SIZE_SIN_TABLE] = { 0 };
 
 uint8_t lerpU8(uint8_t a, uint8_t b, uint8_t t) 
 {
-    int16_t r = int16_t(a) + (int16_t(b) - int16_t(a)) * int16_t(t) / 255;
-    return uint8_t(clamp(r, int16_t(0), int16_t(255)));
+    int32_t r = int32_t(a) + (int32_t(b) - int32_t(a)) * int32_t(t) / 255;
+    return uint8_t(clamp(r, int32_t(0), int32_t(255)));
 }
 
 bool TestUtil()

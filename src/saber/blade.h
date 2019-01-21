@@ -68,7 +68,9 @@ private:
     int32_t m_vbat;
     FixedNorm m_throttle[NCHANNELS];  // throttle = f(vbat).
     uint8_t m_pwm[NCHANNELS];         // pwm = f(color, throttle)
-    bool m_interpMode;
+
+    enum {NO_INTERP, IGNITE, RETRACT};
+    int m_interpMode = NO_INTERP;
 };
 
 #endif // BLADE_INCLUDED

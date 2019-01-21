@@ -161,6 +161,9 @@ Timer2      pingPongTimer(PING_PONG_INTERVAL);
 CMDParser   cmdParser(&saberDB);
 Blade       blade;
 Timer2      vbatTimer(AveragePower::SAMPLE_INTERVAL);
+#ifdef LOG_AVE_POWER
+Timer2      vbatPrintTimer(500);
+#endif
 Timer2      gforceDataTimer(110);
 
 Tester      tester;
@@ -609,13 +612,16 @@ void loop() {
     sfx.process();
 
     if (vbatTimer.tick(delta)) {
-        //uint32_t sample = 
         voltmeter.takeSample();
-        //Log.p("vsample=").p(sample).eol();
-        //Log.p("ave power=").p(voltmeter.averagePower()).eol();
         blade.setVoltage(voltmeter.averagePower());
         uiRenderData.mVolts = voltmeter.averagePower();
     }
+    
+    #ifdef LOG_AVE_POWER
+    if (vbatPrintTimer.tick(delta)) {
+        Log.p(" ave power=").p(voltmeter.averagePower()).eol();
+    }
+    #endif    
 
     if (gforceDataTimer.tick(delta)) {
         #if SABER_DISPLAY == SABER_DISPLAY_128_32

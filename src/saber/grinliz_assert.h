@@ -22,7 +22,7 @@ template<> struct CompileTimeAssert <true> {};
 		#define ASSERT2( x, y, z ) 	if (!(x)) { AssertOut2(#x, y, z, __FILE__, __LINE__); while(true) {} }
 #	else
 		#define ASSERT( x ) 		{}
-		#define ASSERT2( x )		{}
+		#define ASSERT2( x, y, z )  {}
 #	endif
 #endif
 

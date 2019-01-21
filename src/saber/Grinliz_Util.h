@@ -16,11 +16,14 @@ T clamp(T value, T lower, T upper) {
 	return value;
 }
 
-uint8_t lerpU8(uint8_t a, uint8_t b, uint8_t t);
+template<class T>
+T lerp256(T a, T b, T t256) {
+    return (a * (256 - t256) + b * t256) / 256;
+}
 
 template<class T>
-T lerp(T a, T b, T t256) {
-    return (a * (256 - t256) + b * t256) / 256;
+T lerp1024(T a, T b, T t1024) {
+    return (a * (1024 - t1024) + b * t1024) / 1024;
 }
 
 bool TestUtil();
@@ -326,8 +329,8 @@ bool TestCQueue();
 
 // --- Range / Min / Max --- //
 template<class T>
-bool inRange(const T& a, const T& b, const T& c) {
-	return a >= b && a <= c;
+bool inRange(const T& val, const T& a, const T& b) {
+	return val >= a && val <= b;
 }
 
 template<class T>

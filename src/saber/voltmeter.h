@@ -15,8 +15,8 @@ public:
     void push(uint32_t milliVolts);     // circular buffer of samples; seeded with nominal
 
     uint32_t power() const;
-    enum { NUM_SAMPLES = 16 };
-    enum { SAMPLE_INTERVAL = 67 };
+    enum { NUM_SAMPLES = 100 };
+    enum { SAMPLE_INTERVAL = 12 };
 
     static int vbatToPowerLevel(int32_t vbat, int nLevels);
 
