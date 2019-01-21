@@ -68,7 +68,6 @@ int main(int, char**) {
 	SDL_Event e;
 	int scale = 4;
 	UIModeUtil mode;
-	mode.set(UIMode::MEDITATION);
 	bool bladeOn = false;
 	int count = 0;
 	uint32_t lastUpdate = SDL_GetTicks();
@@ -80,7 +79,8 @@ int main(int, char**) {
         RENDER_DOTSTAR_6,
         NUM_RENDER_MODE
     };
-	int renderMode = RENDER_DOTSTAR_6;
+	int renderMode = RENDER_OLED;
+    mode.set(UIMode::NORMAL);
 
 	const char* FONT_NAMES[8] = {
 		"Bespin", "Tatoine", "Jaina", "Vader", "ObiAni", "Bespin", "JainaSw", "Sentinel"

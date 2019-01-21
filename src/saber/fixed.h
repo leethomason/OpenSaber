@@ -20,6 +20,7 @@
 
 template<class T> 
 struct Limit {
+    // Don't compile if the type isn't defined in the specializations below.
 };
 
 template<>

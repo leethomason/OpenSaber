@@ -33,7 +33,9 @@ public:
               UIMode mode, bool bladeIgnited, const UIRenderData& data) const;
 
 	static bool Test();
+
 private:
+    void DrawVolume(osbr::RGB* led, int nLED, uint32_t time, int vol04) const;
 };
 
 
@@ -110,6 +112,7 @@ private:
 
     uint8_t  line = 0;
     uint8_t  pos = 0;
+    uint32_t lastTime = 0;
     uint32_t animTime = 0;
 	uint8_t  accelData[DATA_WIDTH];
 };
@@ -120,7 +123,5 @@ void calcCrystalColorRGB(uint32_t msec,
     const osbr::RGB& base, osbr::RGB* out);
 
 void calcCrystalColorHSV(uint32_t msec, const osbr::RGB& base, osbr::RGB* out);
-
-void timeScaleRGB(uint32_t msec, uint32_t timeSpan, uint32_t scale, const osbr::RGB& base, osbr::RGB* out);
 
 #endif // SKETCHER_INCLUDED

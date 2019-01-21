@@ -4,15 +4,6 @@
 #include "voltmeter.h"
 #include "rgb2hsv.h"
 
-#ifdef  _WIN32
-#   define SABER_CRYSTAL			100
-#   define SABER_CRYSTAL_LOW		60
-#else
-#   include "pins.h"
-#endif
-
-//#include <math.h>
-
 using namespace osbr;
 
 int UIRenderData::powerLevel(int maxLevel) const
@@ -160,7 +151,16 @@ void Sketcher::DrawBladeMode(Renderer* d, uint32_t time, bool ignited, const UIR
 		"THERE IS NO SELF, THERE IS ONLY THE FORCE.",
 	};
 
-	animTime += time;
+    uint32_t deltaTime = 0;
+    if (lastTime == 0) {
+        lastTime = time;
+    }
+    else {
+        deltaTime = time - lastTime;
+        lastTime = time;
+    }
+
+	animTime += deltaTime;
 
 	if (!ignited) {
 		// Render the Jedi Creed.
@@ -250,17 +250,41 @@ void Sketcher::DrawMeditationMode(Renderer* d, uint32_t time, const UIRenderData
 }
 
 
-void DotStarUI::Draw(osbr::RGB* led, int nLED, uint32_t time,
-                     UIMode mode, bool ignited, const UIRenderData& data) const
+void DotStarUI::DrawVolume(osbr::RGB* led, int n, uint32_t time, int vol04) const
 {
     static const uint32_t COLOR_AUDIO_ON = 0x0000FF;
     static const uint32_t COLOR_AUDIO_OFF = 0xFFD800;
 
-    ASSERT(nLED == 4 || nLED == 6);
-    osbr::RGB currentLED[6];
-    for (int i = 0; i < nLED; ++i) {
-        currentLED[i] = led[i];
+    if (n >= 4) {
+        int i = 0;
+        for (; i < vol04 && i < 4; ++i) {
+            led[i].set(COLOR_AUDIO_ON);
+        }
+        for (; i < 4; ++i) {
+            led[i].set(COLOR_AUDIO_OFF);
+        }
+        for (; i < n; ++i) {
+            led[i].set(0);
+        }
     }
+    else {
+        for (int i = 0; i < n; ++i) {
+            if (i < vol04 * n / 4)
+                led[i].set(COLOR_AUDIO_ON);
+            else
+                led[i].set(COLOR_AUDIO_OFF);
+        }
+        if (vol04 > 0)
+            led[0].set(COLOR_AUDIO_ON);
+    }
+}
+
+
+void DotStarUI::Draw(osbr::RGB* led, int nLED, uint32_t time,
+                     UIMode mode, bool ignited, const UIRenderData& data) const
+{
+
+    ASSERT(nLED == 4 || nLED == 6);
 
     if (ignited) {
         // Set the power level.
@@ -277,19 +301,7 @@ void DotStarUI::Draw(osbr::RGB* led, int nLED, uint32_t time,
         switch (mode) {
         case UIMode::NORMAL:
         {
-            if (nLED == 4) {
-                led[0].set(data.volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
-                led[1].set(data.volume ? COLOR_AUDIO_ON : COLOR_AUDIO_OFF);
-            }
-            else {
-				int i = 0;
-				for (; i < data.volume && i < 4; ++i) {
-					led[i].set(COLOR_AUDIO_ON);
-				}
-				for (; i < 4; ++i) {
-					led[i].set(COLOR_AUDIO_OFF);
-				}            
-			}
+            DrawVolume(led, nLED - 2, time, data.volume);
             led[nLED - 2].set(0);
             led[nLED - 1] = data.color;
         }
@@ -306,16 +318,7 @@ void DotStarUI::Draw(osbr::RGB* led, int nLED, uint32_t time,
 
         case UIMode::VOLUME:
         {
-            int i = 0;
-            for (; i < data.volume && i < 4; ++i) {
-                led[i].set(COLOR_AUDIO_ON);
-            }
-            for (; i < 4; ++i) {
-                led[i].set(COLOR_AUDIO_OFF);
-            }
-            for (; i < nLED; ++i) {
-                led[i].set(0);
-            }
+            DrawVolume(led, nLED, time, data.volume);
         }
         break;
 
@@ -350,7 +353,7 @@ bool DotStarUI::Test()
 		dotstar.Draw(&leds[1], 4, 0, UIMode::NORMAL, false, data);
 		ASSERT(leds[0].get() == 0);			// check memory
 		ASSERT(leds[1].get() == 0x0000ff);	// sound on
-		ASSERT(leds[2].get() == 0x0000ff);	// sound on
+		ASSERT(leds[2].get() == 0xFFD800);	// sound low
 		ASSERT(leds[3].get() == 0);			// off
 		ASSERT(leds[4].get() == 0xff0000);	// blade color
 		ASSERT(leds[5].get() == 0);			// memory check
