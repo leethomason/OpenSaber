@@ -1,10 +1,33 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <SDL.h>
 #include <assert.h>
-
-#include <iostream>
+#include <stdio.h>
+#include <stdint.h>
+#include <limits.h>
+#include <algorithm>
+#include <vector>
+#include <assert.h>
 
 static const int WIDTH = 1024;
 static const int HEIGHT = 768;
+
+struct float3 {
+    float x, y, z;
+};
+
+struct AccelData {
+    float3 accel;
+    float g;
+    uint32_t time;
+};
+
+struct RGBA {
+    uint8_t r, g, b, a;
+};
+
+static const RGBA RED = { 255, 0, 0, 255 };
+
+
 
 int main(int argc, char* argv[])
 {
@@ -13,12 +36,62 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    SDL_Window *win = SDL_CreateWindow("Hello World!", 100, 100, 800, 400, SDL_WINDOW_SHOWN);
+    SDL_Window *win = SDL_CreateWindow("Hello World!", 100, 100, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
     if (win == nullptr) {
         printf("SDL_CreateWindow Error: %s\n", SDL_GetError());
         SDL_Quit();
         return 1;
     }
+
+    FILE* fp = fopen("accel_cap.txt", "r");
+    if (!fp) {
+        printf("Could not apen accel_cap\n");
+        SDL_Quit();
+        return 1;
+    }
+    char buf[256];
+    std::vector<AccelData> data;
+    uint32_t t0 = UINT32_MAX, t1 = 0;
+    float gMax = 0, gMin = 16.0f;
+
+    while (fgets(buf, 255, fp)) {
+        AccelData ad;
+        const char* p = strchr(buf, '=') + 1;
+        sscanf(p, "%f", &ad.accel.x);
+        p = strchr(p + 1, '=') + 1;
+        sscanf(p, "%f", &ad.accel.y);
+        p = strchr(p + 1, '=') + 1;
+        sscanf(p, "%f", &ad.accel.z);
+        p = strchr(p + 1, '=') + 1;
+        sscanf(p, "%f", &ad.g);
+        assert(ad.g > 0);
+        p = strchr(p + 1, '=') + 1;
+        sscanf(p, "%d", &ad.time);
+
+        data.push_back(ad);
+        t0 = std::min(t0, ad.time);
+        t1 = std::max(t1, ad.time);
+        gMax = std::max(gMax, ad.g);
+        gMin = std::min(gMin, ad.g);
+    }
+    fclose(fp);
+
+    RGBA* pixels = new RGBA[WIDTH*HEIGHT];
+    memset(pixels, 0, sizeof(RGBA)*WIDTH*HEIGHT);
+    for (size_t i = 0; i < data.size(); ++i) {
+        const AccelData& ad = data[i];
+        int x = WIDTH * (ad.time - t0) / (t1 - t0);
+        int y = int(HEIGHT * (ad.g - gMin) / (gMax - gMin));
+        if (x >= WIDTH) x = WIDTH - 1;
+        if (y >= HEIGHT) y = HEIGHT - 1;
+
+        assert(x >= 0 && x < WIDTH);
+        assert(y >= 0 && y < HEIGHT);
+
+        pixels[(HEIGHT - y - 1)*WIDTH + x] = RED;
+    }
+
+
 
     SDL_Renderer *ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     assert(ren);
@@ -34,7 +107,7 @@ int main(int argc, char* argv[])
             break;
         }
         SDL_RenderClear(ren);
-        //SDL_UpdateTexture(texture, NULL, oled.Pixels(), WIDTH * 4);
+        SDL_UpdateTexture(texture, 0, pixels, WIDTH*sizeof(RGBA));
         SDL_RenderCopy(ren, texture, 0, 0);
         SDL_RenderPresent(ren);
     }
