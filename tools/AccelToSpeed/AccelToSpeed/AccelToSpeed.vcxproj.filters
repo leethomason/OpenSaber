@@ -18,5 +18,13 @@
     <ClCompile Include="AccelToSpeed.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="accelspeed.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="accelspeed.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

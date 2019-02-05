@@ -7,9 +7,12 @@
 #include <algorithm>
 #include <vector>
 #include <assert.h>
+#include <stdint.h>
+
+#include "accelspeed.h"
 
 static const int WIDTH = 1024;
-static const int HEIGHT = 768;
+static const int HEIGHT = 512;
 
 struct float3 {
     float x, y, z;
@@ -26,8 +29,8 @@ struct RGBA {
 };
 
 static const RGBA RED = { 255, 0, 0, 255 };
-
-
+static const RGBA GREEN = { 0, 255, 0, 255 };
+static const bool CLIP = true;
 
 int main(int argc, char* argv[])
 {
@@ -51,8 +54,10 @@ int main(int argc, char* argv[])
     }
     char buf[256];
     std::vector<AccelData> data;
+    std::vector<float> speeds;
     uint32_t t0 = UINT32_MAX, t1 = 0;
     float gMax = 0, gMin = 16.0f;
+    float speedMax = 0, speedMin = 100.0;
 
     while (fgets(buf, 255, fp)) {
         AccelData ad;
@@ -78,6 +83,8 @@ int main(int argc, char* argv[])
 
     RGBA* pixels = new RGBA[WIDTH*HEIGHT];
     memset(pixels, 0, sizeof(RGBA)*WIDTH*HEIGHT);
+    AccelSpeed accelSpeed;
+
     for (size_t i = 0; i < data.size(); ++i) {
         const AccelData& ad = data[i];
         int x = WIDTH * (ad.time - t0) / (t1 - t0);
@@ -89,14 +96,32 @@ int main(int argc, char* argv[])
         assert(y >= 0 && y < HEIGHT);
 
         pixels[(HEIGHT - y - 1)*WIDTH + x] = RED;
+   
+        if (i > 0) {
+            uint32_t micro = (data[i].time - data[i - 1].time) * 1000;
+            accelSpeed.push(data[i].accel.x, data[i].accel.y, data[i].accel.z, micro);
+
+            speeds.push_back(accelSpeed.speed());
+            speedMin = std::min(speedMin, accelSpeed.speed());
+            speedMax = std::max(speedMax, accelSpeed.speed());
+        }
     }
 
+    for (size_t i = 0; i < speeds.size(); ++i) {
+        const AccelData& ad = data[i];
+        int x = WIDTH * (ad.time - t0) / (t1 - t0);
+        int y = int(HEIGHT * (speeds[i] - speedMin) / (speedMax -speedMin));
+        if (x >= WIDTH) x = WIDTH - 1;
+        if (y >= HEIGHT) y = HEIGHT - 1;
 
+        pixels[(HEIGHT - y - 1)*WIDTH + x].g = 0xff;
+        pixels[(HEIGHT - y - 1)*WIDTH + x].a = 0xff;
+    }
 
     SDL_Renderer *ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     assert(ren);
 
-    SDL_Texture* texture = SDL_CreateTexture(ren, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, WIDTH, HEIGHT);
+    SDL_Texture* texture = SDL_CreateTexture(ren, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STATIC, WIDTH, HEIGHT);
     assert(texture);
 
     SDL_Event e;
