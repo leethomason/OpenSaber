@@ -28,8 +28,9 @@ struct RGBA {
     uint8_t r, g, b, a;
 };
 
-static const RGBA RED = { 255, 0, 0, 255 };
+static const RGBA RED = { 255, 128, 0, 255 };
 static const RGBA GREEN = { 0, 255, 0, 255 };
+static const RGBA BLUE = { 0, 128, 255, 255 };
 static const bool CLIP = true;
 
 int main(int argc, char* argv[])
@@ -84,6 +85,11 @@ int main(int argc, char* argv[])
     RGBA* pixels = new RGBA[WIDTH*HEIGHT];
     memset(pixels, 0, sizeof(RGBA)*WIDTH*HEIGHT);
     AccelSpeed accelSpeed;
+
+    for (uint32_t t = t0; t < t1; t += 100) {
+        int x = WIDTH * (t - t0) / (t1 - t0);
+        pixels[(HEIGHT/2)*WIDTH + x] = BLUE;
+    }
 
     for (size_t i = 0; i < data.size(); ++i) {
         const AccelData& ad = data[i];
