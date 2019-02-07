@@ -4,54 +4,10 @@
 #include <string.h>
 #include <stdint.h>
 
-#ifndef _WIN32
-#include <Arduino.h>
-#endif
-
 class Stream;
 
-template<bool> struct CompileTimeAssert;
-template<> struct CompileTimeAssert <true> {};
-#define STATIC_ASSERT(e) (CompileTimeAssert <(e) != 0>())
-
-#if defined(_MSC_VER)
-#   include <assert.h>
-#	define ASSERT assert
-#else
-#	if SERIAL_DEBUG == 1
-		void AssertOut(const char* message, const char* file, int line);
-		#define ASSERT( x ) 	if (!(x)) { AssertOut(#x, __FILE__, __LINE__); while(true) {} }
-#	else
-		#define ASSERT( x )		{}
-#	endif
-#endif
-
-#define TEST_IS_TRUE(x) {         \
-    if((x)) {                     \
-    }                             \
-    else {                        \
-        ASSERT(false);            \
-        return false;             \
-    }                             \
-}
-
-#define TEST_IS_FALSE(x) {        \
-    if(!(x)) {                    \
-    }                             \
-    else {                        \
-        ASSERT(false);            \
-        return false;             \
-    }                             \
-}
-
-#define TEST_IS_EQ(x, y) {        \
-    if((x) == (y)) {              \
-    }                             \
-    else {                        \
-        ASSERT(false);            \
-        return false;             \
-    }                             \
-}
+#include "grinliz_assert.h"
+#include "fixed.h"
 
 template<class T>
 T clamp(T value, T lower, T upper) {
@@ -60,7 +16,15 @@ T clamp(T value, T lower, T upper) {
 	return value;
 }
 
-uint8_t lerpU8(uint8_t a, uint8_t b, uint8_t t);
+template<class T>
+T lerp256(T a, T b, T t256) {
+    return (a * (256 - t256) + b * t256) / 256;
+}
+
+template<class T>
+T lerp1024(T a, T b, T t1024) {
+    return (a * (1024 - t1024) + b * t1024) / 1024;
+}
 
 bool TestUtil();
 
@@ -365,8 +329,8 @@ bool TestCQueue();
 
 // --- Range / Min / Max --- //
 template<class T>
-bool inRange(const T& a, const T& b, const T& c) {
-	return a >= b && a <= c;
+bool inRange(const T& val, const T& a, const T& b) {
+	return val >= a && val <= b;
 }
 
 template<class T>
@@ -475,19 +439,7 @@ private:
 	bool m_enable;
 };
 
-/**
-Sin wave.
-Input: 0-255 (range will be clipped correctly.)
-Output: [-256, 256]
-*/
-int16_t iSin(uint16_t x);
-
-/**
-Sin wave.
-Input: 0-255 (range will be clipped correctly.)
-Output: [0, 255]
-*/
-uint8_t iSin255(uint16_t x);
+FixedNorm iSin(FixedNorm x);
 
 /* Generally try to keep Ardunino and Win332 code very separate.
 But a log class is useful to generalize, both for utility

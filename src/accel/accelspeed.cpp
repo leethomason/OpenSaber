@@ -2,6 +2,13 @@
 #include <assert.h>
 #include <math.h>
 
+// Tuning constant to control jitter and make sure velocity curves go to zero.
+//static const float F = 1.05f;
+static const float F_UP = 1.05f;
+static const float F_DOWN = 1.5f;
+
+static const float MIX_LOWER = 0.2f;    // lower velocity that starts a swing sound
+static const float MIX_CAP = 2.0f;      // fully mixed
 
 AccelSpeed::AccelSpeed()
 {
@@ -20,7 +27,8 @@ void AccelSpeed::push(float ax, float ay, float az, uint32_t microDT)
     vy = vy + ay * G * dts;
     vz = vz + az * G * dts;
 
-    m_speed = (float)sqrt(vx*vx + vy * vy + vz * vz);
+
+    m_speed = (float)sqrt(vx*vx + vy*vy + vz*vz);
     if (m_speed > 0.5f) {
         // Once the speed jumps "enough", increase
         // damping.

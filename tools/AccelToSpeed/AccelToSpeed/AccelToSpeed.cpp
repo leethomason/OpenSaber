@@ -47,6 +47,8 @@ int main(int argc, char* argv[])
         return 1;
     }
 
+    std::vector<AccelData> data;
+#if 1
     FILE* fp = fopen("accel_cap.txt", "r");
     if (!fp) {
         printf("Could not apen accel_cap\n");
@@ -54,11 +56,6 @@ int main(int argc, char* argv[])
         return 1;
     }
     char buf[256];
-    std::vector<AccelData> data;
-    std::vector<float> speeds;
-    uint32_t t0 = UINT32_MAX, t1 = 0;
-    float gMax = 0, gMin = 16.0f;
-    float speedMax = 0, speedMin = 100.0;
 
     while (fgets(buf, 255, fp)) {
         AccelData ad;
@@ -75,21 +72,68 @@ int main(int argc, char* argv[])
         sscanf(p, "%d", &ad.time);
 
         data.push_back(ad);
-        t0 = std::min(t0, ad.time);
-        t1 = std::max(t1, ad.time);
-        gMax = std::max(gMax, ad.g);
-        gMin = std::min(gMin, ad.g);
     }
     fclose(fp);
+#else
+    int ZONE_WIDTH = 128;
+    for (int i = 0; i < WIDTH; ++i) {
+        int zone = i / ZONE_WIDTH;
+
+        AccelData ad = { {0, 0, 0}, 0, 0 };
+        int axis = (i / (ZONE_WIDTH * 2)) % 3;
+
+        // There is always gravity, in an unknown orientation.
+        switch (axis) {
+        case 0: ad.accel.x = 1; break;
+        case 1: ad.accel.y = 1; break;
+        case 2: ad.accel.z = 1; break;
+        }
+
+        // Motion
+        if (zone & 1) {
+            int j = i % ZONE_WIDTH;
+            float a = sinf(2.0f * 3.14159265359f * float(j) / float(ZONE_WIDTH));
+            switch (axis) {
+            case 0: ad.accel.x += a * 2.0f; break;
+            case 1: ad.accel.y += a * 3.0f; break;
+            case 2: ad.accel.z += a * 4.0f; break;
+            }
+        }
+
+        // Jitter
+        static const float RANGE = 0.10f;
+        ad.accel.x += -RANGE/2 + RANGE * (rand() % 100) * 0.01f;
+        ad.accel.y += -RANGE/2 + RANGE * (rand() % 100) * 0.01f;
+        ad.accel.z += -RANGE/2 + RANGE * (rand() % 100) * 0.01f;
+
+        ad.g = sqrtf(ad.accel.x * ad.accel.x + ad.accel.y * ad.accel.y + ad.accel.z * ad.accel.z);
+        ad.time = i * 10;
+        data.push_back(ad);
+    }
+#endif
+
+    uint32_t t0 = UINT32_MAX, t1 = 0;
+    float gMax = 0, gMin = 16.0f;
+    float speedMax = 0, speedMin = 0.0f;
+    for (size_t i = 0; i < data.size(); ++i) {
+        t0 = std::min(t0, data[i].time);
+        t1 = std::max(t1, data[i].time);
+        gMax = std::max(gMax, data[i].g);
+        gMin = std::min(gMin, data[i].g);
+    }
 
     RGBA* pixels = new RGBA[WIDTH*HEIGHT];
     memset(pixels, 0, sizeof(RGBA)*WIDTH*HEIGHT);
     AccelSpeed accelSpeed;
 
+    // 100ms timetamp
     for (uint32_t t = t0; t < t1; t += 100) {
         int x = WIDTH * (t - t0) / (t1 - t0);
         pixels[(HEIGHT/2)*WIDTH + x] = BLUE;
     }
+
+    std::vector<float> speeds;
+    std::vector<float> mix;
 
     for (size_t i = 0; i < data.size(); ++i) {
         const AccelData& ad = data[i];
@@ -108,6 +152,7 @@ int main(int argc, char* argv[])
             accelSpeed.push(data[i].accel.x, data[i].accel.y, data[i].accel.z, micro);
 
             speeds.push_back(accelSpeed.speed());
+            mix.push_back(accelSpeed.mix());
             speedMin = std::min(speedMin, accelSpeed.speed());
             speedMax = std::max(speedMax, accelSpeed.speed());
         }
@@ -123,6 +168,24 @@ int main(int argc, char* argv[])
         pixels[(HEIGHT - y - 1)*WIDTH + x].g = 0xff;
         pixels[(HEIGHT - y - 1)*WIDTH + x].a = 0xff;
     }
+
+    for (size_t i = 0; i < mix.size(); ++i) {
+        int x = WIDTH * (data[i].time - t0) / (t1 - t0);
+        int y = int(mix[i] * HEIGHT/2);
+        if (x >= WIDTH) x = WIDTH - 1;
+        if (y >= HEIGHT) y = HEIGHT - 1;
+
+        pixels[(HEIGHT - y - 1)*WIDTH + x].g = 0xff;
+        pixels[(HEIGHT - y - 1)*WIDTH + x].r = 0xff;
+        pixels[(HEIGHT - y - 1)*WIDTH + x].a = 0xff;
+    }
+
+    // 1 m/s speed stamp
+    for (float speed = 0; speed < speedMax; speed += 1.0f) {
+        int y = int(HEIGHT * (speed - speedMin) / (speedMax - speedMin));
+        pixels[(HEIGHT - y - 1)*WIDTH] = GREEN;
+    }
+
 
     SDL_Renderer *ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     assert(ren);

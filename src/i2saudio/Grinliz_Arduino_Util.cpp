@@ -68,10 +68,8 @@ void LEDManager::process()
         }
         else {
             if (m_style == BLINK_BREATH) {
-                uint32_t dt = dMillis - (n * m_cycle);
-                uint32_t normal128 = uint32_t(128) * dt / m_cycle;  // [0, 128)
-                int16_t sinVal = iSin(normal128);   // [0, -256]
-                int16_t val = 255 - sinVal;
+                FixedNorm dt(dMillis % m_cycle, m_cycle);
+                int32_t val = 128 + iSin(dt).scale(128);
                 if (val < 0) val = 0;
                 if (val > 255) val = 255;
                 m_analogMode = true;
@@ -201,6 +199,12 @@ void SPLog::eol() const
 void AssertOut(const char* message, const char* file, int line)
 {
   Log.p("ASSERT: ").p(message).p(" ").p(file).p(" ").p(line).eol();
+}
+
+void AssertOut2(const char* message, int x, int y, const char* file, int line)
+{
+    Log.p("ASSERT: ").p(message).p(" ").p(file).p(" ").p(line).eol();
+    Log.p("   value0=").p(x).p(" value1=").p(y).eol();
 }
 
 
