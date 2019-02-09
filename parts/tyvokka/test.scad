@@ -47,7 +47,7 @@ module wood()
     }
 }
 
-rotate([90, 0, 0]) translate([0, -10, -10]) wood();
+wood();
 //case();
 
 module attachPost()
