@@ -9,11 +9,11 @@ from mecode import G
 
 mat = init_material("np883-aluminum-3.175")
 g = G(outfile='path.nc', aerotech_include=False, header=None, footer=None)
-nomad_header(g, mat)
+nomad_header(g)
 
 # at center of switch hole; move to center of capsule.
 g.move(y=42.0/2 - 16.2/2)
-capsule(g, mat, -8, 42.0, 16.2, None, True, 'y')
+capsule(g, mat, -10, 42.0, 16.2, None, True, 'y')
 
 
 
