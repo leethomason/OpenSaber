@@ -1,5 +1,11 @@
 #include <Arduino.h>    
+
+// This audio system is set up for using I2S on
+// an Itsy-Bitsy M0. Relies on DMA and SPI memory
+// streaming, so work needs to be done to get it
+// to compile & run on other platforms.
 #ifndef CORE_TEENSY
+
 
 #include <Adafruit_SPIFlash.h>
 #include <Adafruit_ZeroI2S.h>
