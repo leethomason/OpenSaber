@@ -142,6 +142,34 @@ module columnJoint(dz, dOuter, trim)
     }
 }
 
+/* 
+    A simple bridge at 45 degrees for
+    unsupported printing. Made to hold
+    switches, boards, etc. 
+*/
+module simpleBridge(diameter, dyToTop, yThickness, dz, addWidth=0)
+{
+    L = 50;
+    delta = yThickness * 1.2;
+
+    PATH = [
+        [-L, dyToTop - yThickness - L],
+        [0, dyToTop - yThickness],
+        [L, dyToTop - yThickness - L],
+        [L, dyToTop - L],
+        [delta + addWidth, dyToTop],
+        [-delta - addWidth, dyToTop],
+        [-L, dyToTop - L]
+    ];
+
+    translate([0, 0, -dz/2]) {
+        intersection() {
+            cylinder(h=dz, d=diameter);
+            polygonXY(dz, PATH);
+        }
+    }
+}
+
 module bridge(dx, dy, dz, inset=0)
 {
     h1 = dx * 0.57;

@@ -5,3 +5,5 @@ D_INNER      		= 32.258;
 R_INNER             = D_INNER / 2;  
 D_OUTER             = 37.9;             // at the switch
 
+DZ_PORT             = -15;   // FIXME
+DZ_SWITCH           = 15;   // FIXME

@@ -12,9 +12,13 @@ Z1 = 60;
 DSLOT = 16.2;
 DWOOD = 20;
 
+ZMID = (Z0 + Z1) / 2;
+
+// Retaining bolt.
 BOLT_D = 4; // fixme
 NUT_W = 8;  // fixme
 NUT_Y = 4;  // fixme
+MID_BRIDGE_DZ = 10;
 
 module case(extend = 0)
 {
@@ -47,18 +51,17 @@ module wood()
     }
 }
 
-wood();
+//wood();
 //case();
 
 module attachPost()
 {
-    DZ = 10;
     INSET = NUT_W * 0.6;
 
     difference() 
     {
-        translate([-20, 2, -DZ/2]) {
-            cube(size=[40, 20, DZ]);
+        union() {
+            simpleBridge(D_INNER, R_INNER - 5, 5, MID_BRIDGE_DZ);
         }
         // Bolt hole
         rotate([-90, 0, 0])
@@ -72,15 +75,31 @@ module attachPost()
     }
 }
 
-/*
 difference() {
-    CZ = (Z1 + Z0) / 2;
-    translate([0, 0, CZ])
-        attachPost();
+    union() {
+        translate([0, 0, ZMID])
+            attachPost();
+
+        // Switch holder. Fixme: needs side holders?
+        translate([0, 0, ZMID + DZ_SWITCH])
+            simpleBridge(D_INNER, R_INNER - 6, 4, 4);
+
+        // Power holder.
+        translate([0, 0, ZMID + DZ_PORT]) {
+            simpleBridge(D_INNER, R_INNER - 6.5, 3, 12, 4);
+        }
+    }
     wood();
-    tube(h=100, do=D_OUTER*2, di=D_INNER+EPS);
+    // Underside of power port
+    translate([0, 0, ZMID + DZ_PORT]) {
+        rotate([-90, 0, 0]) {
+            cylinder(h=50, d=7.9);
+            cylinder(h=R_INNER-8, d=13);
+        }
+    }
 }
 
+/*
 difference() {
     DY = 12;
     BAFSIZE = 6.5;
@@ -88,7 +107,7 @@ difference() {
 
     union() {
         // Baffles.
-        for(i=[0:NBAF-1])
+        *for(i=[0:NBAF-1])
             translate([0, 0, i*BAFSIZE*2])
                 oneBaffle(D_INNER, BAFSIZE, bridge=(i<(NBAF-1)));
         capsule(10, WOOD_DY-4, 4);
