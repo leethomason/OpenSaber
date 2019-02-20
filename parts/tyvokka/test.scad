@@ -2,7 +2,7 @@ include <dim.scad>
 include <../shapes.scad>
 include <../commonUnified.scad>
 
-$fn=60;
+$fn=90;
 EPS = 0.01;
 EPS2 = EPS * 2;
 
@@ -117,7 +117,7 @@ difference() {
         for(i=[0:NBAF-1])
             translate([0, 0, 20 + i*BAFSIZE*2]) {
                 difference() {
-                    oneBaffle(D_INNER, BAFSIZE, bridge=(i<(NBAF-1)), battery=false, mc=false, cutout=false);
+                    oneBaffle(D_INNER, BAFSIZE, bridge=(i<(NBAF-1)), battery=true, mc=false, cutout=false);
                     cylinder(h=BAFSIZE*1.1, d=D_INNER * 0.7);
                 }
             }
@@ -128,4 +128,7 @@ difference() {
     }
     wood();
     capsule(10, WOOD_DY-8, -4);
+    
+    // Flat bottom
+    translate([-50, -R_INNER, 0]) cube(size=[100, 1.5, 200]);
 }
