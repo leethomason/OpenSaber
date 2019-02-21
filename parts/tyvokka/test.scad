@@ -81,6 +81,18 @@ module attachPost()
     }
 }
 
+
+module dotstarCutout()
+{
+    // Dotstars:
+    Z_DOTSTAR_LEN = dotstarStripZLen(6);
+    DOTSTAR_STRIP_XZ = 12.4;
+    translate([R_INNER - 2, -DOTSTAR_STRIP_XZ/2, Z_MID - Z_DOTSTAR_LEN/2]) {
+        cube(size=[10, DOTSTAR_STRIP_XZ, Z_DOTSTAR_LEN]);
+    }
+}
+
+
 difference() {
     union() {
         translate([0, 0, Z_MID])
@@ -104,6 +116,7 @@ difference() {
             cylinder(h=R_INNER - POWER_DY - 1.5, d=11.5);
         }
     }
+    dotstarCutout();
 }
 
 
@@ -115,10 +128,14 @@ difference() {
     union() {
         // Baffles.
         for(i=[0:NBAF-1])
-            translate([0, 0, 20 + i*BAFSIZE*2]) {
+            translate([0, 0, Z_MID - (NBAF-0.5) * BAFSIZE + i*BAFSIZE*2]) {
                 difference() {
                     oneBaffle(D_INNER, BAFSIZE, bridge=(i<(NBAF-1)), battery=false, mc=false, cutout=false);
-                    cylinder(h=BAFSIZE*1.1, d=D_INNER * 0.7);
+                    hull() {
+                        cylinder(h=BAFSIZE*1.1, d=D_INNER * 0.7);
+                        translate([0, -2.5, 0])
+                            cylinder(h=BAFSIZE*1.1, d=D_INNER * 0.7);
+                    }
                 }
             }
         intersection() {
@@ -128,4 +145,12 @@ difference() {
     }
     wood();
     capsule(10, WOOD_DY-8, -4);
+
+    translate([0, 0, Z_MID + DZ_PORT]) {
+        // Access hole
+        rotate([90, 0, 0]) {
+            cylinder(h=50, d=15.0);
+        }
+    }
+    dotstarCutout();
 }

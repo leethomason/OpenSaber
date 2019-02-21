@@ -243,13 +243,14 @@ module dotstarLED(n, dy, pitch=DOTSTAR_PITCH)
     }
 }
 
+function dotstarStripZLen(n, pitch=DOTSTAR_PITCH) = DOTSTAR_STRIP_XZ + pitch * (n-1);
 
 module dotstarStrip(n, y0=0, y1=1, pitch=DOTSTAR_PITCH)
 {
     translate([-DOTSTAR_STRIP_XZ/2, y0, -DOTSTAR_STRIP_XZ/2]) {
         cube(size=[ DOTSTAR_STRIP_XZ, 
                     y1 - y0,
-                    DOTSTAR_STRIP_XZ + pitch * (n-1)]);
+                    dotstarStripZLen(n, pitch)]);
     }
 }
 

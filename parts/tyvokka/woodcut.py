@@ -82,6 +82,9 @@ g.move(z=CNC_TRAVEL_Z)
 g.move(x=SWITCH_X, y=0)
 hole(g, mat, -H_WOOD - Z_PAD, SWITCH_D/2)
 
+#switch inset
+hole(g, mat, -2, 6.0)
+
 # capsule
 g.move(x=DZ_CAPSULE_NOM/2 + SHIFT_CAPSULE/2, y=0)
 g.move(z=0)
