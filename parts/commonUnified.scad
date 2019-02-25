@@ -47,11 +47,11 @@ module capsule(theta0, theta1, r=2, _mirror=false)
     }
 }
 
-module zCapsule(dz, r)
+module zCapsule(dz0, dz1, r)
 {
     hull() {
-        rotate([-90, 0, 0]) cylinder(h=20, r=r);
-        translate([0, 0, dz]) rotate([-90, 0, 0]) cylinder(h=20, r=r);
+        translate([0, 0, dz0]) rotate([-90, 0, 0]) cylinder(h=50, r=r);
+        translate([0, 0, dz1]) rotate([-90, 0, 0]) cylinder(h=50, r=r);
     }
 }
 
@@ -559,23 +559,23 @@ module powerPortRing(outer, t, dz, dzToPort, portSupportToBack=false)
 }
 
 
-module switchRing(outer, t, dz, dzToSwitch)
+module switchRing(diameter, t, dz, dzToSwitch)
 {
     difference() {
         union() {
-            tube(h=dz, do=outer, di=outer-t);
+            tube(h=dz, do=diameter, di=diameter-t);
             intersection() {
-                cylinder(h=dz, d=outer);
-                translate([-50, outer/2 - 6, dzToSwitch - D_SWITCH_SUPPORT/2])
+                cylinder(h=dz, d=diameter);
+                translate([-50, diameter/2 - 6, dzToSwitch - D_SWITCH_SUPPORT/2])
                     cube(size=[100, 50, D_SWITCH_SUPPORT]);
             }
         }
         translate([0, 0, dzToSwitch]) {
-            switch(outer, true);
+            switch(diameter, true);
         }
     }
     *translate([0, 0, dzToSwitch]) {
-        switch(outer, false);
+        switch(diameter, false);
     }
 }
 
