@@ -11,7 +11,7 @@ D_OUTER             = 37.9;             // at the switch
 */
 D_CAPSULE = 16.2;
 DZ_CAPSULE_NOM  = 42.0;
-DZ_CAPSULE_ACT  = 42.5;
+//DZ_CAPSULE_ACT  = 42.5;
 DZ_CENTER = (DZ_CAPSULE_NOM - D_CAPSULE) / 2;
 
 DZ_PORT         = -DZ_CENTER;

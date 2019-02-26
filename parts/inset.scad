@@ -1,6 +1,8 @@
 include <shapes.scad>
 include <commonUnified.scad>
 
+$fn = 80;
+
 // Retaining bolt.
 BOLT_D = 4.5;
 NUT_W = 8.6;
@@ -22,13 +24,13 @@ module insetCapsule(extends, dy, deltaD=0)
     }
 }
 
-module attachPost()
+module attachPost(diameter)
 {
     INSET = NUT_W * 0.6;
 
     difference() 
     {
-        simpleBridge(D_INNER, R_INNER - POST_DY, 5, MID_BRIDGE_DZ);
+        simpleBridge(diameter, diameter/2 - POST_DY, 5, MID_BRIDGE_DZ);
 
         // Bolt hole
         rotate([-90, 0, 0])
@@ -49,19 +51,42 @@ module attachPost()
     }
 }
 
+module insetBaffle(diameter, dzBaffle, bridge)
+{
+    difference() {
+        oneBaffle(diameter, dzBaffle, bridge=bridge, battery=false, mc=false, cutout=false);
+        hull() {
+            cylinder(h=dzBaffle*1.1, d=diameter * 0.65);
+            translate([0, -2.5, 0])
+                cylinder(h=dzBaffle*1.1, d=diameter * 0.7);
+        }
+    }
+}
 
-module insetHolder(diameter, outerDiameter, dzSection, dzCenter, dzCenterPort, dzCenterSwitch, diameterCapsule)
+module insetHolder( diameter, 
+                    outerDiameter, 
+                    dzSection, 
+                    dzCenter, 
+                    dzCenterPort, 
+                    dzCenterSwitch, 
+                    diameterCapsule,
+                    dzBaffle)
 {
     Z_MID = dzCenter;
     DZ_PORT = dzCenterPort;
     DZ_SWITCH = dzCenterSwitch;
     D_INNER = diameter;
     R_INNER = D_INNER / 2.0;
+    Y_INSET = R_INNER - 5;
+    rCapsule = diameterCapsule / 2;
 
+    //color("red") cylinder(d=10, h=dzSection);
+
+    // Bridges
     difference() {
         union() {
             translate([0, 0, Z_MID])
-                attachPost();
+                attachPost(D_INNER);
 
             // Switch holder. Fixme: needs side holders?
             translate([0, 0, Z_MID + DZ_SWITCH])
@@ -69,10 +94,10 @@ module insetHolder(diameter, outerDiameter, dzSection, dzCenter, dzCenterPort, d
 
             // Power holder.
             translate([0, 0, Z_MID + DZ_PORT]) {
-                simpleBridge(D_INNER, R_INNER - POWER_DY, 3, 12, 4);
+                simpleBridge(D_INNER, R_INNER - POWER_DY, 3, 14, 4);
             }
         }
-        wood();
+
         // Underside of power port
         translate([0, 0, Z_MID + DZ_PORT]) {
             rotate([-90, 0, 0]) {
@@ -83,39 +108,54 @@ module insetHolder(diameter, outerDiameter, dzSection, dzCenter, dzCenterPort, d
         }
     }
 
-    difference() {
-        DY = 12;
-        BAFSIZE = 4;
-        NBAF = 8;
+    // The inset holder.
+    intersection()
+    {
+        translate([0, 0, -50]) cylinder(h=200, d=D_INNER);
+        translate([0, Y_INSET, Z_MID]) {
+            difference() {
+                translate([0, -4, 0])
+                    zCapsule(DZ_PORT, DZ_SWITCH, rCapsule+2);
+                zCapsule(DZ_PORT, DZ_SWITCH, rCapsule);          // the actual wood
+                translate([0, -4, 0])
+                    zCapsule(DZ_PORT, DZ_SWITCH, rCapsule-2);
 
-        union() {
-            // Baffles.
-            for(i=[0:NBAF-1]) {
-                translate([0, 0, Z_MID - (NBAF-0.5) * BAFSIZE + i*BAFSIZE*2]) {
-                    difference() {
-                        oneBaffle(D_INNER, BAFSIZE, bridge=(i<(NBAF-1)), battery=false, mc=false, cutout=false);
-                        hull() {
-                            cylinder(h=BAFSIZE*1.1, d=D_INNER * 0.65);
-                            translate([0, -2.5, 0])
-                                cylinder(h=BAFSIZE*1.1, d=D_INNER * 0.7);
-                        }
-                    }
-                }
-            }
-            intersection() {
-                capsule(10, WOOD_DY-4, 4);
-                cylinder(h=100, d=D_INNER);
-            }
-        }
-        wood();
-        capsule(10, WOOD_DY-8, -4);
-
-        translate([0, 0, Z_MID + DZ_PORT]) {
-            // Access hole
-            rotate([90, 0, 0]) {
-                cylinder(h=50, d=15.0);
+                stockHeight = outerDiameter / 2 - (Y_INSET);
+                echo("Stock height:", stockHeight);
             }
         }
     }
+
+    nBaffle = floor((dzSection+dzBaffle) / (dzBaffle*2)); 
+    echo("nbaffle", nBaffle, "dzSection", dzSection, "dzBaffle", dzBaffle);
+
+    difference() {
+        union() {
+            for(i=[0:nBaffle-1]) {
+                translate([0, 0, i*dzBaffle*2]) {
+                    insetBaffle(diameter, dzBaffle, true);
+                }
+            }
+        }
+        // Removes the front bridge hanging out.
+        translate([0, 0, dzSection]) cylinder(h=dzBaffle*2, d=diameter);
+
+        // Removes the space for the inset.
+        translate([0, Y_INSET, Z_MID])
+            difference()
+                translate([0, -4, 0])
+                    zCapsule(DZ_PORT, DZ_SWITCH, rCapsule+2);
+
+        // Access to the power port.
+        translate([0, 0, Z_MID + DZ_PORT])
+            rotate([90, 0, 0])
+                cylinder(h=50, d=15.0);
+    }
+    // Cap the end.
+    translate([0, 0, dzSection - dzBaffle])
+        insetBaffle(diameter, dzBaffle, false);
 }
 
+insetHolder(32.2, 37.9, 
+    52, 24,     // section, center
+    -13.0, 13.0, 16.0, 4.0);
