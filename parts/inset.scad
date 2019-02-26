@@ -63,6 +63,10 @@ module insetBaffle(diameter, dzBaffle, bridge)
     }
 }
 
+/*
+    Creates a section with an inset holder, intended to give access to the switch
+    and power, as well as lock the other case to the inner carriage.
+*/
 module insetHolder( diameter, 
                     outerDiameter, 
                     dzSection, 
@@ -120,14 +124,15 @@ module insetHolder( diameter,
                 translate([0, -4, 0])
                     zCapsule(DZ_PORT, DZ_SWITCH, rCapsule-2);
 
-                stockHeight = outerDiameter / 2 - (Y_INSET);
-                echo("Stock height:", stockHeight);
+                stockX = diameterCapsule;
+                stockY = outerDiameter / 2 - (Y_INSET);
+                stockZ = abs(DZ_PORT - DZ_SWITCH) + diameterCapsule;
+                echo("Stock size:", stockX, stockY, stockZ);
             }
         }
     }
 
     nBaffle = floor((dzSection+dzBaffle) / (dzBaffle*2)); 
-    echo("nbaffle", nBaffle, "dzSection", dzSection, "dzBaffle", dzBaffle);
 
     difference() {
         union() {
