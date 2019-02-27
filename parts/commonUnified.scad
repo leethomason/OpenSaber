@@ -714,6 +714,67 @@ module oledHolder(outer, t, dz, dzToPCB, dyPCB)
               ]);
 }
 
+/*
+    Render the emitter holder for a advanced LED heatsink.
+    Should render at the same place as the base:
+    translate([0, 0, z]) {
+        emitterBase(d, dz);
+        emitterHolder(d, dz);
+    }
+*/
+
+N_TEETH = 6;
+H_ADVANCED_THREAD    = 12.0;                     // FIXME
+
+module emitterHolder(d)
+{
+    INCHES_TO_MM = 25.4;
+    D_LED       = 20.000;                   // hole where the light shines.
+    H_RING      = 0.280 * INCHES_TO_MM;     // measured at 279
+    H_HEATSINK  = 0.45 + 0.890 * INCHES_TO_MM;
+    D_HEATSINK  = 1.000 * INCHES_TO_MM;
+    H_OUTER     = 0.700 * INCHES_TO_MM;     // height below ring.
+
+    translate([0, 0, H_ADVANCED_THREAD]) difference() {
+        union() {
+            // Top cap
+            translate([0, 0, H_OUTER]) {
+                difference() {
+                    cylinder(h=H_RING, d=d);
+                    cylinder(h=H_RING, d=D_LED);
+                }
+            };
+        
+            // LED
+            cylinder(h=H_OUTER, d=d);
+        }
+        cylinder(h=H_HEATSINK, d=D_HEATSINK);
+
+        // Vents / decoration / volume reduction
+        Z0 = 4;
+        Z1 = 12;
+        Z2 = 21;
+
+        for(r=[0:5]) {
+            rotate([0, 0, r*60])
+                polygonXZ(h=50, points=
+                [
+                    [-5, Z2],
+                    [5, Z2],
+                    [5, Z1],
+                    [0, Z0],
+                    [-5, Z1]
+                ]);
+        }
+    }
+}
+
+module emitterBase(d)
+{
+    color("olive") {
+        tube(h=H_ADVANCED_THREAD, do=d, di=dynamicHeatSinkThread());
+    }
+}
 
 /*
     Render the front (1", typically) mount for the advanced LED,
