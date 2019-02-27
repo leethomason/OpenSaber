@@ -723,8 +723,21 @@ module oledHolder(outer, t, dz, dzToPCB, dyPCB)
     }
 */
 
-N_TEETH = 6;
+H_TEETH = 4.0;
 H_ADVANCED_THREAD    = 12.0;                     // FIXME
+
+module emitterTeeth()
+{
+    N_ADVANCED_TEETH = 6;
+
+    TEETH_Y = 7;
+
+    for(r=[0:5]) {
+        rotate([0, 0, r*60])
+            translate([0, -TEETH_Y/2, 0])
+                cube(size=[50, TEETH_Y, H_TEETH]);
+    }
+}
 
 module emitterHolder(d)
 {
@@ -767,12 +780,21 @@ module emitterHolder(d)
                 ]);
         }
     }
+    translate([0, 0, H_ADVANCED_THREAD - H_TEETH]) {
+        intersection() {
+            tube(h=H_TEETH, do=d, di=D_HEATSINK);
+            emitterTeeth();
+        }
+    }
 }
 
 module emitterBase(d)
 {
     color("olive") {
-        tube(h=H_ADVANCED_THREAD, do=d, di=dynamicHeatSinkThread());
+        difference() {
+            tube(h=H_ADVANCED_THREAD, do=d, di=dynamicHeatSinkThread());
+            translate([0, 0, H_ADVANCED_THREAD - H_TEETH]) emitterTeeth();
+        }
     }
 }
 
