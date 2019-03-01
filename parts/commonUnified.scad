@@ -47,14 +47,6 @@ module capsule(theta0, theta1, r=2, _mirror=false)
     }
 }
 
-module zCapsule(dz0, dz1, r)
-{
-    hull() {
-        translate([0, 0, dz0]) rotate([-90, 0, 0]) cylinder(h=50, r=r);
-        translate([0, 0, dz1]) rotate([-90, 0, 0]) cylinder(h=50, r=r);
-    }
-}
-
 module columnY(dx, dyFrom0, dz, diameter, baseDX=0, baseDZ=0)
 {
     intersection() {
@@ -723,8 +715,14 @@ module oledHolder(outer, t, dz, dzToPCB, dyPCB)
     }
 */
 
-H_TEETH = 4.0;
-H_ADVANCED_THREAD    = 12.0;                     // FIXME
+INCHES_TO_MM        = 25.4;
+H_TEETH             = 4.0;
+H_ADVANCED_THREAD   = 12.0;                     // FIXME
+H_RING              = 3.0;
+H_HEATSINK          = 0.45 + 0.890 * INCHES_TO_MM;
+D_ADVANCED_LED      = 20.000;                   // hole where the light shines.
+D_HEATSINK          = 1.000 * INCHES_TO_MM;
+
 
 module emitterTeeth()
 {
@@ -739,27 +737,22 @@ module emitterTeeth()
     }
 }
 
+function emitterZ() = H_ADVANCED_THREAD + H_HEATSINK + H_RING;
+
 module emitterHolder(d)
 {
-    INCHES_TO_MM = 25.4;
-    D_LED       = 20.000;                   // hole where the light shines.
-    H_RING      = 0.280 * INCHES_TO_MM;     // measured at 279
-    H_HEATSINK  = 0.45 + 0.890 * INCHES_TO_MM;
-    D_HEATSINK  = 1.000 * INCHES_TO_MM;
-    H_OUTER     = 0.700 * INCHES_TO_MM;     // height below ring.
-
     translate([0, 0, H_ADVANCED_THREAD]) difference() {
         union() {
             // Top cap
-            translate([0, 0, H_OUTER]) {
+            translate([0, 0, H_HEATSINK]) {
                 difference() {
                     cylinder(h=H_RING, d=d);
-                    cylinder(h=H_RING, d=D_LED);
+                    cylinder(h=H_RING, d=D_ADVANCED_LED);
                 }
             };
         
             // LED
-            cylinder(h=H_OUTER, d=d);
+            cylinder(h=H_HEATSINK, d=d);
         }
         cylinder(h=H_HEATSINK, d=D_HEATSINK);
 
@@ -790,7 +783,8 @@ module emitterHolder(d)
 
 module emitterBase(d)
 {
-    color("olive") {
+    //color("olive") 
+    {
         difference() {
             tube(h=H_ADVANCED_THREAD, do=d, di=dynamicHeatSinkThread());
             translate([0, 0, H_ADVANCED_THREAD - H_TEETH]) emitterTeeth();

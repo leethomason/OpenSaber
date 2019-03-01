@@ -6,8 +6,8 @@ $fn = 60;
 EPS = 0.01;
 
 DRAW_AFT = false;
-DRAW_FORE = false;
-DRAW_EMITTER = true;
+DRAW_FORE = true;
+DRAW_EMITTER = false;
 
 if (DRAW_AFT) {
     translate([0, 0, M_SPEAKER_BACK])
@@ -29,6 +29,16 @@ if (DRAW_AFT) {
     }
 }
 
+module dotstarCutout()
+{
+    N_DOTSTAR = 4;
+    Z_DOTSTAR_LEN = dotstarStripZLen(N_DOTSTAR);
+    DOTSTAR_STRIP_XZ = 12.4;
+    translate([R_INNER - 2, -DOTSTAR_STRIP_XZ/2, M_CAPSULE_CENTER - Z_DOTSTAR_LEN/2]) {
+        cube(size=[10, DOTSTAR_STRIP_XZ, Z_DOTSTAR_LEN]);
+    }
+}
+
 
 if (DRAW_FORE)
 {
@@ -38,15 +48,16 @@ if (DRAW_FORE)
         {
             translate([0, 0, M_BATTERY_FRONT]) {
                 difference() {
-                    tube(h=M_CAPSULE_START - M_BATTERY_FRONT, do=D_INNER, di=D_INNER - 6);
+                    H = M_CAPSULE_BACK - M_BATTERY_FRONT;
+                    tube(h=H, do=D_INNER, di=D_INNER - 6);
                     translate([0, -1, 0]) 
-                        cylinder(h=M_CAPSULE_START - M_BATTERY_FRONT, d=D_INNER - 6);
+                        cylinder(h=H, d=D_INNER - 6);
                 }
             }
-            translate([0, 0, M_CAPSULE_START]) {
+            translate([0, 0, M_CAPSULE_BACK]) {
                 insetHolder(D_INNER, D_OUTER,
-                    M_EMITTER - M_CAPSULE_START,
-                    (M_CAPSULE_BACK - M_CAPSULE_START) + DZ_CAPSULE_NOM / 2,
+                    M_EMITTER - M_CAPSULE_BACK,
+                    DZ_CAPSULE_NOM / 2,
                     DZ_PORT, DZ_SWITCH,
                     D_CAPSULE, DZ_BAFFLE
                 );    
@@ -55,7 +66,10 @@ if (DRAW_FORE)
         translate([0, 0, M_BATTERY_FRONT]) {
             keyJoint(8, D_INNER + EPS*4, D_INNER - 4.0, 0.0, 0.0, true);
         }
+        dotstarCutout();
     }
+
+    //color("red") dotstarCutout();
 
     translate([0, 0, M_EMITTER]) {
         emitterBase(D_INNER);
@@ -65,6 +79,10 @@ if (DRAW_FORE)
 if (DRAW_EMITTER) {
     translate([0, 0, M_EMITTER]) {
         emitterHolder(D_INNER);
+    }
+    echo("Saber stop=", M_PHYSICAL_STOP, "z=", M_EMITTER + emitterZ());
+    if (M_EMITTER + emitterZ() >= M_PHYSICAL_STOP) {
+        echo("** Physical stop exceeded. **");
     }
 }
 

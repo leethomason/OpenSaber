@@ -75,25 +75,10 @@ module polygonXZ(h, points)
 }
 
 
-////////////////
-// DEPRECATED //
-////////////////
-
-module shelf(_r0, _h, _r1) {
-	rotate_extrude($fn=FACES) {
-		polygon([[_r0, 0], [_r1, _h], [_r0, _h]]);
-	}
-}
-
-
-module pinsAtTube(r, h, nX, nY, longY)
+module zCapsule(dz0, dz1, r)
 {
-	OFFSET = sqrt(r * r - PIN * PIN * nX * nX / 4);
-
-	Y = longY ? 40 : PIN * nY;
-
-    translate([-nX * PIN / 2, OFFSET - PIN * nY, 0]) {
-        cube([nX * PIN, Y, h]);
-    }	
+    hull() {
+        translate([0, 0, dz0]) rotate([-90, 0, 0]) cylinder(h=50, r=r);
+        translate([0, 0, dz1]) rotate([-90, 0, 0]) cylinder(h=50, r=r);
+    }
 }
-
