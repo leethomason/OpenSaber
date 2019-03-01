@@ -9,6 +9,13 @@ DRAW_AFT = false;
 DRAW_FORE = true;
 DRAW_EMITTER = false;
 
+module flatBottom()
+{
+    translate([-50, -R_INNER-2, -50]) {
+        cube(size=[100, 2.5, 400]);
+    }
+}
+
 if (DRAW_AFT) {
     translate([0, 0, M_SPEAKER_BACK])
         speakerHolder(D_INNER, M_BATTERY_BACK - M_SPEAKER_BACK, 3, "cls28");
@@ -62,18 +69,19 @@ if (DRAW_FORE)
                     D_CAPSULE, DZ_BAFFLE
                 );    
             }
+            translate([0, 0, M_EMITTER]) {
+                emitterBase(D_INNER);
+            }
         }
         translate([0, 0, M_BATTERY_FRONT]) {
             keyJoint(8, D_INNER + EPS*4, D_INNER - 4.0, 0.0, 0.0, true);
         }
         dotstarCutout();
+        flatBottom();
     }
 
     //color("red") dotstarCutout();
 
-    translate([0, 0, M_EMITTER]) {
-        emitterBase(D_INNER);
-    }
 }
 
 if (DRAW_EMITTER) {
