@@ -717,7 +717,7 @@ module oledHolder(outer, t, dz, dzToPCB, dyPCB)
 
 INCHES_TO_MM        = 25.4;
 H_TEETH             = 4.0;
-H_ADVANCED_THREAD   = 12.0;                     // FIXME
+H_ADVANCED_THREAD   = 12.6;                    
 H_RING              = 3.0;
 H_HEATSINK          = 0.45 + 0.890 * INCHES_TO_MM;
 D_ADVANCED_LED      = 20.000;                   // hole where the light shines.

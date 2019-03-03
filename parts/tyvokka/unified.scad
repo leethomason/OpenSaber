@@ -40,9 +40,18 @@ module dotstarCutout()
 {
     N_DOTSTAR = 4;
     Z_DOTSTAR_LEN = dotstarStripZLen(N_DOTSTAR);
-    DOTSTAR_STRIP_XZ = 12.4;
-    translate([R_INNER - 2, -DOTSTAR_STRIP_XZ/2, M_CAPSULE_CENTER - Z_DOTSTAR_LEN/2]) {
-        cube(size=[10, DOTSTAR_STRIP_XZ, Z_DOTSTAR_LEN]);
+    DOTSTAR_STRIP_XZ = 12.8;
+    translate([R_INNER - 3.0, -DOTSTAR_STRIP_XZ/2, M_CAPSULE_CENTER - Z_DOTSTAR_LEN/2]) {
+        cube(size=[0.8, DOTSTAR_STRIP_XZ, Z_DOTSTAR_LEN]);
+    }
+    OFFSET = 2;
+    translate([R_INNER - 3.0, -DOTSTAR_STRIP_XZ/2 + OFFSET, M_CAPSULE_CENTER - Z_DOTSTAR_LEN/2]) {
+        hull() {
+            cube(size=[10, DOTSTAR_STRIP_XZ - OFFSET, Z_DOTSTAR_LEN + 4]);
+            // This is just to slant up the top of the holder for printing.
+            translate([3, DOTSTAR_STRIP_XZ - OFFSET + 3, 0])
+                cube(size=[1, 1, Z_DOTSTAR_LEN + 4]);
+        }
     }
 }
 
@@ -56,7 +65,7 @@ if (DRAW_FORE)
             translate([0, 0, M_BATTERY_FRONT]) {
                 difference() {
                     H = M_CAPSULE_BACK - M_BATTERY_FRONT;
-                    tube(h=H, do=D_INNER, di=D_INNER - 6);
+                    tube(h=H, do=D_INNER, di=D_INNER - 8);
                     translate([0, -1, 0]) 
                         cylinder(h=H, d=D_INNER - 6);
                 }
