@@ -16,8 +16,6 @@ SMOOTH_PATHS = False
 MAT = 'np883-pine-3.175'
 
 
-
-
 Z_STOCK = H_STOCK - H_WOOD
 DELTA = 3
 SMALL = 0.5
@@ -77,7 +75,7 @@ hole(g, mat, -H_WOOD - Z_PAD, BOLT/2)
 # power
 POWER_D = 8.0
 POWER_OUTER_D = 11.0
-POWER_OUTER_DEPTH = -4.0
+POWER_OUTER_DEPTH = -1.0
 POWER_X = X_CAPSULE_NOM/2 - DZ_CENTER
 
 g.move(z=CNC_TRAVEL_Z)
@@ -87,7 +85,7 @@ hole(g, mat, -H_WOOD - Z_PAD, POWER_D/2)
 # switch
 SWITCH_D = 4.0 # 3.6 # 3.5
 SWITCH_X = X_CAPSULE_NOM/2 + DZ_CENTER
-SWITCH_INSET_D = 5.0
+SWITCH_INSET_D = 8.0
 SWITCH_INSET_DEPTH = -1.0
 
 g.move(z=CNC_TRAVEL_Z)
