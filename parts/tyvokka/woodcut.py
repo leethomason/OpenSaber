@@ -6,12 +6,17 @@ from plane import plane
 from covertec import hill
 from hole import hole
 
+# Start at top of wood, NOT top of stock.
+# This can make centering the machine a little tricky.
 H_WOOD = 8.0
-H_STOCK = 12.0
-Z_PAD = 0.8
+H_STOCK = 19.3
+Z_PAD = 0.5
 TOOL_R = 3.175 / 2
 SMOOTH_PATHS = False
-MAT = 'np883-hardwood-3.175'
+MAT = 'np883-pine-3.175'
+
+
+
 
 Z_STOCK = H_STOCK - H_WOOD
 DELTA = 3
@@ -29,7 +34,7 @@ TRAVEL = H_STOCK + 3
 # origin at left end of piece.
 mat = init_material(MAT)
 g = G(outfile='path.nc', aerotech_include=False, header=None, footer=None, print_lines=False)
-nomad_header(g, mat, CNC_TRAVEL_Z)
+nomad_header(g, mat, TRAVEL)
 
 g.absolute()
 g.move(z=TRAVEL)
@@ -78,12 +83,6 @@ POWER_X = X_CAPSULE_NOM/2 - DZ_CENTER
 g.move(z=CNC_TRAVEL_Z)
 g.move(x=POWER_X, y=0)
 hole(g, mat, -H_WOOD - Z_PAD, POWER_D/2)
-
-if SMOOTH_PATHS:
-    # rounded inset
-    hole(g, mat, POWER_OUTER_DEPTH, POWER_OUTER_D/2 - TOOL_R)
-else:
-    hole(g, mat, POWER_OUTER_DEPTH, POWER_OUTER_D/2)
 
 # switch
 SWITCH_D = 4.0 # 3.6 # 3.5
