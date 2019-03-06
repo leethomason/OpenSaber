@@ -8,7 +8,7 @@ from hole import hole
 
 # Top of stock.
 H_WOOD = 8.0
-H_STOCK = 12.0
+H_STOCK = 13.18
 X_CAPSULE = 42.0
 Y_CAPSULE = 16.2
 Z_PAD = 0.5
@@ -25,7 +25,7 @@ top = -(H_STOCK - H_WOOD)
 
 mat = init_material(MAT)
 g = G(outfile='path.nc', aerotech_include=False, header=None, footer=None, print_lines=False)
-nomad_header(g, mat, TRAVEL)
+nomad_header(g, mat, H_STOCK + CNC_TRAVEL_Z)
 
 g.absolute()
 g.move(z=0)
@@ -53,11 +53,9 @@ hole(g, mat, bottom, d=BOLT)
 # power
 POWER_D = 8.0
 POWER_OUTER_D = 11.0
-POWER_OUTER_DEPTH = -4.0
 
 travel(g, mat, x=bounds.cx - DZ_CENTER)
 hole(g, mat, bottom, d=POWER_D)
-hole(g, mat, POWER_OUTER_DEPTH, d=POWER_OUTER_D)
 
 # switch
 SWITCH_D = 4.0 # 3.6 # 3.5
