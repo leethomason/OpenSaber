@@ -87,6 +87,11 @@ if (DRAW_FORE)
         }
         dotstarCutout();
         flatBottom();
+        
+        translate([0, 0, M_EMITTER])
+            for(r=[0:5])
+                rotate([0, 0, 60*r])
+                    capsule(-10, 10, 2);
     }
 
     //color("red") dotstarCutout();

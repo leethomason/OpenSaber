@@ -25,7 +25,7 @@ top = -(H_STOCK - H_WOOD)
 
 mat = init_material(MAT)
 g = G(outfile='path.nc', aerotech_include=False, header=None, footer=None, print_lines=False)
-nomad_header(g, mat, CNC_TRAVEL_Z)
+nomad_header(g, mat, TRAVEL)
 
 g.absolute()
 g.move(z=0)

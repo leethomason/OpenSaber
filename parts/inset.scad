@@ -103,22 +103,11 @@ module insetHolder( diameter,
         }
 
         // Power port
-        *translate([0, 0, Z_MID + DZ_PORT]) {
+        translate([0, 0, Z_MID + DZ_PORT]) {
             rotate([-90, 0, 0]) {
                 // Initially measured.
                 cylinder(h=50, d=8.0);
                 cylinder(h=R_INNER - POWER_DY - 1.5, d=11.5);
-            }
-        }
-        // Alternate holder for power port.
-        translate([0, 0, Z_MID + DZ_PORT]) {
-            rotate([-90, 0, 0]) {
-                cylinder(h=50, d=8.7);
-            }
-        }
-        translate([0, R_INNER - POWER_DY-3, Z_MID + DZ_PORT]) {
-            rotate([-90, 0, 0]) {
-                cylinder(h=50, d=11.4);
             }
         }
     }
