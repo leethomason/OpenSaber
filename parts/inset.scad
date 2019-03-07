@@ -13,7 +13,7 @@ MID_BRIDGE_DZ = 10;
 
 WOOD_DY = -8;
 POST_DY = 5;
-POWER_DY = 5;
+POWER_DY = 7.5;
 SWITCH_DY = 10.5;
 
 module insetCapsule(extends, dy, deltaD=0)
@@ -105,7 +105,6 @@ module insetHolder( diameter,
         // Power port
         translate([0, 0, Z_MID + DZ_PORT]) {
             rotate([-90, 0, 0]) {
-                // Initially measured.
                 cylinder(h=50, d=8.0);
                 cylinder(h=R_INNER - POWER_DY - 1.5, d=11.5);
             }
@@ -122,7 +121,7 @@ module insetHolder( diameter,
                 translate([0, DY, 0])
                     zCapsule(DZ_PORT, DZ_SWITCH, rCapsule+2);
                 zCapsule(DZ_PORT, DZ_SWITCH, rCapsule);          // the actual wood
-                translate([0, DY, 0])
+                translate([0, DY - EPS*2, 0])
                     zCapsule(DZ_PORT, DZ_SWITCH, rCapsule-2);
 
                 stockX = diameterCapsule;

@@ -2,6 +2,12 @@ use <../inset.scad>
 use <../commonUnified.scad>
 include <dim.scad>
 
+/*
+    [ ] Move led to other side
+    [ ] Front of led wiring area
+    [ ] Flatten, consume space for switch (6.5mm switch, 3mm tall)
+*/
+
 $fn = 60;
 EPS = 0.01;
 
