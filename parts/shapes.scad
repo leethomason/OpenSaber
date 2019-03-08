@@ -82,3 +82,18 @@ module zCapsule(dz0, dz1, r)
         translate([0, 0, dz1]) rotate([-90, 0, 0]) cylinder(h=50, r=r);
     }
 }
+
+
+module xRoofCube(size)
+{
+	x = size[0];
+	y = size[1];
+	z = size[2];
+
+	polygonXY(h=z, points=[
+		[0, 0],
+		[x, 0],
+		[x, y + x],		// gets the 45 degree angle for printing
+		[0, y]
+	]);
+}
