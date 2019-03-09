@@ -47,8 +47,12 @@ int main(int argc, char* argv[])
         return 1;
     }
 
+    // Speed (green) -> volume of swing
+    // dSpeed (teal) -> mix from a to b
+    // 
+
     std::vector<AccelData> data;
-#if 1
+#if 0
     FILE* fp = fopen("accel_cap.txt", "r");
     if (!fp) {
         printf("Could not apen accel_cap\n");
@@ -94,9 +98,9 @@ int main(int argc, char* argv[])
             int j = i % ZONE_WIDTH;
             float a = sinf(2.0f * 3.14159265359f * float(j) / float(ZONE_WIDTH));
             switch (axis) {
-            case 0: ad.accel.x += a * 2.0f; break;
-            case 1: ad.accel.y += a * 3.0f; break;
-            case 2: ad.accel.z += a * 4.0f; break;
+            case 0: ad.accel.x += a * 1.0f; break;  // 1 G accel
+            case 1: ad.accel.y += a * 2.0f; break;  // 2 G
+            case 2: ad.accel.z += a * 3.0f; break;  // 3 G (near clash threshold)
             }
         }
 
@@ -113,13 +117,9 @@ int main(int argc, char* argv[])
 #endif
 
     uint32_t t0 = UINT32_MAX, t1 = 0;
-    float gMax = 0, gMin = 16.0f;
-    float speedMax = 0, speedMin = 0.0f;
     for (size_t i = 0; i < data.size(); ++i) {
         t0 = std::min(t0, data[i].time);
         t1 = std::max(t1, data[i].time);
-        gMax = std::max(gMax, data[i].g);
-        gMin = std::min(gMin, data[i].g);
     }
 
     RGBA* pixels = new RGBA[WIDTH*HEIGHT];
@@ -133,12 +133,19 @@ int main(int argc, char* argv[])
     }
 
     std::vector<float> speeds;
+    std::vector<float> dSpeeds;
     std::vector<float> mix;
 
+    static const float GMAX = 5.0f;    // m/s2
+    static const float GMIN = -5.0;
+    static const float VMAX = 20.0f;
+    static const float VMIN = -20.0f;
+
+    // Acceleration.
     for (size_t i = 0; i < data.size(); ++i) {
         const AccelData& ad = data[i];
         int x = WIDTH * (ad.time - t0) / (t1 - t0);
-        int y = int(HEIGHT * (ad.g - gMin) / (gMax - gMin));
+        int y = int(HEIGHT * (ad.g - GMIN) / (GMAX - GMIN));
         if (x >= WIDTH) x = WIDTH - 1;
         if (y >= HEIGHT) y = HEIGHT - 1;
 
@@ -152,16 +159,15 @@ int main(int argc, char* argv[])
             accelSpeed.push(data[i].accel.x, data[i].accel.y, data[i].accel.z, micro);
 
             speeds.push_back(accelSpeed.speed());
-            mix.push_back(accelSpeed.mix());
-            speedMin = std::min(speedMin, accelSpeed.speed());
-            speedMax = std::max(speedMax, accelSpeed.speed());
+            dSpeeds.push_back(accelSpeed.dSpeed());
         }
     }
 
+    // Speed
     for (size_t i = 0; i < speeds.size(); ++i) {
         const AccelData& ad = data[i];
         int x = WIDTH * (ad.time - t0) / (t1 - t0);
-        int y = int(HEIGHT * (speeds[i] - speedMin) / (speedMax -speedMin));
+        int y = int(HEIGHT * (speeds[i] - VMIN) / (VMAX - VMIN));
         if (x >= WIDTH) x = WIDTH - 1;
         if (y >= HEIGHT) y = HEIGHT - 1;
 
@@ -169,7 +175,25 @@ int main(int argc, char* argv[])
         pixels[(HEIGHT - y - 1)*WIDTH + x].a = 0xff;
     }
 
-    for (size_t i = 0; i < mix.size(); ++i) {
+    // dSpeed
+    for (size_t i = 0; i < speeds.size(); ++i) {
+        const AccelData& ad = data[i];
+        int x = WIDTH * (ad.time - t0) / (t1 - t0);
+        float RANGE = 20.0;  // m/2
+        int y = HEIGHT / 2 + int(dSpeeds[i] * (HEIGHT/2) / RANGE);
+
+        if (x >= WIDTH) x = WIDTH - 1;
+        if (y < 0) y = 0;
+        if (y >= HEIGHT) y = HEIGHT - 1;
+
+        pixels[(HEIGHT - y - 1)*WIDTH + x].g = 0xaa;
+        pixels[(HEIGHT - y - 1)*WIDTH + x].b = 0xaa;
+        pixels[(HEIGHT - y - 1)*WIDTH + x].a = 0xff;
+    }
+
+    // Mix
+    
+    /*for (size_t i = 0; i < mix.size(); ++i) {
         int x = WIDTH * (data[i].time - t0) / (t1 - t0);
         int y = int(mix[i] * HEIGHT/2);
         if (x >= WIDTH) x = WIDTH - 1;
@@ -179,10 +203,10 @@ int main(int argc, char* argv[])
         pixels[(HEIGHT - y - 1)*WIDTH + x].r = 0xff;
         pixels[(HEIGHT - y - 1)*WIDTH + x].a = 0xff;
     }
-
+    */
     // 1 m/s speed stamp
-    for (float speed = 0; speed < speedMax; speed += 1.0f) {
-        int y = int(HEIGHT * (speed - speedMin) / (speedMax - speedMin));
+    for (float speed = 0; speed < VMAX; speed += 1.0f) {
+        int y = int(HEIGHT * (speed - VMIN) / (VMAX - VMIN));
         pixels[(HEIGHT - y - 1)*WIDTH] = GREEN;
     }
 

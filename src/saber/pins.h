@@ -47,6 +47,7 @@ SOFTWARE.
 #define SABER_MODEL_SISTER_2	   15   // Shield v4, Teensy 3.5, 5x7 Display. Replaced the cool-but-useless wirelss communication
 #define SABER_MODEL_KENOBI_IV	   16   // ItsyBitsy, Shield v1,Neopixel
 #define SABER_MODEL_AQUATIC_2	   17   // ItsyBitsy, Shield v1c, Dotstar
+#define SABER_MODEL_TYVOKKA			 18   // ItsyBitsy, Shield v1c, Dotstar
 
 #define SABER_SUB_MODEL_NONE		0
 #define SABER_SUB_MODEL_LUNA		1
@@ -55,9 +56,9 @@ SOFTWARE.
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_AQUATIC_2
-#define SABER_SUB_MODEL				SABER_SUB_MODEL_STANDARD
+#define SERIAL_DEBUG 				1
+#define SABER_MODEL 				SABER_MODEL_TYVOKKA
+#define SABER_SUB_MODEL			SABER_SUB_MODEL_STANDARD
 // ----------------------------------
 
 #define LED_TYPE_RGB				1   // red-green-blue
@@ -643,6 +644,42 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 
 	static const int32_t UVOLT_MULT = 5019;	
 	#define ID_STR "Aquatic 2 Cree XPE2 RGB"
+
+	// Heat sink compound; copper TCSS heatsink.
+	static const int32_t RED_VF   = 2200;   // milli-volts
+	static const int32_t RED_I    = 400;    // milli-amps
+	static const int32_t RED_R    = 4700;   // milli-ohms
+
+	static const int32_t GREEN_VF = 3200;
+	static const int32_t GREEN_I  = 400;
+	static const int32_t GREEN_R  = 1000;
+
+	static const int32_t BLUE_VF  = 3100;
+	static const int32_t BLUE_I   = 400;
+	static const int32_t BLUE_R   = 1800;
+
+	static const int VOLUME_1 = 15;
+	static const int VOLUME_2 = 50;
+	static const int VOLUME_3 = 120;
+	static const int VOLUME_4 = 204;
+
+#elif (SABER_MODEL == SABER_MODEL_TYVOKKA)
+	#define PCB_VERSION 			PCB_ITSY_1C
+	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
+	#define SABER_VOLTMETER			
+	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
+	#define SABER_UI_LED			SABER_LED_DOTSTAR
+
+	#define SABER_NUM_LEDS 			4
+	#define SABER_UI_START			0
+	#define SABER_UI_COUNT			4
+	#define SABER_UI_BRIGHTNESS		16		
+	#define SABER_UI_IDLE_MEDITATION
+
+	#define SABER_SOUND_DEF SABER_SOUND_DEF_BESPIN_ROGUE
+
+	static const int32_t UVOLT_MULT = 5019;	
+	#define ID_STR "Tyvokka Cree XPE2 RGB"
 
 	// Heat sink compound; copper TCSS heatsink.
 	static const int32_t RED_VF   = 2200;   // milli-volts

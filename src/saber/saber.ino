@@ -273,6 +273,7 @@ void setup() {
         }
     #endif
     Log.p(__LINE__).eol();
+    Log.p("power: ").p(voltmeter.averagePower()).eol();
     blade.setVoltage(voltmeter.averagePower());
     Log.p(__LINE__).eol();
 
