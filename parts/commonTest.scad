@@ -16,5 +16,7 @@ forwardAdvanced(25.4,   // diameter
             );
 */
 
-emitterHolder(32);
+//emitterHolder(32);
 //emitterBase(32);
+
+baffleMCBattery(32, 10, 4, bridgeStyle=3);

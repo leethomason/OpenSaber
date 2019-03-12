@@ -7,8 +7,12 @@ $fn = 80;
 EPS = 0.01;
 
 DRAW_AFT = true;
-DRAW_FORE = false;
+DRAW_FORE =false;
 DRAW_EMITTER = false;
+
+FAST = false;
+BAFFLE_FORE = FAST ? 1 : 3;
+BAFFLE_AFT  = FAST ? 1 : 3;
 
 module flatBottom()
 {
@@ -23,13 +27,21 @@ if (DRAW_AFT) {
 
     translate([0, 0, M_BATTERY_BACK]) {
         dz = M_BATTERY_FRONT - M_BATTERY_BACK;
-        nBaffles = nBafflesNeeded(DZ_BAFFLE) + 1;   // padding.
-        dzAllBaffles = zLenOfBaffles(nBaffles, DZ_BAFFLE);
+        nBaffles = nBafflesNeeded(DZ_BAFFLE);
+        dzAllBafflesBeforePad = zLenOfBaffles(nBaffles, DZ_BAFFLE);
+        BAFFLE_PAD = 4.0;
+        dzAllBaffles = dzAllBafflesBeforePad + BAFFLE_PAD;
+
+        if (M_BATTERY_BACK + dzAllBaffles > M_BATTERY_FRONT) {
+            echo("Aft section too long.", M_BATTERY_BACK + dzAllBaffles, "past", M_BATTERY_FRONT);
+        }
 
         baffleMCBattery(
             D_INNER,
             nBaffles,
-            DZ_BAFFLE   
+            DZ_BAFFLE,
+            extraBaffle=BAFFLE_PAD,
+            bridgeStyle=BAFFLE_AFT   
         );
     }
     translate([0, 0, M_BATTERY_FRONT]) {
@@ -53,9 +65,13 @@ module dotstarCutout()
         xRoofCube([10, DOTSTAR_STRIP_XZ - OFFSET, Z_DOTSTAR_LEN + 4]);
     }
 
-    // Extra cutout for wiring.
-    translate([R_INNER - 6.0, -DOTSTAR_STRIP_XZ/2+1, M_CAPSULE_CENTER + 12]) {
-        xRoofCube([10, DOTSTAR_STRIP_XZ-4, 4]);
+    // FIXME: measure size and z
+    translate([10, 0, M_CAPSULE_CENTER + 17]) {
+        rotate([0, 90, 0])
+            hull() {
+                translate([0, 3, 0]) cylinder(h=50, d=4);
+                translate([0, -3, 0]) cylinder(h=50, d=4);
+            }
     }
 }
 
@@ -79,7 +95,8 @@ if (DRAW_FORE)
                     M_EMITTER - M_CAPSULE_BACK,
                     DZ_CAPSULE_NOM / 2,
                     DZ_PORT, DZ_SWITCH,
-                    D_CAPSULE, DZ_BAFFLE
+                    D_CAPSULE, DZ_BAFFLE,
+                    bridgeStyle=BAFFLE_FORE
                 );    
             }
             translate([0, 0, M_EMITTER]) {

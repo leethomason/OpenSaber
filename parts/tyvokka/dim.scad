@@ -1,9 +1,8 @@
-M_0                 = 0;            // physical back of the lightsaber main body.
-M_SPEAKER_BACK      = 10;           // could probably go to 9
-M_BATTERY_BACK      = 25;           // FIXME
-M_BATTERY_FRONT     = 100;          // FIXME
+M_SPEAKER_BACK      = 12;
+M_BATTERY_BACK      = 28;
+M_BATTERY_FRONT     = 100;
 M_CAPSULE_BACK      = 105.0;
-M_EMITTER           = 161.0;        // FIXME
+M_EMITTER           = 161.0;
 M_PHYSICAL_STOP     = 200.0;
 
 DZ_BAFFLE           = 4.0;

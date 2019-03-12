@@ -1,4 +1,5 @@
 use <shapes.scad>
+use <baffles.scad>
 
 // TODO: unify the OledHolder and the PCB holder
 
@@ -425,7 +426,7 @@ module oneBaffle(   d,
                     dz,
                     battery=true,       // space for the battery
                     mc=true,            // space for the microcontroller
-                    bridge=true,        // create a bridge to the next baffle. designed to print w/o support material. 
+                    bridge=1,           // create a bridge to the next baffle. designed to print w/o support material. 
                     mcSpace=false,      // lots of space for the microcontroller
                     dExtra=0,           // additional diameter
                     scallop=false,      // outside curves
@@ -475,19 +476,30 @@ module oneBaffle(   d,
         }
     }
 
-    if (bridge) {
-        yBridge = yAtX(X_BRIDGE+T_BRIDGE, d/2);
+    if (bridge > 0) {
+        if (bridge == 1) 
+        {
 
-        translate([X_BRIDGE, -yBridge, dz]) 
-            baffleHalfBridge(dz, T_BRIDGE);        
-        mirror([1, 0, 0]) translate([X_BRIDGE, -yBridge, dz]) 
-            baffleHalfBridge(dz, T_BRIDGE);
+            yBridge = yAtX(X_BRIDGE+T_BRIDGE, d/2);
 
-        translate([X_BRIDGE, yBridge - dz*2, dz]) 
-            baffleHalfBridge(dz, T_BRIDGE);        
-        mirror([1, 0, 0]) translate([X_BRIDGE, yBridge - dz*2, dz]) 
-            baffleHalfBridge(dz, T_BRIDGE);
+            translate([X_BRIDGE, -yBridge, dz]) 
+                baffleHalfBridge(dz, T_BRIDGE);        
+            mirror([1, 0, 0]) translate([X_BRIDGE, -yBridge, dz]) 
+                baffleHalfBridge(dz, T_BRIDGE);
 
+            translate([X_BRIDGE, yBridge - dz*2, dz]) 
+                baffleHalfBridge(dz, T_BRIDGE);        
+            mirror([1, 0, 0]) translate([X_BRIDGE, yBridge - dz*2, dz]) 
+                baffleHalfBridge(dz, T_BRIDGE);
+        }
+        else {
+            translate([0, 0, dz]) {
+                if (bridge == 2)
+                    bridge2(d, dz);
+                else if (bridge == 3)
+                    bridge3(d, dz);
+            }
+        }
         oneBaffleBottonRail(d, dz);
         mirror([1,0,0]) oneBaffleBottonRail(d, dz);
     }
@@ -605,6 +617,7 @@ module baffleMCBattery( outer,          // outer diameter
                         extraBaffle=0,  // add this much to the front baffle
                         mcWide=0,       // set this for a wide top board
                         bridgeInFront=false,    // set true to contiue bridge. Useful for attaching to a cap.
+                        bridgeStyle = 1
                     )
 {
     for(i=[0:n-1]) {
@@ -615,16 +628,21 @@ module baffleMCBattery( outer,          // outer diameter
                 // to bring it in.
                 intersection() {
                     cylinder(h=dzButtress*2, d=dFirst);
-                    oneBaffle(outer, dzFirst, dExtra=dFirst - outer, mcWide=mcWide);
+                    oneBaffle(outer, dzFirst, 
+                            dExtra=dFirst - outer, 
+                            mcWide=mcWide, 
+                            bridge=bridgeStyle);
                 }
             }
             else {
-                oneBaffle(outer, dzButtress, bridge=bridgeInFront || (i < n-1), mcWide=mcWide);
+                oneBaffle(outer, dzButtress, 
+                    bridge=bridgeInFront || (i < n-1) ? bridgeStyle : 0, 
+                    mcWide=mcWide);
             }
     }
     if (extraBaffle) {
         translate([0, 0, (n*2 - 1) * dzButtress]) {
-            oneBaffle(outer, extraBaffle, bridge=false, mcWide=mcWide);
+            oneBaffle(outer, extraBaffle, bridge=0, mcWide=mcWide);
         }
     }
 }

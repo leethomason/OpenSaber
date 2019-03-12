@@ -74,7 +74,8 @@ module insetHolder( diameter,
                     dzCenterPort, 
                     dzCenterSwitch, 
                     diameterCapsule,
-                    dzBaffle)
+                    dzBaffle,
+                    bridgeStyle=1)
 {
     Z_MID = dzCenter;
     DZ_PORT = dzCenterPort;
@@ -150,7 +151,7 @@ module insetHolder( diameter,
         union() {
             for(i=[0:nBaffle-1]) {
                 translate([0, 0, i*dzBaffle*2]) {
-                    insetBaffle(diameter, dzBaffle, true);
+                    insetBaffle(diameter, dzBaffle, bridgeStyle);
                 }
             }
         }
@@ -170,7 +171,7 @@ module insetHolder( diameter,
     }
     // Cap the end.
     translate([0, 0, dzSection - dzBaffle])
-        insetBaffle(diameter, dzBaffle, false);
+        insetBaffle(diameter, dzBaffle, bridgeStyle);
 }
 
 insetHolder(32.2, 37.9, 
