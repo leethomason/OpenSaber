@@ -3,16 +3,16 @@ use <../commonUnified.scad>
 use <../shapes.scad>
 include <dim.scad>
 
-$fn = 80;
 EPS = 0.01;
 
-DRAW_AFT = true;
-DRAW_FORE =false;
+DRAW_AFT = false;
+DRAW_FORE =true;
 DRAW_EMITTER = false;
 
 FAST = false;
-BAFFLE_FORE = FAST ? 1 : 3;
 BAFFLE_AFT  = FAST ? 1 : 3;
+BAFFLE_FORE = FAST ? 1 : 2;
+$fn = FAST ? 20 : 80;
 
 module flatBottom()
 {
@@ -54,24 +54,14 @@ module dotstarCutout()
     N_DOTSTAR = 4;
     Z_DOTSTAR_LEN = dotstarStripZLen(N_DOTSTAR);
     DOTSTAR_STRIP_XZ = 12.8;
+    DY = 3.5;
     
     // Railing (so handy) and dotstar cutout.
-    translate([R_INNER - 3.0, -DOTSTAR_STRIP_XZ/2, M_CAPSULE_CENTER - Z_DOTSTAR_LEN/2]) {
+    translate([R_INNER - DY, -DOTSTAR_STRIP_XZ/2, M_CAPSULE_CENTER - Z_DOTSTAR_LEN/2]) {
         cube(size=[0.8, DOTSTAR_STRIP_XZ, Z_DOTSTAR_LEN]);
-    }
-
-    OFFSET = 2;
-    translate([R_INNER - 3.0, -DOTSTAR_STRIP_XZ/2 + OFFSET, M_CAPSULE_CENTER - Z_DOTSTAR_LEN/2]) {
-        xRoofCube([10, DOTSTAR_STRIP_XZ - OFFSET, Z_DOTSTAR_LEN + 4]);
-    }
-
-    // FIXME: measure size and z
-    translate([10, 0, M_CAPSULE_CENTER + 17]) {
-        rotate([0, 90, 0])
-            hull() {
-                translate([0, 3, 0]) cylinder(h=50, d=4);
-                translate([0, -3, 0]) cylinder(h=50, d=4);
-            }
+        OFFSET = 2;
+        translate([0, OFFSET, 0])
+            cube(size=[10, DOTSTAR_STRIP_XZ - OFFSET, Z_DOTSTAR_LEN+2]);
     }
 }
 
@@ -96,7 +86,8 @@ if (DRAW_FORE)
                     DZ_CAPSULE_NOM / 2,
                     DZ_PORT, DZ_SWITCH,
                     D_CAPSULE, DZ_BAFFLE,
-                    bridgeStyle=BAFFLE_FORE
+                    bridgeStyle = 3,
+                    bridgeStyleArray=[2, 2, 2, 2, 2, 3]
                 );    
             }
             translate([0, 0, M_EMITTER]) {
@@ -112,7 +103,7 @@ if (DRAW_FORE)
         translate([0, 0, M_EMITTER])
             for(r=[0:5])
                 rotate([0, 0, 60*r])
-                    capsule(-10, 10, 2);
+                    capsule(-12, 12, 2);
     }
     //color("red") dotstarCutout();
 }

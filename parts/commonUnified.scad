@@ -757,18 +757,17 @@ module oledHolder(outer, t, dz, dzToPCB, dyPCB)
 
 INCHES_TO_MM        = 25.4;
 H_TEETH             = 4.0;
-H_ADVANCED_THREAD   = 13.2; // larger to make threading easier
+H_ADVANCED_THREAD   = 13.8; // larger to make threading easier
 H_RING              = 3.0;
-H_HEATSINK          = 0.45 + 0.890 * INCHES_TO_MM;
-D_ADVANCED_LED      = 20.000;                   // hole where the light shines.
-D_HEATSINK          = 1.000 * INCHES_TO_MM;
+H_HEATSINK          = 0.5 + 0.890 * INCHES_TO_MM;
+D_ADVANCED_LED      = 20.000; // hole where the light shines.
+D_HEATSINK          = 25.6;
 
 
-module emitterTeeth()
+module emitterTeeth(delta=0)
 {
     N_ADVANCED_TEETH = 6;
-
-    TEETH_Y = 7;
+    TEETH_Y = 7 + delta;
 
     for(r=[0:5]) {
         rotate([0, 0, r*60])
@@ -781,21 +780,23 @@ function emitterZ() = H_ADVANCED_THREAD + H_HEATSINK + H_RING;
 
 module emitterHolder(d)
 {
-    translate([0, 0, H_ADVANCED_THREAD]) difference() {
+    translate([0, 0, H_ADVANCED_THREAD]) 
+    difference() {
         union() {
             // Top cap
-            translate([0, 0, H_HEATSINK]) {
-                difference() {
-                    cylinder(h=H_RING, d=d);
-                    cylinder(h=H_RING, d=D_ADVANCED_LED);
-                }
-            };
-        
+            translate([0, 0, H_HEATSINK])
+                cylinder(h=H_RING, d=d);        
             // LED
             cylinder(h=H_HEATSINK, d=d);
         }
-        cylinder(h=H_HEATSINK, d=D_HEATSINK);
-
+        BEPS = 1;   // offset back to clean up noise
+        translate([0, 0, -BEPS])
+        {
+        // Center light
+            cylinder(h=100, d=D_ADVANCED_LED);
+            // Heatsink
+            cylinder(h=H_HEATSINK + BEPS, d=D_HEATSINK);
+        }
         // Vents / decoration / volume reduction
         Z0 = 4;
         Z1 = 12;
@@ -827,7 +828,7 @@ module emitterBase(d)
     {
         difference() {
             tube(h=H_ADVANCED_THREAD, do=d, di=dynamicHeatSinkThread());
-            translate([0, 0, H_ADVANCED_THREAD - H_TEETH]) emitterTeeth();
+            translate([0, 0, H_ADVANCED_THREAD - H_TEETH]) emitterTeeth(0.1);
         }
     }
 }
