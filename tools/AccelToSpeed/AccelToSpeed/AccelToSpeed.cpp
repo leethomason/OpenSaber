@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
     // 
 
     std::vector<AccelData> data;
-#if 0
+#if 1
     FILE* fp = fopen("accel_cap.txt", "r");
     if (!fp) {
         printf("Could not apen accel_cap\n");
@@ -138,8 +138,12 @@ int main(int argc, char* argv[])
 
     static const float GMAX = 5.0f;    // m/s2
     static const float GMIN = -5.0;
+
     static const float VMAX = 20.0f;
     static const float VMIN = -20.0f;
+
+    static const float MIX_MAX = 2.0;
+    static const float MIX_MIN = -2.0;
 
     // Acceleration.
     for (size_t i = 0; i < data.size(); ++i) {
@@ -160,6 +164,7 @@ int main(int argc, char* argv[])
 
             speeds.push_back(accelSpeed.speed());
             dSpeeds.push_back(accelSpeed.dSpeed());
+            mix.push_back(accelSpeed.mix());
         }
     }
 
@@ -192,10 +197,9 @@ int main(int argc, char* argv[])
     }
 
     // Mix
-    
-    /*for (size_t i = 0; i < mix.size(); ++i) {
+    for (size_t i = 0; i < mix.size(); ++i) {
         int x = WIDTH * (data[i].time - t0) / (t1 - t0);
-        int y = int(mix[i] * HEIGHT/2);
+        int y = HEIGHT / 2 + int(mix[i] * (HEIGHT / 4));
         if (x >= WIDTH) x = WIDTH - 1;
         if (y >= HEIGHT) y = HEIGHT - 1;
 
@@ -203,7 +207,7 @@ int main(int argc, char* argv[])
         pixels[(HEIGHT - y - 1)*WIDTH + x].r = 0xff;
         pixels[(HEIGHT - y - 1)*WIDTH + x].a = 0xff;
     }
-    */
+    
     // 1 m/s speed stamp
     for (float speed = 0; speed < VMAX; speed += 1.0f) {
         int y = int(HEIGHT * (speed - VMIN) / (VMAX - VMIN));

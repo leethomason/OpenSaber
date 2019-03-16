@@ -15,8 +15,8 @@ D_TUBE = 6;
 D_TUBE_CAP = 4.6;
 
 DRAW_AFT   = false;
-DRAW_FRONT = false;
-DRAW_CAP   = true;
+DRAW_FRONT = true;
+DRAW_CAP   = false;
 
 AFT_ROT = 19;
 
