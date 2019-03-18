@@ -5,9 +5,9 @@
 static const float G_LESS = 1.05f;
 static const float G_MORE = 1.2f;
 static const float DSPEED_EASING = 0.6f;
-static const float MIX_EASING = 0.15f;
+static const float MIX_EASING = 0.1f; // 0.15f;
 static const float MOTION_THRESHOLD = 2.0f;
-
+static const float MOTION_FULL_VOLUME = 6.0;
 
 AccelSpeed::AccelSpeed()
 {
@@ -29,6 +29,13 @@ void AccelSpeed::calcMix()
     }
     m_mix = mix * MIX_EASING + m_mix1 * (1.0f - MIX_EASING);
     m_mix1 = m_mix;
+}
+
+float AccelSpeed::swingVolume() const
+{
+    if (m_speed < MOTION_THRESHOLD) return 0.f;
+    if (m_speed > MOTION_FULL_VOLUME) return 1.0f;
+    return (m_speed - MOTION_THRESHOLD) / (MOTION_FULL_VOLUME - MOTION_THRESHOLD);
 }
 
 void AccelSpeed::push(float ax_g, float ay_g, float az_g, uint32_t microDT)

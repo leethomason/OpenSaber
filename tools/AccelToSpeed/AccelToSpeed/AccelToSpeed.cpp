@@ -165,6 +165,7 @@ int main(int argc, char* argv[])
             speeds.push_back(accelSpeed.speed());
             dSpeeds.push_back(accelSpeed.dSpeed());
             mix.push_back(accelSpeed.mix());
+            //mix.push_back(accelSpeed.swingVolume());
         }
     }
 

@@ -14,7 +14,10 @@ public:
     // Normal vector derivative of speed. In m/s.
     float dSpeed() const { return m_dSpeed; }
 
+    // mix of a to b, ranges from 0 to 1
     float mix() const { return m_mix; }
+
+    float swingVolume() const;
 
 private:
     template<class T> T Max(const T& a, const T& b) const {
