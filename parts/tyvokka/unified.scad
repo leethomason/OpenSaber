@@ -5,8 +5,8 @@ include <dim.scad>
 
 EPS = 0.01;
 
-DRAW_AFT = false;
-DRAW_FORE =true;
+DRAW_AFT     = true;
+DRAW_FORE    = false;
 DRAW_EMITTER = false;
 
 FAST = false;
