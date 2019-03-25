@@ -1,7 +1,13 @@
 use <shapes.scad>
 
+D_OUTER = 2;
+D_THIN  = 3;
+D_INNER = 6;
+
 module curveBridge(h, y, z, low, high)
 {
+    EPS = 0.1;
+
     // a + b*t + c*t*t + d*t*t*t
     al = low[0];
     bl = low[1];
@@ -14,7 +20,7 @@ module curveBridge(h, y, z, low, high)
 
     t = z;
     points = [
-        [0.0, al],
+        [-EPS, al],
         [0.1, al + 0.1*bl + 0.1*0.1*cl + 0.1*0.1*0.1*dl],
         [0.2, al + 0.2*bl + 0.2*0.2*cl + 0.2*0.2*0.2*dl],
         [0.3, al + 0.3*bl + 0.3*0.3*cl + 0.3*0.3*0.3*dl],
@@ -24,8 +30,8 @@ module curveBridge(h, y, z, low, high)
         [0.7, al + 0.7*bl + 0.7*0.7*cl + 0.7*0.7*0.7*dl],
         [0.8, al + 0.8*bl + 0.8*0.8*cl + 0.8*0.8*0.8*dl],
         [0.9, al + 0.9*bl + 0.9*0.9*cl + 0.9*0.9*0.9*dl],
-        [1.0, al + 1.0*bl + 1.0*1.0*cl + 1.0*1.0*1.0*dl],
-        [1.0, ah + 1.0*bh + 1.0*1.0*ch + 1.0*1.0*1.0*dh],
+        [1.0+EPS, al + 1.0*bl + 1.0*1.0*cl + 1.0*1.0*1.0*dl],
+        [1.0+EPS, ah + 1.0*bh + 1.0*1.0*ch + 1.0*1.0*1.0*dh],
         [0.9, ah + 0.9*bh + 0.9*0.9*ch + 0.9*0.9*0.9*dh],
         [0.8, ah + 0.8*bh + 0.8*0.8*ch + 0.8*0.8*0.8*dh],
         [0.7, ah + 0.7*bh + 0.7*0.7*ch + 0.7*0.7*0.7*dh],
@@ -35,7 +41,7 @@ module curveBridge(h, y, z, low, high)
         [0.3, ah + 0.3*bh + 0.3*0.3*ch + 0.3*0.3*0.3*dh],
         [0.2, ah + 0.2*bh + 0.2*0.2*ch + 0.2*0.2*0.2*dh],
         [0.1, ah + 0.1*bh + 0.1*0.1*ch + 0.1*0.1*0.1*dh],
-        [0.0, ah]
+        [-EPS, ah]
     ];
 
     multmatrix(m = [ [0, 0, 1, 0],
@@ -53,7 +59,7 @@ module bridge2(d, dz)
     difference() {
         intersection() 
         {
-            tube(h=dz, do=d-2, di=d-6);
+            tube(h=dz, do=d - D_OUTER, di=d - D_INNER);
             union() {
                 translate([-d, d*0.10, 0]) {
                     polygonYZ(d*2, [[0,0], [dz*2, dz*2], [dz*2, 0]]);
@@ -75,7 +81,7 @@ module bridge3(d, dz)
         union() {
             intersection() 
             {
-                tube(h=dz, do=d-2, di=d-5);
+                tube(h=dz, do=d - D_OUTER, di=d - D_INNER);
                 union() {
                     translate([-d, 0, 0]) {
                         curveBridge(d*2, dz, dz, 
@@ -89,20 +95,20 @@ module bridge3(d, dz)
                     }
                 }
             }
-            //color("silver") 
+            color("silver") 
             intersection() 
             {
-                tube(h=dz, do=d-3, di=d-5);
+                tube(h=dz, do=d - D_THIN, di=d - D_INNER);
                 translate([-d, 0, 0]) {
                     curveBridge(d*2, dz, dz, 
                         [ 2.5, -1.0, -1.5, 0.0], 
                         [ 3.0, -1.0, 0.5, 0.0]);
                 }
             }
-            //color("silver")
+            color("silver")
             intersection() 
             {
-                tube(h=dz, do=d-3, di=d-5);
+                tube(h=dz, do=d - D_THIN, di=d - D_INNER);
                 translate([-d, 0, 0]) {
                     curveBridge(d*2, dz, dz, 
                         [ -0.8, -1.0, -0.5, -0.2], 
@@ -120,6 +126,7 @@ module bridge3(d, dz)
 }
 
 $fn = 80;
+
 translate([0, 0, 0]) tube(h=4, do=32, di=26);
 translate([0, 0, 8]) tube(h=4, do=32, di=26);
 translate([0, 0, 16]) tube(h=4, do=32, di=26);

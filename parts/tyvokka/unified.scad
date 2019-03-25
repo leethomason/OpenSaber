@@ -61,7 +61,7 @@ module dotstarCutout()
         cube(size=[0.8, DOTSTAR_STRIP_XZ, Z_DOTSTAR_LEN]);
         OFFSET = 2;
         translate([0, OFFSET, 0])
-            cube(size=[10, DOTSTAR_STRIP_XZ - OFFSET, Z_DOTSTAR_LEN+2]);
+            xRoofCube([10, DOTSTAR_STRIP_XZ - OFFSET, Z_DOTSTAR_LEN+2]);
     }
 }
 
