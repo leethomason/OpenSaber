@@ -53,7 +53,6 @@ void Voltmeter::begin()
     #endif
 
     for(int i=0; i<AveragePower::NUM_SAMPLES; ++i) {
-        delay(10);
         m_averagePower.push(readVBat());
     }
     Log.p("Vbat: ").p(readVBat()).p(" Ave:").p(averagePower()).eol();
