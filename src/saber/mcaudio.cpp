@@ -1,5 +1,11 @@
 #include <Arduino.h>    
+
+// This audio system is set up for using I2S on
+// an Itsy-Bitsy M0. Relies on DMA and SPI memory
+// streaming, so work needs to be done to get it
+// to compile & run on other platforms.
 #ifndef CORE_TEENSY
+
 
 #include <Adafruit_SPIFlash.h>
 #include <Adafruit_ZeroI2S.h>
@@ -27,7 +33,7 @@ int32_t I2SAudio::audioBuffer1[STEREO_BUFFER_SAMPLES];
 // When uncompressed, SPI is read in as 16 bit mono,
 // and they are read to a buffer that is expanded to 32 bit stereo.
 uint8_t subBuffer[AUDIO_SUB_BUFFER];
-wav12::Expander expander(subBuffer, AUDIO_SUB_BUFFER);
+wav12::ExpanderV expander;
 DmacDescriptor* dmacDescriptor = 0;
 
 I2STracker I2SAudio::tracker;
@@ -112,11 +118,6 @@ void I2SAudio::init()
     audioBufferData[1].reset();
     ASSERT(audioBuffer0 == audioBufferData[0].buffer);
 
-#   if 0
-    for (int i=0; i<2; ++i)
-        testReadRate(i);
-#   endif
-
     Log.p("Configuring DMA trigger").eol();
     audioDMA.setTrigger(I2S_DMAC_ID_TX_0);
     audioDMA.setAction(DMA_TRIGGER_ACTON_BEAT);
@@ -152,31 +153,6 @@ void I2SAudio::init()
     dmaPlaybackBuffer = 1;  // seed to the first, so the dma will switch back to 0.
     stat = audioDMA.startJob();
     Log.p("Audio init complete.").eol();
-}
-
-
-void I2SAudio::testReadRate(int index)
-{
-    MemUnit file;
-    readFile(spiFlash, index, &file);
-    wav12::Wav12Header header;
-    uint32_t baseAddr = 0;
-    readAudioInfo(spiFlash, file, &header, &baseAddr);
-
-    Log.p("Test: lenInBytes=").p(header.lenInBytes).p(" nSamples=").p(header.nSamples).p(" format=").p(header.format).eol();
-    spiStream.init(baseAddr, header.lenInBytes);
-    expander.init(&spiStream, header.nSamples, header.format);
-    int volume = 1000;
-
-    uint32_t start = millis();
-    while(expander.pos() < expander.samples()) {
-        audioBufferData[0].reset();
-        audioBufferData[0].fillBuffer(expander, volume);
-    }
-    uint32_t end = millis();
-    Log.p("Index ").p(index).p( " samples/second=").p((expander.samples()*uint32_t(1000))/(end - start)).eol();
-
-    audioBufferData[0].reset();
 }
 
 
@@ -234,7 +210,7 @@ bool I2SAudio::isPlaying() const
 {
     noInterrupts();
     bool isQueued = I2SAudio::isStreamQueued;
-    bool hasSamples = expander.pos() < expander.samples();    
+    bool hasSamples = !expander.done();    
     interrupts();
 
     return isQueued || hasSamples;
@@ -271,36 +247,20 @@ void I2SAudio::dumpStatus()
 }
 
 
-int AudioBufferData::fillBuffer(wav12::Expander& expander, int32_t volume)
+int AudioBufferData::fillBuffer(wav12::ExpanderV& expander, int32_t volume)
 {
     if (status != AUDBUF_EMPTY) {
         I2SAudio::tracker.fillErrors++;
     }
     status = AUDBUF_FILLING;
 
-    uint32_t MILLION2 = 2 * 1024 * 1024;
-    if (expander.samples() < expander.pos()) {
-        I2SAudio::tracker.fillCritErrors++;
-        status = AUDBUF_READY;
-        return AUDERROR_SAMPLES_POS_OUT_OF_RANGE;
-    }
-    if (expander.samples() > MILLION2 || expander.pos() > MILLION2) {
-        I2SAudio::tracker.fillCritErrors++;
-        status = AUDBUF_READY;
-        return AUDERROR_SAMPLES_POS_OUT_OF_RANGE;
-    }
-
-    uint32_t toRead = glMin(expander.samples() - expander.pos(), (uint32_t)AUDIO_BUFFER_SAMPLES);
-    if (toRead) {
-        // The expand is buried here:
-        expander.expand2(buffer, toRead, volume);
+    uint32_t read = expander.expand(buffer, AUDIO_BUFFER_SAMPLES, volume, false);
+    if (read)
         I2SAudio::tracker.fillSome++;
-    }
-    else {
+    else
         I2SAudio::tracker.fillEmpty++;
-    }
 
-    for(int i=toRead*2; i<STEREO_BUFFER_SAMPLES; ++i) {
+    for(int i=read*2; i<STEREO_BUFFER_SAMPLES; ++i) {
         buffer[i] = 0;
     }
     status = AUDBUF_READY;

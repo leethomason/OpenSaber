@@ -63,6 +63,29 @@ module insetBaffle(diameter, dzBaffle, bridge)
     }
 }
 
+// Origin top, center, back of pins.
+module headerHolder(diameter, dy)
+{
+    T = 1.5;
+    DZ = 2.6;
+    DX = 10;
+    D_OPEN = 6.3;
+
+    intersection() {
+        translate([0, 0, -20]) cylinder(h=300, d=diameter);
+        translate([0, dy, 0]) difference() {
+            translate([-(DX/2 + T), -20, -(DZ + T)]) {
+                cube(size=[DX + 2*T, 20, DZ + 2*T]);
+            }
+            translate([-DX/2, -20, -DZ])
+                cube(size=[DX, 21, DZ]);
+            translate([-D_OPEN/2, -20, -DZ-T-1])
+                cube(size=[D_OPEN, 21, DZ+T+1]);
+        }
+    }
+}
+
+
 /*
     Creates a section with an inset holder, intended to give access to the switch
     and power, as well as lock the other case to the inner carriage.
@@ -89,20 +112,20 @@ module insetHolder( diameter,
     //color("red") cylinder(d=10, h=dzSection);
 
     // Bridges
+    X_SWITCH = 6.5;
+    Y_SWITCH = 3.0;
+                    
     difference() {
         union() {
             translate([0, 0, Z_MID])
                 attachPost(D_INNER);
 
             // Switch holder.
-            intersection() {
+            *intersection() {
                 cylinder(h=300, d=D_INNER);
                 translate([0, 0, Z_MID + DZ_SWITCH]) {
                     simpleBridge(D_INNER, R_INNER - SWITCH_DY, 3, SWITCH_BRIDGE_DZ, flatFill=true);
 
-                    X_SWITCH = 6.5; // FIXME
-                    Y_SWITCH = 3.0;
-                    
                     translate([X_SWITCH/2, R_INNER - SWITCH_DY, -SWITCH_BRIDGE_DZ/2])
                         cube(size=[50, Y_SWITCH, SWITCH_BRIDGE_DZ]);
                     mirror([-1, 0, 0])
@@ -110,6 +133,28 @@ module insetHolder( diameter,
                             cube(size=[50, Y_SWITCH, SWITCH_BRIDGE_DZ]);
                 }
             }
+
+            // Switch flat version + header mount
+            intersection() {
+                BRIDGE_T = 3;
+                cylinder(h=300, d=D_INNER);                
+                translate([0, 0, Z_MID + DZ_SWITCH - SWITCH_BRIDGE_DZ/2]) {
+                    translate([-20, R_INNER - SWITCH_DY - BRIDGE_T]) {
+                        cube(size=[40, BRIDGE_T, SWITCH_BRIDGE_DZ]);
+                    }
+
+                    translate([X_SWITCH/2, R_INNER - SWITCH_DY, 0]) {
+                        cube(size=[50, Y_SWITCH, SWITCH_BRIDGE_DZ]);
+                    }
+
+                    mirror([-1, 0, 0]) translate([X_SWITCH/2, R_INNER - SWITCH_DY, 0]) {
+                        cube(size=[50, Y_SWITCH, SWITCH_BRIDGE_DZ]);
+                    }
+
+                    headerHolder(diameter, R_INNER - SWITCH_DY - 9.9);
+                }
+            }
+
             // Power holder.
             translate([0, 0, Z_MID + DZ_PORT]) {
                 simpleBridge(D_INNER, R_INNER - POWER_DY, 3, 14, 4);

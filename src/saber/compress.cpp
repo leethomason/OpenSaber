@@ -6,255 +6,194 @@
 
 using namespace wav12;
 
-template<class T>
-T wav12Min(T a, T b) { return (a < b) ? a : b; }
-template<class T>
-T wav12Max(T a, T b) { return (a > b) ? a : b; }
-template<class T>
-T wav12Clamp(T x, T a, T b) {
-	if (x < a) return a;
-	if (x > b) return b;
-	return x;
-}
+static const int FRAME_SAMPLES = 16;
+static const int FRAME_BYTES = 17;
 
-/*
-    wav12 format=1 writes 16 samples in 24 bytes (75%)
-    wav12 format=2 writes 16 samples in:
-        12 bit header + 4 bits scale + 15 * 8 bits =
-        2 bytes + 15 bytes = 17 bytes (53%)
- */
-
-bool wav12::compress8(
-    const int16_t* data, int32_t nSamples, 
-    uint8_t** compressed, uint32_t* nCompressed, 
-    float* errorFraction)
+bool wav12::compressVelocity(const int16_t *data, int32_t nSamples, uint8_t **compressed, uint32_t *nCompressed)
 {
-    static const int FRAME = 16;
-    static const int DIV = 16;
-    int scalingError = 0;
-    int16_t samples12[FRAME];
+    Velocity vel;
 
-    *compressed = new uint8_t[nSamples*2 + FRAME]; // more than needed
-    //uint8_t* target = *compressed;
-    uint8_t* p = *compressed;
+    *compressed = new uint8_t[nSamples * 2];
+    uint8_t *target = *compressed;
+    bool hasPrevBits = false;
 
-    for(int i=0; i<nSamples; i += FRAME) {
-        //memset(samples12, 0, sizeof(int16_t) * FRAME);
-        for (int j = 0; j < FRAME && (i + j) < nSamples; ++j) {
-            samples12[j] = data[i + j] / DIV;
-        }
-        // Pad the end w/ a repeating value so the delta will be 0.
-        for (int j = nSamples - i; j < FRAME; ++j) {
-            samples12[j] = data[nSamples - 1] / DIV;
-        }
-        
-        // Scan frame.
-        int maxInc = 0;
-        int maxDec = 0;
-
-        for (int j = 1; j < FRAME; ++j) {
-            int d = samples12[j] - samples12[j - 1];
-            if (d > 0)
-                maxInc = wav12Max(maxInc, d);
-            else
-                maxDec = wav12Min(maxDec, d);
-        }
-        int scale = 1;
-        // 2^12 = 4096
-        // Jump from -2048 to 2047 is possible at 12 bits. (+4095)
-        // Scale from 1-16, but it multiplies 127*16 = 2032
-        // 
-        int upScale = 1;
-        int downScale = 1;
-        while (maxInc > 127 * upScale)
-            upScale++;
-        while (maxDec < -128 * downScale)
-            downScale++;
-
-        scale = wav12Max(upScale, downScale);
-        if (scale > 16) {
-            delete[] *compressed;
-            *compressed = 0;
-            *nCompressed = 0;
-            return false;
-        }
-
-        scalingError += scale - 1;
-
-        // Encode!
-        *p = uint8_t(data[i] >> 8);  // high bits of sample, in full 12 bits.
-        p++;
-        *p = uint8_t((data[i] & 0xff) >> 4) | ((scale - 1) << 4); // low bits
-        p++;
-
-        int current = samples12[0];
-        for (int j = 1; j < FRAME; ++j) {
-            int delta = samples12[j] - current;
-            int deltaToWrite = delta / scale;
-            deltaToWrite = wav12Clamp(deltaToWrite, -128, 127);
-            int deltaPrime = deltaToWrite * scale;
-            current += deltaPrime;
-            assert(abs(current - samples12[j]) < 256 * scale);
-
-            *p++ = (uint8_t)(int8_t(deltaToWrite));
-        }
-    }
-    *errorFraction = float(scalingError * FRAME) / float(nSamples);
-    *nCompressed = int32_t(p - *compressed);
-    return true;
-}
-
-
-void wav12::compress(const int16_t* data, int32_t nSamples, uint8_t** compressed, uint32_t* nCompressed)
-{
-    *compressed = new uint8_t[nSamples*2];
-    uint8_t* target = *compressed;
-
-    for (int i = 0; i < nSamples; i += 2)
+    for (int i = 0; i < nSamples; i++)
     {
-        // Always use an even size, to avoid unaligned reads in the 16 bit section.
-        int16_t v0 = data[i];
-        int16_t v1 = (i + 1 < nSamples) ? data[i + 1] : 0;
+        int value = data[i] / 16;
+        int guess = vel.guess();
+        int delta = value - guess;
 
-        uint16_t v0u = uint16_t(v0);
-        uint16_t v1u = uint16_t(v1);
+        if (hasPrevBits && delta < 512 && delta >= -512)
+        {
+            static const int BIAS = 512;
+            uint32_t bits = delta + BIAS;
+            uint8_t low7 = (bits & 0x7f);
+            uint8_t high3 = (bits & 0x380) >> 7;
+            //assert((high3 << 7 | low7) == bits);
+            *target = low7 | 0x80;
+            //assert((*(target - 1) & 0xe0) == 0);    // make sure high 3 are empty
+            *(target - 1) |= (high3 << 5);
+            target++;
+            hasPrevBits = false;
+        }
+        else if (delta < 64 && delta >= -64)
+        {
+            assert(!hasPrevBits);
+            static const int BIAS = 64;
+            uint8_t bits = delta + BIAS;
+            *target++ = bits | 0x80;
+            hasPrevBits = false;
+        }
+        else
+        {
+            assert(value < 2048 && value >= -2048);
+            static const int BIAS = 2048;
+            int32_t bits = BIAS + value;
+            uint32_t low7 = bits & 0x07f;
+            uint32_t high5 = (bits & 0xf80) >> 7;
 
-        *target++ = (v0u >> 8) & 0xff;
-        *target++ = (v0u & 0xf0) | ((v1u >> 12) & 0x0f);
-        *target++ = (v1u >> 4) & 0xff;
+            *target++ = low7;
+            *target++ = high5;
+            hasPrevBits = true;
+        }
+        vel.push(value);
     }
     size_t size = target - *compressed;
     *nCompressed = uint32_t(size);
+
+    return false;
 }
 
-
-Expander::Expander(uint8_t* buffer, uint32_t bufferSize)
+void ExpanderV::init(IStream *stream, uint32_t nSamples, int format)
 {
-    m_buffer = buffer;
-    m_bufferSize = bufferSize;
-    init(0, 0, 0);
-}
-
-
-void Expander::init(wav12::IStream* stream, uint32_t nSamples, int format)
-{
+    assert(format == 3);
     m_stream = stream;
-    m_nSamples = nSamples;
-    m_pos = 0;
-    m_format = format;
+    m_done = false;
 }
 
-
-void Expander::expand2(int32_t* target, uint32_t nSamples, int32_t volume)
+void ExpanderV::rewind()
 {
-    m_pos += nSamples;
-    const int32_t* end = target + nSamples * 2;
+    m_bufferEnd = m_bufferStart = 0;
+    memset(m_buffer, 0, BUFFER_SIZE);
+    m_vel = Velocity();
+    m_done = false;
+    m_stream->rewind();
+}
 
-    if (m_format == 0) {
-        uint32_t i = 0;
-        while (i < nSamples) {
-            int nSamplesFetched = wav12Min(nSamples - i, m_bufferSize / 2);
-            m_stream->fetch(m_buffer, nSamplesFetched * 2);
-
-            int32_t* t = target + i * 2;
-            const int16_t* src = (const int16_t*) m_buffer;
-            for (int j = 0; j < nSamplesFetched; j++) {
-                int32_t v = *src  * volume;
-                ++src;
-                *t++ = v;
-                *t++ = v;
-            }
-            i += nSamplesFetched;
-        }
+void ExpanderV::fetch()
+{
+    // Each sample is one or two bytes.
+    uint32_t read = 0;
+    if (m_bufferStart < m_bufferEnd)
+    {
+        // In this case, we have the 1st byte of a pair, but
+        // not the 2nd. So the 2nd has to be there, and
+        // we can't be done.
+        assert(m_bufferStart == m_bufferEnd - 1);
+        assert(m_bufferStart > 0);
+        m_buffer[0] = m_buffer[m_bufferStart];
+        read = m_stream->fetch(m_buffer + 1, BUFFER_SIZE - 1);
+        assert(read > 0);
+        m_bufferEnd = read + 1;
     }
-    else if (m_format == 1) {
-        uint32_t i = 0;
-        while (i < nSamples) {
-            uint32_t samplesRemaning = nSamples - i;
-            uint32_t samplesCanFetch = (m_bufferSize / 3) * 2;
-            uint32_t fetched = 0;
-            if (samplesRemaning <= samplesCanFetch) {
-                // But there can be padding so that bytes % 3 always zero.
-                fetched = (samplesRemaning + 1) & (~1);
-            }
-            else {
-                // Normal case: 
-                //  samplesCanFetch MULT 2 so that
-                //  bytes MULT 3
-                assert(samplesCanFetch % 2 == 0);
-                fetched = samplesCanFetch;
-            }
-            uint32_t bytes = fetched * 3 / 2;
-            assert(bytes % 3 == 0);
-            m_stream->fetch(m_buffer, bytes);
-
-            int32_t* t = target + i * 2;
-            uint8_t* src = m_buffer;
-            for (uint32_t j = 0; j < fetched; j += 2) {
-                uint8_t s0 = *src++;
-                uint8_t s1 = *src++;
-                uint8_t s2 = *src++;
-                int32_t v0 = int16_t((uint16_t(s0) << 8) | (uint16_t(s1 & 0xf0))) * volume;
-                int32_t v1 = int16_t((uint16_t(s1 & 0x0f) << 12) | (uint16_t(s2) << 4)) * volume;
-                *t++ = v0;
-                *t++ = v0;
-                if (t < end) {
-                    *t++ = v1;
-                    *t++ = v1;
-                }
-            }
-            i += fetched;
-        }
+    else
+    {
+        // We were on a sample boundary, so read as much as possible.
+        read = m_stream->fetch(m_buffer, BUFFER_SIZE);
+        m_bufferEnd = read;
     }
-    else if (m_format == 2) {
-        uint32_t i = 0;
-        static const int FRAME_SAMPLES = 16;
-        static const int FRAME_BYTES = 17;
-        // Align sample read to frame.
-        const uint32_t nSamplesPadded = ((nSamples + FRAME_SAMPLES - 1) / FRAME_SAMPLES) * FRAME_SAMPLES;
-        const uint32_t bufferCap = (m_bufferSize / FRAME_BYTES) * FRAME_SAMPLES;
-
-        while (i < nSamplesPadded) {
-            int nSamplesFetched = wav12Min(nSamplesPadded - i, bufferCap);
-            m_stream->fetch(m_buffer, nSamplesFetched * FRAME_BYTES / FRAME_SAMPLES);
-
-            int32_t* t = target + i * 2;
-            const uint8_t* src = m_buffer;
-
-            assert(nSamplesFetched % FRAME_SAMPLES == 0);
-            const int nFrames = nSamplesFetched / FRAME_SAMPLES;
-
-            for (int f = 0; f < nFrames; ++f) {
-                assert(src < m_buffer + m_bufferSize);
-                int32_t base = int8_t(*src) << 8;
-                src++;
-                base |= (*src & 0xf) << 4;
-                int scale = (*src >> 4) + 1;
-                assert(src < m_buffer + m_bufferSize);
-                src++;
-
-                assert(t < end);
-                *t++ = base * volume;
-                *t++ = base * volume;
-
-                for (int j = 1; j < FRAME_SAMPLES; ++j) {
-                    base += scale * int8_t(*src) * 16;
-                    src++;
-                    assert(t < end);
-                    *t++ = base * volume;
-                    *t++ = base * volume;
-                    if (t == end) break;
-                }
-            }
-            i += nSamplesFetched;
-        }
-    }
-    else {
-        assert(false); // bad format
+    m_bufferStart = 0;
+    if (read == 0)
+    {
+        m_done = true;
     }
 }
 
-uint32_t MemStream::fetch(uint8_t* buffer, uint32_t nBytes)
+int ExpanderV::expand(int32_t *target, uint32_t nSamples, int32_t volume, bool add)
+{
+    for (uint32_t i = 0; i < nSamples; ++i)
+    {
+        if (!hasSample())
+        {
+            fetch();
+            if (done())
+                return i;
+        }
+        const uint8_t *src = m_buffer + m_bufferStart;
+        const int32_t guess = m_vel.guess();
+        int32_t value = 0;
+
+        if (src[0] & 0x80)
+        {
+            int32_t low7 = src[0] & 0x7f;
+
+            if (m_hasHigh3)
+            {
+                static const int32_t BIAS = 512;
+                int32_t bits = ((m_high3 << 7) | low7);
+                int32_t delta = bits - BIAS;
+                value = guess + delta;
+            }
+            else
+            {
+                static const int32_t BIAS = 64;
+                int32_t delta = low7 - BIAS;
+                value = guess + delta;
+            }
+            m_hasHigh3 = false;
+            m_bufferStart++;
+        }
+        else
+        {
+            // Stored as: low7 high5
+            static const int32_t BIAS = 2048;
+            m_high3 = (src[1] & 0xe0) >> 5; // save for later
+
+            int32_t low7 = src[0] & 0x7f;
+            int32_t high5 = (src[1] & 0x1f);
+            int32_t bits = low7 | (high5 << 7);
+            value = bits - BIAS;
+
+            m_hasHigh3 = true;
+            m_bufferStart += 2;
+        }
+        m_vel.push(value);
+        int32_t s = value * volume * 16;
+        if (add)
+        {
+            target[0] += s;
+            target[1] = target[0];
+        }
+        else
+        {
+            target[0] = s;
+            target[1] = s;
+        }
+        target += 2;
+    }
+    return nSamples;
+}
+
+MemStream::MemStream(const uint8_t *data, uint32_t size)
+{
+    m_data = data;
+    m_size = size;
+    m_pos = 0;
+}
+
+void MemStream::set(uint32_t addr, uint32_t size)
+{
+    assert(addr == 0); // just not implemented
+    assert(size == this->m_size);
+    m_pos = 0;
+}
+
+void MemStream::rewind()
+{
+    m_pos = 0;
+}
+
+uint32_t MemStream::fetch(uint8_t *buffer, uint32_t nBytes)
 {
     uint32_t n = wav12Min(nBytes, m_size - m_pos);
     memcpy(buffer, m_data + m_pos, n);
