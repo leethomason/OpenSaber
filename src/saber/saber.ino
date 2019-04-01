@@ -272,10 +272,8 @@ void setup() {
             Log.p("sfx initialized.").eol();
         }
     #endif
-    Log.p(__LINE__).eol();
     Log.p("power: ").p(voltmeter.averagePower()).eol();
     blade.setVoltage(voltmeter.averagePower());
-    Log.p(__LINE__).eol();
 
     #if SABER_DISPLAY == SABER_DISPLAY_128_32
         display.begin(OLED_WIDTH, OLED_HEIGHT, SSD1306_SWITCHCAPVCC);
