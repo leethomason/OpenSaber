@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 
-typedef const uint8_t* (*glyphMetrics)(int charID, int* advance, int* w, int* rows);
-typedef const uint8_t* (*textureData)(int* w, int* h);
+typedef const uint8_t* (*GlyphMetrics)(int charID, int* advance, int* w, int* rows);
+typedef const uint8_t* (*TextureData)(int* w, int* h);
 
 class Renderer
 {
@@ -18,11 +18,11 @@ public:
 	};
 	bool DrawBitmap(int x, int y, const uint8_t* bitmap, int w, int h,
 					int flags = 0, int clip0 = 0, int clip1 = 256);
-	bool DrawBitmap(int x, int y, textureData data, 
+	bool DrawBitmap(int x, int y, TextureData data, 
 					int flags = 0, int clip0 = 0, int clip1 = 256);
-	bool DrawStr(const char* str, int x, int y, glyphMetrics metrics, 
+	bool DrawStr(const char* str, int x, int y, GlyphMetrics metrics, 
 				 int clip0 = 0, int clip1 = 256);
-	int StrWidth(const char* str, glyphMetrics metrics);
+	int StrWidth(const char* str, GlyphMetrics metrics);
 	void DrawRectangle(int x, int y, int w, int h);
 
 	void Fill(int c);

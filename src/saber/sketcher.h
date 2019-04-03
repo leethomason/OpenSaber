@@ -100,7 +100,7 @@ public:
     void Push(uint8_t value);
 
 private:
-    textureData GetDial(int value);
+    TextureData GetDial(int value);
 
 	void DrawBladeMode(Renderer* d, uint32_t time, bool ignited, const UIRenderData* data);
 	void DrawPaletteMode(Renderer* d, uint32_t time, const UIRenderData* data);

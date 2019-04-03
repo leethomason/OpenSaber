@@ -20,9 +20,9 @@ Sketcher::Sketcher()
 }
 
 
-textureData Sketcher::GetDial(int value)
+TextureData Sketcher::GetDial(int value)
 {
-    textureData td = get_dial0;
+    TextureData td = get_dial0;
     switch (value) {
     case 0: break;	// already set to default.
 	case 1: td = get_dial1; break;

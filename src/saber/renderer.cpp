@@ -17,7 +17,7 @@ void Renderer::Attach(int w, int h, uint8_t* buf)
 	ASSERT(m_nRows <= MAX_ROWS);
 }
 
-bool Renderer::DrawBitmap(int x, int y, textureData data, int flags, int clip0, int clip1)
+bool Renderer::DrawBitmap(int x, int y, TextureData data, int flags, int clip0, int clip1)
 {
 	int texW = 0;
 	int texH = 0;
@@ -143,7 +143,7 @@ void Renderer::CalcMask(int y, int h, int* pr0, int* pr1)
 	}
 }
 
-bool Renderer::DrawStr(const char* str, int x, int y, glyphMetrics metrics, int clip0, int clip1)
+bool Renderer::DrawStr(const char* str, int x, int y, GlyphMetrics metrics, int clip0, int clip1)
 {
 	int cx = x;
 	bool didRender = false;
@@ -161,7 +161,7 @@ bool Renderer::DrawStr(const char* str, int x, int y, glyphMetrics metrics, int 
 }
 
 
-int Renderer::StrWidth(const char* str, glyphMetrics metrics)
+int Renderer::StrWidth(const char* str, GlyphMetrics metrics)
 {
 	int w = 0;
 	int d0 = 0, d1 = 0;

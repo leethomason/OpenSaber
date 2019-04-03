@@ -74,7 +74,6 @@ void ExpanderV::init(IStream *stream, uint32_t nSamples, int format)
 void ExpanderV::rewind()
 {
     m_bufferEnd = m_bufferStart = 0;
-    memset(m_buffer, 0, BUFFER_SIZE);
     m_vel = Velocity();
     m_done = false;
     m_stream->rewind();
@@ -111,6 +110,9 @@ void ExpanderV::fetch()
 
 int ExpanderV::expand(int32_t *target, uint32_t nSamples, int32_t volume, bool add)
 {
+    if (!m_stream)
+        return 0;
+        
     for (uint32_t i = 0; i < nSamples; ++i)
     {
         if (!hasSample())

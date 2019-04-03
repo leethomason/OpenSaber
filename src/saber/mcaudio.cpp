@@ -32,7 +32,6 @@ int32_t I2SAudio::audioBuffer1[STEREO_BUFFER_SAMPLES];
 
 // When uncompressed, SPI is read in as 16 bit mono,
 // and they are read to a buffer that is expanded to 32 bit stereo.
-uint8_t subBuffer[AUDIO_SUB_BUFFER];
 wav12::ExpanderV expander;
 DmacDescriptor* dmacDescriptor = 0;
 
