@@ -126,6 +126,7 @@ public:
         m_size = size;
         m_addr = addr;
     }
+
     virtual uint32_t fetch(uint8_t* target, uint32_t nBytes);
 
     virtual void rewind() {

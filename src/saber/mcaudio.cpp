@@ -57,6 +57,7 @@ void I2SAudio::timerCallback(int id)
         I2SAudio::isStreamQueued = false;
         I2SAudio::tracker.timerQueued++;
         SPIStream& spiStream = I2SAudio::instance()->spiStream;
+        spiStream.set(I2SAudio::queued_addr, I2SAudio::queued_size);
         expander.init(&spiStream);
     }
 
