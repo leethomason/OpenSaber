@@ -57,8 +57,7 @@ void I2SAudio::timerCallback(int id)
         I2SAudio::isStreamQueued = false;
         I2SAudio::tracker.timerQueued++;
         SPIStream& spiStream = I2SAudio::instance()->spiStream;
-        spiStream.init(I2SAudio::queued_addr, I2SAudio::queued_size);
-        expander.init(&spiStream, I2SAudio::queued_nSamples, I2SAudio::queued_format);
+        expander.init(&spiStream);
     }
 
     if (audioBufferData[id].status != AUDBUF_EMPTY)
@@ -272,11 +271,18 @@ uint32_t SPIStream::fetch(uint8_t* target, uint32_t nBytes)
     // Normally, the SPI would need to be locked.
     // HOWEVER, this is only called by the interrupt, so 
     // all should be well.
+
+    // Don't read over the end. (Oops - that was a bug.)
+
+    if (m_pos + nBytes > m_size)
+        nBytes = m_size - m_pos;
+
     uint32_t r = m_flash.readBuffer(
         m_addr + m_pos, 
         target,
         nBytes);
-    m_pos += nBytes;
+
+    m_pos += r;
     return r;
 }
 

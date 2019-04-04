@@ -120,21 +120,16 @@ private:
 class SPIStream : public wav12::IStream
 {
 public:
-    SPIStream(Adafruit_SPIFlash& flash) : m_flash(flash) { init(0, 0); }
+    SPIStream(Adafruit_SPIFlash& flash) : m_flash(flash) {}
 
-    void init(uint32_t addr, uint32_t size) {
-        m_addr = addr;
-        m_size = size;
-        m_pos = 0;
-    }
-
-    virtual uint32_t fetch(uint8_t* target, uint32_t nBytes);
-    virtual void rewind() {
-        m_pos = 0;
-    }
     virtual void set(uint32_t addr, uint32_t size) {
         m_size = size;
         m_addr = addr;
+    }
+    virtual uint32_t fetch(uint8_t* target, uint32_t nBytes);
+
+    virtual void rewind() {
+        m_pos = 0;
     }
 
 private:
