@@ -12,10 +12,20 @@
 #include "sketcher.h"
 #include "../saber/unittest.h"
 #include "../saber/rgb.h"
+#include "../saber/vrender.h"
 
+//#define MONO_128_32 1
+#define RGB_160_80 2
+
+#ifdef MONO_128_32
 Sketcher sketcher;
 static const int WIDTH = 128;
 static const int HEIGHT = 32;
+#endif
+#ifdef RGB_160_80
+static const int WIDTH = 160;
+static const int HEIGHT = 80;
+#endif
 
 UIModeUtil::UIModeUtil()
 {
@@ -48,13 +58,19 @@ int main(int, char**) {
 	SDL_Texture* texture = SDL_CreateTexture(ren, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, WIDTH, HEIGHT);
 	assert(texture);
 
-	OledSim oled(WIDTH, HEIGHT);
+#ifdef MONO_128_32
+    OledSim oled(WIDTH, HEIGHT, 1);
 	Renderer display;
 	display.Attach(WIDTH, HEIGHT, oled.Buffer());
 	Pixel_7_5_UI pixel75;
     osbr::RGB dotstar4[4];
     osbr::RGB dotstar6[6];
     DotStarUI dotstarUI;
+#endif
+#ifdef RGB_160_80
+    OledSim oled(WIDTH, HEIGHT, 2);
+    VRender16 vrender16;
+#endif
 
 	SDL_SetRenderDrawColor(ren, 128, 128, 128, 255);
 

@@ -10,7 +10,7 @@ namespace osbr {
 class OledSim
 {
 public:
-	OledSim(int w, int h);
+	OledSim(int w, int h, int bytesPerPixel);
 	~OledSim();
 
 	const uint32_t* Pixels() const { return pixels; }
@@ -25,6 +25,7 @@ private:
 
 	int width;
 	int height;
+    int bytesPerPixel;
 	uint32_t* pixels;
 	uint8_t* buffer;
 };

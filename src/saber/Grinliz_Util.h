@@ -344,6 +344,9 @@ T glClamp(T x, T a, T b) {
 	return x;
 }
 
+template<class T>
+T glAbs(T x) { return x >= 0 ? x : -x; }
+
 // --- Algorithm --- //
 
 template <class T> inline void	Swap(T* a, T* b) {

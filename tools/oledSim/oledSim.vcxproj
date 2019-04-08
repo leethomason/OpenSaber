@@ -77,6 +77,7 @@
     <ClCompile Include="..\..\src\saber\sketcher.cpp" />
     <ClCompile Include="..\..\src\saber\unittest.cpp" />
     <ClCompile Include="..\..\src\saber\voltmeter.cpp" />
+    <ClCompile Include="..\..\src\saber\vrender.cpp" />
     <ClCompile Include="..\WinUtil.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="oledsim.cpp" />
@@ -89,6 +90,7 @@
     <ClInclude Include="..\..\src\saber\rgb2hsv.h" />
     <ClInclude Include="..\..\src\saber\sketcher.h" />
     <ClInclude Include="..\..\src\saber\unittest.h" />
+    <ClInclude Include="..\..\src\saber\vrender.h" />
     <ClInclude Include="oledsim.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

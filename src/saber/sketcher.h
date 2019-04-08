@@ -84,15 +84,13 @@ public:
 		WIDTH = 128,
 		HEIGHT = 32,
 
-		TWEAK_X0    = 0, //2,
-		TWEAK_X1    = 0,
-		X0			= 0 + TWEAK_X0,
-		X1			= WIDTH - TWEAK_X1,
+		X0			= 0,
+		X1			= WIDTH,
 		CENTER		= (X0 + X1) / 2,
 
         DIAL_WIDTH  = 28,
 		DATA_WIDTH	= WIDTH - DIAL_WIDTH * 2 - 20,
-		BAR_WIDTH   = 38 - TWEAK_X0 - TWEAK_X1,
+		BAR_WIDTH   = 38,
     };
 
     Sketcher();
@@ -115,6 +113,15 @@ private:
     uint32_t lastTime = 0;
     uint32_t animTime = 0;
 	uint8_t  accelData[DATA_WIDTH];
+};
+
+class SketcherRGB
+{
+public:
+    SketcherRGB(Renderer* renderer);
+    void Draw(uint32_t time, UIMode mode, bool bladeIgnited, const UIRenderData* data);
+private:
+    Renderer* m_renderer = 0;
 };
 
 void calcCrystalColorRGB(uint32_t msec, 

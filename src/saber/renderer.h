@@ -2,6 +2,7 @@
 #define DISPLAY_INCLUDED
 
 #include <stdint.h>
+#include "rgb.h"
 
 typedef const uint8_t* (*GlyphMetrics)(int charID, int* advance, int* w, int* rows);
 typedef const uint8_t* (*TextureData)(int* w, int* h);
@@ -40,5 +41,6 @@ private:
 	enum { MAX_ROWS = 4};
 	uint8_t m_mask[MAX_ROWS];
 };
+
 
 #endif // DISPLAY_INCLUDED

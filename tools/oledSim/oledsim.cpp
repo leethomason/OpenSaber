@@ -2,16 +2,16 @@
 #include <string.h>
 #include "../saber/rgb.h"
 
-OledSim::OledSim(int w, int h)
+OledSim::OledSim(int w, int h, int bytes)
 {
 	width = w;
 	height = h;
+    bytesPerPixel = bytes;
 
 	pixels = new uint32_t[w*h];
-	buffer = new uint8_t[w*h];
+	buffer = new uint8_t[w*h*bytesPerPixel];
 
-	memset(pixels, 0, w * h * sizeof(uint32_t));
-	memset(buffer, 0, w * h * sizeof(uint8_t));
+    Clear();
 }
 
 
@@ -85,5 +85,5 @@ void OledSim::CommitFromDotstar(const osbr::RGB* dotstar, int n)
 void OledSim::Clear()
 {
 	memset(pixels, 0, width * height * sizeof(uint32_t));
-	memset(buffer, 0, width * height * sizeof(uint8_t));
+	memset(buffer, 0, width * height * bytesPerPixel * sizeof(uint8_t));
 }

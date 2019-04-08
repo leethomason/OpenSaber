@@ -40,6 +40,9 @@
     <ClCompile Include="..\..\src\saber\fixed.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\saber\vrender.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="oledsim.h">
@@ -64,6 +67,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\saber\fixed.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\saber\vrender.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

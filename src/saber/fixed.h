@@ -93,6 +93,9 @@ public:
 
     void set(float v) { x = SHORT(v * FIXED_1); }
     void set(double v) { x = SHORT(v * FIXED_1); }
+    void balancedDiv(int num, int den) {
+        x = (FIXED_1 * num + den / 2) / den;
+    }
 
     // Scale up to an int, potentially out of the range of this fixed.
     int32_t scale(int32_t s) const { 
