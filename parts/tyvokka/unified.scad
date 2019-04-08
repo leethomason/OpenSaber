@@ -12,7 +12,7 @@ DRAW_EMITTER = false;
 FAST = false;
 BAFFLE_AFT  = FAST ? 1 : 3;
 BAFFLE_FORE = FAST ? 1 : 2;
-$fn = FAST ? 20 : 80;
+$fn = FAST ? 40 : 80;
 
 module flatBottom()
 {
