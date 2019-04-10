@@ -64,17 +64,22 @@ bool wav12::compressVelocity(const int16_t *data, int32_t nSamples, uint8_t **co
     return false;
 }
 
-void ExpanderV::init(IStream *stream)
+void ExpanderV::attach(IStream *stream)
 {
+    reset();
     m_stream = stream;
+}
+
+void ExpanderV::reset()
+{
+    m_bufferEnd = m_bufferStart = 0;
     m_done = false;
+    m_vel = Velocity();
 }
 
 void ExpanderV::rewind()
 {
-    m_bufferEnd = m_bufferStart = 0;
-    m_vel = Velocity();
-    m_done = false;
+    reset();
     m_stream->rewind();
 }
 

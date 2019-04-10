@@ -676,7 +676,7 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define SABER_UI_BRIGHTNESS		16		
 	#define SABER_UI_IDLE_MEDITATION
 
-	#define SABER_SOUND_DEF SABER_SOUND_DEF_BESPIN_ROGUE
+	#define SABER_SOUND_DEF SABER_SOUND_DEF_BESPIN_JAINA
 
 	static const int32_t UVOLT_MULT = 5019;	
 	#define ID_STR "Tyvokka Cree XPE2 RGB"

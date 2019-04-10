@@ -58,7 +58,7 @@ void I2SAudio::timerCallback(int id)
         I2SAudio::tracker.timerQueued++;
         SPIStream& spiStream = I2SAudio::instance()->spiStream;
         spiStream.set(I2SAudio::queued_addr, I2SAudio::queued_size);
-        expander.init(&spiStream);
+        expander.attach(&spiStream);
     }
 
     if (audioBufferData[id].status != AUDBUF_EMPTY)
@@ -164,7 +164,7 @@ bool I2SAudio::play(int fileIndex)
     uint32_t baseAddr = 0;
     readAudioInfo(spiFlash, file, &header, &baseAddr);
 
-    Log.p("Play(index) [").p(fileIndex).p("]: lenInBytes=").p(header.lenInBytes).p(" nSamples=").p(header.nSamples).p(" format=").p(header.format).eol();
+    Log.p("Play [").p(fileIndex).p("]: lenInBytes=").p(header.lenInBytes).p(" nSamples=").p(header.nSamples).p(" baseAddr=").p(baseAddr).p(" format=").p(header.format).eol();
 
     // Queue members need to be in the no-interupt lock since
     // it is read and modified by the timer callback. readFile()

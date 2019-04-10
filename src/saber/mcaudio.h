@@ -125,6 +125,7 @@ public:
     virtual void set(uint32_t addr, uint32_t size) {
         m_size = size;
         m_addr = addr;
+        m_pos = 0;
     }
 
     virtual uint32_t fetch(uint8_t* target, uint32_t nBytes);

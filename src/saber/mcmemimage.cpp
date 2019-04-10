@@ -134,8 +134,6 @@ void dumpImage(Adafruit_SPIFlash& spiFlash)
     }
 }
 
-#define DEBUG_LOOKUP
-
 DirToIndex::DirToIndex()
 {
     for(int i=0; i<ConstMemImage::NUM_DIR; i++) {
