@@ -30,7 +30,15 @@ module attachPost(diameter)
 
     difference() 
     {
-        simpleBridge(diameter, diameter/2 - POST_DY, 5, MID_BRIDGE_DZ);
+        //simpleBridge(diameter, diameter/2 - POST_DY, 5, MID_BRIDGE_DZ);
+        BRIDGE_T = 3;
+        intersection() {
+            translate([0, 0, -MID_BRIDGE_DZ/2 - 0.5])
+                cylinder(h=MID_BRIDGE_DZ + 1, d=diameter - 1);
+            translate([-20, diameter/2 - POST_DY - BRIDGE_T, -MID_BRIDGE_DZ/2])
+                cube(size=[40, BRIDGE_T, MID_BRIDGE_DZ]);
+        }
+
 
         // Bolt hole
         rotate([-90, 0, 0])
@@ -51,10 +59,11 @@ module attachPost(diameter)
     }
 }
 
-module insetBaffle(diameter, dzBaffle, bridge)
+module insetBaffle(diameter, dzBaffle, bridge, cutout)
 {
     difference() {
-        oneBaffle(diameter, dzBaffle, bridge=bridge, battery=false, mc=false, cutout=false);
+        oneBaffle(diameter, dzBaffle, bridge=bridge, 
+            battery=false, mc=false, cutout=cutout);
         hull() {
             cylinder(h=dzBaffle*1.1, d=diameter * 0.65);
             translate([0, -2.5, 0])
@@ -63,24 +72,27 @@ module insetBaffle(diameter, dzBaffle, bridge)
     }
 }
 
+
 // Origin top, center, back of pins.
 module headerHolder(diameter, dy)
 {
-    T = 1.5;
-    DZ = 2.6;
+    HEADER_HOLDER_T = 2.0;
+    HEADER_HOLDER_DZ = 2.6;
     DX = 10;
     D_OPEN = 6.3;
 
-    intersection() {
-        translate([0, 0, -20]) cylinder(h=300, d=diameter);
-        translate([0, dy, 0]) difference() {
-            translate([-(DX/2 + T), -20, -(DZ + T)]) {
-                cube(size=[DX + 2*T, 20, DZ + 2*T]);
-            }
-            translate([-DX/2, -20, -DZ])
-                cube(size=[DX, 21, DZ]);
-            translate([-D_OPEN/2, -20, -DZ-T-1])
-                cube(size=[D_OPEN, 21, DZ+T+1]);
+    //intersection() 
+    {
+        //translate([0, 0, -20]) cylinder(h=300, d=diameter);
+        translate([0, dy, 0]) 
+            difference() {
+                translate([-(DX/2 + HEADER_HOLDER_T), -20, -(HEADER_HOLDER_DZ + HEADER_HOLDER_T)]) {
+                    cube(size=[DX + 2*HEADER_HOLDER_T, 20, HEADER_HOLDER_DZ + 2*HEADER_HOLDER_T]);
+                }
+                translate([-DX/2, -20, -HEADER_HOLDER_DZ])
+                    cube(size=[DX, 21, HEADER_HOLDER_DZ]);
+                translate([-D_OPEN/2, -20, -HEADER_HOLDER_DZ-HEADER_HOLDER_T-1])
+                    cube(size=[D_OPEN, 21, HEADER_HOLDER_DZ+HEADER_HOLDER_T+1]);
         }
     }
 }
@@ -157,7 +169,14 @@ module insetHolder( diameter,
 
             // Power holder.
             translate([0, 0, Z_MID + DZ_PORT]) {
-                simpleBridge(D_INNER, R_INNER - POWER_DY, 3, 14, 4);
+                //simpleBridge(D_INNER, R_INNER - POWER_DY, 3, 14, 4);
+                BRIDGE_T = 3;
+                intersection() {
+                    translate([0, 0, -7 - 0.5])
+                        cylinder(h=14 + 1, d=D_INNER - 1);
+                    translate([-20, R_INNER - POWER_DY - BRIDGE_T, -7])
+                        cube(size=[40, BRIDGE_T, 14]);
+                }
             }
         }
 
@@ -198,7 +217,7 @@ module insetHolder( diameter,
             for(i=[0:nBaffle-1]) {
                 translate([0, 0, i*dzBaffle*2]) {
                     style = (bridgeStyleArray && i < len(bridgeStyleArray)) ? bridgeStyleArray[i] : bridgeStyle;
-                    insetBaffle(diameter, dzBaffle, style);
+                    insetBaffle(diameter, dzBaffle, style, i < 4);
                 }
             }
         }
