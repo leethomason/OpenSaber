@@ -85,7 +85,7 @@ uint32_t lastLoopTime   = 0;
 
 /* First up; initialize the audio system and all its 
    resources. Also need to disable the amp to avoid
-   clicking.
+   clicking. (clicking isn't a problem with the i2s amp)
 */
 #if SABER_SOUND_ON == SABER_SOUND_SD
 AudioPlayer audioPlayer;
@@ -96,7 +96,7 @@ Adafruit_ZeroI2S i2s(0, 1, 12, 2);          // FIXME define pins
 Adafruit_SPIFlash spiFlash(SS1, &SPI1);     // Use hardware SPI 
 Adafruit_ZeroDMA audioDMA;
 SPIStream spiStream(spiFlash);              // FIXME global generic resource
-I2SAudio audioPlayer(i2s, audioDMA, spiFlash, spiStream);
+I2SAudio audioPlayer(i2s, audioDMA, spiFlash);
 SFX sfx(&audioPlayer);
 ConstMemImage MemImage(spiFlash);
 
@@ -152,18 +152,9 @@ Digit4UI digit4UI;
 #define SHIFTED_OUTPUT
 #endif
 
-#ifdef SABER_COMRF24
-RF24        rf24(PIN_SPI_CE, PIN_SPI_CS);
-ComRF24     comRF24(&rf24);
-Timer2      pingPongTimer(PING_PONG_INTERVAL);
-#endif
-
 CMDParser   cmdParser(&saberDB);
 Blade       blade;
 Timer2      vbatTimer(AveragePower::SAMPLE_INTERVAL);
-#ifdef LOG_AVE_POWER
-Timer2      vbatPrintTimer(500);
-#endif
 Timer2      gforceDataTimer(110);
 
 Tester      tester;
@@ -210,8 +201,14 @@ void setupSD()
 
     #ifdef SABER_SOUND_ON
     if (wavSource) {
+        audioPlayer.initStream(&spiStream, 0);
+        #if NUM_AUDIO_CHANNELS == 4
+            audioPlayer.initStream(&spiStream1, 1);
+            audioPlayer.initStream(&spiStream2, 2);
+            audioPlayer.initStream(&spiStream3, 3);
+        #endif
         audioPlayer.init();
-        audioPlayer.setVolume(50);
+        audioPlayer.setVolume(50, 0);
     }
     #endif
 }
@@ -234,7 +231,7 @@ void setup() {
         digitalWrite(PIN_LATCH, HIGH);
     #endif
 
-    Serial.begin(19200);  // still need to turn it on in case a command line is connected.
+    Serial.begin(19200);  // Still need to turn it on in case USB is connected later to configure or debug.
     #if SERIAL_DEBUG == 1
     {
         int nTries = 0;
@@ -318,23 +315,6 @@ void setup() {
             neoPixels.setBrightness(SABER_UI_BRIGHTNESS);
             Log.p("Neopixel initialized.").eol();
         #endif
-    #endif
-
-    #ifdef SABER_COMRF24 
-        #if SABER_SUB_MODEL == SABER_SUB_MODEL_LUNA
-            const int role = 0;
-        #elif SABER_SUB_MODEL == SABER_SUB_MODEL_CELESTIA
-            const int role = 1;
-        #else
-            #error Role not defined.
-        #endif
-        if(comRF24.begin(role)) {
-            Log.p("RF24 initialized. Role=").p(comRF24.role()).eol();
-        }
-        else {
-            Log.p("RF24 error.").eol();
-        }
-
     #endif
 
     syncToDB();
@@ -452,13 +432,6 @@ void buttonAHoldHandler(const Button& button)
         if (uiMode.mode() == UIMode::NORMAL) {
             if (button.nHolds() == 1) {
                 igniteBlade();
-                int pal = saberDB.paletteIndex();
-                (void) pal;
-                #ifdef SABER_COMRF24
-                char buf[] = "ignite0";
-                buf[6] = '0' + pal;
-                comRF24.send(buf);
-                #endif
             }
         }
         else 
@@ -480,9 +453,6 @@ void buttonAHoldHandler(const Button& button)
     else if (bladeState.state() != BLADE_RETRACT) {
         if (button.nHolds() == 1) {
             retractBlade();
-            #ifdef SABER_COMRF24
-            comRF24.send("retract");
-            #endif
         }
     }
 }
@@ -502,48 +472,7 @@ void processSerial() {
 }
 
 
-#ifdef SABER_COMRF24
-void processCom(uint32_t delta)
-{
-    CStr<16> comStr;
-    comRF24.process(&comStr);
-    if (!comStr.empty()) {
-        if (comStr.beginsWith("ignite")) {
-            char c = comStr[6];
-            if (c >= '0' && c <= '7') {
-                saberDB.setPalette(c - '0');
-            }
-            igniteBlade();
-        }
-        else if (comStr == "retract") {
-            retractBlade();
-        }
-        else if (comStr == "ping") {
-            // Low priority event. Only do the breathing
-            // if the LED isn't being used to display something else.
-            if (!ledA.blinking() && bladeState.state() == BLADE_OFF && uiMode.mode() == UIMode::NORMAL) {
-                ledA.blink(1, BREATH_TIME, 0, LEDManager::BLINK_BREATH);
-            }
-            comRF24.send("pong");
-        }
-        else if (comStr == "pong") {
-            // Low priority event. Only do the breathing
-            // if the LED isn't being used to display something else.
-            if (!ledA.blinking() && bladeState.state() == BLADE_OFF && uiMode.mode() == UIMode::NORMAL) {
-                ledA.blink(1, BREATH_TIME, 0, LEDManager::BLINK_BREATH);
-            }
-        }
-    }
-    if (comRF24.role() == 1 && bladeState.state() == BLADE_OFF && uiMode.mode() == UIMode::NORMAL) {
-        if (pingPongTimer.tick(delta)) {
-            comRF24.send("ping");
-        }
-    }
-}
-#endif
-
-
-void processAccel(uint32_t msec)
+void processAccel(uint32_t msec, uint32_t deltaMicro)
 {
     if (bladeState.state() == BLADE_ON) {
         float g2Normal = 1.0f;
@@ -589,7 +518,8 @@ void processAccel(uint32_t msec)
 }
 
 void loop() {
-    // Doesn't seem to get called on M0 / ItsyBitsy. Not sure why.
+    // processSerial() doesn't seem to get called on M0 / ItsyBitsy. 
+    // Not sure why.
     // processSerial() is intended to be "out of loop". Call it
     // first in the loop to try to preserve current behavior.
     processSerial();
@@ -602,10 +532,6 @@ void loop() {
 
     buttonA.process();
     ledA.process();
-    #ifdef SABER_COMRF24
-    processCom(delta);
-    #endif
-    processAccel(msec);
 
     bladeState.process(&blade, saberDB, millis());
     sfx.process();

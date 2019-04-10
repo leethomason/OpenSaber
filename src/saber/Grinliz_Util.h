@@ -439,6 +439,7 @@ private:
 	bool m_enable;
 };
 
+// iSin goes [0,1], not [0, 2pi]
 FixedNorm iSin(FixedNorm x);
 
 /* Generally try to keep Ardunino and Win332 code very separate.

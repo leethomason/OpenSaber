@@ -99,8 +99,7 @@ void ExpanderV::fetch()
         assert(read > 0);
         m_bufferEnd = read + 1;
     }
-    else
-    {
+            else {
         // We were on a sample boundary, so read as much as possible.
         read = m_stream->fetch(m_buffer, BUFFER_SIZE);
         m_bufferEnd = read;
@@ -214,7 +213,7 @@ uint32_t MemStream::fetch(uint8_t *buffer, uint32_t nBytes)
     if (m_pos + nBytes > m_size)
         nBytes = m_size - m_pos;
 
-    memcpy(buffer, m_data + m_pos, nBytes);
+    memcpy(buffer, m_data + m_addr + m_pos, nBytes);
     m_pos += nBytes;
     return nBytes;
 }

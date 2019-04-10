@@ -65,7 +65,7 @@ public:
   bool init();
   void scanFiles(uint8_t font);
 
-  bool playSound(int sfx, int mode, bool playIfOff=false);
+  bool playSound(int sfx, int mode);
   bool playSound(const char* sfx);
   bool playUISound(const char* name, bool prepandUIPath=true);
   bool playUISound(int n, bool prepandUIPath=true);
@@ -80,10 +80,6 @@ public:
   const uint32_t getIgniteTime() const    { return m_igniteTime; }
   const uint32_t getRetractTime() const   { return m_retractTime; }
 
-  // Get the length of the currently playing file. Will
-  // return 0 if the file header isn't read yet.
-  //uint32_t lengthMillis() const;
-
   void setVolume204(int vol);
   uint8_t getVolume204() const;
 
@@ -95,7 +91,7 @@ public:
 
   bool readHeader(const char* path, uint32_t* lengthMillis);
 
-private:
+  protected:
   void filePath(CStr<25>* str, int id);
   void filePath(CStr<25>* str, const char* dir, const char* file);
   void scanFonts();
@@ -119,7 +115,7 @@ private:
   bool         m_bladeOn;
   uint8_t      m_numFonts;
   int8_t       m_numFilenames;
-  int8_t       m_currentSound;
+  int8_t m_currentSound; // For smooth, refers to the current effect sound.
   int8_t       m_lastSFX;
   uint8_t      m_currentFont;
   uint32_t     m_igniteTime;
@@ -127,9 +123,9 @@ private:
   int          m_savedVolume = -1;  // negative means not in use.
 
   Random       m_random;
-  SFXLocation  m_location[NUM_SFX_TYPES];
-  CStr<13>     m_filename[MAX_SFX_FILES];
-  CStr<9>      m_dirName[MAX_FONTS];
+    SFXLocation m_location[NUM_SFX_TYPES];  // written at scanFiles
+    CStr<13> m_filename[MAX_SFX_FILES];     // written at scanFiles
+    CStr<9> m_dirName[MAX_FONTS];           // written at init() / scanFonts()
   
   static SFX*  m_instance;
 };

@@ -67,7 +67,7 @@ namespace wav12 {
     class ExpanderV
     {
     public:
-        static const int BUFFER_SIZE = 256;
+        static const int BUFFER_SIZE = 128;
 
         ExpanderV() {}
         void attach(IStream* stream);
@@ -80,6 +80,7 @@ namespace wav12 {
     private:
         void reset();
 
+    private:
         inline bool hasSample() {
             if (m_bufferStart < m_bufferEnd - 1)
                 return true;
