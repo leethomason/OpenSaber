@@ -44,8 +44,6 @@
 
 using namespace osbr;
 
-#define DEBUG_DEEP
-
 const int8_t Blade::pinRGB[NCHANNELS] = { PIN_EMITTER_RED, PIN_EMITTER_GREEN, PIN_EMITTER_BLUE };
 Blade* Blade::instance = 0;
 
@@ -134,23 +132,20 @@ void Blade::setVoltage(int milliVolts) {
     static const int32_t amps[NCHANNELS] = { RED_I,  GREEN_I,  BLUE_I };
     static const int32_t res[NCHANNELS]  = { RED_R,  GREEN_R,  BLUE_R };
 
-    #ifdef DEBUG_DEEP
-        // Shouldn't see rapid change, and power should be averaged.
-        if(milliVolts == 3700 || (m_vbat == 3700) || (abs(milliVolts - m_vbat) < 100)) {
-            // all well.
-        } 
-        else {
-            Log.p("Blade::setVoltage() vBat=").p(m_vbat).p(" mV=").p(milliVolts).eol();
-            ASSERT(false);
-        }
-    #endif
+    if (milliVolts < 3400 || milliVolts > 5400) {
+        Log.p("Blade::setVoltage() vBat=").p(m_vbat).p(" mV=").p(milliVolts).eol();
+        ASSERT(false);
+    }
 
     m_vbat = milliVolts;
     for (int i = 0; i < NCHANNELS; ++i) {
         // throttle = I * R / (Vbat - Vf)
         // Denominator x1000 corrects for units (mAmps, mOhms, mVolts)
         m_throttle[i] = FixedNorm(amps[i] * res[i] / 1000, m_vbat - vF[i] );
-        ASSERT(m_throttle[i] >= 0);
+        if (m_throttle[i] < 0) {
+            Log.p(i).p(": ").p(amps[i]).p(" ").p(res[i]).p(" ").p(m_vbat).p(" ").p(vF[i]).eol();
+            ASSERT(false);
+        }
         // Want more power than we have as the battery goes down:
         if (m_throttle[i] > 1)
             m_throttle[i] = 1;

@@ -32,6 +32,7 @@ void ConstMemImage::readDir(int index, MemUnit* dir) const
 void ConstMemImage::readDir(const char* dirName, MemUnit* dir) const
 {
     int index = dirToIndex.lookup(dirName);
+    ASSERT(index >= 0);
     if (index >= 0) {
         readDir(index, dir);
     }
@@ -53,7 +54,9 @@ void ConstMemImage::readAudioInfo(int index, wav12::Wav12Header* header, uint32_
 
 int ConstMemImage::lookup(const char* path) const
 {
-    return dirToIndex.lookup(path);
+    int index = dirToIndex.lookup(path);
+    ASSERT(index >= 0);
+    return index;
 }
 
 
@@ -131,7 +134,7 @@ void dumpImage(Adafruit_SPIFlash& spiFlash)
     }
 }
 
-//#define DEBUG_LOOKUP
+#define DEBUG_LOOKUP
 
 DirToIndex::DirToIndex()
 {
@@ -179,30 +182,31 @@ int DirToIndex::lookup(const char* path) const
 
     const char* end = path + strlen(path);
     
-    #ifdef DEBUG_LOOKUP
     CStr<10> dirStr, fileStr;
     dirStr.append(path, div);
     fileStr.append(div+1, end);    
+
+    #ifdef DEBUG_LOOKUP
     Log.p(dirStr.c_str()).p(" ").p(fileStr.c_str()).eol();
     #endif
 
-    uint16_t dHash = hash8(path, div);
-    uint16_t fHash = hash8(div+1, end);
+    uint16_t dHash = dirStr.hash8();
+    uint16_t fHash = fileStr.hash8();
 
     #ifdef DEBUG_LOOKUP
-    Log.p("d=").p(dHash).p(" f=").p(fHash).eol();
+    Log.p("Dir=").p(dirStr.c_str()).p(" ").p(dHash).p(" File=").p(fileStr.c_str()).p(" ").p(fHash).eol();
     #endif
-
-    if (!dHash || !fHash) return -1;
+    ASSERT(dHash);
+    ASSERT(fHash);
 
     for(int i=0; i<ConstMemImage::NUM_DIR; i++) {
         #ifdef DEBUG_LOOKUP
-        Log.p("  d=").p(dirHash[i]).eol();
+        Log.p("  Dir=").p(dirHash[i]).eol();
         #endif
         if (dirHash[i] == dHash) {
             for(int j=dirStart[i]; j<ConstMemImage::NUM_FILES; ++j) {
                 #ifdef DEBUG_LOOKUP
-                Log.p("    f[").p(j).p(")]=").p(fileHash[j]).eol();
+                Log.p("    f[").p(j).p("]=").p(fileHash[j]).eol();
                 #endif
                 if (fileHash[j] == fHash) {
                     return j;
