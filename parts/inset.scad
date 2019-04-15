@@ -31,7 +31,7 @@ module attachPost(diameter)
     difference() 
     {
         //simpleBridge(diameter, diameter/2 - POST_DY, 5, MID_BRIDGE_DZ);
-        BRIDGE_T = 3;
+        BRIDGE_T = 8;
         intersection() {
             translate([0, 0, -MID_BRIDGE_DZ/2 - 0.5])
                 cylinder(h=MID_BRIDGE_DZ + 1, d=diameter - 1);
@@ -132,20 +132,6 @@ module insetHolder( diameter,
             translate([0, 0, Z_MID])
                 attachPost(D_INNER);
 
-            // Switch holder.
-            *intersection() {
-                cylinder(h=300, d=D_INNER);
-                translate([0, 0, Z_MID + DZ_SWITCH]) {
-                    simpleBridge(D_INNER, R_INNER - SWITCH_DY, 3, SWITCH_BRIDGE_DZ, flatFill=true);
-
-                    translate([X_SWITCH/2, R_INNER - SWITCH_DY, -SWITCH_BRIDGE_DZ/2])
-                        cube(size=[50, Y_SWITCH, SWITCH_BRIDGE_DZ]);
-                    mirror([-1, 0, 0])
-                        translate([X_SWITCH/2, R_INNER - SWITCH_DY, -SWITCH_BRIDGE_DZ/2])
-                            cube(size=[50, Y_SWITCH, SWITCH_BRIDGE_DZ]);
-                }
-            }
-
             // Switch flat version + header mount
             intersection() {
                 BRIDGE_T = 3;
@@ -169,7 +155,6 @@ module insetHolder( diameter,
 
             // Power holder.
             translate([0, 0, Z_MID + DZ_PORT]) {
-                //simpleBridge(D_INNER, R_INNER - POWER_DY, 3, 14, 4);
                 BRIDGE_T = 3;
                 intersection() {
                     translate([0, 0, -7 - 0.5])
