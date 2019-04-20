@@ -68,4 +68,4 @@ hole(g, mat, SWITCH_INSET_DEPTH, d=SWITCH_INSET_D)
 
 #### capsule cut #######
 travel(g, mat, x=bounds.cx)
-capsule(g, mat, bottom, bounds.center.dx, bounds.center.dy, "outside", True, 'x')
+capsule(g, mat, bottom, bounds.center.dx, bounds.center.dy, "outside", True, 'x', Z_PAD + 1.0)
