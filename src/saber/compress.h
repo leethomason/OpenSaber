@@ -100,10 +100,12 @@ namespace wav12 {
         bool m_done = false;
 
         // State for decompression
-        Velocity m_vel;
-        int m_high3 = 0;
-        bool m_hasHigh3 = false;
-
+        struct State {
+            Velocity vel;
+            int high3 = 0;
+            bool hasHigh3 = false;
+        };
+        State m_state;
     };
 }
 #endif

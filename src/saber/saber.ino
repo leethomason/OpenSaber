@@ -300,11 +300,9 @@ void setup() {
     #endif
 
     #if defined(SABER_NUM_LEDS)
-        Log.p(__LINE__).eol();
         for(int i=0; i<SABER_NUM_LEDS; ++i) {
             leds[i].set(2, 2, 2, 255);
         }
-        Log.p(__LINE__).eol();
         #if SABER_UI_LED == SABER_LED_DOTSTAR
             dotstar.beginSPI(PIN_DOTSTAR_EN);
             dotstar.display(leds, SABER_NUM_LEDS);
@@ -607,7 +605,11 @@ void loopDisplays(uint32_t msec, uint32_t delta)
 
             // Copy back from Draw(RGB) to Dotstar(RGBA)
             for(int i=0; i<SABER_UI_COUNT; ++i) {
+                #ifdef SABER_UI_REVERSE
+                leds[SABER_UI_START + SABER_UI_COUNT - 1 - i].set(rgb[i], SABER_UI_BRIGHTNESS);
+                #else
                 leds[SABER_UI_START + i].set(rgb[i], SABER_UI_BRIGHTNESS);
+                #endif
             }
         #endif
     }

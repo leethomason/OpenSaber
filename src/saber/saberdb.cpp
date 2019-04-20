@@ -148,10 +148,17 @@ bool SaberDB::writeDefaults()
             { 0x0000ff,  0x00c8ff,    0 },    // blue
             { 0x00ffff,  0x00a0ff,    0 },    // cyan
             { 0xff0000,  0xa08000,    0 },    // red
-            { 0xff4000,  0x80ff00,    0 },
+#if (SABER_MODEL == SABER_MODEL_TYVOKKA)            
+            { 0xff6000,  0x808000,    0 },    // orange
+            { 0x0044ff,  0x00ccff,    0 },    // blue-green
+            { 0x508080,  0x30a0a0,    0 },    // white
+            { 0x00ff44,  0x00ffaa,    0 }     // green-blue
+#else
+            { 0xff4000,  0x80ff00,    0 },    // orange
             { 0x0044ff,  0x00ccff,    0 },
             { 0x9000ff,  0x9064ff,    0 },
             { 0x00ff44,  0x00ffaa,    0 }
+#endif                        
         };
 
         #ifndef SABER_SOUND_FLASH
