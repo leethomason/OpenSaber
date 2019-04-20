@@ -74,7 +74,7 @@ void ExpanderV::reset()
 {
     m_bufferEnd = m_bufferStart = 0;
     m_done = false;
-    m_vel = Velocity();
+    m_state = State();
 }
 
 void ExpanderV::rewind()
@@ -125,7 +125,7 @@ int ExpanderV::expand(int32_t *target, uint32_t nSamples, int32_t volume, bool a
                 return i;
         }
         const uint8_t *src = m_buffer + m_bufferStart;
-        const int32_t guess = m_vel.guess();
+        const int32_t guess = m_state.vel.guess();
         int32_t value = 0;
 
         // If the high bit is a set, it is a 1 byte sample.
@@ -135,10 +135,10 @@ int ExpanderV::expand(int32_t *target, uint32_t nSamples, int32_t volume, bool a
         {
             int32_t low7 = src[0] & 0x7f;
 
-            if (m_hasHigh3)
+            if (m_state.hasHigh3)
             {
                 static const int32_t BIAS = 512;
-                int32_t bits = ((m_high3 << 7) | low7);
+                int32_t bits = ((m_state.high3 << 7) | low7);
                 int32_t delta = bits - BIAS;
                 value = guess + delta;
             }
@@ -148,7 +148,7 @@ int ExpanderV::expand(int32_t *target, uint32_t nSamples, int32_t volume, bool a
                 int32_t delta = low7 - BIAS;
                 value = guess + delta;
             }
-            m_hasHigh3 = false;
+            m_state.hasHigh3 = false;
             m_bufferStart++;
         }
         else
@@ -159,17 +159,17 @@ int ExpanderV::expand(int32_t *target, uint32_t nSamples, int32_t volume, bool a
             //
             // Stored as: low7 high5
             static const int32_t BIAS = 2048;
-            m_high3 = (src[1] & 0xe0) >> 5;
+            m_state.high3 = (src[1] & 0xe0) >> 5;
 
             int32_t low7 = src[0] & 0x7f;
             int32_t high5 = (src[1] & 0x1f);
             int32_t bits = low7 | (high5 << 7);
             value = bits - BIAS;
 
-            m_hasHigh3 = true;
+            m_state.hasHigh3 = true;
             m_bufferStart += 2;
         }
-        m_vel.push(value);
+        m_state.vel.push(value);
         int32_t s = value * volume * 16;
         if (add)
         {
