@@ -470,7 +470,7 @@ void processSerial() {
 }
 
 
-void processAccel(uint32_t msec, uint32_t deltaMicro)
+void processAccel(uint32_t msec)
 {
     if (bladeState.state() == BLADE_ON) {
         float g2Normal = 1.0f;
@@ -532,6 +532,7 @@ void loop() {
     ledA.process();
 
     bladeState.process(&blade, saberDB, millis());
+    processAccel(msec);
     sfx.process();
 
     if (vbatTimer.tick(delta)) {

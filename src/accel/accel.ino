@@ -3,9 +3,10 @@
 #include <math.h>
 
 #include "accelspeed.h"
+#include "GrinlizLIS3DH.h"
 
 //#define LOG_MODE
-#define SOUND_TEST
+//#define SOUND_TEST
 #define PIN_ENABLE 2
 #define TONE_PIN A2
 
@@ -14,8 +15,11 @@ AccelSpeed accelSpeed;
 uint32_t lastMicros = 0;
 uint32_t lastTone = 0;
 #endif
+uint32_t lastMillis = 0;
+int nRead = 0;
 
-Adafruit_LIS3DH accel(PIN_ENABLE);
+//Adafruit_LIS3DH accel(PIN_ENABLE);
+GrinlizLIS3DH accel(PIN_ENABLE, LIS3DH_RANGE_8_G, LIS3DH_DATARATE_100_HZ);
 
 void setup() {
     Serial.begin(115200);
@@ -31,36 +35,11 @@ void setup() {
     for(int i=0; i<5; ++i) {
         // Buggy buggy buggy SPI code.
         delay(20);
-        if (accel.begin(0)) {
+        if (accel.begin()) {
             Serial.print("Accelerometer open on attempt: "); Serial.println(i);
             success = true;
             break;
         }   
-    }
-
-    if (!success) {
-        Serial.println("Accelerometer ERROR.");
-    }
-    else {
-        bool success = false;
-        int n=0;
-        for(; n<4; n++) {
-            accel.setRange(LIS3DH_RANGE_4_G);
-            accel.setDataRate(LIS3DH_DATARATE_100_HZ);
-            delay(20);
-            lis3dh_range_t range = accel.getRange();
-            lis3dh_dataRate_t rate = accel.getDataRate();
-
-            if (range == LIS3DH_RANGE_4_G && rate == LIS3DH_DATARATE_100_HZ) {
-                success = true;
-                break;
-            }
-            delay(100);
-        }
-        Serial.print("Accelerometer open. Configuration success=");
-        Serial.print(success ? "true" : "false");
-        Serial.print(" on attempt=");
-        Serial.println(n);
     }
 
     #ifdef SOUND_TEST
@@ -68,11 +47,27 @@ void setup() {
     lastMicros = micros();
     lastTone = millis();
     #endif
+    Serial.println("Go!");
+    //lastMillis = millis();
 }
 
 
 void loop()
 {
+    GrinlizLIS3DH::AccelData data[8];
+    int16_t div = 0;
+    int n = accel.readRaw(data, 8, &div);
+    nRead += n;
+
+    uint32_t t = millis();
+    if (t - lastMillis >= 1000) {
+        Serial.print("Samples = ");
+        Serial.println(nRead);
+        lastMillis = t;
+        nRead = 0;
+    }
+
+/*
     uint32_t t = millis();
     uint32_t t_micros = micros();
 
@@ -112,4 +107,5 @@ void loop()
     delay(1000);
 #   endif
 #endif
+*/
 }
