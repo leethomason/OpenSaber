@@ -64,6 +64,7 @@
 #define LIS3DH_DATARATE_LOWPOWER_5KHZ       0x09
 
 
+// Reads the LIS3D in FIFO mode at a constant frequency.
 class GrinlizLIS3DH
 {
 public:
@@ -74,7 +75,7 @@ public:
     GrinlizLIS3DH(uint8_t enable, uint8_t scale = LIS3DH_RANGE_8_G, uint8_t dataRate = LIS3DH_DATARATE_100_HZ);
 
     bool begin();
-    int readRaw(AccelData* data, int inData, int16_t* divisor);
+    int readRaw(AccelData* data, int nData, int16_t* divisor);
 
 private:
     uint8_t readReg(uint8_t reg);

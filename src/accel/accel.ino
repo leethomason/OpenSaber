@@ -18,8 +18,7 @@ uint32_t lastTone = 0;
 uint32_t lastMillis = 0;
 int nRead = 0;
 
-//Adafruit_LIS3DH accel(PIN_ENABLE);
-GrinlizLIS3DH accel(PIN_ENABLE, LIS3DH_RANGE_16_G, LIS3DH_DATARATE_100_HZ);
+GrinlizLIS3DH accel(PIN_ENABLE, LIS3DH_RANGE_8_G, LIS3DH_DATARATE_100_HZ);
 
 void setup() {
     Serial.begin(115200);
