@@ -19,7 +19,7 @@ uint32_t lastMillis = 0;
 int nRead = 0;
 
 //Adafruit_LIS3DH accel(PIN_ENABLE);
-GrinlizLIS3DH accel(PIN_ENABLE, LIS3DH_RANGE_8_G, LIS3DH_DATARATE_100_HZ);
+GrinlizLIS3DH accel(PIN_ENABLE, LIS3DH_RANGE_16_G, LIS3DH_DATARATE_100_HZ);
 
 void setup() {
     Serial.begin(115200);
@@ -33,7 +33,6 @@ void setup() {
 
     bool success = false;
     for(int i=0; i<5; ++i) {
-        // Buggy buggy buggy SPI code.
         delay(20);
         if (accel.begin()) {
             Serial.print("Accelerometer open on attempt: "); Serial.println(i);
@@ -49,15 +48,39 @@ void setup() {
     #endif
     Serial.println("Go!");
     //lastMillis = millis();
+
+    GrinlizLIS3DH::AccelData data[8];
+    int16_t div = 0;
+    int n = accel.readRaw(data, 8, &div);
+    for(int i=0; i<n; ++i) {
+        float ax = (float)data[i].x / div;
+        float ay = (float)data[i].y / div;
+        float az = (float)data[i].z / div;
+        Serial.print("a="); Serial.print(ax); Serial.print(" ");
+        Serial.print(ay); Serial.print(" ");
+        Serial.println(az);
+    }
 }
 
 
 void loop()
 {
+    static bool printTime = false;
+
     GrinlizLIS3DH::AccelData data[8];
     int16_t div = 0;
     int n = accel.readRaw(data, 8, &div);
     nRead += n;
+
+    if (n && printTime) {
+        printTime = false;
+        float ax = (float)data[0].x / div;
+        float ay = (float)data[0].y / div;
+        float az = (float)data[0].z / div;
+        Serial.print("a="); Serial.print(ax); Serial.print(" ");
+        Serial.print(ay); Serial.print(" ");
+        Serial.println(az);
+    }
 
     uint32_t t = millis();
     if (t - lastMillis >= 1000) {
@@ -65,47 +88,6 @@ void loop()
         Serial.println(nRead);
         lastMillis = t;
         nRead = 0;
+        printTime = true;
     }
-
-/*
-    uint32_t t = millis();
-    uint32_t t_micros = micros();
-
-    accel.read();
-    float ax = accel.x_g;
-    float ay = accel.y_g;
-    float az = accel.z_g;
-    float g = sqrt(ax*ax + ay*ay + az*az);
-
-#ifdef SOUND_TEST
-    (void) t;
-    (void) g;
-    uint32_t delta = t_micros - lastMicros;
-    lastMicros = t_micros;
-
-    if (delta > 100) {
-        accelSpeed.push(ax, ay, az, delta);
-    }
-    if (t - lastTone > 50) {
-        lastTone = t;
-        tone(TONE_PIN, 440 + int32_t(440 * accelSpeed.mix()));
-
-        Serial.print("speed="); Serial.print(accelSpeed.speed());
-        Serial.print(" mix="); Serial.print(accelSpeed.mix());
-        Serial.print(" rising="); Serial.println(accelSpeed.risingEdge());
-    }
-#else
-    Serial.print("accel x="); Serial.print(ax);
-    Serial.print(" y="); Serial.print(ay);
-    Serial.print(" z="); Serial.print(az);
-    Serial.print(" g="); Serial.print(g);
-    Serial.print(" t="); Serial.println(t);
-
-#   ifdef LOG_MODE
-    delay(10);
-#   else
-    delay(1000);
-#   endif
-#endif
-*/
 }

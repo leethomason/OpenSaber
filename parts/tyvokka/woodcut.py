@@ -8,7 +8,7 @@ from hole import hole
 
 # Top of stock.
 H_WOOD = 8.0
-H_STOCK = 19.20
+H_STOCK = 12.3
 X_CAPSULE = 42.0
 Y_CAPSULE = 16.2
 Z_PAD = 0.5
@@ -47,19 +47,21 @@ HEAD_H = 4.5
 BOLT = 4.3
 
 travel(g, mat, x=bounds.cx)
-hole(g, mat, -HEAD_H, d=HEAD)
 hole(g, mat, bottom, d=BOLT)
+hole(g, mat, -HEAD_H, d=HEAD)
 
 # power
 POWER_D = 8.0
 POWER_OUTER_D = 11.0
+POWER_OUTER_DEPTH = -2.0
 
 travel(g, mat, x=bounds.cx - DZ_CENTER)
 hole(g, mat, bottom, d=POWER_D)
+hole(g, mat, POWER_OUTER_DEPTH, d=POWER_OUTER_D)
 
 # switch
 SWITCH_D = 4.0 # 3.6 # 3.5
-SWITCH_INSET_D = 7.0
+SWITCH_INSET_D = 8.0 # 7.0
 SWITCH_INSET_DEPTH = -2.0
 
 travel(g, mat, x=bounds.cx + DZ_CENTER)    

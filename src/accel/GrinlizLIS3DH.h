@@ -51,10 +51,6 @@
 #define LIS3DH_RANGE_4_G         0x01   // +/- 4g
 #define LIS3DH_RANGE_2_G         0x00   // +/- 2g (default value)
 
-#define LIS3DH_AXIS_X   0x0
-#define LIS3DH_AXIS_Y   0x1
-#define LIS3DH_AXIS_Z   0x2
-
 /* Used with register 0x2A (LIS3DH_REG_CTRL_REG1) to set bandwidth */
 #define LIS3DH_DATARATE_400_HZ     0x07     //  400Hz 
 #define LIS3DH_DATARATE_200_HZ     0x06     //  200Hz
