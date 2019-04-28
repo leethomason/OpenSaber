@@ -47,19 +47,21 @@ HEAD_H = 4.0    # was 4.5 - go a little proud
 BOLT = 4.3
 
 travel(g, mat, x=bounds.cx)
-hole(g, mat, -HEAD_H, d=HEAD)
 hole(g, mat, bottom, d=BOLT)
+hole(g, mat, -HEAD_H, d=HEAD)
 
 # power
 POWER_D = 8.0
 POWER_OUTER_D = 11.0
+POWER_OUTER_H = 2.0
 
 travel(g, mat, x=bounds.cx - DZ_CENTER)
 hole(g, mat, bottom, d=POWER_D)
+hole(g, mat, -POWER_OUTER_H, d=POWER_OUTER_D)
 
 # switch
 SWITCH_D = 4.0 # 3.6 # 3.5
-SWITCH_INSET_D = 7.0
+SWITCH_INSET_D = 8.0
 SWITCH_INSET_DEPTH = -2.0
 
 travel(g, mat, x=bounds.cx + DZ_CENTER)    
