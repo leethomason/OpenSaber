@@ -8,7 +8,7 @@ from hole import hole
 
 # Top of stock.
 H_WOOD = 8.0
-H_STOCK = 19.20
+H_STOCK = 14.60
 X_CAPSULE = 42.0
 Y_CAPSULE = 16.2
 Z_PAD = 0.5
@@ -43,7 +43,7 @@ hill(g, mat, D_OUTER, bounds.center.dx, bounds.center.dy)
 
 #center bolt
 HEAD = 7.0
-HEAD_H = 4.5
+HEAD_H = 4.0    # was 4.5 - go a little proud
 BOLT = 4.3
 
 travel(g, mat, x=bounds.cx)
