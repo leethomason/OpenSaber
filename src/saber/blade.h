@@ -29,6 +29,24 @@
 #include "pins.h"
 #include "rgb.h"
 
+
+inline void calcGravity2(float ax, float ay, float az, float* g2, float* g2Normal)
+{
+    if (g2) {
+        *g2 = ax*ax + ay*ay + az*az;
+    }
+    if (g2Normal) {
+        #if ACCEL_BLADE_DIRECTION == 0
+        *g2Normal = ay * ay + az * az;
+        #elif ACCEL_BLADE_DIRECTION == 1
+        *g2Normal = ax * ax + az * az;
+        #elif ACCEL_BLADE_DIRECTION == 2
+        *g2Normal = ax * ax + ay * ay;
+        #endif
+    }
+}
+
+
 class Blade
 {
 public:

@@ -8,7 +8,7 @@ class Button;
 struct ButtonCBHandlers;
 class Tester;
 class SaberDB;
-class Accelerometer;
+class GrinlizLIS3DH;
 
 namespace osbr {
 	struct RGB;
@@ -37,7 +37,6 @@ public:
 	Tester();
 	void attach(Button* buttonA, Button* buttonB);
 	void attachDB(SaberDB* _saberDB) { saberDB = _saberDB; }
-	void attachAccel(Accelerometer* _accel) { accel = _accel; }
 
 	void runTests();
 	void process();
@@ -49,7 +48,6 @@ public:
 	void press(int button, uint32_t time);
 	void delayedPress(int button, uint32_t wait, uint32_t time);
 	SaberDB* getSaberDB() { return saberDB; }
-	Accelerometer* getAccelerometer() { return accel; }
 
 	int getOrder() const { return order; }
 	void incrementOrder() { order++; }
@@ -70,7 +68,6 @@ private:
 	uint32_t delayTime = 0;
 	SaberDB* saberDB = 0;
 	int order = 0;
-	Accelerometer* accel = 0;
 
 	struct Press {
 		uint32_t start;

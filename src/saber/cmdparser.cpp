@@ -28,7 +28,7 @@
 #include "SFX.h"
 #include "Tester.h"
 #include "saberUtil.h"
-#include "accelerometer.h"
+#include "GrinlizLIS3DH.h"
 
 using namespace osbr;
 
@@ -306,16 +306,28 @@ bool CMDParser::processCMD()
         root.close();
     }
     else if (action == ACCEL) {
-        float ax, ay, az, g2, g2n;
-        // 0 value sometimes. Flush.
-        Accelerometer::instance().read(&ax, &ay, &az, &g2, &g2n);        
-        delay(20);
-        Accelerometer::instance().read(&ax, &ay, &az, &g2, &g2n);
-        Serial.print( "x="); Serial.print(ax);
-        Serial.print(" y="); Serial.print(ay);
-        Serial.print(" z="); Serial.print(az);
-        Serial.print(" g="); Serial.print(sqrt(g2));
-        Serial.print(" gN="); Serial.println(sqrt(g2n));
+        GrinlizLIS3DH* accel = GrinlizLIS3DH::instance();
+        accel->flush();
+
+        static const int N = 4;
+        int n = 0;
+        GrinlizLIS3DH::Data data[N];
+        while(n < N) {
+            int read = accel->read(data + n, N - n);
+            n += read;
+        }
+
+        for(int i=0; i<N; ++i) {
+            Serial.print( "x="); Serial.print(data[i].ax);
+            Serial.print(" y="); Serial.print(data[i].ay);
+            Serial.print(" z="); Serial.print(data[i].az);
+
+            float g2, g2n;
+            calcGravity2(data[i].ax, data[i].ay, data[i].az, &g2, &g2n);
+
+            Serial.print(" g="); Serial.print(sqrt(g2));
+            Serial.print(" gN="); Serial.println(sqrt(g2n));
+        }
     }
     else if (action == CRYSTAL) {
         if (isSet) {

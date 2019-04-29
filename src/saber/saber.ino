@@ -52,8 +52,12 @@
     #endif
 #endif
 
+// Generalized accelerometer is simpler to code and works for prop shield.
+// But the LIS3DH is simpler to use directly, and the smooth-sound relies
+// on the constant frequency output. Now using the LIS3DH, moved Generalized
+// to git history (accelerometer.cpp/h and accelFXOS8700.cpp/h)
+#include "GrinlizLIS3DH.h"
 
-#include "accelerometer.h"
 #include "voltmeter.h"
 #include "sfx.h"
 #include "saberdb.h"
@@ -127,7 +131,7 @@ Voltmeter   voltmeter;
     #endif
 #endif
 
-Accelerometer accel;
+GrinlizLIS3DH accel(PIN_ACCEL_EN);
 
 Timer2 displayTimer(100);
 
@@ -249,7 +253,20 @@ void setup() {
     SPI.begin();
     setupSD();
 
-    accel.begin();
+    {
+        int nTries = 0;
+        bool okay = false;
+        while(nTries < 5) {
+            okay = accel.begin();
+            if (okay) break;
+            delay(100);
+            ++nTries;
+        }
+        if (okay)
+            Log.p("Accelerometer initialized on nTry=").p(nTries).eol();
+        else
+            Log.p("Accelerometer ERROR.").eol();
+    }
     delay(10);
     voltmeter.begin();
     delay(10);
@@ -261,7 +278,6 @@ void setup() {
 
     tester.attach(&buttonA, 0);
     tester.attachDB(&saberDB);
-    tester.attachAccel(&accel);
 
     #ifdef SABER_SOUND_ON
         if (wavSource) {
@@ -473,40 +489,62 @@ void processSerial() {
 void processAccel(uint32_t msec)
 {
     if (bladeState.state() == BLADE_ON) {
-        float g2Normal = 1.0f;
-        float g2 = 1.0f;
-        float ax=0, ay=0, az=0;
-        accel.read(&ax, &ay, &az, &g2, &g2Normal);
+        static const int N_ACCEL = 5;   // Don't need much history. (If any, honestly).
 
-        maxGForce2 = max(maxGForce2, g2);
-        float motion = saberDB.motion();
-        float impact = saberDB.impact();
-
-        // The extra check here for the motion time is because some
-        // motion loops are tacked on to the beginning of the idle
-        // loop...which makes sense. (Sortof). But leads to super-long
-        // motion. So if time is above a threshold, allow replay.
-        // Actual motion / impact sounds are usually less that 1 second.
-        #ifdef SABER_SOUND_ON
-        bool sfxOverDue = ((msec - lastMotionTime) > 1500) &&
-                          ((sfx.lastSFX() == SFX_MOTION) || (sfx.lastSFX() == SFX_IMPACT));
-        #else
-        bool sfxOverDue = false;
+        #if SERIAL_DEBUG == 1
+        var start = millis();
+        #endif
+        accel.flush(N_ACCEL);
+        #if SERIAL_DEBUG == 1
+        var end = millis();
+        if (end - start > 3) Log.p("WARNING accel flush time (ms)=").p(end - start).eol();
         #endif
 
-        if ((g2Normal >= impact * impact)) {
-            bool sound = sfx.playSound(SFX_IMPACT, sfxOverDue ? SFX_OVERRIDE : SFX_GREATER_OR_EQUAL);
-            if (sound) {
-                Log.p("Impact. g=").p(sqrt(g2)).eol();
-                bladeState.change(BLADE_FLASH);
-                lastMotionTime = msec;
+        GrinlizLIS3DH::Data data[N_ACCEL];
+        int n = accel.read(data, N_ACCEL);
+
+        for (int i = 0; i < n; ++i)
+        {
+            float g2Normal, g2;
+            float ax = data[i].ax;
+            float ay = data[i].ay;
+            float az = data[i].az;
+            calcGravity2(ax, ay, az, &g2, &g2Normal);
+
+            maxGForce2 = max(maxGForce2, g2);
+            float motion = saberDB.motion();
+            float impact = saberDB.impact();
+
+            // The extra check here for the motion time is because some
+            // motion loops are tacked on to the beginning of the idle
+            // loop...which makes sense. (Sortof). But leads to super-long
+            // motion. So if time is above a threshold, allow replay.
+            // Actual motion / impact sounds are usually less that 1 second.
+#ifdef SABER_SOUND_ON
+            bool sfxOverDue = ((msec - lastMotionTime) > 1500) &&
+                              ((sfx.lastSFX() == SFX_MOTION) || (sfx.lastSFX() == SFX_IMPACT));
+#else
+            bool sfxOverDue = false;
+#endif
+
+            if ((g2Normal >= impact * impact))
+            {
+                bool sound = sfx.playSound(SFX_IMPACT, sfxOverDue ? SFX_OVERRIDE : SFX_GREATER_OR_EQUAL);
+                if (sound)
+                {
+                    Log.p("Impact. g=").p(sqrt(g2)).eol();
+                    bladeState.change(BLADE_FLASH);
+                    lastMotionTime = msec;
+                }
             }
-        }
-        else if ( g2 >= motion * motion) {
-            bool sound = sfx.playSound(SFX_MOTION, sfxOverDue ? SFX_OVERRIDE : SFX_GREATER);
-            if (sound) {
-                Log.p("Motion. g=").p(sqrt(g2)).eol();
-                lastMotionTime = msec;
+            else if (g2 >= motion * motion)
+            {
+                bool sound = sfx.playSound(SFX_MOTION, sfxOverDue ? SFX_OVERRIDE : SFX_GREATER);
+                if (sound)
+                {
+                    Log.p("Motion. g=").p(sqrt(g2)).eol();
+                    lastMotionTime = msec;
+                }
             }
         }
     }
