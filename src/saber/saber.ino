@@ -488,21 +488,26 @@ void processSerial() {
 
 void processAccel(uint32_t msec)
 {
+    // Consistently process the accelerometer queue, even if we don't use the values.
+    // Also look for stalls and hitches.
+    static const int N_ACCEL = 4;
+    GrinlizLIS3DH::Data data[N_ACCEL];
+
+    #if SERIAL_DEBUG == 1
+    var start = millis();
+    #endif
+
+    int removed = 0;
+    accel.flush(N_ACCEL, &removed);
+    int n = accel.read(data, N_ACCEL);
+
+    #if SERIAL_DEBUG == 1
+    var end = millis();
+    if (removed > 0) Log.p("Accelerometer samples displosed=").p(removed).eol();
+    if (end - start > 3) Log.p("WARNING accel flush & read time (ms)=").p(end - start).eol();
+    #endif
+
     if (bladeState.state() == BLADE_ON) {
-        static const int N_ACCEL = 5;   // Don't need much history. (If any, honestly).
-
-        #if SERIAL_DEBUG == 1
-        var start = millis();
-        #endif
-        accel.flush(N_ACCEL);
-        #if SERIAL_DEBUG == 1
-        var end = millis();
-        if (end - start > 3) Log.p("WARNING accel flush time (ms)=").p(end - start).eol();
-        #endif
-
-        GrinlizLIS3DH::Data data[N_ACCEL];
-        int n = accel.read(data, N_ACCEL);
-
         for (int i = 0; i < n; ++i)
         {
             float g2Normal, g2;
