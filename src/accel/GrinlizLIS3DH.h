@@ -68,21 +68,35 @@
 class GrinlizLIS3DH
 {
 public:
-    struct AccelData {
+    struct RawData {
         int16_t x, y, z;
+    };
+    struct Data {
+        float ax, ay, az;
     };
 
     GrinlizLIS3DH(uint8_t enable, uint8_t scale = LIS3DH_RANGE_8_G, uint8_t dataRate = LIS3DH_DATARATE_100_HZ);
 
     bool begin();
-    int readRaw(AccelData* data, int nData, int16_t* divisor);
+    int read(Data* data, int nData) { return readInner(0, data, nData); }
+    int readRaw(RawData* data, int nData) { return readInner(data, 0, nData); }
+
+    void flush(int remainingMax=0, int* nRemoved=0);   // get rid of data in the FIFO
+
+    static GrinlizLIS3DH* instance() { return _instance; }
+
+    int readInner(RawData* rawData, Data* data, int n);
 
 private:
+    int available();
     uint8_t readReg(uint8_t reg);
     void writeReg(uint8_t reg, uint8_t value);
 
-    uint8_t enable;
-    uint8_t scale;
-    uint8_t dataRate;
-    int16_t divisor;
+    uint8_t m_enable;
+    uint8_t m_scale;
+    uint8_t m_dataRate;
+    int16_t m_divisor;
+    float m_divInv;
+
+    static GrinlizLIS3DH* _instance;
 };

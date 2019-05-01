@@ -324,7 +324,8 @@ public:
             return TEST_CONTINUE;
 
         int32_t deltaTime = millis() - startTime;
-        TEST_IS_TRUE(deltaTime > NDATA * 8 && deltaTime < NDATA * 12);
+        Serial.print("Time to read (ms):"); Serial.println(deltaTime);
+        TEST_IS_TRUE(deltaTime > NDATA * 8 && deltaTime < NDATA * 20);
 
         bool variation = false;
 

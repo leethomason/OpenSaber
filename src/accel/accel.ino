@@ -47,18 +47,6 @@ void setup() {
     #endif
     Serial.println("Go!");
     //lastMillis = millis();
-
-    GrinlizLIS3DH::AccelData data[8];
-    int16_t div = 0;
-    int n = accel.readRaw(data, 8, &div);
-    for(int i=0; i<n; ++i) {
-        float ax = (float)data[i].x / div;
-        float ay = (float)data[i].y / div;
-        float az = (float)data[i].z / div;
-        Serial.print("a="); Serial.print(ax); Serial.print(" ");
-        Serial.print(ay); Serial.print(" ");
-        Serial.println(az);
-    }
 }
 
 
@@ -66,16 +54,15 @@ void loop()
 {
     static bool printTime = false;
 
-    GrinlizLIS3DH::AccelData data[8];
-    int16_t div = 0;
-    int n = accel.readRaw(data, 8, &div);
+    GrinlizLIS3DH::Data data[8];
+    int n = accel.read(data, 8);
     nRead += n;
 
     if (n && printTime) {
         printTime = false;
-        float ax = (float)data[0].x / div;
-        float ay = (float)data[0].y / div;
-        float az = (float)data[0].z / div;
+        float ax = data[0].ax;
+        float ay = data[0].ay;
+        float az = data[0].az;
         Serial.print("a="); Serial.print(ax); Serial.print(" ");
         Serial.print(ay); Serial.print(" ");
         Serial.println(az);

@@ -87,6 +87,11 @@ float    maxGForce2     = 0.0f;
 uint32_t lastMotionTime = 0;    
 uint32_t lastLoopTime   = 0;
 
+#ifdef LOG_ACCEL
+int nAccelLog = 0;
+GrinlizLIS3DH::RawData accelData[LOG_ACCEL];
+#endif 
+
 /* First up; initialize the audio system and all its 
    resources. Also need to disable the amp to avoid
    clicking. (clicking isn't a problem with the i2s amp)
@@ -164,7 +169,6 @@ Timer2      gforceDataTimer(110);
 Tester      tester;
 bool        wavSource = false;
 
-
 void setupSD()
 {
     Log.p("setupSD()").eol();
@@ -191,11 +195,10 @@ void setupSD()
         Log.p("SPI Flash Memory").eol();
         Log.p("Manufacturer: 0x").p(manid, HEX).eol();
         Log.p("Device ID: 0x").p(devid, HEX).eol();
-        Log.p("Pagesize: ").p(spiFlash.pageSize()).p(" Page buffer: ").p(LOCAL_PAGESIZE).eol();
+        Log.p("Pagesize: ").p(spiFlash.pageSize()).eol();
 
         MemImage.begin();
         saberDB.writeDefaults(); // FIXME proper vprom emulation.
-        //Log.p("Free ram:").p(FreeRam()).eol();
 
         wavSource = true;
     #endif
@@ -254,6 +257,9 @@ void setup() {
     setupSD();
 
     {
+        pinMode(PIN_ACCEL_EN, OUTPUT);
+        digitalWrite(PIN_ACCEL_EN, HIGH);
+
         int nTries = 0;
         bool okay = false;
         while(nTries < 5) {
@@ -266,6 +272,7 @@ void setup() {
             Log.p("Accelerometer initialized on nTry=").p(nTries).eol();
         else
             Log.p("Accelerometer ERROR.").eol();
+        ASSERT(okay);
     }
     delay(10);
     voltmeter.begin();
@@ -494,16 +501,28 @@ void processAccel(uint32_t msec)
     GrinlizLIS3DH::Data data[N_ACCEL];
 
     #if SERIAL_DEBUG == 1
-    var start = millis();
+    uint32_t start = millis();
     #endif
 
     int removed = 0;
     accel.flush(N_ACCEL, &removed);
+
+    #if LOG_ACCEL
+    int n = 0;
+    if (   (bladeState.state() != BLADE_OFF || nAccelLog) 
+        && nAccelLog < LOG_ACCEL - N_ACCEL) 
+    {
+        n = accel.readInner(accelData + nAccelLog, data, N_ACCEL);
+        nAccelLog += n;
+    }
+    #else
     int n = accel.read(data, N_ACCEL);
+    ASSERT(n <= N_ACCEL);
+    #endif
 
     #if SERIAL_DEBUG == 1
-    var end = millis();
-    if (removed > 0) Log.p("Accelerometer samples displosed=").p(removed).eol();
+    uint32_t end = millis();
+    if (removed > 0) Log.p("Accelerometer samples disposed=").p(removed).eol();
     if (end - start > 3) Log.p("WARNING accel flush & read time (ms)=").p(end - start).eol();
     #endif
 

@@ -34,6 +34,12 @@ using namespace osbr;
 
 File streamFile;
 
+#ifdef LOG_ACCEL
+extern int nAccelLog;
+extern GrinlizLIS3DH::RawData accelData[LOG_ACCEL];
+#endif 
+ 
+
 CMDParser::CMDParser(SaberDB* _db) {
     database = _db;
 }
@@ -163,7 +169,7 @@ bool CMDParser::processCMD()
     static const char CRYSTAL[] = "crys";
     static const char PLAY[]    = "play";
     static const char UPLOAD[]  = "up";
-    static const char COMLOG[]  = "comlog";
+    static const char LOGACCELDATA[] = "lad";
 
     static const int DELAY = 20;  // don't saturate the serial line. Too much for SoftwareSerial.
 
@@ -363,14 +369,14 @@ bool CMDParser::processCMD()
         Serial.println(size);
         upload(value.c_str(), size);
     }
-    else if (action == COMLOG) {
-        #if 0    // disabled until library updated and build fixed
-        ComRF24* com = ComRF24::instance();
-        if (com) {
-            com->setComLog(!com->isComLogging());
-            Serial.print("Com logging=");
-            Serial.println(com->isComLogging());
+    else if (action == LOGACCELDATA) {
+        #ifdef LOG_ACCEL
+        for(int i=0; i<nAccelLog; i++) {
+            Serial.print(accelData[i].x); Serial.print(" ");
+            Serial.print(accelData[i].y); Serial.print(" ");
+            Serial.println(accelData[i].z);
         }
+        nAccelLog = 0;
         #endif
     }
     else if (action == STATUS) {
