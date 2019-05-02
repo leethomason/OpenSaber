@@ -291,7 +291,11 @@ bool SFX::playSound(int sound, int mode)
         ASSERT(track >= 0);
         ASSERT(track < m_numFilenames);
 
-        //Log.p("SFX play track ").p(m_filename[track].c_str()).eol();
+        Log.p("SFX play=").p(m_filename[track].c_str()).p(" track=").p(track)
+            .p(" [")
+            .p(m_location[sound].start).p(",")
+            .p(m_location[sound].start + m_location[sound].count).p("]")
+            .eol();
         EventQ.event("[SFX play]", sound);
 
         CStr<25> path;
