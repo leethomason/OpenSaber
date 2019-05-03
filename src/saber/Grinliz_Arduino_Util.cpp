@@ -218,3 +218,36 @@ SPITransaction::~SPITransaction() {
     digitalWrite(cs, HIGH);
     SPI.endTransaction();
 }
+
+
+void ProfileStart(ProfileData* data)
+{
+    data->startTime = micros();
+}
+
+void ProfileEnd(ProfileData* data)
+{
+    uint32_t t = micros();
+    uint32_t delta = t - data->startTime;
+    data->nCalls++;
+    data->totalTime += delta;
+    if (delta > data->maxTime) data->maxTime = delta;
+}
+
+void DumpProfile(ProfileData* data, int n)
+{
+    Log.p("Profile:").eol();
+    for(int i=0; i<n; ++i) {
+        uint32_t aveTime = data[i].totalTime / data[i].nCalls;
+        Log.p("  ").p(data[i].name)
+           .p(" aveTime=").p(aveTime / 1000.0f)
+           .p("ms maxTime=").p(data[i].maxTime / 1000.0f)
+           .p("ms nCalls=").p(data[i].nCalls)
+           .eol();
+
+        data[i].nCalls = 0;
+        data[i].totalTime = 0;
+        data[i].maxTime = 0;
+    }
+}
+
