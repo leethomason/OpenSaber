@@ -56,7 +56,7 @@ SOFTWARE.
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
+#define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_TYVOKKA
 #define SABER_SUB_MODEL			SABER_SUB_MODEL_STANDARD
 // ----------------------------------
@@ -664,8 +664,6 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	static const int VOLUME_4 = 204;
 
 #elif (SABER_MODEL == SABER_MODEL_TYVOKKA)
-	// #define LOG_ACCEL           1024*2
-
 	#define PCB_VERSION 				PCB_ITSY_1C
 	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
 	#define SABER_VOLTMETER			
@@ -832,15 +830,17 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	*/
 	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
 
-	#define PIN_VMETER        	A1
-	#define PIN_LED_A    	  		A2 
+	#define PIN_VMETER        			A1
+	#define PIN_LED_A    	  			A2 
 	#define PIN_SWITCH_A				A3
 	#if (PCB_VERSION == PCB_ITSY_1C)
-	#define PIN_DOTSTAR_EN			A4
+	#define PIN_DOTSTAR_EN				A4
 	#else
 	// A4 exposed
 	// A5 exposed
 	#endif
+	#define PIN_I2S_LRCLK		0
+	#define PIN_I2S_BITCLK		1
 	// CLOCK	 
 	// MOSI
 	// MISO 
@@ -854,7 +854,7 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define PIN_EMITTER_RED   	9
 	#define PIN_EMITTER_GREEN 	10
 	#define PIN_EMITTER_BLUE   	11
-	// I2S
+	#define PIN_I2S_DATA		12
 	// 13 exposed
 	
 	#define ACCEL_BLADE_DIRECTION 0	// The x direction is the blade.

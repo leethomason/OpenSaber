@@ -458,7 +458,7 @@ public:
 	void attachSerial(Stream* stream);
 	void attachLog(Stream* stream);
 
-	const SPLog& p(const char v[]) const;
+	const SPLog& p(const char v[], int width=0) const;
 	const SPLog& p(char v) const;
 	const SPLog& p(unsigned char v, int p = DEC) const;
 	const SPLog& p(int v, int p = DEC) const;

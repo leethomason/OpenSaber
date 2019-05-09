@@ -20,7 +20,8 @@
   SOFTWARE.
 */
 
-#define LOG_AVE_POWER
+// #define PROFILE
+#define LOG_ACCEL 1024*2
 
 // Arduino Libraries
 #ifdef CORE_TEENSY
@@ -56,7 +57,7 @@
 
 // Generalized accelerometer is simpler to code and works for prop shield.
 // But the LIS3DH is simpler to use directly, and the smooth-sound relies
-// on the constant frequency output. Now using the LIS3DH, moved Generalized
+// on the constant frequency output. Now using the LIS3DH, moved generalized
 // to git history (accelerometer.cpp/h and accelFXOS8700.cpp/h)
 #include "GrinlizLIS3DH.h"
 
@@ -90,9 +91,12 @@ uint32_t lastMotionTime = 0;
 uint32_t lastLoopTime   = 0;
 
 #ifdef LOG_ACCEL
-int nAccelLog = 0;
-GrinlizLIS3DH::RawData accelData[LOG_ACCEL];
+GrinlizLIS3DH::RawData accelDataBuf[LOG_ACCEL];
+GrinlizLIS3DH::RawData* accelData = accelDataBuf;
+#else
+GrinlizLIS3DH::RawData* accelData = 0;
 #endif 
+int nAccelLog = 0;
 
 /* First up; initialize the audio system and all its 
    resources. Also need to disable the amp to avoid
@@ -103,7 +107,7 @@ AudioPlayer audioPlayer;
 SFX sfx(&audioPlayer);
 
 #elif SABER_SOUND_ON == SABER_SOUND_FLASH
-Adafruit_ZeroI2S i2s(0, 1, 12, 2);          // FIXME define pins
+Adafruit_ZeroI2S i2s(PIN_I2S_LRCLK, PIN_I2S_BITCLK, PIN_I2S_DATA, 2);
 Adafruit_SPIFlash spiFlash(SS1, &SPI1);     // Use hardware SPI 
 Adafruit_ZeroDMA audioDMA;
 SPIStream spiStream(spiFlash);              // FIXME global generic resource
@@ -513,13 +517,16 @@ void processAccel(uint32_t msec)
     int removed = 0;
     accel.flush(N_ACCEL, &removed);
 
-    #if LOG_ACCEL
+    #ifdef LOG_ACCEL
     int n = 0;
     if (   (bladeState.state() != BLADE_OFF || nAccelLog) 
         && nAccelLog < LOG_ACCEL - N_ACCEL) 
     {
         n = accel.readInner(accelData + nAccelLog, data, N_ACCEL);
         nAccelLog += n;
+    }
+    else {
+        n = accel.read(data, N_ACCEL);
     }
     #else
     int n = accel.read(data, N_ACCEL);
@@ -612,7 +619,7 @@ void loop() {
         uiRenderData.mVolts = voltmeter.averagePower();
     }
     
-    #ifdef LOG_AVE_POWER
+    #ifdef PROFILE
     if (vbatPrintTimer.tick(delta)) {
         Log.p(" ave power=").p(voltmeter.averagePower()).eol();
         DumpProfile();

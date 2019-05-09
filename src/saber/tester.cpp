@@ -332,7 +332,7 @@ public:
         for(int i=0; i<NDATA; ++i) {
             Log.p("Accel ax=").p(data[i].ax).p(" ay=").p(data[i].ay).p(" az=").p(data[i].az).eol();
             
-            float g2, g2n;
+            float g2;
             calcGravity2(data[i].ax, data[i].ay, data[i].az, &g2, 0);
             TEST_RANGE(0.6f, 1.4f, g2);
 

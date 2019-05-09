@@ -34,11 +34,8 @@ using namespace osbr;
 
 File streamFile;
 
-#ifdef LOG_ACCEL
 extern int nAccelLog;
-extern GrinlizLIS3DH::RawData accelData[LOG_ACCEL];
-#endif 
- 
+extern GrinlizLIS3DH::RawData* accelData;
 
 CMDParser::CMDParser(SaberDB* _db) {
     database = _db;
@@ -370,14 +367,22 @@ bool CMDParser::processCMD()
         upload(value.c_str(), size);
     }
     else if (action == LOGACCELDATA) {
-        #ifdef LOG_ACCEL
+        Serial.println("--- Log start --");
+        int cluster = 0;
         for(int i=0; i<nAccelLog; i++) {
             Serial.print(accelData[i].x); Serial.print(" ");
             Serial.print(accelData[i].y); Serial.print(" ");
-            Serial.println(accelData[i].z);
+            Serial.print(accelData[i].z); Serial.print("    ");
+            ++cluster;
+            if (cluster == 8) {
+                Serial.println("");
+                cluster = 0;
+            }
         }
+        Serial.println("");
+        delay(2);
+        Serial.println("--- Log end --");
         nAccelLog = 0;
-        #endif
     }
     else if (action == STATUS) {
         static const char* space = "-----------";
