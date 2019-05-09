@@ -58,7 +58,7 @@ SOFTWARE.
 // ----------------------------------
 #define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_TYVOKKA
-#define SABER_SUB_MODEL			SABER_SUB_MODEL_STANDARD
+#define SABER_SUB_MODEL				SABER_SUB_MODEL_STANDARD
 // ----------------------------------
 
 #define LED_TYPE_RGB				1   // red-green-blue

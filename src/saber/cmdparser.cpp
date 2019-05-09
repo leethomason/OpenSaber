@@ -312,6 +312,7 @@ bool CMDParser::processCMD()
         GrinlizLIS3DH* accel = GrinlizLIS3DH::instance();
         accel->flush();
 
+        uint32_t start = millis();
         static const int N = 4;
         int n = 0;
         GrinlizLIS3DH::Data data[N];
@@ -319,6 +320,7 @@ bool CMDParser::processCMD()
             int read = accel->read(data + n, N - n);
             n += read;
         }
+        float samplesPerSecond = N * 1000.0f / (millis() - start);
 
         for(int i=0; i<N; ++i) {
             Serial.print( "x="); Serial.print(data[i].ax);
@@ -331,6 +333,7 @@ bool CMDParser::processCMD()
             Serial.print(" g="); Serial.print(sqrt(g2));
             Serial.print(" gN="); Serial.println(sqrt(g2n));
         }
+        Serial.print("Samples per second: "); Serial.println(samplesPerSecond);
     }
     else if (action == CRYSTAL) {
         if (isSet) {
