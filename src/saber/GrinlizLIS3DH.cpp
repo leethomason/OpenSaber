@@ -1,6 +1,9 @@
 #include "GrinlizLIS3DH.h"
 #include <Arduino.h>
 #include <SPI.h>
+#include "Grinliz_Util.h"
+
+// very helpful: https://github.com/electricimp/LIS3DH/blob/master/LIS3DH.device.lib.nut
 
 SPISettings gSPISettings(500000, MSBFIRST, SPI_MODE0);
 
@@ -110,6 +113,7 @@ void GrinlizLIS3DH::writeReg(uint8_t reg, uint8_t value)
 void GrinlizLIS3DH::flush(int remaining, int* removed)
 {
     int avail = available();
+    //Serial.println(avail);
     int n = avail > remaining ? avail - remaining : 0;
     if (removed) *removed = n;
     if (n == 0) return;
@@ -118,19 +122,20 @@ void GrinlizLIS3DH::flush(int remaining, int* removed)
     digitalWrite(m_enable, LOW);
     for(int i=0; i<n; ++i) {
         SPI.transfer(LIS3DH_REG_OUT_X_L | 0x80 | 0x40);
-        int16_t x, y, z;
-
-        x = SPI.transfer(0xff);
-        x |= uint16_t(SPI.transfer(0xff)) << 8;
-
-        y = SPI.transfer(0xff);
-        y |= uint16_t(SPI.transfer(0xff)) << 8;
-
-        z = SPI.transfer(0xff);
-        z |= uint16_t(SPI.transfer(0xff)) << 8;
+        for(int j=0; j<6; ++j) {
+            SPI.transfer(0xff);
+        }
     }
     digitalWrite(m_enable, HIGH);
     SPI.endTransaction();
+
+/*    if (available() >= remaining + 2) {
+        Serial.println("error");
+        Serial.println(remaining);
+        Serial.println(n);
+        Serial.println(available());
+        ASSERT(false);
+    }*/
 }
 
 int GrinlizLIS3DH::available()
@@ -139,8 +144,7 @@ int GrinlizLIS3DH::available()
     uint8_t overrun = fifosrc & (1 << 6);
     uint8_t avail = fifosrc & 31;
 
-    int maxRead = overrun ? 32 : avail;
-    return maxRead;
+    return avail + (overrun ? 1 : 0);
 }
 
 int GrinlizLIS3DH::readInner(RawData* rawData, Data* data, int n)

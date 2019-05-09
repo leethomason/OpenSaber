@@ -8,7 +8,7 @@ from hole import hole
 
 # Top of stock.
 H_WOOD = 8.0
-H_STOCK = 12.3
+H_STOCK = 13.30
 X_CAPSULE = 42.0
 Y_CAPSULE = 16.2
 Z_PAD = 0.5

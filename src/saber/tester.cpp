@@ -8,7 +8,7 @@
 #include "voltmeter.h"
 #include "unittest.h"
 #include "saberdb.h"
-#include "accelerometer.h"
+#include "GrinlizLIS3DH.h"
 
 #include "Button.h"
 #include "Grinliz_Arduino_Util.h"
@@ -292,11 +292,10 @@ class AccelerometerTest : public Test
 {
 public:
 
-	static const int GOAL = 100;
+	static const int NDATA = 10;
 	int nSamples;
-    float ax, ay, az, g2, g2normal;
-    bool jitter;
-    Accelerometer* accel = 0;
+    GrinlizLIS3DH::Data data[NDATA];
+    uint32_t startTime;
 
     virtual const char* name() const {
         return "AccelerometerTest";
@@ -305,40 +304,49 @@ public:
     virtual void start(Tester* tester)
     {
         nSamples = 0;
-        accel = tester->getAccelerometer();
+        GrinlizLIS3DH* accel = GrinlizLIS3DH::instance();
         ASSERT(accel);
-        accel->read(&ax, &ay, &az, &g2, &g2normal);
-        jitter = false;
+        accel->flush(0);
+        startTime = millis();
     }
 
     virtual int process(Tester* tester, EventQueue* queue)
     {
-        delay(10);
-
         EventQueue::Event e;
         while (queue->hasEvent()) {
          	e = queue->popEvent();
         }
-        float _ax = 0, _ay = 0, _az = 0, _g2 = 0, _g2normal = 0;
-        accel->read(&_ax, &_ay, &_az, &_g2, &_g2normal);
-        if (ax != _ax || ay != _ay || az != _az) {
-            jitter = true;  // If all the values come back the same, can be a connection / wiring / short issue.
-        }
-        // Surprisingly poor calibation on the accelerometer.
-        TEST_RANGE( 0.8f, 1.2f, g2);
 
-        ax = _ax;
-        ay = _ay;
-        az = _az;
-        g2 = _g2;
-        g2normal = _g2normal;
+        GrinlizLIS3DH* accel = GrinlizLIS3DH::instance();
+        int n = accel->read(data + nSamples, NDATA - nSamples);
+        nSamples += n;
+        if (nSamples < NDATA)
+            return TEST_CONTINUE;
 
-        ++nSamples;
-        if (nSamples == GOAL) {
-            TEST_IS_TRUE(jitter);
-            return TEST_SUCCESS;
+        int32_t deltaTime = millis() - startTime;
+        Serial.print("Time to read (ms):"); Serial.println(deltaTime);
+        TEST_IS_TRUE(deltaTime > NDATA * 8 && deltaTime < NDATA * 20);
+
+        bool variation = false;
+
+        for(int i=0; i<NDATA; ++i) {
+            Log.p("Accel ax=").p(data[i].ax).p(" ay=").p(data[i].ay).p(" az=").p(data[i].az).eol();
+            
+            float g2;
+            calcGravity2(data[i].ax, data[i].ay, data[i].az, &g2, 0);
+            TEST_RANGE(0.6f, 1.4f, g2);
+
+            if (i >= 1) {
+                if (data[i].ax != data[i-1].ax ||
+                    data[i].ay != data[i-1].ay ||
+                    data[i].az != data[i-1].az) 
+                {
+                    variation = true;
+                }
+            }
         }
-        return TEST_CONTINUE;
+        TEST_IS_TRUE(variation);
+        return TEST_SUCCESS;
     }
 };
 

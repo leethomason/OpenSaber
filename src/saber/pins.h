@@ -830,15 +830,17 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	*/
 	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
 
-	#define PIN_VMETER        	A1
-	#define PIN_LED_A    	  	A2 
-	#define PIN_SWITCH_A	  	A3
+	#define PIN_VMETER        			A1
+	#define PIN_LED_A    	  			A2 
+	#define PIN_SWITCH_A				A3
 	#if (PCB_VERSION == PCB_ITSY_1C)
-	#define PIN_DOTSTAR_EN		A4
+	#define PIN_DOTSTAR_EN				A4
 	#else
 	// A4 exposed
 	// A5 exposed
 	#endif
+	#define PIN_I2S_LRCLK		0
+	#define PIN_I2S_BITCLK		1
 	// CLOCK	 
 	// MOSI
 	// MISO 
@@ -848,16 +850,15 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	// unused
 	// unused
 	#define PIN_NEOPIXEL_DATA 	5
-	// unused				  	7
+	// unused
 	#define PIN_EMITTER_RED   	9
 	#define PIN_EMITTER_GREEN 	10
 	#define PIN_EMITTER_BLUE   	11
-	// I2S
+	#define PIN_I2S_DATA		12
 	// 13 exposed
 	
 	#define ACCEL_BLADE_DIRECTION 0	// The x direction is the blade.
-    #define LOCAL_PAGESIZE 		256
-
+	
 #else
 	#error Pins not defined.
 #endif
