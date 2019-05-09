@@ -83,14 +83,6 @@ static const uint32_t INDICATOR_CYCLE         = 1000;
 static const uint32_t PING_PONG_INTERVAL      = 2400;
 static const uint32_t BREATH_TIME             = 1200;
 
-enum {
-    PROFILE_OUTER_LOOP,
-    PROFILE_ACCEL,
-    PROFILE_DISPLAYS,
-    PROFILE_COUNT
-};
-ProfileData profileData[PROFILE_COUNT];
-
 uint32_t reflashTime    = 0;
 bool     flashOnClash   = false;
 float    maxGForce2     = 0.0f;
@@ -248,10 +240,6 @@ void setup() {
         shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, 0);
         digitalWrite(PIN_LATCH, HIGH);
     #endif
-
-    profileData[PROFILE_OUTER_LOOP].name    = "outerLoop";
-    profileData[PROFILE_ACCEL].name         = "accel    ";
-    profileData[PROFILE_DISPLAYS].name      = "displays ";
 
     Serial.begin(19200);  // Still need to turn it on in case USB is connected later to configure or debug.
     #if SERIAL_DEBUG == 1
@@ -510,7 +498,9 @@ void processSerial() {
 
 void processAccel(uint32_t msec)
 {
-    ProfileBlock block(profileData + PROFILE_ACCEL);
+    static ProfileData profData("processAccel");
+    ProfileBlock block(&profData);
+
     // Consistently process the accelerometer queue, even if we don't use the values.
     // Also look for stalls and hitches.
     static const int N_ACCEL = 4;
@@ -594,7 +584,8 @@ void processAccel(uint32_t msec)
 }
 
 void loop() {
-    ProfileBlock block(profileData + PROFILE_OUTER_LOOP);
+    static ProfileData data("loop");
+    ProfileBlock block(&data);
 
     // processSerial() doesn't seem to get called on M0 / ItsyBitsy. 
     // Not sure why.
@@ -624,7 +615,7 @@ void loop() {
     #ifdef LOG_AVE_POWER
     if (vbatPrintTimer.tick(delta)) {
         Log.p(" ave power=").p(voltmeter.averagePower()).eol();
-        DumpProfile(profileData, PROFILE_COUNT);
+        DumpProfile();
     }
     #endif    
 
@@ -653,7 +644,8 @@ void loop() {
 
 void loopDisplays(uint32_t msec, uint32_t delta)
 {
-    ProfileBlock block(profileData + PROFILE_DISPLAYS);
+    static ProfileData data("loopDisplays");
+    ProfileBlock block(&data);
     // General display state processing. Draw to the current supported display.
 
     if (displayTimer.tick(delta)) {

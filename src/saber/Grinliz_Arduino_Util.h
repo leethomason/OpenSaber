@@ -55,17 +55,26 @@ private:
 
 struct ProfileData
 {
+    ProfileData(const char* _name) { 
+        name = _name;
+        next = root;
+        root = this; 
+    }
+
     const char* name = 0;
+    ProfileData* next = 0;
+
     uint32_t nCalls;
     uint32_t totalTime;
     uint32_t maxTime;
-
     uint32_t startTime;
+
+    static ProfileData* root;
 };
 
 void ProfileStart(ProfileData* data);
 void ProfileEnd(ProfileData* data);
-void DumpProfile(ProfileData* data, int n);
+void DumpProfile();
 
 class ProfileBlock
 {
@@ -78,6 +87,7 @@ public:
     ~ProfileBlock() {
         ProfileEnd(m_data);
     }
+
 private:
     ProfileData* m_data;
 };

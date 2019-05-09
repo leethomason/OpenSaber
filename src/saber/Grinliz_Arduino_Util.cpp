@@ -219,6 +219,7 @@ SPITransaction::~SPITransaction() {
     SPI.endTransaction();
 }
 
+ProfileData* ProfileData::root = 0;
 
 void ProfileStart(ProfileData* data)
 {
@@ -234,20 +235,21 @@ void ProfileEnd(ProfileData* data)
     if (delta > data->maxTime) data->maxTime = delta;
 }
 
-void DumpProfile(ProfileData* data, int n)
+void DumpProfile()
 {
     Log.p("Profile:").eol();
-    for(int i=0; i<n; ++i) {
-        uint32_t aveTime = data[i].totalTime / data[i].nCalls;
-        Log.p("  ").p(data[i].name)
+    for(ProfileData* data = ProfileData::root; data; data = data->next)
+    {
+        uint32_t aveTime = data->totalTime / data->nCalls;
+        Log.p("  ").p(data->name)
            .p(" aveTime=").p(aveTime / 1000.0f)
-           .p("ms maxTime=").p(data[i].maxTime / 1000.0f)
-           .p("ms nCalls=").p(data[i].nCalls)
+           .p("ms maxTime=").p(data->maxTime / 1000.0f)
+           .p("ms nCalls=").p(data->nCalls)
            .eol();
 
-        data[i].nCalls = 0;
-        data[i].totalTime = 0;
-        data[i].maxTime = 0;
+        data->nCalls = 0;
+        data->totalTime = 0;
+        data->maxTime = 0;
     }
 }
 
