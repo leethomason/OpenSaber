@@ -21,7 +21,7 @@
 */
 
 // #define PROFILE
-#define LOG_ACCEL 1024*2
+// #define LOG_ACCEL 1024*2
 
 // Arduino Libraries
 #ifdef CORE_TEENSY
