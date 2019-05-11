@@ -664,11 +664,11 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	static const int VOLUME_4 = 204;
 
 #elif (SABER_MODEL == SABER_MODEL_TYVOKKA)
-	#define PCB_VERSION 				PCB_ITSY_1C
+	#define PCB_VERSION 			PCB_ITSY_1C
 	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
 	#define SABER_VOLTMETER			
-	#define SABER_BUTTON 				Button::INTERNAL_PULLUP
-	#define SABER_UI_LED				SABER_LED_DOTSTAR
+	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
+	#define SABER_UI_LED			SABER_LED_DOTSTAR
 
 	#define SABER_NUM_LEDS 			4
 	#define SABER_UI_START			0
