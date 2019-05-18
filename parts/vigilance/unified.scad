@@ -7,14 +7,14 @@ use <../shapes.scad>
 $fn = 80;
 T = 4;
 FRONT_T = 4;
-JUNCTION = 5;
+JUNCTION = 6;
 EPS = 0.01;
 EPS2 = 2 * EPS;
 D_ROD = 3.6;
 D_TUBE = 6;
 D_TUBE_CAP = 4.6;
 
-DRAW_AFT   = true;
+DRAW_AFT   = false;
 DRAW_FRONT = true;
 DRAW_CAP   = false;
 
@@ -38,10 +38,7 @@ if (DRAW_AFT) {
     }
 
     translate([0, 0, M_BAFFLE_FRONT]) {
-        intersection() {
-            tube(JUNCTION, do=D_AFT, di=D_AFT - T);
-            keyJoint(JUNCTION - 0.5);
-        }
+        keyJoint(JUNCTION, do=D_AFT, di=D_AFT-T, trim=0.1, angle=0, tJoint=true);
     }
 }
 
@@ -129,10 +126,9 @@ if (DRAW_FRONT) {
             }
             tube(RING_T, do=D_AFT - T, di=D_AFT - 2 * T);
         }
-        translate([0, 0 , M_BAFFLE_FRONT - EPS])
-        intersection() {
-            tube(JUNCTION, do=D_AFT+EPS, di=D_AFT - T - EPS);
-            keyJoint(JUNCTION);
+
+        translate([0, 0 , M_BAFFLE_FRONT - EPS]) {
+            keyJoint(JUNCTION, do=D_AFT, di=D_AFT-T, trim=0.0, angle=0, tJoint=true);
         }
         NUT_T = 5;
         translate([0, 0, M_CHAMBER - FRONT_T - NUT_T])
@@ -142,7 +138,7 @@ if (DRAW_FRONT) {
         translate([-50, -D_AFT/2, M_BAFFLE_FRONT]) 
             cube(size=[100, 0.5, 100]);
 
-        // Aesthetics
+        // Aesthetics        
         translate([0, 0, M_BAFFLE_FRONT + 8 ]) 
             capsule(-110, -80, 2, true);
         translate([0, 0, M_BAFFLE_FRONT + 20 ]) 
@@ -152,7 +148,7 @@ if (DRAW_FRONT) {
         for(i=[0:4]) {
             translate([0, 0, M_BAFFLE_FRONT + 8 + i*6])
                 capsule(-170, 170, 2);
-        }
+        }        
     }
 
     translate([0, 0, M_CHAMBER - FRONT_T]) {
