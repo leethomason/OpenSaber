@@ -67,15 +67,18 @@ namespace wav12 {
     class ExpanderV
     {
     public:
-        static const int BUFFER_SIZE = 256;
+        static const int BUFFER_SIZE = 128;
 
         ExpanderV() {}
-        void init(IStream* stream);
+        void attach(IStream* stream);
 
         // Returns the number of samples it could expand.
         int expand(int32_t* target, uint32_t nTarget, int32_t volume, bool add);
         bool done() const { return m_done; }
         void rewind();
+
+    private:
+        void reset();
 
     private:
         inline bool hasSample() {
@@ -97,10 +100,12 @@ namespace wav12 {
         bool m_done = false;
 
         // State for decompression
-        Velocity m_vel;
-        int m_high3 = 0;
-        bool m_hasHigh3 = false;
-
+        struct State {
+            Velocity vel;
+            int high3 = 0;
+            bool hasHigh3 = false;
+        };
+        State m_state;
     };
 }
 #endif

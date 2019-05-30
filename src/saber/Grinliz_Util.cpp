@@ -133,12 +133,9 @@ bool istrStarts(const char* str, const char* prefix)
 */
 uint16_t hash8(const char* v, const char* end)
 {
-	unsigned shift = 0;
 	uint16_t h = 0;
-	while(v < end) {
-		h = ((*v) << (shift & 7)) ^ h;
-		++shift;
-		++v;            
+	for(; v<end; ++v) {
+		h = h * 33 ^ (*v);
 	}
 	return h;
 }

@@ -56,9 +56,9 @@ SOFTWARE.
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
+#define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_TYVOKKA
-#define SABER_SUB_MODEL			SABER_SUB_MODEL_STANDARD
+#define SABER_SUB_MODEL				SABER_SUB_MODEL_STANDARD
 // ----------------------------------
 
 #define LED_TYPE_RGB				1   // red-green-blue
@@ -664,24 +664,25 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	static const int VOLUME_4 = 204;
 
 #elif (SABER_MODEL == SABER_MODEL_TYVOKKA)
-	#define PCB_VERSION 			PCB_ITSY_1C
+	#define PCB_VERSION 				PCB_ITSY_1C
 	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
 	#define SABER_VOLTMETER			
-	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
-	#define SABER_UI_LED			SABER_LED_DOTSTAR
+	#define SABER_BUTTON 				Button::INTERNAL_PULLUP
+	#define SABER_UI_LED				SABER_LED_DOTSTAR
 
 	#define SABER_NUM_LEDS 			4
 	#define SABER_UI_START			0
 	#define SABER_UI_COUNT			4
-	#define SABER_UI_BRIGHTNESS		16		
+	#define SABER_UI_BRIGHTNESS	16		
 	#define SABER_UI_IDLE_MEDITATION
+	#define SABER_UI_REVERSE
 
-	#define SABER_SOUND_DEF SABER_SOUND_DEF_BESPIN_ROGUE
+	#define SABER_SOUND_DEF 		SABER_SOUND_DEF_BESPIN_JAINA
 
-	static const int32_t UVOLT_MULT = 5019;	
+	static const int32_t UVOLT_MULT = 5612;	
 	#define ID_STR "Tyvokka Cree XPE2 RGB"
 
-	// Heat sink compound; copper TCSS heatsink.
+	// Heat sink compound; LED Supply advanced heat sink.
 	static const int32_t RED_VF   = 2200;   // milli-volts
 	static const int32_t RED_I    = 400;    // milli-amps
 	static const int32_t RED_R    = 4700;   // milli-ohms
@@ -829,15 +830,17 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	*/
 	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
 
-	#define PIN_VMETER        	A1
-	#define PIN_LED_A    	  	A2 
-	#define PIN_SWITCH_A	  	A3
+	#define PIN_VMETER        			A1
+	#define PIN_LED_A    	  			A2 
+	#define PIN_SWITCH_A				A3
 	#if (PCB_VERSION == PCB_ITSY_1C)
-	#define PIN_DOTSTAR_EN		A4
+	#define PIN_DOTSTAR_EN				A4
 	#else
 	// A4 exposed
 	// A5 exposed
 	#endif
+	#define PIN_I2S_LRCLK		0
+	#define PIN_I2S_BITCLK		1
 	// CLOCK	 
 	// MOSI
 	// MISO 
@@ -847,16 +850,15 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	// unused
 	// unused
 	#define PIN_NEOPIXEL_DATA 	5
-	// unused				  	7
+	// unused
 	#define PIN_EMITTER_RED   	9
 	#define PIN_EMITTER_GREEN 	10
 	#define PIN_EMITTER_BLUE   	11
-	// I2S
+	#define PIN_I2S_DATA		12
 	// 13 exposed
 	
 	#define ACCEL_BLADE_DIRECTION 0	// The x direction is the blade.
-    #define LOCAL_PAGESIZE 		256
-
+	
 #else
 	#error Pins not defined.
 #endif

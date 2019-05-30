@@ -29,6 +29,9 @@
 #include "pins.h"
 #include "rgb.h"
 
+
+void calcGravity2(float ax, float ay, float az, float* g2, float* g2Normal);
+
 class Blade
 {
 public:

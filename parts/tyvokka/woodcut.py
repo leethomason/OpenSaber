@@ -8,7 +8,7 @@ from hole import hole
 
 # Top of stock.
 H_WOOD = 8.0
-H_STOCK = 13.18
+H_STOCK = 13.30
 X_CAPSULE = 42.0
 Y_CAPSULE = 16.2
 Z_PAD = 0.5
@@ -43,24 +43,26 @@ hill(g, mat, D_OUTER, bounds.center.dx, bounds.center.dy)
 
 #center bolt
 HEAD = 7.0
-HEAD_H = 4.5
+HEAD_H = 4.0    # was 4.5 - go a little proud
 BOLT = 4.3
 
 travel(g, mat, x=bounds.cx)
-hole(g, mat, -HEAD_H, d=HEAD)
 hole(g, mat, bottom, d=BOLT)
+hole(g, mat, -HEAD_H, d=HEAD)
 
 # power
 POWER_D = 8.0
 POWER_OUTER_D = 11.0
+POWER_OUTER_H = 2.0
 
 travel(g, mat, x=bounds.cx - DZ_CENTER)
 hole(g, mat, bottom, d=POWER_D)
+hole(g, mat, -POWER_OUTER_H, d=POWER_OUTER_D)
 
 # switch
 SWITCH_D = 4.0 # 3.6 # 3.5
-SWITCH_INSET_D = 7.0
-SWITCH_INSET_DEPTH = -2.0
+SWITCH_INSET_D = 8.0
+SWITCH_INSET_DEPTH = -1.5
 
 travel(g, mat, x=bounds.cx + DZ_CENTER)    
 hole(g, mat, bottom, d=SWITCH_D)
@@ -68,4 +70,4 @@ hole(g, mat, SWITCH_INSET_DEPTH, d=SWITCH_INSET_D)
 
 #### capsule cut #######
 travel(g, mat, x=bounds.cx)
-capsule(g, mat, bottom, bounds.center.dx, bounds.center.dy, "outside", True, 'x')
+capsule(g, mat, bottom, bounds.center.dx, bounds.center.dy, "outside", True, 'x', Z_PAD + 1.0)

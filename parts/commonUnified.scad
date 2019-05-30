@@ -77,8 +77,9 @@ module tjoint(outer, dz, trim)
 
 /*
     The green-sky version of the key joint was large, but
-    secure. Problematic is that it click together on the y
-    axis so it's hard to run the wires.
+    secure. Problematic is that it clicked together on the y
+    axis so it's hard to run the wires. The jJoint=true version
+    is by far the more successful design.
 */
 module keyJoint(dz, do, di, trim, angle=0, tJoint=false)
 {

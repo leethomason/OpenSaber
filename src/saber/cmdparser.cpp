@@ -28,11 +28,14 @@
 #include "SFX.h"
 #include "Tester.h"
 #include "saberUtil.h"
-#include "accelerometer.h"
+#include "GrinlizLIS3DH.h"
 
 using namespace osbr;
 
 File streamFile;
+
+extern int nAccelLog;
+extern GrinlizLIS3DH::RawData* accelData;
 
 CMDParser::CMDParser(SaberDB* _db) {
     database = _db;
@@ -163,7 +166,7 @@ bool CMDParser::processCMD()
     static const char CRYSTAL[] = "crys";
     static const char PLAY[]    = "play";
     static const char UPLOAD[]  = "up";
-    static const char COMLOG[]  = "comlog";
+    static const char LOGACCELDATA[] = "lad";
 
     static const int DELAY = 20;  // don't saturate the serial line. Too much for SoftwareSerial.
 
@@ -306,16 +309,31 @@ bool CMDParser::processCMD()
         root.close();
     }
     else if (action == ACCEL) {
-        float ax, ay, az, g2, g2n;
-        // 0 value sometimes. Flush.
-        Accelerometer::instance().read(&ax, &ay, &az, &g2, &g2n);        
-        delay(20);
-        Accelerometer::instance().read(&ax, &ay, &az, &g2, &g2n);
-        Serial.print( "x="); Serial.print(ax);
-        Serial.print(" y="); Serial.print(ay);
-        Serial.print(" z="); Serial.print(az);
-        Serial.print(" g="); Serial.print(sqrt(g2));
-        Serial.print(" gN="); Serial.println(sqrt(g2n));
+        GrinlizLIS3DH* accel = GrinlizLIS3DH::instance();
+        accel->flush();
+
+        uint32_t start = millis();
+        static const int N = 4;
+        int n = 0;
+        GrinlizLIS3DH::Data data[N];
+        while(n < N) {
+            int read = accel->read(data + n, N - n);
+            n += read;
+        }
+        float samplesPerSecond = N * 1000.0f / (millis() - start);
+
+        for(int i=0; i<N; ++i) {
+            Serial.print( "x="); Serial.print(data[i].ax);
+            Serial.print(" y="); Serial.print(data[i].ay);
+            Serial.print(" z="); Serial.print(data[i].az);
+
+            float g2, g2n;
+            calcGravity2(data[i].ax, data[i].ay, data[i].az, &g2, &g2n);
+
+            Serial.print(" g="); Serial.print(sqrt(g2));
+            Serial.print(" gN="); Serial.println(sqrt(g2n));
+        }
+        Serial.print("Samples per second: "); Serial.println(samplesPerSecond);
     }
     else if (action == CRYSTAL) {
         if (isSet) {
@@ -351,15 +369,23 @@ bool CMDParser::processCMD()
         Serial.println(size);
         upload(value.c_str(), size);
     }
-    else if (action == COMLOG) {
-        #if 0    // disabled until library updated and build fixed
-        ComRF24* com = ComRF24::instance();
-        if (com) {
-            com->setComLog(!com->isComLogging());
-            Serial.print("Com logging=");
-            Serial.println(com->isComLogging());
+    else if (action == LOGACCELDATA) {
+        Serial.println("--- Log start --");
+        int cluster = 0;
+        for(int i=0; i<nAccelLog; i++) {
+            Serial.print(accelData[i].x); Serial.print(" ");
+            Serial.print(accelData[i].y); Serial.print(" ");
+            Serial.print(accelData[i].z); Serial.print("    ");
+            ++cluster;
+            if (cluster == 8) {
+                Serial.println("");
+                cluster = 0;
+            }
         }
-        #endif
+        Serial.println("");
+        delay(2);
+        Serial.println("--- Log end --");
+        nAccelLog = 0;
     }
     else if (action == STATUS) {
         static const char* space = "-----------";
