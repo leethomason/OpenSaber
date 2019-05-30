@@ -34,9 +34,12 @@ void SPLog::attachLog(Stream* stream)
 }
 
 
-const SPLog& SPLog::p(const char v[]) const
+const SPLog& SPLog::p(const char v[], int width) const
 {
-	dprintf("%s", v);
+    if (width)
+        dprintf("%*s", width, v);
+    else
+        dprintf("%s", v);
 	return *this;
 }
 
