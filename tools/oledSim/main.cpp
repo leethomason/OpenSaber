@@ -17,8 +17,9 @@
 //#define MONO_128_32 1
 #define RGB_160_80 2
 
-#ifdef MONO_128_32
 Sketcher sketcher;
+
+#ifdef MONO_128_32
 static const int WIDTH = 128;
 static const int HEIGHT = 32;
 #endif

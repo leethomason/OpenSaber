@@ -2,7 +2,13 @@
 
 #include <stdint.h>
 #include "rgb.h"
-/*
+
+struct Vec2
+{
+    int x = 0;
+    int y = 0;
+};
+
 struct Rect
 {
     int x0 = 0;
@@ -15,28 +21,31 @@ struct Rect
     int Area() const { return CX() * CY(); }
 };
 
-// Renders to a 16bit RGB buffer.
-class VRender16
+class VRender
 {
 public:
-    void Set(int width, int height);
-    void Attach(uint16_t* buffer,       // Memory for the RGB data
-        const Rect& bufferRect,         // Defines the bounds of the buffer 
-        const Rect& clip);              // And sub-clip to this
+    enum {
+        MODE_RGB_32,
+        MODE_RGB_16
+    };
+
+    void Attach(void* buffer,
+                int mode,
+                const Rect& size);
+    void SetClip(const Rect& clip);     // And sub-clip to this
 
     void Clear(const osbr::RGBA rgba);
+
+    // x0, x1 inclusive
     void DrawLine(int x0, int y0, int x1, int y1, const osbr::RGBA& rgba);
-    //void DrawRectangle(const Rect& rectangle, const osbr::RGBA *fill, const osbr::RGBA* border);
+    void DrawPoly(const Vec2* points, int n, const osbr::RGBA& rgba);
 
 private:
-    uint16_t ToU16(const osbr::RGBA& c) {
-        return ((c.r >> 3) << 11) | ((c.g >> 2) << 5) | (c.b >> 3); // fixme
-    }
+    // primitive; generally meant for slabs, but get rect efficiency when we can.
+    void DrawRect(int x0, int y0, int x1, int y);
 
-    int m_width = 0, m_height = 0;
+    Rect m_bufferSize;
     uint16_t* m_buffer = 0;
-    Rect m_bufferRect;
+    int m_mode;
     Rect m_clip;
 };
-
-*/
