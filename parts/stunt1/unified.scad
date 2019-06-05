@@ -36,46 +36,38 @@ if (DRAW_HOLDER) {
     holder();
 }
 
+module innerSpace()
+{
+    cylinder(h=DZ_AFT, d=D_AFT);
+    translate([0, 0, DZ_AFT]) cylinder(h=DZ_FORE, d=D_FORE);
+}
+
 if (DRAW_BODY) {
 
     BATTERY_BAFFLES = nBafflesNeeded(H_BUTTRESS);
-    //N_BAFFLES = floor(DZ_HOLDER / (H_BUTTRESS*2));
     N_BAFFLES = BATTERY_BAFFLES + 1;
 
     echo("Battery baffles=", BATTERY_BAFFLES);
     echo("nBaffles=", N_BAFFLES);
     
     intersection() {
-        union() {
-            cylinder(h=DZ_CHASSIS - DZ_PADDING, d=D_AFT);
-        }
+        innerSpace();
         difference() {
             union() {
-                for(i=[0:BATTERY_BAFFLES-1]) {
+                for(i=[0:BATTERY_BAFFLES]) {
+                    last = i == BATTERY_BAFFLES;
                     translate([0, 0, i*H_BUTTRESS*2 + DZ_PCB]) {
                         oneBaffle(
                             D_AFT,
                             H_BUTTRESS,
-                            battery=true,
+                            battery=!last,
                             mc=true,
-                            bridge=true,
+                            bridge=!last,
                             scallop=false,
                             cutout=false,
                             mcSpace=false
                         );
                     }
-                }
-                translate([0, 0, DZ_CHASSIS - H_BUTTRESS]) {
-                    oneBaffle(
-                        D_AFT,
-                        H_BUTTRESS,
-                        battery=false,
-                        mc=true,
-                        bridge=true,
-                        scallop=false,
-                        cutout=false,
-                        mcSpace=true
-                    );
                 }
             }
             // flat bottom
