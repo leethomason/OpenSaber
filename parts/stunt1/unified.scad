@@ -9,9 +9,6 @@ DRAW_BODY   = true;
 $fn = 80;
 EPS = .01;
 
-// Duped in holder.
-Y_POWER = -yAtX(DX_POWER/2, D_AFT/2) + 1;
-
 if (DRAW_HOLDER) {
     holder();
 }

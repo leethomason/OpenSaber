@@ -7,8 +7,11 @@ DZ_FORE = 0.0;
 D_AFT = 28.5;
 D_FORE = 28.5;
 M_SWITCH = 115.0;   // 0 for no switch
-ADD_EMITTER = false; // adds extra length
-USE_AA = true;
+
+ADD_EMITTER = false;    // adds extra length to hold dynamic heat sink
+USE_AA = true;          // use an AA battery holder (vs 18650)
+ACCESS_PCB = false;     // makes the PCB switches accessible from the pommel
+
 
 // Test
 /*
@@ -35,8 +38,6 @@ DY_POWER = 9;
 DZ_POWER = 14;
 
 DY_PCB = 0;
-ROT = -25;
-Y_TWEAK = -5;
 
 JOINT_DZ = 8;
 JOINT_T = 3;

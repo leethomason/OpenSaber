@@ -2,8 +2,10 @@ include <dim.scad>
 use <../shapes.scad>
 use <../commonUnified.scad>
 
-// Duped in unified.
 Y_POWER = -yAtX(DX_POWER/2, D_AFT/2) + 1;
+
+ROT = ACCESS_PCB ? -25 : 0;
+Y_TWEAK = ACCESS_PCB ? -5 : 2;
 
 module holder() {    
     difference() {
@@ -62,3 +64,6 @@ module holder() {
     translate([-27/2, 0, Z_OFFSET]) 
         cube(size=[27, 2, 20]);
 }
+
+$fn = 80;
+holder();
