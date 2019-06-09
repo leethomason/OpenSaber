@@ -2,6 +2,7 @@
 // of the chassis, after the pommel. 
 
 // Vented
+
 DZ_AFT = 115.0;
 DZ_FORE = 0.0;
 D_AFT = 28.5;
@@ -11,7 +12,6 @@ M_SWITCH = 115.0;   // 0 for no switch
 ADD_EMITTER = false;    // adds extra length to hold dynamic heat sink
 USE_AA = true;          // use an AA battery holder (vs 18650)
 ACCESS_PCB = false;     // makes the PCB switches accessible from the pommel
-
 
 // Test
 /*
@@ -25,7 +25,6 @@ ADD_EMITTER = true; // adds extra length
 
 DZ_TOTAL = DZ_AFT + DZ_FORE;    // excluding emitter
 DZ_PCB = 27;
-DZ_HOLDER = 30;    // fixme 
 
 H_BUTTRESS			= 4;
 R_AFT 				= D_AFT / 2;
