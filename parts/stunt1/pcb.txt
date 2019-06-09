@@ -1,5 +1,7 @@
 # move mounting hole away from switch
-# 
+# 5 resistor RR GG B
+# 4 switch R GG B (green is adjustable)
+#
 #################################
 # +M 2.2  Mounting
 # # # # # # # # # # # # # # # # #

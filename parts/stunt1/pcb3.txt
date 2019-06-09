@@ -1,4 +1,7 @@
 #################################
+# 4 resistor RR G B 
+# 3 switches
+#
 # +M 2.2  Mounting
 # Red needs 2 resistors
 # Cree: 
