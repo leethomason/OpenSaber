@@ -22,6 +22,19 @@ module innerSpace()
     translate([0, 0, DZ_AFT]) cylinder(h=DZ_FORE, d=D_FORE);
 }
 
+module AAHolder(extraZ)
+{
+    D_BATT_HOLDER = 17.2;
+    DY_BATT = 8.0;
+    Y_TOT = DY_BATT + D_BATT_HOLDER / 2;
+    DZ_BATT_HOLDER = 58.0;
+
+    translate([0, R_AFT - D_BATT_HOLDER/2, 0])
+        cylinder(h=DZ_BATT_HOLDER + extraZ, d=D_BATT_HOLDER);
+    translate([-D_BATT_HOLDER/2, R_AFT - D_BATT_HOLDER/2 - DY_BATT, 0])
+        cube(size=[D_BATT_HOLDER, DY_BATT, DZ_BATT_HOLDER + extraZ]);
+}
+
 if (DRAW_BODY) {
 
     BATTERY_BAFFLES = nBafflesNeeded(H_BUTTRESS);
@@ -37,11 +50,13 @@ if (DRAW_BODY) {
             union() {
                 for(i=[0:N_BAFFLES - 1]) {
                     z = i*H_BUTTRESS*2 + DZ_PCB;
+                    batt = (i < BATTERY_BAFFLES) && !USE_AA;
+
                     translate([0, 0, z]) {
                         oneBaffle(
                             D_AFT,
                             H_BUTTRESS,
-                            battery=i < BATTERY_BAFFLES,
+                            battery=batt,
                             mc=i >= REINFORCE,
                             bridge=(z < DZ_AFT - H_BUTTRESS*2) ? 1 : 0,
                             scallop=false,
@@ -55,8 +70,8 @@ if (DRAW_BODY) {
                     translate([-50, 0, 0]) cube(size=[100, 100, 500]); 
                 }
             }
-            translate([0, 0, DZ_PCB])
-                battery(D_FORE);
+            //translate([0, 0, DZ_PCB])
+            //    battery(D_FORE);
 
             // flat bottom
             translate([-20, -20, 0])
@@ -73,6 +88,9 @@ if (DRAW_BODY) {
                 translate([0, 0, DZ_TOTAL - spacer]) 
                     cylinder(h=100, d=dynamicHeatSinkThread());
             }  
+            if (USE_AA) {
+                translate([0, 0, DZ_PCB - EPS]) AAHolder(3);
+            }
         }
     }
     // Connection
@@ -87,3 +105,4 @@ if (DRAW_BODY) {
 }
 
 *color("yellow") translate([0, 0, DZ_PCB]) battery(D_FORE);
+*color("red") translate([0, 0, DZ_PCB - EPS]) AAHolder();

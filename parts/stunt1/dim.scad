@@ -8,6 +8,7 @@ D_AFT = 28.5;
 D_FORE = 28.5;
 M_SWITCH = 115.0;   // 0 for no switch
 ADD_EMITTER = false; // adds extra length
+USE_AA = true;
 
 // Test
 /*
