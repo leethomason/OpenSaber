@@ -1,6 +1,13 @@
 include <dim.scad>
+use <../shapes.scad>
+use <../commonUnified.scad>
 
-module holder() {
+Y_POWER = -yAtX(DX_POWER/2, D_AFT/2) + 1;
+
+ROT = ACCESS_PCB ? -25 : 0;
+Y_TWEAK = ACCESS_PCB ? -5 : 2;
+
+module holder() {    
     difference() {
         intersection() {
             cylinder(h=DZ_PCB, d=D_AFT);
@@ -22,6 +29,21 @@ module holder() {
                         ],
                         makeSection=false
                 );
+
+                // Battery stop.
+                translate([-20, -20, DZ_PCB - 3]) 
+                    cube(size=[12, 40, 10]);
+                mirror([1,0,0]) translate([-20, -20, DZ_PCB - 3]) 
+                    cube(size=[12, 40, 10]);
+                
+                
+                translate([DX_POWER/2, Y_POWER, 0]) 
+                    cube(size=[4, DY_POWER, DZ_POWER]);
+                mirror([1,0,0]) translate([DX_POWER/2, Y_POWER, 0]) 
+                    cube(size=[4, DY_POWER, DZ_POWER]);
+                
+                translate([-10, Y_POWER, DZ_POWER])
+                    cube(size=[20, 1, 2]);
             }
         }
 
@@ -34,32 +56,14 @@ module holder() {
         }
         // flat bottom
         translate([-20, -20.5, 0]) cube(size=[40, 5, 100]);
+
+        translate([0, 0, DZ_PCB]) mirror([0, 0, -1]) keyJoint(JOINT_DZ, D_AFT, D_AFT - JOINT_T, 0, 0, true);    
+
     }
     *color("green") translate([0, Y_TWEAK, 0])  rotate([ROT, 0, 0]) 
     translate([-27/2, 0, Z_OFFSET]) 
         cube(size=[27, 2, 20]);
-    
-    intersection() {
-        cylinder(h=DZ_PCB, d=D_AFT);
-        union() {
-            // Battery stop.
-            translate([-20, -20, DZ_PCB - 3]) 
-                cube(size=[12, 40, 10]);
-            mirror([1,0,0]) translate([-20, -20, DZ_PCB - 3]) 
-                cube(size=[12, 40, 10]);
-            
-            
-            translate([DX_POWER/2, Y_POWER, 0]) 
-                cube(size=[4, DY_POWER, DZ_POWER]);
-            mirror([1,0,0]) translate([DX_POWER/2, Y_POWER, 0]) 
-                cube(size=[4, DY_POWER, DZ_POWER]);
-            
-            translate([-10, Y_POWER, DZ_POWER])
-                cube(size=[20, 1, 2]);
-        }
-    }
-    difference() {
-        translate([0, 0, DZ_PCB]) key(true);    
-        translate([-20, -20.5, 0]) cube(size=[40, 5, 100]);
-    }
 }
+
+$fn = 80;
+holder();

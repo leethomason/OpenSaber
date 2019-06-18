@@ -1,4 +1,3 @@
-use <../threads.scad>
 use <../shapes.scad>
 include <dim.scad>
 
