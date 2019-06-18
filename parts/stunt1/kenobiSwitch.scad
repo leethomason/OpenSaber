@@ -1,7 +1,7 @@
 $fn=90;
 
 LOWER_H = 6.0;
-UPPER_H = 2.4; // 4.4;
+UPPER_H = 3.4; // 2.4; // 4.4;
 TOTAL_H = UPPER_H + LOWER_H;
 
 SW_X = 6.5;
