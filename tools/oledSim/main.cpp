@@ -14,8 +14,8 @@
 #include "../saber/rgb.h"
 #include "../saber/vrender.h"
 
-#define MONO_128_32 1
-//#define RGB_160_80 2
+//#define MONO_128_32 1
+#define RGB_160_80 2
 
 Sketcher sketcher;
 
@@ -67,7 +67,8 @@ int main(int, char**) {
     renderer.Attach(WIDTH, HEIGHT, displayBuffer);
 #endif
 #ifdef RGB_160_80
-    SimDisplay simDisplay(WIDTH, HEIGHT, 2);
+    uint16_t* displayBuffer = new uint16_t[WIDTH*HEIGHT];
+    memset(displayBuffer, 0, 2 * WIDTH*HEIGHT);
 #endif
 
     Pixel_7_5_UI pixel75;
