@@ -2,6 +2,25 @@
 #include "fixed.h"
 #include "Grinliz_Util.h"
 
+void VRender::Clear(const osbr::RGBA rgba) 
+{
+    Rect clip = m_size.Intersect(m_clip);
+    if (!clip.Empty()) {
+        m_blockDraw(clip.x0, clip.y0, clip.x1, clip.y1, rgba);
+    }
+}
+
+void VRender::DrawRect(int x0, int y0, int x1, int y1, const osbr::RGBA& rgba)
+{
+    Rect in(x0, y0, x1, y1);
+    Rect r = m_size.Intersect(m_clip).Intersect(in);
+    if (!r.Empty()) {
+        m_blockDraw(r.x0, r.y0, r.x1, r.y1, rgba);
+    }
+}
+
+
+
 /*
 void VRender16::Set(int w, int h)
 {

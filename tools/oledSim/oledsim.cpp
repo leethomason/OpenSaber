@@ -2,27 +2,24 @@
 #include <string.h>
 #include "../saber/rgb.h"
 
-OledSim::OledSim(int w, int h, int bytes)
+SimDisplay::SimDisplay(int w, int h, int bytes)
 {
 	width = w;
 	height = h;
     bytesPerPixel = bytes;
 
 	pixels = new uint32_t[w*h];
-	buffer = new uint8_t[w*h*bytesPerPixel];
-
     Clear();
 }
 
 
-OledSim::~OledSim()
+SimDisplay::~SimDisplay()
 {
 	delete[] pixels;
-	delete[] buffer;
 }
 
 
-void OledSim::Commit()
+void SimDisplay::CommitFromBuffer(const uint8_t* buffer, int width, int height)
 {
 	for (int j = 0; j < height; ++j) {
 		for (int i = 0; i < width; ++i) {
@@ -37,7 +34,7 @@ void OledSim::Commit()
 }
 
 
-void OledSim::DrawRect(int x, int y, int size, uint32_t c)
+void SimDisplay::DrawRect(int x, int y, int size, uint32_t c)
 {
     for (int j = y * size; j < (y + 1)*size - 1; j++) {
         for (int i = x * size; i < (x + 1)*size - 1; i++) {
@@ -47,7 +44,7 @@ void OledSim::DrawRect(int x, int y, int size, uint32_t c)
 }
 
 
-void OledSim::CommitFrom5x7(const uint8_t* col)
+void SimDisplay::CommitFrom5x7(const uint8_t* col)
 {
     memset(pixels, 0, width * height * sizeof(uint32_t));
     int w = width / 7;
@@ -66,7 +63,7 @@ void OledSim::CommitFrom5x7(const uint8_t* col)
 }
 
 
-void OledSim::CommitFromDotstar(const osbr::RGB* dotstar, int n)
+void SimDisplay::CommitFromDotstar(const osbr::RGB* dotstar, int n)
 {
     //memset(pixels, 0, width * height * sizeof(uint32_t));
     const int s = width * height;
@@ -82,8 +79,7 @@ void OledSim::CommitFromDotstar(const osbr::RGB* dotstar, int n)
 }
 
 
-void OledSim::Clear()
+void SimDisplay::Clear()
 {
 	memset(pixels, 0, width * height * sizeof(uint32_t));
-	memset(buffer, 0, width * height * bytesPerPixel * sizeof(uint8_t));
 }

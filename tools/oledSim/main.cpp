@@ -14,8 +14,8 @@
 #include "../saber/rgb.h"
 #include "../saber/vrender.h"
 
-//#define MONO_128_32 1
-#define RGB_160_80 2
+#define MONO_128_32 1
+//#define RGB_160_80 2
 
 Sketcher sketcher;
 
@@ -60,18 +60,20 @@ int main(int, char**) {
 	assert(texture);
 
 #ifdef MONO_128_32
-    OledSim oled(WIDTH, HEIGHT, 1);
-	Renderer display;
-	display.Attach(WIDTH, HEIGHT, oled.Buffer());
-	Pixel_7_5_UI pixel75;
+    SimDisplay simDisplay(WIDTH, HEIGHT, 1);
+    uint8_t* displayBuffer = new uint8_t[WIDTH*HEIGHT];
+    memset(displayBuffer, 0, WIDTH * HEIGHT);
+	Renderer renderer;
+    renderer.Attach(WIDTH, HEIGHT, displayBuffer);
+#endif
+#ifdef RGB_160_80
+    SimDisplay simDisplay(WIDTH, HEIGHT, 2);
+#endif
+
+    Pixel_7_5_UI pixel75;
     osbr::RGB dotstar4[4];
     osbr::RGB dotstar6[6];
     DotStarUI dotstarUI;
-#endif
-#ifdef RGB_160_80
-    OledSim oled(WIDTH, HEIGHT, 2);
-    VRender16 vrender16;
-#endif
 
 	SDL_SetRenderDrawColor(ren, 128, 128, 128, 255);
 
@@ -160,7 +162,9 @@ int main(int, char**) {
 			++count;
 
 			sketcher.Push(value);
-			sketcher.Draw(&display, t, mode.mode(), bladeOn, &data);
+#ifdef MONO_128_32
+            sketcher.Draw(&renderer, t, mode.mode(), bladeOn, &data);
+#endif
 			pixel75.Draw(t, mode.mode(), bladeOn, &data);
             dotstarUI.Draw(dotstar4, 4, t, mode.mode(), bladeOn, data);
             dotstarUI.Draw(dotstar6, 6, t, mode.mode(), bladeOn, data);
@@ -174,23 +178,24 @@ int main(int, char**) {
 		SDL_Rect dst = { (winRect.w - w) / 2, (winRect.h - h) / 2, w, h };
 
         if (renderMode == RENDER_OLED) {
-            oled.Commit();
+            simDisplay.CommitFromBuffer(displayBuffer, WIDTH, HEIGHT);
         }
         else if (renderMode == RENDER_MATRIX) {
-            oled.CommitFrom5x7(pixel75.Pixels());
+            simDisplay.CommitFrom5x7(pixel75.Pixels());
         }
         else if (renderMode == RENDER_DOTSTAR_4) {
-            oled.CommitFromDotstar(dotstar4, 4);
+            simDisplay.CommitFromDotstar(dotstar4, 4);
         }
         else if (renderMode == RENDER_DOTSTAR_6) {
-            oled.CommitFromDotstar(dotstar6, 6);
+            simDisplay.CommitFromDotstar(dotstar6, 6);
         }
 
 		SDL_RenderClear(ren);
-		SDL_UpdateTexture(texture, NULL, oled.Pixels(), WIDTH * 4);
+		SDL_UpdateTexture(texture, NULL, simDisplay.Pixels(), WIDTH * 4);
 		SDL_RenderCopy(ren, texture, &src, &dst);
 		SDL_RenderPresent(ren);
 	}
+    delete[] displayBuffer;
 	SDL_Quit();
 	return 0;
 }
