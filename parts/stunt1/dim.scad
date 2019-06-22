@@ -7,6 +7,7 @@ DZ_FORE = 0.0;
 D_AFT = 28.5;
 D_FORE = 28.5;
 M_SWITCH = 115.0;   // 0 for no switch
+BATTERY_TYPE = "18500";
 
 ADD_EMITTER = false;    // adds extra length to hold dynamic heat sink
 USE_AA = false;          // use an AA battery holder (vs 18650)
