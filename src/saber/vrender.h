@@ -51,12 +51,13 @@ public:
 
 
     void Attach(BlockDraw blockDraw) { m_blockDraw = blockDraw; }
-    void SetSize(const Rect& size) { m_size = size; }
+    void SetSize(int w, int h) { m_size = Rect(0, 0, w, h); }
     void SetClip(const Rect& clip) { m_clip = clip; }
+    void ClearClip() { m_clip = m_size; }
 
     // Respects clip
     void Clear(const osbr::RGBA rgba);
-    void DrawRect(int x0, int y0, int x1, int y1, const osbr::RGBA& rgba);
+    void DrawRect(int x0, int y0, int width, int height, const osbr::RGBA& rgba);
 
     // x0, x1 inclusive
     void DrawLine(int x0, int y0, int x1, int y1, const osbr::RGBA& rgba);

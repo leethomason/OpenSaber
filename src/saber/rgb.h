@@ -88,6 +88,12 @@ struct RGBA {
     RGBA() {}
     RGBA(const RGBA& other) { r = other.r; g = other.g; b = other.b; a = other.a; }
     RGBA(uint32_t c) { set(c); }
+    RGBA(int r, int g, int b, int a = 255) {
+        this->r = r;
+        this->g = g;
+        this->b = b;
+        this->a = a;
+    }
 
     uint8_t r = 0;
     uint8_t g = 0;

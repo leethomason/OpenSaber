@@ -10,9 +10,9 @@ void VRender::Clear(const osbr::RGBA rgba)
     }
 }
 
-void VRender::DrawRect(int x0, int y0, int x1, int y1, const osbr::RGBA& rgba)
+void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba)
 {
-    Rect in(x0, y0, x1, y1);
+    Rect in(x0, y0, w + x0, h + y0);
     Rect r = m_size.Intersect(m_clip).Intersect(in);
     if (!r.Empty()) {
         m_blockDraw(r.x0, r.y0, r.x1, r.y1, rgba);

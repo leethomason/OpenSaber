@@ -28,6 +28,20 @@ static const int WIDTH = 160;
 static const int HEIGHT = 80;
 #endif
 
+osbr::RGBA* blockDrawRGBABuffer = 0;
+
+void BlockDrawRGBA(int x0, int y0, int x1, int y1, const osbr::RGBA& rgba)
+{
+    uint32_t c = (rgba.r << 24) | (rgba.g << 16) | (rgba.b << 8) | rgba.a;
+    uint32_t* pixels = (uint32_t*)blockDrawRGBABuffer;
+    for (int j = y0; j < y1; ++j) {
+        for (int i = x0; i < x1; ++i) {
+            pixels[j*WIDTH + i] = c;
+        }
+    }
+}
+
+
 UIModeUtil::UIModeUtil()
 {
     lastActive = 0;
@@ -67,8 +81,18 @@ int main(int, char**) {
     renderer.Attach(WIDTH, HEIGHT, displayBuffer);
 #endif
 #ifdef RGB_160_80
-    uint16_t* displayBuffer = new uint16_t[WIDTH*HEIGHT];
-    memset(displayBuffer, 0, 2 * WIDTH*HEIGHT);
+    // VRender can directly write to the display buffer
+    uint32_t* displayBuffer = new uint32_t[WIDTH*HEIGHT];
+    memset(displayBuffer, 0, 4 * WIDTH*HEIGHT);
+
+    VRender vrender;
+    blockDrawRGBABuffer = (osbr::RGBA*)displayBuffer;
+    vrender.Attach(BlockDrawRGBA);
+
+    vrender.SetSize(WIDTH, HEIGHT);
+    vrender.ClearClip();
+    vrender.SetClip(VRender::Rect(0, 0, WIDTH / 2, HEIGHT / 2));
+    vrender.DrawRect(10, 10, WIDTH-20, HEIGHT-20, osbr::RGBA(255, 0, 0));
 #endif
 
     Pixel_7_5_UI pixel75;
@@ -178,6 +202,8 @@ int main(int, char**) {
 		const int h = HEIGHT * scale;
 		SDL_Rect dst = { (winRect.w - w) / 2, (winRect.h - h) / 2, w, h };
 
+        SDL_RenderClear(ren);
+#ifdef MONO_128_32
         if (renderMode == RENDER_OLED) {
             simDisplay.CommitFromBuffer(displayBuffer, WIDTH, HEIGHT);
         }
@@ -190,9 +216,11 @@ int main(int, char**) {
         else if (renderMode == RENDER_DOTSTAR_6) {
             simDisplay.CommitFromDotstar(dotstar6, 6);
         }
-
-		SDL_RenderClear(ren);
-		SDL_UpdateTexture(texture, NULL, simDisplay.Pixels(), WIDTH * 4);
+        SDL_UpdateTexture(texture, NULL, simDisplay.Pixels(), WIDTH * 4);
+#endif
+#ifdef RGB_160_80
+        SDL_UpdateTexture(texture, NULL, displayBuffer, WIDTH * 4);
+#endif
 		SDL_RenderCopy(ren, texture, &src, &dst);
 		SDL_RenderPresent(ren);
 	}

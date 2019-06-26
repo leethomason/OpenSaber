@@ -16,8 +16,8 @@ public:
 	// After commit, this is the RGBA pixels that are displayed in the simulator.
     const uint32_t* Pixels() const { return pixels; }
    
-	void CommitFromBuffer(const uint8_t* src, int w, int h);
-    void CommitFrom5x7(const uint8_t* src); // use this as a dot matrix renderer
+	void CommitFromBuffer(const void* src, int w, int h);
+    void CommitFrom5x7(const void* src); // use this as a dot matrix renderer
     void CommitFromDotstar(const osbr::RGB* dotstars, int n);
 	void Clear();
 

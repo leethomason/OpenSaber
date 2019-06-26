@@ -7,6 +7,8 @@
 typedef const uint8_t* (*GlyphMetrics)(int charID, int* advance, int* w, int* rows);
 typedef const uint8_t* (*TextureData)(int* w, int* h);
 
+// Renders to an OLED mono compatible buffer.
+// Doesn't own the buffer - just writes to it.
 class Renderer
 {
 public:
@@ -28,6 +30,7 @@ public:
 
 	void Fill(int c);
 
+    // The buffer attached to this OLED renderer
 	uint8_t* Buffer() { return m_buffer;  }
 
 private:
