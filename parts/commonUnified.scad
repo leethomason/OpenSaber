@@ -3,9 +3,9 @@ use <baffles.scad>
 
 // TODO: unify the OledHolder and the PCB holder
 
-Z_BATTERY           =  68;
-Z_PADDED_BATTERY    =  Z_BATTERY + 1;
-D_BATTERY           =  18.50 + 0.5;    // An 1850. Huh. 
+Z_BATTERY_18650     = 65 + 4;
+Z_BATTERY_18500     = 50 + 4;
+D_BATTERY           = 18.50 + 0.5;    // An 1850. Huh. 
 
 D_SWITCH            =  12.5;     // actually 12, by thread.
 D_SWITCH_SUPPORT    =  16;
@@ -226,9 +226,13 @@ module bridge(dx, dy, dz, inset=0)
 }
 
 // Physical components. ----------------------
-module battery(outer) {
+
+function zBattery(type) = (type == "18500") ? Z_BATTERY_18500 : Z_BATTERY_18650;
+
+module battery(outer, type) {
+    dz = zBattery(type);
     color("yellow") translate([0, outer/2 - D_BATTERY/2, 0]) {
-        cylinder(d=D_BATTERY, h = Z_BATTERY + EPS2);
+        cylinder(d=D_BATTERY, h = dz + EPS2);
     }
 }
 
@@ -606,7 +610,7 @@ module switchRing(diameter, t, dz, dzToSwitch)
     }
 }
 
-function nBafflesNeeded(dzButtress) = ceil(Z_PADDED_BATTERY / (dzButtress*2));
+function nBafflesNeeded(dzButtress, type) = ceil(zBattery(type) / (dzButtress*2));
 
 function zLenOfBaffles(n, dzButtress) = n * dzButtress * 2 - dzButtress;
 

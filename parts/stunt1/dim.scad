@@ -1,16 +1,32 @@
 // Tuned per build. Measurement is from the back
 // of the chassis, after the pommel. 
 
+// Vader
+DZ_AFT = 187.0 - 10.0;  // subtract the emitter....
+DZ_FORE = 0.0;
+D_AFT = 34.0;
+D_FORE = 28.5;
+M_SWITCH = 122.0 - 10.0;
+BATTERY_TYPE = "18500";
+
+ADD_EMITTER = true;    // adds extra length to hold dynamic heat sink
+USE_AA = false;         // use an AA battery holder (vs 18650)
+ACCESS_PCB = false;     // makes the PCB switches accessible from the pommel
+
 // Vented
+/*
 DZ_AFT = 115.0;
 DZ_FORE = 0.0;
 D_AFT = 28.5;
 D_FORE = 28.5;
 M_SWITCH = 115.0;   // 0 for no switch
+BATTERY_TYPE = "18500";
 
 ADD_EMITTER = false;    // adds extra length to hold dynamic heat sink
 USE_AA = false;          // use an AA battery holder (vs 18650)
 ACCESS_PCB = false;     // makes the PCB switches accessible from the pommel
+*/
+
 
 // Test
 /*

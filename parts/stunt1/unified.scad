@@ -34,7 +34,7 @@ module AAHolder(extraZ)
 
 if (DRAW_BODY) {
 
-    BATTERY_BAFFLES = nBafflesNeeded(H_BUTTRESS);
+    BATTERY_BAFFLES = nBafflesNeeded(H_BUTTRESS, BATTERY_TYPE);
     N_BAFFLES = floor((DZ_TOTAL - DZ_PCB + H_BUTTRESS)/(H_BUTTRESS*2));
     REINFORCE = 4;
 
@@ -67,9 +67,6 @@ if (DRAW_BODY) {
                     translate([-50, 0, 0]) cube(size=[100, 100, 500]); 
                 }
             }
-            //translate([0, 0, DZ_PCB])
-            //    battery(D_FORE);
-
             // flat bottom
             translate([-20, -20, 0])
                 cube(size=[40, 5, 100]);
