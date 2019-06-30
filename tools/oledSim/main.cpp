@@ -30,10 +30,11 @@ static const int HEIGHT = 80;
 
 osbr::RGBA* blockDrawRGBABuffer = 0;
 
-void BlockDrawRGBA(int x0, int y0, int x1, int y1, const osbr::RGBA& rgba)
+void BlockDrawRGB(int x0, int y0, int x1, int y1, const osbr::RGB& rgb)
 {
-    uint32_t c = (rgba.r << 24) | (rgba.g << 16) | (rgba.b << 8) | rgba.a;
+    uint32_t c = (rgb.r << 24) | (rgb.g << 16) | (rgb.b << 8) | 0xff;
     uint32_t* pixels = (uint32_t*)blockDrawRGBABuffer;
+
     for (int j = y0; j < y1; ++j) {
         for (int i = x0; i < x1; ++i) {
             pixels[j*WIDTH + i] = c;
@@ -87,12 +88,14 @@ int main(int, char**) {
 
     VRender vrender;
     blockDrawRGBABuffer = (osbr::RGBA*)displayBuffer;
-    vrender.Attach(BlockDrawRGBA);
+    vrender.Attach(BlockDrawRGB);
 
     vrender.SetSize(WIDTH, HEIGHT);
     vrender.ClearClip();
-    vrender.SetClip(VRender::Rect(0, 0, WIDTH / 2, HEIGHT / 2));
     vrender.DrawRect(10, 10, WIDTH-20, HEIGHT-20, osbr::RGBA(255, 0, 0));
+    vrender.DrawRect(20, 20, 20, 20, osbr::RGBA(0, 255, 0));
+    vrender.DrawRect(30, 30, 20, 20, osbr::RGBA(0, 0, 255, 128));
+    vrender.Render();
 #endif
 
     Pixel_7_5_UI pixel75;

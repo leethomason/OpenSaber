@@ -2,69 +2,195 @@
 #include "fixed.h"
 #include "Grinliz_Util.h"
 
-void VRender::Clear(const osbr::RGBA rgba) 
+
+VRender::VRender()
+{
+    m_activeRoot = 0;
+}
+
+void VRender::Clear(const osbr::RGB rgb) 
 {
     Rect clip = m_size.Intersect(m_clip);
     if (!clip.Empty()) {
-        m_blockDraw(clip.x0, clip.y0, clip.x1, clip.y1, rgba);
+        m_blockDraw(clip.x0, clip.y0, clip.x1, clip.y1, rgb);
     }
 }
 
 void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba)
 {
     Rect in(x0, y0, w + x0, h + y0);
-    Rect r = m_size.Intersect(m_clip).Intersect(in);
-    if (!r.Empty()) {
-        m_blockDraw(r.x0, r.y0, r.x1, r.y1, rgba);
+    ASSERT(m_nEdge + 1 < MAX_EDGES);
+    ASSERT(in.y0 <= in.y1);
+    m_layer++;
+    m_edge[m_nEdge++].Init(in.x0, in.y0, in.x0, in.y1, m_layer, rgba);
+    m_edge[m_nEdge++].Init(in.x1, in.y0, in.x1, in.y1, m_layer, rgba);
+}
+
+void VRender::Render()
+{
+    Rect clip = m_size.Intersect(m_clip);
+    ASSERT(m_nEdge + 1 < MAX_EDGES);
+    osbr::RGBA rgba(0);
+    m_edge[m_nEdge++].Init(clip.x0, clip.y0, clip.x0, clip.y1, Edge::LAYER_BACKGROUND, rgba);
+    m_edge[m_nEdge++].Init(clip.x1, clip.y0, clip.x1, clip.y1, Edge::LAYER_BACKGROUND, rgba);
+
+    // Sort the edges by y0? Or bin them. Faster to bin, of course, but a bit more memory.
+    SortToStart();
+    Rasterize();
+
+    // Delete the background.
+    m_nEdge -= 2;
+}
+
+void VRender::SortToStart()
+{
+    memset(m_rootHash, 0, sizeof(Edge*)*Y_HASH);
+
+    for (int i = 0; i < m_nEdge; ++i) {
+        int y = m_edge[i].y0;
+        if (y < 0) y = 0;
+        int yHash = y % Y_HASH;
+        m_edge[i].nextStart = m_rootHash[yHash];
+        m_rootHash[yHash] = m_edge + i;
     }
 }
 
 
-
-/*
-void VRender16::Set(int w, int h)
+void VRender::IncrementActiveEdges(int y)
 {
-    m_width = w;
-    m_height = h;
-}
+    Edge* e = m_activeRoot;
+    Edge* prev = 0;
 
-void VRender16::Attach(uint16_t* buffer,       // Memory for the RGB data
-    const Rect& bufferRect,         // Defines the bounds of the buffer 
-    const Rect& clip)
-{
-    m_buffer = buffer;
-    m_bufferRect = bufferRect;
-    m_clip = clip;
-}
-
-void VRender16::Clear(const osbr::RGBA rgba)
-{
-    uint16_t c = ToU16(rgba);
-    const int area = m_bufferRect.Area();
-    for (int i = 0; i < area; ++i) {
-        m_buffer[i] = c;
-    }
-}
-
-
-void VRender16::DrawLine(int x0, int y0, int x1, int y1, const osbr::RGBA& rgba)
-{
-    Fixed115 step;
-    uint16_t c = ToU16(rgba);
-    int pitch = m_bufferRect.CX();
-
-    int dx = x1 - x0 + 1;
-    int dy = y1 - y0 + 1;
-    if (glAbs(dx) > glAbs(dy)) {
-        if (x0 > x1) {
-            Swap(&x0, &x1); Swap(&y0, &y1);
+    // Set the new edge x value, cull the no longer active.
+    // Will sort int the next stage.
+    while (e) {
+        if (y >= e->y1) {
+            if (prev) prev->nextActive = e->nextActive;
+            else m_activeRoot = e->nextActive;
         }
-        dx = glAbs(dx);
-        step.balancedDiv(dx, dy);
-        Fixed115 y(y0);
-        for (int i = 0; i < dx; ++i, y += step) {
-            m_buffer[(y.getInt() - m_bufferRect.y0)*pitch + x0 - m_bufferRect.x0 + i] = c;
+        else {
+            e->x += e->slope;   
+            prev = e;
+        }
+        e = e->nextActive;
+    }
+}
+
+void VRender::AddStartingEdges(int y)
+{
+    for (Edge* e = m_rootHash[y % Y_HASH]; e; e = e->nextStart) {
+        if (e->y0 == y) {
+            if (e->Horizontal()) continue;
+            e->nextActive = m_activeRoot;
+            m_activeRoot = e;
+            e->x = e->x0;
+            e->slope = Fixed115(e->x1 - e->x0, e->y1 - e->y0);
         }
     }
 }
-*/
+
+
+void VRender::SortActiveEdges()
+{
+    if (!m_activeRoot || !m_activeRoot->nextActive) return;
+
+    // Resulting list:
+    Edge* head = 0;
+    while (m_activeRoot) {
+        Edge* current = m_activeRoot;
+        m_activeRoot = m_activeRoot->nextActive;
+
+        if (!head || current->x < head->x) {
+            current->nextActive = head;
+            head = current;
+        }
+        else {
+            Edge* p = head;
+            while (p) {
+                if (!p->nextActive || (current->x < p->nextActive->x)) {
+                    current->nextActive = p->nextActive;
+                    p->nextActive = current;
+                    break;
+                }
+                p = p->nextActive;
+            }
+        }
+    }
+    m_activeRoot = head;
+}
+
+
+osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color)
+{
+    // Toggles layers. (even-odd rule)
+    bool added = false;
+    for (int i = 0; i < m_nColor; ++i) {
+        if (m_colorStack[i].layer == layer) {
+            // A match, remove.
+            for (int j = i + 1; j < m_nColor; ++j) {
+                m_colorStack[j - 1] = m_colorStack[j];
+            }
+            m_nColor--;
+            added = true;
+            break;
+        }
+        else if (layer > m_colorStack[i].layer 
+            && i < (m_nColor-1) 
+            && layer < m_colorStack[i+1].layer)
+        {
+            // Add after.
+            ASSERT(m_nColor < MAX_COLOR_STACK);
+            for (int j = m_nColor; j > i; --j) {
+                m_colorStack[j] = m_colorStack[j - 1];
+            }
+            m_colorStack[i].Set(layer, color);
+            ++m_nColor;
+            added = true;
+            break;
+        }
+    }
+    if (!added) {
+        ASSERT(m_nColor < MAX_COLOR_STACK);
+        m_colorStack[m_nColor++].Set(layer, color);
+    }
+
+    osbr::RGB rgb(0);
+    int alpha = 0;
+    for (int i = 0; i < m_nColor; ++i) {
+        osbr::RGBA c = m_colorStack[i].color;
+        rgb.r = (c.r * c.a + rgb.r * (255 - c.a)) / 255;
+        rgb.g = (c.g * c.a + rgb.g * (255 - c.a)) / 255;
+        rgb.b = (c.b * c.a + rgb.b * (255 - c.a)) / 255;
+    }
+    return rgb;
+}
+
+void VRender::RasterizeLine(int y, const Rect& clip)
+{
+    // Edges are sorted. Walk right to left.
+    int SENTINEL = -1000;
+    int x0 = SENTINEL;
+    osbr::RGB rgb(0);
+    for (Edge* e = m_activeRoot; e; e = e->nextActive) {
+        int x1 = e->x.getInt();
+        // Rasterize previous chunk.
+        if (x0 != SENTINEL)
+            m_blockDraw(x0, y, x1, y + 1, rgb);
+        x0 = x1;
+        rgb = AddToColorStack(e->layer, e->color);
+    }
+}
+
+
+void VRender::Rasterize()
+{
+    Rect clip = m_size.Intersect(m_clip);
+
+    for (int j = 0; j < clip.y1; ++j) {
+        IncrementActiveEdges(j);
+        AddStartingEdges(j);
+        SortActiveEdges();
+        RasterizeLine(j, clip);
+        ASSERT(m_nColor == 0);
+    }
+}

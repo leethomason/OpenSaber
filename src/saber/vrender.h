@@ -2,12 +2,17 @@
 
 #include <stdint.h>
 #include "rgb.h"
+#include "fixed.h"
 
-typedef void (*BlockDraw)(int x0, int y0, int x1, int y1, const osbr::RGBA& rgba);
+typedef void (*BlockDraw)(int x0, int y0, int x1, int y1, const osbr::RGB& rgb);
 
 class VRender
 {
 public:
+    static const int MAX_EDGES = 200;   // defines memory use.
+    static const int MAX_ACTIVE = 16;
+    static const int Y_HASH = 32;
+
     template<class T> 
     static T Min(T a, T b) { return a < b ? a : b; }
     template<class T> 
@@ -49,27 +54,84 @@ public:
         }
     };
 
-
+    VRender();
     void Attach(BlockDraw blockDraw) { m_blockDraw = blockDraw; }
     void SetSize(int w, int h) { m_size = Rect(0, 0, w, h); }
     void SetClip(const Rect& clip) { m_clip = clip; }
     void ClearClip() { m_clip = m_size; }
 
+    void Render();
+
     // Respects clip
-    void Clear(const osbr::RGBA rgba);
+    void Clear(const osbr::RGB rgb);
     void DrawRect(int x0, int y0, int width, int height, const osbr::RGBA& rgba);
 
     // x0, x1 inclusive
-    void DrawLine(int x0, int y0, int x1, int y1, const osbr::RGBA& rgba);
+    //void DrawLine(int x0, int y0, int x1, int y1, const osbr::RGBA& rgba);
     void DrawPoly(const Vec2* points, int n, const osbr::RGBA& rgba);
 
 private:
-    struct Segment {
-        Vec2 p0;
-        Vec2 p1;
+    struct Edge {
+        enum {
+            LAYER_SENTINEL = -100,
+            LAYER_BACKGROUND = -1
+        };
+        int16_t x0, y0;
+        int16_t x1, y1;
+        Fixed115 x;
+        Fixed115 slope;
+        int layer;
+        osbr::RGBA color;
+        Edge* nextStart = 0;
+        Edge* nextActive = 0;
+
+        void Init(int x0, int y0, int x1, int y1, int layer, const osbr::RGBA& rgba) {
+            this->x0 = (int16_t)x0;
+            this->y0 = (int16_t)y0;
+            this->x1 = (int16_t)x1;
+            this->y1 = (int16_t)y1;
+            this->layer = layer;
+            this->color = rgba;
+            this->nextStart = 0;
+        }
+
+        bool Horizontal() const { return y0 == y1; }
     };
+
+    struct ColorEntry
+    {
+        int layer;
+        osbr::RGBA color;
+        void Set(int layer, osbr::RGBA color) {
+            this->layer = layer;
+            this->color = color;
+        }
+    };
+
+    void SortToStart();
+    void Rasterize();
+    void RasterizeLine(int y, const Rect&);
+    osbr::RGB AddToColorStack(int layer, const osbr::RGBA&);
+
+    void IncrementActiveEdges(int y);
+    void AddStartingEdges(int y);
+    void SortActiveEdges();
+    void SortActiveLeft(Edge* e);
+
+    void UnlinkActive(Edge* e);
+    void AddRightActive(Edge* addThis, Edge* inList);
+
+    static const int MAX_COLOR_STACK = 8;
 
     BlockDraw m_blockDraw = 0;
     Rect m_size;
     Rect m_clip;
+    int m_nEdge = 0;
+    int m_layer = 0;
+    int m_nColor = 0;
+    Edge* m_activeRoot = 0;
+
+    ColorEntry m_colorStack[MAX_COLOR_STACK];
+    Edge m_edge[MAX_EDGES];
+    Edge* m_rootHash[Y_HASH];
 };
