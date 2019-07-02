@@ -93,6 +93,7 @@ int main(int, char**) {
     vrender.SetSize(WIDTH, HEIGHT);
     vrender.ClearClip();
     vrender.DrawRect(10, 10, WIDTH-20, HEIGHT-20, osbr::RGBA(255, 0, 0));
+    vrender.DrawRect(5, 5, 10, 10, osbr::RGBA(255, 255, 255, 128));
     vrender.DrawRect(20, 20, 20, 20, osbr::RGBA(0, 255, 0));
     vrender.DrawRect(30, 30, 20, 20, osbr::RGBA(0, 0, 255, 128));
     vrender.Render();

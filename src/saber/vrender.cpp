@@ -155,12 +155,24 @@ osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color)
     }
 
     osbr::RGB rgb(0);
-    int alpha = 0;
-    for (int i = 0; i < m_nColor; ++i) {
+    int start = m_nColor - 1;
+    for (; start > 0; start--) {
+        if (m_colorStack[start].color.a == 255)
+            break;
+    }
+    for (int i = start; i < m_nColor; ++i) {
         osbr::RGBA c = m_colorStack[i].color;
-        rgb.r = (c.r * c.a + rgb.r * (255 - c.a)) / 255;
-        rgb.g = (c.g * c.a + rgb.g * (255 - c.a)) / 255;
-        rgb.b = (c.b * c.a + rgb.b * (255 - c.a)) / 255;
+        // ARM M0+ doesn't have division.
+        if (c.a == 255) {
+            rgb.r = c.r;
+            rgb.g = c.g;
+            rgb.b = c.b;
+        }
+        else {
+            rgb.r = (c.r * c.a + rgb.r * (255 - c.a)) >> 8;
+            rgb.g = (c.g * c.a + rgb.g * (255 - c.a)) >> 8;
+            rgb.b = (c.b * c.a + rgb.b * (255 - c.a)) >> 8;
+        }
     }
     return rgb;
 }
