@@ -26,6 +26,20 @@ void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba)
     m_edge[m_nEdge++].Init(in.x1, in.y0, in.x1, in.y1, m_layer, rgba);
 }
 
+void VRender::DrawPoly(const Vec2* points, int n, const osbr::RGBA& rgba)
+{
+    m_layer++;
+    for (int i = 1; i < n; ++i) {
+        ASSERT(m_nEdge < MAX_EDGES);
+        m_edge[m_nEdge++].Init(points[i - 1].x, points[i - 1].y, points[i].x, points[i].y, m_layer, rgba);
+    }
+    if (points[n - 1] != points[0]) {
+        ASSERT(m_nEdge < MAX_EDGES);
+        m_edge[m_nEdge++].Init(points[n - 1].x, points[n - 1].y, points[0].x, points[0].y, m_layer, rgba);
+    }
+}
+
+
 void VRender::Render()
 {
     Rect clip = m_size.Intersect(m_clip);
@@ -47,6 +61,7 @@ void VRender::SortToStart()
     memset(m_rootHash, 0, sizeof(Edge*)*Y_HASH);
 
     for (int i = 0; i < m_nEdge; ++i) {
+        m_edge[i].Align();
         int y = m_edge[i].y0;
         if (y < 0) y = 0;
         int yHash = y % Y_HASH;
@@ -186,8 +201,11 @@ void VRender::RasterizeLine(int y, const Rect& clip)
     for (Edge* e = m_activeRoot; e; e = e->nextActive) {
         int x1 = e->x.getInt();
         // Rasterize previous chunk.
-        if (x0 != SENTINEL)
-            m_blockDraw(x0, y, x1, y + 1, rgb);
+        if (x0 != SENTINEL) {
+            Rect clipped = clip.Intersect(Rect(x0, y, x1, y + 1));
+            if (!clipped.Empty())
+                m_blockDraw(clipped.x0, y, clipped.x1, y + 1, rgb);
+        }
         x0 = x1;
         rgb = AddToColorStack(e->layer, e->color);
     }

@@ -96,6 +96,10 @@ int main(int, char**) {
     vrender.DrawRect(5, 5, 10, 10, osbr::RGBA(255, 255, 255, 128));
     vrender.DrawRect(20, 20, 20, 20, osbr::RGBA(0, 255, 0));
     vrender.DrawRect(30, 30, 20, 20, osbr::RGBA(0, 0, 255, 128));
+    VRender::Vec2 points[4] = {
+        { 0, -10 }, {10, 0}, {0, 10}, {-10,0}
+    };
+    vrender.DrawPoly(points, 4, osbr::RGBA(255, 255, 0, 128));
     vrender.Render();
 #endif
 

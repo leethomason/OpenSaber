@@ -17,11 +17,25 @@ public:
     static T Min(T a, T b) { return a < b ? a : b; }
     template<class T> 
     static T Max(T a, T b) { return a > b ? a : b; }
+    template<class T>
+    static void Swap(T& a, T& b) {
+        T temp = a;
+        a = b;
+        b = temp;
+    }
 
     struct Vec2
     {
         int x = 0;
         int y = 0;
+
+        const bool operator== (const Vec2& rhs) const {
+            return rhs.x == x && rhs.y == y;
+        }
+
+        const bool operator!= (const Vec2& rhs) const {
+            return rhs.x != x || rhs.y != y;
+        }
     };
 
     struct Rect
@@ -65,15 +79,11 @@ public:
     // Respects clip
     void Clear(const osbr::RGB rgb);
     void DrawRect(int x0, int y0, int width, int height, const osbr::RGBA& rgba);
-
-    // x0, x1 inclusive
-    //void DrawLine(int x0, int y0, int x1, int y1, const osbr::RGBA& rgba);
     void DrawPoly(const Vec2* points, int n, const osbr::RGBA& rgba);
 
 private:
     struct Edge {
         enum {
-            LAYER_SENTINEL = -100,
             LAYER_BACKGROUND = -1
         };
         int16_t x0, y0;
@@ -93,6 +103,13 @@ private:
             this->layer = layer;
             this->color = rgba;
             this->nextStart = 0;
+        }
+        
+        void Align() {
+            if (y0 > y1) {
+                Swap(y0, y1);
+                Swap(x0, x1);
+            }
         }
 
         bool Horizontal() const { return y0 == y1; }
