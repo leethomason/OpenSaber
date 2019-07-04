@@ -442,9 +442,6 @@ private:
 	bool m_enable;
 };
 
-// iSin goes [0,1], not [0, 2pi]
-FixedNorm iSin(FixedNorm x);
-
 /* Generally try to keep Ardunino and Win332 code very separate.
 But a log class is useful to generalize, both for utility
 and testing. Therefore put up with some #define nonsense here.

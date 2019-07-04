@@ -2,10 +2,6 @@
 #include <math.h>
 
 //#define DEBUG_EVENT
-
-static const int SIZE_SIN_TABLE = 256;
-static FixedNorm gSinTable[SIZE_SIN_TABLE] = { 0 };
-
 uint8_t lerpU8(uint8_t a, uint8_t b, uint8_t t) 
 {
     int32_t r = int32_t(a) + (int32_t(b) - int32_t(a)) * int32_t(t) / 255;
@@ -34,38 +30,21 @@ bool TestUtil()
     TEST_IS_TRUE(iSin(FixedNorm(2, 4)) == 0);
     TEST_IS_TRUE(iSin(FixedNorm(3, 4)) == -1);
     
-    FixedNorm ref(0);
-    for (int i = 0; i < 10; i++) {
-        FixedNorm fn = iSin(FixedNorm(i, 1024));
-        TEST_IS_TRUE(fn >= ref);
-        ref = fn;
+#ifdef _WIN32
+    for (float r = 0; r <= 1.0f; r += 0.01f) {
+        float f = sinf(r * 2.0f * 3.1415926535897932384626433832795f);
+        FixedNorm fn = iSin(FixedNorm(r));
+        int s3 = iSin_S3(int(r * 32768));
+
+        float fnFloat = fn.toFloat();
+        float s3Float = float(s3) / 4096.0f;
+
+        TEST_IS_TRUE(fabsf(f - fnFloat) < 0.04f);
+        TEST_IS_TRUE(fabsf(f - float(s3) / 4096.0f) < 0.04f);
     }
+#endif
 
     return true;
-}
-
-FixedNorm iSin(FixedNorm fx)
-{
-	if (gSinTable[SIZE_SIN_TABLE/4] == 0) {
-		for (int i = 0; i < SIZE_SIN_TABLE; ++i) {
-			float x = 2 * 3.14159f * float(i) / float(SIZE_SIN_TABLE);
-            gSinTable[i].set(sin(x) * 8193./8192.);
-		}
-	}
-    // Just need the decimal part for the lookup.
-    STATIC_ASSERT(SIZE_SIN_TABLE == 256);   // If not 256, change the shift bits below.
-    int x = fx.getDec() >> 8;
-    FixedNorm sin0 = gSinTable[x];
-    FixedNorm sin1 = gSinTable[(x + 1) % 256];
-
-    // Goes from 0-1 in float.
-    // Which is from 0-4096 fixed.
-    // And 0 - 2^16 in getDec() - lots to keep track of
-    // So the "step" is 16 in fixed, 256 in getDec()
-    int32_t ifraction = fx.getDec() - (x * 256);
-    FixedNorm fraction(ifraction, 256);
-    FixedNorm r = sin0 * (1 - fraction) + sin1 * fraction;
-    return r;
 }
 
 

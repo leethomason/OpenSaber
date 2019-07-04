@@ -82,6 +82,8 @@ int main(int, char**) {
     renderer.Attach(WIDTH, HEIGHT, displayBuffer);
 #endif
 #ifdef RGB_160_80
+    printf("Sizeof VRender=%d Edge=%d\n", (int)sizeof(VRender), (int)sizeof(VRender::Edge));
+
     // VRender can directly write to the display buffer
     uint32_t* displayBuffer = new uint32_t[WIDTH*HEIGHT];
     memset(displayBuffer, 0, 4 * WIDTH*HEIGHT);
@@ -100,6 +102,8 @@ int main(int, char**) {
         { 0, -10 }, {10, 0}, {0, 10}, {-10,0}
     };
     vrender.DrawPoly(points, 4, osbr::RGBA(255, 255, 0, 128));
+
+    //vrender.DrawRect(-30, 30, 60, 120, osbr::RGBA(0, 255, 255, 192));
     vrender.Render();
 #endif
 

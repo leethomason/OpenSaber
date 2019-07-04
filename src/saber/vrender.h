@@ -81,13 +81,12 @@ public:
     void DrawRect(int x0, int y0, int width, int height, const osbr::RGBA& rgba);
     void DrawPoly(const Vec2* points, int n, const osbr::RGBA& rgba);
 
-private:
     struct Edge {
         enum {
             LAYER_BACKGROUND = -1
         };
-        int16_t x0, y0;
-        int16_t x1, y1;
+        Fixed115 x0, y0;
+        Fixed115 x1, y1;
         Fixed115 x;
         Fixed115 slope;
         int layer;
@@ -96,10 +95,10 @@ private:
         Edge* nextActive = 0;
 
         void Init(int x0, int y0, int x1, int y1, int layer, const osbr::RGBA& rgba) {
-            this->x0 = (int16_t)x0;
-            this->y0 = (int16_t)y0;
-            this->x1 = (int16_t)x1;
-            this->y1 = (int16_t)y1;
+            this->x0 = x0;
+            this->y0 = y0;
+            this->x1 = x1;
+            this->y1 = y1;
             this->layer = layer;
             this->color = rgba;
             this->nextStart = 0;
@@ -113,6 +112,12 @@ private:
         }
 
         bool Horizontal() const { return y0 == y1; }
+    };
+    private:
+
+    struct Matrix
+    {
+        Fixed115 a, b, c, d, tx, ty;
     };
 
     struct ColorEntry
@@ -139,6 +144,7 @@ private:
     void AddRightActive(Edge* addThis, Edge* inList);
 
     static const int MAX_COLOR_STACK = 8;
+    static const int MAX_MATRIX_STACK = 4;
 
     BlockDraw m_blockDraw = 0;
     Rect m_size;
@@ -146,8 +152,13 @@ private:
     int m_nEdge = 0;
     int m_layer = 0;
     int m_nColor = 0;
+    int m_nMatrix = 0;
+    bool m_matrixDirty = true;
     Edge* m_activeRoot = 0;
 
+    Matrix m_matrix;
+
+    Matrix m_matrixStack[MAX_MATRIX_STACK];
     ColorEntry m_colorStack[MAX_COLOR_STACK];
     Edge m_edge[MAX_EDGES];
     Edge* m_rootHash[Y_HASH];

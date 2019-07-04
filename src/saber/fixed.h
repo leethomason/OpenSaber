@@ -55,7 +55,6 @@ private:
 
     static inline SHORT FixedDiv(SHORT a, SHORT b) {
         static_assert(sizeof(LONG) >= sizeof(SHORT) * 2, "Long must have more bits that short.");
-        static_assert(DECBITS * 2 <= (sizeof(LONG) - sizeof(SHORT)) * 2, "Need enough space to shift for division");
 
         LONG c = (LONG(a) << (DECBITS*2)) / (LONG(b) << DECBITS);
         return SHORT(c);
@@ -101,6 +100,11 @@ public:
     int32_t scale(int32_t s) const { 
         int32_t r = s * x / FIXED_1; 
         return r; 
+    }
+
+    // obviously very expensive call 
+    float toFloat() const {
+        return (float)x / (float)FIXED_1;
     }
 
     // Return the floor part (as a copy).
@@ -202,4 +206,24 @@ typedef FixedT<int32_t, int16_t, 6> Fixed115;
 
 // Good for [1, -1] type functions, general near one.
 typedef FixedT<int32_t, int16_t, 12> FixedNorm;
+
+// Sine approximation.
+// x: angle with 2^15 units/circle
+// return: sine, 12 bits
+int32_t iSin_S3(int32_t x);
+
+inline int32_t iCos_S3(int32_t x) {
+    return iSin_S3(x - 8192);
+}
+
+inline FixedNorm iSin(FixedNorm f) {
+    int32_t s12 = iSin_S3(f.scale(32768));
+    return FixedNorm(s12, 4096);
+}
+
+inline FixedNorm iCos(FixedNorm f) {
+    int32_t c12 = iCos_S3(f.scale(32768));
+    return FixedNorm(c12, 4096);
+}
+
 #endif // FIXED_16_INCLUDED

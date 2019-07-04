@@ -39,7 +39,6 @@ void VRender::DrawPoly(const Vec2* points, int n, const osbr::RGBA& rgba)
     }
 }
 
-
 void VRender::Render()
 {
     Rect clip = m_size.Intersect(m_clip);
@@ -62,9 +61,9 @@ void VRender::SortToStart()
 
     for (int i = 0; i < m_nEdge; ++i) {
         m_edge[i].Align();
-        int y = m_edge[i].y0;
+        Fixed115 y = m_edge[i].y0;
         if (y < 0) y = 0;
-        int yHash = y % Y_HASH;
+        int yHash = y.getInt() % Y_HASH;
         m_edge[i].nextStart = m_rootHash[yHash];
         m_rootHash[yHash] = m_edge + i;
     }
@@ -99,7 +98,7 @@ void VRender::AddStartingEdges(int y)
             e->nextActive = m_activeRoot;
             m_activeRoot = e;
             e->x = e->x0;
-            e->slope = Fixed115(e->x1 - e->x0, e->y1 - e->y0);
+            e->slope = (e->x1 - e->x0) / (e->y1 - e->y0);
         }
     }
 }
