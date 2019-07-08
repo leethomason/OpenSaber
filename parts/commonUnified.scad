@@ -436,7 +436,8 @@ module oneBaffle(   d,
                     scallop=false,      // outside curves
                     noBottom=true,      // bottom cutout 
                     cutoutHigh=true,    // open space to the top
-                    bottomRail=true     // bridge must be >0 for a bottom rail
+                    bottomRail=true,    // bridge must be >0 for a bottom rail
+                    conduit=false
                     )     
 {
     yMC = -yAtX(X_MC/2, d/2) + 1.0;
@@ -473,6 +474,20 @@ module oneBaffle(   d,
         if (noBottom) {
             translate([-TROUGH_2/2, -20, -EPS])
                 cube(size=[TROUGH_2, 15, dz + EPS2]);
+        }
+
+        if (conduit) {
+            // Easy wiring, stops battery
+            translate([0, 0, -EPS]) {
+                hull() {
+                    //translate([0, d*0.00, 0]) 
+                    //    cylinder(h=dz+EPS2, d = d * 0.6);
+                    translate([0, -d*0.1, 0]) 
+                        cylinder(h=dz+EPS2, d = d * 0.6);
+                }
+                translate([-TROUGH_0/2, 0]) 
+                    cube(size=[TROUGH_0, 30, dz + EPS2]);
+            }
         }
     }
 
@@ -919,14 +934,18 @@ module oneBaffle(   d,
                     bridge=1,           // create a bridge to the next baffle. designed to print w/o support material. 
                     dExtra=0,           // additional diameter
                     scallop=false,      // outside curves
-                    noBottom=true,        // bottom cutout 
-                    cutoutHigh=true)    // open space to the top
+                    noBottom=true,      // bottom cutout 
+                    cutoutHigh=true     // open space to the top
+
 */
 
 $fn = 80;
 oneBaffle(30, 4, 
-    battery=true,
-    mc=true,
+    battery=false,
+    mc=false,
     bridge=1,
-    noBottom=true,
-    cutoutHigh=true);
+    noBottom=false,
+    cutoutHigh=false,
+    conduit=true);
+
+//translate([0, 0, 1]) battery(30);

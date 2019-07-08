@@ -3,8 +3,8 @@ use <../commonUnified.scad>
 use <../shapes.scad>
 use <holder.scad>
 
-DRAW_HOLDER = false;
-DRAW_BODY   = true;
+DRAW_HOLDER = true;
+DRAW_BODY   = false;
 DRAW_EMITTER = false;
 
 DZ_BODY = (EMITTER == "closed") ? (DZ_TOTAL - emitterZ()) : DZ_TOTAL;
@@ -67,18 +67,18 @@ if (DRAW_BODY) {
                 for(i=[0:N_BAFFLES - 1]) {
                     REINFORCE = 4;
                     z = i*H_BUTTRESS*2 + DZ_PCB;
-                    batt = (i < BATTERY_BAFFLES) || (i > N_BAFFLES - 4);
+                    batt = i < BATTERY_BAFFLES;
+                    hasEmitter = EMITTER != "none";
 
                     translate([0, 0, z]) {
                         oneBaffle(
                             D_AFT,
                             H_BUTTRESS,
                             battery=batt,
-                            mc=true,
-                            bridge=(z < DZ_AFT - H_BUTTRESS*2) ? 1 : 0,
-                            scallop=false,
+                            conduit = !batt,
+                            mc=batt,
+                            bridge=(i < N_BAFFLES-1 || hasEmitter) ? 1 : 0,
                             noBottom=i < REINFORCE,
-                            mcSpace=false,
                             bottomRail = ((i%2) == 0)
                         );
                     }
@@ -102,12 +102,6 @@ if (DRAW_BODY) {
                         emitterBase(D_FORE);
                 }
             }
-            // Wiring
-            translate([D_AFT/2 * 0.70, -D_AFT/2 * 0.05, 0])
-                cylinder(h=DZ_TOTAL, d=4);
-            mirror([-1, 0, 0]) translate([D_AFT/2 * 0.70, -D_AFT/2 * 0.05, 0])
-                cylinder(h=DZ_TOTAL, d=4);
-
             // flat bottom
             translate([-20, -20, 0])
                 cube(size=[40, 5, 500]);
