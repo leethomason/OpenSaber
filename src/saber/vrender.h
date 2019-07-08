@@ -81,15 +81,28 @@ public:
     void DrawRect(int x0, int y0, int width, int height, const osbr::RGBA& rgba);
     void DrawPoly(const Vec2* points, int n, const osbr::RGBA& rgba);
 
+    void SetTransform(FixedNorm rotation, int x, int y) {
+        m_rot = rotation;
+        m_trans.x = x;
+        m_trans.y = y;
+    }
+
+    void ClearTransform()
+    {
+        m_rot = 0;
+        m_trans.x = m_trans.y = 0;
+    }
+
     struct Edge {
         enum {
             LAYER_BACKGROUND = -1
         };
+        uint8_t layer;
+        uint8_t yAdd;
         Fixed115 x0, y0;
         Fixed115 x1, y1;
         Fixed115 x;
         Fixed115 slope;
-        int layer;
         osbr::RGBA color;
         Edge* nextStart = 0;
         Edge* nextActive = 0;
@@ -108,17 +121,13 @@ public:
             if (y0 > y1) {
                 Swap(y0, y1);
                 Swap(x0, x1);
+                slope = -slope;
             }
         }
 
         bool Horizontal() const { return y0 == y1; }
     };
     private:
-
-    struct Matrix
-    {
-        Fixed115 a, b, c, d, tx, ty;
-    };
 
     struct ColorEntry
     {
@@ -130,6 +139,9 @@ public:
         }
     };
 
+    void StartEdges();
+    void EndEdges();
+
     void SortToStart();
     void Rasterize();
     void RasterizeLine(int y, const Rect&);
@@ -138,10 +150,6 @@ public:
     void IncrementActiveEdges(int y);
     void AddStartingEdges(int y);
     void SortActiveEdges();
-    void SortActiveLeft(Edge* e);
-
-    void UnlinkActive(Edge* e);
-    void AddRightActive(Edge* addThis, Edge* inList);
 
     static const int MAX_COLOR_STACK = 8;
     static const int MAX_MATRIX_STACK = 4;
@@ -152,13 +160,13 @@ public:
     int m_nEdge = 0;
     int m_layer = 0;
     int m_nColor = 0;
-    int m_nMatrix = 0;
     bool m_matrixDirty = true;
+    int m_start;
+    int m_end;
     Edge* m_activeRoot = 0;
+    FixedNorm m_rot;
+    Vec2 m_trans;
 
-    Matrix m_matrix;
-
-    Matrix m_matrixStack[MAX_MATRIX_STACK];
     ColorEntry m_colorStack[MAX_COLOR_STACK];
     Edge m_edge[MAX_EDGES];
     Edge* m_rootHash[Y_HASH];

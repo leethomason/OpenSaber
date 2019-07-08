@@ -444,7 +444,8 @@ module oneBaffle(   d,
     difference() {
         cylinder(h=dz, d=d + dExtra);
         if (battery) {
-            battery(d);
+            translate([0, 0, -EPS]) 
+                battery(d);
 
             // Debatable if this should be its
             // own option. Removes area below battery.

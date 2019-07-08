@@ -1,11 +1,14 @@
 #include "vrender.h"
 #include "fixed.h"
 #include "Grinliz_Util.h"
-
+#include <stdio.h>
 
 VRender::VRender()
 {
     m_activeRoot = 0;
+    m_rot.set(0);
+    m_trans.x = 0;
+    m_trans.y = 0;
 }
 
 void VRender::Clear(const osbr::RGB rgb) 
@@ -19,16 +22,21 @@ void VRender::Clear(const osbr::RGB rgb)
 void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba)
 {
     Rect in(x0, y0, w + x0, h + y0);
-    ASSERT(m_nEdge + 1 < MAX_EDGES);
+    ASSERT(m_nEdge + 4 <= MAX_EDGES);
     ASSERT(in.y0 <= in.y1);
     m_layer++;
-    m_edge[m_nEdge++].Init(in.x0, in.y0, in.x0, in.y1, m_layer, rgba);
+    StartEdges();
+    m_edge[m_nEdge++].Init(in.x0, in.y0, in.x1, in.y0, m_layer, rgba);
     m_edge[m_nEdge++].Init(in.x1, in.y0, in.x1, in.y1, m_layer, rgba);
+    m_edge[m_nEdge++].Init(in.x1, in.y1, in.x0, in.y1, m_layer, rgba);
+    m_edge[m_nEdge++].Init(in.x0, in.y1, in.x0, in.y0, m_layer, rgba);
+    EndEdges();
 }
 
 void VRender::DrawPoly(const Vec2* points, int n, const osbr::RGBA& rgba)
 {
     m_layer++;
+    StartEdges();
     for (int i = 1; i < n; ++i) {
         ASSERT(m_nEdge < MAX_EDGES);
         m_edge[m_nEdge++].Init(points[i - 1].x, points[i - 1].y, points[i].x, points[i].y, m_layer, rgba);
@@ -37,10 +45,49 @@ void VRender::DrawPoly(const Vec2* points, int n, const osbr::RGBA& rgba)
         ASSERT(m_nEdge < MAX_EDGES);
         m_edge[m_nEdge++].Init(points[n - 1].x, points[n - 1].y, points[0].x, points[0].y, m_layer, rgba);
     }
+    EndEdges();
 }
+
+
+void VRender::StartEdges()
+{
+    m_start = m_nEdge;
+    m_end = m_nEdge;
+}
+
+void VRender::EndEdges()
+{
+    m_end = m_nEdge;
+    if (m_trans.x || m_trans.y || !m_rot.isZero()) {
+        FixedNorm s = iSin(m_rot);
+        FixedNorm c = iCos(m_rot);
+
+        for (int i = m_start; i < m_end; i++) {
+            Fixed115 x0 = m_edge[i].x0;
+            Fixed115 y0 = m_edge[i].y0;
+            Fixed115 x1 = m_edge[i].x1;
+            Fixed115 y1 = m_edge[i].y1;
+
+            m_edge[i].x0 =  x0 * c - y0 * s;
+            m_edge[i].y0 =  x0 * s + y0 * c;
+
+            m_edge[i].x1 =  x1 * c - y1 * s;
+            m_edge[i].y1 =  x1 * s + y1 * c;
+
+            m_edge[i].Align();
+        }
+    }
+    else {
+        for (int i = m_start; i < m_end; i++) {
+            m_edge[i].Align();
+        }
+    }
+}
+
 
 void VRender::Render()
 {
+    ClearTransform();
     Rect clip = m_size.Intersect(m_clip);
     ASSERT(m_nEdge + 1 < MAX_EDGES);
     osbr::RGBA rgba(0);
@@ -60,12 +107,34 @@ void VRender::SortToStart()
     memset(m_rootHash, 0, sizeof(Edge*)*Y_HASH);
 
     for (int i = 0; i < m_nEdge; ++i) {
-        m_edge[i].Align();
-        Fixed115 y = m_edge[i].y0;
-        if (y < 0) y = 0;
-        int yHash = y.getInt() % Y_HASH;
+        Edge* e = m_edge + i;
+        if (e->Horizontal()) 
+            continue;
+        ASSERT(e->y0 <= e->y1);   // Should be sorted by the Start/End
+
+        int yAdd = 0;
+        e->slope = (e->x1 - e->x0) / (e->y1 - e->y0);
+
+        if (e->y0 < 0) {
+            yAdd = 0;
+            e->x = e->x0 + e->slope * -e->y0;
+        }
+        else if (e->y0.getDec() == 0) {
+            yAdd = e->y0.getInt();
+            e->x = e->x0;
+        }
+        else {
+            yAdd = e->y0.getInt() + 1;
+            e->x = e->x0 + (Fixed115(yAdd) - e->y0) * e->slope;
+        }
+        e->yAdd = (uint8_t)yAdd;
+        int yHash = yAdd % Y_HASH;
         m_edge[i].nextStart = m_rootHash[yHash];
-        m_rootHash[yHash] = m_edge + i;
+        m_rootHash[yHash] = e;
+
+        printf("Sorting start=%d (%.2f,%.2f)-(%.2f,%.2f)\n",
+            e->layer,
+            e->x0.toFloat(), e->y0.toFloat(), e->x1.toFloat(), e->y1.toFloat());
     }
 }
 
@@ -92,13 +161,20 @@ void VRender::IncrementActiveEdges(int y)
 
 void VRender::AddStartingEdges(int y)
 {
+    // Zero is special, because we pick up everything that started off the top
+    // of the screen.
     for (Edge* e = m_rootHash[y % Y_HASH]; e; e = e->nextStart) {
-        if (e->y0 == y) {
-            if (e->Horizontal()) continue;
+        if (e->yAdd == y) {
+            if (e->Horizontal()) 
+                continue;
+            if (e->y1 < y) 
+                continue;
             e->nextActive = m_activeRoot;
             m_activeRoot = e;
-            e->x = e->x0;
-            e->slope = (e->x1 - e->x0) / (e->y1 - e->y0);
+
+            printf("Adding start=%d (%.2f,%.2f)-(%.2f,%.2f)\n",
+                e->layer,
+                e->x0.toFloat(), e->y0.toFloat(), e->x1.toFloat(), e->y1.toFloat());
         }
     }
 }
@@ -170,7 +246,7 @@ osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color)
 
     osbr::RGB rgb(0);
     int start = m_nColor - 1;
-    for (; start > 0; start--) {
+    for (; start >= 0; start--) {
         if (m_colorStack[start].color.a == 255)
             break;
     }
@@ -197,7 +273,12 @@ void VRender::RasterizeLine(int y, const Rect& clip)
     int SENTINEL = -1000;
     int x0 = SENTINEL;
     osbr::RGB rgb(0);
+    printf("------ y=%d\n", y);
     for (Edge* e = m_activeRoot; e; e = e->nextActive) {
+        printf("layer=%d rgb=%d,%d,%d x=%.2f (%.2f,%.2f)-(%.2f,%.2f)\n",
+            e->layer, e->color.r, e->color.g, e->color.b,
+            e->x.toFloat(),
+            e->x0.toFloat(), e->y0.toFloat(), e->x1.toFloat(), e->y1.toFloat());
         int x1 = e->x.getInt();
         // Rasterize previous chunk.
         if (x0 != SENTINEL) {

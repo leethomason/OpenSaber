@@ -74,24 +74,20 @@ public:
     FixedT(const FixedT& f) : x(f.x) {}
     FixedT(int v) : x(v << DECBITS) {}
     FixedT(int32_t num, int32_t den) {
-        const int32_t o_num = num;
-        const int32_t o_den = den;
-        (void) o_num;
-        (void) o_den;
-
-        while(num > Limit<SHORT>::pos() || num < Limit<SHORT>::neg()) {
-            num /= 2;
-            den /= 2;
-        }
-        ASSERT2(den > 0, o_num, o_den);
-        if (den == 0) den = 1;
+        ASSERT(num <= Limit<SHORT>::pos());
+        ASSERT(num >= Limit<SHORT>::neg());
+        ASSERT(den != 0);
         x = FIXED_1 * num / den;
     }
     FixedT(float v) : x(SHORT(FIXED_1 * v)) {}
     FixedT(double v) : x(SHORT(FIXED_1 * v)) {}
 
+    void set(int v) { x = SHORT(v * FIXED_1); }
     void set(float v) { x = SHORT(v * FIXED_1); }
     void set(double v) { x = SHORT(v * FIXED_1); }
+    void setRaw(SHORT v) { x = v; }
+    LONG getRaw() const { return x; }
+
     void balancedDiv(int num, int den) {
         x = (FIXED_1 * num + den / 2) / den;
     }
@@ -107,6 +103,7 @@ public:
         return (float)x / (float)FIXED_1;
     }
 
+    /*
     // Return the floor part (as a copy).
     FixedT getFloor() const { 
         int fraction = x & ~(FIXED_1 - 1); 
@@ -114,6 +111,7 @@ public:
         f.x = fraction; 
         return f; 
     }
+    */
 
     // Query the integer part. Positive or negative.
     int32_t getInt() const { return x >> DECBITS; }
@@ -121,19 +119,21 @@ public:
     // Always positive.
     uint32_t getDec() const { return (unsigned(x) & (FIXED_1 - 1)) << (16 - DECBITS); }
 
+    bool isZero() const { return x == 0; }
+
     FixedT& operator = (const FixedT &v) { x = v.x; return *this; }
     FixedT& operator = (const int v) { x = IntToFixed(v); return *this; }
 
-    FixedT& operator +=  (const FixedT v) { x += v.x; return *this; }
+    FixedT& operator +=  (const FixedT& v) { x += v.x; return *this; }
     FixedT& operator +=  (const int v) { x += IntToFixed(v); return *this; }
 
-    FixedT& operator -=  (const FixedT v) { x -= v.x; return *this; }
+    FixedT& operator -=  (const FixedT& v) { x -= v.x; return *this; }
     FixedT& operator -=  (const int v) { x -= IntToFixed(v); return *this; }
 
-    FixedT& operator *=  (const FixedT v) { x = FixedMul(x, v.x); return *this; }
+    FixedT& operator *=  (const FixedT& v) { x = FixedMul(x, v.x); return *this; }
     FixedT& operator *=  (const int v) { x *= v; return *this; }
 
-    FixedT& operator /=  (const FixedT v) { x = FixedDiv(x, v.x); return *this; }
+    FixedT& operator /=  (const FixedT& v) { x = FixedDiv(x, v.x); return *this; }
     FixedT& operator /=  (const int v) { x /= v; return *this; }
 
     FixedT& operator <<= (const int v) { x <<= v; return *this; }
@@ -207,13 +207,21 @@ typedef FixedT<int32_t, int16_t, 6> Fixed115;
 // Good for [1, -1] type functions, general near one.
 typedef FixedT<int32_t, int16_t, 12> FixedNorm;
 
+inline Fixed115 operator * (const Fixed115& a, const FixedNorm& b)
+{
+    FixedT<int32_t, int16_t, 6> f;
+    int32_t x = (a.getRaw() * b.getRaw()) >> 12;
+    f.setRaw((int16_t)x);
+    return f;
+}
+
 // Sine approximation.
 // x: angle with 2^15 units/circle
 // return: sine, 12 bits
 int32_t iSin_S3(int32_t x);
 
 inline int32_t iCos_S3(int32_t x) {
-    return iSin_S3(x - 8192);
+    return iSin_S3(x + 8192);
 }
 
 inline FixedNorm iSin(FixedNorm f) {

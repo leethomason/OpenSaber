@@ -94,6 +94,7 @@ int main(int, char**) {
 
     vrender.SetSize(WIDTH, HEIGHT);
     vrender.ClearClip();
+    /*
     vrender.DrawRect(10, 10, WIDTH-20, HEIGHT-20, osbr::RGBA(255, 0, 0));
     vrender.DrawRect(5, 5, 10, 10, osbr::RGBA(255, 255, 255, 128));
     vrender.DrawRect(20, 20, 20, 20, osbr::RGBA(0, 255, 0));
@@ -102,8 +103,12 @@ int main(int, char**) {
         { 0, -10 }, {10, 0}, {0, 10}, {-10,0}
     };
     vrender.DrawPoly(points, 4, osbr::RGBA(255, 255, 0, 128));
-
-    //vrender.DrawRect(-30, 30, 60, 120, osbr::RGBA(0, 255, 255, 192));
+    */
+    vrender.SetTransform(FixedNorm(4, 100), 0, 0);
+    //vrender.DrawRect(0, -30, 120, 60, osbr::RGBA(0, 255, 255, 192));
+    vrender.DrawRect(0, 0, 40, 40, osbr::RGBA(0, 255, 255, 192));
+    vrender.DrawRect(40, 0, 40, 40, osbr::RGBA(255, 0, 255, 192));
+    vrender.DrawRect(30, 10, 20, 20, osbr::RGBA(255, 255, 255, 100));
     vrender.Render();
 #endif
 
