@@ -57,8 +57,7 @@ if (DRAW_BODY) {
                             mc=i >= REINFORCE,
                             bridge=(z < DZ_AFT - H_BUTTRESS*2) ? 1 : 0,
                             scallop=false,
-                            cutout=i < REINFORCE,
-                            mcSpace=false
+                            noBottom=i < REINFORCE
                         );
                     }
                 }
