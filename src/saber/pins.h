@@ -47,7 +47,7 @@ SOFTWARE.
 #define SABER_MODEL_SISTER_2	   15   // Shield v4, Teensy 3.5, 5x7 Display. Replaced the cool-but-useless wirelss communication
 #define SABER_MODEL_KENOBI_IV	   16   // ItsyBitsy, Shield v1,Neopixel
 #define SABER_MODEL_AQUATIC_2	   17   // ItsyBitsy, Shield v1c, Dotstar
-#define SABER_MODEL_TYVOKKA			 18   // ItsyBitsy, Shield v1c, Dotstar
+#define SABER_MODEL_TYVOKKA		   18   // ItsyBitsy, Shield v1c, Dotstar
 
 #define SABER_SUB_MODEL_NONE		0
 #define SABER_SUB_MODEL_LUNA		1
@@ -56,8 +56,8 @@ SOFTWARE.
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_TYVOKKA
+#define SERIAL_DEBUG 				1
+#define SABER_MODEL 				SABER_MODEL_TEST
 #define SABER_SUB_MODEL				SABER_SUB_MODEL_STANDARD
 // ----------------------------------
 
@@ -85,8 +85,10 @@ SOFTWARE.
 #define PCB_SHIELD_3			   13	
 #define PCB_SHIELD_4			   14	
 #define PCB_SHIELD_5			   15
+
 #define PCB_ITSY_1				   16
 #define PCB_ITSY_1C				   17	// 1B was a bad run, 1C adds dotstar support
+#define PCB_ITSY_2A				   18
 
 static const int EEPROM_SIZE = 512;
 
@@ -701,25 +703,25 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	static const int VOLUME_4 = 204;
 
 #elif (SABER_MODEL == SABER_MODEL_TEST)
-	#define PCB_VERSION 			PCB_ITSY_1C
+	#define PCB_VERSION 			PCB_ITSY_2A
 	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
 	#define SABER_VOLTMETER			
 	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 	#define SABER_UI_LED			SABER_LED_DOTSTAR
 
-	#define SABER_NUM_LEDS 			8
+	#define SABER_NUM_LEDS 			4
 	#define SABER_UI_START			0
-	#define SABER_UI_COUNT			6
+	#define SABER_UI_COUNT			4
 	// There are 32 leves of brightness, expressed from 0-256 in a step size of 8.
 	#define SABER_UI_BRIGHTNESS		16
 
 	#define SABER_UI_IDLE_MEDITATION
 
-	#define SABER_CRYSTAL_START	    7
-	#define SABER_CRYSTAL_BRIGHTNESS 24
+//	#define SABER_CRYSTAL_START	    7
+//	#define SABER_CRYSTAL_BRIGHTNESS 24
 
-	#define SABER_BLACK_START		6
-	#define SABER_BLACK_COUNT		1
+//	#define SABER_BLACK_START		6
+//	#define SABER_BLACK_COUNT		1
 
 	#define SABER_SOUND_DEF SABER_SOUND_DEF_BESPIN_ROGUE
 
@@ -823,7 +825,7 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 		#define PIN_DATA  		  30
 	#endif
 	#define ACCEL_BLADE_DIRECTION 0	// x is in the blade direction. not used for impact detection.
-#elif (PCB_VERSION == PCB_ITSY_1 || PCB_VERSION == PCB_ITSY_1C)
+#elif (PCB_VERSION == PCB_ITSY_1 || PCB_VERSION == PCB_ITSY_1C || PCB_VERSION == PCB_ITSY_2A)
 	/* Grinning Lizard Shield for ItsyBitys M0.
 	   Integrated memory for sound.
 	   Neopixel support.
@@ -833,7 +835,7 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define PIN_VMETER        			A1
 	#define PIN_LED_A    	  			A2 
 	#define PIN_SWITCH_A				A3
-	#if (PCB_VERSION == PCB_ITSY_1C)
+	#if (PCB_VERSION == PCB_ITSY_1C || PCB_VERSION == PCB_ITSY_2A)
 	#define PIN_DOTSTAR_EN				A4
 	#else
 	// A4 exposed
@@ -844,7 +846,9 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	// CLOCK	 
 	// MOSI
 	// MISO 
+	#if (PCB_VERSION < PCB_ITSY_2A) 
 	#define PIN_ACCEL_EN      	2
+	#endif
 	// LRCLCK - I2S
 	// BITCLK - I2S
 	// unused

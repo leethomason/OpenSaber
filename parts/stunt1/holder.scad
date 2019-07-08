@@ -7,6 +7,9 @@ Y_POWER = -yAtX(DX_POWER/2, D_AFT/2) + 1;
 ROT = ACCESS_PCB ? -25 : 0;
 Y_TWEAK = ACCESS_PCB ? -5 : 2;
 
+PCB_DX = 17.5;  // a bit of padding
+PCB_DZ = 29.5;
+
 module holder() {    
     difference() {
         intersection() {
@@ -14,18 +17,21 @@ module holder() {
             union() {    
                 tube(h=DZ_PCB, do=D_AFT, di=D_AFT - 4);
                 
+                WPCB = 17.145;  // exact size
+                C = -WPCB/2;
+
                 translate([0, Y_TWEAK, 0]) rotate([ROT, 0, 0]) 
                 pcbHolder(0, 
                         4, 
                         DZ_PCB,   // dz
                         Z_OFFSET,    // dz to pcb
                         DY_PCB,    // dy pcb
-                        [27, 50, 20],
+                        [PCB_DX, 50, PCB_DZ],
                         [
-                            [-11.430, 17.280, "buttress" ],     // d=2.2
-                            [11.430, 17.280, "buttress" ],     // d=2.2
-                            [-11.430, 2.040, "buttress" ],     // d=2.2
-                            [11.430, 2.040, "buttress" ],     // d=2.2
+                            [C+2.54, 2.54, "buttress" ],     // d=2.2
+                            [C+2.54, 26.67, "buttress" ],     // d=2.2
+                            [C+14.605, 2.54, "buttress" ],     // d=2.2
+                            [C+14.605, 26.67, "buttress" ],     // d=2.2
                         ],
                         makeSection=false
                 );
@@ -48,15 +54,12 @@ module holder() {
         }
 
         translate([0, Y_TWEAK, 0])  rotate([ROT, 0, 0]) 
-            translate([-28/2, DY_PCB, Z_OFFSET]) 
-                cube(size=[28, 50, 22]);
+            translate([-PCB_DX/2, DY_PCB, Z_OFFSET]) 
+                cube(size=[PCB_DX, 50, PCB_DZ*0.95]);
 
         translate([-DX_POWER/2, Y_POWER, 0]) {
             cube(size=[DX_POWER, DY_POWER, DZ_POWER]);
         }
-        // flat bottom
-        translate([-20, -20.5, 0]) cube(size=[40, 5, 100]);
-
         translate([0, 0, DZ_PCB]) mirror([0, 0, -1]) keyJoint(JOINT_DZ, D_AFT, D_AFT - JOINT_T, 0, 0, true);    
 
     }

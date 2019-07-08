@@ -437,7 +437,8 @@ module oneBaffle(   d,
                     scallop=false,      // outside curves
                     cutout=true,        // bottom cutout 
                     mcWide=0,           // for mc with "wide" top, set the upper width
-                    cutoutHigh=true)    // open space to the top
+                    cutoutHigh=true,    // open space to the top
+                    bottomRail=true)
 {
     yMC = -yAtX(X_MC/2, d/2) + 1.0;
 
@@ -505,8 +506,10 @@ module oneBaffle(   d,
                     bridge3(d, dz);
             }
         }
-        oneBaffleBottonRail(d, dz);
-        mirror([1,0,0]) oneBaffleBottonRail(d, dz);
+        if (bottomRail) {
+            oneBaffleBottonRail(d, dz);
+            mirror([1,0,0]) oneBaffleBottonRail(d, dz);
+        }
     }
 }
 
