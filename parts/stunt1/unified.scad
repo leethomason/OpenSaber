@@ -77,7 +77,7 @@ if (DRAW_BODY) {
                             mc=true,
                             bridge=(z < DZ_AFT - H_BUTTRESS*2) ? 1 : 0,
                             scallop=false,
-                            cutout=i < REINFORCE,
+                            noBottom=i < REINFORCE,
                             mcSpace=false,
                             bottomRail = ((i%2) == 0)
                         );
