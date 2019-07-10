@@ -83,14 +83,15 @@ public:
 
     void SetTransform(FixedNorm rotation, int x, int y) {
         m_rot = rotation;
-        m_trans.x = x;
-        m_trans.y = y;
+        m_transX = Fixed115(x);
+        m_transY = Fixed115(y);
     }
 
     void ClearTransform()
     {
         m_rot = 0;
-        m_trans.x = m_trans.y = 0;
+        m_transX = Fixed115(0); // -Fixed115(1, 2);
+        m_transY = Fixed115(0); // -Fixed115(1, 2);
     }
 
     struct Edge {
@@ -165,7 +166,7 @@ public:
     int m_end;
     Edge* m_activeRoot = 0;
     FixedNorm m_rot;
-    Vec2 m_trans;
+    Fixed115 m_transX, m_transY;
 
     ColorEntry m_colorStack[MAX_COLOR_STACK];
     Edge m_edge[MAX_EDGES];

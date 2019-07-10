@@ -102,9 +102,17 @@ int main(int, char**) {
     vrender.DrawPoly(points, 4, osbr::RGBA(255, 255, 255, 64));
 
     vrender.SetTransform(FixedNorm(4, 100), 0, 0);
-    vrender.DrawRect(5, 0, 40, 40, osbr::RGBA(0, 255, 255, 192));
-    vrender.DrawRect(45, 0, 40, 40, osbr::RGBA(255, 0, 255, 192));
-    vrender.DrawRect(35, 10, 20, 20, osbr::RGBA(255, 255, 255, 100));
+    vrender.DrawRect(0, 0, 40, 40, osbr::RGBA(0, 255, 255, 192));
+    vrender.DrawRect(40, 0, 40, 40, osbr::RGBA(255, 0, 255, 192));
+    vrender.DrawRect(30, 10, 20, 20, osbr::RGBA(255, 255, 255, 100));
+
+    vrender.ClearTransform();
+    for (int r = 0; r < 8; ++r) {
+        vrender.SetTransform(FixedNorm(r, 8), 3 * WIDTH / 4, HEIGHT / 2);
+        //vrender.SetTransform(FixedNorm(0), 3 * WIDTH / 4, HEIGHT / 2);
+        vrender.DrawRect(25, -5, 10, 10, osbr::RGBA(0, 255, 0, 200));
+    }
+
     vrender.Render();
 #endif
 

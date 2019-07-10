@@ -7,8 +7,7 @@ VRender::VRender()
 {
     m_activeRoot = 0;
     m_rot.set(0);
-    m_trans.x = 0;
-    m_trans.y = 0;
+    ClearTransform();
 }
 
 void VRender::Clear(const osbr::RGB rgb) 
@@ -58,30 +57,25 @@ void VRender::StartEdges()
 void VRender::EndEdges()
 {
     m_end = m_nEdge;
-    if (m_trans.x || m_trans.y || !m_rot.isZero()) {
-        FixedNorm s = iSin(m_rot);
-        FixedNorm c = iCos(m_rot);
 
-        for (int i = m_start; i < m_end; i++) {
-            Fixed115 x0 = m_edge[i].x0;
-            Fixed115 y0 = m_edge[i].y0;
-            Fixed115 x1 = m_edge[i].x1;
-            Fixed115 y1 = m_edge[i].y1;
+    FixedNorm s = iSin(m_rot);
+    FixedNorm c = iCos(m_rot);
 
-            m_edge[i].x0 =  x0 * c - y0 * s;
-            m_edge[i].y0 =  x0 * s + y0 * c;
+    for (int i = m_start; i < m_end; i++) {
+        Fixed115 x0 = m_edge[i].x0;
+        Fixed115 y0 = m_edge[i].y0;
+        Fixed115 x1 = m_edge[i].x1;
+        Fixed115 y1 = m_edge[i].y1;
 
-            m_edge[i].x1 =  x1 * c - y1 * s;
-            m_edge[i].y1 =  x1 * s + y1 * c;
+        m_edge[i].x0 = x0 * c - y0 * s + m_transX;
+        m_edge[i].y0 = x0 * s + y0 * c + m_transY;
 
-            m_edge[i].Align();
-        }
+        m_edge[i].x1 = x1 * c - y1 * s + m_transX;
+        m_edge[i].y1 = x1 * s + y1 * c + m_transY;
+
+        m_edge[i].Align();
     }
-    else {
-        for (int i = m_start; i < m_end; i++) {
-            m_edge[i].Align();
-        }
-    }
+
 }
 
 
@@ -310,4 +304,5 @@ void VRender::Rasterize()
 #endif
         ASSERT(m_nColor == 0);
     }
+    ClearTransform();
 }
