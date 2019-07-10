@@ -2,14 +2,14 @@
 // of the chassis, after the pommel. 
 
 // Graflex
-DZ_AFT = 107 - 15;
+DZ_AFT = 85;
 DZ_FORE = 0.0;
 D_AFT = 32.5;
 M_STEPDOWN = 0;
 D_FORE = 33.5;
 M_SWITCH = 0;
-D_RING = 33.5;
-DZ_RING = 4.0;
+D_RING = 33.8;
+DZ_RING = 5.8;
 BATTERY_TYPE = "18500";
 EMITTER = "none";
 ACCESS_PCB = true;
