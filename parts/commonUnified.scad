@@ -432,34 +432,29 @@ module oneBaffle(   d,
                     battery=true,       // space for the battery
                     mc=true,            // space for the microcontroller
                     bridge=1,           // create a bridge to the next baffle. designed to print w/o support material. 
-                    mcSpace=false,      // lots of space for the microcontroller
                     dExtra=0,           // additional diameter
                     scallop=false,      // outside curves
-                    cutout=true,        // bottom cutout 
-                    mcWide=0,           // for mc with "wide" top, set the upper width
-                    cutoutHigh=true)    // open space to the top
+                    noBottom=true,      // bottom cutout 
+                    cutoutHigh=true,    // open space to the top
+                    bottomRail=true,    // bridge must be >0 for a bottom rail
+                    conduit=false
+                    )     
 {
     yMC = -yAtX(X_MC/2, d/2) + 1.0;
 
     difference() {
         cylinder(h=dz, d=d + dExtra);
         if (battery) {
-            translate([0, 0, -EPS]) 
-                battery(d);
-
-            // Debatable if this should be its
-            // own option. Removes area below battery.
-            translate([-TROUGH_1/2, -5, -EPS]) 
-                cube(size=[TROUGH_1, 5, dz + EPS2]);
+            translate([0, 0, -EPS]) battery(d);
         }
+        translate([-TROUGH_1/2, -5, -EPS]) 
+            cube(size=[TROUGH_1, 5, dz + EPS2]);
 
         if (mc) {
             translate([0, yMC, -EPS]) 
-                mc(widePart=mcWide);
+                mc();
         }
-        if (mcSpace)
-            translate([-X_MC/2, DY_MC, -EPS])
-                cube(size=[X_MC, 20, dz+EPS2]);
+
         if (scallop) {
             TUNE_X = 1.2;
             TUNE_D = 1.6;
@@ -476,9 +471,23 @@ module oneBaffle(   d,
                 cube(size=[TROUGH_0, 30, dz + EPS2]);
         }
 
-        if (cutout) {
+        if (noBottom) {
             translate([-TROUGH_2/2, -20, -EPS])
                 cube(size=[TROUGH_2, 15, dz + EPS2]);
+        }
+
+        if (conduit) {
+            // Easy wiring, stops battery
+            translate([0, 0, -EPS]) {
+                hull() {
+                    //translate([0, d*0.00, 0]) 
+                    //    cylinder(h=dz+EPS2, d = d * 0.6);
+                    translate([0, -d*0.1, 0]) 
+                        cylinder(h=dz+EPS2, d = d * 0.6);
+                }
+                translate([-TROUGH_0/2, 0]) 
+                    cube(size=[TROUGH_0, 30, dz + EPS2]);
+            }
         }
     }
 
@@ -506,8 +515,10 @@ module oneBaffle(   d,
                     bridge3(d, dz);
             }
         }
-        oneBaffleBottonRail(d, dz);
-        mirror([1,0,0]) oneBaffleBottonRail(d, dz);
+        if (bottomRail) {
+            oneBaffleBottonRail(d, dz);
+            mirror([1,0,0]) oneBaffleBottonRail(d, dz);
+        }
     }
 }
 
@@ -621,7 +632,6 @@ module baffleMCBattery( outer,          // outer diameter
                         dFirst=0,       // make the back baffle this diameter (0 to use standard)
                         dzFirst=0,      // make the back baffle this thicknes  (0 to use standard)
                         extraBaffle=0,  // add this much to the front baffle
-                        mcWide=0,       // set this for a wide top board
                         bridgeInFront=false,    // set true to contiue bridge. Useful for attaching to a cap.
                         bridgeStyle = 1
                     )
@@ -636,19 +646,17 @@ module baffleMCBattery( outer,          // outer diameter
                     cylinder(h=dzButtress*2, d=dFirst);
                     oneBaffle(outer, dzFirst, 
                             dExtra=dFirst - outer, 
-                            mcWide=mcWide, 
                             bridge=bridgeStyle);
                 }
             }
             else {
                 oneBaffle(outer, dzButtress, 
-                    bridge=bridgeInFront || (i < n-1) ? bridgeStyle : 0, 
-                    mcWide=mcWide);
+                    bridge=bridgeInFront || (i < n-1) ? bridgeStyle : 0);
             }
     }
     if (extraBaffle) {
         translate([0, 0, (n*2 - 1) * dzButtress]) {
-            oneBaffle(outer, extraBaffle, bridge=0, mcWide=mcWide);
+            oneBaffle(outer, extraBaffle, bridge=0);
         }
     }
 }
@@ -915,3 +923,29 @@ module forwardAdvanced(d, dz, overlap, outer, dzToPort, dzToSwitch)
         }
     }
 }
+
+
+
+/*
+module oneBaffle(   d,
+                    dz,
+                    battery=true,       // space for the battery
+                    mc=true,            // space for the microcontroller
+                    bridge=1,           // create a bridge to the next baffle. designed to print w/o support material. 
+                    dExtra=0,           // additional diameter
+                    scallop=false,      // outside curves
+                    noBottom=true,      // bottom cutout 
+                    cutoutHigh=true     // open space to the top
+
+*/
+
+$fn = 80;
+oneBaffle(30, 4, 
+    battery=false,
+    mc=false,
+    bridge=1,
+    noBottom=false,
+    cutoutHigh=false,
+    conduit=true);
+
+//translate([0, 0, 1]) battery(30);

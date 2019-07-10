@@ -97,7 +97,7 @@ public:
         enum {
             LAYER_BACKGROUND = -1
         };
-        uint8_t layer;
+        int8_t layer;
         uint8_t yAdd;
         Fixed115 x0, y0;
         Fixed115 x1, y1;

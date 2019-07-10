@@ -60,6 +60,8 @@
 // on the constant frequency output. Now using the LIS3DH, moved generalized
 // to git history (accelerometer.cpp/h and accelFXOS8700.cpp/h)
 #include "GrinlizLIS3DH.h"
+// Accelerometer / Magnemometer
+#include "GrinlizLSM303.h"
 
 #include "voltmeter.h"
 #include "sfx.h"
@@ -142,7 +144,11 @@ Voltmeter   voltmeter;
     #endif
 #endif
 
+#if PCB_VERSION == PCB_ITSY_2A
+GrinlizLSM303 accelMag;
+#else
 GrinlizLIS3DH accel(PIN_ACCEL_EN);
+#endif
 
 Timer2 displayTimer(100);
 Timer2 vbatPrintTimer(1000);
@@ -263,6 +269,7 @@ void setup() {
     SPI.begin();
     setupSD();
 
+#if PCB_VERSION < PCB_ITSY_2A
     {
         pinMode(PIN_ACCEL_EN, OUTPUT);
         digitalWrite(PIN_ACCEL_EN, HIGH);
@@ -281,6 +288,9 @@ void setup() {
             Log.p("Accelerometer ERROR.").eol();
         ASSERT(okay);
     }
+#else
+    accelMag.begin();
+#endif
     delay(10);
     voltmeter.begin();
     delay(10);
@@ -505,6 +515,7 @@ void processAccel(uint32_t msec)
     static ProfileData profData("processAccel");
     ProfileBlock block(&profData);
 
+#if 0
     // Consistently process the accelerometer queue, even if we don't use the values.
     // Also look for stalls and hitches.
     static const int N_ACCEL = 4;
@@ -588,6 +599,7 @@ void processAccel(uint32_t msec)
     else {
         maxGForce2 = 1;
     }
+    #endif
 }
 
 void loop() {

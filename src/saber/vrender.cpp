@@ -214,7 +214,7 @@ osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color)
 {
     // Toggles layers. (even-odd rule)
     bool added = false;
-    for (int i = 0; i < m_nColor; ++i) {
+    for (int i = 0; !added && i < m_nColor; ++i) {
         if (m_colorStack[i].layer == layer) {
             // A match, remove.
             for (int j = i + 1; j < m_nColor; ++j) {
@@ -222,28 +222,22 @@ osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color)
             }
             m_nColor--;
             added = true;
-            break;
         }
-        else if (layer > m_colorStack[i].layer 
-            && i < (m_nColor-1) 
-            && layer < m_colorStack[i+1].layer)
-        {
-            // Add after.
+        else if (layer > m_colorStack[i].layer) {
+            // Should be in previous slot.
             ASSERT(m_nColor < MAX_COLOR_STACK);
             for (int j = m_nColor; j > i; --j) {
                 m_colorStack[j] = m_colorStack[j - 1];
             }
             m_colorStack[i].Set(layer, color);
-            ++m_nColor;
+            m_nColor++;
             added = true;
-            break;
         }
     }
     if (!added) {
         ASSERT(m_nColor < MAX_COLOR_STACK);
         m_colorStack[m_nColor++].Set(layer, color);
     }
-
     osbr::RGB rgb(0);
     int start = m_nColor - 1;
     for (; start >= 0; start--) {
@@ -274,12 +268,16 @@ void VRender::RasterizeLine(int y, const Rect& clip)
     int x0 = SENTINEL;
     osbr::RGB rgb(0);
     printf("------ y=%d\n", y);
+    // Edges can go away under the current active, or abut.
+    // Intentionally trying to keep this loop simple without look-ahead, etc.
+    // FIXME: on the other hand, edges under the opaque part of the stack are causing slab rendering.
     for (Edge* e = m_activeRoot; e; e = e->nextActive) {
         printf("layer=%d rgb=%d,%d,%d x=%.2f (%.2f,%.2f)-(%.2f,%.2f)\n",
             e->layer, e->color.r, e->color.g, e->color.b,
             e->x.toFloat(),
             e->x0.toFloat(), e->y0.toFloat(), e->x1.toFloat(), e->y1.toFloat());
         int x1 = e->x.getInt();
+
         // Rasterize previous chunk.
         if (x0 != SENTINEL) {
             Rect clipped = clip.Intersect(Rect(x0, y, x1, y + 1));
@@ -301,6 +299,15 @@ void VRender::Rasterize()
         AddStartingEdges(j);
         SortActiveEdges();
         RasterizeLine(j, clip);
+#if _MSC_VER
+        if (m_nColor) {
+            printf("ASSERTION\n");
+            for (int i = 0; i < m_nColor; ++i) {
+                printf("Color: [%d] layer=%d (%d,%d,%d)\n", i, m_colorStack[i].layer,
+                    m_colorStack[i].color.r, m_colorStack[i].color.g, m_colorStack[i].color.b);
+            }
+        }
+#endif
         ASSERT(m_nColor == 0);
     }
 }
