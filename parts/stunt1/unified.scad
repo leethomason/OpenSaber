@@ -4,13 +4,17 @@ use <../shapes.scad>
 use <holder.scad>
 
 DRAW_HOLDER = true;
-DRAW_BODY   = false;
+DRAW_BODY   = true;
 DRAW_EMITTER = false;
 
 DZ_BODY = (EMITTER == "closed") ? (DZ_TOTAL - emitterZ()) : DZ_TOTAL;
 
 $fn = 80;
 EPS = .01;
+
+module flatBottom() {
+    translate([-20, -D_AFT/2 - 5, -20]) cube(size=[40, 5.5, 500]);
+}
 
 if (DRAW_HOLDER) {
     difference() {
@@ -23,7 +27,7 @@ if (DRAW_HOLDER) {
                 }
             }
         }
-        translate([-20, -D_AFT/2 - 5, -20]) cube(size=[40, 5.5, 100]);
+        flatBottom();
     }
 }
 
@@ -103,8 +107,7 @@ if (DRAW_BODY) {
                 }
             }
             // flat bottom
-            translate([-20, -20, 0])
-                cube(size=[40, 5, 500]);
+            flatBottom();
 
             if (M_SWITCH) {
                 translate([0, -50, M_SWITCH]) {
