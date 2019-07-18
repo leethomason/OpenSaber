@@ -76,6 +76,7 @@
     <ClCompile Include="..\..\src\saber\rgb2hsv.cpp" />
     <ClCompile Include="..\..\src\saber\sketcher.cpp" />
     <ClCompile Include="..\..\src\saber\unittest.cpp" />
+    <ClCompile Include="..\..\src\saber\vectorui.cpp" />
     <ClCompile Include="..\..\src\saber\voltmeter.cpp" />
     <ClCompile Include="..\..\src\saber\vrender.cpp" />
     <ClCompile Include="..\WinUtil.cpp" />
@@ -86,10 +87,13 @@
     <ClInclude Include="..\..\src\saber\assets.h" />
     <ClInclude Include="..\..\src\saber\fixed.h" />
     <ClInclude Include="..\..\src\saber\Grinliz_Util.h" />
+    <ClInclude Include="..\..\src\saber\modes.h" />
     <ClInclude Include="..\..\src\saber\renderer.h" />
     <ClInclude Include="..\..\src\saber\rgb2hsv.h" />
     <ClInclude Include="..\..\src\saber\sketcher.h" />
+    <ClInclude Include="..\..\src\saber\uirenderdata.h" />
     <ClInclude Include="..\..\src\saber\unittest.h" />
+    <ClInclude Include="..\..\src\saber\vectorui.h" />
     <ClInclude Include="..\..\src\saber\vrender.h" />
     <ClInclude Include="oledsim.h" />
   </ItemGroup>

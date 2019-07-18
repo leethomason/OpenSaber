@@ -5,11 +5,14 @@
 #include "fixed.h"
 
 typedef void (*BlockDraw)(int x0, int y0, int x1, int y1, const osbr::RGB& rgb);
+typedef const uint8_t* (*GlyphMetrics)(int charID, int* advance, int* w, int* rows);
 
 class VRender
 {
 public:
-    static const int MAX_EDGES = 200;   // defines memory use.
+    // FIXME optimize for edges
+    //static const int MAX_EDGES = 200;   // defines memory use.
+    static const int MAX_EDGES = 600;   // defines memory use.
     static const int MAX_ACTIVE = 16;
     static const int Y_HASH = 32;
 
@@ -71,27 +74,33 @@ public:
     VRender();
     void Attach(BlockDraw blockDraw) { m_blockDraw = blockDraw; }
     void SetSize(int w, int h) { m_size = Rect(0, 0, w, h); }
+    
     void SetClip(const Rect& clip) { m_clip = clip; }
     void ClearClip() { m_clip = m_size; }
 
     void Render();
 
-    // Respects clip
-    void Clear(const osbr::RGB rgb);
+    void Clear();
     void DrawRect(int x0, int y0, int width, int height, const osbr::RGBA& rgba);
     void DrawPoly(const Vec2* points, int n, const osbr::RGBA& rgba);
+    void PushLayer() { m_layerFixed = true; m_layer++; }
+    void PopLayer() { m_layerFixed = false; }
 
-    void SetTransform(FixedNorm rotation, int x, int y) {
+    void SetTransform(FixedNorm rotation, Fixed115 x, Fixed115 y) {
         m_rot = rotation;
-        m_transX = Fixed115(x);
-        m_transY = Fixed115(y);
+        m_transX = x;
+        m_transY = y;
     }
 
     void ClearTransform()
     {
         m_rot = 0;
-        m_transX = Fixed115(0); // -Fixed115(1, 2);
-        m_transY = Fixed115(0); // -Fixed115(1, 2);
+        m_transX = Fixed115(0);
+        m_transY = Fixed115(0);
+    }
+
+    int NumEdges() const {
+        return m_nEdge;
     }
 
     struct Edge {
@@ -108,14 +117,26 @@ public:
         Edge* nextStart = 0;
         Edge* nextActive = 0;
 
+        void Clear() {
+            this->layer = layer;
+            this->yAdd = 0;
+            this->nextStart = 0;
+            this->nextActive = 0;
+        }
+
         void Init(int x0, int y0, int x1, int y1, int layer, const osbr::RGBA& rgba) {
+            Clear();
+
             this->x0 = x0;
             this->y0 = y0;
             this->x1 = x1;
             this->y1 = y1;
             this->layer = layer;
-            this->color = rgba;
-            this->nextStart = 0;
+
+            this->color.r = rgba.r;
+            this->color.g = rgba.g;
+            this->color.b = rgba.b;
+            this->color.a = rgba.a;
         }
         
         void Align() {
@@ -155,6 +176,7 @@ public:
     static const int MAX_COLOR_STACK = 8;
     static const int MAX_MATRIX_STACK = 4;
 
+    bool m_layerFixed = false;
     BlockDraw m_blockDraw = 0;
     Rect m_size;
     Rect m_clip;
@@ -171,4 +193,11 @@ public:
     ColorEntry m_colorStack[MAX_COLOR_STACK];
     Edge m_edge[MAX_EDGES];
     Edge* m_rootHash[Y_HASH];
+};
+
+
+class VRenderUtil
+{
+public:
+    static void DrawStr(VRender* vrender, const char* str, int x, int y, GlyphMetrics metrics, const osbr::RGBA&);
 };

@@ -13,6 +13,7 @@
 #include "../saber/unittest.h"
 #include "../saber/rgb.h"
 #include "../saber/vrender.h"
+#include "../saber/vectorui.h"
 
 //#define MONO_128_32 1
 #define RGB_160_80 2
@@ -82,7 +83,6 @@ int main(int, char**) {
     renderer.Attach(WIDTH, HEIGHT, displayBuffer);
 #endif
 #ifdef RGB_160_80
-    printf("Sizeof VRender=%d Edge=%d\n", (int)sizeof(VRender), (int)sizeof(VRender::Edge));
 
     // VRender can directly write to the display buffer
     uint32_t* displayBuffer = new uint32_t[WIDTH*HEIGHT];
@@ -91,7 +91,6 @@ int main(int, char**) {
     VRender vrender;
     blockDrawRGBABuffer = (osbr::RGBA*)displayBuffer;
     vrender.Attach(BlockDrawRGB);
-
     vrender.SetSize(WIDTH, HEIGHT);
     vrender.ClearClip();
     
@@ -112,8 +111,8 @@ int main(int, char**) {
         //vrender.SetTransform(FixedNorm(0), 3 * WIDTH / 4, HEIGHT / 2);
         vrender.DrawRect(25, -5, 10, 10, osbr::RGBA(0, 255, 0, 200));
     }
-
     vrender.Render();
+    bool firstRender = true;
 #endif
 
     Pixel_7_5_UI pixel75;
@@ -210,6 +209,14 @@ int main(int, char**) {
 			sketcher.Push(value);
 #ifdef MONO_128_32
             sketcher.Draw(&renderer, t, mode.mode(), bladeOn, &data);
+#endif
+#ifdef RGB_160_80
+            VectorUI::Draw(&vrender, t, mode.mode(), bladeOn, &data);
+            if (firstRender) {
+                firstRender = false;
+                printf("Sizeof VRender=%d Edge=%d\n", (int)sizeof(VRender), (int)sizeof(VRender::Edge));
+                printf("NumEdges=%d\n", vrender.NumEdges());
+            }
 #endif
 			pixel75.Draw(t, mode.mode(), bladeOn, &data);
             dotstarUI.Draw(dotstar4, 4, t, mode.mode(), bladeOn, data);

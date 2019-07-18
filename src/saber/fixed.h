@@ -56,7 +56,7 @@ private:
     static inline SHORT FixedDiv(SHORT a, SHORT b) {
         static_assert(sizeof(LONG) >= sizeof(SHORT) * 2, "Long must have more bits that short.");
 
-        LONG c = (LONG(a) << (DECBITS*2)) / (LONG(b) << DECBITS);
+        LONG c = (LONG(a) << (DECBITS)) / (LONG(b));
         return SHORT(c);
     }
 
@@ -87,10 +87,6 @@ public:
     void set(double v) { x = SHORT(v * FIXED_1); }
     void setRaw(SHORT v) { x = v; }
     LONG getRaw() const { return x; }
-
-    void balancedDiv(int num, int den) {
-        x = (FIXED_1 * num + den / 2) / den;
-    }
 
     // Scale up to an int, potentially out of the range of this fixed.
     int32_t scale(int32_t s) const { 

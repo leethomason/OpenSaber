@@ -5,17 +5,16 @@
 
 VRender::VRender()
 {
-    m_activeRoot = 0;
-    m_rot.set(0);
     ClearTransform();
+    Clear();
 }
 
-void VRender::Clear(const osbr::RGB rgb) 
+void VRender::Clear() 
 {
-    Rect clip = m_size.Intersect(m_clip);
-    if (!clip.Empty()) {
-        m_blockDraw(clip.x0, clip.y0, clip.x1, clip.y1, rgb);
-    }
+    m_nEdge = 0;
+    m_nColor = 0;
+    m_activeRoot = 0;
+    m_layer = 0;
 }
 
 void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba)
@@ -23,18 +22,26 @@ void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba)
     Rect in(x0, y0, w + x0, h + y0);
     ASSERT(m_nEdge + 4 <= MAX_EDGES);
     ASSERT(in.y0 <= in.y1);
-    m_layer++;
+    ASSERT(w > 0);
+    ASSERT(h > 0);
+    ASSERT(m_layer < 127);
+
+    if (!m_layerFixed)
+        m_layer++;
     StartEdges();
-    m_edge[m_nEdge++].Init(in.x0, in.y0, in.x1, in.y0, m_layer, rgba);
+    if (m_rot != 0)
+        m_edge[m_nEdge++].Init(in.x0, in.y0, in.x1, in.y0, m_layer, rgba);
     m_edge[m_nEdge++].Init(in.x1, in.y0, in.x1, in.y1, m_layer, rgba);
-    m_edge[m_nEdge++].Init(in.x1, in.y1, in.x0, in.y1, m_layer, rgba);
+    if (m_rot != 0)
+        m_edge[m_nEdge++].Init(in.x1, in.y1, in.x0, in.y1, m_layer, rgba);
     m_edge[m_nEdge++].Init(in.x0, in.y1, in.x0, in.y0, m_layer, rgba);
     EndEdges();
 }
 
 void VRender::DrawPoly(const Vec2* points, int n, const osbr::RGBA& rgba)
 {
-    m_layer++;
+    if (!m_layerFixed)
+        m_layer++;
     StartEdges();
     for (int i = 1; i < n; ++i) {
         ASSERT(m_nEdge < MAX_EDGES);
@@ -47,7 +54,6 @@ void VRender::DrawPoly(const Vec2* points, int n, const osbr::RGBA& rgba)
     EndEdges();
 }
 
-
 void VRender::StartEdges()
 {
     m_start = m_nEdge;
@@ -58,24 +64,30 @@ void VRender::EndEdges()
 {
     m_end = m_nEdge;
 
-    FixedNorm s = iSin(m_rot);
-    FixedNorm c = iCos(m_rot);
+    if (m_transX != 0 || m_transY != 0 || m_rot != 0) {
+        FixedNorm s = iSin(m_rot);
+        FixedNorm c = iCos(m_rot);
 
-    for (int i = m_start; i < m_end; i++) {
-        Fixed115 x0 = m_edge[i].x0;
-        Fixed115 y0 = m_edge[i].y0;
-        Fixed115 x1 = m_edge[i].x1;
-        Fixed115 y1 = m_edge[i].y1;
+        for (int i = m_start; i < m_end; i++) {
+            Fixed115 x0 = m_edge[i].x0;
+            Fixed115 y0 = m_edge[i].y0;
+            Fixed115 x1 = m_edge[i].x1;
+            Fixed115 y1 = m_edge[i].y1;
 
-        m_edge[i].x0 = x0 * c - y0 * s + m_transX;
-        m_edge[i].y0 = x0 * s + y0 * c + m_transY;
+            m_edge[i].x0 = x0 * c - y0 * s + m_transX;
+            m_edge[i].y0 = x0 * s + y0 * c + m_transY;
 
-        m_edge[i].x1 = x1 * c - y1 * s + m_transX;
-        m_edge[i].y1 = x1 * s + y1 * c + m_transY;
+            m_edge[i].x1 = x1 * c - y1 * s + m_transX;
+            m_edge[i].y1 = x1 * s + y1 * c + m_transY;
 
-        m_edge[i].Align();
+            m_edge[i].Align();
+        }
     }
-
+    else {
+        for (int i = m_start; i < m_end; i++) {
+            m_edge[i].Align();
+        }
+    }
 }
 
 
@@ -88,7 +100,6 @@ void VRender::Render()
     m_edge[m_nEdge++].Init(clip.x0, clip.y0, clip.x0, clip.y1, Edge::LAYER_BACKGROUND, rgba);
     m_edge[m_nEdge++].Init(clip.x1, clip.y0, clip.x1, clip.y1, Edge::LAYER_BACKGROUND, rgba);
 
-    // Sort the edges by y0? Or bin them. Faster to bin, of course, but a bit more memory.
     SortToStart();
     Rasterize();
 
@@ -108,6 +119,21 @@ void VRender::SortToStart()
 
         int yAdd = 0;
         e->slope = (e->x1 - e->x0) / (e->y1 - e->y0);
+#if defined(_MSC_VER) && defined(_DEBUG)
+        /*  FIXME
+            The patching works. (Adding 1 or subtracting 1.) Which implies
+            there is a way to do the division so it always ends up at the correct result.
+            But haven't worked it out yet.
+
+        int x1Slope = (e->x0 + e->slope * (e->y1 - e->y0)).getInt();
+        int x1Literal = e->x1.getInt();
+        if (x1Slope < x1Literal) e->slope.setRaw(e->slope.getRaw() + 1);
+        if (x1Slope > x1Literal) e->slope.setRaw(e->slope.getRaw() - 1);
+        int x1SlopeP = (e->x0 + e->slope * (e->y1 - e->y0)).getInt();
+        int x1LiteralP = e->x1.getInt();
+        ASSERT(x1SlopeP == x1LiteralP);
+        */
+#endif
 
         if (e->y0 < 0) {
             yAdd = 0;
@@ -126,9 +152,11 @@ void VRender::SortToStart()
         m_edge[i].nextStart = m_rootHash[yHash];
         m_rootHash[yHash] = e;
 
-        printf("Sorting start=%d (%.2f,%.2f)-(%.2f,%.2f)\n",
-            e->layer,
-            e->x0.toFloat(), e->y0.toFloat(), e->x1.toFloat(), e->y1.toFloat());
+#if defined(_MSC_VER) && defined(_DEBUG)
+        //printf("Sorting start=%d (%.2f,%.2f)-(%.2f,%.2f)\n",
+        //    e->layer,
+        //    e->x0.toFloat(), e->y0.toFloat(), e->x1.toFloat(), e->y1.toFloat());
+#endif
     }
 }
 
@@ -155,9 +183,9 @@ void VRender::IncrementActiveEdges(int y)
 
 void VRender::AddStartingEdges(int y)
 {
-    // Zero is special, because we pick up everything that started off the top
-    // of the screen.
     for (Edge* e = m_rootHash[y % Y_HASH]; e; e = e->nextStart) {
+        // Things that are added before 0 have yAdd of 0.
+        // For everything else it is a hash.
         if (e->yAdd == y) {
             if (e->Horizontal()) 
                 continue;
@@ -166,9 +194,11 @@ void VRender::AddStartingEdges(int y)
             e->nextActive = m_activeRoot;
             m_activeRoot = e;
 
-            printf("Adding start=%d (%.2f,%.2f)-(%.2f,%.2f)\n",
-                e->layer,
-                e->x0.toFloat(), e->y0.toFloat(), e->x1.toFloat(), e->y1.toFloat());
+#if defined(_MSC_VER) && defined(_DEBUG)
+            //printf("Adding start=%d (%.2f,%.2f)-(%.2f,%.2f)\n",
+            //    e->layer,
+            //    e->x0.toFloat(), e->y0.toFloat(), e->x1.toFloat(), e->y1.toFloat());
+#endif
         }
     }
 }
@@ -176,20 +206,23 @@ void VRender::AddStartingEdges(int y)
 
 void VRender::SortActiveEdges()
 {
+    // FIXME This actually sorts in reverse; for an already sorted 
+    // list it is optimally bad. Perhaps keep a head pointer to tack
+    // onto the end?
     if (!m_activeRoot || !m_activeRoot->nextActive) return;
 
     // Resulting list:
-    Edge* head = 0;
+    Edge* root = 0;
     while (m_activeRoot) {
         Edge* current = m_activeRoot;
         m_activeRoot = m_activeRoot->nextActive;
 
-        if (!head || current->x < head->x) {
-            current->nextActive = head;
-            head = current;
+        if (!root || current->x < root->x) {
+            current->nextActive = root;
+            root = current;
         }
         else {
-            Edge* p = head;
+            Edge* p = root;
             while (p) {
                 if (!p->nextActive || (current->x < p->nextActive->x)) {
                     current->nextActive = p->nextActive;
@@ -200,7 +233,7 @@ void VRender::SortActiveEdges()
             }
         }
     }
-    m_activeRoot = head;
+    m_activeRoot = root;
 }
 
 
@@ -208,6 +241,7 @@ osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color)
 {
     // Toggles layers. (even-odd rule)
     bool added = false;
+
     for (int i = 0; !added && i < m_nColor; ++i) {
         if (m_colorStack[i].layer == layer) {
             // A match, remove.
@@ -217,7 +251,7 @@ osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color)
             m_nColor--;
             added = true;
         }
-        else if (layer > m_colorStack[i].layer) {
+        else if (layer < m_colorStack[i].layer) {
             // Should be in previous slot.
             ASSERT(m_nColor < MAX_COLOR_STACK);
             for (int j = m_nColor; j > i; --j) {
@@ -261,28 +295,31 @@ void VRender::RasterizeLine(int y, const Rect& clip)
     int SENTINEL = -1000;
     int x0 = SENTINEL;
     osbr::RGB rgb(0);
-    printf("------ y=%d\n", y);
-    // Edges can go away under the current active, or abut.
+    //printf("------ y=%d\n", y);
+    //
+    //Edges can go away under the current active, or abut.
     // Intentionally trying to keep this loop simple without look-ahead, etc.
     // FIXME: on the other hand, edges under the opaque part of the stack are causing slab rendering.
+    // FIXME: probably makes sense to track the top opaque layer, so that 
+    //        additons to the color stack can be detected.
     for (Edge* e = m_activeRoot; e; e = e->nextActive) {
-        printf("layer=%d rgb=%d,%d,%d x=%.2f (%.2f,%.2f)-(%.2f,%.2f)\n",
-            e->layer, e->color.r, e->color.g, e->color.b,
-            e->x.toFloat(),
-            e->x0.toFloat(), e->y0.toFloat(), e->x1.toFloat(), e->y1.toFloat());
+        //printf("layer=%d rgb=%d,%d,%d x=%.2f (%.2f,%.2f)-(%.2f,%.2f)\n",
+        //    e->layer, e->color.r, e->color.g, e->color.b,
+        //    e->x.toFloat(),
+        //    e->x0.toFloat(), e->y0.toFloat(), e->x1.toFloat(), e->y1.toFloat());
         int x1 = e->x.getInt();
 
         // Rasterize previous chunk.
         if (x0 != SENTINEL) {
             Rect clipped = clip.Intersect(Rect(x0, y, x1, y + 1));
-            if (!clipped.Empty())
+            if (!clipped.Empty()) {
                 m_blockDraw(clipped.x0, y, clipped.x1, y + 1, rgb);
+            }
         }
         x0 = x1;
         rgb = AddToColorStack(e->layer, e->color);
     }
 }
-
 
 void VRender::Rasterize()
 {
@@ -293,7 +330,7 @@ void VRender::Rasterize()
         AddStartingEdges(j);
         SortActiveEdges();
         RasterizeLine(j, clip);
-#if _MSC_VER
+#if defined(_MSC_VER) && defined(_DEBUG)
         if (m_nColor) {
             printf("ASSERTION\n");
             for (int i = 0; i < m_nColor; ++i) {
@@ -306,3 +343,42 @@ void VRender::Rasterize()
     }
     ClearTransform();
 }
+
+
+#define FONT_BIT_SET(arr, x, y) (arr[x] & (1<<y))
+
+void VRenderUtil::DrawStr(VRender* ren, const char* str, int x, int y, GlyphMetrics metrics, const osbr::RGBA& rgba)
+{
+    ren->PushLayer();
+    int cx = x;
+    while (str && *str) {
+        int advance = 0, texW = 0, texRows = 0;
+        const uint8_t* mem = metrics(*str, &advance, &texW, &texRows);
+
+        int i0 = 0;
+        while(i0 < texW) {
+            int j0 = 0;
+            uint8_t c = mem[i0];
+            int i1 = i0 + 1;
+            while (i1 < texW && mem[i1] == c)
+                ++i1;
+
+            while (j0 < 8) {
+                int j1 = j0;
+                while (c & (1 << j1) && j1 < 8) {
+                    j1++;
+                }
+                if (j1 > j0) {
+                    ren->DrawRect(cx + i0, y + j0, i1-i0, j1 - j0, rgba);
+                    j0 = j1;
+                }
+                j0++;
+            }
+            i0 = i1;
+        }
+        cx += advance;
+        ++str;
+    }
+    ren->PopLayer();
+}
+
