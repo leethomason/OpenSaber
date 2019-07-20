@@ -81,7 +81,8 @@ public:
     void Render();
 
     void Clear();
-    void DrawRect(int x0, int y0, int width, int height, const osbr::RGBA& rgba);
+    void DrawRect(int x0, int y0, int width, int height, const osbr::RGBA& rgba, int outline=0);
+
     void DrawPoly(const Vec2* points, int n, const osbr::RGBA& rgba);
     void PushLayer() { m_layerFixed = true; m_layer++; }
     void PopLayer() { m_layerFixed = false; }
@@ -91,6 +92,8 @@ public:
         m_transX = x;
         m_transY = y;
     }
+
+    void SetTransform(int x, int y) { SetTransform(FixedNorm(0), Fixed115(x), Fixed115(y)); }
 
     void ClearTransform()
     {

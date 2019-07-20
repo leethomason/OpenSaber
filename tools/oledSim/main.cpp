@@ -108,9 +108,21 @@ int main(int, char**) {
     vrender.ClearTransform();
     for (int r = 0; r < 8; ++r) {
         vrender.SetTransform(FixedNorm(r, 8), 3 * WIDTH / 4, HEIGHT / 2);
-        //vrender.SetTransform(FixedNorm(0), 3 * WIDTH / 4, HEIGHT / 2);
         vrender.DrawRect(25, -5, 10, 10, osbr::RGBA(0, 255, 0, 200));
     }
+    vrender.ClearTransform();
+    VRender::Vec2 p2[] = {
+        {10, 70}, {20, 60}, {30, 70}, {20, 80}
+    };
+    int T = 1;
+    VRender::Vec2 p2inner[] = {
+        {10+T, 70}, {20, 60+T}, {30-T, 70}, {20, 80-T}
+    };
+    vrender.PushLayer();
+    vrender.DrawPoly(p2, 4, osbr::RGBA(255, 255, 0));
+    vrender.DrawPoly(p2inner, 4, osbr::RGBA(255, 255, 0));
+    vrender.PopLayer();
+
     vrender.Render();
     bool firstRender = true;
 #endif
@@ -211,12 +223,14 @@ int main(int, char**) {
             sketcher.Draw(&renderer, t, mode.mode(), bladeOn, &data);
 #endif
 #ifdef RGB_160_80
+           
             VectorUI::Draw(&vrender, t, mode.mode(), bladeOn, &data);
             if (firstRender) {
                 firstRender = false;
                 printf("Sizeof VRender=%d Edge=%d\n", (int)sizeof(VRender), (int)sizeof(VRender::Edge));
                 printf("NumEdges=%d\n", vrender.NumEdges());
             }
+           
 #endif
 			pixel75.Draw(t, mode.mode(), bladeOn, &data);
             dotstarUI.Draw(dotstar4, 4, t, mode.mode(), bladeOn, data);

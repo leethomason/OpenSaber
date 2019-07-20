@@ -17,7 +17,7 @@ void VRender::Clear()
     m_layer = 0;
 }
 
-void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba)
+void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba, int outline)
 {
     Rect in(x0, y0, w + x0, h + y0);
     ASSERT(m_nEdge + 4 <= MAX_EDGES);
@@ -35,6 +35,16 @@ void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba)
     if (m_rot != 0)
         m_edge[m_nEdge++].Init(in.x1, in.y1, in.x0, in.y1, m_layer, rgba);
     m_edge[m_nEdge++].Init(in.x0, in.y1, in.x0, in.y0, m_layer, rgba);
+
+    if (outline) {
+        if (m_rot != 0)
+            m_edge[m_nEdge++].Init(in.x0 + outline, in.y0 + outline, in.x1 - outline, in.y0 + outline, m_layer, rgba);
+        m_edge[m_nEdge++].Init(in.x1 - outline, in.y0 + outline, in.x1 - outline, in.y1 - outline, m_layer, rgba);
+        if (m_rot != 0)
+            m_edge[m_nEdge++].Init(in.x1 - outline, in.y1 - outline, in.x0 + outline, in.y1 - outline, m_layer, rgba);
+        m_edge[m_nEdge++].Init(in.x0 + outline, in.y1 - outline, in.x0 + outline, in.y0 + outline, m_layer, rgba);
+    }
+
     EndEdges();
 }
 

@@ -46,15 +46,19 @@ class FixedT
 {
 private:
 
-    static inline SHORT FixedMul(SHORT a, SHORT b) {
+    static inline SHORT FixedMul(LONG a, LONG b) {
         static_assert(sizeof(LONG) >= sizeof(SHORT) * 2, "Long must have more bits that short.");
+        ASSERT((SHORT)a == a);
+        ASSERT((SHORT)b == b);
 
         LONG c = LONG(a) * LONG(b);
         return SHORT(c >> DECBITS);
     }
 
-    static inline SHORT FixedDiv(SHORT a, SHORT b) {
+    static inline SHORT FixedDiv(LONG a, LONG b) {
         static_assert(sizeof(LONG) >= sizeof(SHORT) * 2, "Long must have more bits that short.");
+        ASSERT((SHORT)a == a);
+        ASSERT((SHORT)b == b);
 
         LONG c = (LONG(a) << (DECBITS)) / (LONG(b));
         return SHORT(c);
