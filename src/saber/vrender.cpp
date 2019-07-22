@@ -301,17 +301,18 @@ osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color)
 
 void VRender::RasterizeLine(int y, const Rect& clip)
 {
+    if (!m_activeRoot)
+        return;
+    
     // Edges are sorted. Walk right to left.
-    int SENTINEL = -1000;
-    int x0 = SENTINEL;
+    int x0 = m_activeRoot->x.getInt();
     osbr::RGB rgb(0);
+
     //printf("------ y=%d\n", y);
     //
-    //Edges can go away under the current active, or abut.
+    // Edges can go away under the current active, or abut.
     // Intentionally trying to keep this loop simple without look-ahead, etc.
-    // FIXME: on the other hand, edges under the opaque part of the stack are causing slab rendering.
-    // FIXME: probably makes sense to track the top opaque layer, so that 
-    //        additons to the color stack can be detected.
+    // FIXME: edges under the opaque part of the stack are causing slab rendering.
     for (Edge* e = m_activeRoot; e; e = e->nextActive) {
         //printf("layer=%d rgb=%d,%d,%d x=%.2f (%.2f,%.2f)-(%.2f,%.2f)\n",
         //    e->layer, e->color.r, e->color.g, e->color.b,
@@ -320,7 +321,7 @@ void VRender::RasterizeLine(int y, const Rect& clip)
         int x1 = e->x.getInt();
 
         // Rasterize previous chunk.
-        if (x0 != SENTINEL) {
+        if (x1 > x0) {
             Rect clipped = clip.Intersect(Rect(x0, y, x1, y + 1));
             if (!clipped.Empty()) {
                 m_blockDraw(clipped.x0, y, clipped.x1, y + 1, rgb);
