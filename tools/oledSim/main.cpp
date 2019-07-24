@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <math.h>
+#include <chrono>
 
 #include "renderer.h"
 #include "oledsim.h"
@@ -28,6 +29,30 @@ static const int HEIGHT = 32;
 static const int WIDTH = 160;
 static const int HEIGHT = 80;
 #endif
+
+
+class QuickProfile
+{
+public:
+    QuickProfile(const char* name, bool print=true) {
+        startTime = std::chrono::high_resolution_clock::now();
+        this->name = name;
+        this->print = print;
+    }
+
+    ~QuickProfile() {
+        auto endTime = std::chrono::high_resolution_clock::now();
+        std::chrono::microseconds micro = std::chrono::duration_cast<std::chrono::microseconds>(
+            endTime - startTime
+            );
+        if (print) printf("%s: %d micro-secondes\n", name, (int)micro.count());
+    }
+
+private:
+    std::chrono::steady_clock::time_point startTime;
+    const char* name;
+    bool print;
+};
 
 osbr::RGBA* blockDrawRGBABuffer = 0;
 
@@ -223,16 +248,25 @@ int main(int, char**) {
             sketcher.Draw(&renderer, t, mode.mode(), bladeOn, &data);
 #endif
 #ifdef RGB_160_80
-           
-            for (int i = 0; i < WIDTH*HEIGHT; ++i) displayBuffer[i] = 0xaa996633;
-            //vrender.SetClip(VRender::Rect(1, 1, WIDTH - 1, HEIGHT - 1));
-            VectorUI::Draw(&vrender, t, mode.mode(), bladeOn, &data);
+            
+            {
+                // 88,000ms
+                // Rasterize: 43%  -> SortActive 28
+                //                    RasterizeLine 46
+                // AddToColorStack 23
+                // BlockDrawRGB 14
+                QuickProfile qp("multidraw", firstRender);
+                for (int j = 0; j < 500; ++j) {
+                    for (int i = 0; i < WIDTH*HEIGHT; ++i) displayBuffer[i] = i;
+                    //vrender.SetClip(VRender::Rect(1, 1, WIDTH - 1, HEIGHT - 1));
+                    VectorUI::Draw(&vrender, t, mode.mode(), bladeOn, &data);
+                }
+            }
             if (firstRender) {
                 firstRender = false;
                 printf("Sizeof VRender=%d Edge=%d\n", (int)sizeof(VRender), (int)sizeof(VRender::Edge));
                 printf("NumEdges=%d\n", vrender.NumEdges());
             }
-           
 #endif
 			pixel75.Draw(t, mode.mode(), bladeOn, &data);
             dotstarUI.Draw(dotstar4, 4, t, mode.mode(), bladeOn, data);
