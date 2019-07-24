@@ -11,9 +11,7 @@ class VRender
 {
 public:
     // FIXME optimize for edges
-    //static const int MAX_EDGES = 200;   // defines memory use.
-    static const int MAX_EDGES = 600;   // defines memory use.
-    static const int MAX_ACTIVE = 16;
+    static const int MAX_EDGES = 250;   // defines memory use.
     static const int Y_HASH = 32;
 
     template<class T> 
@@ -120,27 +118,8 @@ public:
         Edge* nextStart = 0;
         Edge* nextActive = 0;
 
-        void Clear() {
-            this->layer = layer;
-            this->yAdd = 0;
-            this->nextStart = 0;
-            this->nextActive = 0;
-        }
-
-        void Init(int x0, int y0, int x1, int y1, int layer, const osbr::RGBA& rgba) {
-            Clear();
-
-            this->x0 = x0;
-            this->y0 = y0;
-            this->x1 = x1;
-            this->y1 = y1;
-            this->layer = layer;
-
-            this->color.r = rgba.r;
-            this->color.g = rgba.g;
-            this->color.b = rgba.b;
-            this->color.a = rgba.a;
-        }
+        void Clear();
+        void Init(int x0, int y0, int x1, int y1, int layer, const osbr::RGBA& rgba);
         
         void Align() {
             if (y0 > y1) {
@@ -170,7 +149,7 @@ public:
     void SortToStart();
     void Rasterize();
     void RasterizeLine(int y, const Rect&);
-    osbr::RGB AddToColorStack(int layer, const osbr::RGBA&);
+    osbr::RGB AddToColorStack(int layer, const osbr::RGBA&, bool* empty);
 
     void IncrementActiveEdges(int y);
     void AddStartingEdges(int y);

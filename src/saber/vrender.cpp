@@ -17,6 +17,31 @@ void VRender::Clear()
     m_layer = 0;
 }
 
+void VRender::Edge::Clear()
+{
+    this->layer = layer;
+    this->yAdd = 0;
+    this->nextStart = 0;
+    this->nextActive = 0;
+}
+
+void VRender::Edge::Init(int x0, int y0, int x1, int y1, int layer, const osbr::RGBA& rgba) 
+{
+    Clear();
+
+    this->x0 = x0;
+    this->y0 = y0;
+    this->x1 = x1;
+    this->y1 = y1;
+    this->layer = layer;
+
+    this->color.r = rgba.r;
+    this->color.g = rgba.g;
+    this->color.b = rgba.b;
+    this->color.a = rgba.a;
+}
+
+
 void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba, int outline)
 {
     Rect in(x0, y0, w + x0, h + y0);
@@ -247,7 +272,7 @@ void VRender::SortActiveEdges()
 }
 
 
-osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color)
+osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color, bool* empty)
 {
     // Toggles layers. (even-odd rule)
     bool added = false;
@@ -296,6 +321,7 @@ osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color)
             rgb.b = (c.b * c.a + rgb.b * (255 - c.a)) >> 8;
         }
     }
+    *empty = (m_nColor == 0);
     return rgb;
 }
 
@@ -306,7 +332,7 @@ void VRender::RasterizeLine(int y, const Rect& clip)
     
     // Edges are sorted. Walk right to left.
     int x0 = m_activeRoot->x.getInt();
-    osbr::RGB rgb(0);
+    osbr::RGB rgb(0);;
 
     //printf("------ y=%d\n", y);
     //
@@ -318,17 +344,25 @@ void VRender::RasterizeLine(int y, const Rect& clip)
         //    e->layer, e->color.r, e->color.g, e->color.b,
         //    e->x.toFloat(),
         //    e->x0.toFloat(), e->y0.toFloat(), e->x1.toFloat(), e->y1.toFloat());
-        int x1 = e->x.getInt();
 
-        // Rasterize previous chunk.
-        if (x1 > x0) {
-            Rect clipped = clip.Intersect(Rect(x0, y, x1, y + 1));
-            if (!clipped.Empty()) {
-                m_blockDraw(clipped.x0, y, clipped.x1, y + 1, rgb);
+        // If the color stack doesn't change, we don't need to draw. But be
+        // wary of the boundary condition where it's a black bacground,
+        // which is why the empty is detected, else it will never draw.
+        bool empty = false;
+        osbr::RGB newRGB = AddToColorStack(e->layer, e->color, &empty);
+        if (newRGB != rgb || empty) {
+            int x1 = e->x.getInt();
+
+            // Rasterize previous chunk.
+            if (x1 > x0) {
+                Rect clipped = clip.Intersect(Rect(x0, y, x1, y + 1));
+                if (!clipped.Empty()) {
+                    m_blockDraw(clipped.x0, y, clipped.x1, y + 1, rgb);
+                }
             }
+            x0 = x1;
+            rgb = newRGB;
         }
-        x0 = x1;
-        rgb = AddToColorStack(e->layer, e->color);
     }
 }
 

@@ -224,6 +224,8 @@ int main(int, char**) {
 #endif
 #ifdef RGB_160_80
            
+            for (int i = 0; i < WIDTH*HEIGHT; ++i) displayBuffer[i] = 0xaa996633;
+            //vrender.SetClip(VRender::Rect(1, 1, WIDTH - 1, HEIGHT - 1));
             VectorUI::Draw(&vrender, t, mode.mode(), bladeOn, &data);
             if (firstRender) {
                 firstRender = false;
