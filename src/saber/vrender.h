@@ -4,7 +4,7 @@
 #include "rgb.h"
 #include "fixed.h"
 
-typedef void (*BlockDraw)(int x0, int y0, int x1, int y1, const osbr::RGB& rgb);
+typedef void (*BlockDraw)(const int* x0, const int* x1, int y, const osbr::RGB* rgb, int n);
 typedef const uint8_t* (*GlyphMetrics)(int charID, int* advance, int* w, int* rows);
 
 class VRender
@@ -12,6 +12,7 @@ class VRender
 public:
     // FIXME optimize for edges
     static const int MAX_EDGES = 250;   // defines memory use.
+    static const int MAX_ACTIVE = MAX_EDGES;
     static const int Y_HASH = 32;
 
     template<class T> 
@@ -104,19 +105,18 @@ public:
         return m_nEdge;
     }
 
+private:
+    enum {
+        LAYER_BACKGROUND = -128,
+    };
+
     struct Edge {
-        enum {
-            LAYER_BACKGROUND = -1
-        };
         int8_t layer;
         uint8_t yAdd;
         Fixed115 x0, y0;
         Fixed115 x1, y1;
-        Fixed115 x;
-        Fixed115 slope;
         osbr::RGBA color;
         Edge* nextStart = 0;
-        Edge* nextActive = 0;
 
         void Clear();
         void Init(int x0, int y0, int x1, int y1, int layer, const osbr::RGBA& rgba);
@@ -125,13 +125,31 @@ public:
             if (y0 > y1) {
                 Swap(y0, y1);
                 Swap(x0, x1);
-                slope = -slope;
             }
         }
 
         bool Horizontal() const { return y0 == y1; }
     };
-    private:
+
+    // FIXME need a swap that swaps memory w/o calling constructor stuff
+    struct ActiveEdge
+    {
+        int8_t layer;
+        int8_t _pad;
+        int16_t yEnd;
+        Fixed115 x;
+        Fixed115 slope;
+        osbr::RGBA color;
+    };
+
+    struct ActiveEdgeProxy { int32_t dummy[3]; };
+
+    static void SwapAE(ActiveEdge* _a, ActiveEdge* _b) {
+        STATIC_ASSERT(sizeof(ActiveEdge) == sizeof(ActiveEdgeProxy));
+        ActiveEdgeProxy t = *((ActiveEdgeProxy*)_a);
+        *((ActiveEdgeProxy*)_a) = *((ActiveEdgeProxy*)_b);
+        *((ActiveEdgeProxy*)_b) = t;
+    }
 
     struct ColorEntry
     {
@@ -162,17 +180,18 @@ public:
     BlockDraw m_blockDraw = 0;
     Rect m_size;
     Rect m_clip;
+    int m_nActive;
     int m_nEdge = 0;
     int m_layer = 0;
     int m_nColor = 0;
     bool m_matrixDirty = true;
     int m_start;
     int m_end;
-    Edge* m_activeRoot = 0;
     FixedNorm m_rot;
     Fixed115 m_transX, m_transY;
 
     ColorEntry m_colorStack[MAX_COLOR_STACK];
+    ActiveEdge m_activeEdges[MAX_ACTIVE];
     Edge m_edge[MAX_EDGES];
     Edge* m_rootHash[Y_HASH];
 };

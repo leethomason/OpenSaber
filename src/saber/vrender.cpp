@@ -12,9 +12,10 @@ VRender::VRender()
 void VRender::Clear() 
 {
     m_nEdge = 0;
-    m_nColor = 0;
-    m_activeRoot = 0;
+    m_nActive = 0;
     m_layer = 0;
+    m_nColor = 1;
+    m_colorStack[0].Set(LAYER_BACKGROUND, osbr::RGBA(0, 0, 0, 255));
 }
 
 void VRender::Edge::Clear()
@@ -22,7 +23,6 @@ void VRender::Edge::Clear()
     this->layer = layer;
     this->yAdd = 0;
     this->nextStart = 0;
-    this->nextActive = 0;
 }
 
 void VRender::Edge::Init(int x0, int y0, int x1, int y1, int layer, const osbr::RGBA& rgba) 
@@ -131,15 +131,9 @@ void VRender::Render()
     ClearTransform();
     Rect clip = m_size.Intersect(m_clip);
     ASSERT(m_nEdge + 1 < MAX_EDGES);
-    osbr::RGBA rgba(0);
-    m_edge[m_nEdge++].Init(clip.x0, clip.y0, clip.x0, clip.y1, Edge::LAYER_BACKGROUND, rgba);
-    m_edge[m_nEdge++].Init(clip.x1, clip.y0, clip.x1, clip.y1, Edge::LAYER_BACKGROUND, rgba);
 
     SortToStart();
     Rasterize();
-
-    // Delete the background.
-    m_nEdge -= 2;
 }
 
 void VRender::SortToStart()
@@ -153,7 +147,6 @@ void VRender::SortToStart()
         ASSERT(e->y0 <= e->y1);   // Should be sorted by the Start/End
 
         int yAdd = 0;
-        e->slope = (e->x1 - e->x0) / (e->y1 - e->y0);
 #if defined(_MSC_VER) && defined(_DEBUG)
         /*  FIXME
             The patching works. (Adding 1 or subtracting 1.) Which implies
@@ -172,15 +165,12 @@ void VRender::SortToStart()
 
         if (e->y0 < 0) {
             yAdd = 0;
-            e->x = e->x0 + e->slope * -e->y0;
         }
         else if (e->y0.getDec() == 0) {
             yAdd = e->y0.getInt();
-            e->x = e->x0;
         }
         else {
             yAdd = e->y0.getInt() + 1;
-            e->x = e->x0 + (Fixed115(yAdd) - e->y0) * e->slope;
         }
         e->yAdd = (uint8_t)yAdd;
         int yHash = yAdd % Y_HASH;
@@ -198,22 +188,21 @@ void VRender::SortToStart()
 
 void VRender::IncrementActiveEdges(int y)
 {
-    Edge* e = m_activeRoot;
-    Edge* prev = 0;
-
-    // Set the new edge x value, cull the no longer active.
-    // Will sort int the next stage.
-    while (e) {
-        if (y >= e->y1) {
-            if (prev) prev->nextActive = e->nextActive;
-            else m_activeRoot = e->nextActive;
+    int n = m_nActive;
+    ActiveEdge* ae = m_activeEdges;
+    for(int i=0; i<n; ++i) {
+        // Set the new edge x value, cull the no longer active.
+        // Will sort int the next stage.
+        if (y >= m_activeEdges[i].yEnd) {
+            // Do nothing; will get culled.
         }
         else {
-            e->x += e->slope;   
-            prev = e;
+            *ae = m_activeEdges[i];
+            ae->x += ae->slope;   
+            ++ae;
         }
-        e = e->nextActive;
     }
+    m_nActive = ae - m_activeEdges;
 }
 
 void VRender::AddStartingEdges(int y)
@@ -226,8 +215,16 @@ void VRender::AddStartingEdges(int y)
                 continue;
             if (e->y1 < y) 
                 continue;
-            e->nextActive = m_activeRoot;
-            m_activeRoot = e;
+
+            ASSERT(m_nActive < MAX_ACTIVE);
+            ActiveEdge* ae = m_activeEdges + m_nActive;
+            m_nActive++;
+            ASSERT(e->y1 >= e->y0);
+            ae->slope = (e->x1 - e->x0) / (e->y1 - e->y0);
+            ae->x = (Fixed115(y) - e->y0) * ae->slope + e->x0;
+            ae->yEnd = e->y1.getDec() ? (e->y1.getInt() + 1) : e->y1.getInt();
+            ae->layer = e->layer;
+            ae->color = e->color;
 
 #if defined(_MSC_VER) && defined(_DEBUG)
             //printf("Adding start=%d (%.2f,%.2f)-(%.2f,%.2f)\n",
@@ -241,66 +238,48 @@ void VRender::AddStartingEdges(int y)
 
 void VRender::SortActiveEdges()
 {
-    // FIXME This actually sorts in reverse; for an already sorted 
-    // list it is optimally bad. Perhaps keep a head pointer to tack
-    // onto the end?
-    if (!m_activeRoot || !m_activeRoot->nextActive) return;
-
-    // Resulting list:
-    Edge* root = 0;
-    while (m_activeRoot) {
-        Edge* current = m_activeRoot;
-        m_activeRoot = m_activeRoot->nextActive;
-
-        if (!root || current->x < root->x) {
-            current->nextActive = root;
-            root = current;
-        }
-        else {
-            Edge* p = root;
-            while (p) {
-                if (!p->nextActive || (current->x < p->nextActive->x)) {
-                    current->nextActive = p->nextActive;
-                    p->nextActive = current;
-                    break;
-                }
-                p = p->nextActive;
-            }
+    for (int i = 1; i < m_nActive; ++i) {
+        int j = i;
+        while (j > 0 && m_activeEdges[j - 1].x > m_activeEdges[j].x) {
+            SwapAE(&m_activeEdges[j - 1], &m_activeEdges[j]);
+            j--;
         }
     }
-    m_activeRoot = root;
 }
 
 
 osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color, bool* empty)
 {
     // Toggles layers. (even-odd rule)
-    bool added = false;
+    ASSERT(m_nColor > 0);   // should be a black background, always
+    ASSERT(layer > LAYER_BACKGROUND);
+    ASSERT(m_colorStack[0].layer == LAYER_BACKGROUND);
 
-    for (int i = 0; !added && i < m_nColor; ++i) {
-        if (m_colorStack[i].layer == layer) {
-            // A match, remove.
-            for (int j = i + 1; j < m_nColor; ++j) {
+    for (int i = m_nColor; i > 0; --i) {
+        if (m_colorStack[i - 1].layer == layer) {
+            for (int j = i; j < m_nColor; ++j) {
                 m_colorStack[j - 1] = m_colorStack[j];
             }
-            m_nColor--;
-            added = true;
+            --m_nColor;
+            break;
         }
-        else if (layer < m_colorStack[i].layer) {
-            // Should be in previous slot.
-            ASSERT(m_nColor < MAX_COLOR_STACK);
+        else if (m_colorStack[i-1].layer < layer) {
+            // Scoot up higher entries.
             for (int j = m_nColor; j > i; --j) {
                 m_colorStack[j] = m_colorStack[j - 1];
             }
             m_colorStack[i].Set(layer, color);
-            m_nColor++;
-            added = true;
+            ++m_nColor;
+            break;
         }
     }
-    if (!added) {
-        ASSERT(m_nColor < MAX_COLOR_STACK);
-        m_colorStack[m_nColor++].Set(layer, color);
+
+#ifdef _DEBUG
+    for (int i = 1; i < m_nColor; ++i) {
+        ASSERT(m_colorStack[i-1].layer < m_colorStack[i].layer);
     }
+#endif // _DEBUG
+
     osbr::RGB rgb(0);
     int start = m_nColor - 1;
     for (; start >= 0; start--) {
@@ -327,42 +306,58 @@ osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color, bool* emp
 
 void VRender::RasterizeLine(int y, const Rect& clip)
 {
-    if (!m_activeRoot)
-        return;
-    
-    // Edges are sorted. Walk right to left.
-    int x0 = m_activeRoot->x.getInt();
-    osbr::RGB rgb(0);;
+    static const int CACHE = 8;
+    int x0Cache[CACHE];
+    int x1Cache[CACHE];
+    osbr::RGB rgbCache[CACHE];
+    int nCache = 0;
 
-    //printf("------ y=%d\n", y);
-    //
+    if (m_nActive == 0)
+        return;
+    if (y < clip.y0 || y >= clip.y1)
+        return;
+
+    // Edges are sorted. Walk right to left.
+    int x0 = m_activeEdges[0].x.getInt();
+    osbr::RGB rgb(0);
+    int clipX0 = clip.x0;
+    int clipX1 = clip.x1;
+
     // Edges can go away under the current active, or abut.
     // Intentionally trying to keep this loop simple without look-ahead, etc.
-    // FIXME: edges under the opaque part of the stack are causing slab rendering.
-    for (Edge* e = m_activeRoot; e; e = e->nextActive) {
-        //printf("layer=%d rgb=%d,%d,%d x=%.2f (%.2f,%.2f)-(%.2f,%.2f)\n",
-        //    e->layer, e->color.r, e->color.g, e->color.b,
-        //    e->x.toFloat(),
-        //    e->x0.toFloat(), e->y0.toFloat(), e->x1.toFloat(), e->y1.toFloat());
-
+    ActiveEdge* ae = m_activeEdges;
+    for(int i=0; i<m_nActive; ++i, ++ae) {
         // If the color stack doesn't change, we don't need to draw. But be
         // wary of the boundary condition where it's a black bacground,
         // which is why the empty is detected, else it will never draw.
         bool empty = false;
-        osbr::RGB newRGB = AddToColorStack(e->layer, e->color, &empty);
+        osbr::RGB newRGB = AddToColorStack(ae->layer, ae->color, &empty);
         if (newRGB != rgb || empty) {
-            int x1 = e->x.getInt();
+            int x1 = ae->x.getInt();
 
             // Rasterize previous chunk.
             if (x1 > x0) {
-                Rect clipped = clip.Intersect(Rect(x0, y, x1, y + 1));
-                if (!clipped.Empty()) {
-                    m_blockDraw(clipped.x0, y, clipped.x1, y + 1, rgb);
+                int subClipX0 = Max(x0, clipX0);
+                int subClipX1 = Min(x1, clipX1);
+                if (subClipX1 > subClipX0) {
+
+                    x0Cache[nCache] = subClipX0;
+                    x1Cache[nCache] = subClipX1;
+                    rgbCache[nCache] = rgb;
+                    nCache++;
+
+                    if (nCache == CACHE) {
+                        m_blockDraw(x0Cache, x1Cache, y, rgbCache, nCache);
+                        nCache = 0;
+                    }
                 }
             }
             x0 = x1;
             rgb = newRGB;
         }
+    }
+    if (nCache) {
+        m_blockDraw(x0Cache, x1Cache, y, rgbCache, nCache);
     }
 }
 
@@ -376,7 +371,7 @@ void VRender::Rasterize()
         SortActiveEdges();
         RasterizeLine(j, clip);
 #if defined(_MSC_VER) && defined(_DEBUG)
-        if (m_nColor) {
+        if (m_nColor != 1) {
             printf("ASSERTION\n");
             for (int i = 0; i < m_nColor; ++i) {
                 printf("Color: [%d] layer=%d (%d,%d,%d)\n", i, m_colorStack[i].layer,
@@ -384,7 +379,7 @@ void VRender::Rasterize()
             }
         }
 #endif
-        ASSERT(m_nColor == 0);
+        ASSERT(m_nColor == 1);  // black background always there
     }
     ClearTransform();
 }

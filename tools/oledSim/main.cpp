@@ -56,14 +56,15 @@ private:
 
 osbr::RGBA* blockDrawRGBABuffer = 0;
 
-void BlockDrawRGB(int x0, int y0, int x1, int y1, const osbr::RGB& rgb)
+void BlockDrawRGB(const int* x0, const int* x1, int y, const osbr::RGB* rgb, int n)
 {
-    uint32_t c = (rgb.r << 24) | (rgb.g << 16) | (rgb.b << 8) | 0xff;
-    uint32_t* pixels = (uint32_t*)blockDrawRGBABuffer;
+    for (int i = 0; i < n; ++i, ++x0, ++x1, ++rgb) {
+        uint32_t c = (rgb->r << 24) | (rgb->g << 16) | (rgb->b << 8) | 0xff;
+        uint32_t* pixels = ((uint32_t*)blockDrawRGBABuffer) + y * WIDTH + (*x0);
 
-    for (int j = y0; j < y1; ++j) {
-        for (int i = x0; i < x1; ++i) {
-            pixels[j*WIDTH + i] = c;
+        int n = *x1 - *x0;
+        while (n--) {
+            *pixels++ = c;
         }
     }
 }
@@ -248,25 +249,45 @@ int main(int, char**) {
             sketcher.Draw(&renderer, t, mode.mode(), bladeOn, &data);
 #endif
 #ifdef RGB_160_80
-            
+#if true
             {
-                // 88,000ms
+                // 88ms
                 // Rasterize: 43%  -> SortActive 28
                 //                    RasterizeLine 46
                 // AddToColorStack 23
                 // BlockDrawRGB 14
+                // ------------------------
+                // Optimize: separate ActiveEdge from edge.
+                // 60ms (nice!)
+                // AddToColorStack 36
+                // Rasterize 31
+                // BlockDrawRGB 21
+                // -------------------------
+                // 50ms
+                // Optimize: better color stack
+                // Rasterize 36 -> RasterizeLine 72
+                // AddToColorStack 30
+                // BlockDrawRGB 23
+                // ---------------------
+                // Some lower level optimization
+                // AddToColorStack 30
+                // BlockDrawRGB 21
+                // RasterizeLine 18
+                // Rasterize 16
+
                 QuickProfile qp("multidraw", firstRender);
-                for (int j = 0; j < 500; ++j) {
+                //for (int j = 0; j < 500; ++j) {
                     for (int i = 0; i < WIDTH*HEIGHT; ++i) displayBuffer[i] = i;
                     //vrender.SetClip(VRender::Rect(1, 1, WIDTH - 1, HEIGHT - 1));
                     VectorUI::Draw(&vrender, t, mode.mode(), bladeOn, &data);
-                }
+                //}
             }
             if (firstRender) {
                 firstRender = false;
-                printf("Sizeof VRender=%d Edge=%d\n", (int)sizeof(VRender), (int)sizeof(VRender::Edge));
+                printf("Sizeof VRender=%d\n", (int)sizeof(VRender));
                 printf("NumEdges=%d\n", vrender.NumEdges());
             }
+#endif
 #endif
 			pixel75.Draw(t, mode.mode(), bladeOn, &data);
             dotstarUI.Draw(dotstar4, 4, t, mode.mode(), bladeOn, data);
