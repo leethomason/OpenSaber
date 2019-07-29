@@ -4,7 +4,12 @@
 #include "rgb.h"
 #include "fixed.h"
 
-typedef void (*BlockDraw)(const int* x0, const int* x1, int y, const osbr::RGB* rgb, int n);
+struct BlockDrawChunk {
+    int x0;
+    int x1;
+    osbr::RGB rgb;
+};
+typedef void (*BlockDraw)(const BlockDrawChunk* chunks, int y, int n);
 typedef const uint8_t* (*GlyphMetrics)(int charID, int* advance, int* w, int* rows);
 
 class VRender
@@ -131,7 +136,6 @@ private:
         bool Horizontal() const { return y0 == y1; }
     };
 
-    // FIXME need a swap that swaps memory w/o calling constructor stuff
     struct ActiveEdge
     {
         int8_t layer;
@@ -174,7 +178,6 @@ private:
     void SortActiveEdges();
 
     static const int MAX_COLOR_STACK = 8;
-    static const int MAX_MATRIX_STACK = 4;
 
     bool m_layerFixed = false;
     BlockDraw m_blockDraw = 0;

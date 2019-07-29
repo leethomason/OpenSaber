@@ -56,13 +56,13 @@ private:
 
 osbr::RGBA* blockDrawRGBABuffer = 0;
 
-void BlockDrawRGB(const int* x0, const int* x1, int y, const osbr::RGB* rgb, int n)
+void BlockDrawRGB(const BlockDrawChunk* chunk, int y, int n)
 {
-    for (int i = 0; i < n; ++i, ++x0, ++x1, ++rgb) {
-        uint32_t c = (rgb->r << 24) | (rgb->g << 16) | (rgb->b << 8) | 0xff;
-        uint32_t* pixels = ((uint32_t*)blockDrawRGBABuffer) + y * WIDTH + (*x0);
+    for (int i = 0; i < n; ++i, ++chunk) {
+        uint32_t c = (chunk->rgb.r << 24) | (chunk->rgb.g << 16) | (chunk->rgb.b << 8) | 0xff;
+        uint32_t* pixels = ((uint32_t*)blockDrawRGBABuffer) + y * WIDTH + chunk->x0;
 
-        int n = *x1 - *x0;
+        int n = chunk->x1 - chunk->x0;
         while (n--) {
             *pixels++ = c;
         }

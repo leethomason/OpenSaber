@@ -307,9 +307,7 @@ osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color, bool* emp
 void VRender::RasterizeLine(int y, const Rect& clip)
 {
     static const int CACHE = 8;
-    int x0Cache[CACHE];
-    int x1Cache[CACHE];
-    osbr::RGB rgbCache[CACHE];
+    BlockDrawChunk cache[CACHE];
     int nCache = 0;
 
     if (m_nActive == 0)
@@ -341,13 +339,13 @@ void VRender::RasterizeLine(int y, const Rect& clip)
                 int subClipX1 = Min(x1, clipX1);
                 if (subClipX1 > subClipX0) {
 
-                    x0Cache[nCache] = subClipX0;
-                    x1Cache[nCache] = subClipX1;
-                    rgbCache[nCache] = rgb;
+                    cache[nCache].x0 = subClipX0;
+                    cache[nCache].x1 = subClipX1;
+                    cache[nCache].rgb = rgb;
                     nCache++;
 
                     if (nCache == CACHE) {
-                        m_blockDraw(x0Cache, x1Cache, y, rgbCache, nCache);
+                        m_blockDraw(cache, y, nCache);
                         nCache = 0;
                     }
                 }
@@ -357,7 +355,7 @@ void VRender::RasterizeLine(int y, const Rect& clip)
         }
     }
     if (nCache) {
-        m_blockDraw(x0Cache, x1Cache, y, rgbCache, nCache);
+        m_blockDraw(cache, y, nCache);
     }
 }
 
