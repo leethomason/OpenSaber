@@ -15,8 +15,11 @@ public:
     GrinlizLSM303() {}
 
     bool begin();
+
+    int read(Data* data, int nData) { return readInner(0, data, nData); }
+    int readRaw(RawData* data, int nData) { return readInner(data, 0, nData); }
     int readInner(RawData* rawData, Data* data, int n);
-    
+
 private:
     int available();
     void write8(uint8_t address, uint8_t reg, uint8_t value);

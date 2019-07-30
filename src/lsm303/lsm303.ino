@@ -26,21 +26,27 @@ void setup() {
 
 void loop()
 {
-/*
     static bool printTime = false;
 
-    GrinlizLIS3DH::Data data[8];
-    int n = accel.read(data, 8);
+    GrinlizLSM303::Data data[8];
+    GrinlizLSM303::RawData rawData[8];
+    int n = accel.readInner(rawData, data, 8);
     nRead += n;
 
     if (n && printTime) {
         printTime = false;
+#if true
         float ax = data[0].ax;
         float ay = data[0].ay;
         float az = data[0].az;
         Serial.print("a="); Serial.print(ax); Serial.print(" ");
         Serial.print(ay); Serial.print(" ");
         Serial.println(az);
+#else
+        Serial.print("a="); Serial.print(rawData[0].x); Serial.print(" ");
+        Serial.print(rawData[0].y); Serial.print(" ");
+        Serial.println(rawData[0].z);
+#endif
     }
 
     uint32_t t = millis();
@@ -51,5 +57,4 @@ void loop()
         nRead = 0;
         printTime = true;
     }
-    */
 }

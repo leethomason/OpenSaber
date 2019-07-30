@@ -187,9 +187,9 @@ int GrinlizLSM303::readInner(RawData* rawData, Data* data, int n)
         uint32_t zlo = Wire.read();
         uint32_t zhi = Wire.read();
 
-        uint32_t x = xlo | (xhi << 8);
-        uint32_t y = ylo | (yhi << 8);
-        uint32_t z = zlo | (zhi << 8);
+        int16_t x = xlo | (xhi << 8);
+        int16_t y = ylo | (yhi << 8);
+        int16_t z = zlo | (zhi << 8);
 
         if (rawData) {
             rawData[i].x = x;
@@ -197,7 +197,7 @@ int GrinlizLSM303::readInner(RawData* rawData, Data* data, int n)
             rawData[i].z = z;
         }
         if (data) {
-            static const float divInv = 1.0f / 4096;
+            static const float divInv = 1.0f / 4096.0f;
             data[i].ax = x * divInv;
             data[i].ay = y * divInv;
             data[i].az = z * divInv;
