@@ -3,7 +3,7 @@ use <../commonUnified.scad>
 use <../shapes.scad>
 use <holder.scad>
 
-DRAW_HOLDER = true;
+DRAW_HOLDER = false;
 DRAW_BODY   = true;
 DRAW_EMITTER = false;
 
@@ -94,7 +94,7 @@ if (DRAW_BODY) {
 
                 // Connection
                 translate([0, 0, DZ_PCB]) mirror([0, 0, -1])
-                    keyJoint(JOINT_DZ, D_AFT, D_AFT - JOINT_T, 0.1, 0, true);    
+                    keyJoint(JOINT_DZ, D_AFT, D_AFT - JOINT_T, false, 0);    
 
                 if (EMITTER=="open") {
                     translate([0, 0, DZ_TOTAL]) {
