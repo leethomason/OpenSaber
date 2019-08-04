@@ -11,6 +11,7 @@ DZ_BODY = (EMITTER == "closed") ? (DZ_TOTAL - emitterZ()) : DZ_TOTAL;
 
 $fn = 80;
 EPS = .01;
+EPS2 = 2 * EPS;
 
 module flatBottom() {
     translate([-20, -D_AFT/2 - 5, -20]) cube(size=[40, 5.5, 500]);
@@ -23,7 +24,8 @@ if (DRAW_HOLDER) {
             if (DZ_RING > 0) {
                 difference() {
                     translate([0, 0, -DZ_RING]) tube(h=DZ_RING, do=D_RING, di=D_AFT - 4);
-                    translate([-6, -D_AFT/2, -DZ_RING]) cube(size=[10, 10, DZ_RING]);
+                    translate([-6, -D_AFT/2, -DZ_RING-EPS2]) 
+                        cube(size=[10, 10, DZ_RING+EPS2]);
                 }
             }
         }
