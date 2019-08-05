@@ -14,8 +14,7 @@ void VRender::Clear()
     m_nEdge = 0;
     m_nActive = 0;
     m_layer = 0;
-    m_nColor = 1;
-    m_colorStack[0].Set(LAYER_BACKGROUND, osbr::RGBA(0, 0, 0, 255));
+    m_nColor = 0;
 }
 
 void VRender::Edge::Clear()
@@ -129,11 +128,16 @@ void VRender::EndEdges()
 void VRender::Render()
 {
     ClearTransform();
+
     Rect clip = m_size.Intersect(m_clip);
     ASSERT(m_nEdge + 1 < MAX_EDGES);
+    m_edge[m_nEdge++].Init(clip.x0, clip.y0, clip.x0, clip.y1, LAYER_BACKGROUND, osbr::RGBA(0, 0, 0, 255));
+    m_edge[m_nEdge++].Init(clip.x1, clip.y0, clip.x1, clip.y1, LAYER_BACKGROUND, osbr::RGBA(0, 0, 0, 255));
 
     SortToStart();
     Rasterize();
+
+    m_nEdge -= 2;
 }
 
 void VRender::SortToStart()
@@ -238,7 +242,7 @@ void VRender::AddStartingEdges(int y)
 
 void VRender::SortActiveEdges()
 {
-    for (int i = 1; i < m_nActive; ++i) {
+    for (int i = 0; i < m_nActive; ++i) {
         int j = i;
         while (j > 0 && m_activeEdges[j - 1].x > m_activeEdges[j].x) {
             SwapAE(&m_activeEdges[j - 1], &m_activeEdges[j]);
@@ -248,32 +252,33 @@ void VRender::SortActiveEdges()
 }
 
 
-osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color, bool* empty)
+osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color)
 {
-    // Toggles layers. (even-odd rule)
-    ASSERT(m_nColor > 0);   // should be a black background, always
-    ASSERT(layer > LAYER_BACKGROUND);
-    ASSERT(m_colorStack[0].layer == LAYER_BACKGROUND);
-
-    for (int i = m_nColor; i > 0; --i) {
-        if (m_colorStack[i - 1].layer == layer) {
-            for (int j = i; j < m_nColor; ++j) {
-                m_colorStack[j - 1] = m_colorStack[j];
+    if (m_nColor == 0) {
+        m_colorStack[0].Set(layer, color);
+        m_nColor++;
+    }
+    else {
+        for (int i = m_nColor; i >= 0; --i) {
+            // Even-Odd rule. The layer toggles itself on and off.
+            if (i > 0 && m_colorStack[i - 1].layer == layer) {
+                for (int j = i; j < m_nColor; ++j) {
+                    m_colorStack[j - 1] = m_colorStack[j];
+                }
+                --m_nColor;
+                break;
             }
-            --m_nColor;
-            break;
-        }
-        else if (m_colorStack[i-1].layer < layer) {
-            // Scoot up higher entries.
-            for (int j = m_nColor; j > i; --j) {
-                m_colorStack[j] = m_colorStack[j - 1];
+            else if (i == 0 || m_colorStack[i - 1].layer < layer) {
+                // Scoot up higher entries.
+                for (int j = m_nColor; j > i; --j) {
+                    m_colorStack[j] = m_colorStack[j - 1];
+                }
+                m_colorStack[i].Set(layer, color);
+                ++m_nColor;
+                break;
             }
-            m_colorStack[i].Set(layer, color);
-            ++m_nColor;
-            break;
         }
     }
-
 #ifdef _DEBUG
     for (int i = 1; i < m_nColor; ++i) {
         ASSERT(m_colorStack[i-1].layer < m_colorStack[i].layer);
@@ -300,20 +305,20 @@ osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color, bool* emp
             rgb.b = (c.b * c.a + rgb.b * (255 - c.a)) >> 8;
         }
     }
-    *empty = (m_nColor == 0);
     return rgb;
 }
 
 void VRender::RasterizeLine(int y, const Rect& clip)
 {
+    ASSERT(m_nColor == 0);  // black background always there
     static const int CACHE = 8;
     BlockDrawChunk cache[CACHE];
     int nCache = 0;
 
-    if (m_nActive == 0)
-        return;
     if (y < clip.y0 || y >= clip.y1)
         return;
+
+    ASSERT(m_nActive >= 2);
 
     // Edges are sorted. Walk right to left.
     int x0 = m_activeEdges[0].x.getInt();
@@ -325,35 +330,33 @@ void VRender::RasterizeLine(int y, const Rect& clip)
     // Intentionally trying to keep this loop simple without look-ahead, etc.
     ActiveEdge* ae = m_activeEdges;
     for(int i=0; i<m_nActive; ++i, ++ae) {
+        // FIXME
         // If the color stack doesn't change, we don't need to draw. But be
         // wary of the boundary condition where it's a black bacground,
         // which is why the empty is detected, else it will never draw.
-        bool empty = false;
-        osbr::RGB newRGB = AddToColorStack(ae->layer, ae->color, &empty);
-        if (newRGB != rgb || empty) {
-            int x1 = ae->x.getInt();
+        int x1 = ae->x.getInt();
 
-            // Rasterize previous chunk.
-            if (x1 > x0) {
-                int subClipX0 = Max(x0, clipX0);
-                int subClipX1 = Min(x1, clipX1);
-                if (subClipX1 > subClipX0) {
+        // Rasterize previous chunk.
+        if (x1 > x0) {
+            int subClipX0 = Max(x0, clipX0);
+            int subClipX1 = Min(x1, clipX1);
+            if (subClipX1 > subClipX0) {
 
-                    cache[nCache].x0 = subClipX0;
-                    cache[nCache].x1 = subClipX1;
-                    cache[nCache].rgb = rgb;
-                    nCache++;
+                cache[nCache].x0 = subClipX0;
+                cache[nCache].x1 = subClipX1;
+                cache[nCache].rgb = rgb;
+                nCache++;
 
-                    if (nCache == CACHE) {
-                        m_blockDraw(cache, y, nCache);
-                        nCache = 0;
-                    }
+                if (nCache == CACHE) {
+                    m_blockDraw(cache, y, nCache);
+                    nCache = 0;
                 }
             }
-            x0 = x1;
-            rgb = newRGB;
         }
+        rgb = AddToColorStack(ae->layer, ae->color);
+        x0 = x1;
     }
+    ASSERT(m_nColor == 0);  // black background always there
     if (nCache) {
         m_blockDraw(cache, y, nCache);
     }
@@ -368,16 +371,17 @@ void VRender::Rasterize()
         AddStartingEdges(j);
         SortActiveEdges();
         RasterizeLine(j, clip);
+
 #if defined(_MSC_VER) && defined(_DEBUG)
-        if (m_nColor != 1) {
+        if (m_nColor) {
             printf("ASSERTION\n");
             for (int i = 0; i < m_nColor; ++i) {
                 printf("Color: [%d] layer=%d (%d,%d,%d)\n", i, m_colorStack[i].layer,
                     m_colorStack[i].color.r, m_colorStack[i].color.g, m_colorStack[i].color.b);
             }
+            ASSERT(false);
         }
 #endif
-        ASSERT(m_nColor == 1);  // black background always there
     }
     ClearTransform();
 }

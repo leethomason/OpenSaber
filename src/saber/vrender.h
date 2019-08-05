@@ -171,7 +171,7 @@ private:
     void SortToStart();
     void Rasterize();
     void RasterizeLine(int y, const Rect&);
-    osbr::RGB AddToColorStack(int layer, const osbr::RGBA&, bool* empty);
+    osbr::RGB AddToColorStack(int layer, const osbr::RGBA&);
 
     void IncrementActiveEdges(int y);
     void AddStartingEdges(int y);

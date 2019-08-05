@@ -277,7 +277,7 @@ int main(int, char**) {
 
                 QuickProfile qp("multidraw", firstRender);
                 //for (int j = 0; j < 500; ++j) {
-                    for (int i = 0; i < WIDTH*HEIGHT; ++i) displayBuffer[i] = i;
+                    for (int i = 0; i < WIDTH*HEIGHT; ++i) displayBuffer[i] = 0xff0000ff;
                     //vrender.SetClip(VRender::Rect(1, 1, WIDTH - 1, HEIGHT - 1));
                     VectorUI::Draw(&vrender, t, mode.mode(), bladeOn, &data);
                 //}
