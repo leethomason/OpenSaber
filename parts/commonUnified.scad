@@ -63,16 +63,16 @@ module columnY(dx, dyFrom0, dz, diameter, baseDX=0, baseDZ=0)
     }
 }
 
-module tjoint(outer, dz, trim)
+module tjoint(outer, dz, trim0, trim1)
 {
     RATIO = 0.40; 
     DY = outer * RATIO;
     HALFY = DY * 0.7;
 
-    translate([0, -HALFY/2 + trim, 0]) 
-        cube(size=[outer*2.0, HALFY - trim*2, dz]);
-    translate([0, -DY/2 + trim, dz/2 + trim/2]) 
-        cube(size=[outer*2.0, DY - trim*2, dz/2 - trim]);
+    translate([0, -HALFY/2 - trim0, 0]) 
+        cube(size=[outer*2.0, HALFY + trim0*2, dz]);
+    translate([0, -DY/2 - trim1, dz/2 - trim0/2]) 
+        cube(size=[outer*2.0, DY + trim1*2, dz/2 + trim0]);
 }
 
 /*
@@ -81,32 +81,18 @@ module tjoint(outer, dz, trim)
     axis so it's hard to run the wires. The jJoint=true version
     is by far the more successful design.
 */
-module keyJoint(dz, do, di, trim, angle=0, tJoint=false)
+module keyJoint(dz, do, di, slot, angle=0)
 {
-    if (tJoint) {
-        intersection() {
-            tube(h=dz - trim, do=do, di=di);
-            union() {
-                rotate([0, 0, angle]) 
-                    tjoint(do, dz, trim);
-                rotate([0, 0, 180-angle]) 
-                    tjoint(do, dz, trim);
-            }
-        }
-    }
-    else
-    {
-        RATIO = 0.15; 
-        intersection() {
-            tube(h=dz - trim, do=do, di=di);
-            union() {
-                rotate([0, 0, angle]) 
-                    translate([0, -do*RATIO, 0])
-                        cube(size=[do*2.0, do*RATIO*2, dz]);
-                rotate([0, 0, 180-angle]) 
-                    translate([0, -do*RATIO, 0])
-                        cube(size=[do*2.0, do*RATIO*2, dz]);
-            }
+    trim0 = slot ? 0.1 : 0;
+    trim1 = slot ? 0.4 : 0;
+
+    intersection() {
+        tube(h=dz, do=do, di=di);
+        union() {
+            rotate([0, 0, angle]) 
+                tjoint(do, dz, trim0, trim1);
+            rotate([0, 0, 180-angle]) 
+                tjoint(do, dz, trim0, trim1);
         }
     }
 }

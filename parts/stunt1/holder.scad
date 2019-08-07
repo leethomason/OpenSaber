@@ -59,7 +59,8 @@ module holder() {
             translate([0, 1.5, 0])
                 cube(size=[DX_POWER, DY_POWER-1.5, 100]);
         }
-        translate([0, 0, DZ_PCB]) mirror([0, 0, -1]) keyJoint(JOINT_DZ, D_AFT, D_AFT - JOINT_T, 0, 0, true);    
+        translate([0, 0, DZ_PCB]) mirror([0, 0, -1]) 
+            keyJoint(JOINT_DZ, D_AFT, D_AFT - JOINT_T, true, 0);    
 
     }
     *color("green") translate([0, Y_TWEAK, 0])  rotate([ROT, 0, 0]) 
