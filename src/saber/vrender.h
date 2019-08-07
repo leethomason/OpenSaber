@@ -98,13 +98,9 @@ public:
     }
 
     void SetTransform(int x, int y) { SetTransform(FixedNorm(0), Fixed115(x), Fixed115(y)); }
+    void SetScale(Fixed115 sx, Fixed115 sy) { m_scaleX = sx; m_scaleY = sy; }
 
-    void ClearTransform()
-    {
-        m_rot = 0;
-        m_transX = Fixed115(0);
-        m_transY = Fixed115(0);
-    }
+    void ClearTransform();
 
     int NumEdges() const {
         return m_nEdge;
@@ -191,7 +187,7 @@ private:
     int m_start;
     int m_end;
     FixedNorm m_rot;
-    Fixed115 m_transX, m_transY;
+    Fixed115 m_transX, m_transY, m_scaleX, m_scaleY;
 
     ColorEntry m_colorStack[MAX_COLOR_STACK];
     ActiveEdge m_activeEdges[MAX_ACTIVE];

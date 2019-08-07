@@ -164,9 +164,9 @@ void VectorUI::Draw(VRender* ren,
         static const VRender::Vec2 ARROW[6] = {
             {0, -S}, {T, -S}, {T + S, 0}, {T, S}, {0, S}, {S, 0}
         };
-        static const VRender::Vec2 LARROW[6] = {
-            {0, -S}, {-T, -S}, {-T - S, 0}, {-T, S}, {0, S}, {-S, 0}
-        };
+//        static const VRender::Vec2 LARROW[6] = {
+//            {0, -S}, {-T, -S}, {-T - S, 0}, {-T, S}, {0, S}, {-S, 0}
+//        };
 
         ren->SetTransform(W / 2, H / 2);
         ren->DrawPoly(DIAMOND, 4, osbr::RGBA(data->color.r, data->color.g, data->color.b));
@@ -176,15 +176,17 @@ void VectorUI::Draw(VRender* ren,
 
         for (int i = 0; i < 4; ++i) {
             osbr::RGBA c(data->color.r, data->color.g, data->color.b, 255 - i * 50);
-
+            
             if (drawRight) {
+                ren->SetScale(1, 1);
                 ren->SetTransform(W / 2 + T + 2 * T * i, H / 2);
                 ren->DrawPoly(ARROW, 6, c);
             }
 
             if (drawLeft) {
                 ren->SetTransform(W / 2 - T - 2 * T * i, H / 2);
-                ren->DrawPoly(LARROW, 6, c);
+                ren->SetScale(-1, 1);
+                ren->DrawPoly(ARROW, 6, c);
             }
         }
         ren->ClearTransform();

@@ -17,6 +17,15 @@ void VRender::Clear()
     m_nColor = 0;
 }
 
+void VRender::ClearTransform()
+{
+    m_rot = 0;
+    m_transX = 0;
+    m_transY = 0;
+    m_scaleX = 1;
+    m_scaleY = 1;
+}
+
 void VRender::Edge::Clear()
 {
     this->layer = layer;
@@ -98,15 +107,15 @@ void VRender::EndEdges()
 {
     m_end = m_nEdge;
 
-    if (m_transX != 0 || m_transY != 0 || m_rot != 0) {
+    if (m_transX != 0 || m_transY != 0 || m_rot != 0 || m_scaleX != 1 || m_scaleY != 1) {
         FixedNorm s = iSin(m_rot);
         FixedNorm c = iCos(m_rot);
 
         for (int i = m_start; i < m_end; i++) {
-            Fixed115 x0 = m_edge[i].x0;
-            Fixed115 y0 = m_edge[i].y0;
-            Fixed115 x1 = m_edge[i].x1;
-            Fixed115 y1 = m_edge[i].y1;
+            Fixed115 x0 = m_edge[i].x0 * m_scaleX;
+            Fixed115 y0 = m_edge[i].y0 * m_scaleY;
+            Fixed115 x1 = m_edge[i].x1 * m_scaleX;
+            Fixed115 y1 = m_edge[i].y1 * m_scaleY;
 
             m_edge[i].x0 = x0 * c - y0 * s + m_transX;
             m_edge[i].y0 = x0 * s + y0 * c + m_transY;
@@ -254,29 +263,23 @@ void VRender::SortActiveEdges()
 
 osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color)
 {
-    if (m_nColor == 0) {
-        m_colorStack[0].Set(layer, color);
-        m_nColor++;
-    }
-    else {
-        for (int i = m_nColor; i >= 0; --i) {
-            // Even-Odd rule. The layer toggles itself on and off.
-            if (i > 0 && m_colorStack[i - 1].layer == layer) {
-                for (int j = i; j < m_nColor; ++j) {
-                    m_colorStack[j - 1] = m_colorStack[j];
-                }
-                --m_nColor;
-                break;
+    for (int i = m_nColor; i >= 0; --i) {
+        // Even-Odd rule. The layer toggles itself on and off.
+        if (i > 0 && m_colorStack[i - 1].layer == layer) {
+            for (int j = i; j < m_nColor; ++j) {
+                m_colorStack[j - 1] = m_colorStack[j];
             }
-            else if (i == 0 || m_colorStack[i - 1].layer < layer) {
-                // Scoot up higher entries.
-                for (int j = m_nColor; j > i; --j) {
-                    m_colorStack[j] = m_colorStack[j - 1];
-                }
-                m_colorStack[i].Set(layer, color);
-                ++m_nColor;
-                break;
+            --m_nColor;
+            break;
+        }
+        else if (i == 0 || m_colorStack[i - 1].layer < layer) {
+            // Scoot up higher entries.
+            for (int j = m_nColor; j > i; --j) {
+                m_colorStack[j] = m_colorStack[j - 1];
             }
+            m_colorStack[i].Set(layer, color);
+            ++m_nColor;
+            break;
         }
     }
 #ifdef _DEBUG
@@ -285,25 +288,20 @@ osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color)
     }
 #endif // _DEBUG
 
-    osbr::RGB rgb(0);
     int start = m_nColor - 1;
-    for (; start >= 0; start--) {
+    for (; start > 0; start--) {
         if (m_colorStack[start].color.a == 255)
             break;
     }
-    for (int i = start; i < m_nColor; ++i) {
-        osbr::RGBA c = m_colorStack[i].color;
+
+    osbr::RGB rgb = m_colorStack[start].color.rgb();
+    for (int i = start+1; i < m_nColor; ++i) {
+        // Everything left is translucent.
         // ARM M0+ doesn't have division.
-        if (c.a == 255) {
-            rgb.r = c.r;
-            rgb.g = c.g;
-            rgb.b = c.b;
-        }
-        else {
-            rgb.r = (c.r * c.a + rgb.r * (255 - c.a)) >> 8;
-            rgb.g = (c.g * c.a + rgb.g * (255 - c.a)) >> 8;
-            rgb.b = (c.b * c.a + rgb.b * (255 - c.a)) >> 8;
-        }
+        osbr::RGBA c = m_colorStack[i].color;
+        rgb.r = (c.r * c.a + rgb.r * (255 - c.a)) >> 8;
+        rgb.g = (c.g * c.a + rgb.g * (255 - c.a)) >> 8;
+        rgb.b = (c.b * c.a + rgb.b * (255 - c.a)) >> 8;
     }
     return rgb;
 }
