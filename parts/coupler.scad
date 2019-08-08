@@ -5,26 +5,25 @@ module coupler(diameter, dz, diameterHeatsink)
 {
     $fn = 80;
 
-    SIZE = [16.78, 0, 16.78];
-    CENTER_X = 16.78 / 2;
-    CENTER_Z = 16.78 / 2;
+    SIZE = [21.86, 100, 16.78];
+    CENTER_X = SIZE[0] / 2;
+    CENTER_Z = SIZE[2] / 2;
 
     CUBE_Y = 10;
     CUBE_Z = 5.0;
 
     MOUNT = [
         [ 2.04 - CENTER_X,  2.04, "buttress"],
-        [14.74 - CENTER_X,  2.04, "buttress"],
+        [19.82 - CENTER_X,  2.04, "buttress"],
         [ 2.04 - CENTER_X, 14.74, "buttress"],
-        [14.74 - CENTER_X, 14.74, "buttress"],
+        [19.82 - CENTER_X, 14.74, "buttress"],
     ];
 
     difference() {
-        pcbHolder(diameter, 4, dz, 2, 0, SIZE, MOUNT, holeAccess=true);
+        DZPCB = 3;
+        pcbHolder(diameter, 4, dz, DZPCB, 0, SIZE, MOUNT, holeAccess=true);
 
         translate([-50, -100, 0]) cube(size=[100, 100 - diameter/2 + 0.5, 100]);
-        translate([-SIZE[0]/2, 5, 4])
-            cube(size=[SIZE[0], 100, dz - 8]);
     }
 
     OVERLAP = 2;
@@ -40,6 +39,5 @@ module coupler(diameter, dz, diameterHeatsink)
     }
 }
 
-//coupler(25.4, 24.0);
-//coupler(30.0, 24.0);
+//coupler(25.4, 24.0, 21.0);
 coupler(29.0, 24.0, 21.0);

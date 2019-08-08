@@ -672,7 +672,9 @@ module pcbPillar() {
     dz: length of the section
     dzToPCB: delta to where the pcb start
     dyPCB: y delta to PCB bottom.
-    size[3]: outer size of the pcb
+    size[3]: outer size of the pcb.
+        x and z are obvious
+        y will do a cut above, if > 0
     mount: array of:
         x location, z location, "pillar" or "buttress"
     makeSection: if true, this is a section of the saber, else
@@ -717,6 +719,7 @@ module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount,
         }
         translate([-size[0]/2 - sizePad, dyPCB, dzToPCB - sizePad]) 
             cube(size=[size[0] + 2 * sizePad, size[1], size[2] + 2 * sizePad]);
+
         if (holeAccess == true) {
             for(m = mount) {
                 x = m[0];
