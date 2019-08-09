@@ -1,0 +1,21 @@
+# a connection between the emitter and a pcb connector
+# keeps recurring - needing a connection point (and 
+# split point) that doesn't take much space and 
+# doesn't rattle.
+#
+# +M 2.2  Mounting
+#
+
+[           ]
+ M         M 
+
+   o-----o
+   |
+   o o---o
+   |
+   o o---o     
+   |
+   o o---o   
+
+ M         M 
+[           ]
