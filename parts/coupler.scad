@@ -1,7 +1,7 @@
 use <commonUnified.scad>
 use <shapes.scad>
 
-module coupler(diameter, dz, diameterHeatsink)
+module coupler(diameter, dz, diameterHeatsink, angle=0, dyPCB=0)
 {
     $fn = 80;
 
@@ -21,7 +21,7 @@ module coupler(diameter, dz, diameterHeatsink)
 
     difference() {
         DZPCB = 3;
-        pcbHolder(diameter, 4, dz, DZPCB, 0, SIZE, MOUNT, holeAccess=true);
+        pcbHolder(diameter, 4, dz, DZPCB, dyPCB, SIZE, MOUNT, holeAccess=true, angle=angle);
 
         translate([-50, -100, 0]) cube(size=[100, 100 - diameter/2 + 0.5, 100]);
     }
@@ -39,5 +39,6 @@ module coupler(diameter, dz, diameterHeatsink)
     }
 }
 
-//coupler(25.4, 24.0, 21.0);
-coupler(29.0, 24.0, 21.0);
+//coupler(25.4, 24.0);
+//coupler(30.0, 24.0);
+coupler(29.0, 24.0, 21.0, angle=-20, dyPCB=-2);

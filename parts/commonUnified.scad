@@ -680,26 +680,35 @@ module pcbPillar() {
     makeSection: if true, this is a section of the saber, else
                  just the basic parts are generated.
     sizePad: pad the size to make it fit more easily
+    angle: rotation of the pcb
 */
 module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount, 
-    makeSection=true, sizePad=0, holeAccess=false)
+    makeSection=true, sizePad=0, holeAccess=false, angle=0)
 {
     difference() 
     {
         union() {
-            if (makeSection)
-               tube(h=dz, do=outer, di=outer-t);
-
+            if (makeSection) {
+                difference() {
+                    tube(h=dz, do=outer, di=outer-t);
+                    translate([-size[0]/2 - sizePad, dyPCB, dzToPCB - sizePad]) 
+                        cube(size=[size[0] + 2 * sizePad, size[1], size[2] + 2 * sizePad]);
+                }
+            }
 
             for(m = mount) {
                 intersection() {
-                    translate([0, 0, -20]) cylinder(h=dz+40, d=outer ? outer : 100);
+                    translate([0, 0, -20]) 
+                        cylinder(h=dz+40, d=outer ? outer : 100);
 
+                    translate([0, dyPCB, dz/2])
+                    rotate([angle, 0, 0])
+                    translate([0, 0, -dz/2])
                     color("plum") union() {
                         x = m[0];
                         z = m[1];
                         type = m[2];
-                        translate([x, dyPCB, dzToPCB + z]) 
+                        translate([x, 0, dzToPCB + z]) 
                         {
                             if (type == "pillar") {
                                 pcbPillar();
@@ -717,10 +726,7 @@ module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount,
                 }
             }
         }
-        translate([-size[0]/2 - sizePad, dyPCB, dzToPCB - sizePad]) 
-            cube(size=[size[0] + 2 * sizePad, size[1], size[2] + 2 * sizePad]);
-
-        if (holeAccess == true) {
+        if (holeAccess == true && angle == 0) {
             for(m = mount) {
                 x = m[0];
                 z = m[1];
