@@ -273,6 +273,7 @@ osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color)
             break;
         }
         else if (i == 0 || m_colorStack[i - 1].layer < layer) {
+            ASSERT(m_nColor < MAX_COLOR_STACK);
             // Scoot up higher entries.
             for (int j = m_nColor; j > i; --j) {
                 m_colorStack[j] = m_colorStack[j - 1];

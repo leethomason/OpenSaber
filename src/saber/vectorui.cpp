@@ -136,21 +136,22 @@ void VectorUI::Draw(VRender* ren,
     }
 #endif
 
+    static const int BAR_W = 24;
     // Power
     {
         for (int r = 0; r < 8; ++r) {
-            int x = ((2 * r - 7) * (2 * r - 7)) >> 2;
-            //ren->DrawRect(x + 2, 72 - r * 10, 22, 6, r < p ? POWER_ON : POWER_OFF);
-            ren->DrawRect(x + 2, 72 - r * 10, 22, 6, POWER_ON, r < p ? 0 : 1);
+            Fixed115 d = r - Fixed115(7, 2);
+            Fixed115 fx = Fixed115(11, 10) * d * d + 2;
+            ren->DrawRect(fx.getInt(), 72 - r * 10, BAR_W, 6, POWER_ON, r < p ? 0 : 1);
         }
     }
 
     // Audio
     {
         for (int r = 0; r < 8; ++r) {
-            int x = ((2 * r - 7) * (2 * r - 7)) >> 2;
-            //ren->DrawRect(W - x - 24, 72 - r * 10, 22, 6, r / 2 < data->volume ? AUDIO_ON : AUDIO_OFF);
-            ren->DrawRect(W - x - 24, 72 - r * 10, 22, 6, AUDIO_ON , r / 2 < data->volume ? 0 : 1);
+            Fixed115 d = r - Fixed115(7, 2);
+            Fixed115 fx = Fixed115(11, 10) * d * d + 2;
+            ren->DrawRect(W - fx.getInt() - BAR_W, 72 - r * 10, BAR_W, 6, AUDIO_ON , r / 2 < data->volume ? 0 : 1);
         }
     }
 
@@ -164,9 +165,6 @@ void VectorUI::Draw(VRender* ren,
         static const VRender::Vec2 ARROW[6] = {
             {0, -S}, {T, -S}, {T + S, 0}, {T, S}, {0, S}, {S, 0}
         };
-//        static const VRender::Vec2 LARROW[6] = {
-//            {0, -S}, {-T, -S}, {-T - S, 0}, {-T, S}, {0, S}, {-S, 0}
-//        };
 
         ren->SetTransform(W / 2, H / 2);
         ren->DrawPoly(DIAMOND, 4, osbr::RGBA(data->color.r, data->color.g, data->color.b));
@@ -192,8 +190,20 @@ void VectorUI::Draw(VRender* ren,
         ren->ClearTransform();
     }
 
+    for (int j = 0; j < 4; ++j) {
+        for (int i = 0; i < 4; ++i) {
+            const static int S = 18;
+            ren->DrawRect(
+                W / 2 + S * (i - 2), 
+                H / 2 + S * (j - 2), 
+                S, S, 
+                osbr::RGBA(255, 255, 255, 80), 1);
+        }
+    }
+
     // VoltMeter
-    VRenderUtil::DrawStr(ren, volts.c_str(), W/2-30, H/2+S+4, getGlypth_calibri8, POWER_TEXT);
+    VRenderUtil::DrawStr(ren, volts.c_str(), W / 2 - 30, H / 2 + S + 4, getGlypth_calibri8, POWER_TEXT);
+
 
     // Palette
     /*{
