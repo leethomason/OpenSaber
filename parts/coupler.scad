@@ -23,6 +23,10 @@ module coupler(diameter, dz, diameterHeatsink, angle=0, dyPCB=0)
         DZPCB = 3;
         pcbHolder(diameter, 4, dz, DZPCB, dyPCB, SIZE, MOUNT, holeAccess=true, angle=angle);
 
+        // Cut top.
+        translate([-SIZE[0]/2, 4, 0]) cube(size=[SIZE[0], 100, 100]);
+
+        // Flat bottom
         translate([-50, -100, 0]) cube(size=[100, 100 - diameter/2 + 0.5, 100]);
     }
 
