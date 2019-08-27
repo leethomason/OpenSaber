@@ -54,12 +54,26 @@ enum
     LSM303_REGISTER_MAG_OUT_Z_L_M = 0x06,
     LSM303_REGISTER_MAG_OUT_Y_H_M = 0x07,
     LSM303_REGISTER_MAG_OUT_Y_L_M = 0x08,
-    LSM303_REGISTER_MAG_SR_REG_Mg = 0x09,
+    LSM303_REGISTER_MAG_SR_REG_M  = 0x09,
     LSM303_REGISTER_MAG_IRA_REG_M = 0x0A,
     LSM303_REGISTER_MAG_IRB_REG_M = 0x0B,
     LSM303_REGISTER_MAG_IRC_REG_M = 0x0C,
     LSM303_REGISTER_MAG_TEMP_OUT_H_M = 0x31,
     LSM303_REGISTER_MAG_TEMP_OUT_L_M = 0x32
+};
+
+enum {
+    CFG_REG_A_M = 0x60,
+    CFG_REG_B_M = 0x61,
+    CFG_REG_C_M = 0x62,
+    STATUS_REG_M = 0x67,
+
+    OUTX_LOW_REG_M  = 0x68,
+    OUTX_HIGH_REG_M = 0x69,
+    OUTY_LOW_REG_M  = 0x6A,
+    OUTY_HIGH_REG_M = 0x6B,
+    OUTZ_LOW_REG_M  = 0x6C,
+    OUTZ_HIGH_REG_M = 0x6D
 };
 
 enum
@@ -148,7 +162,111 @@ bool GrinlizLSM303::begin()
     write8(LSM303_ADDRESS_ACCEL, LSM303_REGISTER_ACCEL_CTRL_REG5_A, 0x40);   // FIFO enable (again)
     write8(LSM303_ADDRESS_ACCEL, LSM303_REGISTER_ACCEL_FIFO_CTRL_REG_A, 2 << 6);   // Stream start
 
+    //testMag();
+
+    // Also the magnemometer in high resolution mode.
+    //write8(LSM303_ADDRESS_MAG, CFG_REG_A_M, (1<<6) | (1<<5)); // reboot | reset
+    delay(10);
+    write8(LSM303_ADDRESS_MAG, CFG_REG_A_M, 
+        (1<<7)      // temperature componsation
+        | 3 << 2    // 100 Hz
+        | 0         // continuous mode 
+     );
+
     return (whoAmIA == 0x33) && (whoAmIM == 0x40);
+}
+
+void GrinlizLSM303::logStatus()
+{
+    int8_t d = read8(LSM303_ADDRESS_MAG, CFG_REG_A_M);
+    int tempComp = d & (1<<7);
+    int lowPower = d & (1<<4);
+    int dataRateBits = (d >> 2) & 3;
+    int dataRate = 0;
+    switch(dataRateBits) {
+        case 0: dataRate = 10; break;
+        case 1: dataRate = 20; break;
+        case 2: dataRate = 50; break;
+        case 3: dataRate = 100; break;
+    }
+    int mode = d & 3;
+    Log.p("Status Mag. tempComp=").p(tempComp ? 1 : 0).p(" lowPower=").p(lowPower ? 1 : 0).p(" dataRate=").p(dataRate).p(" mode=").p(mode == 0 ? "continuous" : "??").eol();
+
+    d = read8(LSM303_ADDRESS_MAG, CFG_REG_B_M);
+    int offsetCancellation = d & 2;
+    int lowPass = d & 1;
+    Log.p("    offsetCancellation=").p(offsetCancellation ? 1 : 0).p(" lowPassFilter=").p(lowPass).eol();
+
+    d = read8(LSM303_ADDRESS_MAG, CFG_REG_C_M);
+    int bdu = d & (1<<4);
+    int ble = d & (1<<3);
+    Log.p("    bdu (coherent read)=").p(bdu ? 1 : 0).p(" ble=").p(ble ? "inverted" : "normal").eol();
+}
+
+void GrinlizLSM303::testMag()
+{
+    delay(10);
+    write8(LSM303_ADDRESS_MAG, CFG_REG_A_M, 0x8c);
+    write8(LSM303_ADDRESS_MAG, CFG_REG_B_M, 0x02);
+    write8(LSM303_ADDRESS_MAG, CFG_REG_C_M, 0x10);
+    delay(20);
+
+    int xTot = 0, yTot = 0, zTot = 0;
+
+    for(int i=0; i<51; ++i) {
+        int status = read8(LSM303_ADDRESS_MAG, STATUS_REG_M);
+        while(status & (1<<3) == 0) {
+            status = read8(LSM303_ADDRESS_MAG, STATUS_REG_M);
+        }
+        uint16_t xlo = read8(LSM303_ADDRESS_MAG, OUTX_LOW_REG_M);
+        uint16_t xhi = read8(LSM303_ADDRESS_MAG, OUTX_HIGH_REG_M);
+        uint16_t ylo = read8(LSM303_ADDRESS_MAG, OUTY_LOW_REG_M);
+        uint16_t yhi = read8(LSM303_ADDRESS_MAG, OUTY_HIGH_REG_M);
+        uint16_t zlo = read8(LSM303_ADDRESS_MAG, OUTZ_LOW_REG_M);
+        uint16_t zhi = read8(LSM303_ADDRESS_MAG, OUTZ_HIGH_REG_M);
+
+        if (i) {
+            int16_t x = int16_t(xlo | (xhi << 8));
+            int16_t y = int16_t(ylo | (yhi << 8));
+            int16_t z = int16_t(zlo | (zhi << 8));
+            xTot += x;
+            yTot += y;
+            zTot += z;
+        }
+    }
+
+    write8(LSM303_ADDRESS_MAG, CFG_REG_C_M, 0x12);
+    delay(60);
+
+    int xTestTot = 0, yTestTot = 0, zTestTot = 0;
+
+    for(int i=0; i<51; ++i) {
+        int status = read8(LSM303_ADDRESS_MAG, STATUS_REG_M);
+        while(status & (1<<3) == 0) {
+            status = read8(LSM303_ADDRESS_MAG, STATUS_REG_M);
+        }
+        uint16_t xlo = read8(LSM303_ADDRESS_MAG, OUTX_LOW_REG_M);
+        uint16_t xhi = read8(LSM303_ADDRESS_MAG, OUTX_HIGH_REG_M);
+        uint16_t ylo = read8(LSM303_ADDRESS_MAG, OUTY_LOW_REG_M);
+        uint16_t yhi = read8(LSM303_ADDRESS_MAG, OUTY_HIGH_REG_M);
+        uint16_t zlo = read8(LSM303_ADDRESS_MAG, OUTZ_LOW_REG_M);
+        uint16_t zhi = read8(LSM303_ADDRESS_MAG, OUTZ_HIGH_REG_M);
+
+        if (i) {
+            int16_t x = int16_t(xlo | (xhi << 8));
+            int16_t y = int16_t(ylo | (yhi << 8));
+            int16_t z = int16_t(zlo | (zhi << 8));
+            xTestTot += x;
+            yTestTot += y;
+            zTestTot += z;
+        }
+    }
+
+    Log.p("Average-normal: ").p(xTot/50).p(" ").p(yTot/50).p(" ").p(zTot/50).eol();
+    Log.p("Average-test:   ").p(xTestTot/50).p(" ").p(yTestTot/50).p(" ").p(zTestTot/50).eol();
+
+    write8(LSM303_ADDRESS_MAG, CFG_REG_C_M, 0x62);
+    write8(LSM303_ADDRESS_MAG, CFG_REG_A_M, 0x60);    
 }
 
 int GrinlizLSM303::available()
@@ -206,6 +324,71 @@ int GrinlizLSM303::readInner(RawData* rawData, Data* data, int n)
     return n;
 }
 
+int GrinlizLSM303::readMag(RawData* rawData, float* fx, float* fy, float* fz)
+{
+    int status = read8(LSM303_ADDRESS_MAG, STATUS_REG_M);
+    if ((status & (1<<3)) == 0 && (status & (1<<7)) == 0) return 0;
+
+/*
+    Wire.beginTransmission(LSM303_ADDRESS_MAG);
+    Wire.write(OUTX_LOW_REG_M);
+    Wire.endTransmission();
+    Wire.requestFrom(LSM303_ADDRESS_MAG, 6);
+
+    // Wait around until enough data is available
+    while (Wire.available() < 6);
+
+    // Note high before low (different than accel)  
+
+    uint16_t xlo = Wire.read();
+    uint16_t xhi = Wire.read();
+    uint16_t ylo = Wire.read();
+    uint16_t yhi = Wire.read();
+    uint16_t zlo = Wire.read();
+    uint16_t zhi = Wire.read();
+    */
+
+    uint16_t xlo = read8(LSM303_ADDRESS_MAG, OUTX_LOW_REG_M);
+    uint16_t xhi = read8(LSM303_ADDRESS_MAG, OUTX_HIGH_REG_M);
+    uint16_t ylo = read8(LSM303_ADDRESS_MAG, OUTY_LOW_REG_M);
+    uint16_t yhi = read8(LSM303_ADDRESS_MAG, OUTY_HIGH_REG_M);
+    uint16_t zlo = read8(LSM303_ADDRESS_MAG, OUTZ_LOW_REG_M);
+    uint16_t zhi = read8(LSM303_ADDRESS_MAG, OUTZ_HIGH_REG_M);
+
+    // Shift values to create properly formed integer (low byte first)
+    int16_t x = int16_t(xlo | (xhi << 8));
+    int16_t y = int16_t(ylo | (yhi << 8));
+    int16_t z = int16_t(zlo | (zhi << 8));
+
+    if (x < minX) minX = x;
+    if (y < minY) minY = y;
+    if (z < minZ) minZ = z;
+    if (x > maxX) maxX = x;
+    if (y > maxY) maxY = y;
+    if (z > maxZ) maxZ = z;
+
+    if (rawData) {
+        rawData->x = x;
+        rawData->y = y;
+        rawData->z = z; 
+    }
+    if (fx) {
+        if(x0) {
+            *fx = -1.0f + 2.0f * (x - x0) / (x1 - x0);
+            *fy = -1.0f + 2.0f * (y - y0) / (y1 - y0);
+            *fz = -1.0f + 2.0f * (z - z0) / (z1 - z0);
+        }
+        else {
+            //static const float INV = 1.0f / 32768.0f;
+            static const float INV = 1.0f / 1024.0f;
+            *fx = x * INV;
+            *fy = y * INV;
+            *fz = z * INV;
+        }
+    }
+    return 1;
+}
+
 void GrinlizLSM303::write8(uint8_t address, uint8_t reg, uint8_t value)
 {
     Wire.beginTransmission(address);
@@ -228,3 +411,4 @@ uint8_t GrinlizLSM303::read8(uint8_t address, uint8_t reg)
 
     return value;
 }
+
