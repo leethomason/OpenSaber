@@ -21,7 +21,6 @@ void setup() {
         while(true) {}
     }
     Serial.println("Accel/Gyro success");
-    delay(20);
     accel.setMagCalibration(-431, -505, -421, 259, 90, 258);
     accel.logMagStatus();
 
@@ -67,9 +66,9 @@ void loop()
         float ax = data[0].ax;
         float ay = data[0].ay;
         float az = data[0].az;
-//        Serial.print("a="); Serial.print(ax); Serial.print(" ");
-//        Serial.print(ay); Serial.print(" ");
-//        Serial.println(az);
+        Serial.print("a="); Serial.print(ax); Serial.print(" ");
+        Serial.print(ay); Serial.print(" ");
+        Serial.println(az);
 #else
         Serial.print("a="); Serial.print(rawData[0].x); Serial.print(" ");
         Serial.print(rawData[0].y); Serial.print(" ");

@@ -172,7 +172,7 @@ bool GrinlizLSM303::begin()
         | 3 << 2    // 100 Hz
         | 0         // continuous mode 
      );
-
+    delay(10);
     return (whoAmIA == 0x33) && (whoAmIM == 0x40);
 }
 
@@ -277,6 +277,8 @@ int GrinlizLSM303::readMag(RawData* rawData, float* fx, float* fy, float* fz)
 {
     int status = read8(LSM303_ADDRESS_MAG, STATUS_REG_M);
     if ((status & (1<<3)) == 0 && (status & (1<<7)) == 0) return 0;
+
+    // FIXME restore block read
 
 /*
     Wire.beginTransmission(LSM303_ADDRESS_MAG);
