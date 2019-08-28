@@ -2,6 +2,7 @@
 #include <math.h>
 #include "GrinlizLSM303.h"
 #include "Grinliz_Util.h"
+#include "fixed.h"
 
 uint32_t lastMillis = 0;
 int nRead = 0;
@@ -27,6 +28,8 @@ void setup() {
     delay(20);
     accel.setMagCalibration(-431, -505, -421, 259, 90, 258);
     accel.logStatus();
+
+    TestFixed();
 }
 
 
@@ -52,9 +55,13 @@ void loop()
 
                 Log.p("m=").p(magData.x).p(" ").p(magData.y).p(" ").p(magData.z).
                     p("  ").p(x).p(" ").p(y).p(" ").p(z).eol();
-                Log.p("  min=").p(accel.minX).p(" ").p(accel.minY).p(" ").p(accel.minZ)
-                   .p("  max=").p(accel.maxX).p(" ").p(accel.maxY).p(" ").p(accel.maxZ)
-                   .p("  ave=").p((accel.maxX + accel.minX)/2).p(" ").p((accel.maxY + accel.minY)/2).p(" ").p((accel.maxZ + accel.minZ)/2)
+
+                int x0, y0, z0, x1, y1, z1;
+                accel.getMagCalibration(&x0, &y0, &z0, &x1, &y1, &z1);
+
+                Log.p("  min=").p(x0).p(" ").p(y0).p(" ").p(z0)
+                   .p("  max=").p(x1).p(" ").p(y1).p(" ").p(z1)
+                   .p("  ave=").p((x0 + x1)/2).p(" ").p((y0 + y1)/2).p(" ").p((z0 + z1)/2)
                    .p(" heading=").p(heading).eol();
                 break;
             }

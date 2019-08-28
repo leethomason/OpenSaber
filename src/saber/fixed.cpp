@@ -40,5 +40,14 @@ bool TestFixed()
         FixedNorm d = a + b + c;
         TEST_IS_TRUE(d == 5);
     }
+    {
+        Fixed115 a(4);
+        Fixed115 ar = a.sqrt();
+        TEST_IS_TRUE(ar == 2);
+
+        Fixed115 b(16);
+        Fixed115 br = b.sqrt();
+        TEST_IS_TRUE(br == 4)
+    }
     return true;
 }

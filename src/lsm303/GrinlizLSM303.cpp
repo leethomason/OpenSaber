@@ -1,6 +1,8 @@
-#include "GrinlizLSM303.h"
 #include <Arduino.h>
 #include <Wire.h>
+#include <math.h>
+
+#include "GrinlizLSM303.h"
 #include "Grinliz_Arduino_Util.h"
 #include "Grinliz_Util.h"
 
@@ -360,12 +362,12 @@ int GrinlizLSM303::readMag(RawData* rawData, float* fx, float* fy, float* fz)
     int16_t y = int16_t(ylo | (yhi << 8));
     int16_t z = int16_t(zlo | (zhi << 8));
 
-    if (x < minX) minX = x;
-    if (y < minY) minY = y;
-    if (z < minZ) minZ = z;
-    if (x > maxX) maxX = x;
-    if (y > maxY) maxY = y;
-    if (z > maxZ) maxZ = z;
+    if (x < x0) x0 = x;
+    if (y < y0) y0 = y;
+    if (z < z0) z0 = z;
+    if (x > x1) x1 = x;
+    if (y > y1) y1 = y;
+    if (z > z1) z1 = z;
 
     if (rawData) {
         rawData->x = x;
@@ -373,17 +375,21 @@ int GrinlizLSM303::readMag(RawData* rawData, float* fx, float* fy, float* fz)
         rawData->z = z; 
     }
     if (fx) {
-        if(x0) {
-            *fx = -1.0f + 2.0f * (x - x0) / (x1 - x0);
-            *fy = -1.0f + 2.0f * (y - y0) / (y1 - y0);
-            *fz = -1.0f + 2.0f * (z - z0) / (z1 - z0);
+        if(x0 < x1 && y0 < y1 && z0 < z1) {
+            float vx = -1.0f + 2.0f * (x - x0) / (x1 - x0);
+            float vy = -1.0f + 2.0f * (y - y0) / (y1 - y0);
+            float vz = -1.0f + 2.0f * (z - z0) / (z1 - z0);
+
+            float len2 = vx * vx + vy * vy + vz * vz;
+            float lenInv = 1.0f / sqrtf(len2);
+            *fx = vx * lenInv;
+            *fy = vy * lenInv;
+            *fz = vz * lenInv;
         }
         else {
-            //static const float INV = 1.0f / 32768.0f;
-            static const float INV = 1.0f / 1024.0f;
-            *fx = x * INV;
-            *fy = y * INV;
-            *fz = z * INV;
+            *fx = 1;
+            *fy = 0;
+            *fz = 0;
         }
     }
     return 1;

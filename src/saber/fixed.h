@@ -3,11 +3,10 @@
 
 #include <stdint.h>
 
-// Can't use this because auto-included Arduino headers
+// Note the auto-included Arduino headers
 // shoves min() and max() into the global preprocessor
 // namespace, so that the C++ namespace min() and max()
 // are overwritten. Arduino compilation tools suck.
-// #include <limits>
 
 #include <limits.h>
 #include <stdint.h>
@@ -113,6 +112,31 @@ public:
     // Query the DECBITSimal part - return as a fraction of 2^16.
     // Always positive.
     uint32_t getDec() const { return (unsigned(x) & (FIXED_1 - 1)) << (16 - DECBITS); }
+
+    FixedT sqrt() const {
+        if (x < 0) return 0;
+        LONG target = x << DECBITS;
+        LONG low = 0;
+        LONG high = x;
+        LONG mid = low;
+
+        while (low <= high) {
+            mid = (low + high) / 2;
+            LONG guess = mid * mid;
+            if (guess > target) {
+                high = mid - 1;
+            }
+            else if (guess < target) {
+                low = mid + 1;
+            }
+            else {
+                break;
+            }
+        }
+        FixedT val;
+        val.x = mid;
+        return val;
+    }
 
     FixedT& operator = (const FixedT &v) { x = v.x; return *this; }
     FixedT& operator = (const int v) { x = IntToFixed(v); return *this; }
