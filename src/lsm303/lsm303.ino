@@ -6,10 +6,6 @@
 
 uint32_t lastMillis = 0;
 int nRead = 0;
-
-// -431 -505 -421
-//  259   90  258
-
 GrinlizLSM303 accel;
 
 void setup() {
@@ -27,7 +23,7 @@ void setup() {
     Serial.println("Accel/Gyro success");
     delay(20);
     accel.setMagCalibration(-431, -505, -421, 259, 90, 258);
-    accel.logStatus();
+    accel.logMagStatus();
 
     TestFixed();
 }
