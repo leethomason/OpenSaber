@@ -2,10 +2,10 @@
 #include <math.h>
 #include "GrinlizLSM303.h"
 #include "Grinliz_Util.h"
+#include "fixed.h"
 
 uint32_t lastMillis = 0;
 int nRead = 0;
-
 GrinlizLSM303 accel;
 
 void setup() {
@@ -21,6 +21,10 @@ void setup() {
         while(true) {}
     }
     Serial.println("Accel/Gyro success");
+    accel.setMagCalibration(-431, -505, -421, 259, 90, 258);
+    accel.logMagStatus();
+
+    TestFixed();
 }
 
 
@@ -32,9 +36,32 @@ void loop()
     GrinlizLSM303::RawData rawData[8];
     int n = accel.readInner(rawData, data, 8);
     nRead += n;
+    accel.readMag(0, 0, 0, 0);
 
     if (n && printTime) {
         printTime = false;
+
+        GrinlizLSM303::RawData magData;
+        float x, y, z;
+        while(true) {
+            if (accel.readMag(&magData, &x, &y, &z)) {
+                float heading = atan2(y, x) * 180.0f / 3.14159f;
+                if (heading < 0) heading += 360;
+
+                Log.p("m=").p(magData.x).p(" ").p(magData.y).p(" ").p(magData.z).
+                    p("  ").p(x).p(" ").p(y).p(" ").p(z).eol();
+
+                int x0, y0, z0, x1, y1, z1;
+                accel.getMagCalibration(&x0, &y0, &z0, &x1, &y1, &z1);
+
+                Log.p("  min=").p(x0).p(" ").p(y0).p(" ").p(z0)
+                   .p("  max=").p(x1).p(" ").p(y1).p(" ").p(z1)
+                   .p("  ave=").p((x0 + x1)/2).p(" ").p((y0 + y1)/2).p(" ").p((z0 + z1)/2)
+                   .p(" heading=").p(heading).eol();
+                break;
+            }
+        }
+
 #if true
         float ax = data[0].ax;
         float ay = data[0].ay;

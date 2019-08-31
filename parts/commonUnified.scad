@@ -615,6 +615,7 @@ function zLenOfBaffles(n, dzButtress) = n * dzButtress * 2 - dzButtress;
 module baffleMCBattery( outer,          // outer diameter 
                         n,              // number of baffles 
                         dzButtress,     // thickness of the baffle
+                        nPostBaffles=0,// number of additional baffles, that don't have the battery cutout
                         dFirst=0,       // make the back baffle this diameter (0 to use standard)
                         dzFirst=0,      // make the back baffle this thicknes  (0 to use standard)
                         extraBaffle=0,  // add this much to the front baffle
@@ -622,8 +623,10 @@ module baffleMCBattery( outer,          // outer diameter
                         bridgeStyle = 1
                     )
 {
-    for(i=[0:n-1]) {
-        translate([0, 0, i*dzButtress*2]) 
+    totalN = n + nPostBaffles;
+    for(i=[0:totalN-1]) {
+        translate([0, 0, i*dzButtress*2])  {
+            hasBattery = i < n;
             if (i==0 && dFirst > 0 && dzFirst > 0) {
                 // First baffle can "overflow" decause of
                 // the larger diameter. Use an intersection()
@@ -631,14 +634,17 @@ module baffleMCBattery( outer,          // outer diameter
                 intersection() {
                     cylinder(h=dzButtress*2, d=dFirst);
                     oneBaffle(outer, dzFirst, 
+                            battery=hasBattery,
                             dExtra=dFirst - outer, 
                             bridge=bridgeStyle);
                 }
             }
             else {
                 oneBaffle(outer, dzButtress, 
-                    bridge=bridgeInFront || (i < n-1) ? bridgeStyle : 0);
+                    battery=hasBattery,
+                    bridge=bridgeInFront || (i < totalN-1) ? bridgeStyle : 0);
             }
+        }
     }
     if (extraBaffle) {
         translate([0, 0, (n*2 - 1) * dzButtress]) {
@@ -672,32 +678,43 @@ module pcbPillar() {
     dz: length of the section
     dzToPCB: delta to where the pcb start
     dyPCB: y delta to PCB bottom.
-    size[3]: outer size of the pcb
+    size[3]: outer size of the pcb.
+        x and z are obvious
+        y will do a cut above, if > 0
     mount: array of:
         x location, z location, "pillar" or "buttress"
     makeSection: if true, this is a section of the saber, else
                  just the basic parts are generated.
     sizePad: pad the size to make it fit more easily
+    angle: rotation of the pcb
 */
 module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount, 
-    makeSection=true, sizePad=0, holeAccess=false)
+    makeSection=true, sizePad=0, holeAccess=false, angle=0)
 {
     difference() 
     {
         union() {
-            if (makeSection)
-               tube(h=dz, do=outer, di=outer-t);
-
+            if (makeSection) {
+                difference() {
+                    tube(h=dz, do=outer, di=outer-t);
+                    translate([-size[0]/2 - sizePad, dyPCB, dzToPCB - sizePad]) 
+                        cube(size=[size[0] + 2 * sizePad, size[1], size[2] + 2 * sizePad]);
+                }
+            }
 
             for(m = mount) {
                 intersection() {
-                    translate([0, 0, -20]) cylinder(h=dz+40, d=outer ? outer : 100);
+                    translate([0, 0, -20]) 
+                        cylinder(h=dz+40, d=outer ? outer : 100);
 
+                    translate([0, dyPCB, dz/2])
+                    rotate([angle, 0, 0])
+                    translate([0, 0, -dz/2])
                     color("plum") union() {
                         x = m[0];
                         z = m[1];
                         type = m[2];
-                        translate([x, dyPCB, dzToPCB + z]) 
+                        translate([x, 0, dzToPCB + z]) 
                         {
                             if (type == "pillar") {
                                 pcbPillar();
@@ -715,9 +732,7 @@ module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount,
                 }
             }
         }
-        translate([-size[0]/2 - sizePad, dyPCB, dzToPCB - sizePad]) 
-            cube(size=[size[0] + 2 * sizePad, size[1], size[2] + 2 * sizePad]);
-        if (holeAccess == true) {
+        if (holeAccess == true && angle == 0) {
             for(m = mount) {
                 x = m[0];
                 z = m[1];
@@ -838,7 +853,9 @@ module emitterBase(d)
     port, and switch. Designed to be printed z-axis up, with
     minimal support.
 */
-module forwardAdvanced(d, dz, overlap, outer, dzToPort, dzToSwitch)
+module forwardAdvanced(d, dz, 
+    overlap, // if the length (backward) of the overlap area
+    outer, dzToPort, dzToSwitch)
 {
     LED_DZ = 10.0;    
     D_INNER = dynamicHeatSinkThread();
@@ -871,10 +888,12 @@ module forwardAdvanced(d, dz, overlap, outer, dzToPort, dzToSwitch)
             }
 
             // overlap ring
-            translate([0, 0, -overlap]) {
-                difference() {
-                    cylinder(h=overlap, d=outer);
-                    //cylinder(h=overlap, d1=DIAMETER, d2=D_INNER);
+            if (overlap) {
+                translate([0, 0, -overlap]) {
+                    difference() {
+                        cylinder(h=overlap, d=outer);
+                        //cylinder(h=overlap, d1=DIAMETER, d2=D_INNER);
+                    }
                 }
             }
         }
