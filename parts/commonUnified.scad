@@ -854,8 +854,9 @@ module emitterBase(d)
     minimal support.
 */
 module forwardAdvanced(d, dz, 
-    overlap, // if the length (backward) of the overlap area
-    outer, dzToPort, dzToSwitch)
+    overlap,    // if the length (backward) of the overlap area
+    outer,      // diameter of overlap ring
+    dzToPort, dzToSwitch)
 {
     LED_DZ = 10.0;    
     D_INNER = dynamicHeatSinkThread();
