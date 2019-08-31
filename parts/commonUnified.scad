@@ -852,6 +852,11 @@ module emitterBase(d)
     Render the front (1", typically) mount for the advanced LED,
     port, and switch. Designed to be printed z-axis up, with
     minimal support.
+
+    Note on advanced heat sink:
+    Len (housing) = 22.8mm
+    Len (theard) = 10.0mm
+    
 */
 module forwardAdvanced(d, dz, 
     overlap,    // if the length (backward) of the overlap area
