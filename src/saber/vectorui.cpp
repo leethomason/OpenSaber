@@ -3,6 +3,54 @@
 #include "assets.h"
 #include "Grinliz_Util.h"
 #include "sketcher.h"
+#include "rgb2hsv.h"
+
+
+void VectorUI::NumToDigit(int num, int* digits)
+{
+    digits[0] = num / 1000;
+    num -= digits[0] * 1000;
+    digits[1] = num / 100;
+    num -= digits[1] * 100;
+    digits[2] = num / 10;
+    num -= digits[2] * 10;
+    digits[3] = num;
+}
+
+void VectorUI::Segment(VRender* ren, int width, int s, int num, osbr::RGBA rgba)
+{
+    /*
+        00
+       5  1
+       5  1
+        66
+       4  2
+       4  2
+        33    7
+    */
+
+    static const uint8_t segments[10] = {0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f};
+
+    if (num < 0) num = 0;
+    if (num > 9) num = 9;
+    uint8_t bit = segments[num];
+
+    if (bit & (1 << 0))
+        ren->DrawRect(0, 0, width, s, rgba);
+    if (bit & (1 << 1))
+        ren->DrawRect(width - s, 0, s, width, rgba);
+    if (bit & (1 << 2))
+        ren->DrawRect(width - s, width, s, width, rgba);
+    if (bit & (1 << 3))
+        ren->DrawRect(0, width * 2 - s, width, s, rgba);
+    if (bit & (1 << 4))
+        ren->DrawRect(0, width, s, width, rgba);
+    if (bit & (1 << 5))
+        ren->DrawRect(0, 0, s, width, rgba);
+    if (bit & (1 << 6))
+        ren->DrawRect(0, width - s / 2, width, s, rgba);
+}
+
 
 void VectorUI::Draw(VRender* ren,
     uint32_t time,
@@ -10,9 +58,6 @@ void VectorUI::Draw(VRender* ren,
     bool bladeIgnited,
     const UIRenderData* data)
 {
-    static const int W = 160;
-    static const int H = 80;
-
     ren->Clear();
 
     static const osbr::RGBA POWER_ON(43, 163, 255, 200);
@@ -29,112 +74,85 @@ void VectorUI::Draw(VRender* ren,
     CStr<5> volts;
     volts.setFromNum(data->mVolts, true);
 
-#if false
-    {
+#if true
+    static const int W = 128;
+    static const int H = 32;
+    static const int BAR_W = 16;
+    static const int TEXT = 5;
 
-        // Power
-        VRender::Vec2 P[] = {
-            {15, -2}, {15, 2}, {H / 2 - 2, 5}, {H / 2 - 2, -5}
-        };
-        for (int r = 3; r < 11; ++r) {
-            ren->SetTransform(FixedNorm(r * 2 + 1, 28), Fixed115(H / 2), Fixed115(H / 2));
-            ren->DrawPoly(P, 4, r - 3 <= p ? POWER_ON : POWER_OFF);
+    // Power
+    if (mode == UIMode::NORMAL) {
+        for (int r = 0; r < 8; ++r) {
+            Fixed115 d = r - Fixed115(7, 2);
+            Fixed115 fx = Fixed115(8, 10) * d * d;
+            ren->DrawRect(fx.getInt(), 28 - r * 4, BAR_W, 3, POWER_ON, r < p ? 0 : 1);
         }
     }
-
-    {
-        // Audio
-        VRender::Vec2 P[] = {
-            {15, -2}, {15, 2}, {H / 2 - 2, 5}, {H / 2 - 2, -5}
-        };
-        for (int r = 4, i = 0; r >= -3; --r, ++i) {
-            ren->SetTransform(FixedNorm(r * 2 - 1, 28), Fixed115(W - H / 2), Fixed115(H / 2));
-            ren->DrawPoly(P, 4, i / 2 < data->volume ? AUDIO_ON : AUDIO_OFF);
-        }
-    }
-    ren->ClearTransform();
-    {
-        // Power text
-        VRenderUtil::DrawStr(ren, volts.c_str(), 50, 70, getGlypth_calibri8, POWER_TEXT);
-    }
-
-    {
-        // Palette
-        for (int i = 0; i < 8; ++i) {
-            ren->DrawRect(48 + i * 8, 2, 6, 6, i == data->palette ? PALETTE_ON : PALETTE_OFF);
-        }
-    }
-
-    {
-        // Crystal
-        static const int CX = 25;
-        static const int CY = 13;
-        static const int T = 4;
-
-        static const VRender::Vec2 OUTER[6] = {
-            {W / 2 - CX, H / 2 - CY},
-            {W / 2 - CX - CY, H / 2},
-            {W / 2 - CX, H / 2 + CY},
-            {W / 2 + CX, H / 2 + CY},
-            {W / 2 + CX + CY, H / 2},
-            {W / 2 + CX, H / 2 - CY}
-        };
-        static const VRender::Vec2 ARROW[4] = {
-            {W / 2, H / 2 - CY},
-            {W / 2 - CY, H / 2},
-            {W / 2, H / 2 + CY},
-            {W / 2 + CY, H / 2}
-        };
-        static const VRender::Vec2 ARROW_INNER[4] = {
-            {W / 2, H / 2 - CY + T},
-            {W / 2 - CY + T, H / 2},
-            {W / 2, H / 2 + CY - T},
-            {W / 2 + CY - T, H / 2}
-        };
-        static const VRender::Vec2 INNER[6] = {
-            {W / 2 - CX, H / 2 - CY + T},
-            {W / 2 - CX - CY + T, H / 2},
-            {W / 2 - CX, H / 2 + CY - T},
-            {W / 2 + CX, H / 2 + CY - T},
-            {W / 2 + CX + CY - T, H / 2},
-            {W / 2 + CX, H / 2 - CY + T}
-        };
-        static const VRender::Vec2 LEFT[4] = {
-            {W / 2 - CX, H / 2 - CY + T},
-            {W / 2 - CX - CY + T, H / 2},
-            {W / 2 - CX, H / 2 + CY - T},
-            {W / 2 - CX + CY - T, H / 2},
-        };
-        osbr::RGBA bg(255, 255, 255, 120);
-        for (int i = 0; i < 8; ++i) {
-            if (mode == UIMode::MEDITATION) {
-                osbr::RGB medRGB;
-                calcCrystalColorHSV(time + i * 200, data->color, &medRGB);
-                bg.set(medRGB.r, medRGB.g, medRGB.b, 120);
+    else if (mode == UIMode::PALETTE) {
+        for (int j = 0; j < 2; j++) {
+            for (int i = 0; i < 4; i++) {
+                static const int S = 6;
+                int count = j * 4 + i;
+                ren->DrawRect(S + (S + 2)*i, H / 2 - 8 + 8 * j, S, S, osbr::RGBA(255, 255, 255), data->palette == count ? 1 : 0);
             }
-            ren->DrawRect(W / 2 - 32 + i * 8 + 1, H / 2 - 16, 6, 32, bg, 1);
+        }
+    }
+    else if (mode == UIMode::VOLUME) {
+        for (int i = 0; i < 5; ++i) {
+            static const int S = 6;
+            ren->DrawRect(6 + 4 * i, H / 2 - (S + i * 4) / 2, 2, S + i * 4, osbr::RGBA(255, 255, 255));
+        }
+    }
+
+    // Audio
+    {
+        for (int r = 0; r < 8; ++r) {
+            Fixed115 d = r - Fixed115(7, 2);
+            Fixed115 fx = Fixed115(8, 10) * d * d;
+            ren->DrawRect(W - fx.getInt() - BAR_W, 28 - r * 4, BAR_W, 3, AUDIO_ON, r / 2 < data->volume ? 0 : 1);
+        }
+    }
+    // Color indicator
+    {
+        FixedNorm rotations[6] = {
+            FixedNorm(0, 6), FixedNorm(1, 6), FixedNorm(2, 6), 
+            FixedNorm(3, 6), FixedNorm(4, 6), FixedNorm(5, 6) 
+        };
+        for (int r = 0; r < 6; ++r) {
+            ren->SetTransform(rotations[r], W / 2, H / 2);
+            ren->DrawRect(-1, 10, 2, 5, osbr::RGBA(255, 255, 255));
         }
 
-        osbr::RGBA rgba(data->color.r, data->color.g, data->color.b, 200);
-        ren->PushLayer();
-        if (mode == UIMode::NORMAL) {
-            ren->DrawPoly(OUTER, 6, rgba);
-            ren->DrawPoly(INNER, 6, rgba);
-        }
-        else if (mode == UIMode::PALETTE) {
-            ren->SetTransform(-CX, 0);
-            ren->DrawPoly(ARROW, 4, rgba);
-            ren->DrawPoly(ARROW_INNER, 4, rgba);
-        }
-        else if (mode == UIMode::VOLUME) {
-            ren->SetTransform(CX, 0);
-            ren->DrawPoly(ARROW, 4, rgba);
-            ren->DrawPoly(ARROW_INNER, 4, rgba);
-        }
+        uint8_t h, s, v;
+        rgb2hsv(data->color.r, data->color.g, data->color.b, &h, &s, &v);
+
+        ren->SetTransform(FixedNorm(h, 180), W / 2, H / 2);
+        ren->DrawRect(-2, 0, 4, 12, osbr::RGBA(255, 255, 255));
+
         ren->ClearTransform();
-        ren->PopLayer();
+
+        int digits[4];
+        NumToDigit(data->palette, digits);
+        ren->SetTransform(W - 35, H / 2 - TEXT);
+        Segment(ren, TEXT, 2, digits[3], osbr::RGBA(255, 255, 255));
     }
+
+    // Power
+    if (mode == UIMode::NORMAL) {
+        int digits[4];
+        NumToDigit(data->mVolts, digits);
+        for (int i = 0; i < 4; ++i) {
+            ren->SetTransform(20 + (TEXT+2)*i, H / 2 - TEXT);
+            Segment(ren, TEXT, 2, digits[i], osbr::RGBA(255, 255, 255));
+        }
+    }
+    ren->Render();
+
 #endif
+
+#if false
+    static const int W = 160;
+    static const int H = 80;
 
     static const int BAR_W = 24;
     // Power
@@ -216,4 +234,5 @@ void VectorUI::Draw(VRender* ren,
     }*/
 
     ren->Render();
+#endif
 }

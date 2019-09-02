@@ -16,14 +16,16 @@
 #include "../saber/vrender.h"
 #include "../saber/vectorui.h"
 
-//#define MONO_128_32 1
-#define RGB_160_80 2
+#define MONO_128_32 1
+//#define RGB_160_80 2
 
 Sketcher sketcher;
 
 #ifdef MONO_128_32
 static const int WIDTH = 128;
 static const int HEIGHT = 32;
+#define USE_VRENDER
+
 #endif
 #ifdef RGB_160_80
 static const int WIDTH = 160;
@@ -55,6 +57,7 @@ private:
 };
 
 osbr::RGBA* blockDrawRGBABuffer = 0;
+uint8_t* blockDrawOLEDBUffer = 0;
 
 void BlockDrawRGB(const BlockDrawChunk* chunk, int y, int n)
 {
@@ -65,6 +68,27 @@ void BlockDrawRGB(const BlockDrawChunk* chunk, int y, int n)
         int n = chunk->x1 - chunk->x0;
         while (n--) {
             *pixels++ = c;
+        }
+    }
+}
+
+void BlockDrawOLED(const BlockDrawChunk* chunks, int y, int n)
+{
+    for (int i = 0; i < n; ++i) {
+        const BlockDrawChunk& chunk = chunks[i];
+        int row = y / 8;
+        int bit = 1 << (y & 7);
+
+        if (chunk.rgb.get()) {
+            for (int x = chunk.x0; x < chunk.x1; ++x) {
+                blockDrawOLEDBUffer[row * WIDTH + x] |= bit;
+            }
+        }
+        else {
+            int mask = ~bit;
+            for (int x = chunk.x0; x < chunk.x1; ++x) {
+                blockDrawOLEDBUffer[row * WIDTH + x] &= mask;
+            }
         }
     }
 }
@@ -104,9 +128,20 @@ int main(int, char**) {
 #ifdef MONO_128_32
     SimDisplay simDisplay(WIDTH, HEIGHT, 1);
     uint8_t* displayBuffer = new uint8_t[WIDTH*HEIGHT];
+    
+#   ifdef USE_VRENDER
+    VRender vrender;
+
+
+    blockDrawOLEDBUffer = displayBuffer;
+    vrender.Attach(BlockDrawOLED);
+    vrender.SetClip(VRender::Rect(0, 0, WIDTH, HEIGHT));
+    vrender.SetSize(WIDTH, HEIGHT);
+#   else
     memset(displayBuffer, 0, WIDTH * HEIGHT);
 	Renderer renderer;
     renderer.Attach(WIDTH, HEIGHT, displayBuffer);
+#   endif
 #endif
 #ifdef RGB_160_80
 
@@ -246,7 +281,15 @@ int main(int, char**) {
 
 			sketcher.Push(value);
 #ifdef MONO_128_32
+#   ifdef USE_VRENDER
+            //vrender.DrawRect(10, 10, 20, 20, osbr::RGBA(255, 255, 255));
+            //vrender.Render();
+            //vrender.Clear();
+            vrender.Clear();
+            VectorUI::Draw(&vrender, t, mode.mode(), bladeOn, &data);
+#   else
             sketcher.Draw(&renderer, t, mode.mode(), bladeOn, &data);
+#   endif
 #endif
 #ifdef RGB_160_80
 #if true

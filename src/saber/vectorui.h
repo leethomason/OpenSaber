@@ -15,4 +15,9 @@ public:
         bool bladeIgnited, 
         const UIRenderData* data);
 
+private:
+    static void Segment(VRender* ren, int width, int s, int num, osbr::RGBA rgba);
+    // 1000-100-10-1
+    static void NumToDigit(int num, int* digits);
+
 };
