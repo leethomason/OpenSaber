@@ -80,16 +80,20 @@ void BlockDrawOLED(const BlockDrawChunk* chunks, int y, int n)
         int bit = 1 << (y & 7);
 
         if (chunk.rgb.get()) {
-            for (int x = chunk.x0; x < chunk.x1; ++x) {
-                blockDrawOLEDBUffer[row * WIDTH + x] |= bit;
+            uint8_t* p = blockDrawOLEDBUffer + row * WIDTH + chunk.x0;
+            for(int nPix = chunk.x1 - chunk.x0; nPix > 0; nPix--, p++) {
+                 *p |= bit;
             }
         }
+        // Clear to black beforehand; don't need to set black runs.
+        /*
         else {
             int mask = ~bit;
             for (int x = chunk.x0; x < chunk.x1; ++x) {
                 blockDrawOLEDBUffer[row * WIDTH + x] &= mask;
             }
         }
+        */
     }
 }
 
@@ -127,7 +131,7 @@ int main(int, char**) {
 
 #ifdef MONO_128_32
     SimDisplay simDisplay(WIDTH, HEIGHT, 1);
-    uint8_t* displayBuffer = new uint8_t[WIDTH*HEIGHT];
+    uint8_t* displayBuffer = new uint8_t[WIDTH*HEIGHT/8];
     
 #   ifdef USE_VRENDER
     VRender vrender;
@@ -197,7 +201,7 @@ int main(int, char**) {
 
 	UIRenderData data;
 	data.volume = 2;
-	data.mVolts = 3219;
+	data.mVolts = 3850;
 	data.fontName = "Bespin";
 
     runUnitTests();
@@ -282,9 +286,7 @@ int main(int, char**) {
 			sketcher.Push(value);
 #ifdef MONO_128_32
 #   ifdef USE_VRENDER
-            //vrender.DrawRect(10, 10, 20, 20, osbr::RGBA(255, 255, 255));
-            //vrender.Render();
-            //vrender.Clear();
+            memset(displayBuffer, 0, WIDTH * HEIGHT / 8);
             vrender.Clear();
             VectorUI::Draw(&vrender, t, mode.mode(), bladeOn, &data);
 #   else

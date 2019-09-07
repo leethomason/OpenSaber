@@ -80,12 +80,15 @@ void VectorUI::Draw(VRender* ren,
     static const int BAR_W = 16;
     static const int TEXT = 5;
 
+    static const osbr::RGBA WHITE(255, 255, 255);
+    static const osbr::RGBA BLACK(0, 0, 0, 255);
+
     // Power
     if (mode == UIMode::NORMAL) {
         for (int r = 0; r < 8; ++r) {
             Fixed115 d = r - Fixed115(7, 2);
             Fixed115 fx = Fixed115(8, 10) * d * d;
-            ren->DrawRect(fx.getInt(), 28 - r * 4, BAR_W, 3, POWER_ON, r < p ? 0 : 1);
+            ren->DrawRect(fx.getInt(), 28 - r * 4, BAR_W, 3, WHITE, r < p ? 0 : 1);
         }
     }
     else if (mode == UIMode::PALETTE) {
@@ -93,14 +96,14 @@ void VectorUI::Draw(VRender* ren,
             for (int i = 0; i < 4; i++) {
                 static const int S = 6;
                 int count = j * 4 + i;
-                ren->DrawRect(S + (S + 2)*i, H / 2 - 8 + 8 * j, S, S, osbr::RGBA(255, 255, 255), data->palette == count ? 1 : 0);
+                ren->DrawRect(S + (S + 2)*i, H / 2 - 8 + 8 * j, S, S, WHITE, data->palette == count ? 1 : 0);
             }
         }
     }
     else if (mode == UIMode::VOLUME) {
         for (int i = 0; i < 5; ++i) {
             static const int S = 6;
-            ren->DrawRect(6 + 4 * i, H / 2 - (S + i * 4) / 2, 2, S + i * 4, osbr::RGBA(255, 255, 255));
+            ren->DrawRect(12 + 4 * i, H / 2 - (S + i * 4) / 2, 2, S + i * 4, WHITE);
         }
     }
 
@@ -120,21 +123,29 @@ void VectorUI::Draw(VRender* ren,
         };
         for (int r = 0; r < 6; ++r) {
             ren->SetTransform(rotations[r], W / 2, H / 2);
-            ren->DrawRect(-1, 10, 2, 5, osbr::RGBA(255, 255, 255));
+            ren->DrawRect(-1, 10, 2, 5, WHITE);
         }
 
         uint8_t h, s, v;
         rgb2hsv(data->color.r, data->color.g, data->color.b, &h, &s, &v);
 
         ren->SetTransform(FixedNorm(h, 180), W / 2, H / 2);
-        ren->DrawRect(-2, 0, 4, 12, osbr::RGBA(255, 255, 255));
+        ren->DrawRect(-2, 0, 4, 12, WHITE);
 
         ren->ClearTransform();
 
+        for (int i = 0; i < 3; ++i) {
+            int y = H / 2 - 2 - 6 + 6 * i;
+            ren->DrawRect(W / 2 + 18, y, 12, 3, WHITE, 1);
+            int c = data->color[i] / 25;
+            if (c > 0)
+                ren->DrawRect(W / 2 + 19, y + 1, c, 1, WHITE);
+        }
+
         int digits[4];
         NumToDigit(data->palette, digits);
-        ren->SetTransform(W - 35, H / 2 - TEXT);
-        Segment(ren, TEXT, 2, digits[3], osbr::RGBA(255, 255, 255));
+        ren->SetTransform(W - 30, H / 2 - TEXT);
+        Segment(ren, TEXT, 2, digits[3], WHITE);
     }
 
     // Power
@@ -143,7 +154,7 @@ void VectorUI::Draw(VRender* ren,
         NumToDigit(data->mVolts, digits);
         for (int i = 0; i < 4; ++i) {
             ren->SetTransform(20 + (TEXT+2)*i, H / 2 - TEXT);
-            Segment(ren, TEXT, 2, digits[i], osbr::RGBA(255, 255, 255));
+            Segment(ren, TEXT, 2, digits[i], WHITE);
         }
     }
     ren->Render();
