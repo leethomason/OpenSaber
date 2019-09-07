@@ -3,9 +3,8 @@ use <../commonUnified.scad>
 use <../shapes.scad>
 use <holder.scad>
 
-DRAW_HOLDER  = true;
+DRAW_HOLDER  = false;
 DRAW_BODY    = true;
-DRAW_EMITTER = false;
 
 $fn = 80;
 EPS = .01;
@@ -35,13 +34,50 @@ if (DRAW_BODY) {
         echo("nBaffles=", N_BAFFLES);
             baffleMCBattery(D_AFT, N_BAFFLES, H_BUTTRESS, nPostBaffles=1);
     }
-    
+
+    MOUNT = 5.5;
     DZFA = zLenOfBaffles(N_BAFFLES+1, H_BUTTRESS) + M_BAFFLES_BACK;
-    OFFSET = 2;
+
     intersection() {
         innerSpace();
-        translate([0, 0, DZFA]) 
-            forwardAdvanced(D_AFT, 50, OFFSET, D_AFT, M_POWER - DZFA, M_SWITCH - DZFA);
+        difference() {
+            union() {
+                translate([0, 0, M_SWITCH-8])
+                    switchRing(D_AFT, 3, 20, 8);
+                translate([0, 0, M_POWER-6])
+                    powerPortRing(D_AFT, 3, 14, 6);
+
+            }
+            flatBottom();
+            for(i=[0:2])
+                translate([0, 0, M_POWER + i * 8]) capsule(120, 60, _mirror = true);
+        }
+    }
+
+    // Front sled
+    intersection() {
+        OVERLAP = 1;
+        innerSpace();
+        union() {
+            difference() {
+                translate([0, 0, M_TRANSITION - OVERLAP]) {                
+                    tube(h=M_HEATSINK_BACK - M_TRANSITION + OVERLAP, do=D_AFT, di=D_FORE-3);
+                }
+                THETA = 25;
+                for(i=[0:1]) {
+                    translate([0, 0, 4 + M_TRANSITION + i * 8]) {
+                        capsule(90+THETA, 90-THETA, _mirror = true);
+                        capsule(-THETA, THETA);
+                        capsule(180-THETA, 180+THETA);
+                    }
+                }
+                flatBottom();
+            }
+        }
+    }
+    DZ_THREAD = 10.0;
+    translate([0, 0, M_HEATSINK_BACK - DZ_THREAD]) {
+        tube(h=DZ_THREAD, di=dynamicHeatSinkThread(), do=D_FORE);
     }
 
     // Connection
@@ -50,6 +86,6 @@ if (DRAW_BODY) {
 
 }
 
-color("yellow") translate([0, 0, M_BAFFLES_BACK]) battery(D_FORE, "18500");
+*color("yellow") translate([0, 0, M_BAFFLES_BACK]) battery(D_FORE, "18500");
 *color("red") translate([0, 0, M_POWER]) rotate([-90, 0, 0]) cylinder(h=16, d=12);
 *color("red") translate([0, 0, M_SWITCH]) rotate([-90, 0, 0]) cylinder(h=16, d=12);

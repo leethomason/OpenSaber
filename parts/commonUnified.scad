@@ -391,6 +391,8 @@ module baffleHalfBridge(dz, t)
     polygonYZ(t, [[0,0], [dz*2, dz*2], [dz*2, 0]]);
 }
 
+X_BRIDGE = X_MC/2+1;
+T_BRIDGE = 1.6;
 
 module oneBaffleBottonRail(d, dz) 
 {
@@ -410,8 +412,6 @@ module oneBaffleBottonRail(d, dz)
 TROUGH_0 = 10;
 TROUGH_1 = 10;
 TROUGH_2 = 14;
-X_BRIDGE = X_MC/2+1;
-T_BRIDGE = 1.6;
 
 module oneBaffle(   d,
                     dz,
@@ -564,7 +564,7 @@ module speakerHolder(outer, dz, dzToSpkrBack, type)
 }
 
 
-module powerPortRing(outer, t, dz, dzToPort, portSupportToBack=false)
+module powerPortRing(outer, t, dz, dzToPort, portSupportToBack=false, counter=true)
 {    
     difference() {
         union() {
@@ -583,12 +583,13 @@ module powerPortRing(outer, t, dz, dzToPort, portSupportToBack=false)
         }
         translate([0, 0, dzToPort]) {
             port(true);
+            if (counter) portCounter();
         }
     }
 }
 
 
-module switchRing(diameter, t, dz, dzToSwitch)
+module switchRing(diameter, t, dz, dzToSwitch, counter=true)
 {
     difference() {
         union() {
@@ -601,10 +602,8 @@ module switchRing(diameter, t, dz, dzToSwitch)
         }
         translate([0, 0, dzToSwitch]) {
             switch(diameter, true);
+            if (counter) switchCounter();
         }
-    }
-    *translate([0, 0, dzToSwitch]) {
-        switch(diameter, false);
     }
 }
 
@@ -749,9 +748,9 @@ OLED_DISPLAY_L           = 32 + 1;
 OLED_DISPLAY_MOUNT_W     = 17;
 OLED_DISPLAY_MOUNT_L     = 26;
 
-module oledHolder(outer, t, dz, dzToPCB, dyPCB)
+module oledHolder(diameter, t, dz, dzToPCB, dyPCB)
 {
-    pcbHolder(outer, t, dz, dzToPCB, dyPCB, 
+    pcbHolder(diameter, t, dz, dzToPCB, dyPCB, 
               [OLED_DISPLAY_W, 20, OLED_DISPLAY_L],
               [
                 [-OLED_DISPLAY_MOUNT_W/2, (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L)/2, "buttress" ],
@@ -855,7 +854,7 @@ module emitterBase(d)
 
     Note on advanced heat sink:
     Len (housing) = 22.8mm
-    Len (theard) = 10.0mm
+    Len (thread) = 10.0mm
     
 */
 module forwardAdvanced(d, dz, 

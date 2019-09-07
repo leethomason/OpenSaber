@@ -59,11 +59,10 @@ module attachPost(diameter)
     }
 }
 
-module insetBaffle(diameter, dzBaffle, bridge, cutout)
+module insetBaffle(diameter, dzBaffle, bridge)
 {
     difference() {
-        oneBaffle(diameter, dzBaffle, bridge=bridge, 
-            battery=false, mc=false, cutout=cutout);
+        oneBaffle(diameter, dzBaffle, bridge=bridge, battery=false, mc=false, conduit=true);
         hull() {
             cylinder(h=dzBaffle*1.1, d=diameter * 0.65);
             translate([0, -2.5, 0])
@@ -111,7 +110,8 @@ module insetHolder( diameter,
                     diameterCapsule,
                     dzBaffle,
                     bridgeStyle=1,
-                    bridgeStyleArray=undef)
+                    bridgeStyleArray=undef,
+                    pinHeaderHolder=false)
 {
     Z_MID = dzCenter;
     DZ_PORT = dzCenterPort;
@@ -149,7 +149,8 @@ module insetHolder( diameter,
                         cube(size=[50, Y_SWITCH, SWITCH_BRIDGE_DZ]);
                     }
 
-                    headerHolder(diameter, R_INNER - SWITCH_DY - 9.9);
+                    if (pinHeaderHolder)
+                        headerHolder(diameter, R_INNER - SWITCH_DY - 9.9);
                 }
             }
 
@@ -202,7 +203,7 @@ module insetHolder( diameter,
             for(i=[0:nBaffle-1]) {
                 translate([0, 0, i*dzBaffle*2]) {
                     style = (bridgeStyleArray && i < len(bridgeStyleArray)) ? bridgeStyleArray[i] : bridgeStyle;
-                    insetBaffle(diameter, dzBaffle, style, i < 4);
+                    insetBaffle(diameter, dzBaffle, style);
                 }
             }
         }
