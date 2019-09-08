@@ -7,16 +7,17 @@ namespace osbr {
     struct RGB;
 }
 
-class OledSim
+class SimDisplay
 {
 public:
-	OledSim(int w, int h);
-	~OledSim();
+    SimDisplay(int w, int h, int bytesPerPixel);
+	~SimDisplay();
 
-	const uint32_t* Pixels() const { return pixels; }
-	uint8_t* Buffer() { return buffer;}
-	void Commit();                          // copies the buffer TO the pixels
-    void CommitFrom5x7(const uint8_t* src); // use this as a dot matrix renderer
+	// After commit, this is the RGBA pixels that are displayed in the simulator.
+    const uint32_t* Pixels() const { return pixels; }
+   
+	void CommitFromBuffer(const void* src, int w, int h);
+    void CommitFrom5x7(const void* src); // use this as a dot matrix renderer
     void CommitFromDotstar(const osbr::RGB* dotstars, int n);
 	void Clear();
 
@@ -25,8 +26,8 @@ private:
 
 	int width;
 	int height;
+    int bytesPerPixel;
 	uint32_t* pixels;
-	uint8_t* buffer;
 };
 
 #endif // OLED_SIM_INCLUDED

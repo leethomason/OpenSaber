@@ -84,8 +84,7 @@ uint32_t Voltmeter::takeSample()
 
 int AveragePower::vbatToPowerLevel(int32_t vbat, int maxLevel)
 {
-    const int32_t round = (HIGH_VOLTAGE - LOW_VOLTAGE) / (2 * maxLevel);
-    int32_t level = maxLevel * (round + vbat - LOW_VOLTAGE) / (HIGH_VOLTAGE - LOW_VOLTAGE);
+    int32_t level = maxLevel * (vbat - LOW_VOLTAGE) / (HIGH_VOLTAGE - LOW_VOLTAGE);
 
     if (level < 0) level = 0;
     if (level > maxLevel) level = maxLevel;
