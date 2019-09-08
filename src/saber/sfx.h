@@ -24,7 +24,7 @@ SOFTWARE.
 #define SFX_HEADER
 
 #include <Arduino.h>
-#include <SD.h>
+//#include <SD.h>
 
 #include "Grinliz_Arduino_Util.h"
 #include "Grinliz_Util.h"
@@ -100,7 +100,7 @@ public:
   int calcSlot(const char* filename); // -1 if not a supported file
   void readIgniteRetract();
 
-  uint32_t readU32(File& file, int n);
+//  uint32_t readU32(File& file, int n);
   uint32_t readU32(SerialFlashFile& file, int n);
 
   // note: initialize to 255

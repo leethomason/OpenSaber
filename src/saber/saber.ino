@@ -37,7 +37,6 @@
 
 #include <Wire.h>
 #include <SPI.h>
-#include <SD.h>
 #include <OLED_SSD1306.h>
 #include "Button.h"
 #include "Grinliz_Arduino_Util.h"
@@ -98,7 +97,7 @@ GrinlizLIS3DH::RawData* accelData = accelDataBuf;
 #else
 GrinlizLIS3DH::RawData* accelData = 0;
 #endif 
-int nAccelLog = 0;
+//int nAccelLog = 0;
 
 /* First up; initialize the audio system and all its 
    resources. Also need to disable the amp to avoid
@@ -110,7 +109,8 @@ SFX sfx(&audioPlayer);
 
 #elif SABER_SOUND_ON == SABER_SOUND_FLASH
 Adafruit_ZeroI2S i2s(PIN_I2S_LRCLK, PIN_I2S_BITCLK, PIN_I2S_DATA, 2);
-Adafruit_SPIFlash spiFlash(SS1, &SPI1);     // Use hardware SPI 
+Adafruit_FlashTransport_SPI flashTransport(SS1, &SPI1);
+Adafruit_SPIFlash spiFlash(&flashTransport);     // Use hardware SPI 
 Adafruit_ZeroDMA audioDMA;
 SPIStream spiStream(spiFlash);              // FIXME global generic resource
 I2SAudio audioPlayer(i2s, audioDMA, spiFlash);
@@ -201,15 +201,15 @@ void setupSD()
             Log.p("Unable to access the SD card").eol();
         }
     #elif (SABER_SOUND_ON == SABER_SOUND_FLASH)
-
-        spiFlash.begin(SPIFLASHTYPE_W25Q16BV);
+        spiFlash.begin();
+        /*
         uint8_t manid, devid;
         spiFlash.GetManufacturerInfo(&manid, &devid);
         Log.p("SPI Flash Memory").eol();
         Log.p("Manufacturer: 0x").p(manid, HEX).eol();
         Log.p("Device ID: 0x").p(devid, HEX).eol();
         Log.p("Pagesize: ").p(spiFlash.pageSize()).eol();
-
+        */
         MemImage.begin();
         saberDB.writeDefaults(); // FIXME proper vprom emulation.
 
