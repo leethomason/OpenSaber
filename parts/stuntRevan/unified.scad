@@ -3,8 +3,8 @@ use <../commonUnified.scad>
 use <../shapes.scad>
 use <holder.scad>
 
-DRAW_HOLDER  = false;
-DRAW_BODY    = true;
+DRAW_HOLDER  = true;
+DRAW_BODY    = false;
 
 $fn = 80;
 EPS = .01;
@@ -49,6 +49,11 @@ if (DRAW_BODY) {
 
             }
             flatBottom();
+            hull() {
+                translate([0, 0, M_POWER-5]) rotate([90, 0, 0]) cylinder(h=100, d=12);
+                translate([0, 0, M_SWITCH]) rotate([90, 0, 0]) cylinder(h=100, d=12);
+            }
+
             for(i=[0:2])
                 translate([0, 0, M_POWER + i * 8]) capsule(120, 60, _mirror = true);
         }

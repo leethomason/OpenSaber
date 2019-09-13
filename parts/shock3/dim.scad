@@ -21,11 +21,12 @@ M_CRYSTAL_VIEW_CENTER = (M_CRYSTAL_VIEW_END + M_CRYSTAL_VIEW_START)/2;
 DZ_CRYSTAL_VIEW = M_CRYSTAL_VIEW_END - M_CRYSTAL_VIEW_START;
 
 M_PORT_CENTER       = 132.0;    // fixme
-M_SWITCH_CENTER     = 147.5;
+M_SWITCH_CENTER     = 153;      // fixme 147.5;
 M_USB               = 158;
 
 M_INSET_START       = 125.0;
 M_INSET_END         = 162.0;
+M_INSET_CENTER = (M_INSET_START + M_INSET_END) / 2;
 
 M_EMITTER_BASE      = 165.5;
 
@@ -59,7 +60,7 @@ R_AFT               = D_AFT / 2;
 //N_TEETH				= 2;
 //TEETH_ANGLE			= 90;
 
-H_BUTTRESS			= 3.0;
+H_BUTTRESS			= 4.0;  // > 3.2 so parts can be machined in
 
 // fixme
 W_CRYSTAL           = 12.1;

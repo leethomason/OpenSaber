@@ -16,14 +16,6 @@ POST_DY = 5;
 POWER_DY = 7.5;
 SWITCH_DY = 10.5;
 
-module insetCapsule(extends, dy, deltaD=0)
-{
-    hull() {
-        translate([0, D_OUTER/2 + dy , Z0]) rotate([-90, 0, 0]) cylinder(h=extends, d=D_CAPSULE + deltaD);
-        translate([0, D_OUTER/2 + dy, Z1]) rotate([-90, 0, 0]) cylinder(h=extends, d=D_CAPSULE + deltaD);
-    }
-}
-
 module attachPost(diameter)
 {
     INSET = NUT_W * 0.6;
@@ -62,7 +54,7 @@ module attachPost(diameter)
 module insetBaffle(diameter, dzBaffle, bridge)
 {
     difference() {
-        oneBaffle(diameter, dzBaffle, bridge=bridge, battery=false, mc=false, conduit=true);
+        oneBaffle(diameter, dzBaffle, bridge=bridge, battery=false, mc=false, conduit=true, noBottom=false);
         hull() {
             cylinder(h=dzBaffle*1.1, d=diameter * 0.65);
             translate([0, -2.5, 0])
@@ -103,25 +95,29 @@ module headerHolder(diameter, dy)
 */
 module insetHolder( diameter, 
                     outerDiameter, 
-                    dzSection, 
-                    dzCenter, 
-                    dzCenterPort, 
-                    dzCenterSwitch, 
                     diameterCapsule,
+                    dzSection,
                     dzBaffle,
+                    dzStart,
+                    dzEnd,
+                    dzBolt = 0,
+                    dzPort = 0,
+                    dzSwitch = 0,
                     bridgeStyle=1,
                     bridgeStyleArray=undef,
-                    pinHeaderHolder=false)
+                    pinHeaderHolder=false,
+                    roundRect=0)
 {
-    Z_MID = dzCenter;
-    DZ_PORT = dzCenterPort;
-    DZ_SWITCH = dzCenterSwitch;
-    D_INNER = diameter;
-    R_INNER = D_INNER / 2.0;
-    Y_INSET = R_INNER - 5;
     rCapsule = diameterCapsule / 2;
+    rInner = diameter / 2;
+    yInset = rInner - 5.0;
+    dzMid = (dzStart + dzEnd) / 2;
+    dzCap = dzEnd - dzStart - diameterCapsule;
+    dzA = dzStart + rCapsule;
+    dzB = dzEnd - rCapsule;
 
-    //color("red") cylinder(d=10, h=dzSection);
+    // check alignment
+    // color("red") cylinder(d=10, h=dzSection);
 
     // Bridges
     X_SWITCH = 6.5;
@@ -129,48 +125,55 @@ module insetHolder( diameter,
                     
     difference() {
         union() {
-            translate([0, 0, Z_MID])
-                attachPost(D_INNER);
+            if (dzBolt)
+                translate([0, 0, dzBolt])
+                    attachPost(diameter);
 
             // Switch flat version + header mount
-            intersection() {
-                BRIDGE_T = 3;
-                cylinder(h=300, d=D_INNER);                
-                translate([0, 0, Z_MID + DZ_SWITCH - SWITCH_BRIDGE_DZ/2]) {
-                    translate([-20, R_INNER - SWITCH_DY - BRIDGE_T]) {
-                        cube(size=[40, BRIDGE_T, SWITCH_BRIDGE_DZ]);
-                    }
+            if (dzSwitch) {
+                intersection() {
+                    BRIDGE_T = 3;
+                    cylinder(h=300, d=diameter);                
+                    translate([0, 0, dzSwitch - SWITCH_BRIDGE_DZ/2]) {
+                        translate([-20, rInner - SWITCH_DY - BRIDGE_T]) {
+                            cube(size=[40, BRIDGE_T, SWITCH_BRIDGE_DZ]);
+                        }
 
-                    translate([X_SWITCH/2, R_INNER - SWITCH_DY, 0]) {
-                        cube(size=[50, Y_SWITCH, SWITCH_BRIDGE_DZ]);
-                    }
+                        translate([X_SWITCH/2, rInner - SWITCH_DY, 0]) {
+                            cube(size=[50, Y_SWITCH, SWITCH_BRIDGE_DZ]);
+                        }
 
-                    mirror([-1, 0, 0]) translate([X_SWITCH/2, R_INNER - SWITCH_DY, 0]) {
-                        cube(size=[50, Y_SWITCH, SWITCH_BRIDGE_DZ]);
-                    }
+                        mirror([-1, 0, 0]) translate([X_SWITCH/2, rInner - SWITCH_DY, 0]) {
+                            cube(size=[50, Y_SWITCH, SWITCH_BRIDGE_DZ]);
+                        }
 
-                    if (pinHeaderHolder)
-                        headerHolder(diameter, R_INNER - SWITCH_DY - 9.9);
+                        if (pinHeaderHolder)
+                            headerHolder(diameter, rInner - SWITCH_DY - 9.9);
+                    }
                 }
             }
 
             // Power holder.
-            translate([0, 0, Z_MID + DZ_PORT]) {
-                BRIDGE_T = 3;
-                intersection() {
-                    translate([0, 0, -7 - 0.5])
-                        cylinder(h=14 + 1, d=D_INNER - 1);
-                    translate([-20, R_INNER - POWER_DY - BRIDGE_T, -7])
-                        cube(size=[40, BRIDGE_T, 14]);
+            if (dzPort) {
+                translate([0, 0, dzPort]) {
+                    BRIDGE_T = 3;
+                    intersection() {
+                        translate([0, 0, -7 - 0.5])
+                            cylinder(h=14 + 1, d=diameter - 1);
+                        translate([-20, rInner - POWER_DY - BRIDGE_T, -7])
+                            cube(size=[40, BRIDGE_T, 14]);
+                    }
                 }
             }
         }
 
         // Power port
-        translate([0, 0, Z_MID + DZ_PORT]) {
-            rotate([-90, 0, 0]) {
-                cylinder(h=50, d=8.0);
-                cylinder(h=R_INNER - POWER_DY - 1.5, d=11.5);
+        if (dzPort) {
+            translate([0, 0, dzPort]) {
+                rotate([-90, 0, 0]) {
+                    cylinder(h=50, d=8.0);
+                    cylinder(h=rInner - POWER_DY - 1.5, d=11.5);
+                }
             }
         }
     }
@@ -178,19 +181,19 @@ module insetHolder( diameter,
     // The inset holder.
     intersection()
     {
-        translate([0, 0, -50]) cylinder(h=200, d=D_INNER);
-        translate([0, Y_INSET, Z_MID]) {
+        translate([0, 0, -50]) cylinder(h=200, d=diameter);
+        translate([0, yInset, 0]) {
             difference() {
                 DY = -3;
                 translate([0, DY, 0])
-                    zCapsule(DZ_PORT, DZ_SWITCH, rCapsule+2);
-                zCapsule(DZ_PORT, DZ_SWITCH, rCapsule);          // the actual wood
+                    zCapsule(dzA, dzB, rCapsule+2, roundRect);
+                zCapsule(dzA, dzB, rCapsule, roundRect);          // the actual wood
                 translate([0, DY - EPS*2, 0])
-                    zCapsule(DZ_PORT, DZ_SWITCH, rCapsule-2);
+                    zCapsule(dzA, dzB, rCapsule-2, roundRect);
 
                 stockX = diameterCapsule;
-                stockY = outerDiameter / 2 - (Y_INSET);
-                stockZ = abs(DZ_PORT - DZ_SWITCH) + diameterCapsule;
+                stockY = outerDiameter / 2 - (yInset);
+                stockZ = abs(dzA - dzB) + diameterCapsule;
                 echo("Stock size:", stockX, stockY, stockZ);
             }
         }
@@ -211,15 +214,18 @@ module insetHolder( diameter,
         translate([0, 0, dzSection]) cylinder(h=dzBaffle*2, d=diameter);
 
         // Removes the space for the inset.
-        translate([0, Y_INSET, Z_MID])
-            difference()
-                translate([0, -4, 0])
-                    zCapsule(DZ_PORT, DZ_SWITCH, rCapsule+2);
+        translate([0, yInset - 4, 0])
+            zCapsule(dzA, dzB, rCapsule+2, roundRect);
 
         // Access to the power port.
-        translate([0, 0, Z_MID + DZ_PORT])
-            rotate([90, 0, 0])
-                cylinder(h=50, d=15.0);
+        if (dzPort)
+            translate([0, 0, dzPort])
+                rotate([90, 0, 0])
+                    cylinder(h=50, d=13.0);
+        if (dzSwitch)
+            translate([0, 0, dzSwitch])
+                rotate([90, 0, 0])
+                    cylinder(h=50, d=13.0);
     }
     // Cap the end.
     translate([0, 0, dzSection - dzBaffle]) {
@@ -227,6 +233,30 @@ module insetHolder( diameter,
     }
 }
 
-insetHolder(32.2, 37.9, 
-    52, 24,     // section, center
-    -13.0, 13.0, 16.0, 4.0);
+/*
+module insetHolder( diameter, 
+                    outerDiameter, 
+                    diameterCapsule,
+                    dzSection,
+                    dzBaffle,
+                    dzStart,
+                    dzEnd,
+                    dzBolt = 0,
+                    dzPort = 0,
+                    dzSwitch = 0,
+                    bridgeStyle=1,
+                    bridgeStyleArray=undef,
+                    pinHeaderHolder=false,
+                    roundRect=0)
+*/
+
+insetHolder(
+    32.2, 
+    37.9, 
+    16.0,
+    80,
+    4,
+    10,
+    70,
+    40, 20, 60,
+    roundRect=3.175/2); 
