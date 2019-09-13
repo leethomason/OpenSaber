@@ -15,8 +15,11 @@ gbr_*
 *.drl
 *.gbr
 Debug
+Release
 *.vcxproj.user
 *.VC.db
 .vscode
+.vs
+
 
 
