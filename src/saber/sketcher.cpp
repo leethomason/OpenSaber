@@ -435,7 +435,7 @@ void calcCrystalColorHSV(uint32_t msec, const osbr::RGB& base, osbr::RGB* out)
 
     // Saturation
     static const int32_t SAT_VAR = 32;
-    dt = FixedNorm(msec % SAT_CYCLE, SAT_CYCLE);
+    dt = FixedNorm((msec % SAT_CYCLE)>>4, SAT_CYCLE>>4);
     int32_t sPrime = s - SAT_VAR / 2 + iSin(dt).scale(SAT_VAR);
     if (sPrime < 0) sPrime = 0;
     if (sPrime > 255) sPrime = 255;

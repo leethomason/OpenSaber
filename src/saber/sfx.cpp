@@ -23,7 +23,7 @@
 #include "pins.h"
 
 #if SABER_SOUND_ON == SABER_SOUND_SD
-#include <SD.h>
+//#include <SD.h>
 #include <SerialFlash.h>
 #elif SABER_SOUND_ON == SABER_SOUND_FLASH
 #include "mcmemimage.h"

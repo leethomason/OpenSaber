@@ -51,12 +51,12 @@ private:
     void parseHexColor(const char* str, osbr::RGB* c);
     void printLead(const char* str);
     void printMAmps(const osbr::RGB& color);
-    void upload(const char* path, uint32_t size);
+    //void upload(const char* path, uint32_t size);
 
-    uint32_t m_streamBytes = 0;
+    //uint32_t m_streamBytes = 0;
     SaberDB* database = 0;
     CStr<30> token;
-    CStr<10>  action;
+    CStr<10> action;
     CStr<20> value;
     CStr<20> value2;
 };

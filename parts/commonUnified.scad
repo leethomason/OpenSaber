@@ -418,6 +418,7 @@ module oneBaffle(   d,
                     battery=true,       // space for the battery
                     mc=true,            // space for the microcontroller
                     bridge=1,           // create a bridge to the next baffle. designed to print w/o support material. 
+                    bridgeOnlyBottom=false, // constrain the type1 bridge to the bottom part
                     dExtra=0,           // additional diameter
                     scallop=false,      // outside curves
                     noBottom=true,      // bottom cutout 
@@ -487,11 +488,12 @@ module oneBaffle(   d,
                 baffleHalfBridge(dz, T_BRIDGE);        
             mirror([1, 0, 0]) translate([X_BRIDGE, -yBridge, dz]) 
                 baffleHalfBridge(dz, T_BRIDGE);
-
-            translate([X_BRIDGE, yBridge - dz*2, dz]) 
-                baffleHalfBridge(dz, T_BRIDGE);        
-            mirror([1, 0, 0]) translate([X_BRIDGE, yBridge - dz*2, dz]) 
-                baffleHalfBridge(dz, T_BRIDGE);
+            if (!bridgeOnlyBottom) {
+                translate([X_BRIDGE, yBridge - dz*2, dz]) 
+                    baffleHalfBridge(dz, T_BRIDGE);        
+                mirror([1, 0, 0]) translate([X_BRIDGE, yBridge - dz*2, dz]) 
+                    baffleHalfBridge(dz, T_BRIDGE);
+            }
         }
         else {
             translate([0, 0, dz]) {

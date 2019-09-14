@@ -75,12 +75,31 @@ module polygonXZ(h, points)
 }
 
 
-module zCapsule(dz0, dz1, r)
+module zCapsule(dz0, dz1, r, roundedRect=0)
 {
-    hull() {
-        translate([0, 0, dz0]) rotate([-90, 0, 0]) cylinder(h=50, r=r);
-        translate([0, 0, dz1]) rotate([-90, 0, 0]) cylinder(h=50, r=r);
-    }
+	if (roundedRect == 0) {
+		hull() {
+			translate([0, 0, dz0]) rotate([-90, 0, 0]) cylinder(h=50, r=r);
+			translate([0, 0, dz1]) rotate([-90, 0, 0]) cylinder(h=50, r=r);
+		}
+	}
+	else {
+		if (dz1 < dz0) {
+			t = dz0;
+			dz0 = dz1;
+			dz1 = t;
+		}
+		hull() {
+			translate([r - roundedRect, 0, dz0 - r + roundedRect]) 
+				rotate([-90, 0, 0]) cylinder(h=50, r=roundedRect);
+			translate([-r + roundedRect, 0, dz0 - r + roundedRect]) 
+				rotate([-90, 0, 0]) cylinder(h=50, r=roundedRect);
+			translate([r - roundedRect, 0, dz1 + r - roundedRect]) 
+				rotate([-90, 0, 0]) cylinder(h=50, r=roundedRect);
+			translate([-r + roundedRect, 0, dz1 + r - roundedRect]) 
+				rotate([-90, 0, 0]) cylinder(h=50, r=roundedRect);
+		}
+	}
 }
 
 

@@ -7,17 +7,10 @@
    code.
 */
 //#include "pins.h" 
+#include "modes.h"
 
 class Blade;
 class SaberDB;
-
-enum {
-    BLADE_OFF,
-    BLADE_IGNITE,
-    BLADE_ON,
-    BLADE_FLASH,
-    BLADE_RETRACT
-};
 
 class BladeState
 {
@@ -44,13 +37,6 @@ public:
 private:
     uint8_t  m_currentState = BLADE_OFF;
     uint32_t m_startTime = 0;
-};
-
-enum class UIMode {
-    NORMAL,
-    PALETTE,
-    VOLUME,
-	MEDITATION
 };
 
 class UIModeUtil

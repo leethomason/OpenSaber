@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <math.h>
+#include <chrono>
 
 #include "renderer.h"
 #include "oledsim.h"
@@ -12,10 +13,90 @@
 #include "sketcher.h"
 #include "../saber/unittest.h"
 #include "../saber/rgb.h"
+#include "../saber/vrender.h"
+#include "../saber/vectorui.h"
+
+#define MONO_128_32 1
+//#define RGB_160_80 2
 
 Sketcher sketcher;
+
+#ifdef MONO_128_32
 static const int WIDTH = 128;
 static const int HEIGHT = 32;
+#define USE_VRENDER
+
+#endif
+#ifdef RGB_160_80
+static const int WIDTH = 160;
+static const int HEIGHT = 80;
+#endif
+
+
+class QuickProfile
+{
+public:
+    QuickProfile(const char* name, bool print=true) {
+        startTime = std::chrono::high_resolution_clock::now();
+        this->name = name;
+        this->print = print;
+    }
+
+    ~QuickProfile() {
+        auto endTime = std::chrono::high_resolution_clock::now();
+        std::chrono::microseconds micro = std::chrono::duration_cast<std::chrono::microseconds>(
+            endTime - startTime
+            );
+        if (print) printf("%s: %d micro-secondes\n", name, (int)micro.count());
+    }
+
+private:
+    std::chrono::steady_clock::time_point startTime;
+    const char* name;
+    bool print;
+};
+
+osbr::RGBA* blockDrawRGBABuffer = 0;
+uint8_t* blockDrawOLEDBUffer = 0;
+
+void BlockDrawRGB(const BlockDrawChunk* chunk, int y, int n)
+{
+    for (int i = 0; i < n; ++i, ++chunk) {
+        uint32_t c = (chunk->rgb.r << 24) | (chunk->rgb.g << 16) | (chunk->rgb.b << 8) | 0xff;
+        uint32_t* pixels = ((uint32_t*)blockDrawRGBABuffer) + y * WIDTH + chunk->x0;
+
+        int n = chunk->x1 - chunk->x0;
+        while (n--) {
+            *pixels++ = c;
+        }
+    }
+}
+
+void BlockDrawOLED(const BlockDrawChunk* chunks, int y, int n)
+{
+    for (int i = 0; i < n; ++i) {
+        const BlockDrawChunk& chunk = chunks[i];
+        int row = y / 8;
+        int bit = 1 << (y & 7);
+
+        if (chunk.rgb.get()) {
+            uint8_t* p = blockDrawOLEDBUffer + row * WIDTH + chunk.x0;
+            for(int nPix = chunk.x1 - chunk.x0; nPix > 0; nPix--, p++) {
+                 *p |= bit;
+            }
+        }
+        // Clear to black beforehand; don't need to set black runs.
+        /*
+        else {
+            int mask = ~bit;
+            for (int x = chunk.x0; x < chunk.x1; ++x) {
+                blockDrawOLEDBUffer[row * WIDTH + x] &= mask;
+            }
+        }
+        */
+    }
+}
+
 
 UIModeUtil::UIModeUtil()
 {
@@ -48,10 +129,70 @@ int main(int, char**) {
 	SDL_Texture* texture = SDL_CreateTexture(ren, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, WIDTH, HEIGHT);
 	assert(texture);
 
-	OledSim oled(WIDTH, HEIGHT);
-	Renderer display;
-	display.Attach(WIDTH, HEIGHT, oled.Buffer());
-	Pixel_7_5_UI pixel75;
+#ifdef MONO_128_32
+    SimDisplay simDisplay(WIDTH, HEIGHT, 1);
+    uint8_t* displayBuffer = new uint8_t[WIDTH*HEIGHT/8];
+    
+#   ifdef USE_VRENDER
+    VRender vrender;
+
+
+    blockDrawOLEDBUffer = displayBuffer;
+    vrender.Attach(BlockDrawOLED);
+    vrender.SetClip(VRender::Rect(0, 0, WIDTH, HEIGHT));
+    vrender.SetSize(WIDTH, HEIGHT);
+#   else
+    memset(displayBuffer, 0, WIDTH * HEIGHT);
+	Renderer renderer;
+    renderer.Attach(WIDTH, HEIGHT, displayBuffer);
+#   endif
+#endif
+#ifdef RGB_160_80
+
+    // VRender can directly write to the display buffer
+    uint32_t* displayBuffer = new uint32_t[WIDTH*HEIGHT];
+    memset(displayBuffer, 0, 4 * WIDTH*HEIGHT);
+
+    VRender vrender;
+    blockDrawRGBABuffer = (osbr::RGBA*)displayBuffer;
+    vrender.Attach(BlockDrawRGB);
+    vrender.SetSize(WIDTH, HEIGHT);
+    vrender.ClearClip();
+    
+    vrender.DrawRect(10, 10, WIDTH-20, HEIGHT-20, osbr::RGBA(255, 255, 255, 64));
+    VRender::Vec2 points[4] = {
+        { WIDTH/2, 0 }, {WIDTH, HEIGHT/2}, {WIDTH/2, HEIGHT}, {0,HEIGHT/2}
+    };
+    vrender.DrawPoly(points, 4, osbr::RGBA(255, 255, 255, 64));
+
+    vrender.SetTransform(FixedNorm(4, 100), 0, 0);
+    vrender.DrawRect(0, 0, 40, 40, osbr::RGBA(0, 255, 255, 192));
+    vrender.DrawRect(40, 0, 40, 40, osbr::RGBA(255, 0, 255, 192));
+    vrender.DrawRect(30, 10, 20, 20, osbr::RGBA(255, 255, 255, 100));
+
+    vrender.ClearTransform();
+    for (int r = 0; r < 8; ++r) {
+        vrender.SetTransform(FixedNorm(r, 8), 3 * WIDTH / 4, HEIGHT / 2);
+        vrender.DrawRect(25, -5, 10, 10, osbr::RGBA(0, 255, 0, 200));
+    }
+    vrender.ClearTransform();
+    VRender::Vec2 p2[] = {
+        {10, 70}, {20, 60}, {30, 70}, {20, 80}
+    };
+    int T = 1;
+    VRender::Vec2 p2inner[] = {
+        {10+T, 70}, {20, 60+T}, {30-T, 70}, {20, 80-T}
+    };
+    vrender.PushLayer();
+    vrender.DrawPoly(p2, 4, osbr::RGBA(255, 255, 0));
+    vrender.DrawPoly(p2inner, 4, osbr::RGBA(255, 255, 0));
+    vrender.PopLayer();
+
+    vrender.Render();
+    bool firstRender = true;
+#endif
+
+    Pixel_7_5_UI pixel75;
     osbr::RGB dotstar4[4];
     osbr::RGB dotstar6[6];
     DotStarUI dotstarUI;
@@ -60,7 +201,7 @@ int main(int, char**) {
 
 	UIRenderData data;
 	data.volume = 2;
-	data.mVolts = 3219;
+	data.mVolts = 3850;
 	data.fontName = "Bespin";
 
     runUnitTests();
@@ -143,7 +284,57 @@ int main(int, char**) {
 			++count;
 
 			sketcher.Push(value);
-			sketcher.Draw(&display, t, mode.mode(), bladeOn, &data);
+#ifdef MONO_128_32
+#   ifdef USE_VRENDER
+            memset(displayBuffer, 0, WIDTH * HEIGHT / 8);
+            vrender.Clear();
+            VectorUI::Draw(&vrender, t, mode.mode(), bladeOn, &data);
+#   else
+            sketcher.Draw(&renderer, t, mode.mode(), bladeOn, &data);
+#   endif
+#endif
+#ifdef RGB_160_80
+#if true
+            {
+                // 88ms
+                // Rasterize: 43%  -> SortActive 28
+                //                    RasterizeLine 46
+                // AddToColorStack 23
+                // BlockDrawRGB 14
+                // ------------------------
+                // Optimize: separate ActiveEdge from edge.
+                // 60ms (nice!)
+                // AddToColorStack 36
+                // Rasterize 31
+                // BlockDrawRGB 21
+                // -------------------------
+                // 50ms
+                // Optimize: better color stack
+                // Rasterize 36 -> RasterizeLine 72
+                // AddToColorStack 30
+                // BlockDrawRGB 23
+                // ---------------------
+                // Some lower level optimization
+                // AddToColorStack 30
+                // BlockDrawRGB 21
+                // RasterizeLine 18
+                // Rasterize 16
+
+                QuickProfile qp("multidraw", firstRender);
+        //        for (int j = 0; j < 500; ++j) 
+                {
+                    for (int i = 0; i < WIDTH*HEIGHT; ++i) displayBuffer[i] = 0xff0000ff;
+                    //vrender.SetClip(VRender::Rect(1, 1, WIDTH - 1, HEIGHT - 1));
+                    VectorUI::Draw(&vrender, t, mode.mode(), bladeOn, &data);
+                }
+            }
+            if (firstRender) {
+                firstRender = false;
+                printf("Sizeof VRender=%d\n", (int)sizeof(VRender));
+                printf("NumEdges=%d\n", vrender.NumEdges());
+            }
+#endif
+#endif
 			pixel75.Draw(t, mode.mode(), bladeOn, &data);
             dotstarUI.Draw(dotstar4, 4, t, mode.mode(), bladeOn, data);
             dotstarUI.Draw(dotstar6, 6, t, mode.mode(), bladeOn, data);
@@ -156,24 +347,29 @@ int main(int, char**) {
 		const int h = HEIGHT * scale;
 		SDL_Rect dst = { (winRect.w - w) / 2, (winRect.h - h) / 2, w, h };
 
+        SDL_RenderClear(ren);
+#ifdef MONO_128_32
         if (renderMode == RENDER_OLED) {
-            oled.Commit();
+            simDisplay.CommitFromBuffer(displayBuffer, WIDTH, HEIGHT);
         }
         else if (renderMode == RENDER_MATRIX) {
-            oled.CommitFrom5x7(pixel75.Pixels());
+            simDisplay.CommitFrom5x7(pixel75.Pixels());
         }
         else if (renderMode == RENDER_DOTSTAR_4) {
-            oled.CommitFromDotstar(dotstar4, 4);
+            simDisplay.CommitFromDotstar(dotstar4, 4);
         }
         else if (renderMode == RENDER_DOTSTAR_6) {
-            oled.CommitFromDotstar(dotstar6, 6);
+            simDisplay.CommitFromDotstar(dotstar6, 6);
         }
-
-		SDL_RenderClear(ren);
-		SDL_UpdateTexture(texture, NULL, oled.Pixels(), WIDTH * 4);
+        SDL_UpdateTexture(texture, NULL, simDisplay.Pixels(), WIDTH * 4);
+#endif
+#ifdef RGB_160_80
+        SDL_UpdateTexture(texture, NULL, displayBuffer, WIDTH * 4);
+#endif
 		SDL_RenderCopy(ren, texture, &src, &dst);
 		SDL_RenderPresent(ren);
 	}
+    delete[] displayBuffer;
 	SDL_Quit();
 	return 0;
 }

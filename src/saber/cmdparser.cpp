@@ -32,7 +32,7 @@
 
 using namespace osbr;
 
-File streamFile;
+//File streamFile;
 
 extern int nAccelLog;
 extern GrinlizLIS3DH::RawData* accelData;
@@ -102,6 +102,7 @@ void CMDParser::printLead(const char* str) {
 
 bool CMDParser::push(int c)
 {
+    /*
     if (m_streamBytes) {
         --m_streamBytes;
         streamFile.write(c);
@@ -112,7 +113,8 @@ bool CMDParser::push(int c)
         }
         return false;
     }
-    else {
+    else*/ 
+    {
         //Serial.println(c);
         bool processed = false;
         if (c == '\n') {
@@ -125,7 +127,7 @@ bool CMDParser::push(int c)
         return processed;
     }
 }
-
+/*
 void CMDParser::upload(const char* path, uint32_t size)
 {
     Serial.print("Upload. path='");
@@ -142,6 +144,7 @@ void CMDParser::upload(const char* path, uint32_t size)
     Serial.println(size);
     m_streamBytes = size;
 }
+*/
 
 bool CMDParser::processCMD() 
 {
@@ -293,7 +296,7 @@ bool CMDParser::processCMD()
 #endif
     }
     else if (action == LIST) {
-        File root = SD.open("/");
+/*        File root = SD.open("/");
         while (true) {
             File entry =  root.openNextFile();
             if (!entry) {
@@ -306,7 +309,7 @@ bool CMDParser::processCMD()
             Serial.println(entry.name());
             entry.close();
         }
-        root.close();
+        root.close();*/
     }
     else if (action == ACCEL) {
         GrinlizLIS3DH* accel = GrinlizLIS3DH::instance();
@@ -360,6 +363,7 @@ bool CMDParser::processCMD()
     }
     else if (action == UPLOAD) {
         // up ui/foo.wav 1182
+        /*
         uint32_t size = atoi(value2.c_str());
         Serial.print("Upload path='");
         Serial.print(value.c_str());
@@ -368,8 +372,10 @@ bool CMDParser::processCMD()
         Serial.print(" size=");
         Serial.println(size);
         upload(value.c_str(), size);
+        */
     }
     else if (action == LOGACCELDATA) {
+        /*
         Serial.println("--- Log start --");
         int cluster = 0;
         for(int i=0; i<nAccelLog; i++) {
@@ -386,6 +392,7 @@ bool CMDParser::processCMD()
         delay(2);
         Serial.println("--- Log end --");
         nAccelLog = 0;
+        */
     }
     else if (action == STATUS) {
         static const char* space = "-----------";
