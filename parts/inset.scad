@@ -103,6 +103,7 @@ module insetHolder( diameter,
                     dzBolt = 0,
                     dzPort = 0,
                     dzSwitch = 0,
+                    dzUSB = 0,
                     bridgeStyle=1,
                     bridgeStyleArray=undef,
                     pinHeaderHolder=false,
@@ -122,6 +123,14 @@ module insetHolder( diameter,
     // Bridges
     X_SWITCH = 6.5;
     Y_SWITCH = 3.0;
+
+    // FIXME
+    X_USB_OUTER = 18.0;
+    X_USB_INNER = 12.0;
+    Z_USB_OUTER = 6;
+    USB_SLOT = 2.0;
+    X_USB_SLOT = 15.0;
+    DEPTH_USB_SLOT = 8.0;
                     
     difference() {
         union() {
@@ -165,6 +174,20 @@ module insetHolder( diameter,
                     }
                 }
             }
+
+            // USB holder
+
+            if(dzUSB) {
+                intersection() {
+                    cylinder(h=300, d=diameter);                
+                    difference() {
+                        translate([-X_USB_OUTER/2, yInset - 100, dzUSB - Z_USB_OUTER/2])
+                            cube(size=[X_USB_OUTER, 100, Z_USB_OUTER]);
+                        translate([-X_USB_INNER/2, yInset - 100, dzUSB - Z_USB_OUTER/2 - EPS])
+                            cube(size=[X_USB_INNER, 100, Z_USB_OUTER + EPS*2]);
+                    }
+                }
+            }
         }
 
         // Power port
@@ -176,26 +199,38 @@ module insetHolder( diameter,
                 }
             }
         }
+
+        if (dzUSB) {
+            translate([-X_USB_SLOT/2, yInset - DEPTH_USB_SLOT, dzUSB - USB_SLOT/2])
+                cube(size=[X_USB_SLOT, 100, USB_SLOT]);
+        }
+
     }
 
     // The inset holder.
-    intersection()
-    {
-        translate([0, 0, -50]) cylinder(h=200, d=diameter);
-        translate([0, yInset, 0]) {
-            difference() {
-                DY = -3;
-                translate([0, DY, 0])
-                    zCapsule(dzA, dzB, rCapsule+2, roundRect);
-                zCapsule(dzA, dzB, rCapsule, roundRect);          // the actual wood
-                translate([0, DY - EPS*2, 0])
-                    zCapsule(dzA, dzB, rCapsule-2, roundRect);
+    difference() {
+        intersection()
+        {
+            translate([0, 0, -50]) cylinder(h=200, d=diameter);
+            translate([0, yInset, 0]) {
+                difference() {
+                    DY = -3;
+                    translate([0, DY, 0])
+                        zCapsule(dzA, dzB, rCapsule+2, roundRect);
+                    zCapsule(dzA, dzB, rCapsule, roundRect);          // the actual wood
+                    translate([0, DY - EPS*2, 0])
+                        zCapsule(dzA, dzB, rCapsule-2, roundRect);
 
-                stockX = diameterCapsule;
-                stockY = outerDiameter / 2 - (yInset);
-                stockZ = abs(dzA - dzB) + diameterCapsule;
-                echo("Stock size:", stockX, stockY, stockZ);
+                    stockX = diameterCapsule;
+                    stockY = outerDiameter / 2 - (yInset);
+                    stockZ = abs(dzA - dzB) + diameterCapsule;
+                    echo("Stock size:", stockX, stockY, stockZ);
+                }
             }
+        }
+        if (dzUSB) {
+            translate([-X_USB_SLOT/2, 0, dzUSB - USB_SLOT/2])
+                cube(size=[X_USB_SLOT, 100, USB_SLOT]);
         }
     }
 
@@ -244,6 +279,7 @@ module insetHolder( diameter,
                     dzBolt = 0,
                     dzPort = 0,
                     dzSwitch = 0,
+                    dzUSB = 0
                     bridgeStyle=1,
                     bridgeStyleArray=undef,
                     pinHeaderHolder=false,
@@ -259,4 +295,5 @@ insetHolder(
     10,
     70,
     40, 20, 60,
+    //dzUSB=60,
     roundRect=3.175/2); 

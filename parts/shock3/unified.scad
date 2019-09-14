@@ -3,8 +3,9 @@ use <../shapes.scad>
 use <../commonUnified.scad>
 use <../inset.scad>
 
-DRAW_AFT = true;
+DRAW_AFT = false;
 DRAW_FORE = true;
+DRAW_EMITTER = false;
 
 $fn=60;
 EPS = 0.01;
@@ -119,19 +120,33 @@ if (DRAW_AFT) {
 
 if(DRAW_FORE) {
     M_START = M_AFT_STOP + H_BUTTRESS * 27;
+    M_END = M_INSET_END + 4;
 
     translate([0, 0, M_START]) {
         insetHolder(
             D_INNER,
             D_OUTER,
-            50, // section
-            M_INSET_CENTER - M_START,
-            M_PORT_CENTER - M_INSET_CENTER,
-            M_SWITCH_CENTER - M_INSET_CENTER,
-            17.0,
+            DX_INSET,
+            M_END - M_START,
             H_BUTTRESS,
+            M_INSET_START - M_START,
+            M_INSET_END - M_START,
+            M_BOLT - M_START,
+            M_PORT_CENTER - M_START,
+            M_SWITCH_CENTER - M_START,
+            M_USB - M_START,
             roundRect = 3.175/2
         );
+    }
+
+    translate([0, 0, M_EMITTER_BASE]) {
+        emitterBase(D_INNER);
+    }
+}
+
+if (DRAW_EMITTER) {
+    translate([0, 0, M_EMITTER_BASE]) {
+        emitterHolder(D_INNER);
     }
 }
 
