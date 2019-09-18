@@ -591,7 +591,7 @@ module powerPortRing(outer, t, dz, dzToPort, portSupportToBack=false, counter=tr
 }
 
 
-module switchRing(diameter, t, dz, dzToSwitch, counter=true)
+module switchRing(diameter, t, dz, dzToSwitch, counter=true, switchDY=0)
 {
     difference() {
         union() {
@@ -602,7 +602,7 @@ module switchRing(diameter, t, dz, dzToSwitch, counter=true)
                     cube(size=[100, 50, D_SWITCH_SUPPORT]);
             }
         }
-        translate([0, 0, dzToSwitch]) {
+        translate([0, switchDY, dzToSwitch]) {
             switch(diameter, true);
             if (counter) switchCounter();
         }

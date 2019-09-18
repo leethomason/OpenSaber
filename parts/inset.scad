@@ -51,10 +51,10 @@ module attachPost(diameter)
     }
 }
 
-module insetBaffle(diameter, dzBaffle, bridge)
+module insetBaffle(diameter, dzBaffle, bridge, noBottom=false)
 {
     difference() {
-        oneBaffle(diameter, dzBaffle, bridge=bridge, battery=false, mc=false, conduit=true, noBottom=false);
+        oneBaffle(diameter, dzBaffle, bridge=bridge, battery=false, mc=false, conduit=true, noBottom=noBottom);
         hull() {
             cylinder(h=dzBaffle*1.1, d=diameter * 0.65);
             translate([0, -2.5, 0])
@@ -107,6 +107,7 @@ module insetHolder( diameter,
                     bridgeStyle=1,
                     bridgeStyleArray=undef,
                     pinHeaderHolder=false,
+                    firstButtressFullRing=true,
                     roundRect=0)
 {
     rCapsule = diameterCapsule / 2;
@@ -241,7 +242,7 @@ module insetHolder( diameter,
             for(i=[0:nBaffle-1]) {
                 translate([0, 0, i*dzBaffle*2]) {
                     style = (bridgeStyleArray && i < len(bridgeStyleArray)) ? bridgeStyleArray[i] : bridgeStyle;
-                    insetBaffle(diameter, dzBaffle, style);
+                    insetBaffle(diameter, dzBaffle, style, noBottom=!firstButtressFullRing || i>0);
                 }
             }
         }

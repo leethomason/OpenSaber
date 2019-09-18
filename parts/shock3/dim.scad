@@ -4,7 +4,7 @@ EPSILON 			= 0.1;
 // Marks - absolute location.
 M_WAY_BACK          = -40;
 M_POMMEL            = -37;      // approximate. hard to measure.
-//M_SPEAKER_BACK      = -36;
+M_SPEAKER_BACK      = -10;
 M_0                 = 0;        // physical back of the lightsaber main body.
 M_AFT_STOP          = 10.5;     // fixme, was 10
 M_DISPLAY           = 10.5;     // fixme

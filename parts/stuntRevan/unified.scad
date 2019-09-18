@@ -3,8 +3,8 @@ use <../commonUnified.scad>
 use <../shapes.scad>
 use <holder.scad>
 
-DRAW_HOLDER  = true;
-DRAW_BODY    = false;
+DRAW_HOLDER  = false;
+DRAW_BODY    = true;
 
 $fn = 80;
 EPS = .01;
@@ -14,6 +14,7 @@ N_BAFFLES = nBafflesNeeded(H_BUTTRESS, "18500");
 
 module flatBottom() {
     translate([-20, -D_AFT/2 - 5, -20]) cube(size=[40, 5.5, 500]);
+    //translate([-20, -D_FORE/2 - 5, -20]) cube(size=[40, 5, 500]);
 }
 
 if (DRAW_HOLDER) {
@@ -43,7 +44,7 @@ if (DRAW_BODY) {
         difference() {
             union() {
                 translate([0, 0, M_SWITCH-8])
-                    switchRing(D_AFT, 3, 20, 8);
+                    switchRing(D_AFT, 3, 20, 8, switchDY=-1.5);
                 translate([0, 0, M_POWER-6])
                     powerPortRing(D_AFT, 3, 14, 6);
 

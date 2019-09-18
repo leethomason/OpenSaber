@@ -3,15 +3,13 @@ use <../shapes.scad>
 use <../commonUnified.scad>
 use <../inset.scad>
 
-DRAW_AFT = false;
-DRAW_FORE = true;
+DRAW_AFT = true;
+DRAW_FORE = false;
 DRAW_EMITTER = false;
 
 $fn=60;
 EPS = 0.01;
 EPS2 = EPS * 2;
-
-N_BAFFLES = nBafflesNeeded(H_BUTTRESS, "18500");
 
 Z_BATT     = 65 + 4;
 D_BATT     = 18.50 + 0.5;
@@ -42,10 +40,19 @@ module innerSpace() {
         cylinder(h=200, d=D_INNER);
 }
 
+
+
 // Battery section
 if (DRAW_AFT) {
     difference() {
         union() {
+            DZ_SPKR = 8;
+//            translate([0, 0, M_AFT_STOP-2])
+//                tube(h=2+EPS, do=D_AFT, di=D_AFT-4);
+            translate([0, 0, M_SPEAKER_BACK])
+                rotate([0, 0, 180])
+                    speakerHolder(D_AFT, M_AFT_STOP - M_SPEAKER_BACK, 4, "bass22");
+
             for(i=[0:4]) {
                 dz = M_AFT_STOP + i*2*H_BUTTRESS;
                 translate([0, 0, dz]) {
@@ -60,14 +67,14 @@ if (DRAW_AFT) {
                         translate([-3, 0, 0])
                             cube(size=[6, 100, 100]);
                     }
-                    translate([9, -7, 3])
+                    translate([9, -8.5, 3])
                         baffleHalfBridge(H_BUTTRESS, 3);        
-                    mirror([-1, 0, 0]) translate([9, -7, 3])
+                    mirror([-1, 0, 0]) translate([9, -8.5, 3])
                         baffleHalfBridge(H_BUTTRESS, 3);                        
                 }
             }
 
-            for(i=[5:8]) {
+            for(i=[5:9]) {
                 translate([0, 0, M_AFT_STOP + i*2*H_BUTTRESS]) {
                     oneBaffle(D_INNER, H_BUTTRESS,
                         battery=false,
@@ -78,14 +85,15 @@ if (DRAW_AFT) {
                 }
             }
 
-            for(i=[9:13]) {
+            for(i=[10:13]) {
                 translate([0, 0, M_AFT_STOP + i*2*H_BUTTRESS]) {
                     oneBaffle(D_INNER, H_BUTTRESS,
                         battery=false,
                         mc=true,
                         noBottom=true,
                         cutoutHigh=false,
-                        bridgeOnlyBottom=true);
+                        bridgeOnlyBottom=true,
+                        bridge=i < 13 ? 1 : 0);
                 }
             }
             intersection() {
@@ -97,10 +105,28 @@ if (DRAW_AFT) {
                     translate([-6, OLED_DY, M_AFT_STOP+30]) mirror([-1,0,0]) pcbPillar();
                 }
             }
+            intersection() {
+                innerSpace();
+                union() {
+                    translate([-12, -12, M_AFT_STOP]) 
+                        cube(size=[4, 4, H_BUTTRESS * 10]);
+                    mirror([-1, 0, 0]) translate([-12, -12, M_AFT_STOP]) 
+                        cube(size=[4, 4, H_BUTTRESS * 10]);
+                }                
+            }
+
+            translate([0, 0, H_BUTTRESS*29]) {
+                keyJoint(10, D_INNER, D_INNER-4, false, 10);
+            }
         }
+        // Bottom channel
+        translate([-5, -50, M_AFT_STOP]) {
+            cube(size=[10, 50, 200]);
+        }
+
         // Battery
-        translate([0, -R_INNER + D_BATT/2, 0])
-            cylinder(h=200, d=D_BATT);
+        translate([0, -R_INNER + D_BATT/2, M_AFT_STOP])
+            cylinder(h=Z_BATT, d=D_BATT);
 
         // OLED
         *translate([-OLED_DISPLAY_W/2, OLED_DY, 0])
@@ -108,13 +134,16 @@ if (DRAW_AFT) {
 
         // crystal
         C_Y = 10;
-        translate([0, C_Y, M_AFT_STOP + H_BUTTRESS*9]) crystal(11, 9, 200);
+        translate([0, C_Y, M_AFT_STOP + H_BUTTRESS*9]) 
+            crystal(14, 9, 200);
         // Channel
         translate([-3, 0, M_AFT_STOP + H_BUTTRESS*9]) cube(size=[6, 100, 100]);
 
         // Rods
-        translate([10, 7, M_AFT_STOP + H_BUTTRESS*12]) cylinder(h=100, d=D_ROD);
-        mirror([-1,0,0]) translate([10, 7, M_AFT_STOP + H_BUTTRESS*12]) cylinder(h=100, d=D_ROD);
+        translate([10, 7, M_AFT_STOP + H_BUTTRESS*10]) 
+            cylinder(h=100, d=D_ROD);
+        mirror([-1,0,0]) translate([10, 7, M_AFT_STOP + H_BUTTRESS*10]) 
+            cylinder(h=100, d=D_ROD);
     }
 }
 
@@ -122,21 +151,28 @@ if(DRAW_FORE) {
     M_START = M_AFT_STOP + H_BUTTRESS * 27;
     M_END = M_INSET_END + 4;
 
-    translate([0, 0, M_START]) {
-        insetHolder(
-            D_INNER,
-            D_OUTER,
-            DX_INSET,
-            M_END - M_START,
-            H_BUTTRESS,
-            M_INSET_START - M_START,
-            M_INSET_END - M_START,
-            M_BOLT - M_START,
-            M_PORT_CENTER - M_START,
-            M_SWITCH_CENTER - M_START,
-            M_USB - M_START,
-            roundRect = 3.175/2
-        );
+    difference() {
+        translate([0, 0, M_START]) {
+            insetHolder(
+                D_INNER,
+                D_OUTER,
+                DX_INSET,
+                M_END - M_START,
+                H_BUTTRESS,
+                M_INSET_START - M_START,
+                M_INSET_END - M_START,
+                M_BOLT - M_START,
+                M_PORT_CENTER - M_START,
+                M_SWITCH_CENTER - M_START,
+                M_USB - M_START,
+
+                roundRect = 3.175/2,
+                firstButtressFullRing = false
+            );
+        }
+        translate([0, 0, H_BUTTRESS*29]) {
+            keyJoint(10, D_INNER, D_INNER-4, true, 10);
+        }
     }
 
     translate([0, 0, M_EMITTER_BASE]) {
