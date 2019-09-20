@@ -669,7 +669,7 @@ module pcbPillar(dBoost=0) {
         rotate([-90, 0, 0])
             difference() {
                 cylinder(h=50, d1=8 + dBoost, d2=5 + dBoost);
-                cylinder(h=50, d=D_M2);
+                cylinder(h=100, d=D_M2);
             }
 }
 

@@ -13,7 +13,8 @@ EPS2 = EPS * 2;
 
 Z_BATT     = 65 + 4;
 D_BATT     = 18.50 + 0.5;
-D_ROD      = 3.0;   // fixme - diameter of copper rod
+D_M2       = 1.7;
+D_ROD      = 3.4 + 0.4;
 
 // These are the values for the new (generic, not adafruit) screens.
 OLED_DISPLAY_W           = 20.5 + 1;
@@ -60,14 +61,14 @@ if (DRAW_AFT) {
             difference() {
                 // FIXME this shouldn't be a tight fit (in z) on the thread
                 translate([0, 0, M_AFT_STOP]) tube(h=5, do=D_THREAD, di=10);
-                translate([-OLED_DISPLAY_W/2 + OLED_DX, OLED_DY, M_AFT_STOP]) 
+                translate([-OLED_DISPLAY_W/2 + OLED_DX, OLED_DY, M_AFT_STOP-EPS]) 
                     cube(size=[OLED_DISPLAY_W, 100, 100]);
-                translate([-3, 0, M_AFT_STOP]) cube(size=[6, 100, 100]);
+                translate([-3, 0, M_AFT_STOP-EPS]) cube(size=[6, 100, 100]);
 
-                translate([OLED_DISPLAY_MOUNT_W/2 + OLED_DX,  OLED_DY, M_AFT_STOP + POST_DY0])
-                    rotate([90, 0, 0]) cylinder(h=100, d=2.0);
-                translate([-OLED_DISPLAY_MOUNT_W/2 + OLED_DX,  OLED_DY, M_AFT_STOP + POST_DY0])
-                    rotate([90, 0, 0]) cylinder(h=100, d=2.0);
+                translate([OLED_DISPLAY_MOUNT_W/2 + OLED_DX,  OLED_DY + EPS, M_AFT_STOP + POST_DY0])
+                    rotate([90, 0, 0]) cylinder(h=10, d=D_M2);
+                translate([-OLED_DISPLAY_MOUNT_W/2 + OLED_DX,  OLED_DY + EPS, M_AFT_STOP + POST_DY0])
+                    rotate([90, 0, 0]) cylinder(h=10, d=D_M2);
             }
 
             for(i=[0:4]) {
@@ -135,7 +136,7 @@ if (DRAW_AFT) {
             }
 
             translate([0, 0, H_BUTTRESS*29]) {
-                keyJoint(10, D_INNER, D_INNER-4, false, 10);
+                keyJoint(10, D_INNER, D_INNER-4, false, 0);
             }
         }
         // Bottom channel
@@ -194,7 +195,7 @@ if(DRAW_FORE) {
             );
         }
         translate([0, 0, H_BUTTRESS*29]) {
-            keyJoint(10, D_INNER, D_INNER-4, true, 10);
+            keyJoint(10, D_INNER, D_INNER-4, true, 0);
         }
     }
 
