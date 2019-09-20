@@ -127,7 +127,6 @@ void VectorUI::Draw(VRender* ren,
         for (int r = 0; r < 8; ++r) {
             Fixed115 d = r - Fixed115(7, 2);
             Fixed115 fx = Fixed115(8, 10) * d * d;
-            //ren->DrawRect(W - fx.getInt() - BAR_W, 28 - r * 4, BAR_W, 3, AUDIO_ON, r / 2 < data->volume ? 0 : 1);
             DrawBar(ren, W - fx.getInt() - BAR_W, 29 - r * 4, BAR_W, WHITE, r / 2 < data->volume ? 255 : 0);
         }
     }
@@ -152,10 +151,6 @@ void VectorUI::Draw(VRender* ren,
 
         for (int i = 0; i < 3; ++i) {
             int y = H / 2 - 2 - 6 + 6 * i + 1;
-            //ren->DrawRect(W / 2 + 18, y, 12, 3, WHITE, 1);
-            //int c = data->color[i] / 25;
-            //if (c > 0)
-            //    ren->DrawRect(W / 2 + 19, y + 1, c, 1, WHITE);
             DrawBar(ren, W / 2 + 19, y, 12, WHITE, data->color[i]);
         }
 
