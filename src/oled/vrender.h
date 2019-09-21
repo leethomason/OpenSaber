@@ -4,6 +4,8 @@
 #include "rgb.h"
 #include "fixed.h"
 
+#define VECTOR_MONO
+
 struct BlockDrawChunk {
     int x0;
     int x1;
@@ -135,14 +137,22 @@ private:
     struct ActiveEdge
     {
         int8_t layer;
-        int8_t _pad;
+        #ifdef VECTOR_MONO
+        int8_t color;
+        #endif
         int16_t yEnd;
         Fixed115 x;
         Fixed115 slope;
+        #ifndef VECTOR_MONO
         osbr::RGBA color;
+        #endif
     };
 
+    #ifdef VECTOR_MONO
+    struct ActiveEdgeProxy { int32_t dummy[2]; };
+    #else
     struct ActiveEdgeProxy { int32_t dummy[3]; };
+    #endif
 
     static void SwapAE(ActiveEdge* _a, ActiveEdge* _b) {
         STATIC_ASSERT(sizeof(ActiveEdge) == sizeof(ActiveEdgeProxy));
@@ -154,10 +164,19 @@ private:
     struct ColorEntry
     {
         int layer;
+        #ifdef VECTOR_MONO
+        int color;
+        #else
         osbr::RGBA color;
+        #endif
+
         void Set(int layer, osbr::RGBA color) {
             this->layer = layer;
+            #ifdef VECTOR_MONO
+            this->color = color.rgb().get() ? 1 : 0;
+            #else
             this->color = color;
+            #endif
         }
     };
 

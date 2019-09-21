@@ -1,8 +1,6 @@
 #include "vectorui.h"
 #include "vrender.h"
-#include "assets.h"
 #include "Grinliz_Util.h"
-#include "sketcher.h"
 #include "rgb2hsv.h"
 
 

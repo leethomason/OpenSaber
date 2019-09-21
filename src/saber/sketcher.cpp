@@ -6,11 +6,6 @@
 
 using namespace osbr;
 
-int UIRenderData::powerLevel(int maxLevel) const
-{
-    return AveragePower::vbatToPowerLevel(mVolts, maxLevel);
-}
-
 
 Sketcher::Sketcher()
 {
