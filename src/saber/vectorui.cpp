@@ -1,8 +1,6 @@
 #include "vectorui.h"
 #include "vrender.h"
-#include "assets.h"
 #include "Grinliz_Util.h"
-#include "sketcher.h"
 #include "rgb2hsv.h"
 
 
@@ -51,6 +49,21 @@ void VectorUI::Segment(VRender* ren, int width, int s, int num, osbr::RGBA rgba)
         ren->DrawRect(0, width - s / 2, width, s, rgba);
 }
 
+void VectorUI::DrawBar(VRender* ren, int x, int y, int width, const osbr::RGBA& color, int fraction)
+{
+    int w = (width * fraction) >> 8;
+
+    if (w == 0 || fraction == 0) {
+        ren->DrawRect(x, y, width, 1, color);
+    }
+    else if (w == width || fraction == 255) {
+        ren->DrawRect(x, y - 1, width, 3, color);
+    }
+    else {
+        ren->DrawRect(x, y - 1, w, 3, color);
+        ren->DrawRect(x + w, y, width - w, 1, color);
+    }
+}
 
 void VectorUI::Draw(VRender* ren,
     uint32_t time,
@@ -88,7 +101,7 @@ void VectorUI::Draw(VRender* ren,
         for (int r = 0; r < 8; ++r) {
             Fixed115 d = r - Fixed115(7, 2);
             Fixed115 fx = Fixed115(8, 10) * d * d;
-            ren->DrawRect(fx.getInt(), 28 - r * 4, BAR_W, 3, WHITE, r < p ? 0 : 1);
+            DrawBar(ren, fx.getInt(), 29 - r * 4, BAR_W, WHITE, r < p ? 255 : 0);
         }
     }
     else if (mode == UIMode::PALETTE) {
@@ -112,7 +125,7 @@ void VectorUI::Draw(VRender* ren,
         for (int r = 0; r < 8; ++r) {
             Fixed115 d = r - Fixed115(7, 2);
             Fixed115 fx = Fixed115(8, 10) * d * d;
-            ren->DrawRect(W - fx.getInt() - BAR_W, 28 - r * 4, BAR_W, 3, AUDIO_ON, r / 2 < data->volume ? 0 : 1);
+            DrawBar(ren, W - fx.getInt() - BAR_W, 29 - r * 4, BAR_W, WHITE, r / 2 < data->volume ? 255 : 0);
         }
     }
     // Color indicator
@@ -135,11 +148,8 @@ void VectorUI::Draw(VRender* ren,
         ren->ClearTransform();
 
         for (int i = 0; i < 3; ++i) {
-            int y = H / 2 - 2 - 6 + 6 * i;
-            ren->DrawRect(W / 2 + 18, y, 12, 3, WHITE, 1);
-            int c = data->color[i] / 25;
-            if (c > 0)
-                ren->DrawRect(W / 2 + 19, y + 1, c, 1, WHITE);
+            int y = H / 2 - 2 - 6 + 6 * i + 1;
+            DrawBar(ren, W / 2 + 19, y, 12, WHITE, data->color[i]);
         }
 
         int digits[4];

@@ -21,7 +21,7 @@ void setup() {
         while(true) {}
     }
     Serial.println("Accel/Gyro success");
-    accel.setMagCalibration(-431, -505, -421, 259, 90, 258);
+    //accel.setMagCalibration(-431, -505, -421, 259, 90, 258);
     accel.logMagStatus();
 
     TestFixed();
@@ -48,38 +48,31 @@ void loop()
                 float heading = atan2(y, x) * 180.0f / 3.14159f;
                 if (heading < 0) heading += 360;
 
-                Log.p("m=").p(magData.x).p(" ").p(magData.y).p(" ").p(magData.z).
-                    p("  ").p(x).p(" ").p(y).p(" ").p(z).eol();
-
                 int x0, y0, z0, x1, y1, z1;
                 accel.getMagCalibration(&x0, &y0, &z0, &x1, &y1, &z1);
-
-                Log.p("  min=").p(x0).p(" ").p(y0).p(" ").p(z0)
-                   .p("  max=").p(x1).p(" ").p(y1).p(" ").p(z1)
-                   .p("  ave=").p((x0 + x1)/2).p(" ").p((y0 + y1)/2).p(" ").p((z0 + z1)/2)
-                   .p(" heading=").p(heading).eol();
+                
+                Log.v(x, y, z)
+                   .v(x0, x1, "[]")
+                   .v(y0, y1, "[]")
+                   .v(z0, z1, "[]")
+                   .p(" heading=").p(heading)
+                   .eol();
                 break;
             }
         }
 
-#if true
-        float ax = data[0].ax;
-        float ay = data[0].ay;
-        float az = data[0].az;
-        Serial.print("a="); Serial.print(ax); Serial.print(" ");
-        Serial.print(ay); Serial.print(" ");
-        Serial.println(az);
-#else
-        Serial.print("a="); Serial.print(rawData[0].x); Serial.print(" ");
-        Serial.print(rawData[0].y); Serial.print(" ");
-        Serial.println(rawData[0].z);
-#endif
+        //float ax = data[0].ax;
+        //float ay = data[0].ay;
+        //float az = data[0].az;
+        //Serial.print("a="); Serial.print(ax); Serial.print(" ");
+        //Serial.print(ay); Serial.print(" ");
+        //Serial.println(az);
     }
 
     uint32_t t = millis();
     if (t - lastMillis >= 1000) {
-        Serial.print("Samples = ");
-        Serial.println(nRead);
+        //Serial.print("Samples = ");
+        //Serial.println(nRead);
         lastMillis = t;
         nRead = 0;
         printTime = true;

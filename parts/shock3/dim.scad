@@ -36,6 +36,7 @@ H_FAR               = 240;
 
 D_INNER      		= 32.258;
 R_INNER             = D_INNER / 2;
+D_THREAD            = 33.8; // FIXME
 D_OUTER             = 37.6;
 R_OUTER             = D_OUTER / 2;
 D_AFT               = 25.8;

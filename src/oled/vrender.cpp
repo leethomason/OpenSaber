@@ -3,6 +3,10 @@
 #include "Grinliz_Util.h"
 #include <stdio.h>
 
+#ifndef _MSC_VER
+#include "Grinliz_Arduino_Util.h" // profiling
+#endif
+
 VRender::VRender()
 {
     ClearTransform();
@@ -237,13 +241,11 @@ void VRender::AddStartingEdges(int y)
             ae->x = (Fixed115(y) - e->y0) * ae->slope + e->x0;
             ae->yEnd = e->y1.getDec() ? (e->y1.getInt() + 1) : e->y1.getInt();
             ae->layer = e->layer;
+            #ifdef VECTOR_MONO
+            ae->color = e->color.rgb().get() ? 1 : 0;
+            #else
             ae->color = e->color;
-
-#if defined(_MSC_VER) && defined(_DEBUG)
-            //printf("Adding start=%d (%.2f,%.2f)-(%.2f,%.2f)\n",
-            //    e->layer,
-            //    e->x0.toFloat(), e->y0.toFloat(), e->x1.toFloat(), e->y1.toFloat());
-#endif
+            #endif
         }
     }
 }
@@ -289,9 +291,15 @@ osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color)
     }
 #endif // _DEBUG
 
+    #ifdef VECTOR_MONO
+    static const osbr::RGB WHITE(255, 255, 255);
+    static const osbr::RGB BLACK(0, 0, 0);
+    if (m_colorStack[m_nColor-1].color) return WHITE;
+    return BLACK;
+    #else
     int start = m_nColor - 1;
     for (; start > 0; start--) {
-        if (m_colorStack[start].color.a == 255)
+        if (m_colorStack[start].color == 255)
             break;
     }
 
@@ -305,11 +313,12 @@ osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color)
         rgb.b = (c.b * c.a + rgb.b * (255 - c.a)) >> 8;
     }
     return rgb;
+    #endif
 }
 
 void VRender::RasterizeLine(int y, const Rect& clip)
 {
-    ASSERT(m_nColor == 0);  // black background always there
+    ASSERT(m_nColor == 0);
     static const int CACHE = 8;
     BlockDrawChunk cache[CACHE];
     int nCache = 0;
@@ -361,8 +370,21 @@ void VRender::RasterizeLine(int y, const Rect& clip)
     }
 }
 
+/*
+Profile:
+  display              aveTime=1.47 ms maxTime=1.48 ms nCalls=119
+  V:R:Line             aveTime=0.08 ms maxTime=0.21 ms nCalls=3808
+  V:R:Sort             aveTime=0.04 ms maxTime=0.38 ms nCalls=3808
+  V:R:Add              aveTime=0.02 ms maxTime=0.12 ms nCalls=3808
+  V:R:Increment        aveTime=0.03 ms maxTime=0.09 ms nCalls=3808
+  VRender::Rasterize   aveTime=5.65 ms maxTime=6.19 ms nCalls=119
+*/
+
 void VRender::Rasterize()
 {
+    static ProfileData data("VRender::Rasterize");
+    ProfileBlock block(&data);
+
     Rect clip = m_size.Intersect(m_clip);
 
     for (int j = 0; j < clip.y1; ++j) {
@@ -371,6 +393,7 @@ void VRender::Rasterize()
         SortActiveEdges();
         RasterizeLine(j, clip);
 
+#if false
 #if defined(_MSC_VER) && defined(_DEBUG)
         if (m_nColor) {
             printf("ASSERTION\n");
@@ -381,12 +404,11 @@ void VRender::Rasterize()
             ASSERT(false);
         }
 #endif
+#endif
     }
     ClearTransform();
 }
 
-
-#define FONT_BIT_SET(arr, x, y) (arr[x] & (1<<y))
 
 void VRenderUtil::DrawStr(VRender* ren, const char* str, int x, int y, GlyphMetrics metrics, const osbr::RGBA& rgba)
 {

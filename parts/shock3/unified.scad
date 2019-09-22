@@ -3,8 +3,8 @@ use <../shapes.scad>
 use <../commonUnified.scad>
 use <../inset.scad>
 
-DRAW_AFT = true;
-DRAW_FORE = false;
+DRAW_AFT = false;
+DRAW_FORE = true;
 DRAW_EMITTER = false;
 
 $fn=60;
@@ -13,15 +13,20 @@ EPS2 = EPS * 2;
 
 Z_BATT     = 65 + 4;
 D_BATT     = 18.50 + 0.5;
-D_ROD      = 3.0;   // fixme - diameter of copper rod
+D_M2       = 1.7;
+D_ROD      = 3.4 + 0.4;
 
-OLED_DISPLAY_W           = 23 + 1;
-OLED_DISPLAY_L           = 32 + 1;
-OLED_DISPLAY_MOUNT_W     = 17;
-OLED_DISPLAY_MOUNT_L     = 26;
+// These are the values for the new (generic, not adafruit) screens.
+OLED_DISPLAY_W           = 20.5 + 1;
+OLED_DISPLAY_L           = 33 + 1;
+OLED_DISPLAY_MOUNT_W     = 0.6 * 25.4;
+OLED_DISPLAY_MOUNT_L     = 1.1 * 25.4;
 
-OLED_DX = 1;     // fixme; account for offset screen
+OLED_DX = -1.3;     // fixme; account for offset screen
 OLED_DY = 9;
+POST_DY0 = (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L) / 2;
+POST_DY1 = OLED_DISPLAY_L - (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L) / 2;
+                    
 
 module sBattery() {
     translate([0, -R_INNER + D_BATT/2, 0]) cylinder(h=Z_BATT, d=D_BATT); 
@@ -52,6 +57,19 @@ if (DRAW_AFT) {
             translate([0, 0, M_SPEAKER_BACK])
                 rotate([0, 0, 180])
                     speakerHolder(D_AFT, M_AFT_STOP - M_SPEAKER_BACK, 4, "bass22");
+
+            difference() {
+                // FIXME this shouldn't be a tight fit (in z) on the thread
+                translate([0, 0, M_AFT_STOP]) tube(h=5, do=D_THREAD, di=10);
+                translate([-OLED_DISPLAY_W/2 + OLED_DX, OLED_DY, M_AFT_STOP-EPS]) 
+                    cube(size=[OLED_DISPLAY_W, 100, 100]);
+                translate([-3, 0, M_AFT_STOP-EPS]) cube(size=[6, 100, 100]);
+
+                translate([OLED_DISPLAY_MOUNT_W/2 + OLED_DX,  OLED_DY + EPS, M_AFT_STOP + POST_DY0])
+                    rotate([90, 0, 0]) cylinder(h=10, d=D_M2);
+                translate([-OLED_DISPLAY_MOUNT_W/2 + OLED_DX,  OLED_DY + EPS, M_AFT_STOP + POST_DY0])
+                    rotate([90, 0, 0]) cylinder(h=10, d=D_M2);
+            }
 
             for(i=[0:4]) {
                 dz = M_AFT_STOP + i*2*H_BUTTRESS;
@@ -99,10 +117,12 @@ if (DRAW_AFT) {
             intersection() {
                 innerSpace();
                 translate([OLED_DX, 0, 0]) union() {
-                    translate([6, OLED_DY, M_AFT_STOP+2]) pcbButtress();
-                    translate([-6, OLED_DY, M_AFT_STOP+2]) mirror([-1,0,0]) pcbButtress();
-                    translate([6, OLED_DY, M_AFT_STOP+30]) pcbPillar();
-                    translate([-6, OLED_DY, M_AFT_STOP+30]) mirror([-1,0,0]) pcbPillar();
+                    //translate([OLED_DISPLAY_MOUNT_W/2 + OLED_DX,  OLED_DY, M_AFT_STOP + POST_DY0]) pcbButtress();
+                    //translate([-OLED_DISPLAY_MOUNT_W/2 + OLED_DX, OLED_DY, M_AFT_STOP + POST_DY0]) mirror([-1,0,0]) pcbButtress();
+                    translate([OLED_DISPLAY_MOUNT_W/2 + OLED_DX,  OLED_DY, M_AFT_STOP + POST_DY1]) 
+                        pcbPillar(dBoost=2.0);
+                    translate([-OLED_DISPLAY_MOUNT_W/2 + OLED_DX, OLED_DY, M_AFT_STOP + POST_DY1]) 
+                        mirror([-1,0,0]) pcbPillar(dBoost=2.0);
                 }
             }
             intersection() {
@@ -116,7 +136,7 @@ if (DRAW_AFT) {
             }
 
             translate([0, 0, H_BUTTRESS*29]) {
-                keyJoint(10, D_INNER, D_INNER-4, false, 10);
+                keyJoint(10, D_INNER, D_INNER-4, false, 0);
             }
         }
         // Bottom channel
@@ -139,11 +159,15 @@ if (DRAW_AFT) {
         // Channel
         translate([-3, 0, M_AFT_STOP + H_BUTTRESS*9]) cube(size=[6, 100, 100]);
 
-        // Rods
-        translate([10, 7, M_AFT_STOP + H_BUTTRESS*10]) 
-            cylinder(h=100, d=D_ROD);
-        mirror([-1,0,0]) translate([10, 7, M_AFT_STOP + H_BUTTRESS*10]) 
-            cylinder(h=100, d=D_ROD);
+        // Rod
+        ROD_X = 11;
+        ROD_Y = 6.5;
+        // Long one, structural support.
+        translate([ROD_X, ROD_Y, M_AFT_STOP]) 
+            cylinder(h=500, d=D_ROD);
+        // Short one, hold crystal.
+        translate([-ROD_X, ROD_Y, M_AFT_STOP + H_BUTTRESS*10]) 
+            cylinder(h=500, d=D_ROD);
     }
 }
 
@@ -171,7 +195,7 @@ if(DRAW_FORE) {
             );
         }
         translate([0, 0, H_BUTTRESS*29]) {
-            keyJoint(10, D_INNER, D_INNER-4, true, 10);
+            keyJoint(10, D_INNER, D_INNER-4, true, 0);
         }
     }
 

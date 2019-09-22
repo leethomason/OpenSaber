@@ -3,6 +3,8 @@
 #include "vrender.h"
 #include "vectorui.h"
 
+#include "Grinliz_Arduino_Util.h"
+
 #define PIN_OLED_DC 7
 #define PIN_OLED_RESET 9
 #define PIN_OLED_CS 10
@@ -15,6 +17,15 @@ static const int OLED_BYTES = OLED_WIDTH * OLED_HEIGHT / 8;
 uint8_t oledBuffer[OLED_BYTES] = {0};
 VRender vrender;
 UIRenderData data;
+uint32_t lastProfile = 0;
+int nFrames = 0;
+
+#ifdef DEBUG
+xxx
+#endif
+#ifdef _DEBUG
+yyy
+#endif
 
 void BlockDrawOLED(const BlockDrawChunk* chunks, int y, int n)
 {
@@ -36,6 +47,10 @@ void BlockDrawOLED(const BlockDrawChunk* chunks, int y, int n)
 void setup()
 {
     delay(100);
+    Serial.begin(19200);
+    Log.attachSerial(&Serial);
+    delay(100);
+
     static const uint8_t BYTES[3] = {0xff, 0, 0x24};
     for(int i=0; i<OLED_BYTES; ++i) {
         oledBuffer[i] = BYTES[i%3]; 
@@ -55,7 +70,9 @@ void setup()
     data.volume = 2;
     memset(oledBuffer, 0, OLED_BYTES);
     VectorUI::Draw(&vrender, 0, UIMode::NORMAL, false, &data);
+
     display.display(oledBuffer);
+    lastProfile = millis();
 }
 
 void loop()
@@ -64,5 +81,21 @@ void loop()
     if (data.mVolts == 4200) data.mVolts = 3200;
     memset(oledBuffer, 0, OLED_BYTES);
     VectorUI::Draw(&vrender, 0, UIMode::NORMAL, false, &data);
-    display.display(oledBuffer);
+
+    {
+        static ProfileData data("display");
+        ProfileBlock block(&data);
+        display.display(oledBuffer);
+    }
+
+    ++nFrames;
+    if (millis() - lastProfile > 2000) {
+        lastProfile = millis();
+        #if SERIAL_DEBUG > 0
+        Log.p("SERIAL ON").eol();
+        #endif
+        Log.p("FPS=").p(nFrames / 2).eol();
+        DumpProfile();
+        nFrames = 0;
+    }
 }

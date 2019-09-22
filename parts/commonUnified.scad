@@ -664,12 +664,12 @@ module pcbButtress()
     } 
 }
 
-module pcbPillar() {
+module pcbPillar(dBoost=0) {
     translate([0, -50, 0]) 
         rotate([-90, 0, 0])
             difference() {
-                cylinder(h=50, d1=8, d2=5);
-                cylinder(h=50, d=D_M2);
+                cylinder(h=50, d1=8 + dBoost, d2=5 + dBoost);
+                cylinder(h=100, d=D_M2);
             }
 }
 
