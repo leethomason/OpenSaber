@@ -20,6 +20,13 @@ UIRenderData data;
 uint32_t lastProfile = 0;
 int nFrames = 0;
 
+#ifdef DEBUG
+xxx
+#endif
+#ifdef _DEBUG
+yyy
+#endif
+
 void BlockDrawOLED(const BlockDrawChunk* chunks, int y, int n)
 {
     for (int i = 0; i < n; ++i) {

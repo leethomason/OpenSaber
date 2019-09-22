@@ -38,11 +38,11 @@ public:
         int x;
         int y;
 
-        const bool operator== (const Vec2& rhs) const {
+        bool operator== (const Vec2& rhs) const {
             return rhs.x == x && rhs.y == y;
         }
 
-        const bool operator!= (const Vec2& rhs) const {
+        bool operator!= (const Vec2& rhs) const {
             return rhs.x != x || rhs.y != y;
         }
     };
