@@ -44,11 +44,12 @@ public:
 
     // Reduces power consumption at lower frequency
     void setMagDataRate(int hz);   // 10, 20, 50, 100
+    int getMagDataRate() const;
 
 private:
     int x0 = 0, y0 = 0, z0 = 0, x1 = 0, y1 = 0, z1 = 0;
 
     int available();
-    void write8(uint8_t address, uint8_t reg, uint8_t value);
-    uint8_t read8(uint8_t address, uint8_t reg);
+    void write8(uint8_t address, uint8_t reg, uint8_t value) const;
+    uint8_t read8(uint8_t address, uint8_t reg) const;
 };

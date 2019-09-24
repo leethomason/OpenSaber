@@ -178,7 +178,7 @@ bool GrinlizLSM303::begin()
 
 void GrinlizLSM303::logMagStatus()
 {
-    int8_t d = read8(LSM303_ADDRESS_MAG, CFG_REG_A_M);
+    uint8_t d = read8(LSM303_ADDRESS_MAG, CFG_REG_A_M);
     int tempComp = d & (1<<7);
     int lowPower = d & (1<<4);
     int dataRateBits = (d >> 2) & 3;
@@ -212,10 +212,23 @@ void GrinlizLSM303::setMagDataRate(int hz)
         case 50: rateBits = 2; break;
         default: rateBits = 3; break;
     }
-    int8_t d = read8(LSM303_ADDRESS_MAG, CFG_REG_A_M);
+    uint8_t d = read8(LSM303_ADDRESS_MAG, CFG_REG_A_M);
     d = d & (~(3<<2));
     d = d | (rateBits << 2);
     write8(LSM303_ADDRESS_MAG, CFG_REG_A_M, d);
+}
+
+int GrinlizLSM303::getMagDataRate() const
+{
+    uint8_t d = read8(LSM303_ADDRESS_MAG, CFG_REG_A_M) & (3<<2);
+    d >>= 2;
+    switch(d) {
+        case 0: return 10;
+        case 1: return 20;
+        case 2: return 50;
+        default: break;
+    }  
+    return 100;
 }
 
 int GrinlizLSM303::available()
@@ -275,7 +288,7 @@ int GrinlizLSM303::readInner(RawData* rawData, Data* data, int n)
 
 int GrinlizLSM303::readMag(RawData* rawData, float* fx, float* fy, float* fz)
 {
-    int status = read8(LSM303_ADDRESS_MAG, STATUS_REG_M);
+    uint8_t status = read8(LSM303_ADDRESS_MAG, STATUS_REG_M);
     if ((status & (1<<3)) == 0 && (status & (1<<7)) == 0) return 0;
 
     Wire.beginTransmission(LSM303_ADDRESS_MAG);
@@ -294,15 +307,6 @@ int GrinlizLSM303::readMag(RawData* rawData, float* fx, float* fy, float* fz)
     uint16_t zlo = Wire.read();
     uint16_t zhi = Wire.read();
     
-    /*
-    uint16_t xlo = read8(LSM303_ADDRESS_MAG, OUTX_LOW_REG_M);
-    uint16_t xhi = read8(LSM303_ADDRESS_MAG, OUTX_HIGH_REG_M);
-    uint16_t ylo = read8(LSM303_ADDRESS_MAG, OUTY_LOW_REG_M);
-    uint16_t yhi = read8(LSM303_ADDRESS_MAG, OUTY_HIGH_REG_M);
-    uint16_t zlo = read8(LSM303_ADDRESS_MAG, OUTZ_LOW_REG_M);
-    uint16_t zhi = read8(LSM303_ADDRESS_MAG, OUTZ_HIGH_REG_M);
-    */
-
     // Shift values to create properly formed integer (low byte first)
     int16_t x = int16_t(xlo | (xhi << 8));
     int16_t y = int16_t(ylo | (yhi << 8));
@@ -343,7 +347,7 @@ int GrinlizLSM303::readMag(RawData* rawData, float* fx, float* fy, float* fz)
     return 1;
 }
 
-void GrinlizLSM303::write8(uint8_t address, uint8_t reg, uint8_t value)
+void GrinlizLSM303::write8(uint8_t address, uint8_t reg, uint8_t value) const
 {
     Wire.beginTransmission(address);
     Wire.write((uint8_t)reg);
@@ -351,7 +355,7 @@ void GrinlizLSM303::write8(uint8_t address, uint8_t reg, uint8_t value)
     Wire.endTransmission();
 }
 
-uint8_t GrinlizLSM303::read8(uint8_t address, uint8_t reg)
+uint8_t GrinlizLSM303::read8(uint8_t address, uint8_t reg) const
 {
     uint8_t value;
 

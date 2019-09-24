@@ -1,13 +1,13 @@
 #ifndef GRINLIZ_UTIL_INCLUDED
 #define GRINLIZ_UTIL_INCLUDED
 
-#include <Arduino.h>
 #include <string.h>
 #include <stdint.h>
 
 class Stream;
 
 #include "grinliz_assert.h"
+#include "fixed.h"
 
 template<class T>
 T clamp(T value, T lower, T upper) {
@@ -343,6 +343,9 @@ T glClamp(T x, T a, T b) {
 	if (x > b) return b;
 	return x;
 }
+
+template<class T>
+T glAbs(T x) { return x >= 0 ? x : -x; }
 
 // --- Algorithm --- //
 

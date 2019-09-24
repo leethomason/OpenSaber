@@ -29,7 +29,7 @@ public:
     */
     int readMag(RawData* rawData, float* x, float* y, float* z);
 
-    int setMagCalibration(int x0, int y0, int z0, int x1, int y1, int z1) { 
+    void setMagCalibration(int x0, int y0, int z0, int x1, int y1, int z1) { 
         this->x0 = x0; this->y0 = y0; this->z0 = z0;
         this->x1 = x1; this->y1 = y1; this->z1 = z1;    
     }

@@ -466,6 +466,10 @@ public:
 	const SPLog& p(long v, int p = DEC) const;
 	const SPLog& p(unsigned long v, int p = DEC) const;
 	const SPLog& p(double v, int p = 2) const;
+	const SPLog& v(int x, int y, int z, const char* bracket=0) const;
+	const SPLog& v(int x, int y, const char* bracket=0) const;
+	const SPLog& v(float x, float y, float z, const char* bracket=0) const;
+	const SPLog& v(float x, float y, const char* bracket=0) const;
 	
 	// Templated print, generally of alternate string class.
 	template<class T> const SPLog& pt(const T& str) const {

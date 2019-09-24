@@ -2,9 +2,6 @@
 #include <math.h>
 
 //#define DEBUG_EVENT
-
-static const int SIZE_SIN_TABLE = 256;
-
 uint8_t lerpU8(uint8_t a, uint8_t b, uint8_t t) 
 {
     int32_t r = int32_t(a) + (int32_t(b) - int32_t(a)) * int32_t(t) / 255;
@@ -27,8 +24,29 @@ bool TestUtil()
 	TEST_IS_EQ(lerpU8(0, 255, 0), 0);
 	TEST_IS_EQ(lerpU8(0, 255, 255), 255);
 
+    // iSin, iSin255 madness
+    TEST_IS_TRUE(iSin(0) == 0);
+    TEST_IS_TRUE(iSin(FixedNorm(1, 4)) == 1);
+    TEST_IS_TRUE(iSin(FixedNorm(2, 4)) == 0);
+    TEST_IS_TRUE(iSin(FixedNorm(3, 4)) == -1);
+    
+#ifdef _WIN32
+    for (float r = 0; r <= 1.0f; r += 0.01f) {
+        float f = sinf(r * 2.0f * 3.1415926535897932384626433832795f);
+        FixedNorm fn = iSin(FixedNorm(r));
+        int s3 = iSin_S3(int(r * 32768));
+
+        float fnFloat = fn.toFloat();
+        float s3Float = float(s3) / 4096.0f;
+
+        TEST_IS_TRUE(fabsf(f - fnFloat) < 0.04f);
+        TEST_IS_TRUE(fabsf(f - float(s3) / 4096.0f) < 0.04f);
+    }
+#endif
+
     return true;
 }
+
 
 bool strStarts(const char* str, const char* prefix)
 {
