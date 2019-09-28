@@ -1,8 +1,10 @@
 include <dim.scad>
+use <../shapes.scad>
 
 $fn = 40;
 //STOCK_H = 7.671;
 STOCK_H = 25.4/4;   // 6.35
+EPS = 0.01;
 
 difference() {
     intersection() {
@@ -27,5 +29,7 @@ difference() {
         translate([0, STOCK_H - 2.0, M_SWITCH_CENTER - M_INSET_START]) rotate([-90, 0, 0]) cylinder(h=100, d=8.0); 
         translate([0, STOCK_H - 2.0, M_INSET_END - M_INSET_START - (M_PORT_CENTER - M_INSET_START)]) rotate([-90, 0, 0]) cylinder(h=100, d=8.0); 
     }
-    translate([0, -10, 0]) cylinder(h=100, d=24);
+    //translate([0, -10, 0]) cylinder(h=100, d=24);
 }
+
+//color("olive") translate([0, -R_OUTER + STOCK_H, EPS]) tube(h=DZ_INSET - EPS*2, do=D_OUTER-EPS, di=D_INNER+EPS);
