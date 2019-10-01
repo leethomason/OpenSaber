@@ -28,6 +28,18 @@ T lerp1024(T a, T b, T t1024) {
 
 bool TestUtil();
 
+template<typename T>
+struct Vec3
+{
+	T x;
+	T y;
+	T z;
+
+	void setZero() { x = y = z = 0; }
+
+    Vec3& operator += (const Vec3& v) { x += v.x; y += v.y; z += v.z; return *this; }
+};
+
 /**
 * Returns 'true' if 2 strings are equal.
 * If one or both are null, they are never equal.
@@ -466,10 +478,10 @@ public:
 	const SPLog& p(long v, int p = DEC) const;
 	const SPLog& p(unsigned long v, int p = DEC) const;
 	const SPLog& p(double v, int p = 2) const;
-	const SPLog& v(int x, int y, int z, const char* bracket=0) const;
-	const SPLog& v(int x, int y, const char* bracket=0) const;
-	const SPLog& v(float x, float y, float z, const char* bracket=0) const;
-	const SPLog& v(float x, float y, const char* bracket=0) const;
+	const SPLog& v3(int32_t x, int32_t y, int32_t z, const char* bracket=0) const;
+	const SPLog& v2(int32_t x, int32_t y, const char* bracket=0) const;
+	const SPLog& v3(float x, float y, float z, const char* bracket=0) const;
+	const SPLog& v2(float x, float y, const char* bracket=0) const;
 	
 	// Templated print, generally of alternate string class.
 	template<class T> const SPLog& pt(const T& str) const {
