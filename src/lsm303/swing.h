@@ -35,8 +35,8 @@ public:
     float speed() const { return m_speed; }
 
 private:
-    uint32_t m_time;
+    uint32_t m_prevTime;
     float m_speed;
-    Vec3<int32_t> m_pos4;
+    Vec3<int32_t> m_prevPos4;
     Filter m_filter;
 };

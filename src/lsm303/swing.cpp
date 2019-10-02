@@ -33,29 +33,29 @@ void Filter::calc(uint32_t* mSec, Vec3<int32_t>* vec3)
 
 Swing::Swing()
 {
-    m_pos4.setZero();
+    m_prevTime = 0;
     m_speed = 0;
-    m_time = 0;
+    m_prevPos4.setZero();
 }
 
 void Swing::push(uint32_t t, const Vec3<int32_t>& x, const Vec3<int32_t>& x0, const Vec3<int32_t>& x1)
 {
-    #if false
-    if (m_time == 0) {
-        m_time = t;
-        m_pos4 = x;
-        m_filter.fill(m_time, m_pos4);
+    if (m_prevTime == 0) {
+        m_prevTime = t;
+        m_speed = 0;
+        m_prevPos4 = x;
+        m_filter.fill(t, x);
         return;
     }
 
     m_filter.push(t, x);
-
-    Vec3<int32_t> speed4;
-    uint32_t lastT;
-    m_filter.calc(&lastT, &speed4);
+    uint32_t newTime;
+    Vec3<int32_t> newPos;
+    m_filter.calc(&newTime, &newPos);
 
     // sin(t) = t, for small t (in radians)
-    Vec3 c;
+    Vec3<int32_t> c = newPos - m_prevPos4;
+
     c.set(x - m_pos.x, y - m_pos.y, z - m_pos.z);
     float dist = sqrtf(c.x * c.x + c.y * c.y + c.z * c.z);
 
@@ -68,5 +68,4 @@ void Swing::push(uint32_t t, const Vec3<int32_t>& x, const Vec3<int32_t>& x0, co
 
     m_lastSampleTime = msec;
     m_pos.set(x, y, z);
-    #endif
 }
