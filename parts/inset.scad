@@ -12,22 +12,20 @@ SWITCH_BRIDGE_DZ = 5.8;
 MID_BRIDGE_DZ = 10;
 
 WOOD_DY = -8;
-POST_DY = 5;
-POWER_DY = 7.5;
-SWITCH_DY = 10.5;
+POWER_DY = 2.5;
+SWITCH_DY = 5.5;
 
-module attachPost(diameter)
+module attachPost(diameter, postDY)
 {
     INSET = NUT_W * 0.6;
 
     difference() 
     {
-        //simpleBridge(diameter, diameter/2 - POST_DY, 5, MID_BRIDGE_DZ);
         BRIDGE_T = 8;
         intersection() {
             translate([0, 0, -MID_BRIDGE_DZ/2 - 0.5])
                 cylinder(h=MID_BRIDGE_DZ + 1, d=diameter - 1);
-            translate([-20, diameter/2 - POST_DY - BRIDGE_T, -MID_BRIDGE_DZ/2])
+            translate([-20, diameter/2 - postDY - BRIDGE_T, -MID_BRIDGE_DZ/2])
                 cube(size=[40, BRIDGE_T, MID_BRIDGE_DZ]);
         }
 
@@ -108,11 +106,12 @@ module insetHolder( diameter,
                     bridgeStyleArray=undef,
                     pinHeaderHolder=false,
                     firstButtressFullRing=true,
-                    roundRect=0)
+                    roundRect=0,
+                    dyInset=5)
 {
     rCapsule = diameterCapsule / 2;
     rInner = diameter / 2;
-    yInset = rInner - 5.0;
+    yInset = rInner - dyInset;
     dzMid = (dzStart + dzEnd) / 2;
     dzCap = dzEnd - dzStart - diameterCapsule;
     dzA = dzStart + rCapsule;
@@ -137,7 +136,7 @@ module insetHolder( diameter,
         union() {
             if (dzBolt)
                 translate([0, 0, dzBolt])
-                    attachPost(diameter);
+                    attachPost(diameter, dyInset);
 
             // Switch flat version + header mount
             if (dzSwitch) {
@@ -145,20 +144,20 @@ module insetHolder( diameter,
                     BRIDGE_T = 3;
                     cylinder(h=300, d=diameter);                
                     translate([0, 0, dzSwitch - SWITCH_BRIDGE_DZ/2]) {
-                        translate([-20, rInner - SWITCH_DY - BRIDGE_T]) {
+                        translate([-20, rInner - SWITCH_DY - dyInset - BRIDGE_T]) {
                             cube(size=[40, BRIDGE_T, SWITCH_BRIDGE_DZ]);
                         }
 
-                        translate([X_SWITCH/2, rInner - SWITCH_DY, 0]) {
+                        translate([X_SWITCH/2, rInner - SWITCH_DY - dyInset, 0]) {
                             cube(size=[50, Y_SWITCH, SWITCH_BRIDGE_DZ]);
                         }
 
-                        mirror([-1, 0, 0]) translate([X_SWITCH/2, rInner - SWITCH_DY, 0]) {
+                        mirror([-1, 0, 0]) translate([X_SWITCH/2, rInner - SWITCH_DY - dyInset, 0]) {
                             cube(size=[50, Y_SWITCH, SWITCH_BRIDGE_DZ]);
                         }
 
                         if (pinHeaderHolder)
-                            headerHolder(diameter, rInner - SWITCH_DY - 9.9);
+                            headerHolder(diameter, rInner - SWITCH_DY - dyInset - 9.9);
                     }
                 }
             }
@@ -170,7 +169,7 @@ module insetHolder( diameter,
                     intersection() {
                         translate([0, 0, -7 - 0.5])
                             cylinder(h=14 + 1, d=diameter - 1);
-                        translate([-20, rInner - POWER_DY - BRIDGE_T, -7])
+                        translate([-20, rInner - POWER_DY - dyInset - BRIDGE_T, -7])
                             cube(size=[40, BRIDGE_T, 14]);
                     }
                 }
@@ -196,7 +195,7 @@ module insetHolder( diameter,
             translate([0, 0, dzPort]) {
                 rotate([-90, 0, 0]) {
                     cylinder(h=50, d=8.0);
-                    cylinder(h=rInner - POWER_DY - 1.5, d=11.5);
+                    cylinder(h=rInner - POWER_DY - dyInset - 1.5, d=11.5);
                 }
             }
         }
@@ -223,7 +222,7 @@ module insetHolder( diameter,
                         zCapsule(dzA, dzB, rCapsule-2, roundRect);
 
                     stockX = diameterCapsule;
-                    stockY = outerDiameter / 2 - (yInset);
+                    stockY = outerDiameter / 2 - yInset;
                     stockZ = abs(dzA - dzB) + diameterCapsule;
                     echo("Stock size:", stockX, stockY, stockZ);
                 }

@@ -203,6 +203,70 @@ const SPLog &SPLog::p(double v, int p) const
     return *this;
 }
 
+const SPLog& SPLog::v(int x, int y, int z, const char* bracket) const
+{
+    static const char* BRACKET = "()";
+    if (!bracket) bracket = BRACKET;
+
+    if (serialStream) {
+        serialStream->print(bracket[0]);
+        serialStream->print(x);
+        serialStream->print(",");
+        serialStream->print(y);
+        serialStream->print(",");
+        serialStream->print(z);
+        serialStream->print(bracket[1]);
+    }
+    return *this;
+}
+
+const SPLog& SPLog::v(int x, int y, const char* bracket) const
+{
+    static const char* BRACKET = "()";
+    if (!bracket) bracket = BRACKET;
+
+    if (serialStream) {
+        serialStream->print(bracket[0]);
+        serialStream->print(x);
+        serialStream->print(",");
+        serialStream->print(y);
+        serialStream->print(bracket[1]);
+    }
+    return *this;
+}
+
+const SPLog& SPLog::v(float x, float y, float z, const char* bracket) const
+{
+    static const char* BRACKET = "()";
+    if (!bracket) bracket = BRACKET;
+
+    if (serialStream) {
+        serialStream->print(bracket[0]);
+        serialStream->print(x);
+        serialStream->print(",");
+        serialStream->print(y);
+        serialStream->print(",");
+        serialStream->print(z);
+        serialStream->print(bracket[1]);
+    }
+    return *this;
+}
+
+const SPLog& SPLog::v(float x, float y, const char* bracket) const
+{
+    static const char* BRACKET = "()";
+    if (!bracket) bracket = BRACKET;
+
+    if (serialStream) {
+        serialStream->print(bracket[0]);
+        serialStream->print(x);
+        serialStream->print(",");
+        serialStream->print(y);
+        serialStream->print(bracket[1]);
+    }
+    return *this;
+}
+
 void SPLog::eol() const
 {
     if (serialStream)
@@ -261,7 +325,7 @@ void DumpProfile()
     for (ProfileData *data = ProfileData::root; data; data = data->next)
     {
         uint32_t aveTime = data->totalTime / data->nCalls;
-        Log.p("  ").p(data->name, 20).p(" aveTime=").p(aveTime / 1000.0f).p(" ms maxTime=").p(data->maxTime / 1000.0f).p(" ms nCalls=").p(data->nCalls).eol();
+        Log.p("  ").p(data->name, 20).p(" aveTime=").p(aveTime / 1000.0f).p("ms maxTime=").p(data->maxTime / 1000.0f).p("ms nCalls=").p(data->nCalls).eol();
 
         data->nCalls = 0;
         data->totalTime = 0;

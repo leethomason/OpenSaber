@@ -1,13 +1,13 @@
 #ifndef GRINLIZ_UTIL_INCLUDED
 #define GRINLIZ_UTIL_INCLUDED
 
-#include <Arduino.h>
 #include <string.h>
 #include <stdint.h>
 
 class Stream;
 
 #include "grinliz_assert.h"
+#include "fixed.h"
 
 template<class T>
 T clamp(T value, T lower, T upper) {
@@ -27,6 +27,22 @@ T lerp1024(T a, T b, T t1024) {
 }
 
 bool TestUtil();
+
+template<typename T>
+struct Vec3
+{
+	T x;
+	T y;
+	T z;
+
+	void setZero() { x = y = z = 0; }
+
+    Vec3<T>& operator += (const Vec3<T>& v) { x += v.x; y += v.y; z += v.z; return *this; }
+    Vec3<T>& operator -= (const Vec3<T>& v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
+
+    inline friend Vec3<T> operator +  (const Vec3<T>& a, const Vec3<T>& b) { Vec3<T> t;  t.x = a.x + b.x; t.y = a.y + b.y; t.z = a.z + b.z; return t; }
+    inline friend Vec3<T> operator -  (const Vec3<T>& a, const Vec3<T>& b) { Vec3<T> t;  t.x = a.x - b.x; t.y = a.y - b.y; t.z = a.z - b.z; return t; }
+};
 
 /**
 * Returns 'true' if 2 strings are equal.
@@ -344,6 +360,9 @@ T glClamp(T x, T a, T b) {
 	return x;
 }
 
+template<class T>
+T glAbs(T x) { return x >= 0 ? x : -x; }
+
 // --- Algorithm --- //
 
 template <class T> inline void	Swap(T* a, T* b) {
@@ -463,10 +482,10 @@ public:
 	const SPLog& p(long v, int p = DEC) const;
 	const SPLog& p(unsigned long v, int p = DEC) const;
 	const SPLog& p(double v, int p = 2) const;
-	const SPLog& v(int x, int y, int z, const char* bracket=0) const;
-	const SPLog& v(int x, int y, const char* bracket=0) const;
-	const SPLog& v(float x, float y, float z, const char* bracket=0) const;
-	const SPLog& v(float x, float y, const char* bracket=0) const;
+	const SPLog& v3(int32_t x, int32_t y, int32_t z, const char* bracket=0) const;
+	const SPLog& v2(int32_t x, int32_t y, const char* bracket=0) const;
+	const SPLog& v3(float x, float y, float z, const char* bracket=0) const;
+	const SPLog& v2(float x, float y, const char* bracket=0) const;
 	
 	// Templated print, generally of alternate string class.
 	template<class T> const SPLog& pt(const T& str) const {

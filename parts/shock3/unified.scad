@@ -45,6 +45,10 @@ module innerSpace() {
         cylinder(h=200, d=D_INNER);
 }
 
+module thisKeyJoint(slot)
+{
+    keyJoint(12, D_INNER, D_INNER-4, false, 0);
+}
 
 
 // Battery section
@@ -136,7 +140,7 @@ if (DRAW_AFT) {
             }
 
             translate([0, 0, H_BUTTRESS*29]) {
-                keyJoint(10, D_INNER, D_INNER-4, false, 0);
+                thisKeyJoint(false);
             }
         }
         // Bottom channel
@@ -191,11 +195,12 @@ if(DRAW_FORE) {
                 M_USB - M_START,
 
                 roundRect = 3.175/2,
-                firstButtressFullRing = false
+                firstButtressFullRing = false,
+                dyInset=3.7
             );
         }
         translate([0, 0, H_BUTTRESS*29]) {
-            keyJoint(10, D_INNER, D_INNER-4, true, 0);
+            thisKeyJoint(true);
         }
     }
 

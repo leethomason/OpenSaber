@@ -278,9 +278,6 @@ int GrinlizLSM303::readMag(RawData* rawData, float* fx, float* fy, float* fz)
     int status = read8(LSM303_ADDRESS_MAG, STATUS_REG_M);
     if ((status & (1<<3)) == 0 && (status & (1<<7)) == 0) return 0;
 
-    // FIXME restore block read
-
-/*
     Wire.beginTransmission(LSM303_ADDRESS_MAG);
     Wire.write(OUTX_LOW_REG_M);
     Wire.endTransmission();
@@ -290,22 +287,13 @@ int GrinlizLSM303::readMag(RawData* rawData, float* fx, float* fy, float* fz)
     while (Wire.available() < 6);
 
     // Note high before low (different than accel)  
-
     uint16_t xlo = Wire.read();
     uint16_t xhi = Wire.read();
     uint16_t ylo = Wire.read();
     uint16_t yhi = Wire.read();
     uint16_t zlo = Wire.read();
     uint16_t zhi = Wire.read();
-    */
-
-    uint16_t xlo = read8(LSM303_ADDRESS_MAG, OUTX_LOW_REG_M);
-    uint16_t xhi = read8(LSM303_ADDRESS_MAG, OUTX_HIGH_REG_M);
-    uint16_t ylo = read8(LSM303_ADDRESS_MAG, OUTY_LOW_REG_M);
-    uint16_t yhi = read8(LSM303_ADDRESS_MAG, OUTY_HIGH_REG_M);
-    uint16_t zlo = read8(LSM303_ADDRESS_MAG, OUTZ_LOW_REG_M);
-    uint16_t zhi = read8(LSM303_ADDRESS_MAG, OUTZ_HIGH_REG_M);
-
+    
     // Shift values to create properly formed integer (low byte first)
     int16_t x = int16_t(xlo | (xhi << 8));
     int16_t y = int16_t(ylo | (yhi << 8));
@@ -314,6 +302,7 @@ int GrinlizLSM303::readMag(RawData* rawData, float* fx, float* fy, float* fz)
     if (x < x0) x0 = x;
     if (y < y0) y0 = y;
     if (z < z0) z0 = z;
+
     if (x > x1) x1 = x;
     if (y > y1) y1 = y;
     if (z > z1) z1 = z;
@@ -324,7 +313,7 @@ int GrinlizLSM303::readMag(RawData* rawData, float* fx, float* fy, float* fz)
         rawData->z = z; 
     }
     if (fx) {
-        if(x0 < x1 && y0 < y1 && z0 < z1) {
+        if(x0 < x1 && y0 < y1 && z0 < z1 && x0 != 0 && x1 != 0 && y0 != 0 && y1 != 0 && z0 != 0 && z1 != 0) {
             float vx = -1.0f + 2.0f * (x - x0) / (x1 - x0);
             float vy = -1.0f + 2.0f * (y - y0) / (y1 - y0);
             float vz = -1.0f + 2.0f * (z - z0) / (z1 - z0);
@@ -339,6 +328,7 @@ int GrinlizLSM303::readMag(RawData* rawData, float* fx, float* fy, float* fz)
             *fx = 1;
             *fy = 0;
             *fz = 0;
+            return 0;
         }
     }
     return 1;

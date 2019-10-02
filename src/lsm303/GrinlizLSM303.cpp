@@ -4,7 +4,6 @@
 
 #include "GrinlizLSM303.h"
 #include "Grinliz_Arduino_Util.h"
-#include "Grinliz_Util.h"
 
 #define LSM303_ADDRESS_ACCEL (0x32 >> 1) // 0011001x
 #define LSM303_ADDRESS_MAG (0x3C >> 1)   // 0011110x
@@ -171,14 +170,17 @@ bool GrinlizLSM303::begin()
         (1<<7)      // temperature componsation
         | 3 << 2    // 100 Hz
         | 0         // continuous mode 
-     );
+    );
+    write8(LSM303_ADDRESS_MAG, CFG_REG_B_M,
+        0 // 1           // low pass filter
+    );
     delay(10);
     return (whoAmIA == 0x33) && (whoAmIM == 0x40);
 }
 
 void GrinlizLSM303::logMagStatus()
 {
-    int8_t d = read8(LSM303_ADDRESS_MAG, CFG_REG_A_M);
+    uint8_t d = read8(LSM303_ADDRESS_MAG, CFG_REG_A_M);
     int tempComp = d & (1<<7);
     int lowPower = d & (1<<4);
     int dataRateBits = (d >> 2) & 3;
@@ -212,10 +214,23 @@ void GrinlizLSM303::setMagDataRate(int hz)
         case 50: rateBits = 2; break;
         default: rateBits = 3; break;
     }
-    int8_t d = read8(LSM303_ADDRESS_MAG, CFG_REG_A_M);
+    uint8_t d = read8(LSM303_ADDRESS_MAG, CFG_REG_A_M);
     d = d & (~(3<<2));
     d = d | (rateBits << 2);
     write8(LSM303_ADDRESS_MAG, CFG_REG_A_M, d);
+}
+
+int GrinlizLSM303::getMagDataRate() const
+{
+    uint8_t d = read8(LSM303_ADDRESS_MAG, CFG_REG_A_M) & (3<<2);
+    d >>= 2;
+    switch(d) {
+        case 0: return 10;
+        case 1: return 20;
+        case 2: return 50;
+        default: break;
+    }  
+    return 100;
 }
 
 int GrinlizLSM303::available()
@@ -227,7 +242,7 @@ int GrinlizLSM303::available()
     return avail + (overrun ? 1 : 0);
 }
 
-int GrinlizLSM303::readInner(RawData* rawData, Data* data, int n)
+int GrinlizLSM303::readInner(Vec3<int32_t>* rawData, Vec3<float>* data, int n)
 {
     int i = 0;
 
@@ -265,17 +280,17 @@ int GrinlizLSM303::readInner(RawData* rawData, Data* data, int n)
         }
         if (data) {
             static const float divInv = 1.0f / 4096.0f;
-            data[i].ax = x * divInv;
-            data[i].ay = y * divInv;
-            data[i].az = z * divInv;
+            data[i].x = x * divInv;
+            data[i].y = y * divInv;
+            data[i].z = z * divInv;
         }
     }
     return n;
 }
 
-int GrinlizLSM303::readMag(RawData* rawData, float* fx, float* fy, float* fz)
+int GrinlizLSM303::readMag(Vec3<int32_t>* rawData, Vec3<float>* data)
 {
-    int status = read8(LSM303_ADDRESS_MAG, STATUS_REG_M);
+    uint8_t status = read8(LSM303_ADDRESS_MAG, STATUS_REG_M);
     if ((status & (1<<3)) == 0 && (status & (1<<7)) == 0) return 0;
 
     Wire.beginTransmission(LSM303_ADDRESS_MAG);
@@ -294,56 +309,47 @@ int GrinlizLSM303::readMag(RawData* rawData, float* fx, float* fy, float* fz)
     uint16_t zlo = Wire.read();
     uint16_t zhi = Wire.read();
     
-    /*
-    uint16_t xlo = read8(LSM303_ADDRESS_MAG, OUTX_LOW_REG_M);
-    uint16_t xhi = read8(LSM303_ADDRESS_MAG, OUTX_HIGH_REG_M);
-    uint16_t ylo = read8(LSM303_ADDRESS_MAG, OUTY_LOW_REG_M);
-    uint16_t yhi = read8(LSM303_ADDRESS_MAG, OUTY_HIGH_REG_M);
-    uint16_t zlo = read8(LSM303_ADDRESS_MAG, OUTZ_LOW_REG_M);
-    uint16_t zhi = read8(LSM303_ADDRESS_MAG, OUTZ_HIGH_REG_M);
-    */
-
     // Shift values to create properly formed integer (low byte first)
-    int16_t x = int16_t(xlo | (xhi << 8));
-    int16_t y = int16_t(ylo | (yhi << 8));
-    int16_t z = int16_t(zlo | (zhi << 8));
+    int32_t x = int16_t(xlo | (xhi << 8));
+    int32_t y = int16_t(ylo | (yhi << 8));
+    int32_t z = int16_t(zlo | (zhi << 8));
 
-    if (x < x0) x0 = x;
-    if (y < y0) y0 = y;
-    if (z < z0) z0 = z;
+    mMin.x = glMin(x, mMin.x);
+    mMin.y = glMin(y, mMin.y);
+    mMin.z = glMin(z, mMin.z);
 
-    if (x > x1) x1 = x;
-    if (y > y1) y1 = y;
-    if (z > z1) z1 = z;
+    mMax.x = glMax(x, mMax.x);
+    mMax.y = glMax(y, mMax.y);
+    mMax.z = glMax(z, mMax.z);
 
     if (rawData) {
         rawData->x = x;
         rawData->y = y;
         rawData->z = z; 
     }
-    if (fx) {
-        if(x0 < x1 && y0 < y1 && z0 < z1 && x0 != 0 && x1 != 0 && y0 != 0 && y1 != 0 && z0 != 0 && z1 != 0) {
-            float vx = -1.0f + 2.0f * (x - x0) / (x1 - x0);
-            float vy = -1.0f + 2.0f * (y - y0) / (y1 - y0);
-            float vz = -1.0f + 2.0f * (z - z0) / (z1 - z0);
+    if (data) {
+        if(magDataValid()) {
+            float vx = -1.0f + 2.0f * (x - mMin.x) / (mMax.x - mMin.x);
+            float vy = -1.0f + 2.0f * (y - mMin.y) / (mMax.y - mMin.y);
+            float vz = -1.0f + 2.0f * (z - mMin.z) / (mMax.z - mMin.z);
 
             float len2 = vx * vx + vy * vy + vz * vz;
             float lenInv = 1.0f / sqrtf(len2);
-            *fx = vx * lenInv;
-            *fy = vy * lenInv;
-            *fz = vz * lenInv;
+            data->x = vx * lenInv;
+            data->y = vy * lenInv;
+            data->z = vz * lenInv;
         }
         else {
-            *fx = 1;
-            *fy = 0;
-            *fz = 0;
+            data->x = 1;
+            data->y = 0;
+            data->z = 0;
             return 0;
         }
     }
     return 1;
 }
 
-void GrinlizLSM303::write8(uint8_t address, uint8_t reg, uint8_t value)
+void GrinlizLSM303::write8(uint8_t address, uint8_t reg, uint8_t value) const
 {
     Wire.beginTransmission(address);
     Wire.write((uint8_t)reg);
@@ -351,7 +357,7 @@ void GrinlizLSM303::write8(uint8_t address, uint8_t reg, uint8_t value)
     Wire.endTransmission();
 }
 
-uint8_t GrinlizLSM303::read8(uint8_t address, uint8_t reg)
+uint8_t GrinlizLSM303::read8(uint8_t address, uint8_t reg) const
 {
     uint8_t value;
 
