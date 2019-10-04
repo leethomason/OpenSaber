@@ -36,6 +36,7 @@ struct Vec3
 	T z;
 
 	void setZero() { x = y = z = 0; }
+	void scale(T s) { x *= s; y *= s; z *= s; }
 
     Vec3<T>& operator += (const Vec3<T>& v) { x += v.x; y += v.y; z += v.z; return *this; }
     Vec3<T>& operator -= (const Vec3<T>& v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
