@@ -180,24 +180,51 @@ if(DRAW_FORE) {
     M_END = M_INSET_END + 4;
 
     difference() {
-        translate([0, 0, M_START]) {
-            insetHolder(
-                D_INNER,
-                D_OUTER,
-                DX_INSET,
-                M_END - M_START,
-                H_BUTTRESS,
-                M_INSET_START - M_START,
-                M_INSET_END - M_START,
-                M_BOLT - M_START,
-                M_PORT_CENTER - M_START,
-                M_SWITCH_CENTER - M_START,
-                M_USB - M_START,
+        union() {
+            translate([0, 0, M_START]) {
+                insetHolder(
+                    D_INNER,
+                    D_OUTER,
+                    DX_INSET,
+                    M_END - M_START,
+                    H_BUTTRESS,
+                    M_INSET_START - M_START,
+                    M_INSET_END - M_START,
+                    M_BOLT - M_START,
+                    0, // use flat port holderM_PORT_CENTER - M_START,
+                    0, // use flat switch holder M_SWITCH_CENTER - M_START,
+                    M_USB - M_START,
 
-                roundRect = 3.175/2,
-                firstButtressFullRing = false,
-                dyInset=3.7
-            );
+                    roundRect = 3.175/2,
+                    firstButtressFullRing = false,
+                    dyInset=3.7
+                );
+            }
+            intersection() {
+                innerSpace();
+                union() {
+
+                    // Switch
+                    SWITCH_DZ = 5.7;
+                    SWITCH_T = 3;
+                    BASE_Y = R_INNER - 3.7;
+
+                    translate([-50, BASE_Y - SWITCH_T - 2.0, M_SWITCH_CENTER - SWITCH_DZ/2])
+                        cube(size=[100, SWITCH_T, SWITCH_DZ]);
+
+                    // Port
+                    PORT_T = 5.0;
+                    PORT_DZ = 14;
+                    D_PORT = 7.9;
+                    difference() {
+                        translate([-50, BASE_Y-PORT_T, M_PORT_CENTER - PORT_DZ/2])
+                            cube(size=[100, PORT_T, PORT_DZ]);
+                        translate([0, 0, M_PORT_CENTER])
+                            rotate([-90, 0, 0])
+                                cylinder(h=100, d=D_PORT);
+                    }
+                }
+            }
         }
         translate([0, 0, H_BUTTRESS*29]) {
             thisKeyJoint(true);

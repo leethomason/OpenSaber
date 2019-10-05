@@ -3,49 +3,65 @@ include <commonUnified.scad>
 
 $fn = 80;
 
-// Retaining bolt.
-BOLT_D = 4.5;
-NUT_W = 8.6;
-NUT_Y = 3.4;
-
 SWITCH_BRIDGE_DZ = 5.8;
-MID_BRIDGE_DZ = 10;
+INNER_VIEW = false;
 
 WOOD_DY = -8;
 POWER_DY = 2.5;
 SWITCH_DY = 5.5;
+EPS = 0.01;
+ESP2 = EPS*2;
 
-module attachPost(diameter, postDY)
+module attachPost(diameter, postDY, capsuleWidth)
 {
-    INSET = NUT_W * 0.6;
+    BRIDGE_DY = 5.5 + 3.4;
+    BRIDGE_DZ = 10;
 
-    difference() 
-    {
-        BRIDGE_T = 8;
-        intersection() {
-            translate([0, 0, -MID_BRIDGE_DZ/2 - 0.5])
-                cylinder(h=MID_BRIDGE_DZ + 1, d=diameter - 1);
-            translate([-20, diameter/2 - postDY - BRIDGE_T, -MID_BRIDGE_DZ/2])
-                cube(size=[40, BRIDGE_T, MID_BRIDGE_DZ]);
+    BOLT_D = 4.5;
+    NUT_W = 8.6;
+    NUT_Y = 3.4;
+    
+    HOOK_X = 20;
+    HOOK_Z = 2;
+
+    INSET_DZ = 2;
+
+    Y_TOP = diameter / 2 - postDY;
+
+    intersection() {
+        translate([0, 0, -50]) cylinder(h=100, d=diameter);
+        union() {
+            // bridge
+            difference() {
+                translate([-50, Y_TOP - BRIDGE_DY, -BRIDGE_DZ/2]) {
+                    cube(size=[100, BRIDGE_DY, BRIDGE_DZ]);
+                }
+                // space for nut
+                translate([-NUT_W/2, Y_TOP - BRIDGE_DY - EPS, -BRIDGE_DZ/2 - EPS]) {
+                    cube(size=[NUT_W, NUT_Y + EPS, BRIDGE_DZ + EPS2]);
+                }
+                // bolt
+                rotate([-90, 0, 0])
+                    cylinder(h=20, d=BOLT_D);
+
+                translate([-capsuleWidth/2, 0, -INSET_DZ/2])
+                    cube(size=[capsuleWidth, 100, INSET_DZ]);
+            }
+
+            Y_HOLDER = Y_TOP - BRIDGE_DY;
+            translate([0, 0, -INSET_DZ/2]) {
+                polygonXY(h=INSET_DZ, points=[
+                    [-50,  Y_HOLDER],
+                    [-NUT_W * 0.4, Y_HOLDER],
+                    [-50, -50]
+                ]);
+                mirror([-1,0,0]) polygonXY(h=INSET_DZ, points=[
+                    [-50,  Y_HOLDER],
+                    [-NUT_W * 0.4, Y_HOLDER],
+                    [-50, -50]
+                ]);
+            }
         }
-
-
-        // Bolt hole
-        rotate([-90, 0, 0])
-            cylinder(h=20, d=BOLT_D);
-
-        // Nut retainer
-        translate([-NUT_W/2, 5, -20])
-            cube(size=[NUT_W, NUT_Y, 40]);
-
-        translate([-INSET/2, 0, -20])
-            cube(size=[INSET, 6, 40]);
-
-        // slot to lift out inset.
-        HOOK_X = 8;
-        HOOK_Z = 2;
-        translate([-HOOK_X/2, 5, -HOOK_Z/2])
-            cube(size=[HOOK_X, 10, HOOK_Z]);
     }
 }
 
@@ -70,10 +86,10 @@ module headerHolder(diameter, dy)
     DX = 10;
     D_OPEN = 6.3;
 
-    //intersection() 
+    //intersection()
     {
         //translate([0, 0, -20]) cylinder(h=300, d=diameter);
-        translate([0, dy, 0]) 
+        translate([0, dy, 0])
             difference() {
                 translate([-(DX/2 + HEADER_HOLDER_T), -20, -(HEADER_HOLDER_DZ + HEADER_HOLDER_T)]) {
                     cube(size=[DX + 2*HEADER_HOLDER_T, 20, HEADER_HOLDER_DZ + 2*HEADER_HOLDER_T]);
@@ -91,8 +107,8 @@ module headerHolder(diameter, dy)
     Creates a section with an inset holder, intended to give access to the switch
     and power, as well as lock the other case to the inner carriage.
 */
-module insetHolder( diameter, 
-                    outerDiameter, 
+module insetHolder( diameter,
+                    outerDiameter,
                     diameterCapsule,
                     dzSection,
                     dzBaffle,
@@ -135,13 +151,13 @@ module insetHolder( diameter,
         union() {
             if (dzBolt)
                 translate([0, 0, dzBolt])
-                    attachPost(diameter, dyInset);
+                    attachPost(diameter, dyInset, rCapsule*2-4);
 
             // Switch flat version + header mount
             if (dzSwitch) {
                 intersection() {
                     BRIDGE_T = 3;
-                    cylinder(h=300, d=diameter);                
+                    cylinder(h=300, d=diameter);
                     translate([0, 0, dzSwitch - SWITCH_BRIDGE_DZ/2]) {
                         translate([-20, rInner - SWITCH_DY - dyInset - BRIDGE_T]) {
                             cube(size=[40, BRIDGE_T, SWITCH_BRIDGE_DZ]);
@@ -178,10 +194,10 @@ module insetHolder( diameter,
 
             if(dzUSB) {
                 intersection() {
-                    cylinder(h=300, d=diameter);                
+                    cylinder(h=300, d=diameter);
                     difference() {
                         translate([-X_USB_OUTER/2, yInset - 100, dzUSB - Z_USB_OUTER/2])
-                            cube(size=[X_USB_OUTER, 100, Z_USB_OUTER]);
+                            cube(size=[X_USB_OUTER, 100-EPS, Z_USB_OUTER]);
                         translate([-X_USB_INNER/2, yInset - 100, dzUSB - Z_USB_OUTER/2 - EPS])
                             cube(size=[X_USB_INNER, 100, Z_USB_OUTER + EPS*2]);
                     }
@@ -233,14 +249,15 @@ module insetHolder( diameter,
         }
     }
 
-    nBaffle = floor((dzSection+dzBaffle) / (dzBaffle*2)); 
+    nBaffle = floor((dzSection+dzBaffle) / (dzBaffle*2));
 
     difference() {
         union() {
             for(i=[0:nBaffle-1]) {
                 translate([0, 0, i*dzBaffle*2]) {
                     style = (bridgeStyleArray && i < len(bridgeStyleArray)) ? bridgeStyleArray[i] : bridgeStyle;
-                    insetBaffle(diameter, dzBaffle, style, noBottom=!firstButtressFullRing || i>0);
+                    if (!INNER_VIEW)
+                        insetBaffle(diameter, dzBaffle, style, noBottom=!firstButtressFullRing || i>0);
                 }
             }
         }
@@ -268,8 +285,8 @@ module insetHolder( diameter,
 }
 
 /*
-module insetHolder( diameter, 
-                    outerDiameter, 
+module insetHolder( diameter,
+                    outerDiameter,
                     diameterCapsule,
                     dzSection,
                     dzBaffle,
@@ -286,8 +303,8 @@ module insetHolder( diameter,
 */
 
 insetHolder(
-    32.2, 
-    37.9, 
+    32.2,
+    37.9,
     16.0,
     80,
     4,
@@ -295,4 +312,4 @@ insetHolder(
     70,
     40, 20, 60,
     //dzUSB=60,
-    roundRect=3.175/2); 
+    roundRect=3.175/2);

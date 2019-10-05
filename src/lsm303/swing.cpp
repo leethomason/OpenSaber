@@ -9,6 +9,15 @@ Filter::Filter()
     }
 }
 
+void Filter::fill(uint32_t mSec, const Vec3<int32_t> v)
+{
+    for(int i=0; i<N; ++i) {
+        sample[i].m = v;
+        sample[i].t = mSec;
+    }
+    current = 0;
+}
+
 void Filter::push(uint32_t mSec, const Vec3<int32_t> v)
 {
     sample[current].t = mSec;
@@ -35,15 +44,27 @@ Swing::Swing()
 {
     m_prevTime = 0;
     m_speed = 0;
-    m_prevPos4.setZero();
+    m_prevPosNorm.setZero();
 }
 
-void Swing::push(uint32_t t, const Vec3<int32_t>& x, const Vec3<int32_t>& x0, const Vec3<int32_t>& x1)
+Vec3<float> Swing::normalize(const Vec3<int32_t> v, const Vec3<int32_t> &mMin, const Vec3<int32_t> &mMax)
+{
+    Vec3<float> a;
+    a.x = -1.0f + 2.0f * (v.x - mMin.x) / (mMax.x - mMin.x);
+    a.y = -1.0f + 2.0f * (v.y - mMin.y) / (mMax.y - mMin.y);
+    a.z = -1.0f + 2.0f * (v.z - mMin.z) / (mMax.z - mMin.z);
+
+    float lenAInv = 1.0f / sqrtf(a.x * a.x + a.y * a.y + a.z * a.z);
+    a.scale(lenAInv);
+    return a;
+}
+
+void Swing::push(uint32_t t, const Vec3<int32_t>& x, const Vec3<int32_t>& mMin, const Vec3<int32_t>& mMax)
 {
     if (m_prevTime == 0) {
         m_prevTime = t;
         m_speed = 0;
-        m_prevPos4 = x;
+        m_prevPosNorm = normalize(x, mMin, mMax);
         m_filter.fill(t, x);
         return;
     }
@@ -53,19 +74,47 @@ void Swing::push(uint32_t t, const Vec3<int32_t>& x, const Vec3<int32_t>& x0, co
     Vec3<int32_t> newPos;
     m_filter.calc(&newTime, &newPos);
 
-    // sin(t) = t, for small t (in radians)
-    Vec3<int32_t> c = newPos - m_prevPos4;
+    // But we need normals.
+    // This is a lot of math for our poor little microprocessor.
+    Vec3<float> a = m_prevPosNorm;
+    Vec3<float> b = normalize(newPos, mMin, mMax);
 
-    c.set(x - m_pos.x, y - m_pos.y, z - m_pos.z);
+    // sin(t) = t, for small t (in radians)
+    Vec3<float> c = b - a;
     float dist = sqrtf(c.x * c.x + c.y * c.y + c.z * c.z);
 
-    float dt = (msec - m_lastSampleTime) / 1000.0f;
-    float speed = dist / dt;
+    float dt = (newTime - m_prevTime) / 1000.0f;
+    m_speed = dist / dt;
 
-    //filter.push(speed);
-    //m_speed = filter.average();
-    m_speed = speed;
+    m_prevTime = newTime;
+    m_prevPosNorm = b;
+}
 
-    m_lastSampleTime = msec;
-    m_pos.set(x, y, z);
+
+bool Swing::test()
+{
+    // Test filtering at 45deg / second
+    static const Vec3<int32_t> mMin = {-100, -200, -300};
+    static const Vec3<int32_t> mMax = { 300, 200, 100};
+
+    static const Vec3<int32_t> x0 = {300, -200, -300};  // (1, 0, 0)
+    static const Vec3<int32_t> x1 = {100, 0, -300};     // (0.5, 0.5, 0)
+
+    static const float speedDeg = 3.1459 / 8;
+
+    Swing swing;
+
+    for(int i=0; i<=10; ++i) {
+        Vec3<int32_t> x;
+        x.x = x0.x + i * (x1.x - x0.x) / 10;
+        x.y = x0.y + i * (x1.y - x0.y) / 10;
+        x.z = x0.z + i * (x1.z - x0.z) / 10;
+
+        swing.push(i*100, x, mMin, mMax);
+        Log.p("Swing speed (").p(i*100).p(")=").p(swing.speed()).eol();
+        TEST_IS_TRUE(swing.speed() >= 0 && swing.speed() <= speedDeg);
+    }
+    TEST_IS_TRUE(swing.speed() > speedDeg - 0.01f && swing.speed() < speedDeg + 0.01f);
+
+    return true;
 }

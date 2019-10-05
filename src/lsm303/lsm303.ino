@@ -27,6 +27,7 @@ void setup() {
     accel.logMagStatus();
 
     TestFixed();
+    Swing::test();
 }
 
 void loop()

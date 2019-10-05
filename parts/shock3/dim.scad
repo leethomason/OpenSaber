@@ -20,10 +20,10 @@ M_CRYSTAL_VIEW_END = M_CRYSTAL_SECTION + DZ_CRYSTAL_SECTION - DZ_CRYSTAL_BUFFER;
 M_CRYSTAL_VIEW_CENTER = (M_CRYSTAL_VIEW_END + M_CRYSTAL_VIEW_START)/2;
 DZ_CRYSTAL_VIEW = M_CRYSTAL_VIEW_END - M_CRYSTAL_VIEW_START;
 
-M_PORT_CENTER       = 132.0;    // fixme
-M_BOLT              = 142.0;    // fixme
-M_SWITCH_CENTER     = 151;      // fixme 147.5;
-M_USB               = 157;      // fixme
+M_PORT_CENTER       = 132.0;
+M_BOLT              = 142;
+M_SWITCH_CENTER     = 151.5;
+M_USB               = 157;
 
 M_INSET_START       = 125.0;
 M_INSET_END         = 162.0;
