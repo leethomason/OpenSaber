@@ -163,9 +163,9 @@ private:
 
     struct ColorEntry
     {
-        int layer;
+        int8_t layer;				// actually int8_t in the active edge.
         #ifdef VECTOR_MONO
-        int color;
+		int8_t color;
         #else
         osbr::RGBA color;
         #endif
@@ -191,6 +191,8 @@ private:
     void AddStartingEdges(int y);
     void SortActiveEdges();
 
+	int CalcRootHash(int y) { return ((uint32_t)y) % Y_HASH; }
+
     static const int MAX_COLOR_STACK = 8;
 
     bool m_layerFixed = false;
@@ -201,7 +203,6 @@ private:
     int m_nEdge = 0;
     int m_layer = 0;
     int m_nColor = 0;
-    bool m_matrixDirty = true;
     int m_start;
     int m_end;
     FixedNorm m_rot;

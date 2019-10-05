@@ -124,13 +124,12 @@ module insetHolder( diameter,
     X_SWITCH = 6.5;
     Y_SWITCH = 3.0;
 
-    // FIXME
-    X_USB_OUTER = 18.0;
-    X_USB_INNER = 12.0;
-    Z_USB_OUTER = 6;
-    USB_SLOT = 2.0;
-    X_USB_SLOT = 15.0;
-    DEPTH_USB_SLOT = 8.0;
+    X_USB_OUTER = 25.0;     // Size of the outer holder. Bigger than USB PCB.
+    X_USB_INNER = 13.0;     // Space inside for wires and plug
+    Z_USB_OUTER = 6;        // Outer holder size
+    USB_SLOT = 1.8;         // PCB cutout space
+    X_USB_SLOT = 21.0;      // Width of PCB
+    DEPTH_USB_SLOT = 11.0;   // Height of PCB
                     
     difference() {
         union() {

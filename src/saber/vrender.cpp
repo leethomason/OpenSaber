@@ -190,7 +190,7 @@ void VRender::SortToStart()
             yAdd = e->y0.getInt() + 1;
         }
         e->yAdd = (uint8_t)yAdd;
-        int yHash = yAdd % Y_HASH;
+        int yHash = CalcRootHash(yAdd);
         m_edge[i].nextStart = m_rootHash[yHash];
         m_rootHash[yHash] = e;
 
@@ -224,7 +224,7 @@ void VRender::IncrementActiveEdges(int y)
 
 void VRender::AddStartingEdges(int y)
 {
-    for (Edge* e = m_rootHash[y % Y_HASH]; e; e = e->nextStart) {
+    for (Edge* e = m_rootHash[CalcRootHash(y)]; e; e = e->nextStart) {
         // Things that are added before 0 have yAdd of 0.
         // For everything else it is a hash.
         if (e->yAdd == y) {
@@ -294,7 +294,7 @@ osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color)
     #ifdef VECTOR_MONO
     static const osbr::RGB WHITE(255, 255, 255);
     static const osbr::RGB BLACK(0, 0, 0);
-    if (m_colorStack[m_nColor-1].color) return WHITE;
+    if (m_nColor < 1 || m_colorStack[m_nColor-1].color) return WHITE;
     return BLACK;
     #else
     int start = m_nColor - 1;
