@@ -5,7 +5,6 @@ use <../inset.scad>
 
 DRAW_AFT = false;
 DRAW_FORE = true;
-DRAW_EMITTER = false;
 
 $fn=60;
 EPS = 0.01;
@@ -63,15 +62,15 @@ if (DRAW_AFT) {
                     speakerHolder(D_AFT, M_AFT_STOP - M_SPEAKER_BACK, 4, "bass22");
 
             difference() {
-                // FIXME this shouldn't be a tight fit (in z) on the thread
-                translate([0, 0, M_AFT_STOP]) tube(h=5, do=D_THREAD, di=10);
-                translate([-OLED_DISPLAY_W/2 + OLED_DX, OLED_DY, M_AFT_STOP-EPS]) 
+                translate([0, 0, M_DISPLAY]) 
+                    tube(h=5, do=D_THREAD, di=10);
+                translate([-OLED_DISPLAY_W/2 + OLED_DX, OLED_DY, M_DISPLAY-EPS]) 
                     cube(size=[OLED_DISPLAY_W, 100, 100]);
                 translate([-3, 0, M_AFT_STOP-EPS]) cube(size=[6, 100, 100]);
 
-                translate([OLED_DISPLAY_MOUNT_W/2 + OLED_DX,  OLED_DY + EPS, M_AFT_STOP + POST_DY0])
+                translate([OLED_DISPLAY_MOUNT_W/2 + OLED_DX,  OLED_DY + EPS, M_DISPLAY + POST_DY0])
                     rotate([90, 0, 0]) cylinder(h=10, d=D_M2);
-                translate([-OLED_DISPLAY_MOUNT_W/2 + OLED_DX,  OLED_DY + EPS, M_AFT_STOP + POST_DY0])
+                translate([-OLED_DISPLAY_MOUNT_W/2 + OLED_DX,  OLED_DY + EPS, M_DISPLAY + POST_DY0])
                     rotate([90, 0, 0]) cylinder(h=10, d=D_M2);
             }
 
@@ -230,16 +229,7 @@ if(DRAW_FORE) {
             thisKeyJoint(true);
         }
     }
-
-    translate([0, 0, M_EMITTER_BASE]) {
-        emitterBase(D_INNER);
-    }
-}
-
-if (DRAW_EMITTER) {
-    translate([0, 0, M_EMITTER_BASE]) {
-        emitterHolder(D_INNER);
-    }
+    translate([0, 0, M_EMITTER_BASE]) tube(h=10.0, di=dynamicHeatSinkThread(), do=D_INNER);
 }
 
 *color("red") translate([0, 0, M_SWITCH_CENTER]) rotate([-90, 0, 0]) cylinder(d=16, h=12);

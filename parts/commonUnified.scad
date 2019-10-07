@@ -843,7 +843,7 @@ module emitterBase(d)
     //color("olive") 
     {
         difference() {
-            tube(h=H_ADVANCED_THREAD, do=d, di=dynamicHeatSinkThread());
+            tube(h=H_ADVANCED_THREAD-EPS, do=d, di=dynamicHeatSinkThread());
             translate([0, 0, H_ADVANCED_THREAD - H_TEETH]) emitterTeeth(0.1);
         }
     }
