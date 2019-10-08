@@ -10,7 +10,7 @@ uint32_t lastMillis = 0;
 int nRead = 0;
 int nMagRead = 0;
 GrinlizLSM303 accel;
-Swing swing(10);
+Swing swing;
 
 void setup() {
     Serial.begin(19200);
@@ -40,6 +40,7 @@ void setup() {
 
 void loop()
 {
+    return;
     static bool printTime = false;
 
     Vec3<float> data[8];
@@ -51,14 +52,15 @@ void loop()
     Vec3<int32_t> magData;
     int nMag = accel.readMag(&magData, &fMagData);
     if(nMag) {
-        swing.push(magData, accel.getMagMin(), accel.getMagMax());
+        swing.push(millis(), magData, accel.getMagMin(), accel.getMagMax());
         ++nMagRead;
     }
 
-    #if true
+    #if false
     {
         if (nMag) {
             static const int N = 40;
+            swing.push(millis(), x, y, z);
             float speed = swing.speed();
             int ticks = (int)(speed * 2);
             if (ticks < 0) ticks = 0;
@@ -66,9 +68,9 @@ void loop()
             for(int i=0; i<ticks; i++) Serial.print("#");
             for(int i=ticks; i<N; i++) Serial.print("-");
             Serial.print(" speed="); Serial.print(speed);
-            //Serial.print(" x="); Serial.print(x);
-            //Serial.print(" y="); Serial.print(y);
-            //Serial.print(" z="); Serial.print(z);
+            Serial.print(" x="); Serial.print(x);
+            Serial.print(" y="); Serial.print(y);
+            Serial.print(" z="); Serial.print(z);
             Serial.println("");
         }
     }

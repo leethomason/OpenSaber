@@ -75,7 +75,7 @@ void Swing::push(const Vec3<int32_t>& x, const Vec3<int32_t>& mMin, const Vec3<i
     // This is a lot of math for our poor little microprocessor.
     Vec3<float> a = m_prevPosNorm;
     Vec3<float> b = normalize(newPos, mMin, mMax);
-    //Log.p("in: ").v3(b.x, b.y, b.z).eol();
+    Log.p("in: ").v3(b.x, b.y, b.z).eol();
 
     // sin(t) = t, for small t (in radians)
     Vec3<float> c = b - a;

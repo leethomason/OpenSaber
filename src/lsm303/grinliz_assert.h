@@ -1,6 +1,8 @@
 #ifndef GRINLIZ_ASSERT_INCLUDED
 #define GRINLIZ_ASSERT_INCLUDED
 
+#define SERIAL_DEBUG 1
+
 #ifndef _WIN32
 #include <Arduino.h>
 #endif

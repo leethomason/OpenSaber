@@ -124,3 +124,40 @@ void SPLog::eol() const
 }
 
 
+const SPLog& SPLog::v3(int32_t x, int32_t y, int32_t z, const char* bracket) const
+{
+    static const char* BRACKET = "()";
+    if (!bracket) bracket = BRACKET;
+
+    dprintf("%c%d,%d,%d%c", bracket[0], x, y, z, bracket[1]);
+    return *this;
+}
+
+const SPLog& SPLog::v2(int32_t x, int32_t y, const char* bracket) const
+{
+    static const char* BRACKET = "()";
+    if (!bracket) bracket = BRACKET;
+
+    dprintf("%c%d,%d%c", bracket[0], x, y, bracket[1]);
+    return *this;
+}
+
+const SPLog& SPLog::v3(float x, float y, float z, const char* bracket) const
+{
+    static const char* BRACKET = "()";
+    if (!bracket) bracket = BRACKET;
+
+    dprintf("%c%f,%f,%f%c", bracket[0], x, y, z, bracket[1]);
+    return *this;
+}
+
+const SPLog& SPLog::v2(float x, float y, const char* bracket) const
+{
+    static const char* BRACKET = "()";
+    if (!bracket) bracket = BRACKET;
+
+    dprintf("%c%f,%f%c", bracket[0], x, y, bracket[1]);
+    return *this;
+}
+
+

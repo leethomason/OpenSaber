@@ -1,9 +1,10 @@
 #ifndef GRINLIZ_ASSERT_INCLUDED
 #define GRINLIZ_ASSERT_INCLUDED
 
+#include "pins.h"
+
 #ifndef _WIN32
 #include <Arduino.h>
-#include "pins.h" // ONLY for the debug status, to control the ASSERT
 #endif
 
 template<bool> struct CompileTimeAssert;

@@ -13,13 +13,13 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{19832112-CA9B-4B14-90EE-E489AE3ECF3F}</ProjectGuid>
     <RootNamespace>oledSim</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -79,6 +79,7 @@
     <ClCompile Include="..\..\src\saber\renderer.cpp" />
     <ClCompile Include="..\..\src\saber\rgb2hsv.cpp" />
     <ClCompile Include="..\..\src\saber\sketcher.cpp" />
+    <ClCompile Include="..\..\src\saber\swing.cpp" />
     <ClCompile Include="..\..\src\saber\unittest.cpp" />
     <ClCompile Include="..\..\src\saber\vectorui.cpp" />
     <ClCompile Include="..\..\src\saber\voltmeter.cpp" />
@@ -95,6 +96,7 @@
     <ClInclude Include="..\..\src\saber\renderer.h" />
     <ClInclude Include="..\..\src\saber\rgb2hsv.h" />
     <ClInclude Include="..\..\src\saber\sketcher.h" />
+    <ClInclude Include="..\..\src\saber\swing.h" />
     <ClInclude Include="..\..\src\saber\uirenderdata.h" />
     <ClInclude Include="..\..\src\saber\unittest.h" />
     <ClInclude Include="..\..\src\saber\vectorui.h" />
