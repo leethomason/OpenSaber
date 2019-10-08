@@ -6,31 +6,36 @@ M_WAY_BACK          = -40;
 M_POMMEL            = -37;      // approximate. hard to measure.
 M_SPEAKER_BACK      = -4;
 M_0                 = 0;        // physical back of the lightsaber main body.
-M_AFT_STOP          = 10.5;     // fixme, was 10
-M_DISPLAY           = 10.5;     // fixme
+M_AFT_STOP          = 10.0;
+M_DISPLAY           = 12.0;
 DZ_DISPLAY          = 33;
 M_DISPLAY_FRONT     = M_DISPLAY + DZ_DISPLAY;
 
-M_CRYSTAL_SECTION = 83.6;
-DZ_CRYSTAL_SECTION = 19.0;
-DZ_CRYSTAL_BUFFER = 3.0;
+M_CRYSTAL_SECTION   = 83.6;
+M_1                 = 116.3;    // mark on the saber case used for the CNC cut; used to compute other marks. 
+                                // in a completely different coordinate system
+M_2                 = 116.3 + 84.2; // full length of center section
+
+DZ_CRYSTAL_SECTION  = 19.0;
+DZ_CRYSTAL_BUFFER   = 3.0;
 
 M_CRYSTAL_VIEW_START = M_CRYSTAL_SECTION + DZ_CRYSTAL_BUFFER;
 M_CRYSTAL_VIEW_END = M_CRYSTAL_SECTION + DZ_CRYSTAL_SECTION - DZ_CRYSTAL_BUFFER;
 M_CRYSTAL_VIEW_CENTER = (M_CRYSTAL_VIEW_END + M_CRYSTAL_VIEW_START)/2;
 DZ_CRYSTAL_VIEW = M_CRYSTAL_VIEW_END - M_CRYSTAL_VIEW_START;
 
-M_PORT_CENTER       = 132.0;
-M_BOLT              = 142;
-M_SWITCH_CENTER     = 151.5;
-M_USB               = 157;
+// These values are from the CNC
+M_INSET_START       = M_1 + (63.1/2) - 20;
+DZ_INSET            = 40.0;
+M_INSET_END         = M_INSET_START + DZ_INSET;
+DX_INSET            = 18.5;
 
-M_INSET_START       = 125.0;
-M_INSET_END         = 162.0;
-DX_INSET            = 17.0;
-DZ_INSET = M_INSET_END - M_INSET_START;
+M_PORT_CENTER       = M_INSET_START + 8.0;
+M_BOLT              = M_INSET_START + 20.0;
+M_SWITCH_CENTER     = M_INSET_START + 29.0;
+M_USB               = M_INSET_START + 35.0;
 
-M_EMITTER_BASE      = 165.5;
+M_EMITTER_BASE      = M_INSET_END + 4.0;
 
 H_FAR               = 240;
 

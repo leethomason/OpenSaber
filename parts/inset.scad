@@ -49,15 +49,16 @@ module attachPost(diameter, postDY, capsuleWidth)
             }
 
             Y_HOLDER = Y_TOP - BRIDGE_DY;
+            MULT = 0.3;
             translate([0, 0, -INSET_DZ/2]) {
                 polygonXY(h=INSET_DZ, points=[
                     [-50,  Y_HOLDER],
-                    [-NUT_W * 0.4, Y_HOLDER],
+                    [-NUT_W * MULT, Y_HOLDER],
                     [-50, -50]
                 ]);
                 mirror([-1,0,0]) polygonXY(h=INSET_DZ, points=[
                     [-50,  Y_HOLDER],
-                    [-NUT_W * 0.4, Y_HOLDER],
+                    [-NUT_W * MULT, Y_HOLDER],
                     [-50, -50]
                 ]);
             }
@@ -68,7 +69,13 @@ module attachPost(diameter, postDY, capsuleWidth)
 module insetBaffle(diameter, dzBaffle, bridge, noBottom=false)
 {
     difference() {
-        oneBaffle(diameter, dzBaffle, bridge=bridge, battery=false, mc=false, conduit=true, noBottom=noBottom);
+        oneBaffle(diameter, dzBaffle, 
+            bridge=bridge, 
+            battery=false, 
+            mc=true, 
+            conduit=true, 
+            noBottom=noBottom);
+
         hull() {
             cylinder(h=dzBaffle*1.1, d=diameter * 0.65);
             translate([0, -2.5, 0])
