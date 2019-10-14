@@ -4,25 +4,20 @@ EPSILON 			= 0.1;
 // Marks - absolute location.
 M_WAY_BACK          = -40;
 M_POMMEL            = -37;      // approximate. hard to measure.
-M_SPEAKER_BACK      = -4;
+M_SPEAKER_BACK      = -3;       // can go pretty far. challenge is fitting on printer bed.
 M_0                 = 0;        // physical back of the lightsaber main body.
 M_AFT_STOP          = 10.0;
 M_DISPLAY           = 12.0;
 DZ_DISPLAY          = 33;
 M_DISPLAY_FRONT     = M_DISPLAY + DZ_DISPLAY;
 
-M_CRYSTAL_SECTION   = 83.6;
+M_CRYSTAL_START     = 70.0 - 10.0 - 2.5;
+M_CRYSTAL_END       = 100.0 + 10.0 + 0.5;
 M_1                 = 116.3;    // mark on the saber case used for the CNC cut; used to compute other marks. 
                                 // in a completely different coordinate system
 M_2                 = 116.3 + 84.2; // full length of center section
 
-DZ_CRYSTAL_SECTION  = 19.0;
-DZ_CRYSTAL_BUFFER   = 3.0;
-
-M_CRYSTAL_VIEW_START = M_CRYSTAL_SECTION + DZ_CRYSTAL_BUFFER;
-M_CRYSTAL_VIEW_END = M_CRYSTAL_SECTION + DZ_CRYSTAL_SECTION - DZ_CRYSTAL_BUFFER;
-M_CRYSTAL_VIEW_CENTER = (M_CRYSTAL_VIEW_END + M_CRYSTAL_VIEW_START)/2;
-DZ_CRYSTAL_VIEW = M_CRYSTAL_VIEW_END - M_CRYSTAL_VIEW_START;
+DZ_CRYSTAL_SECTION  = M_CRYSTAL_END - M_CRYSTAL_START;
 
 // These values are from the CNC
 M_INSET_START       = M_1 + (63.1/2) - 20;
@@ -51,10 +46,20 @@ H_BUTTRESS			= 4.0;  // > 3.2 so parts can be machined in
 
 // fixme
 W_CRYSTAL           = 12.1;
-H_CRYSTAL           = 10;
-Y_CRYSTAL           = 9;        // offset up of the crystal
-Z_CRYSTAL           = 52;
+H_CRYSTAL           = 8;
+Y_CRYSTAL           = 11;        // offset up of the crystal
 
 X_DOTSTAR           = 5.0 + 0.5;  // from spec
 Y_DOTSTAR           = 1.4;  // from spec
 DOTSTAR_STRIP       = 12.4;
+
+BUTTON_D = 7.2;
+BUTTON_H = 1.6;
+BUTTON_THREAD_H = 4.0;
+BUTTON_THREAD_D = 4.0;
+
+TACTILE_POST_H = 5.5;
+TACTILE_POST_D = 3.4;
+TACTILE_BASE_H = 3.8;
+TACTILE_BASE_X = 6.0;
+

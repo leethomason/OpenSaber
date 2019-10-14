@@ -3,8 +3,8 @@ use <../shapes.scad>
 use <../commonUnified.scad>
 use <../inset.scad>
 
-DRAW_AFT = false;
-DRAW_FORE = true;
+DRAW_AFT = true;
+DRAW_FORE = false;
 
 $fn=60;
 EPS = 0.01;
@@ -13,13 +13,14 @@ EPS2 = EPS * 2;
 Z_BATT     = 65 + 4;
 D_BATT     = 18.50 + 0.5;
 D_M2       = 1.7;
-D_ROD      = 3.4 + 0.4;
+D_ROD       = 3.4;
+D_ROD_PLUS  = 3.4 + 0.4;
 
 // These are the values for the new (generic, not adafruit) screens.
 OLED_DISPLAY_W           = 20.5 + 1;
 OLED_DISPLAY_L           = 33 + 1;
 OLED_DISPLAY_MOUNT_W     = 0.6 * 25.4;
-OLED_DISPLAY_MOUNT_L     = 1.1 * 25.4;
+OLED_DISPLAY_MOUNT_L     = 27.6; //1.1 * 25.4;
 
 OLED_DX = -1.3;     // fixme; account for offset screen
 OLED_DY = 9;
@@ -54,16 +55,15 @@ module thisKeyJoint(slot)
 if (DRAW_AFT) {
     difference() {
         union() {
-            DZ_SPKR = 8;
-//            translate([0, 0, M_AFT_STOP-2])
-//                tube(h=2+EPS, do=D_AFT, di=D_AFT-4);
             translate([0, 0, M_SPEAKER_BACK])
                 rotate([0, 0, 180])
-                    speakerHolder(D_AFT, M_AFT_STOP - M_SPEAKER_BACK, 4, "bass22");
+                    speakerHolder(D_AFT, M_AFT_STOP - M_SPEAKER_BACK, 3, "bass22");
 
             difference() {
-                translate([0, 0, M_DISPLAY]) 
-                    tube(h=5, do=D_THREAD, di=10);
+                translate([0, 0, M_DISPLAY]) {
+                    tube(h=4, do=D_THREAD, di=10);
+                    tube(h=5.5, do=D_INNER, di=10);
+                }
                 translate([-OLED_DISPLAY_W/2 + OLED_DX, OLED_DY, M_DISPLAY-EPS]) 
                     cube(size=[OLED_DISPLAY_W, 100, 100]);
                 translate([-3, 0, M_AFT_STOP-EPS]) cube(size=[6, 100, 100]);
@@ -85,7 +85,7 @@ if (DRAW_AFT) {
                             cylinder(h=10, d=D_INNER);
                         }
                         // Channel
-                        translate([-3, 0, 0])
+                        translate([-3, 0, -EPS])
                             cube(size=[6, 100, 100]);
                     }
                     translate([9, -8.5, 3])
@@ -120,11 +120,9 @@ if (DRAW_AFT) {
             intersection() {
                 innerSpace();
                 translate([OLED_DX, 0, 0]) union() {
-                    //translate([OLED_DISPLAY_MOUNT_W/2 + OLED_DX,  OLED_DY, M_AFT_STOP + POST_DY0]) pcbButtress();
-                    //translate([-OLED_DISPLAY_MOUNT_W/2 + OLED_DX, OLED_DY, M_AFT_STOP + POST_DY0]) mirror([-1,0,0]) pcbButtress();
-                    translate([OLED_DISPLAY_MOUNT_W/2 + OLED_DX,  OLED_DY, M_AFT_STOP + POST_DY1]) 
+                    translate([OLED_DISPLAY_MOUNT_W/2 + OLED_DX,  OLED_DY, M_DISPLAY + POST_DY1]) 
                         pcbPillar(dBoost=2.0);
-                    translate([-OLED_DISPLAY_MOUNT_W/2 + OLED_DX, OLED_DY, M_AFT_STOP + POST_DY1]) 
+                    translate([-OLED_DISPLAY_MOUNT_W/2 + OLED_DX, OLED_DY, M_DISPLAY + POST_DY1]) 
                         mirror([-1,0,0]) pcbPillar(dBoost=2.0);
                 }
             }
@@ -142,6 +140,11 @@ if (DRAW_AFT) {
                 thisKeyJoint(false);
             }
         }
+        // Top metal art
+        translate([-50, 9, M_CRYSTAL_START]) {
+            cube(size=[100, 100, DZ_CRYSTAL_SECTION]);
+        }
+
         // Bottom channel
         translate([-5, -50, M_AFT_STOP]) {
             cube(size=[10, 50, 200]);
@@ -156,21 +159,26 @@ if (DRAW_AFT) {
             cube(size=[OLED_DISPLAY_W, 100, OLED_DISPLAY_L]);
 
         // crystal
-        C_Y = 10;
-        translate([0, C_Y, M_AFT_STOP + H_BUTTRESS*9]) 
-            crystal(14, 9, 200);
+        translate([0, Y_CRYSTAL, M_AFT_STOP + H_BUTTRESS*9]) 
+            crystal(W_CRYSTAL, H_CRYSTAL, 200);
+
         // Channel
-        translate([-3, 0, M_AFT_STOP + H_BUTTRESS*9]) cube(size=[6, 100, 100]);
+        translate([-3, -EPS, M_AFT_STOP + H_BUTTRESS*9]) cube(size=[6, 100, 100]);
 
         // Rod
-        ROD_X = 11;
-        ROD_Y = 6.5;
+        ROD_X = 10.5;
+        ROD_Y = 6.0;
         // Long one, structural support.
         translate([ROD_X, ROD_Y, M_AFT_STOP]) 
             cylinder(h=500, d=D_ROD);
+        translate([ROD_X, ROD_Y, M_AFT_STOP + 10.0]) 
+            cylinder(h=500, d=D_ROD_PLUS);
+        
         // Short one, hold crystal.
-        translate([-ROD_X, ROD_Y, M_AFT_STOP + H_BUTTRESS*10]) 
-            cylinder(h=500, d=D_ROD);
+        translate([-ROD_X, ROD_Y, M_AFT_STOP + H_BUTTRESS*10-EPS]) 
+            cylinder(h=H_BUTTRESS*2, d=D_ROD);
+        translate([-ROD_X, ROD_Y, M_AFT_STOP + H_BUTTRESS*12-EPS]) 
+            cylinder(h=500, d=D_ROD_PLUS);
     }
 }
 
@@ -232,9 +240,12 @@ if(DRAW_FORE) {
     translate([0, 0, M_EMITTER_BASE]) tube(h=10.0, di=dynamicHeatSinkThread(), do=D_INNER);
 }
 
-*color("red") translate([0, 0, M_SWITCH_CENTER]) rotate([-90, 0, 0]) cylinder(d=16, h=12);
-*color("red") translate([0, 0, M_PORT_CENTER]) rotate([-90, 0, 0]) cylinder(d=11, h=12);
-*color("red") translate([-5, 0, M_USB - 1]) cube(size=[10, 12, 2]);
 *color("red") translate([0, 0, M_AFT_STOP]) sBattery(); 
-*color("red") translate([0, 0, M_AFT_STOP + Z_BATT]) pcb(); 
+*color("olive") translate([0, 0, M_AFT_STOP + Z_BATT]) pcb(); 
+*color("orange") translate([0, Y_CRYSTAL, M_CRYSTAL_START]) 
+    crystal(W_CRYSTAL, H_CRYSTAL, DZ_CRYSTAL_SECTION);
 
+*color("olive") union() {
+    translate([-OLED_DISPLAY_W/2 + OLED_DX, OLED_DY, M_DISPLAY-EPS]) 
+        cube(size=[OLED_DISPLAY_W, 2, OLED_DISPLAY_L]);
+}

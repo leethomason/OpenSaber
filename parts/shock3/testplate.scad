@@ -2,7 +2,6 @@ include <dim.scad>
 use <../shapes.scad>
 
 $fn = 80;
-//STOCK_H = 7.671;
 STOCK_H = 25.4/4;   // 6.35
 EPS = 0.01;
 
@@ -18,13 +17,13 @@ difference() {
         }
         translate([0, -R_OUTER + STOCK_H, 0]) cylinder(h=100, d=D_OUTER, $fn=80);
     }
-    translate([0, -EPS, M_BOLT - M_INSET_START]) rotate([-90, 0, 0]) cylinder(h=100, d=4.0);   // fixme on bolt diameter
+    translate([0, -EPS, M_BOLT - M_INSET_START]) rotate([-90, 0, 0]) cylinder(h=100, d=4.3);
     translate([0, STOCK_H - 1.5, M_BOLT - M_INSET_START]) rotate([-90, 0, 0]) cylinder(h=100, d=8.0);
     
     translate([0, -EPS, M_PORT_CENTER - M_INSET_START]) rotate([-90, 0, 0]) cylinder(h=100, d=8.0); 
     translate([0, STOCK_H - 3, M_PORT_CENTER - M_INSET_START]) rotate([-90, 0, 0]) cylinder(h=100, d=11.0); 
 
-    translate([0, -EPS, M_SWITCH_CENTER - M_INSET_START]) rotate([-90, 0, 0]) cylinder(h=100, d=7.0); 
+    translate([0, -EPS, M_SWITCH_CENTER - M_INSET_START]) rotate([-90, 0, 0]) cylinder(h=100, d=BUTTON_D); 
     hull() {
         translate([0, STOCK_H - 2.0, M_SWITCH_CENTER - M_INSET_START]) rotate([-90, 0, 0]) cylinder(h=100, d=8.0); 
         DZ_EDGE = M_PORT_CENTER - 11.0/2;
