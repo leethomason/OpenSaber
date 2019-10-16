@@ -26,7 +26,10 @@ OLED_DX = -1.3;     // fixme; account for offset screen
 OLED_DY = 9;
 POST_DY0 = (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L) / 2;
 POST_DY1 = OLED_DISPLAY_L - (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L) / 2;
-                    
+
+M_METAL_ART = M_AFT_STOP + H_BUTTRESS*11;
+DZ_METAL_ART = H_BUTTRESS*15;
+Y_METAL_ART = 9;
 
 module sBattery() {
     translate([0, -R_INNER + D_BATT/2, 0]) cylinder(h=Z_BATT, d=D_BATT); 
@@ -48,6 +51,32 @@ module innerSpace() {
 module thisKeyJoint(slot)
 {
     keyJoint(12, D_INNER, D_INNER-4, false, 0);
+}
+
+module metalArt()
+{
+    color("gold") {
+        DO_TUBE = 1.25 * 25.4;
+        DI_TUBE = DO_TUBE - 0.050 * 2 * 25.4;
+
+        //translate([0, 20, 0])
+        difference() {
+            intersection() {
+                translate([0, R_INNER - DO_TUBE/2, M_METAL_ART]) {
+                    tube(h=DZ_METAL_ART, do=DO_TUBE, di=DI_TUBE);
+                }
+                W = 24;
+                translate([-W/2, 0, M_METAL_ART])
+                    cube(size=[W, 100, DZ_METAL_ART]);
+            }    
+            translate([-6, 0, M_METAL_ART+H_BUTTRESS]) 
+                cube(size=[12, 100, DZ_METAL_ART - H_BUTTRESS*2]);
+            for(i=[1:6]) {
+                translate([-8, 0, M_METAL_ART + i*2*H_BUTTRESS])
+                    cube(size=[16, 100, H_BUTTRESS]);
+            }
+        }
+    }
 }
 
 
@@ -141,9 +170,10 @@ if (DRAW_AFT) {
             }
         }
         // Top metal art
-        translate([-50, 9, M_CRYSTAL_START]) {
-            cube(size=[100, 100, DZ_CRYSTAL_SECTION]);
+        translate([-12, Y_METAL_ART, M_METAL_ART]) {
+            cube(size=[24, 100, DZ_METAL_ART]);
         }
+        metalArt();
 
         // Bottom channel
         translate([-5, -50, M_AFT_STOP]) {
@@ -249,3 +279,5 @@ if(DRAW_FORE) {
     translate([-OLED_DISPLAY_W/2 + OLED_DX, OLED_DY, M_DISPLAY-EPS]) 
         cube(size=[OLED_DISPLAY_W, 2, OLED_DISPLAY_L]);
 }
+
+metalArt();
