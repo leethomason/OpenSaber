@@ -73,16 +73,6 @@ void VectorUI::Draw(VRender* ren,
 {
     ren->Clear();
 
-    static const osbr::RGBA POWER_ON(43, 163, 255, 200);
-    static const osbr::RGBA POWER_OFF(43, 163, 255, 40);
-    static const osbr::RGBA POWER_TEXT(43, 163, 255, 200);
-
-    static const osbr::RGBA AUDIO_ON(255, 163, 0, 200);
-    static const osbr::RGBA AUDIO_OFF(43, 163, 255, 40);
-
-    static const osbr::RGBA PALETTE_ON = POWER_ON;
-    static const osbr::RGBA PALETTE_OFF = POWER_OFF;
-
     int p = data->powerLevel(8);
     CStr<5> volts;
     volts.setFromNum(data->mVolts, true);
@@ -172,6 +162,16 @@ void VectorUI::Draw(VRender* ren,
 #endif
 
 #if false
+    static const osbr::RGBA POWER_ON(43, 163, 255, 200);
+    static const osbr::RGBA POWER_OFF(43, 163, 255, 40);
+    static const osbr::RGBA POWER_TEXT(43, 163, 255, 200);
+
+    static const osbr::RGBA AUDIO_ON(255, 163, 0, 200);
+    static const osbr::RGBA AUDIO_OFF(43, 163, 255, 40);
+
+    static const osbr::RGBA PALETTE_ON = POWER_ON;
+    static const osbr::RGBA PALETTE_OFF = POWER_OFF;
+
     static const int W = 160;
     static const int H = 80;
 

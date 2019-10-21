@@ -18,6 +18,7 @@ namespace wav12 {
         virtual uint32_t fetch(uint8_t* target, uint32_t nBytes) = 0;
         // Rewind back to the beginning of the sound.
         virtual void rewind() = 0;
+        virtual bool done() const = 0;
     };
 
 }

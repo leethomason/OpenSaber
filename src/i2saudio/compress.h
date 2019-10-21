@@ -2,10 +2,14 @@
 #define WAV_COMPRESSION
 
 #include "wav12stream.h"
+#include "s4adpcm.h"
 
 #include <stdint.h>
 #include <assert.h>
 #include <string.h>
+#include <limits.h>
+
+//#define TUNE_MODE
 
 namespace wav12 {
 
@@ -25,79 +29,63 @@ namespace wav12 {
         char id[4];             // 'wv12'
         uint32_t lenInBytes;    // after header, compressed size
         uint32_t nSamples;
-        uint8_t  format;        // 3 is the only supported
+        uint8_t  format; 
         uint8_t  unused[3];
     };
 
-    struct Velocity
-    {
-        int prev2 = 0;
-        int prev1 = 0;
-        int guess() const { return 2 * prev1 - prev2; }
-        void push(int value) {
-            prev2 = prev1;
-            prev1 = value;
-        }
-    };
-
-    // Codec 0 is uncompressed. (100%)
-    // Codec 1 is 12 bit (loss) (75%)
-    // Codec 2 is 12 bit (loss) with delta in a frame (63%)
-    // Codec 3 is 12 bit (loss) predictive, and already better (58%)
-    // Codec 3b is 12 bit (loss) predictive, uses extra bits, and gets to 55%
-    bool compressVelocity(const int16_t* data, int32_t nSamples, uint8_t** compressed, uint32_t* nCompressed);
-    
     class MemStream : public wav12::IStream
     {
     public:
-        MemStream(const uint8_t* data, uint32_t size);
-        
+        MemStream(const uint8_t* data, uint32_t dataSize);
+
         virtual void set(uint32_t addr, uint32_t size);
         virtual uint32_t fetch(uint8_t* buffer, uint32_t nBytes);
         virtual void rewind();
+        virtual bool done() const { return m_pos == m_size; }
 
-     protected:
-         const uint8_t* m_data;
-         uint32_t m_size;
-         uint32_t m_pos;
+    protected:
+        const uint8_t* m_data;
+        const uint8_t* m_data_end;
+        uint32_t m_addr = 0;
+        uint32_t m_size = 0;
+        uint32_t m_pos = 0;
     };
 
-    class ExpanderV
+    class ExpanderAD4
     {
     public:
-        static const int BUFFER_SIZE = 256;
+        static const int BUFFER_SIZE = 128;
 
-        ExpanderV() {}
-        void init(IStream* stream, uint32_t nSamples, int format);
+        ExpanderAD4() {}
+        void init(IStream* stream);
 
-        void expand(int32_t* target, uint32_t nTarget, int32_t volume, bool add);
-        bool done() const { return m_done; }
+        // Returns the number of samples it could expand. nTarget should be even,
+        // unless it is the last sample (which can be odd if it uses up the
+        // entire track.)
+        int expand(int32_t* target, uint32_t nTarget, int32_t volume, bool add);
         void rewind();
+        bool done() const;
+        
+        // Codec 0 is uncompressed. (100%)
+        // Codec 1 is 12 bit (loss) (75%)
+        // Codec 2 is 12 bit (loss) with delta in a frame (63%)
+        // Codec 3 is 12 bit (loss) predictive, and already better (58%)
+        // Codec 3b is 12 bit (loss) predictive, uses extra bits, and gets to 55%
+        // Codec 3c adds a stack for the high bits. PowerOff 79.2 -> 76.5. Also cleaner code.
+        //
+        // Codec 4 is lossy; predictive, with sliding scale. Similar to ADPCM 
+        // Intending it to be replaced by ADPCM, but need to have a fallback for quality.
+        // Always 2:1. Really good quality. Simpler.
+        //
+        // Codec 4/4-bit is a kind of ADPCM. (Although simpler than the standard algorithm.)
+        // Simpler and cleaner. Tuned on the lightsaber sounds and a sample of classical music.
+        // The quality is shockingly good for such a simple algorithm at 4 bits / samples.
+        static void compress(const int16_t* data, int32_t nSamples, uint8_t** compressed, uint32_t* nCompressed);
 
     private:
-        inline bool hasSample() {
-            if (m_bufferStart < m_bufferEnd - 1)
-                return true;
-
-            if (m_bufferStart == m_bufferEnd - 1 &&
-                m_buffer[m_bufferStart] & 0x80)
-                return true;
-        
-            return false;
-        }
-        void fetch();
-
         uint8_t m_buffer[BUFFER_SIZE];
         IStream* m_stream = 0;
-        int m_bufferEnd = 0;      // position in the buffer
-        int m_bufferStart = 0;
-        bool m_done = false;
-
-        // State for decompression
-        Velocity m_vel;
-        int m_high3 = 0;
-        bool m_hasHigh3 = false;
-
+        S4ADPCM::State m_state;
     };
 }
 #endif

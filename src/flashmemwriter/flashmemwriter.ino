@@ -3,9 +3,8 @@
 #include "Grinliz_Arduino_Util.h"
 #include "Grinliz_Util.h"
 
-#define FLASH_SS       SS1                    // Flash chip SS pin.
-#define FLASH_SPI_PORT SPI1                   // What SPI port is Flash on?
-Adafruit_SPIFlash spiFlash(FLASH_SS, &FLASH_SPI_PORT);     // Use hardware SPI 
+Adafruit_FlashTransport_SPI flashTransport(SS1, &SPI1);
+Adafruit_SPIFlash spiFlash(&flashTransport);     // Use hardware SPI 
 
 static const int SERIAL_SPEED = 115200;
 CStr<200> line;
@@ -28,13 +27,10 @@ void setup()
 
     Log.p("Serial started at ").p(SERIAL_SPEED).eol();
 
-    spiFlash.begin(SPIFLASHTYPE_W25Q16BV);
+    spiFlash.begin();
 
-    uint8_t manid, devid;
-    spiFlash.GetManufacturerInfo(&manid, &devid);
-    Log.p("Manufacturer: 0x").p(manid, HEX).eol();
-    Log.p("Device ID: 0x").p(devid, HEX).eol();
-    Log.p("Pagesize: ").p(spiFlash.pageSize()).p(" Page buffer: ").p(LOCAL_PAGESIZE).eol();
+    uint32_t jedecid = spiFlash.getJEDECID();
+    Log.p("SPI Flash JEDECID=").p(jedecid).eol();
 
     Log.p("Enter 'y' to erase chip and begin upload.").eol();
 }
@@ -61,7 +57,7 @@ void parseSize() {
 void sendPage()
 {
     uint32_t addr = LOCAL_PAGESIZE * nPages;
-    uint32_t nWritten = spiFlash.writePage(addr, pageBuffer, pageAddr);
+    uint32_t nWritten = spiFlash.writeBuffer(addr, pageBuffer, pageAddr);
 
     Log.p("Page ").p(nPages).p(" written. nBytes=").p(nWritten).p("/").p(pageAddr)
         .p(" ").p(nWritten == pageAddr ? "okay" : "ERROR").eol();

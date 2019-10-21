@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#ifndef CORE_TEENSY
 
 #include "mcmemimage.h"
 #include <Adafruit_SPIFlash.h>
@@ -212,69 +211,3 @@ int DirToIndex::lookup(const char* path) const
     }
     return -1;
 }
-#endif // !CORE_TEENSY
-
-
-#ifndef CORE_TEENSY
-uint8_t vpromBuffer[MEM_IMAGE_EEPROM] = { 0 };
-
-void vpromPutRaw(uint32_t addr, size_t size, const void* data)
-{
-    ASSERT(addr + size < MEM_IMAGE_EEPROM);
-    memcpy(vpromBuffer + addr, data, size);
-}
-
-void vpromGetRaw(uint32_t addr, size_t size, void* data)
-{
-    ASSERT(addr + size < MEM_IMAGE_EEPROM);
-    memcpy(data, vpromBuffer + addr, size);
-}
-
-#endif
-
-#if 0
-#ifndef CORE_TEENSY
-#define DEBUG_VPROM
-static const uint32_t BASE_ADDR = MEM_IMAGE_SIZE - MEM_IMAGE_EEPROM;   // 1k of "EEPROM" at the end.
-uint8_t vpromBuffer[MEM_IMAGE_EEPROM] = { 0 };
-
-void vpromPutRaw(uint32_t addr, size_t size, const void* data)
-{
-    #ifdef DEBUG_VPROM
-    Log.p("vpromPut addr=").p(addr).p(" size=").p(size).eol();
-    #endif
-    ASSERT(addr + size < MEM_IMAGE_EEPROM);
-
-    noInterrupts();  // Lock down the SPI
-    Adafruit_SPIFlash& spiFlash = MemImage.getSPIFlash();
-
-    spiFlash.readBuffer(
-        BASE_ADDR,
-        vpromBuffer,
-        MEM_IMAGE_EEPROM
-    );
-
-    spiFlash.eraseSector(W25Q16BV_SECTORS - 1); // last sector...takes out 4k. grr.
-
-    memcpy(vpromBuffer + addr, data, size);
-
-    uint32_t bytes = spiFlash.writeBuffer(BASE_ADDR, vpromBuffer, MEM_IMAGE_EEPROM);
-    interrupts();
-    ASSERT(bytes == size);
-}
-
-void vpromGetRaw(uint32_t addr, size_t size, void* data)
-{
-    #ifdef DEBUG_VPROM
-    Log.p("vpromGet addr=").p(addr).p(" size=").p(size).eol();
-    #endif
-    ASSERT(addr + size < MEM_IMAGE_EEPROM);
-    
-    noInterrupts();  // Lock down the SPI
-    Adafruit_SPIFlash& spiFlash = MemImage.getSPIFlash();
-    uint32_t bytes = spiFlash.readBuffer(BASE_ADDR + addr, (uint8_t*)data, uint32_t(size));
-    interrupts();
-    ASSERT(bytes == size);
-}
-#endif
-#endif

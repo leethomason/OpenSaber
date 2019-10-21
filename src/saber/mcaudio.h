@@ -33,7 +33,7 @@ struct AudioBufferData {
     uint32_t dataAvailable = 0;
     int32_t* buffer = 0;
     
-    int fillBuffer(wav12::ExpanderV& expander, int32_t volume, bool loop, bool add);
+    int fillBuffer(wav12::ExpanderAD4& expander, int32_t volume, bool loop, bool add);
 
     void reset() { dataAvailable = 0; }
 };
@@ -148,6 +148,7 @@ public:
     virtual void set(uint32_t addr, uint32_t size);
     virtual uint32_t fetch(uint8_t* target, uint32_t nBytes);
     virtual void rewind();
+    virtual bool done() const;
 
 private:
     Adafruit_SPIFlash& m_flash;

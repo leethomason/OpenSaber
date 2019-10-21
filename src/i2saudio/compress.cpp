@@ -1,191 +1,108 @@
 #include "compress.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <assert.h>
 #include <limits.h>
+
+#ifdef _MSC_VER
+#include <assert.h>
+#define ASSERT assert
+#else
+#define ASSERT
+#endif
 
 using namespace wav12;
 
-static const int FRAME_SAMPLES = 16;
-static const int FRAME_BYTES = 17;
+// 8 bit version:
+// fiati:   mse=460     -1 0 1 2 2 2 3 4
+// poweron: mse=1056136 -1 0 1 2 3 3 3 4
+// hum:     mse=73      -1 0 1 2 2 2 3 4
 
+// 4 bit version:
+// poweron: mse=4349732 -1 0 0 1 1 1 2 3
+// hum:     mse=2437    -1 0 0 0 1 1 2 3
+// fiati:   mse=20122   -1 0 0 0 0 0 1 2
 
-bool wav12::compressVelocity(const int16_t* data, int32_t nSamples, uint8_t** compressed, uint32_t* nCompressed)
+void ExpanderAD4::init(IStream* stream)
 {
-    Velocity vel;
-
-    *compressed = new uint8_t[nSamples*2];
-    uint8_t* target = *compressed;
-    bool hasPrevBits = false;
-
-    for (int i = 0; i < nSamples; i++)
-    {
-        int value = data[i] / 16;
-        int guess = vel.guess();
-        int delta = value - guess;
-
-        if (hasPrevBits && delta < 512 && delta >= -512) {
-            static const int BIAS = 512;
-            uint32_t bits = delta + BIAS;
-            uint8_t low7 = (bits & 0x7f);
-            uint8_t high3 = (bits & 0x380) >> 7;
-            assert((high3 << 7 | low7) == bits);
-            *target = low7 | 0x80;
-            assert((*(target - 1) & 0xe0) == 0);    // make sure high 3 are empty
-            *(target - 1) |= (high3 << 5);
-            target++;
-            hasPrevBits = false;
-        }
-        else if (delta < 64 && delta >= -64) {
-            assert(!hasPrevBits);
-            static const int BIAS = 64;
-            uint8_t bits = delta + BIAS;
-            *target++ = bits | 0x80;
-            hasPrevBits = false;
-        }
-        else {
-            assert(value < 2048 && value >= -2048);
-            static const int BIAS = 2048;
-            int32_t bits = BIAS + value;
-            uint32_t low7 = bits & 0x07f;
-            uint32_t high5 = (bits & 0xf80) >> 7;
-
-            *target++ = low7;
-            *target++ = high5;
-            hasPrevBits = true;
-        }
-        vel.push(value);
-    }
-    size_t size = target - *compressed;
-    *nCompressed = uint32_t(size);
-
-    return false;
-}
-
-
-void ExpanderV::init(IStream* stream, uint32_t nSamples, int format)
-{
-    assert(format == 3);
     m_stream = stream;
-    m_done = false;
+    rewind();
 }
 
-
-void ExpanderV::rewind()
+void ExpanderAD4::rewind()
 {
-    m_bufferEnd = m_bufferStart = 0;
-    memset(m_buffer, 0, BUFFER_SIZE);
-    m_vel = Velocity();
-    m_done = false;
+    m_state = S4ADPCM::State();
     m_stream->rewind();
 }
 
-
-void ExpanderV::fetch()
-{
-    // Each sample is one or two bytes.
-    uint32_t read = 0;
-    if (m_bufferStart < m_bufferEnd) {
-        // In this case, we have the 1st byte of a pair, but
-        // not the 2nd. So the 2nd has to be there, and
-        // we can't be done.
-        assert(m_bufferStart == m_bufferEnd - 1);
-        assert(m_bufferStart > 0);
-        m_buffer[0] = m_buffer[m_bufferStart];
-        read = m_stream->fetch(m_buffer+1, BUFFER_SIZE - 1);
-        assert(read > 0);
-        m_bufferEnd = read + 1;
-            }
-            else {
-        // We were on a sample boundary, so read as much as possible.
-        read = m_stream->fetch(m_buffer, BUFFER_SIZE);
-        m_bufferEnd = read;
-                }
-    m_bufferStart = 0;
-    if (read == 0) {
-        m_done = true;
-            }
-        }
-
-void ExpanderV::expand(int32_t* target, uint32_t nSamples, int32_t volume, bool add)
-{
-    for (uint32_t i = 0; i < nSamples; ++i) {
-        if (!hasSample()) {
-            fetch();
-            if (done())
-                return;
-        }
-        const uint8_t* src = m_buffer + m_bufferStart;
-        const int32_t guess = m_vel.guess();
-        int32_t value = 0;
-
-        if (src[0] & 0x80) {
-            int32_t low7 = src[0] & 0x7f;
-
-            if (m_hasHigh3) {
-                static const int32_t BIAS = 512;
-                int32_t bits = ((m_high3 << 7) | low7);
-                int32_t delta = bits - BIAS;
-                value = guess + delta;
-    }
-    else {
-                static const int32_t BIAS = 64;
-                int32_t delta = low7 - BIAS;
-                value = guess + delta;
-            }
-            m_hasHigh3 = false;
-            m_bufferStart++;
-        }
-        else {
-            // Stored as: low7 high5
-            static const int32_t BIAS = 2048;
-            m_high3 = (src[1] & 0xe0) >> 5; // save for later
-
-            int32_t low7 = src[0] & 0x7f;
-            int32_t high5 = (src[1] & 0x1f);
-            int32_t bits = low7 | (high5 << 7);
-            value = bits - BIAS;
-
-            m_hasHigh3 = true;
-            m_bufferStart += 2;
-        }
-        m_vel.push(value);
-        int32_t s = value * volume * 16;
-        if (add) {
-            target[0] += s;
-            target[1] = target[0];
-        }
-        else {
-            target[0] = s;
-            target[1] = s;
-        }
-        target += 2;
-    }
+bool ExpanderAD4::done() const { 
+    ASSERT(m_stream); 
+    return m_stream->done(); 
 }
 
-MemStream::MemStream(const uint8_t* data, uint32_t size) {
+void ExpanderAD4::compress(const int16_t* data, int32_t nSamples, 
+    uint8_t** compressed, uint32_t* nCompressed)
+{
+    *nCompressed = (nSamples + 1) / 2;
+    *compressed = new uint8_t[nSamples];
+
+    S4ADPCM::State state;
+    S4ADPCM::encode(data, nSamples, *compressed, &state);
+}
+
+
+int ExpanderAD4::expand(int32_t *target, uint32_t nSamples, int32_t volume, bool add)
+{
+    if (!m_stream)
+        return 0;
+
+    uint32_t n = 0;
+
+    while (n < nSamples) {
+        // Rembering that everything but the last call n should be even.
+        uint32_t nBytes = (nSamples - n + 1) / 2;
+        uint32_t bytesFetched = m_stream->fetch(m_buffer, wav12Min(nBytes, uint32_t(BUFFER_SIZE)));
+        if (bytesFetched == 0)
+            break;
+
+        uint32_t ns = bytesFetched * 2;
+        if (ns > (nSamples - n))
+            ns = nSamples - n;
+
+        S4ADPCM::decode(m_buffer, ns, volume, add, target + n, &m_state);
+        n += ns;
+    }
+    return n;
+}
+
+
+MemStream::MemStream(const uint8_t *data, uint32_t size)
+{
     m_data = data;
+    m_data_end = data + size;
+    m_addr = 0;
+    m_size = 0;
+    m_pos = 0;
+}
+
+void MemStream::set(uint32_t addr, uint32_t size)
+{
+    m_addr = addr;
     m_size = size;
     m_pos = 0;
+    ASSERT(m_data + m_addr + m_size <= m_data_end);
 }
 
-
-void MemStream::set(uint32_t addr, uint32_t size) {
-    assert(addr == 0);  // just not implemented
-    assert(size == this->m_size);
-    m_pos = 0;
-}
-
-
-void MemStream::rewind() {
-    m_pos = 0;
-}
-
-
-uint32_t MemStream::fetch(uint8_t* buffer, uint32_t nBytes)
+void MemStream::rewind()
 {
-    uint32_t n = wav12Min(nBytes, m_size - m_pos);
-    memcpy(buffer, m_data + m_pos, n);
-    m_pos += n;
-    return n;
+    m_pos = 0;
+}
+
+uint32_t MemStream::fetch(uint8_t *buffer, uint32_t nBytes)
+{
+    if (m_pos + nBytes > m_size)
+        nBytes = m_size - m_pos;
+
+    memcpy(buffer, m_data + m_addr + m_pos, nBytes);
+    m_pos += nBytes;
+    return nBytes;
 }
