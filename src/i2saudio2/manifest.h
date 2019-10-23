@@ -7,12 +7,17 @@ class Adafruit_SPIFlash;
 struct MemUnit {
     static const int NAME_LEN = 8;
 
-    CStrBuf<NAME_LEN> name;
+    CStrBuf<NAME_LEN> name;   // NOT null terminated, but 0-filled.
     uint32_t offset;
-    uint32_t size;
+    uint32_t size : 24;
+    uint32_t shortSample : 1;
+    uint32_t is8Bit : 1;
+    uint32_t reserve : 6;
+
+    uint32_t numSamples() const { return is8Bit ? size : size * 2 - shortSample; }
 };
 
-static_assert(sizeof(MemUnit) == 16, "MemUnit isn't the correct size.");
+static_assert(sizeof(MemUnit) == 16, "16 byte MemUnit");
 
 enum {
     MEM_IMAGE_NUM_DIR   = 4,
