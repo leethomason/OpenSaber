@@ -1,4 +1,5 @@
-#include "compress.h"
+#include "expander.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <limits.h>

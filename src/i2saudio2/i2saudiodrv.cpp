@@ -66,6 +66,13 @@ void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
 
 void I2SAudioDriver::begin()
 {
+    Log.p("I2SAudioDriver::begin starting.").eol();
+
+    for(int i=0; i<AUDDRV_NUM_CHANNELS; ++i) {
+        spiStream[i].init(spiFlash);
+        expander[i].init(spiStream);   
+    }
+
     Log.p("DMA Configure.").eol();
     dma->setTrigger(I2S_DMAC_ID_TX_0);
     dma->setAction(DMA_TRIGGER_ACTON_BEAT);

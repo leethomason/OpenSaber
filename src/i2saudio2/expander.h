@@ -32,10 +32,10 @@ namespace wav12 {
         ExpanderAD4() {}
         void init(IStream* stream);
 
-        // Returns the number of samples it could expand. nTarget should be even,
+        // Returns the number of samples it could expand. nSamples should be even,
         // unless it is the last sample (which can be odd if it uses up the
         // entire track.)
-        int expand(int32_t* target, uint32_t nTarget, int32_t volume, bool add, bool use8Bit);
+        int expand(int32_t* target, uint32_t nSamples, int32_t volume, bool add, bool use8Bit);
         void rewind();
         bool done() const { return m_stream->done(); }
 
@@ -58,7 +58,7 @@ namespace wav12 {
         static void compress8(const int16_t* data, int32_t nSamples, uint8_t** compressed, uint32_t* nCompressed);
 
     private:
-        uint8_t m_buffer[BUFFER_SIZE];
+        static uint8_t m_buffer[BUFFER_SIZE];
         IStream* m_stream = 0;
         S4ADPCM::State m_state;
     };

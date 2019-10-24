@@ -11,7 +11,7 @@ Adafruit_SPIFlash spiFlash(&flashTransport);     // Use hardware SPI
 Adafruit_ZeroDMA dma;
 Adafruit_ZeroI2S i2s(0, 1, 12, 2);
 Manifest manifest;
-I2SAudioDriver i2sAudioDriver(&dma, &i2s, manifest);
+I2SAudioDriver i2sAudioDriver(&dma, &i2s, &spiFlash, manifest);
 
 int currentDir = 0;
 

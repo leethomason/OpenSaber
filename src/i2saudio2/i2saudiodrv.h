@@ -1,9 +1,12 @@
 #pragma once
 
 #include <stdint.h>
+#include "spistream.h"
+#include "expander.h"
 
 class Adafruit_ZeroDMA;
 class Adafruit_ZeroI2S;
+class Adafruit_SPIFlash;
 class Manifest;
 
 #define AUDDRV_NUM_CHANNELS 4
@@ -17,9 +20,10 @@ class Manifest;
 class I2SAudioDriver
 {
 public:
-    I2SAudioDriver(Adafruit_ZeroDMA* _dma, Adafruit_ZeroI2S* _i2s, const Manifest& _manifest) :
+    I2SAudioDriver(Adafruit_ZeroDMA* _dma, Adafruit_ZeroI2S* _i2s, Adafruit_SPIFlash* _spiFlash, const Manifest& _manifest) :
         dma(_dma),
         i2s(_i2s),
+        spiFlash(_spiFlash),
         manifest(_manifest)
     {
     }
@@ -46,7 +50,11 @@ private:
 
     Adafruit_ZeroDMA* dma;
     Adafruit_ZeroI2S* i2s;
+    Adafruit_SPIFlash* spiFlash;
     const Manifest& manifest;
+
+    SPIStream spiStream[AUDDRV_NUM_CHANNELS];
+    wav12::ExpanderAD4 expander[AUDDRV_NUM_CHANNELS];
 
     static int callbackCycle;
 
