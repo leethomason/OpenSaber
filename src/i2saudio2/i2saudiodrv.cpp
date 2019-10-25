@@ -11,7 +11,7 @@
 #define DECODE_NONE 0
 #define DECODE_SIN 1
 #define DECODE_S4 2
-#define DECODE DECODE_SIN
+#define DECODE DECODE_S4
 
 //#define USE_16_BIT  // doesn't work - not sure if hardware or sw config
 
@@ -25,15 +25,23 @@ int32_t stereoBuffer1[AUDDRV_STEREO_SAMPLES];
 DmacDescriptor* descriptor = 0;
 
 int I2SAudioDriver::callbackCycle = 0;
+I2SAudioDriver::Status I2SAudioDriver::status[AUDDRV_NUM_CHANNELS];
+bool I2SAudioDriver::isQueued[AUDDRV_NUM_CHANNELS];
+SPIStream I2SAudioDriver::spiStream[AUDDRV_NUM_CHANNELS];
+wav12::ExpanderAD4 I2SAudioDriver::expander[AUDDRV_NUM_CHANNELS];
+int I2SAudioDriver::volume[AUDDRV_NUM_CHANNELS];
+uint32_t I2SAudioDriver::callbackMicros = 0;
+
 
 void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
 {
+    int32_t startMicros = micros();
     callbackCycle++;
     #ifdef USE_16_BIT
     int16_t* src = (callbackCycle & 1) ? stereoBuffer1 : stereoBuffer0;
     int16_t* fill = (callbackCycle & 1) ? stereoBuffer0 : stereoBuffer1;
     #else
-    int32_t* src = (callbackCycle & 1) ? stereoBuffer1 : stereoBuffer0;
+    int32_t* src  = (callbackCycle & 1) ? stereoBuffer1 : stereoBuffer0;
     int32_t* fill = (callbackCycle & 1) ? stereoBuffer0 : stereoBuffer1;
     #endif
     
@@ -45,11 +53,10 @@ void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
     dma->startJob();
 
     /* --- decode to fill --- */
-    #if DECODE == DECODE_SIN
-
+#if DECODE == DECODE_SIN
     static uint32_t t = 0;
     static const int TEST_FREQ = 220;
-    static const uint32_t MULT = 32768 * TEST_FREQ / AUDDRV_FREQ; // about 654
+    static const uint32_t MULT = 32768 * TEST_FREQ / AUDDRV_FREQ;
 
     for(int i=0; i<AUDDRV_BUFFER_SAMPLES; i++, t++) {
         #ifdef USE_16_BIT
@@ -61,7 +68,38 @@ void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
         fill[i*2 + 1] = val;
         ++t;
     }
-    #endif
+#elif DECODE == DECODE_S4
+
+    for(int i=0; i<AUDDRV_NUM_CHANNELS; ++i) {
+        if (isQueued[i]) {
+            isQueued[i] = false;
+            spiStream[i].set(status[i].addr, status[i].size);
+            expander[i].rewind();
+            //Serial.print("queue "); Serial.print(i); Serial.print(" "); Serial.print(status[i].addr); Serial.print(" "); Serial.println(status[i].size);
+        }
+    }
+
+    for(int i=0; i<AUDDRV_NUM_CHANNELS; ++i) {
+        int n = 0;
+        if (status[i].addr) {
+            n = expander[i].expand(fill, AUDDRV_BUFFER_SAMPLES, volume[i], i > 0, status[i].is8Bit);
+
+            if (status[i].loop && n < AUDDRV_BUFFER_SAMPLES) {
+                expander[i].rewind();
+                expander[i].expand(fill + n*2, AUDDRV_BUFFER_SAMPLES - n, volume[i], i > 0, status[i].is8Bit);
+                n = AUDDRV_BUFFER_SAMPLES;
+            }
+        }
+        if (i == 0 && n < AUDDRV_BUFFER_SAMPLES) {
+            for(int j=n; j<AUDDRV_BUFFER_SAMPLES; ++j) {
+                fill[j*2 + 0] = 0;
+                fill[j*2 + 1] = 0;
+            }
+        }
+    }
+#endif
+    uint32_t endMicros = micros();
+    callbackMicros += (endMicros - startMicros);
 }
 
 void I2SAudioDriver::begin()
@@ -70,7 +108,8 @@ void I2SAudioDriver::begin()
 
     for(int i=0; i<AUDDRV_NUM_CHANNELS; ++i) {
         spiStream[i].init(spiFlash);
-        expander[i].init(spiStream);   
+        expander[i].init(&spiStream[i]);   
+        volume[i] = 64;
     }
 
     Log.p("DMA Configure.").eol();
@@ -112,18 +151,16 @@ void I2SAudioDriver::begin()
 }
 
 
-void I2SAudioDriver::play(int index, int volume, bool loop, int channel)
+void I2SAudioDriver::play(int index, bool loop, int channel)
 {
     channel = glClamp(channel, 0, AUDDRV_NUM_CHANNELS - 1);
     const MemUnit& memUnit = manifest.getUnit(index);
 
     noInterrupts();
-    queuedStatus[channel].addr = memUnit.offset;
-    queuedStatus[channel].size = memUnit.size;
-    queuedStatus[channel].samples = memUnit.numSamples();
-    queuedStatus[channel].volume = volume;
-    queuedStatus[channel].is8Bit = memUnit.is8Bit == true;
-    queuedStatus[channel].loop = loop;
+    status[channel].addr = memUnit.offset;
+    status[channel].size = memUnit.size;
+    status[channel].is8Bit = memUnit.is8Bit == true;
+    status[channel].loop = loop;
     isQueued[channel] = true;
     interrupts();
 }
@@ -134,8 +171,23 @@ void I2SAudioDriver::stop(int channel)
     channel = glClamp(channel, 0, AUDDRV_NUM_CHANNELS - 1);
 
     noInterrupts();
-    queuedStatus[channel] = Status();
+    status[channel].clear();
     isQueued[channel] = true;
     interrupts();
 }
+
+
+void I2SAudioDriver::setVolume(int v, int channel)
+{
+    channel = glClamp(channel, 0, AUDDRV_NUM_CHANNELS - 1);
+    volume[channel] = v;
+}
+
+
+int I2SAudioDriver::getVolume(int channel)
+{
+    channel = glClamp(channel, 0, AUDDRV_NUM_CHANNELS - 1);
+    return volume[channel];
+}
+
 

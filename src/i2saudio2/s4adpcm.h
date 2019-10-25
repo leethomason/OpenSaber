@@ -3,15 +3,6 @@
 #include <stdint.h>
 #include <limits.h>
 
-#define S4ADPCM_CHANNELS 2      // 1 or 2
-#define S4ADPCM_OUT_BITS 32     // 32 or 16; always signed
-
-#if S4ADPCM_OUT_BITS == 32
-#   define S4ADPCM_INT int32_t
-#else
-#   define S4ADPCM_INT int16_t
-#endif
-
 /* 
     A 4-bit ADPCM encoder/decoder. It is not any of the "official" ADPCM codecs.
     It is very very simple, and surprisingly good quality. It was tuned on
@@ -61,14 +52,14 @@ public:
         int32_t nSamples,  
         int volume,         // 0-256 (higher values can overflow)
         bool add,           // if true, add to the 'data' buffer, else write to it
-        S4ADPCM_INT* samples, State* state);
+        int32_t* samples, State* state);
 
     static void encode8(const int16_t* data, int32_t nSamples, uint8_t* compressed, State* state);
     static void decode8(const uint8_t* compressed,
         int32_t nSamples,
         int volume,         // 0-256 (higher values can overflow)
         bool add,           // if true, add to the 'data' buffer, else write to it
-        S4ADPCM_INT* samples, State* state);
+        int32_t* samples, State* state);
 
 private:
     static const int TABLE_SIZE = 8;

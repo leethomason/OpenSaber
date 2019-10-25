@@ -122,6 +122,10 @@ public:
 		return strEqual(buf, str);
 	}
 
+	bool operator==(char c) const {
+		return len == 1 and buf[0] == c;
+	}
+
 	bool operator!=(const char* str) const {
 		return !strEqual(buf, str);
 	}
@@ -200,6 +204,22 @@ public:
 	
 	uint16_t hash8() const {
 		return ::hash8(buf, buf + len);
+	}
+
+	void tokenize(char sep, CStr<ALLOCATE>* tokens[], int n) const {
+		int i =0;
+		const char* p = buf;
+
+		while(*p && i < n) {
+			if (*p == sep) {
+				while(*p == sep) ++p;
+				i++;
+			}
+			else {
+				tokens[i]->append(*p);
+				p++;
+			}
+		} 
 	}
 
 private:
@@ -282,6 +302,7 @@ public:
 	uint16_t hash8() const {
 		return ::hash8(buf, buf + size());
 	}
+
 
 private:
     char buf[ALLOCATE];

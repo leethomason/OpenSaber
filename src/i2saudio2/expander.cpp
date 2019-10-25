@@ -6,6 +6,8 @@
 
 using namespace wav12;
 
+uint8_t ExpanderAD4::m_buffer[BUFFER_SIZE] = {0};
+
 // 8 bit version:
 // fiati:   mse=    460 -1 0 1 2 2 2 3 4
 // poweron: mse=1056136 -1 0 1 2 3 3 3 4
@@ -57,28 +59,28 @@ int ExpanderAD4::expand(int32_t *target, uint32_t nSamples, int32_t volume, bool
 
     uint32_t n = 0;
 
-    if (use8Bit)
-    {
-        while (n < nSamples) {
-            uint32_t bytesFetched = m_stream->fetch(m_buffer, wav12Min(nSamples, uint32_t(BUFFER_SIZE)));
-            S4ADPCM::decode8(m_buffer, bytesFetched, volume, add, target + n * 2, &m_state);
-            n += bytesFetched;
+    while(n < nSamples) {
+        uint32_t samplesWanted = nSamples - n;
+        uint32_t bytesWanted = use8Bit ? samplesWanted : (samplesWanted+1) / 2;
+        uint32_t bytesFetched = m_stream->fetch(m_buffer, wav12Min(bytesWanted, uint32_t(BUFFER_SIZE)));
+        uint32_t samplesFetched = use8Bit ? bytesFetched : bytesFetched * 2;
+        if (samplesFetched > samplesWanted) {
+            // edge case of odd number of samples.
+            samplesFetched = samplesWanted;
         }
-    }
-    else {
-        while (n < nSamples) {
-            // Rembering that everything but the last call n should be even.
-            uint32_t nBytes = (nSamples - n + 1) / 2;
-            uint32_t bytesFetched = m_stream->fetch(m_buffer, wav12Min(nBytes, uint32_t(BUFFER_SIZE)));
 
-            uint32_t ns = bytesFetched * 2;
-            if (ns > (nSamples - n))
-                ns = nSamples - n;
-
-            S4ADPCM::decode4(m_buffer, ns, volume, add, target + n * 2, &m_state);
-            n += ns;
+        if (bytesFetched) {
+            if (use8Bit)
+                S4ADPCM::decode8(m_buffer, samplesFetched, volume, add, target + n * 2, &m_state);
+            else
+                S4ADPCM::decode4(m_buffer, samplesFetched, volume, add, target + n * 2, &m_state);
         }
+        else {
+            break;
+        }
+        n += samplesFetched;
     }
-    return nSamples;
+
+    return n;
 }
 

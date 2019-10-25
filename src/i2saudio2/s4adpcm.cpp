@@ -80,7 +80,7 @@ void S4ADPCM::encode8(const int16_t* data, int32_t nSamples, uint8_t* target, St
 
 
 void S4ADPCM::decode4(const uint8_t* p, int32_t nSamples,
-    int volume, bool add, S4ADPCM_INT* out, State* state)
+    int volume, bool add, int32_t* out, State* state)
 {
     for (int32_t i = 0; i < nSamples; ++i) {
         uint8_t delta = 0;
@@ -104,17 +104,14 @@ void S4ADPCM::decode4(const uint8_t* p, int32_t nSamples,
         }
         state->push(value);
 
-#if S4ADPCM_OUT_BITS == 32
         int32_t s = value * (volume << 8);
-        *out = add ? (*out + s) : s;
-#    if S4ADPCM_CHANNELS == 2
-        *(out + 1) = *out;
-        out++;
-#    endif
-        out++;
-#else
-#   error not implemented
-#endif
+        if (add) {
+            out[0] = out[1] = out[0] + s;
+        }
+        else {
+            out[0] = out[1] = s;
+        }
+        out += 2;
 
         state->shift += DELTA_TABLE_4[delta];
         if (state->shift < 0) state->shift = 0;
@@ -125,7 +122,7 @@ void S4ADPCM::decode4(const uint8_t* p, int32_t nSamples,
 
 
 void S4ADPCM::decode8(const uint8_t* p, int32_t nSamples,
-    int volume, bool add, S4ADPCM_INT* out, State* state)
+    int volume, bool add, int32_t* out, State* state)
 {
     for (int32_t i = 0; i < nSamples; ++i) {
         int delta = *p & 0x7f;
@@ -142,17 +139,14 @@ void S4ADPCM::decode8(const uint8_t* p, int32_t nSamples,
         }
         state->push(value);
 
-#if S4ADPCM_OUT_BITS == 32
         int32_t s = value * (volume << 8);
-        *out = add ? (*out + s) : s;
-#    if S4ADPCM_CHANNELS == 2
-        * (out + 1) = *out;
-        out++;
-#    endif
-        out++;
-#else
-#   error not implemented
-#endif
+        if (add) {
+            out[0] = out[1] = out[0] + s;
+        }
+        else {
+            out[0] = out[1] = s;
+        }
+        out += 2;
 
         state->shift += DELTA_TABLE_8[delta >> 4];
         if (state->shift < 0) state->shift = 0;

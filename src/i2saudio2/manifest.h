@@ -10,11 +10,10 @@ struct MemUnit {
     CStrBuf<NAME_LEN> name;   // NOT null terminated, but 0-filled.
     uint32_t offset;
     uint32_t size : 24;
-    uint32_t shortSample : 1;
     uint32_t is8Bit : 1;
-    uint32_t reserve : 6;
+    uint32_t reserve : 7;
 
-    uint32_t numSamples() const { return is8Bit ? size : size * 2 - shortSample; }
+    uint32_t numSamples() const { return is8Bit ? size : size * 2; }
 };
 
 static_assert(sizeof(MemUnit) == 16, "16 byte MemUnit");

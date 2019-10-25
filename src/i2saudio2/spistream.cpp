@@ -30,6 +30,7 @@ uint32_t SPIStream::fetch(uint8_t* target, uint32_t nBytes)
 
     if (m_pos + nBytes > m_size)
         nBytes = m_size - m_pos;
+    if (nBytes == 0) return 0;
 
     uint32_t r = m_flash->readBuffer(
         m_addr + m_pos, 
