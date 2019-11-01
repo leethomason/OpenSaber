@@ -24,33 +24,6 @@ namespace wav12 {
         return x;
     }
 
-    struct Wav12Header
-    {
-        char id[4];             // 'wv12'
-        uint32_t lenInBytes;    // after header, compressed size
-        uint32_t nSamples;
-        uint8_t  format; 
-        uint8_t  unused[3];
-    };
-
-    class MemStream : public wav12::IStream
-    {
-    public:
-        MemStream(const uint8_t* data, uint32_t dataSize);
-
-        virtual void set(uint32_t addr, uint32_t size);
-        virtual uint32_t fetch(uint8_t* buffer, uint32_t nBytes);
-        virtual void rewind();
-        virtual bool done() const { return m_pos == m_size; }
-
-    protected:
-        const uint8_t* m_data;
-        const uint8_t* m_data_end;
-        uint32_t m_addr = 0;
-        uint32_t m_size = 0;
-        uint32_t m_pos = 0;
-    };
-
     class ExpanderAD4
     {
     public:
@@ -59,13 +32,13 @@ namespace wav12 {
         ExpanderAD4() {}
         void init(IStream* stream);
 
-        // Returns the number of samples it could expand. nTarget should be even,
+        // Returns the number of samples it could expand. nSamples should be even,
         // unless it is the last sample (which can be odd if it uses up the
         // entire track.)
-        int expand(int32_t* target, uint32_t nTarget, int32_t volume, bool add);
+        int expand(int32_t* target, uint32_t nSamples, int32_t volume, bool add, bool use8Bit);
         void rewind();
-        bool done() const;
-        
+        bool done() const { return m_stream->done(); }
+
         // Codec 0 is uncompressed. (100%)
         // Codec 1 is 12 bit (loss) (75%)
         // Codec 2 is 12 bit (loss) with delta in a frame (63%)
@@ -80,10 +53,12 @@ namespace wav12 {
         // Codec 4/4-bit is a kind of ADPCM. (Although simpler than the standard algorithm.)
         // Simpler and cleaner. Tuned on the lightsaber sounds and a sample of classical music.
         // The quality is shockingly good for such a simple algorithm at 4 bits / samples.
-        static void compress(const int16_t* data, int32_t nSamples, uint8_t** compressed, uint32_t* nCompressed);
+        static void compress4(const int16_t* data, int32_t nSamples, uint8_t** compressed, uint32_t* nCompressed);
+
+        static void compress8(const int16_t* data, int32_t nSamples, uint8_t** compressed, uint32_t* nCompressed);
 
     private:
-        uint8_t m_buffer[BUFFER_SIZE];
+        static uint8_t m_buffer[BUFFER_SIZE];
         IStream* m_stream = 0;
         S4ADPCM::State m_state;
     };

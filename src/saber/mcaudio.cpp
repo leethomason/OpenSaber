@@ -32,7 +32,7 @@ int32_t I2SAudio::audioBuffer0[STEREO_BUFFER_SAMPLES];            // stereo buff
 int32_t I2SAudio::audioBuffer1[STEREO_BUFFER_SAMPLES];
 
 // Could be a static:
-wav12::ExpanderV expander[NUM_AUDIO_CHANNELS];
+wav12::ExpanderAD4 expander[NUM_AUDIO_CHANNELS];
 DmacDescriptor* dmacDescriptor = 0;
 
 I2STracker I2SAudio::tracker;
@@ -288,7 +288,7 @@ void I2SAudio::dumpStatus()
     tracker.reset();
 }
 
-int AudioBufferData::fillBuffer(wav12::ExpanderV &expander, int32_t volume, bool loop, bool add)
+int AudioBufferData::fillBuffer(wav12::ExpanderAD4 &expander, int32_t volume, bool loop, bool add)
 {
     if (loop)
     {
@@ -332,6 +332,11 @@ void SPIStream::set(uint32_t addr, uint32_t size)
 void SPIStream::rewind()
 {
     m_pos = 0;
+}
+
+bool SPIStream::done() const
+{
+    return m_pos == m_size;
 }
 
 // Call from interrupt
