@@ -3,8 +3,8 @@ use <../shapes.scad>
 use <../commonUnified.scad>
 use <../inset.scad>
 
-DRAW_AFT = true;
-DRAW_FORE = false;
+DRAW_AFT = false;
+DRAW_FORE = true;
 
 $fn=60;
 EPS = 0.01;
@@ -27,10 +27,6 @@ OLED_DY = 9;
 POST_DY0 = (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L) / 2;
 POST_DY1 = OLED_DISPLAY_L - (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L) / 2;
 
-M_METAL_ART = M_AFT_STOP + H_BUTTRESS*11;
-DZ_METAL_ART = H_BUTTRESS*15;
-Y_METAL_ART = 9;
-
 module sBattery() {
     translate([0, -R_INNER + D_BATT/2, 0]) cylinder(h=Z_BATT, d=D_BATT); 
 }
@@ -50,14 +46,15 @@ module innerSpace() {
 
 module thisKeyJoint(slot)
 {
-    keyJoint(12, D_INNER, D_INNER-4, false, 0);
+    keyJoint(12, slot ? D_INNER + 1 : D_INNER, D_INNER-4, false, 0);
 }
 
 module metalArt()
 {
     color("gold") {
         DO_TUBE = 1.25 * 25.4;
-        DI_TUBE = DO_TUBE - 0.050 * 2 * 25.4;
+        THICK = 0.032;
+        DI_TUBE = DO_TUBE - THICK * 2 * 25.4;
 
         //translate([0, 20, 0])
         difference() {
@@ -66,19 +63,38 @@ module metalArt()
                     tube(h=DZ_METAL_ART, do=DO_TUBE, di=DI_TUBE);
                 }
                 W = 24;
-                translate([-W/2, 0, M_METAL_ART])
+                translate([-W/2, Y_METAL_ART, M_METAL_ART])
                     cube(size=[W, 100, DZ_METAL_ART]);
             }    
-            translate([-6, 0, M_METAL_ART+H_BUTTRESS]) 
-                cube(size=[12, 100, DZ_METAL_ART - H_BUTTRESS*2]);
-            for(i=[1:6]) {
-                translate([-8, 0, M_METAL_ART + i*2*H_BUTTRESS])
-                    cube(size=[16, 100, H_BUTTRESS]);
-            }
+            *translate([-6, 0, M_CRYSTAL_START]) 
+                cube(size=[12, 100, DZ_CRYSTAL_SECTION]);
+
+            W = 18.5;
+            translate([-W/2, 0, WINDOW_0_START]) 
+                cube(size=[W, 100, WINDOW_0_DZ]);
+            translate([-W/2, 0, WINDOW_1_START]) 
+                cube(size=[W, 100, WINDOW_1_DZ]);
         }
     }
 }
 
+module reverseBridge()
+{
+    translate([7, 0, 0])
+    polygonYZ(h=1, points=[
+        [8, 1],
+        [8, -6],
+        [2, 0]
+    ]);
+
+    mirror([-1,0, 0])
+    translate([7, 0, 0])
+    polygonYZ(h=1, points=[
+        [8, 1],
+        [8, -6],
+        [2, 0]
+    ]);
+}
 
 // Battery section
 if (DRAW_AFT) {
@@ -132,6 +148,7 @@ if (DRAW_AFT) {
                         noBottom=false,
                         cutoutHigh=false,
                         bridgeOnlyBottom=true);
+                    reverseBridge();
                 }
             }
 
@@ -144,6 +161,7 @@ if (DRAW_AFT) {
                         cutoutHigh=false,
                         bridgeOnlyBottom=true,
                         bridge=i < 13 ? 1 : 0);
+                    reverseBridge();
                 }
             }
             intersection() {
@@ -170,7 +188,7 @@ if (DRAW_AFT) {
             }
         }
         // Top metal art
-        translate([-12, Y_METAL_ART, M_METAL_ART]) {
+        translate([-12, Y_METAL_ART+1, M_METAL_ART]) {
             cube(size=[24, 100, DZ_METAL_ART]);
         }
         metalArt();
@@ -192,8 +210,13 @@ if (DRAW_AFT) {
         translate([0, Y_CRYSTAL, M_AFT_STOP + H_BUTTRESS*9]) 
             crystal(W_CRYSTAL, H_CRYSTAL, 200);
 
-        // Channel
-        translate([-3, -EPS, M_AFT_STOP + H_BUTTRESS*9]) cube(size=[6, 100, 100]);
+        // Channels
+        LOWER_W = 6;
+        UPPER_W = 10;
+        translate([-LOWER_W/2, -EPS, M_AFT_STOP + H_BUTTRESS*9]) 
+            cube(size=[LOWER_W, 100, 100]);
+        translate([-UPPER_W/2, Y_CRYSTAL, M_AFT_STOP + H_BUTTRESS*9]) 
+            cube(size=[UPPER_W, 100, 100]);
 
         // Rod
         ROD_X = 10.5;
@@ -229,25 +252,26 @@ if(DRAW_FORE) {
                     M_INSET_END - M_START,
                     M_BOLT - M_START,
                     0, // use flat port holderM_PORT_CENTER - M_START,
-                    0, // use flat switch holder M_SWITCH_CENTER - M_START,
+                    M_SWITCH_CENTER - M_START,
                     M_USB - M_START,
 
                     roundRect = 3.175/2,
                     firstButtressFullRing = false,
-                    dyInset=3.7
+                    dyInset=3.7,
+                    dySwitch=10.5
                 );
             }
             intersection() {
                 innerSpace();
                 union() {
-
-                    // Switch
-                    SWITCH_DZ = 5.7;
-                    SWITCH_T = 3;
                     BASE_Y = R_INNER - 3.7;
 
-                    translate([-50, BASE_Y - SWITCH_T - 2.0, M_SWITCH_CENTER - SWITCH_DZ/2])
-                        cube(size=[100, SWITCH_T, SWITCH_DZ]);
+                    difference() {
+                        translate([-100, -R_INNER, M_START]) {
+                            cube(size=[200, 3.5, H_BUTTRESS*2]);
+                        }
+                        cylinder(h=500, d=D_INNER-4);
+                    }
 
                     // Port
                     PORT_T = 5.0;
@@ -280,4 +304,4 @@ if(DRAW_FORE) {
         cube(size=[OLED_DISPLAY_W, 2, OLED_DISPLAY_L]);
 }
 
-metalArt();
+*metalArt();

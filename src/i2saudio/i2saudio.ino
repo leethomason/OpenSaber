@@ -1,6 +1,5 @@
 #include <Adafruit_ZeroI2S.h>
 #include <Adafruit_ZeroDMA.h>
-#include <Adafruit_ZeroTimer.h>
 #include <Adafruit_SPIFlash.h>
 
 #include "Grinliz_Util.h"
@@ -18,7 +17,6 @@ Adafruit_ZeroI2S i2s(0, 1, 12, 2);
 Adafruit_SPIFlash spiFlash(SS1, &SPI1);     // Use hardware SPI 
 Adafruit_ZeroDMA audioDMA;
 SPIStream spiStream(spiFlash);
-Adafruit_ZeroTimer zt4(4);
 
 ConstMemImage MemImage(spiFlash);
 I2SAudio i2sAudio(i2s, audioDMA, spiFlash, spiStream);

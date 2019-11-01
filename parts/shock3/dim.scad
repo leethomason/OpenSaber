@@ -25,6 +25,11 @@ DZ_INSET            = 40.0;
 M_INSET_END         = M_INSET_START + DZ_INSET;
 DX_INSET            = 18.5;
 
+WINDOW_0_START      = 71.1;
+WINDOW_0_DZ         =  7.27;
+WINDOW_1_START      = 87.1;
+WINDOW_1_DZ         = 12.75;
+
 M_PORT_CENTER       = M_INSET_START + 8.0;
 M_BOLT              = M_INSET_START + 20.0;
 M_SWITCH_CENTER     = M_INSET_START + 29.0;
@@ -53,13 +58,22 @@ X_DOTSTAR           = 5.0 + 0.5;  // from spec
 Y_DOTSTAR           = 1.4;  // from spec
 DOTSTAR_STRIP       = 12.4;
 
-BUTTON_D = 7.2;
-BUTTON_H = 1.6;
+STOCK_H = 6.35;     // 1/4 inch aluminum
+
+BUTTON_WELL = 3.5;
+BUTTON_HEAD_D = 7.2;
+BUTTON_HEAD_H = 1.6;
 BUTTON_THREAD_H = 4.0;
 BUTTON_THREAD_D = 4.0;
+BUTTON_UNDER_WELL = 4.0;
+BUTTON_UNDER_WELL_D = 10.0;
 
 TACTILE_POST_H = 5.5;
 TACTILE_POST_D = 3.4;
 TACTILE_BASE_H = 3.8;
 TACTILE_BASE_X = 6.0;
+
+M_METAL_ART = M_AFT_STOP + H_BUTTRESS*13;
+DZ_METAL_ART = H_BUTTRESS*11;
+Y_METAL_ART = 9;
 
