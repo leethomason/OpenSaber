@@ -87,7 +87,15 @@ module keyJoint(dz, do, di, slot, angle=0)
     trim1 = slot ? 0.4 : 0;
 
     intersection() {
-        tube(h=dz, do=do, di=di);
+        difference() {
+            union() {
+                //tube(h=dz, do=do, di=di);  
+                cylinder(h=dz-2, d=do);
+                translate([0, 0, dz-2]) cylinder(h=2, d1=do, d2=do-1);
+
+            }
+            cylinder(h=100, d=di);
+        }
         union() {
             rotate([0, 0, angle]) 
                 tjoint(do, dz, trim0, trim1);

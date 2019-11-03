@@ -8,7 +8,6 @@ INNER_VIEW = false;
 
 WOOD_DY = -8;
 POWER_DY = 2.5;
-SWITCH_DY = 5.5;
 EPS = 0.01;
 ESP2 = EPS*2;
 
@@ -130,7 +129,8 @@ module insetHolder( diameter,
                     pinHeaderHolder=false,
                     firstButtressFullRing=true,
                     roundRect=0,
-                    dyInset=5)
+                    dyInset=5,
+                    dySwitch=5.5)
 {
     rCapsule = diameterCapsule / 2;
     rInner = diameter / 2;
@@ -166,15 +166,15 @@ module insetHolder( diameter,
                     BRIDGE_T = 3;
                     cylinder(h=300, d=diameter);
                     translate([0, 0, dzSwitch - SWITCH_BRIDGE_DZ/2]) {
-                        translate([-20, rInner - SWITCH_DY - dyInset - BRIDGE_T]) {
+                        translate([-20, rInner - dySwitch - dyInset - BRIDGE_T]) {
                             cube(size=[40, BRIDGE_T, SWITCH_BRIDGE_DZ]);
                         }
 
-                        translate([X_SWITCH/2, rInner - SWITCH_DY - dyInset, 0]) {
+                        translate([X_SWITCH/2, rInner - dySwitch - dyInset, 0]) {
                             cube(size=[50, Y_SWITCH, SWITCH_BRIDGE_DZ]);
                         }
 
-                        mirror([-1, 0, 0]) translate([X_SWITCH/2, rInner - SWITCH_DY - dyInset, 0]) {
+                        mirror([-1, 0, 0]) translate([X_SWITCH/2, rInner - dySwitch - dyInset, 0]) {
                             cube(size=[50, Y_SWITCH, SWITCH_BRIDGE_DZ]);
                         }
 
