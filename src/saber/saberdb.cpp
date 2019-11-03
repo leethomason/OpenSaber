@@ -24,207 +24,24 @@ SOFTWARE.
 #include "Grinliz_Arduino_Util.h"
 #include "saberdb.h"
 #include "sfx.h"  // bug fix; generally don't want a dependency on sfx
-#include "vprom.h"
+//#include "vprom.h"    // would be nice to get this working.
 
 using namespace osbr;
 
-SaberDB::SaberDB() {
-    STATIC_ASSERT(BASE_ADDR + NUM_PALETTES * sizeof(Palette) + sizeof(DataHeader) < EEPROM_SIZE);
-}
-
-bool SaberDB::writeDefaults()
+SaberDB::SaberDB()
 {
-    #if (defined(LED_TYPE) && (LED_TYPE == LED_TYPE_BBG))
-        static Palette defPalette[NUM_PALETTES] = {
-                                              // assume 400ma/channel 
-            { 0x00ff00,  0x00ffa0,    0 },    // green         400         
-            { 0x0000ff,  0x00c8ff,    0 },    // blue          400
-            { 0x00ffff,  0x00a0ff,    0 },    // cyan          800
-            { 0x00ff44,  0x00ffaa,    0 },    // off-green     500
+    static const int BESPIN2 = 0;
+    static const int ROGUE = 1;
 
-            { 0xffff00,  0x44ffa0,    0 },    // green-green   800
-            { 0xa0a000,  0x44ffa0,    0 },    // green-green   500
-            { 0x8080ff,  0x00a0ff,    0 },    // cyan          800
-            { 0xffff44,  0xaaffaa,    0 },    // off-green     900
-        };
-
-        static const char* defNames[NUM_PALETTES] = {
-            "BESPIN2",
-            "OBIWAN",
-            "FATES",
-            "JAINA",
-            "BESPIN2",
-            "BESPIN2",
-            "JAINA",
-            "JAINA",
-        };
-    #elif (defined(LED_TYPE) && (LED_TYPE == LED_TYPE_WWG))
-        static Palette defPalette[NUM_PALETTES] = {
-            { 0x440044,  0x444400,    0 }, 
-            { 0x880088,  0x888800,    0 }, 
-            { 0xbb00bb,  0xbbbb00,    0 }, 
-            { 0xff00ff,  0xffff00,    0 }, 
-
-            { 0x004400,  0x440044,    0 }, 
-            { 0x008800,  0x880088,    0 }, 
-            { 0x00bb00,  0xbb00bb,    0 }, 
-            { 0x00ff00,  0xff00ff,    0 }, 
-        };
-
-        static const char* defNames[NUM_PALETTES] = {
-            "JAINA",
-            "JAINA",
-            "JAINA",
-            "JAINA",
-            "JAINA",
-            "JAINA",
-            "JAINA",
-            "JAINA",
-        };        
-    #elif (defined(LED_TYPE) && (LED_TYPE == LED_TYPE_GGC))
-        static Palette defPalette[NUM_PALETTES] = {
-            { 0x444400,  0x440044,    0 }, 
-            { 0x888800,  0x880088,    0 }, 
-            { 0xbbbb00,  0xbb00bb,    0 }, 
-            { 0xffff00,  0xff00ff,    0 }, 
-
-            { 0x440044,  0x444400,    0 }, 
-            { 0x880088,  0x888800,    0 }, 
-            { 0xbb00bb,  0xbbbb00,    0 }, 
-            { 0x00ff00,  0xffff00,    0 }, 
-        };
-
-        static const char* defNames[NUM_PALETTES] = {
-            "BESPIN2",
-            "BESPIN2",
-            "BESPIN2",
-            "BESPIN2",
-            "BESPIN2",
-            "BESPIN2",
-            "BESPIN2",
-            "BESPIN2",
-        };        
-    #elif (SABER_MODEL == SABER_MODEL_SISTER)
-        #if SABER_SUB_MODEL == SABER_SUB_MODEL_CELESTIA
-            static Palette defPalette[NUM_PALETTES] = {
-                { 0x00ff00,  0x00ffa0,    0 },    // green-green
-                { 0x0000ff,  0x00c8ff,    0 },    // blue-blue
-                { 0x00ffff,  0x00a0ff,    0 },    // cyan-cyan
-                { 0xff0000,  0xa08000,    0 },    // red-red
-                { 0x00ff00,  0x00c8ff,    0 },    // green-blue
-                { 0x00ff00,  0x00ccff,    0 },    // green-cyan
-                { 0x9000ff,  0x9064ff,    0 },    // purple-purple
-                { 0xffff00,  0x44ff00,    0 }     // yellow-yellow
-            };
-
-        #elif SABER_SUB_MODEL == SABER_SUB_MODEL_LUNA
-            static Palette defPalette[NUM_PALETTES] = {
-                { 0x00ff00,  0x00ffa0,    0 },    // green-green
-                { 0x0000ff,  0x00c8ff,    0 },    // blue-blue
-                { 0x00ffff,  0x00a0ff,    0 },    // cyan-cyan
-                { 0xff0000,  0xa08000,    0 },    // red-red
-                { 0x0000ff,  0x00c8ff,    0 },    // green-blue
-                { 0x00ffff,  0x00ccff,    0 },    // green-cyan
-                { 0x9000ff,  0x9064ff,    0 },    // purple-purple
-                { 0xffff00,  0x44ff00,    0 },    // yellow-yellow
-            };
-        #else 
-            #error SUB_MODEL not defined.
-        #endif
-        static const char* defNames[NUM_PALETTES] = {
-            "BESPIN2",
-            "JAINA",
-            "FATES",
-            "REVENGE",
-            "FATES",
-            "JAINA",
-            "JAINA",
-            "ROGUE"
-        };        
-    #else
-        // STANDARD
-        static Palette defPalette[NUM_PALETTES] = {
-            { 0x00ff00,  0x00ffa0,    0 },    // green
-            { 0x0000ff,  0x00c8ff,    0 },    // blue
-            { 0x00ffff,  0x00a0ff,    0 },    // cyan
-            { 0xff0000,  0xa08000,    0 },    // red
-#if (SABER_MODEL == SABER_MODEL_TYVOKKA)            
-            { 0xff6000,  0x808000,    0 },    // orange
-            { 0x0044ff,  0x00ccff,    0 },    // blue-green
-            { 0x508080,  0x30a0a0,    0 },    // white
-            { 0x00ff44,  0x00ffaa,    0 }     // green-blue
-#else
-            { 0xff4000,  0x80ff00,    0 },    // orange
-            { 0x0044ff,  0x00ccff,    0 },
-            { 0x9000ff,  0x9064ff,    0 },
-            { 0x00ff44,  0x00ffaa,    0 }
-#endif                        
-        };
-
-        #ifndef SABER_SOUND_FLASH
-        static const char* defNames[NUM_PALETTES] = {
-            "BESPIN2",
-            "OBIWAN",
-            "FATES",
-            "VADER",
-            "ROGUE",
-            "GRAFLEX",
-            "JAINA",
-            "ROGUE"
-        };
-        #else
-            #if (SABER_SOUND_DEF == SABER_SOUND_DEF_BESPIN_JAINA)
-                static const char* defNames[NUM_PALETTES] = {
-                    "bespin2",
-                    "bespin2",
-                    "bespin2",
-                    "jaina",
-                    "jaina",
-                    "jaina",
-                    "jaina",
-                    "jaina"
-                };
-            #elif (SABER_SOUND_DEF == SABER_SOUND_DEF_BESPIN_ROGUE)
-                static const char* defNames[NUM_PALETTES] = {
-                    "bespin2",
-                    "bespin2",
-                    "bespin2",
-                    "rogue",
-                    "rogue",
-                    "rogue",
-                    "rogue",
-                    "rogue"
-                };
-            #else
-                #error SABER_SOUND_DEF not defined.
-            #endif 
-        #endif
-    #endif
-
-    Log.p("Writing EEPROM default.").eol();
-
-    DataHeader dataHeaderDefault;
-    vpromPut(headerAddr(), dataHeaderDefault);
-
-    for (int i = 0; i < NUM_PALETTES; ++i) {
-        Palette p = defPalette[i];
-        p.soundFont = defNames[i];
-        vpromPut(paletteAddr(i), p);
-    }
-    readData();
-    Log.p("EEPROM default complete.").eol();
-    return true;
+    palette[0].set(0x00ff00,  0x00ffa0, BESPIN2); // green 
+    palette[1].set(0x0000ff,  0x00c8ff, BESPIN2); // blue
+    palette[2].set(0x00ffff,  0x00a0ff, BESPIN2); // cyan
+    palette[3].set(0xff0000,  0xa08000, ROGUE);   // red
+    palette[4].set(0xff6000,  0x808000, ROGUE);   // orange
+    palette[5].set(0x0044ff,  0x00ccff, ROGUE);   // blue-green
+    palette[6].set(0x508080,  0x30a0a0, ROGUE);   // white
+    palette[7].set(0x00ff44,  0x00ffaa, ROGUE);   // green-blue
 }
-
-
-bool SaberDB::readData() {
-
-    vpromGet(headerAddr(), dataHeader);
-    vpromGet(paletteAddr(dataHeader.currentPalette), palette);
-    setupInit();
-    return true;
-}
-
 
 void SaberDB::nextPalette() {
     setPalette(dataHeader.currentPalette + 1);
@@ -242,29 +59,18 @@ void SaberDB::setPalette(int n)
 
     dataHeader.currentPalette = abs(n) % NUM_PALETTES;
     EventQ.event("[PALETTE]", dataHeader.currentPalette);
-    //Log.p("Switch Palette to: ").p(dataHeader.currentPalette).eol();
-
-    vpromPut(headerAddr(), dataHeader);
-    vpromGet(paletteAddr(dataHeader.currentPalette), palette);
 }
 
 
 void SaberDB::getPalette(int i, Palette* pal)
 {
-    vpromGet(paletteAddr(i), *pal);
+    i = glClamp(i, 0, NUM_PALETTES-1);
+    *pal = palette[i];
 }
 
-
-void SaberDB::setupInit()
-{
-    dataHeader.nSetup = dataHeader.nSetup + 1;
-    vpromPut(headerAddr(), dataHeader);
-}
 
 void SaberDB::setVolume(int v) {
-    v = constrain(v, 0, 204);
-    dataHeader.volume = v;
-    vpromPut(headerAddr(), dataHeader);
+    dataHeader.volume = glClamp(v, 0, 256);
 }
 
 void SaberDB::setVolume4(int v)
@@ -302,27 +108,22 @@ uint8_t SaberDB::volume4() const
 void SaberDB::setMotion(float v) {
     v = constrain(v, 1.1, 10.0);
     dataHeader.motion = v;
-    vpromPut(headerAddr(), dataHeader);
 }
 
 void SaberDB::setImpact(float v) {
     v = constrain(v, 1.1, 10.0);
     dataHeader.impact = v;
-    vpromPut(headerAddr(), dataHeader);
 }
 
 void SaberDB::setBladeColor(const RGB& color) {
-    palette.bladeColor = color;
-    vpromPut(paletteAddr(dataHeader.currentPalette), palette);
+    palette[dataHeader.currentPalette].bladeColor = color;
 }
 
 void SaberDB::setImpactColor(const RGB& color) {
-    palette.impactColor = color;
-    vpromPut(paletteAddr(dataHeader.currentPalette), palette);
+    palette[dataHeader.currentPalette].impactColor = color;
 }
 
-void SaberDB::setSoundFont(const char* v) {
-    palette.soundFont = v;
-    vpromPut(paletteAddr(dataHeader.currentPalette), palette);
+void SaberDB::setSoundFont(int f) {
+    palette[dataHeader.currentPalette].soundFont = glClamp(f, 0, 3); // fixme: use constants
 }
 

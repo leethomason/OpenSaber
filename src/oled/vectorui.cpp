@@ -167,7 +167,7 @@ void VectorUI::Draw(VRender* ren,
             Segment(ren, TEXT, 2, digits[i], WHITE);
         }
     }
-    ren->Render();
+    //ren->Render();
 
 #endif
 

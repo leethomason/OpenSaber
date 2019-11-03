@@ -33,10 +33,6 @@ class SaberDB
 public:
     SaberDB();
 
-    bool writeDefaults();
-    bool readData();
-
-    // Global
     void nextPalette();
     int paletteIndex() const      {
         return dataHeader.currentPalette;
@@ -70,42 +66,45 @@ public:
 
     // Palette
     const osbr::RGB& bladeColor() const   {
-        return palette.bladeColor;
+        return palette[dataHeader.currentPalette].bladeColor;
     }
     void setBladeColor(const osbr::RGB& color);
 
     const osbr::RGB& impactColor() const  {
-        return palette.impactColor;
+        return palette[dataHeader.currentPalette].impactColor;
     }
     void setImpactColor(const osbr::RGB& color);
 
-    const char* soundFont() const {
-        return palette.soundFont.c_str();
+    int soundFont() const {
+        return palette[dataHeader.currentPalette].soundFont;
     }
-    void setSoundFont(const char*);
+    void setSoundFont(int f);
 
     static const int NUM_PALETTES = 8;
 
     // Testing (not saved)
     void setCrystalColor(const osbr::RGB& color) {
-        m_crystalColor = color;
+        crystalColor = color;
     }
-    const osbr::RGB& crystalColor() const {
-        return m_crystalColor;
+    const osbr::RGB& getCrystalColor() const {
+        return crystalColor;
     }
 
     struct Palette {
         osbr::RGB bladeColor;
         osbr::RGB impactColor;
-        CStr<9> soundFont;
+        int soundFont;
+
+        void set(const osbr::RGB& blade, const osbr::RGB& impact, int font) {
+            bladeColor = blade;
+            impactColor = impact;
+            soundFont = font;
+        }
     };
 
     void getPalette(int i, Palette* palette);
 
 private:
-    void setupInit();
-
-    static const int BASE_ADDR    = 20;
 
     struct DataHeader {
         DataHeader() :
@@ -125,16 +124,9 @@ private:
         uint32_t nSetup;
     };
 
-    const int headerAddr() const        {
-        return BASE_ADDR;
-    }
-    const int paletteAddr(int i) const  {
-        return BASE_ADDR + sizeof(DataHeader) + sizeof(Palette) * i;
-    }
-
-    osbr::RGB     m_crystalColor;
+    osbr::RGB   crystalColor;
     DataHeader	dataHeader;
-    Palette 		palette;
+    Palette 	palette[NUM_PALETTES];
 };
 
 

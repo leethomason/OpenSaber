@@ -105,10 +105,7 @@ bool istrStarts(const char* str, const char* prefix)
 
 
 /*
-    This algorithm is ad-hoc. Need a consistent, fast
-    hash for storing filenames as 16-bit ints instead
-    of strings. The strings are capped at 8 length,
-    which lets a super-simple approach probably stand.
+    Modified Bernstein hash.
 */
 uint16_t hash8(const char* v, const char* end)
 {

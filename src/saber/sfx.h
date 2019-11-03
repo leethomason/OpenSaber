@@ -24,110 +24,84 @@ SOFTWARE.
 #define SFX_HEADER
 
 #include <Arduino.h>
-//#include <SD.h>
-
 #include "Grinliz_Arduino_Util.h"
 #include "Grinliz_Util.h"
-#include "iaudio.h"
+
+class I2SAudioDriver;
+class Manifest;
 
 // SFX in priority order!
-enum {            //  Max
-  SFX_IDLE,       //  1
-  SFX_MOTION,     //  16
-  //SFX_SPIN,       //  4  although not currently used
-  SFX_IMPACT,     //  16
-  SFX_USER_TAP,   //  4
-  //SFX_USER_HOLD,  //  1
-  SFX_POWER_ON,   //  4
-  SFX_POWER_OFF,  //  4
+enum
+{				//  Max
+	SFX_IDLE,   //  1
+	SFX_MOTION, //  16
+	SFX_IMPACT,   //  16
+	SFX_USER_TAP, //  4
+	SFX_POWER_ON,  //  4
+	SFX_POWER_OFF, //  4
 
-  NUM_SFX_TYPES,
-  MAX_SFX_FILES = 64,
-  MAX_FONTS = 10,
-  SFX_NONE = 255
+	NUM_SFX_TYPES,
+	SFX_NONE = 255
 };
 
-enum {
-  SFX_GREATER,
-  SFX_GREATER_OR_EQUAL,
-  SFX_OVERRIDE
+enum
+{
+	SFX_GREATER,
+	SFX_GREATER_OR_EQUAL,
+	SFX_OVERRIDE
 };
-
-class SerialFlashFile;
 
 class SFX
 {
 public:
-  // AudioPlayer can be null to avoid a bunch of #if/if
-  SFX(IAudio* audioPlayer);
-  static SFX* instance() { return m_instance; }
+	// AudioPlayer can be null to avoid a bunch of #if/if
+	SFX(I2SAudioDriver *driver, const Manifest& manifest);
+	static SFX *instance() { return m_instance; }
 
-  bool init();
-  void scanFiles(uint8_t font);
+	bool playSound(int sfx, int mode);
+	bool playSound(const char *sfx);
+	void stopSound();
 
-  bool playSound(int sfx, int mode);
-  bool playSound(const char* sfx);
-  bool playUISound(const char* name, bool prepandUIPath=true);
-  bool playUISound(int n, bool prepandUIPath=true);
-  void stopSound();
+	bool bladeOn() const { return m_bladeOn; }
+	void process();
 
-  // The class of SFX (MOTION, IMPACT, etc) last successfully played.
-  int lastSFX() const                     { return m_lastSFX; }
-  
-  bool bladeOn() const                    { return m_bladeOn; }
-  void process();
+	void setVolume(int v) { m_volume = glClamp(v, 0, 256);}
+	int getVolume() const { return m_volume; }
 
-  const uint32_t getIgniteTime() const    { return m_igniteTime; }
-  const uint32_t getRetractTime() const   { return m_retractTime; }
+	int lastSFX() const { return m_lastSFX; }
 
-  void setVolume204(int vol);
-  uint8_t getVolume204() const;
+	const uint32_t getIgniteTime() const { return m_igniteTime; }
+	const uint32_t getRetractTime() const { return m_retractTime; }
 
-  uint8_t setFont(uint8_t font);
-  uint8_t setFont(const char* fontName);
-  const char* fontName(uint8_t font) const;
-  int numFonts() const { return m_numFonts; }
-  const char* currentFontName() const;
+	int setFont(int font);
+	int setFont(const char *fontName);
+	int currentFont() const { return m_currentFont; }
 
-  bool readHeader(const char* path, uint32_t* lengthMillis);
+protected:
+	void readIgniteRetract();
+	void scanFiles();
+	int calcSlot(const char* name);
 
-  protected:
-  void filePath(CStr<25>* str, int id);
-  void filePath(CStr<25>* str, const char* dir, const char* file);
-  void scanFonts();
+	I2SAudioDriver *m_driver;
+	const Manifest& m_manifest;
 
-  void addFile(const char* filename, int index);
-  int calcSlot(const char* filename); // -1 if not a supported file
-  void readIgniteRetract();
+	bool m_bladeOn;
+	int m_currentSound; // For smooth, refers to the current effect sound.
+	int m_lastSFX;
+	int m_currentFont;
+	uint32_t m_igniteTime;
+	uint32_t m_retractTime;
+	int m_volume;
 
-//  uint32_t readU32(File& file, int n);
-  uint32_t readU32(SerialFlashFile& file, int n);
+	Random m_random;
 
-  // note: initialize to 255
-  struct SFXLocation {
-    uint8_t start;
-    uint8_t count;
-  
-    const bool InUse() const { return start < 255 && count < 255; }
-  };
+	struct SFXType {
+		int start;
+		int count;
+	};
+	SFXType m_sfxType[NUM_SFX_TYPES];
 
-  IAudio*      m_player;
-  bool         m_bladeOn;
-  uint8_t      m_numFonts;
-  int8_t       m_numFilenames;
-  int8_t m_currentSound; // For smooth, refers to the current effect sound.
-  int8_t       m_lastSFX;
-  uint8_t      m_currentFont;
-  uint32_t     m_igniteTime;
-  uint32_t     m_retractTime;
-  int          m_savedVolume = -1;  // negative means not in use.
-
-  Random       m_random;
-    SFXLocation m_location[NUM_SFX_TYPES];  // written at scanFiles
-    CStr<13> m_filename[MAX_SFX_FILES];     // written at scanFiles
-    CStr<9> m_dirName[MAX_FONTS];           // written at init() / scanFonts()
-  
-  static SFX*  m_instance;
+	static SFX *m_instance;
 };
 
 #endif // SFX_HEADER

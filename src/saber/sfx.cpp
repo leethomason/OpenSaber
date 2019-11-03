@@ -22,195 +22,73 @@
 
 #include "pins.h"
 
-#if SABER_SOUND_ON == SABER_SOUND_SD
-//#include <SD.h>
-#include <SerialFlash.h>
-#elif SABER_SOUND_ON == SABER_SOUND_FLASH
-#include "mcmemimage.h"
-#endif
-
+#include "manifest.h"
 #include "sfx.h"
 #include "tester.h"
-
-#if SERIAL_DEBUG == 1
-//#define DEBUG_DEEP
-#endif
+#include "i2saudiodrv.h"
 
 SFX* SFX::m_instance = 0;
 
-SFX::SFX(IAudio* audioPlayer)
+SFX::SFX(I2SAudioDriver *driver, const Manifest& manifest) :
+    m_driver(driver),
+    m_manifest(manifest)
 {
     m_instance = this;
-
-    m_player = audioPlayer;
     m_bladeOn = false;
-    m_numFonts = 0;
-    m_numFilenames = 0;
     m_currentSound = SFX_NONE;
-    m_currentFont = -1;
+    m_currentFont = 0;
     m_igniteTime = 1000;
     m_retractTime = 1000;
+    m_volume = 64;
     m_lastSFX = SFX_NONE;
 
-    memset(m_location, 255, sizeof(SFXLocation)*NUM_SFX_TYPES);
+    scanFiles();
 }
 
-bool SFX::init()
+void SFX::scanFiles()
 {
-    Log.p("SFX::init()").eol();
-    scanFonts();
-    return true;
-}
+    ASSERT(m_currentFont >= 0 && m_currentFont < MEM_IMAGE_NUM_DIR);
+    const MemUnit& dirUnit = m_manifest.getUnit(m_currentFont);
+    int start = dirUnit.offset;
+    int count = dirUnit.size;
+    Log.p("scanning: ").p(dirUnit.getName().c_str()).p(" start=").p(start).p(" count=").p(count).eol();
 
-void SFX::filePath(CStr<25>* path, const char* dir, const char* file)
-{
-    path->clear();
-    *path = dir;
-    path->append('/');
-    path->append(file);
-}
-
-void SFX::filePath(CStr<25>* path, int index)
-{
-    path->clear();
-    if (m_numFonts > 0 && m_currentFont >= 0) {
-        *path = m_dirName[m_currentFont].c_str();
-        path->append('/');
+    // Group the files; assume they are already
+    // in swing / clash / etc. groups.
+    for(int i=0; i<NUM_SFX_TYPES; ++i) {
+        m_sfxType[i].start = 0;
+        m_sfxType[i].count = 0;
     }
-    path->append(m_filename[index].c_str());
-}
 
-void SFX::scanFonts()
-{
-    m_numFonts = 0;
- 
-#if (SABER_SOUND_ON == SABER_SOUND_SD)
-    // Scan for a sound font with a limited, reasonable set of files.
-    static const int N = 4;
-    const char* NAMES[N] = { "HUM.WAV", "IDLE.WAV", "POWERON.WAV", "IGNITE.WAV" };
-
-    File root = SD.open("/");
-    while (true) {
-        File entry =  root.openNextFile();
-        if (!entry) {
-            // no more files
-            break;
-        }
-        if (entry.isDirectory()) {
-            for (int i = 0; i < N; ++i) {
-                CStr<25> path;
-                filePath(&path, entry.name(), NAMES[i]);
-
-                File file = SD.open(path.c_str());
-                if (file) {
-                    m_dirName[m_numFonts++] = entry.name();
-                    file.close();
-                    break;
-                }
-            }
-        }
-        entry.close();
-    }
-    root.close();
-#elif (SABER_SOUND_ON == SABER_SOUND_FLASH)
-    m_numFonts = MemImage.numDir();
-    for(int i=0; i<m_numFonts; ++i) {
-        MemUnit dir;
-        MemImage.readDir(i, &dir);
-        m_dirName[i] = dir.name;
-    }
-#endif
-
-    combSort(m_dirName, m_numFonts);
-
-    Log.p("Fonts:").eol();
-    for (int i = 0; i < m_numFonts; ++i) {
-        Log.p(i).p(": ").p(m_dirName[i].c_str()).eol();
-    }
-}
-
-void SFX::scanFiles(uint8_t index)
-{
-    // First get the files,
-    // then sort the files,
-    // finally assign location info.
-    memset(m_location, 255, sizeof(SFXLocation)*NUM_SFX_TYPES);
-    m_numFilenames = 0;
-
-#if (SABER_SOUND_ON == SABER_SOUND_SD)
-    File root = SD.open(m_dirName[index].c_str());
-    while (true) {
-        File entry =  root.openNextFile();
-        if (!entry) {
-            // no more files
-            break;
-        }
-        if (entry.isDirectory()) {
-            continue;
-        }
-        else {
-            int slot = calcSlot(entry.name());
-            if (slot >= 0 && m_numFilenames < MAX_SFX_FILES) {
-                m_filename[m_numFilenames++] = entry.name();
-            }
-        }
-        entry.close();
-    }
-    root.close();
-#elif SABER_SOUND_ON == SABER_SOUND_FLASH
-    MemUnit dir;
-    MemImage.readDir(m_dirName[index].c_str(), &dir);
-    for(unsigned i=0; i<dir.size; i++) {
-        MemUnit file;
-        MemImage.readFile(i + dir.offset, &file);
-        CStr<13> name;
-        name = file.name;   // explicity call operator=
-
+    for(int i=start; i < start + count; ++i) {
+        const MemUnit& memUnit = m_manifest.getUnit(i);
+        CStr<9> name;
+        memUnit.name.toStr(&name);
         int slot = calcSlot(name.c_str());
-        if (slot >= 0 && m_numFilenames < MAX_SFX_FILES) {
-            m_filename[m_numFilenames++] = name;
-        }
-    }
-#endif
-    // They often come in weird order, which is a bummer.
-    // Simple sort seems fast enough.
-    combSort(m_filename, m_numFilenames);
 
-    for (int i = 0; i < m_numFilenames; ++i) {
-        addFile(m_filename[i].c_str(), i);
+        Log.p("slot name=").pt(name).p(" slot=").p(slot).eol();
+
+        if (slot >= 0) {
+            if (m_sfxType[slot].count == 0) {
+                m_sfxType[slot].start = i;
+                m_sfxType[slot].count = 1;
+            }
+            else {
+                m_sfxType[slot].count++;
+            }
+        }
     }
 
     static const char* NAMES[NUM_SFX_TYPES] = {
         "Idle        ",
         "Motion      ",
-        //"Spin        ",
         "Impact      ",
         "User_Tap    ",
-        //"User_Hold   ",
         "Power_On    ",
         "Power_Off   "
     };
     for(int i=0; i<NUM_SFX_TYPES; ++i) {
-        const int id = SFX_IDLE + i;
-        Log.p(NAMES[i]).p("start=").p(m_location[id].start).p(" count=").p(m_location[id].count).eol();
-
-        #if 0
-        Log.p("  ");
-        for(int j=0; j<m_location[id].count; ++j) {
-            uint32_t length = 0;
-
-            int track = m_location[id].start + j;
-            ASSERT(track >= 0);
-            ASSERT(track < m_numFilenames);
-
-            CStr<25> path;
-            filePath(&path, track);
-
-            readHeader(path.c_str(), &length);
-            Log.p(m_filename[track].c_str()).p(":").p(length).p(" ");
-        }
-        Log.eol();
-        #endif
+        Log.p(NAMES[i]).p("start=").p(m_sfxType[i].start).p(" count=").p(m_sfxType[i].count).eol();
     }
     readIgniteRetract();
 }   
@@ -226,42 +104,17 @@ int SFX::calcSlot(const char* name )
     else if (istrStarts(name, "IDLE")    || istrStarts(name, "HUM"))        slot = SFX_IDLE;
     else if (istrStarts(name, "IMPACT")  || istrStarts(name, "CLASH"))      slot = SFX_IMPACT;
     else if (istrStarts(name, "MOTION")  || istrStarts(name, "SWING"))      slot = SFX_MOTION;
-    //else if (istrStarts(name, "USRHOLD") || istrStarts(name, "LOCKUP"))     slot = SFX_USER_HOLD;
     else if (istrStarts(name, "USRTAP")  || istrStarts(name, "BLASTER"))    slot = SFX_USER_TAP;
-    //else if (istrStarts(name, "SPIN"))                                      slot = SFX_SPIN;
 
     return slot;
 }
 
-void SFX::addFile(const char* name, int index)
-{
-    int slot = calcSlot(name);
-    if (slot == -1) return;
-
-    if (!m_location[slot].InUse()) {
-        m_location[slot].start = index;
-        m_location[slot].count = 1;
-    }
-    else {
-        m_location[slot].count++;
-    }
-}
-
 bool SFX::playSound(int sound, int mode)
 {
-    if (!m_player) return false;
+    if (!m_driver) return false;
 
     ASSERT(sound >= 0);
     ASSERT(sound < NUM_SFX_TYPES);
-    ASSERT(m_player);
-
-#if SERIAL_DEBUG == 1
-#ifdef DEBUG_DEEP
-    Log.p("SFX playSound() sound: ").p(sound).eol();
-    Log.p("SFX m_bladeOn: ").p(m_bladeOn).eol();
-    Log.p("SFX m_currentSound: ").p(m_currentSound).eol();
-#endif
-#endif
 
     if (!m_bladeOn && (sound != SFX_POWER_ON)) {
         return false ; // don't play sound with blade off
@@ -278,7 +131,7 @@ bool SFX::playSound(int sound, int mode)
         m_bladeOn = false;
     }
 
-    if (!m_player->isPlaying(0)) {
+    if (!m_driver->isPlaying(0)) {
         m_currentSound = SFX_NONE;
     }
 
@@ -287,259 +140,89 @@ bool SFX::playSound(int sound, int mode)
             || (mode == SFX_GREATER && sound > m_currentSound)
             || (mode == SFX_GREATER_OR_EQUAL && sound >= m_currentSound))
     {
-        int track = m_location[sound].start + m_random.rand(m_location[sound].count);
-        ASSERT(track >= 0);
-        ASSERT(track < m_numFilenames);
+        int track = m_sfxType[sound].start + m_random.rand(m_sfxType[sound].count);
+        ASSERT(track >= MEM_IMAGE_NUM_DIR);
+        ASSERT(track < MEM_IMAGE_TOTAL);
 
-        Log.p("SFX play=").p(m_filename[track].c_str()).p(" track=").p(track)
+        CStr<9> filename;
+        const MemUnit& memUnit = m_manifest.getUnit(track);
+        memUnit.name.toStr(&filename);
+
+        Log.p("SFX play=").p(filename.c_str()).p(" track=").p(track)
             .p(" [")
-            .p(m_location[sound].start).p(",")
-            .p(m_location[sound].start + m_location[sound].count).p("]")
+            .p(m_sfxType[sound].start).p(",")
+            .p(m_sfxType[sound].start + m_sfxType[sound].count).p("]")
             .eol();
         EventQ.event("[SFX play]", sound);
 
-        CStr<25> path;
-        if (m_numFonts > 0 && m_currentFont >= 0) {
-            filePath(&path, m_dirName[m_currentFont].c_str(), m_filename[track].c_str());
-        }
-        else {
-            path = m_filename[track].c_str();
-        }
-        if (m_savedVolume >= 0) {
-            m_player->setVolume(m_savedVolume, 0);
-            m_savedVolume = -1;
-        }
-        m_player->play(path.c_str(), sound == SFX_IDLE, 0);
-        m_currentSound = sound;
         m_lastSFX = sound;
+        m_driver->play(track, sound == SFX_IDLE, 0);
+        m_driver->setVolume(m_volume, 0);
+        m_currentSound = sound;
         return true;
     }
     return false;
 }
 
-bool SFX::playUISound(int n, bool prepend)
-{
-    CStr<10> str;
-    switch(n) {
-        case 0: str = "zero"; break;
-        case 1: str = "one"; break;
-        case 2: str = "two"; break;
-        case 3: str = "three"; break;
-        case 4: str = "four"; break;
-        case 5: str = "five"; break;
-        case 6: str = "six"; break;
-        case 7: str = "seven"; break;
-        default: ASSERT(false); break;
-    }
-    return playUISound(str.c_str(), prepend);
-}
-
-bool SFX::playUISound(const char* name, bool prepend)
-{
-    if (!m_player) return false;
-
-    // Overrides the volume so the UI is at
-    // a consistent volume. Volume will be restored
-    // when the sound playing is done.
-    CStr<24> path;
-    if (prepend)
-        path.append("ui/");
-    path.append(name);
-    path.append(".wav");
-
-#if SERIAL_DEBUG == 1
-#ifdef DEBUG_DEEP
-    Log.p("SFX::playUISound sound: ").p(path.c_str()).eol();
-    /*
-    uint8_t nChannels = 0;
-    uint32_t nSamplesPerSec = 0;
-    uint32_t length = 0;
-
-    readHeader(path.c_str(), &nChannels, &nSamplesPerSec, &length, false);
-    Log.p(path.c_str()).p(":").p(nChannels).p(":").p(nSamplesPerSec).p(":").p(length).p(" ");
-    */
-#endif
-#endif
-    
-    if (m_savedVolume < 0) {
-        m_savedVolume = m_player->volume(0);
-    }
-
-    m_player->setVolume(128, 0);
-    return m_player->play(path.c_str(), false, 0);
-}
-
 bool SFX::playSound(const char* sfx)
 {
-    if (!m_player) return false;
+    if (!m_driver) return false;
 
-    if (m_savedVolume >= 0) {
-        m_player->setVolume(m_savedVolume, 0);
-        m_savedVolume = -1;
+    int index = m_manifest.getFile(m_currentFont, sfx);
+    if (index > 0) {
+        m_driver->play(index, false, 0);
+        m_driver->setVolume(m_volume, 0);
+        return true;
     }
-    m_player->play(sfx, false, 0);
-    return true;
+    return false;
 }
 
 void SFX::stopSound()
 {
-    if (!m_player) return;
+    if (!m_driver) return;
 
-    m_player->stop(0);
+    m_driver->stop(0);
     m_currentSound = SFX_NONE;
 }
 
 void SFX::process()
 {
-    if (!m_player) return;
-
-    if (!m_player->isPlaying(0)) {
-        if (m_savedVolume >= 0) {
-            //Log.p("restoring volume=").p(m_savedVolume).eol();
-            m_player->setVolume(m_savedVolume, 0);
-            m_savedVolume = -1;
-        }
-        // Play the idle sound if the blade is on.
-        if (m_bladeOn) {
-            playSound(SFX_IDLE, SFX_OVERRIDE);
-        }
-    }
-    // Basically sets the enable line; do this 
-    // last so enable isn't cycled without need.
-    m_player->process();
 }
-
-
-#if (SABER_SOUND_ON == SABER_SOUND_SD)
-uint32_t SFX::readU32(File& file, int n) {
-    uint32_t v = 0;
-    for (int i = 0; i < n; ++i) {
-        int b = file.read();
-        v += b << (i * 8);
-    }
-    return v;
-}
-
-uint32_t SFX::readU32(SerialFlashFile& file, int n) {
-    uint32_t v = 0;
-    for (int i = 0; i < n; ++i) {
-        uint8_t b = 0;
-        file.read(&b, 1);
-        v += uint32_t(b) << (i * 8);
-    }
-    return v;
-}
-
-bool SFX::readHeader(const char* filename, uint32_t* lengthMillis)
-{
-    File file = SD.open(filename);
-    if (file) {
-        Log.p(filename).eol();
-
-        file.seek(22);
-        uint32_t nAvgBytesPerSec = readU32(file, 4);
-        *lengthMillis = (file.size() - 44u) * 1000u / (nAvgBytesPerSec);
-        file.close();
-        return true;
-    }
-    return false;
-}
-#elif SABER_SOUND_ON == SABER_SOUND_FLASH
-bool SFX::readHeader(const char* filename, uint32_t* lengthMillis)
-{
-    MemUnit file;
-    int index = MemImage.lookup(filename);
-    if (index >= 0) {
-        MemImage.readFile(index, &file);
-        uint32_t addr = 0;
-        wav12::Wav12Header header;
-        MemImage.readAudioInfo(index, &header, &addr);
-        *lengthMillis = 1000U * header.nSamples / 22050U;
-        return true;
-    }
-    return false;
-}
-#else
-bool SFX::readHeader(const char* filename, uint32_t* lengthMillis)
-{
-    *lengthMillis = 1000;
-    return true;
-}
-#endif
 
 void SFX::readIgniteRetract()
 {
-    CStr<25> path;
+    m_igniteTime = m_retractTime = 1000;
 
-    if (m_location[SFX_POWER_ON].InUse()) {
-        filePath(&path, m_location[SFX_POWER_ON].start);
-        readHeader(path.c_str(), &m_igniteTime);
+    if(m_sfxType[SFX_POWER_ON].count) {
+        const MemUnit& memUnit = m_manifest.getUnit(m_sfxType[SFX_POWER_ON].start);
+        m_igniteTime = memUnit.timeInMSec();
     }
-    if (m_location[SFX_POWER_OFF].InUse()) {
-        filePath(&path, m_location[SFX_POWER_OFF].start);
-        readHeader(path.c_str(), &m_retractTime);
-    }
-}
-
-
-void SFX::setVolume204(int vol)
-{
-    if (!m_player) return;
-    vol = constrain(vol, 0, 204);
-    if (vol >= 204) {
-        if (m_player)
-            m_player->setVolume(256, 0);
-    }
-    else {
-        if (m_player)
-            m_player->setVolume(vol * 256 / 204, 0);
+    if(m_sfxType[SFX_POWER_OFF].count) {
+        const MemUnit& memUnit = m_manifest.getUnit(m_sfxType[SFX_POWER_OFF].start);
+        m_retractTime = memUnit.timeInMSec();
     }
 }
 
 
-uint8_t SFX::getVolume204() const
+int SFX::setFont(int font)
 {
-    if (m_player)
-        return m_player->volume(0) * 204 / 256;
-    return 160;
-}
+    font = glClamp(font, 0, MEM_IMAGE_NUM_DIR-1);
+    const MemUnit& unit = m_manifest.getUnit(font);
+    if (unit.size == 0) 
+        font = 0;
 
-
-uint8_t SFX::setFont(uint8_t font)
-{
-    if (m_numFonts) {
-        if (font != m_currentFont) {
-            m_currentFont = font % m_numFonts;
-            scanFiles(m_currentFont);
-        }
-    }
-    else {
-        m_currentFont = 0;
-    }
+    m_currentFont = font;
+    scanFiles();
     return m_currentFont;
 }
 
-uint8_t SFX::setFont(const char* name)
+int SFX::setFont(const char* name)
 {
-    int i=0;
-    for(; i<m_numFonts; ++i) {
-        if (strEqual(name, fontName(i))) {
-            break;
-        }
+    int index = m_manifest.getDir(name);
+    if (index < 0) {
+        index = 0;;
     }
-    return setFont(i);
+    return setFont(index);
 }
 
-const char* SFX::currentFontName() const
-{
-    if (m_numFonts && m_currentFont >= 0) {
-        return m_dirName[m_currentFont].c_str();
-    }
-    return "<none>";
-}
 
-const char* SFX::fontName(uint8_t font) const
-{
-    if (m_numFonts == 0) return "";
-    return m_dirName[font % m_numFonts].c_str();
-}

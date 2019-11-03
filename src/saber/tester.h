@@ -8,7 +8,6 @@ class Button;
 struct ButtonCBHandlers;
 class Tester;
 class SaberDB;
-class GrinlizLIS3DH;
 
 namespace osbr {
 	struct RGB;

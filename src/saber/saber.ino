@@ -21,23 +21,15 @@
 */
 
 // #define PROFILE
-// #define LOG_ACCEL 1024*2
 
 // Arduino Libraries
-#ifdef CORE_TEENSY
-#include <EEPROM.h>
-#include <SerialFlash.h>
-#include <Audio.h>
-#else 
 #include <Adafruit_ZeroI2S.h>
 #include <Adafruit_ZeroDMA.h>
 #include <Adafruit_SPIFlash.h>
-#include "mcmemimage.h"
-#endif
-
 #include <Wire.h>
 #include <SPI.h>
 #include <OLED_SSD1306.h>
+
 #include "Button.h"
 #include "Grinliz_Arduino_Util.h"
 
@@ -46,22 +38,10 @@
 #include "pins.h"
 
 #ifdef SABER_NUM_LEDS
-    #if SABER_UI_LED == SABER_LED_DOTSTAR
-        #include "DotStar.h"
-    #elif SABER_UI_LED == SABER_LED_NEOPIXEL
-        #include <Adafruit_NeoPixel.h>  // A poor design, but solid implementation.
-        //#include <FastLED.h>          // FastLED is a basically good design with and ENDLESS string of bugs and problems.
-    #endif
+    #include "DotStar.h"
 #endif
 
-// Generalized accelerometer is simpler to code and works for prop shield.
-// But the LIS3DH is simpler to use directly, and the smooth-sound relies
-// on the constant frequency output. Now using the LIS3DH, moved generalized
-// to git history (accelerometer.cpp/h and accelFXOS8700.cpp/h)
-#include "GrinlizLIS3DH.h"
-// Accelerometer / Magnemometer
 #include "GrinlizLSM303.h"
-
 #include "voltmeter.h"
 #include "sfx.h"
 #include "saberdb.h"
@@ -72,12 +52,8 @@
 #include "saberUtil.h"
 #include "tester.h"
 #include "ShiftedSevenSeg.h"
-
-#if SABER_SOUND_ON == SABER_SOUND_SD
-#include "AudioPlayer.h"
-#elif SABER_SOUND_ON == SABER_SOUND_FLASH
-#include "mcaudio.h"
-#endif
+#include "i2saudiodrv.h"
+#include "manifest.h"
 
 using namespace osbr;
 
@@ -87,39 +63,17 @@ static const uint32_t BREATH_TIME             = 1200;
 
 uint32_t reflashTime    = 0;
 bool     flashOnClash   = false;
-float    maxGForce2     = 0.0f;
 uint32_t lastMotionTime = 0;    
 uint32_t lastLoopTime   = 0;
 
-#ifdef LOG_ACCEL
-GrinlizLIS3DH::RawData accelDataBuf[LOG_ACCEL];
-GrinlizLIS3DH::RawData* accelData = accelDataBuf;
-#else
-GrinlizLIS3DH::RawData* accelData = 0;
-#endif 
-//int nAccelLog = 0;
-
-/* First up; initialize the audio system and all its 
-   resources. Also need to disable the amp to avoid
-   clicking. (clicking isn't a problem with the i2s amp)
-*/
-#if SABER_SOUND_ON == SABER_SOUND_SD
-AudioPlayer audioPlayer;
-SFX sfx(&audioPlayer);
-
-#elif SABER_SOUND_ON == SABER_SOUND_FLASH
-Adafruit_ZeroI2S i2s(PIN_I2S_LRCLK, PIN_I2S_BITCLK, PIN_I2S_DATA, 2);
 Adafruit_FlashTransport_SPI flashTransport(SS1, &SPI1);
-Adafruit_SPIFlash spiFlash(&flashTransport);     // Use hardware SPI 
-Adafruit_ZeroDMA audioDMA;
-SPIStream spiStream(spiFlash);              // FIXME global generic resource
-I2SAudio audioPlayer(i2s, audioDMA, spiFlash);
-SFX sfx(&audioPlayer);
-ConstMemImage MemImage(spiFlash);
+Adafruit_SPIFlash spiFlash(&flashTransport);
+Adafruit_ZeroDMA dma;
 
-#else
-SFX sfx(0);
-#endif
+Manifest manifest;
+Adafruit_ZeroI2S i2s(PIN_I2S_LRCLK, PIN_I2S_BITCLK, PIN_I2S_DATA, 2);
+I2SAudioDriver i2sAudioDriver(&dma, &i2s, &spiFlash, manifest);
+SFX sfx(&i2sAudioDriver, manifest);
 
 BladeState  bladeState;
 
@@ -136,20 +90,10 @@ Voltmeter   voltmeter;
     DotStarUI dotstarUI;                // It is the DotStarUI regardless of physical pixel protocol
     osbr::RGBA leds[SABER_NUM_LEDS];    // This file computes w/ brightness. Sketcher uses RGB, so there is some conversion.
 
-    #if SABER_UI_LED == SABER_LED_DOTSTAR
-        DotStar dotstar;
-    #elif SABER_UI_LED == SABER_LED_NEOPIXEL
-        Adafruit_NeoPixel neoPixels(SABER_NUM_LEDS, PIN_NEOPIXEL_DATA, NEO_GRB + NEO_KHZ800);
-        RGB neoPixelCache[SABER_NUM_LEDS];
-    #endif
+    DotStar dotstar;
 #endif
 
-#if PCB_VERSION == PCB_ITSY_2A
 GrinlizLSM303 accelMag;
-#else
-GrinlizLIS3DH accel(PIN_ACCEL_EN);
-#endif
-
 Timer2 displayTimer(100);
 Timer2 vbatPrintTimer(1000);
 
@@ -174,64 +118,11 @@ Digit4UI digit4UI;
 #define SHIFTED_OUTPUT
 #endif
 
-CMDParser   cmdParser(&saberDB);
+CMDParser   cmdParser(&saberDB, manifest);
 Blade       blade;
 Timer2      vbatTimer(AveragePower::SAMPLE_INTERVAL);
-Timer2      gforceDataTimer(110);
-
 Tester      tester;
-bool        wavSource = false;
 
-void setupSD()
-{
-    Log.p("setupSD()").eol();
-    #if (SABER_SOUND_ON == SABER_SOUND_SD)
-        #ifdef SABER_INTEGRATED_SD
-            Log.p("Connecting to built in SD...").eol();
-            wavSource = SD.begin(BUILTIN_SDCARD);
-        #else
-            // WARNING: if using LIS3DH ond SPI and and SD,
-            // may need to comment out:
-            // #define USE_TEENSY3_SPI
-            // in Sd2Card2.cpp
-            Log.p("Connecting to SPI SD...").eol();
-            wavSource = SD.begin(PIN_SDCARD_CS);
-        #endif
-        if (!wavSource) {
-            Log.p("Unable to access the SD card").eol();
-        }
-    #elif (SABER_SOUND_ON == SABER_SOUND_FLASH)
-        spiFlash.begin();
-        /*
-        uint8_t manid, devid;
-        spiFlash.GetManufacturerInfo(&manid, &devid);
-        Log.p("SPI Flash Memory").eol();
-        Log.p("Manufacturer: 0x").p(manid, HEX).eol();
-        Log.p("Device ID: 0x").p(devid, HEX).eol();
-        Log.p("Pagesize: ").p(spiFlash.pageSize()).eol();
-        */
-        MemImage.begin();
-        saberDB.writeDefaults(); // FIXME proper vprom emulation.
-
-        wavSource = true;
-    #endif
-
-    Log.p("SaberDB initialize.").eol();
-    saberDB.readData();
-
-    #ifdef SABER_SOUND_ON
-    if (wavSource) {
-        audioPlayer.initStream(&spiStream, 0);
-        #if NUM_AUDIO_CHANNELS == 4
-            audioPlayer.initStream(&spiStream1, 1);
-            audioPlayer.initStream(&spiStream2, 2);
-            audioPlayer.initStream(&spiStream3, 3);
-        #endif
-        audioPlayer.init();
-        audioPlayer.setVolume(50, 0);
-    }
-    #endif
-}
 
 void setup() {
     #if defined(SHIFTED_OUTPUT)
@@ -264,34 +155,23 @@ void setup() {
     }
     #endif
 
-    Log.p("setup()").eol(); 
+    Log.p("Setup:").eol(); 
+    Log.p("Init flash memory.").eol();
 
-    SPI.begin();
-    setupSD();
+    flashTransport.begin();
+    spiFlash.begin();
+    manifest.scan(&spiFlash);
 
-#if PCB_VERSION < PCB_ITSY_2A
-    {
-        pinMode(PIN_ACCEL_EN, OUTPUT);
-        digitalWrite(PIN_ACCEL_EN, HIGH);
+    Log.p("Init audio system.").eol();
+    i2sAudioDriver.begin();
 
-        int nTries = 0;
-        bool okay = false;
-        while(nTries < 5) {
-            okay = accel.begin();
-            if (okay) break;
-            delay(100);
-            ++nTries;
-        }
-        if (okay)
-            Log.p("Accelerometer initialized on nTry=").p(nTries).eol();
-        else
-            Log.p("Accelerometer ERROR.").eol();
-        ASSERT(okay);
-    }
-#else
-    accelMag.begin();
-#endif
+    Log.p("Init accelerometer and magnemometer.").eol();
     delay(10);
+    accelMag.begin();
+    Log.p("Min/Max=").v3(accelMag.getMagMin()).p(" ").v3(accelMag.getMagMax()).eol();
+    delay(10);
+
+    Log.p("Init systems.").eol();
     voltmeter.begin();
     delay(10);
     blade.setRGB(RGB::BLACK);
@@ -303,14 +183,10 @@ void setup() {
     tester.attach(&buttonA, 0);
     tester.attachDB(&saberDB);
 
-    #ifdef SABER_SOUND_ON
-        if (wavSource) {
-            sfx.init();
-            Log.p("sfx initialized.").eol();
-        }
-    #endif
-    Log.p("power: ").p(voltmeter.averagePower()).eol();
+    Log.p("Average power: ").p(voltmeter.averagePower()).eol();
     blade.setVoltage(voltmeter.averagePower());
+
+    Log.p("Init display.").eol();
 
     #if SABER_DISPLAY == SABER_DISPLAY_128_32
         display.begin(OLED_WIDTH, OLED_HEIGHT, SSD1306_SWITCHCAPVCC);
@@ -363,11 +239,6 @@ void setup() {
     EventQ.event("[saber start]");
     lastLoopTime = millis();    // so we don't get a big jump on the first loop()
 
-    #if defined(OVERRIDE_BOOT_SOUND)
-        SFX::instance()->playUISound(OVERRIDE_BOOT_SOUND, false);
-    #elif defined(SABER_BOOT_SOUND) || defined(SABER_AUDIO_UI)
-        SFX::instance()->playUISound("ready");
-    #endif
     Log.p("Setup() done.").eol();
 }
 
@@ -382,13 +253,13 @@ uint32_t calcReflashTime() {
 void syncToDB()
 {
     sfx.setFont(saberDB.soundFont());
-    sfx.setVolume204(saberDB.volume());
+    sfx.setVolume(saberDB.volume());
 
     uiRenderData.volume = saberDB.volume4();
     uiRenderData.color = Blade::convertRawToPerceived(saberDB.bladeColor());
     uiRenderData.palette = saberDB.paletteIndex();
     uiRenderData.mVolts = voltmeter.averagePower();
-    uiRenderData.fontName = sfx.currentFontName();
+    uiRenderData.fontName = manifest.getUnit(sfx.currentFont()).getName();
 }
 
 void buttonAReleaseHandler(const Button& b)
@@ -515,51 +386,33 @@ void processAccel(uint32_t msec)
     static ProfileData profData("processAccel");
     ProfileBlock block(&profData);
 
-#if 0
     // Consistently process the accelerometer queue, even if we don't use the values.
     // Also look for stalls and hitches.
     static const int N_ACCEL = 4;
-    GrinlizLIS3DH::Data data[N_ACCEL];
+    Vec3<float> data[N_ACCEL];
 
     #if SERIAL_DEBUG == 1
     uint32_t start = millis();
     #endif
 
-    int removed = 0;
-    accel.flush(N_ACCEL, &removed);
+    int available = accelMag.available();
+    if (available > N_ACCEL) {
+        accelMag.flush(available - N_ACCEL);
+        Log.p("Accelerometer samples disposed=").p(available - N_ACCEL).eol();
+    }
 
-    #ifdef LOG_ACCEL
-    int n = 0;
-    if (   (bladeState.state() != BLADE_OFF || nAccelLog) 
-        && nAccelLog < LOG_ACCEL - N_ACCEL) 
-    {
-        n = accel.readInner(accelData + nAccelLog, data, N_ACCEL);
-        nAccelLog += n;
-    }
-    else {
-        n = accel.read(data, N_ACCEL);
-    }
-    #else
-    int n = accel.read(data, N_ACCEL);
+    int n = accelMag.read(data, N_ACCEL);
     ASSERT(n <= N_ACCEL);
-    #endif
-
-    #if SERIAL_DEBUG == 1
-    uint32_t end = millis();
-    if (removed > 0) Log.p("Accelerometer samples disposed=").p(removed).eol();
-    if (end - start > 3) Log.p("WARNING accel flush & read time (ms)=").p(end - start).eol();
-    #endif
 
     if (bladeState.state() == BLADE_ON) {
         for (int i = 0; i < n; ++i)
         {
             float g2Normal, g2;
-            float ax = data[i].ax;
-            float ay = data[i].ay;
-            float az = data[i].az;
+            float ax = data[i].x;
+            float ay = data[i].y;
+            float az = data[i].z;
             calcGravity2(ax, ay, az, &g2, &g2Normal);
 
-            maxGForce2 = max(maxGForce2, g2);
             float motion = saberDB.motion();
             float impact = saberDB.impact();
 
@@ -596,10 +449,6 @@ void processAccel(uint32_t msec)
             }
         }
     }
-    else {
-        maxGForce2 = 1;
-    }
-    #endif
 }
 
 void loop() {
@@ -637,16 +486,6 @@ void loop() {
         DumpProfile();
     }
     #endif    
-
-    if (gforceDataTimer.tick(delta)) {
-        #if SABER_DISPLAY == SABER_DISPLAY_128_32
-            maxGForce2 = constrain(maxGForce2, 0.1, 16);
-            static const float MULT = 256.0f / accel.range();  // g=1 translates to uint8 64
-            const uint8_t gForce = constrain(sqrtf(maxGForce2) * MULT, 0, 255);
-            sketcher.Push(gForce);
-        #endif
-        maxGForce2 = 0;
-    }
 
     if (reflashTime && msec >= reflashTime) {
         reflashTime = 0;
@@ -793,26 +632,6 @@ void loopDisplays(uint32_t msec, uint32_t delta)
     #endif
 
     #ifdef SABER_NUM_LEDS
-        #if SABER_UI_LED == SABER_LED_DOTSTAR
-            dotstar.display(leds, SABER_NUM_LEDS);
-
-        #elif SABER_UI_LED == SABER_LED_NEOPIXEL
-            // Neopixels cause noise - but not errors - from the audio system.
-            // Haven't tracked down why. But rather than bang on it, simply
-            // only push new LEDs when something changes.
-            bool ledsNeedUpdate = false;
-            for(int i=0; i<SABER_NUM_LEDS; ++i) {
-                if (neoPixelCache[i] != leds[i].rgb()) {
-                    neoPixelCache[i] = leds[i].rgb();
-                    ledsNeedUpdate = true;
-                }
-            }
-            if (ledsNeedUpdate) {
-                for(int i=0; i<SABER_NUM_LEDS; ++i) {
-                    neoPixels.setPixelColor(i, leds[i].r, leds[i].g, leds[i].b);
-                }
-                neoPixels.show();
-            }
-        #endif
+        dotstar.display(leds, SABER_NUM_LEDS);
     #endif    
 }

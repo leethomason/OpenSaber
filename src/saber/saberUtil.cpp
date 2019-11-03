@@ -130,34 +130,18 @@ void UIModeUtil::nextMode()
         case UIMode::NORMAL:        
             m_mode = UIMode::PALETTE;       
             Log.p("mode: palette").eol();    
-            if (sfx) sfx->playUISound("palette");
+            //if (sfx) sfx->playUISound("palette");
             break;
         case UIMode::PALETTE:       
             m_mode = UIMode::VOLUME;        
             Log.p("mode: volume").eol();     
-            if (sfx) sfx->playUISound("audio");
+            //if (sfx) sfx->playUISound("audio");
             break;
-#if SABER_MODEL == SABER_MODEL_SHOCK2
-        case UIMode::VOLUME:        
-            m_mode = UIMode::MEDITATION;        
-            Log.p("mode: meditation").eol();     
-            break;
-        case UIMode::MEDITATION:        
-            m_mode = UIMode::NORMAL;        
-            Log.p("mode: normal").eol();     
-            break;
-#else            
         case UIMode::VOLUME:        
             m_mode = UIMode::NORMAL;        
             Log.p("mode: normal").eol();     
-            #if defined(OVERRIDE_READY_SOUND)
-                SFX::instance()->playUISound(OVERRIDE_READY_SOUND, false);
-            #else
-                if (sfx) sfx->playUISound("ready");
-            #endif
+            //if (sfx) sfx->playUISound("ready");
             break;
-#endif
-
         default:
             ASSERT(false);
             m_mode = UIMode::NORMAL;

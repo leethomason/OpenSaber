@@ -42,11 +42,7 @@ uint32_t AveragePower::power() const
 void Voltmeter::begin()
 {
     #ifdef SABER_VOLTMETER
-    #ifdef CORE_TEENSY
-    analogReference(INTERNAL);  // 1.1 volts
-    #else
     analogReference(AR_INTERNAL1V0);    // FIXME: also 1.65 - need to check range.
-    #endif
     analogRead(PIN_VMETER);     // warm up the ADC to avoid spurious initial value.
     Log.p("Voltmeter open.").eol();
     delay(50);

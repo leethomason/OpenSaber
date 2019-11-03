@@ -28,16 +28,14 @@
 #include "SFX.h"
 #include "Tester.h"
 #include "saberUtil.h"
-#include "GrinlizLIS3DH.h"
+#include "GrinlizLSM303.h"
+#include "manifest.h"
 
 using namespace osbr;
 
 //File streamFile;
 
-extern int nAccelLog;
-extern GrinlizLIS3DH::RawData* accelData;
-
-CMDParser::CMDParser(SaberDB* _db) {
+CMDParser::CMDParser(SaberDB* _db, const Manifest& _manifest) : manifest(_manifest) {
     database = _db;
 }
 
@@ -163,13 +161,10 @@ bool CMDParser::processCMD()
     static const char STATUS[]  = "stat";
     static const char RESET[]   = "reset";
     static const char ID[]      = "id";
-    static const char LIST[]    = "ls"; 
     static const char TEST[]    = "test";
     static const char ACCEL[]   = "accel";
     static const char CRYSTAL[] = "crys";
     static const char PLAY[]    = "play";
-    static const char UPLOAD[]  = "up";
-    static const char LOGACCELDATA[] = "lad";
 
     static const int DELAY = 20;  // don't saturate the serial line. Too much for SoftwareSerial.
 
@@ -206,8 +201,13 @@ bool CMDParser::processCMD()
         for(int i=0; i<SaberDB::NUM_PALETTES; ++i) {
             SaberDB::Palette pal;
             database->getPalette(i, &pal);
+
+            CStr<10> name;
+            const MemUnit& memUnit = manifest.getUnit(database->soundFont());
+            memUnit.name.toStr(&name);
+
             Log.p(i).p(": ")
-               .p(pal.soundFont.c_str())
+               .p(name.c_str())
                .p(" ")
                .ptc(pal.bladeColor)
                .p(" ")
@@ -226,11 +226,13 @@ bool CMDParser::processCMD()
     else if (action == FONT) {
         if (isSet) {
             int f = atoi(value.c_str());
-            const char* fontName = SFX::instance()->fontName(f);
-            database->setSoundFont(fontName);
+            database->setSoundFont(f);
         }
         printLead(action.c_str());
-        Serial.println(database->soundFont());
+        CStr<10> name;
+        const MemUnit& memUnit = manifest.getUnit(database->soundFont());
+        memUnit.name.toStr(&name);
+        Serial.println(name.c_str());
     }
     else if (action == VOL) {
         if (isSet) {
@@ -276,10 +278,6 @@ bool CMDParser::processCMD()
         printLead(action.c_str());
         Serial.println(database->impact());
     }
-    else if (action == RESET) {
-        database->writeDefaults();
-        Serial.println("reset complete.");
-    }
     else if (action == ID) {
         printLead(action.c_str());
         Serial.println(F(ID_STR));
@@ -287,38 +285,23 @@ bool CMDParser::processCMD()
     else if (action == FONTS) {
 #ifdef SABER_SOUND_ON
         const SFX* sfx = SFX::instance();
-        for (int i = 0; i < sfx->numFonts(); ++i) {
+        for (int i = 0; i < MEM_IMAGE_NUM_DIR; ++i) {
             Serial.print(i);
             Serial.print(": ");
-            const char* name = sfx->fontName(i);
-            Serial.println(name);
+
+            CStr<10> name = manifest.getUnit(i).getName();
+            Serial.println(name.c_str());
         }
 #endif
     }
-    else if (action == LIST) {
-/*        File root = SD.open("/");
-        while (true) {
-            File entry =  root.openNextFile();
-            if (!entry) {
-                // no more files
-                break;
-            }
-            if (entry.isDirectory()) {
-                Serial.print("d: ");
-            }
-            Serial.println(entry.name());
-            entry.close();
-        }
-        root.close();*/
-    }
     else if (action == ACCEL) {
-        GrinlizLIS3DH* accel = GrinlizLIS3DH::instance();
+        GrinlizLSM303* accel = GrinlizLSM303::instance();
         accel->flush();
 
         uint32_t start = millis();
         static const int N = 4;
         int n = 0;
-        GrinlizLIS3DH::Data data[N];
+        Vec3<float> data[N];
         while(n < N) {
             int read = accel->read(data + n, N - n);
             n += read;
@@ -326,17 +309,31 @@ bool CMDParser::processCMD()
         float samplesPerSecond = N * 1000.0f / (millis() - start);
 
         for(int i=0; i<N; ++i) {
-            Serial.print( "x="); Serial.print(data[i].ax);
-            Serial.print(" y="); Serial.print(data[i].ay);
-            Serial.print(" z="); Serial.print(data[i].az);
+            Serial.print( "x="); Serial.print(data[i].x);
+            Serial.print(" y="); Serial.print(data[i].y);
+            Serial.print(" z="); Serial.print(data[i].z);
 
             float g2, g2n;
-            calcGravity2(data[i].ax, data[i].ay, data[i].az, &g2, &g2n);
+            calcGravity2(data[i].x, data[i].y, data[i].z, &g2, &g2n);
 
             Serial.print(" g="); Serial.print(sqrt(g2));
             Serial.print(" gN="); Serial.println(sqrt(g2n));
         }
         Serial.print("Samples per second: "); Serial.println(samplesPerSecond);
+
+        delay(10);
+        Vec3<float> mag;
+        if (accel->readMag(0, &mag) == 0) {
+            Serial.println("no mag data.");
+            Log.p("Min/Max=").v3(accel->getMagMin()).p(" ").v3(accel->getMagMax()).eol();
+            accel->logMagStatus();
+        }
+        else {
+            Serial.print("Mag:");
+            Serial.print(" x="); Serial.print(mag.x);
+            Serial.print(" y="); Serial.print(mag.y);
+            Serial.print(" z="); Serial.println(mag.z);
+        }
     }
     else if (action == CRYSTAL) {
         if (isSet) {
@@ -344,55 +341,20 @@ bool CMDParser::processCMD()
             database->setCrystalColor(c);
         }
         printLead(action.c_str());
-        RGB c = database->crystalColor();
+        RGB c = database->getCrystalColor();
         printHexColor(c);
         Serial.println("");
     }
     else if (action == PLAY) {
         printLead(action.c_str());        
         SFX* sfx = SFX::instance();
-        uint32_t length = 0;
-        sfx->readHeader(value.c_str(), &length);
-        Serial.print("File length (msec)=");
-        Serial.println(length);
-        sfx->playSound(value.c_str());
+        bool okay = sfx->playSound(value.c_str());
+        Serial.print("Play returned ");
+        Serial.println(okay ? "okay" : "error");
     }
     else if (action == TEST) {
         Tester* tester = Tester::instance();
         tester->runTests();
-    }
-    else if (action == UPLOAD) {
-        // up ui/foo.wav 1182
-        /*
-        uint32_t size = atoi(value2.c_str());
-        Serial.print("Upload path='");
-        Serial.print(value.c_str());
-        Serial.print("' value2=");
-        Serial.print(value2.c_str());
-        Serial.print(" size=");
-        Serial.println(size);
-        upload(value.c_str(), size);
-        */
-    }
-    else if (action == LOGACCELDATA) {
-        /*
-        Serial.println("--- Log start --");
-        int cluster = 0;
-        for(int i=0; i<nAccelLog; i++) {
-            Serial.print(accelData[i].x); Serial.print(" ");
-            Serial.print(accelData[i].y); Serial.print(" ");
-            Serial.print(accelData[i].z); Serial.print("    ");
-            ++cluster;
-            if (cluster == 8) {
-                Serial.println("");
-                cluster = 0;
-            }
-        }
-        Serial.println("");
-        delay(2);
-        Serial.println("--- Log end --");
-        nAccelLog = 0;
-        */
     }
     else if (action == STATUS) {
         static const char* space = "-----------";

@@ -371,13 +371,14 @@ void VRender::RasterizeLine(int y, const Rect& clip)
 }
 
 /*
+FPS=137 time/frame=7
 Profile:
-  display              aveTime=1.47 ms maxTime=1.48 ms nCalls=119
-  V:R:Line             aveTime=0.08 ms maxTime=0.21 ms nCalls=3808
-  V:R:Sort             aveTime=0.04 ms maxTime=0.38 ms nCalls=3808
-  V:R:Add              aveTime=0.02 ms maxTime=0.12 ms nCalls=3808
-  V:R:Increment        aveTime=0.03 ms maxTime=0.09 ms nCalls=3808
-  VRender::Rasterize   aveTime=5.65 ms maxTime=6.19 ms nCalls=119
+  display              aveTime=1.47 ms maxTime=1.48 ms nCalls=275   time to transfer to display
+  VRender::Rasterize   aveTime=4.64 ms maxTime=5.26 ms nCalls=275   scan line conversions, edges, generate bitmap
+  draw                 aveTime=0.91 ms maxTime=0.99 ms nCalls=275   the draw calls to set up the image
+
+  Using a simple split, no stall greater than 5ms.
+  Update at ~60 hz (which is crazy fast)
 */
 
 void VRender::Rasterize()

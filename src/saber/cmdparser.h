@@ -28,11 +28,12 @@ SOFTWARE.
 #include "DotStar.h"
 
 class SaberDB;
+class Manifest;
 
 class CMDParser
 {
 public:
-    CMDParser(SaberDB* database);
+    CMDParser(SaberDB* database, const Manifest& manifest);
 
     bool push(int c);
    
@@ -53,6 +54,8 @@ private:
     void printMAmps(const osbr::RGB& color);
 
     SaberDB* database = 0;
+    const Manifest& manifest;
+
     CStr<30> token;
     CStr<10> action;
     CStr<20> value;

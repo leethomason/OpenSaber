@@ -6,13 +6,15 @@
 class GrinlizLSM303
 {
 public:
-    GrinlizLSM303() {}
+    GrinlizLSM303() { s_instance = this; }
 
     bool begin();
 
     int read(Vec3<float>* data, int nData) { return readInner(0, data, nData); }
     int readRaw(Vec3<int32_t>* data, int nData) { return readInner(data, 0, nData); }
     int readInner(Vec3<int32_t>* rawData, Vec3<float>* data, int n);
+    int available();
+    int flush(int n=32);
 
     /* In my test bed, the rawData isn't even close to being correctly pre-set.
        the ranges [-400, 200] and [-500, 90] have come up. Also totally 
@@ -36,10 +38,12 @@ public:
     void setMagDataRate(int hz);   // 10, 20, 50, 100
     int getMagDataRate() const;
 
+    static GrinlizLSM303* instance() { return s_instance; }
+
 private:
     Vec3<int32_t> mMin, mMax;
+    static GrinlizLSM303* s_instance;
 
-    int available();
     void write8(uint8_t address, uint8_t reg, uint8_t value) const;
     uint8_t read8(uint8_t address, uint8_t reg) const;
 };

@@ -8,10 +8,9 @@
 #include "voltmeter.h"
 #include "unittest.h"
 #include "saberdb.h"
-#include "GrinlizLIS3DH.h"
-
 #include "Button.h"
 #include "Grinliz_Arduino_Util.h"
+#include "GrinlizLSM303.h"
 
 using namespace osbr;
 
@@ -294,7 +293,7 @@ public:
 
 	static const int NDATA = 10;
 	int nSamples;
-    GrinlizLIS3DH::Data data[NDATA];
+    Vec3<float> data[NDATA];
     uint32_t startTime;
 
     virtual const char* name() const {
@@ -304,9 +303,9 @@ public:
     virtual void start(Tester* tester)
     {
         nSamples = 0;
-        GrinlizLIS3DH* accel = GrinlizLIS3DH::instance();
+        GrinlizLSM303* accel = GrinlizLSM303::instance();
         ASSERT(accel);
-        accel->flush(0);
+        accel->flush();
         startTime = millis();
     }
 
@@ -317,7 +316,7 @@ public:
          	e = queue->popEvent();
         }
 
-        GrinlizLIS3DH* accel = GrinlizLIS3DH::instance();
+        GrinlizLSM303* accel = GrinlizLSM303::instance();
         int n = accel->read(data + nSamples, NDATA - nSamples);
         nSamples += n;
         if (nSamples < NDATA)
@@ -330,16 +329,16 @@ public:
         bool variation = false;
 
         for(int i=0; i<NDATA; ++i) {
-            Log.p("Accel ax=").p(data[i].ax).p(" ay=").p(data[i].ay).p(" az=").p(data[i].az).eol();
+            Log.p("Accel x=").p(data[i].x).p(" y=").p(data[i].y).p(" z=").p(data[i].z).eol();
             
             float g2;
-            calcGravity2(data[i].ax, data[i].ay, data[i].az, &g2, 0);
+            calcGravity2(data[i].x, data[i].y, data[i].z, &g2, 0);
             TEST_RANGE(0.6f, 1.4f, g2);
 
             if (i >= 1) {
-                if (data[i].ax != data[i-1].ax ||
-                    data[i].ay != data[i-1].ay ||
-                    data[i].az != data[i-1].az) 
+                if (data[i].x != data[i-1].x ||
+                    data[i].y != data[i-1].y ||
+                    data[i].z != data[i-1].z) 
                 {
                     variation = true;
                 }

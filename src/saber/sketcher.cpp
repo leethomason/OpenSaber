@@ -221,8 +221,8 @@ void Sketcher::DrawVolumeMode(Renderer* d, uint32_t time, const UIRenderData* da
 	static const char* label = "VOL";
 	int wVol = d->StrWidth(label, getGlypth_aurekBesh6);
 
-	int wName = d->StrWidth(data->fontName, getGlypth_calibri8);
-	d->DrawStr(data->fontName, CENTER - wName / 2, 14, getGlypth_calibri8);
+	int wName = d->StrWidth(data->fontName.c_str(), getGlypth_calibri8);
+	d->DrawStr(data->fontName.c_str(), CENTER - wName / 2, 14, getGlypth_calibri8);
 
 	d->DrawStr(label, CENTER - wVol / 2, 23, getGlypth_aurekBesh6);
 	DrawStateDisplay(d, data);

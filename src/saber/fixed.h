@@ -240,8 +240,8 @@ inline Fixed115 operator * (const Fixed115& a, const FixedNorm& b)
 }
 
 // Sine approximation.
-// x: angle with 2^15 units/circle
-// return: sine, 12 bits
+// x: angle with 2^15 units/circle (32768)
+// return: sine, 12 bits (range -4096 to 4096)
 int32_t iSin_S3(int32_t x);
 
 inline int32_t iCos_S3(int32_t x) {

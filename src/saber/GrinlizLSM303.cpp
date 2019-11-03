@@ -100,6 +100,8 @@ enum
     LSM303_MAGRATE_220 = 0x07  // 200 Hz
 };
 
+GrinlizLSM303* GrinlizLSM303::s_instance;
+
 bool GrinlizLSM303::begin()
 {
     Log.p("---- LSM303 begin ----").eol();
@@ -175,6 +177,9 @@ bool GrinlizLSM303::begin()
         0 // 1           // low pass filter
     );
     delay(10);
+
+    mMin.setZero();
+    mMax.setZero();
     return (whoAmIA == 0x33) && (whoAmIM == 0x40);
 }
 
@@ -203,6 +208,8 @@ void GrinlizLSM303::logMagStatus()
     int bdu = d & (1<<4);
     int ble = d & (1<<3);
     Log.p("    bdu (coherent read)=").p(bdu ? 1 : 0).p(" ble=").p(ble ? "inverted" : "normal").eol();
+    delay(2);
+    
 }
 
 void GrinlizLSM303::setMagDataRate(int hz)
@@ -241,6 +248,12 @@ int GrinlizLSM303::available()
 
     return avail + (overrun ? 1 : 0);
 }
+
+int GrinlizLSM303::flush(int n) 
+{
+    return readInner(0, 0, n);
+}
+
 
 int GrinlizLSM303::readInner(Vec3<int32_t>* rawData, Vec3<float>* data, int n)
 {

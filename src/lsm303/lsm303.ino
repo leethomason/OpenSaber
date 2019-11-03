@@ -55,7 +55,7 @@ void loop()
         ++nMagRead;
     }
 
-    #if true
+    #if false
     {
         if (nMag) {
             static const int N = 40;

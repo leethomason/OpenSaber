@@ -20,11 +20,11 @@ UIRenderData data;
 uint32_t lastProfile = 0;
 int nFrames = 0;
 
-#ifdef DEBUG
-xxx
-#endif
-#ifdef _DEBUG
-yyy
+#define USE_SPLIT
+#ifdef USE_SPLIT
+// goes from 4.6 for full frame to 3.5 for half frame. Not a huge win.
+// probably just ping ponging render vs. transfer will do.
+int split = 0;
 #endif
 
 void BlockDrawOLED(const BlockDrawChunk* chunks, int y, int n)
@@ -77,24 +77,51 @@ void setup()
 
 void loop()
 {
-    data.mVolts += 1;
-    if (data.mVolts == 4200) data.mVolts = 3200;
-    memset(oledBuffer, 0, OLED_BYTES);
-    VectorUI::Draw(&vrender, 0, UIMode::NORMAL, false, &data);
-
-    {
+    #ifdef USE_SPLIT
+    if (split == 0) {
+        data.mVolts += 1;
+        if (data.mVolts == 4200) data.mVolts = 3200;
+        memset(oledBuffer, 0, OLED_BYTES);
+        VectorUI::Draw(&vrender, 0, UIMode::NORMAL, false, &data);
+    }
+    else if (split == 1) {
+        vrender.Render();
+    }
+    else if (split == 2) {
         static ProfileData data("display");
         ProfileBlock block(&data);
         display.display(oledBuffer);
     }
+    split++;
+    if (split == 3) split = 0;
+
+    #else
+    data.mVolts += 1;
+    if (data.mVolts == 4200) data.mVolts = 3200;
+    memset(oledBuffer, 0, OLED_BYTES);
+    {
+        static ProfileData profileData("draw");
+        ProfileBlock block(&profileData);
+        VectorUI::Draw(&vrender, 0, UIMode::NORMAL, false, &data);
+    }
+    {
+        vrender.Render();
+    }
+    {
+        static ProfileData profileData("display");
+        ProfileBlock block(&profileData);
+        display.display(oledBuffer);
+    }
+    #endif
 
     ++nFrames;
-    if (millis() - lastProfile > 2000) {
+    static const int SEC = 2;
+    if (millis() - lastProfile > 1000 * SEC) {
         lastProfile = millis();
         #if SERIAL_DEBUG > 0
         Log.p("SERIAL ON").eol();
         #endif
-        Log.p("FPS=").p(nFrames / 2).eol();
+        Log.p("FPS=").p(nFrames / SEC).p(" time/frame=").p(SEC * 1000 / nFrames).eol();
         DumpProfile();
         nFrames = 0;
     }
