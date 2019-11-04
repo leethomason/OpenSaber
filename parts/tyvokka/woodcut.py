@@ -6,6 +6,15 @@ from plane import plane
 from covertec import hill
 from hole import hole
 
+# Strategy on this.
+# X direction is the long direction (just to keep consistent. Annoying to have different coordinate systems.)
+# Y direction curves
+# 
+# 1st pass: flat: rough the hill
+# 2nd pass: ball: smooth cut the hill
+# 3rd pass: flat: cut the holes
+# 4th pass: flat: cut the outline
+
 # Top of stock.
 H_WOOD = 8.0
 H_STOCK = 13.30

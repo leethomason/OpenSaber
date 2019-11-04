@@ -489,7 +489,6 @@ module oneBaffle(   d,
     if (bridge > 0) {
         if (bridge == 1) 
         {
-
             yBridge = yAtX(X_BRIDGE+T_BRIDGE, d/2);
 
             translate([X_BRIDGE, -yBridge, dz]) 

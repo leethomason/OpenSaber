@@ -28,7 +28,13 @@ module attachPost(diameter, postDY, capsuleWidth)
     Y_TOP = diameter / 2 - postDY;
 
     intersection() {
-        translate([0, 0, -50]) cylinder(h=100, d=diameter);
+        intersection() {
+            translate([0, 0, -50]) cylinder(h=100, d=diameter);
+            // This is a little limit to clean up the design.
+            DELTA = 1.5;
+            translate([-diameter/2 + DELTA, -100, -50])
+                cube(size=[diameter - DELTA*2, 200, 200]);
+        }
         union() {
             // bridge
             difference() {
@@ -198,7 +204,6 @@ module insetHolder( diameter,
             }
 
             // USB holder
-
             if(dzUSB) {
                 intersection() {
                     cylinder(h=300, d=diameter);
@@ -263,10 +268,20 @@ module insetHolder( diameter,
             for(i=[0:nBaffle-1]) {
                 translate([0, 0, i*dzBaffle*2]) {
                     style = (bridgeStyleArray && i < len(bridgeStyleArray)) ? bridgeStyleArray[i] : bridgeStyle;
-                    if (!INNER_VIEW)
-                        insetBaffle(diameter, dzBaffle, style, noBottom=!firstButtressFullRing || i>0);
+                    if (!INNER_VIEW) {
+                        DZ = dzBaffle;
+                        insetBaffle(diameter, DZ, style, noBottom=!firstButtressFullRing || i>0);
+                    }
                 }
             }
+
+            // Add some support around the joint.
+            intersection() {
+                H = 16;
+                translate([-100, -H/2, 0]) cube(size=[200, H, dzBaffle*2 + EPS]);
+                tube(h=dzBaffle*2 + EPS, do=diameter, di=diameter - 8);
+            }
+            
         }
         // Removes the front bridge hanging out.
         translate([0, 0, dzSection]) cylinder(h=dzBaffle*2, d=diameter);

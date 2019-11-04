@@ -16,11 +16,12 @@ difference() {
         }
         translate([0, -R_OUTER + STOCK_H, 0]) cylinder(h=100, d=D_OUTER, $fn=80);
     }
-    translate([0, -EPS, M_BOLT - M_INSET_START]) rotate([-90, 0, 0]) cylinder(h=100, d=4.3);
+    translate([0, -EPS, M_BOLT - M_INSET_START]) rotate([-90, 0, 0]) cylinder(h=100, d=4.4);
     translate([0, STOCK_H - 1.5, M_BOLT - M_INSET_START]) rotate([-90, 0, 0]) cylinder(h=100, d=8.0);
     
-    translate([0, -EPS, M_PORT_CENTER - M_INSET_START]) rotate([-90, 0, 0]) cylinder(h=100, d=8.0); 
-    translate([0, STOCK_H - 3, M_PORT_CENTER - M_INSET_START]) rotate([-90, 0, 0]) cylinder(h=100, d=11.0); 
+    // translate([0, -EPS, M_PORT_CENTER - M_INSET_START]) rotate([-90, 0, 0]) cylinder(h=100, d=8.0); 
+    // translate([0, STOCK_H - 3, M_PORT_CENTER - M_INSET_START]) rotate([-90, 0, 0]) cylinder(h=100, d=11.0); 
+    translate([0, -EPS, M_PORT_CENTER - M_INSET_START]) rotate([-90, 0, 0]) cylinder(h=100, d=11.0); 
 
     translate([0, -EPS, M_SWITCH_CENTER - M_INSET_START]) rotate([-90, 0, 0]) cylinder(h=100, d=BUTTON_HEAD_D + 0.2); 
     hull() {
@@ -30,5 +31,9 @@ difference() {
     }
     //translate([0, -10, 0]) cylinder(h=100, d=24);
 }
+
+echo("Bolt", M_BOLT - M_INSET_START);
+echo("Port", M_PORT_CENTER - M_INSET_START);
+echo("Switch", M_SWITCH_CENTER - M_INSET_START);
 
 //color("olive") translate([0, -R_OUTER + STOCK_H, EPS]) tube(h=DZ_INSET - EPS*2, do=D_OUTER-EPS, di=D_INNER+EPS);
