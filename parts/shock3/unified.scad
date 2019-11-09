@@ -56,7 +56,6 @@ module metalArt()
         THICK = 0.032;
         DI_TUBE = DO_TUBE - THICK * 2 * 25.4;
 
-        //translate([0, 20, 0])
         difference() {
             intersection() {
                 translate([0, R_INNER - DO_TUBE/2, M_METAL_ART]) {
