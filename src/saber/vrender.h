@@ -122,11 +122,11 @@ private:
     };
 
     struct Edge {
+        osbr::RGBA color;
         int8_t layer;
         uint8_t yAdd;
         Fixed115 x0, y0;
         Fixed115 x1, y1;
-        osbr::RGBA color;
         Edge* nextStart = 0;
 
         void Clear();
@@ -145,15 +145,10 @@ private:
     struct ActiveEdge
     {
         int8_t layer;
-        #ifdef VECTOR_MONO
-        int8_t color;
-        #endif
+        ColorRGBA color;
         int16_t yEnd;
         Fixed115 x;
         Fixed115 slope;
-        #ifndef VECTOR_MONO
-        osbr::RGBA color;
-        #endif
     };
 
     #ifdef VECTOR_MONO
@@ -172,18 +167,10 @@ private:
     struct ColorEntry
     {
         int8_t layer;				// actually int8_t in the active edge.
-        #ifdef VECTOR_MONO
-		int8_t color;
-        #else
-        osbr::RGBA color;
-        #endif
-        void Set(int layer, osbr::RGBA color) {
+		ColorRGBA color;
+        void Set(int layer, ColorRGBA color) {
             this->layer = layer;
-            #ifdef VECTOR_MONO
-            this->color = color.rgb().get() ? 1 : 0;
-            #else
             this->color = color;
-            #endif
         }
     };
 
@@ -193,7 +180,7 @@ private:
     void SortToStart();
     void Rasterize();
     void RasterizeLine(int y, const Rect&);
-    osbr::RGB AddToColorStack(int layer, const osbr::RGBA&);
+    osbr::RGB AddToColorStack(int layer, ColorRGBA color);
 
     void IncrementActiveEdges(int y);
     void AddStartingEdges(int y);

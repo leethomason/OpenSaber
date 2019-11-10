@@ -263,7 +263,7 @@ void VRender::SortActiveEdges()
 }
 
 
-osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color)
+osbr::RGB VRender::AddToColorStack(int layer, ColorRGBA color)
 {
     for (int i = m_nColor; i >= 0; --i) {
         // Even-Odd rule. The layer toggles itself on and off.
