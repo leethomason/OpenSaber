@@ -6,10 +6,18 @@
 
 #define VECTOR_MONO
 
+#ifdef VECTOR_MONO
+typedef uint8_t ColorRGB;
+typedef uint8_t ColorRGBA;
+#else
+typedef osbr::RGB ColorRGB;
+typedef osbr::RGBA ColorRGBA;
+#endif
+
 struct BlockDrawChunk {
     int x0;
     int x1;
-    osbr::RGB rgb;
+    ColorRGB rgb;
 };
 typedef void (*BlockDraw)(const BlockDrawChunk* chunks, int y, int n);
 typedef const uint8_t* (*GlyphMetrics)(int charID, int* advance, int* w, int* rows);

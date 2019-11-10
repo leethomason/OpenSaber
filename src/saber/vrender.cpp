@@ -352,7 +352,11 @@ void VRender::RasterizeLine(int y, const Rect& clip)
 
                 cache[nCache].x0 = subClipX0;
                 cache[nCache].x1 = subClipX1;
+#ifdef VECTOR_MONO
+                cache[nCache].rgb = rgb.get() ? 1 : 0;
+#else
                 cache[nCache].rgb = rgb;
+#endif
                 nCache++;
 
                 if (nCache == CACHE) {

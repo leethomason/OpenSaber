@@ -62,7 +62,11 @@ uint8_t* blockDrawOLEDBUffer = 0;
 void BlockDrawRGB(const BlockDrawChunk* chunk, int y, int n)
 {
     for (int i = 0; i < n; ++i, ++chunk) {
+#ifdef VECTOR_MONO
+        uint32_t c = chunk->rgb ? 0xffffffff : 0;
+#else
         uint32_t c = (chunk->rgb.r << 24) | (chunk->rgb.g << 16) | (chunk->rgb.b << 8) | 0xff;
+#endif
         uint32_t* pixels = ((uint32_t*)blockDrawRGBABuffer) + y * WIDTH + chunk->x0;
 
         int n = chunk->x1 - chunk->x0;
@@ -79,7 +83,11 @@ void BlockDrawOLED(const BlockDrawChunk* chunks, int y, int n)
         int row = y / 8;
         int bit = 1 << (y & 7);
 
+#ifdef VECTOR_MONO
+        if (chunk.rgb) {
+#else
         if (chunk.rgb.get()) {
+#endif
             uint8_t* p = blockDrawOLEDBUffer + row * WIDTH + chunk.x0;
             for(int nPix = chunk.x1 - chunk.x0; nPix > 0; nPix--, p++) {
                  *p |= bit;
