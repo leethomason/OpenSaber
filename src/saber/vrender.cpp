@@ -37,7 +37,7 @@ void VRender::Edge::Clear()
     this->nextStart = 0;
 }
 
-void VRender::Edge::Init(int x0, int y0, int x1, int y1, int layer, const osbr::RGBA& rgba) 
+void VRender::Edge::Init(int x0, int y0, int x1, int y1, int layer, osbr::RGBA rgba)
 {
     Clear();
 
@@ -47,10 +47,11 @@ void VRender::Edge::Init(int x0, int y0, int x1, int y1, int layer, const osbr::
     this->y1 = y1;
     this->layer = layer;
 
-    this->color.r = rgba.r;
-    this->color.g = rgba.g;
-    this->color.b = rgba.b;
-    this->color.a = rgba.a;
+#ifdef VECTOR_MONO
+    this->color = rgba.rgb().get() ? 1 : 0;
+#else
+    this->color = rgba;
+#endif
 }
 
 
@@ -241,11 +242,7 @@ void VRender::AddStartingEdges(int y)
             ae->x = (Fixed115(y) - e->y0) * ae->slope + e->x0;
             ae->yEnd = e->y1.getDec() ? (e->y1.getInt() + 1) : e->y1.getInt();
             ae->layer = e->layer;
-            #ifdef VECTOR_MONO
-            ae->color = e->color.rgb().get() ? 1 : 0;
-            #else
             ae->color = e->color;
-            #endif
         }
     }
 }
