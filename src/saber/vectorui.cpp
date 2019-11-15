@@ -72,8 +72,7 @@ void VectorUI::Draw(VRender* ren,
     const UIRenderData* data)
 {
     ren->Clear();
-    ren->SetImmediate(true);
-
+  
     int p = data->powerLevel(8);
     CStr<5> volts;
     volts.setFromNum(data->mVolts, true);
@@ -147,6 +146,7 @@ void VectorUI::Draw(VRender* ren,
         int digits[4];
         NumToDigit(data->palette, digits);
         ren->SetTransform(W - 30, H / 2 - TEXT);
+        ren->SetImmediate(true);
         Segment(ren, TEXT, 2, digits[3], WHITE);
     }
 
@@ -156,6 +156,7 @@ void VectorUI::Draw(VRender* ren,
         NumToDigit(data->mVolts, digits);
         for (int i = 0; i < 4; ++i) {
             ren->SetTransform(20 + (TEXT+2)*i, H / 2 - TEXT);
+            ren->SetImmediate(true);
             Segment(ren, TEXT, 2, digits[i], WHITE);
         }
     }

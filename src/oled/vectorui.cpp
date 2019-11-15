@@ -28,6 +28,7 @@ void VectorUI::Segment(VRender* ren, int width, int s, int num, osbr::RGBA rgba)
     */
 
     static const uint8_t segments[10] = {0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f};
+    ren->SetImmediate(true);
 
     if (num < 0) num = 0;
     if (num > 9) num = 9;
@@ -47,6 +48,8 @@ void VectorUI::Segment(VRender* ren, int width, int s, int num, osbr::RGBA rgba)
         ren->DrawRect(0, 0, s, width, rgba);
     if (bit & (1 << 6))
         ren->DrawRect(0, width - s / 2, width, s, rgba);
+
+    ren->SetImmediate(false);
 }
 
 void VectorUI::DrawBar(VRender* ren, int x, int y, int width, const osbr::RGBA& color, int fraction)
@@ -72,8 +75,7 @@ void VectorUI::Draw(VRender* ren,
     const UIRenderData* data)
 {
     ren->Clear();
-    ren->SetImmediate(true);
-
+  
     int p = data->powerLevel(8);
     CStr<5> volts;
     volts.setFromNum(data->mVolts, true);

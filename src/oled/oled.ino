@@ -11,6 +11,7 @@
 OLED_SSD1306 display(PIN_OLED_DC, PIN_OLED_RESET, PIN_OLED_CS);
 
 static const int OLED_WIDTH = 128;
+static const int OLED_WIDTH_SHIFT = 7;
 static const int OLED_HEIGHT = 32;
 static const int OLED_BYTES = OLED_WIDTH * OLED_HEIGHT / 8;
 
@@ -27,48 +28,37 @@ int nFrames = 0;
 int split = 0;
 #endif
 
-// 4.6 good, VECTOR_MONO
-// 3.9 was...callback improvements? An error implementing immediate mode is still faster.
 /*
-// Immediate
-FPS=167 time/frame=5
+// Immediate,
+FPS=172 time/frame=5
 Profile:
-  display              aveTime=1.45ms maxTime=1.46ms nCalls=335
-  draw                 aveTime=3.33ms maxTime=3.66ms nCalls=335
-  VRender::Rasterize   aveTime=1.02ms maxTime=1.02ms nCalls=335
+  display              aveTime=1.47ms maxTime=1.48ms nCalls=344
+  draw                 aveTime=3.18ms maxTime=3.33ms nCalls=344
+  VRender::Rasterize   aveTime=1.01ms maxTime=1.01ms nCalls=344
 
-// Classic
-FPS=151 time/frame=6
+// Normal
+FPS=154 time/frame=6
 Profile:
-  display              aveTime=1.47ms maxTime=1.48ms nCalls=303
-  draw                 aveTime=1.00ms maxTime=1.11ms nCalls=303
-  VRender::Rasterize   aveTime=3.87ms maxTime=4.45ms nCalls=303
+  display              aveTime=1.45ms maxTime=1.46ms nCalls=309
+  draw                 aveTime=1.02ms maxTime=1.12ms nCalls=309
+  VRender::Rasterize   aveTime=3.73ms maxTime=4.36ms nCalls=309
 
-// Immediate w/ mask table
-PS=164 time/frame=6
-Profile:
-  display              aveTime=1.47ms maxTime=1.48ms nCalls=328
-  draw                 aveTime=3.44ms maxTime=3.82ms nCalls=328
-  VRender::Rasterize   aveTime=1.02ms maxTime=1.02ms nCalls=328
+  Nothing really moving the needle. Leaving in immediate in case it's needed.
+  Certainly immediate uses less memory.
 
-  Nothing really moving the needle. 
+  Only immediate draw text:
+    FPS=212 time/frame=4
+    Profile:
+    display              aveTime=1.47ms maxTime=1.48ms nCalls=425
+    draw                 aveTime=1.10ms maxTime=1.26ms nCalls=425
+    VRender::Rasterize   aveTime=1.92ms maxTime=1.96ms nCalls=425
+
+    Huh. Well, that's the winner.
 */
 
 
 void BlockDrawOLED(const BlockDrawChunk* chunks, int n)
 {
-    static const uint8_t MASK0[] = { 1, 3, 7, 15, 31, 63, 127, 255 };
-    static const uint8_t MASK1[] = { 2, 6, 14, 30, 62, 126, 254 };
-    static const uint8_t MASK2[] = { 4, 12, 28, 60, 124, 252 };
-    static const uint8_t MASK3[] = { 8, 24, 56, 120, 248 };
-    static const uint8_t MASK4[] = { 16, 48, 112, 240 };
-    static const uint8_t MASK5[] = { 32, 96, 224 };
-    static const uint8_t MASK6[] = { 64, 192 };
-    static const uint8_t MASK7[] = { 128 };
-    static const uint8_t* MASK[] = {
-        MASK0, MASK1, MASK2, MASK3, MASK4, MASK5, MASK6, MASK7
-    };
-
     // Clear to black beforehand; don't need to set black runs.
     for (int i = 0; i < n; ++i) {
         const BlockDrawChunk& chunk = chunks[i];
@@ -80,33 +70,30 @@ void BlockDrawOLED(const BlockDrawChunk* chunks, int n)
 #endif
         // Simple for the single row.
         if (chunk.y0 == chunk.y1 - 1) {
-            int row = chunk.y0 / 8;
-            int bit = chunk.y0 - row * 8;
+            int row = chunk.y0 >> 3;
+            int bit = chunk.y0 - (row << 3);
             uint8_t mask = 1 << bit;
-            uint8_t* p = oledBuffer + row * OLED_WIDTH + chunk.x0;
+            uint8_t* p = oledBuffer + (row << OLED_WIDTH_SHIFT) + chunk.x0;
             for (int nPix = chunk.x1 - chunk.x0; nPix > 0; nPix--, p++) {
                 *p |= mask;
             }
         }
         else {
-            int row0 = chunk.y0 / 8;
-            int row1 = (chunk.y1 + 7) / 8;
+            int row0 = chunk.y0 >> 3;
+            int row1 = (chunk.y1 + 7) >> 3;
 
             for (int r = row0; r < row1; ++r) {
-                int bit0 = chunk.y0 - r * 8;
-                int bit1 = chunk.y1 - r * 8;
+                int bit0 = chunk.y0 - (r << 3);
+                int bit1 = chunk.y1 - (r << 3);
                 bit0 = glMax(bit0, 0);
                 bit1 = glMin(bit1, 8);
-#if false
+
                 uint8_t mask = 0;
                 for (int b = bit0; b < bit1; ++b) {
                     mask |= 1 << b;
                 }
-#else
-                const uint8_t* m = MASK[bit0];
-                uint8_t mask = m[bit1 - bit0 - 1];
-#endif
-                uint8_t* p = oledBuffer + r * OLED_WIDTH + chunk.x0;
+
+                uint8_t* p = oledBuffer + (r << OLED_WIDTH_SHIFT) + chunk.x0;
                 for (int nPix = chunk.x1 - chunk.x0; nPix > 0; nPix--, p++) {
                     *p |= mask;
                 }
