@@ -28,6 +28,23 @@ T lerp1024(T a, T b, T t1024) {
 
 bool TestUtil();
 
+template<typename T>
+struct Vec3
+{
+	T x;
+	T y;
+	T z;
+
+	void setZero() { x = y = z = 0; }
+	void scale(T s) { x *= s; y *= s; z *= s; }
+
+    Vec3<T>& operator += (const Vec3<T>& v) { x += v.x; y += v.y; z += v.z; return *this; }
+    Vec3<T>& operator -= (const Vec3<T>& v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
+
+    inline friend Vec3<T> operator +  (const Vec3<T>& a, const Vec3<T>& b) { Vec3<T> t;  t.x = a.x + b.x; t.y = a.y + b.y; t.z = a.z + b.z; return t; }
+    inline friend Vec3<T> operator -  (const Vec3<T>& a, const Vec3<T>& b) { Vec3<T> t;  t.x = a.x - b.x; t.y = a.y - b.y; t.z = a.z - b.z; return t; }
+};
+
 /**
 * Returns 'true' if 2 strings are equal.
 * If one or both are null, they are never equal.
@@ -103,6 +120,10 @@ public:
 
 	bool operator==(const char* str) const {
 		return strEqual(buf, str);
+	}
+
+	bool operator==(char c) const {
+		return len == 1 and buf[0] == c;
 	}
 
 	bool operator!=(const char* str) const {
@@ -185,6 +206,22 @@ public:
 		return ::hash8(buf, buf + len);
 	}
 
+	void tokenize(char sep, CStr<ALLOCATE>* tokens[], int n) const {
+		int i =0;
+		const char* p = buf;
+
+		while(*p && i < n) {
+			if (*p == sep) {
+				while(*p == sep) ++p;
+				i++;
+			}
+			else {
+				tokens[i]->append(*p);
+				p++;
+			}
+		} 
+	}
+
 private:
 	int len;
 	char buf[ALLOCATE];
@@ -212,6 +249,14 @@ public:
     }
 
     ~CStrBuf() {}
+
+	template <typename T>
+	void toStr(T* str) const {
+		str->clear();
+		for(int i=0; i<size(); ++i) {
+			str->append(buf[i]);
+		}
+	}
 
     int size() const {
         for (int i = 0; i < ALLOCATE; i++) {
@@ -265,6 +310,7 @@ public:
 	uint16_t hash8() const {
 		return ::hash8(buf, buf + size());
 	}
+
 
 private:
     char buf[ALLOCATE];
@@ -466,7 +512,18 @@ public:
 	const SPLog& p(long v, int p = DEC) const;
 	const SPLog& p(unsigned long v, int p = DEC) const;
 	const SPLog& p(double v, int p = 2) const;
-	
+	const SPLog& v3(int32_t x, int32_t y, int32_t z, const char* bracket=0) const;
+	const SPLog& v2(int32_t x, int32_t y, const char* bracket=0) const;
+	const SPLog& v3(float x, float y, float z, const char* bracket=0) const;
+	const SPLog& v2(float x, float y, const char* bracket=0) const;
+
+	const SPLog& v3(const Vec3<float>& v, const char* bracket=0) const {
+		return v3(v.x, v.y, v.z, bracket);
+	}
+	const SPLog& v3(const Vec3<int32_t>& v, const char* bracket=0) const {
+		return v3(v.x, v.y, v.z, bracket);
+	}
+
 	// Templated print, generally of alternate string class.
 	template<class T> const SPLog& pt(const T& str) const {
 		for(int i=0; i<str.size(); ++i) {

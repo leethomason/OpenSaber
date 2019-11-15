@@ -16,17 +16,20 @@ typedef osbr::RGBA ColorRGBA;
 
 struct BlockDrawChunk {
     int x0;
+    int y0;
     int x1;
+    int y1;
     ColorRGB rgb;
 };
-typedef void (*BlockDraw)(const BlockDrawChunk* chunks, int y, int n);
+typedef void (*BlockDraw)(const BlockDrawChunk* chunks, int n);
 typedef const uint8_t* (*GlyphMetrics)(int charID, int* advance, int* w, int* rows);
 
 class VRender
 {
 public:
-    // FIXME optimize for edges
-    static const int MAX_EDGES = 250;   // defines memory use.
+    // Defines memory use; should probably be passed in. The test UI uses 20-24 edges
+    // with immediate mode on, 120 with it off. 
+    static const int MAX_EDGES = 100;    
     static const int MAX_ACTIVE = MAX_EDGES;
     static const int Y_HASH = 32;
 
@@ -100,6 +103,7 @@ public:
     void DrawPoly(const Vec2* points, int n, const osbr::RGBA& rgba);
     void PushLayer() { m_layerFixed = true; m_layer++; }
     void PopLayer() { m_layerFixed = false; }
+    void SetImmediate(bool val) { m_immediate = val; }
 
     void SetTransform(FixedNorm rotation, Fixed115 x, Fixed115 y) {
         m_rot = rotation;
@@ -180,7 +184,7 @@ private:
     void SortToStart();
     void Rasterize();
     void RasterizeLine(int y, const Rect&);
-    osbr::RGB AddToColorStack(int layer, ColorRGBA color);
+    ColorRGB AddToColorStack(int layer, ColorRGBA color);
 
     void IncrementActiveEdges(int y);
     void AddStartingEdges(int y);
@@ -200,6 +204,7 @@ private:
     int m_nColor = 0;
     int m_start;
     int m_end;
+    bool m_immediate = false;
     FixedNorm m_rot;
     Fixed115 m_transX, m_transY, m_scaleX, m_scaleY;
 

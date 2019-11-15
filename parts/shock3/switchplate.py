@@ -44,8 +44,8 @@ hole(g, mat, bottom, d=BUTTON_HEAD_D + 0.2)
 D = 8.0
 SPACE = PORT - 11.0/2
 
-travel(g, mat, x=SWITCH - D/2)
-rectangleTool(g, mat, -2.0, (X_CAPSULE - SPACE) - (SWITCH - D/2), D, D/2, "left", "inner", True)
+travel(g, mat, x=SWITCH - BUTTON_HEAD_D/2)
+rectangleTool(g, mat, -2.0, (X_CAPSULE - SPACE) - (SWITCH - BUTTON_HEAD_D/2), D, D/2, "left", "inner", True)
 
 #### capsule cut #######
 travel(g, mat, x=0)

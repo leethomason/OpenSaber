@@ -64,6 +64,32 @@ void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba, int
     ASSERT(h > 0);
     ASSERT(m_layer < 127);
 
+    if (m_immediate && m_rot == 0 && outline == 0) {
+        Fixed115 xf = x0 * m_scaleX + m_transX;
+        Fixed115 yf = y0 * m_scaleY + m_transY;
+        Fixed115 wf = w * m_scaleX;
+        Fixed115 hf = h * m_scaleY;
+
+        Rect r(xf.getInt(), yf.getInt(), (xf + wf).getInt(), (yf + hf).getInt());
+        r.Intersect(m_clip);
+        if (!r.Empty()) {
+            for (int y = r.x0; y < r.x1; ++y) {
+                BlockDrawChunk chunk;
+#ifdef VECTOR_MONO
+                chunk.rgb = rgba.rgb().get() ? 1 : 0;
+#else
+                chunk.rgb = rgba.rgb();
+#endif
+                chunk.x0 = r.x0;
+                chunk.y0 = r.y0;
+                chunk.x1 = r.x1;
+                chunk.y1 = r.y1;
+                m_blockDraw(&chunk, 1);
+            }
+        }
+        return;
+    }
+
     if (!m_layerFixed)
         m_layer++;
     StartEdges();
@@ -142,6 +168,7 @@ void VRender::EndEdges()
 void VRender::Render()
 {
     ClearTransform();
+    m_immediate = false;
 
     Rect clip = m_size.Intersect(m_clip);
     ASSERT(m_nEdge + 1 < MAX_EDGES);
@@ -260,7 +287,7 @@ void VRender::SortActiveEdges()
 }
 
 
-osbr::RGB VRender::AddToColorStack(int layer, ColorRGBA color)
+ColorRGB VRender::AddToColorStack(int layer, ColorRGBA color)
 {
     for (int i = m_nColor; i >= 0; --i) {
         // Even-Odd rule. The layer toggles itself on and off.
@@ -289,10 +316,9 @@ osbr::RGB VRender::AddToColorStack(int layer, ColorRGBA color)
 #endif // _DEBUG
 
     #ifdef VECTOR_MONO
-    static const osbr::RGB WHITE(255, 255, 255);
-    static const osbr::RGB BLACK(0, 0, 0);
-    if (m_nColor < 1 || m_colorStack[m_nColor-1].color) return WHITE;
-    return BLACK;
+    if (m_nColor)
+        return m_colorStack[m_nColor - 1].color;
+    return 0;
     #else
     int start = m_nColor - 1;
     for (; start > 0; start--) {
@@ -327,7 +353,7 @@ void VRender::RasterizeLine(int y, const Rect& clip)
 
     // Edges are sorted. Walk right to left.
     int x0 = m_activeEdges[0].x.getInt();
-    osbr::RGB rgb(0);
+    ColorRGB rgb(0);
     int clipX0 = clip.x0;
     int clipX1 = clip.x1;
 
@@ -349,15 +375,13 @@ void VRender::RasterizeLine(int y, const Rect& clip)
 
                 cache[nCache].x0 = subClipX0;
                 cache[nCache].x1 = subClipX1;
-#ifdef VECTOR_MONO
-                cache[nCache].rgb = rgb.get() ? 1 : 0;
-#else
+                cache[nCache].y0 = y;
+                cache[nCache].y1 = y + 1;
                 cache[nCache].rgb = rgb;
-#endif
                 nCache++;
 
                 if (nCache == CACHE) {
-                    m_blockDraw(cache, y, nCache);
+                    m_blockDraw(cache, nCache);
                     nCache = 0;
                 }
             }
@@ -367,7 +391,7 @@ void VRender::RasterizeLine(int y, const Rect& clip)
     }
     ASSERT(m_nColor == 0);  // black background always there
     if (nCache) {
-        m_blockDraw(cache, y, nCache);
+        m_blockDraw(cache, nCache);
     }
 }
 

@@ -6,19 +6,30 @@
 
 #define VECTOR_MONO
 
+#ifdef VECTOR_MONO
+typedef uint8_t ColorRGB;
+typedef uint8_t ColorRGBA;
+#else
+typedef osbr::RGB ColorRGB;
+typedef osbr::RGBA ColorRGBA;
+#endif
+
 struct BlockDrawChunk {
     int x0;
+    int y0;
     int x1;
-    osbr::RGB rgb;
+    int y1;
+    ColorRGB rgb;
 };
-typedef void (*BlockDraw)(const BlockDrawChunk* chunks, int y, int n);
+typedef void (*BlockDraw)(const BlockDrawChunk* chunks, int n);
 typedef const uint8_t* (*GlyphMetrics)(int charID, int* advance, int* w, int* rows);
 
 class VRender
 {
 public:
-    // FIXME optimize for edges
-    static const int MAX_EDGES = 250;   // defines memory use.
+    // Defines memory use; should probably be passed in. The test UI uses 20-24 edges
+    // with immediate mode on, 120 with it off. 
+    static const int MAX_EDGES = 250;    
     static const int MAX_ACTIVE = MAX_EDGES;
     static const int Y_HASH = 32;
 
@@ -38,11 +49,11 @@ public:
         int x;
         int y;
 
-        bool operator== (const Vec2& rhs) const {
+        const bool operator== (const Vec2& rhs) const {
             return rhs.x == x && rhs.y == y;
         }
 
-        bool operator!= (const Vec2& rhs) const {
+        const bool operator!= (const Vec2& rhs) const {
             return rhs.x != x || rhs.y != y;
         }
     };
@@ -92,6 +103,7 @@ public:
     void DrawPoly(const Vec2* points, int n, const osbr::RGBA& rgba);
     void PushLayer() { m_layerFixed = true; m_layer++; }
     void PopLayer() { m_layerFixed = false; }
+    void SetImmediate(bool val) { m_immediate = val; }
 
     void SetTransform(FixedNorm rotation, Fixed115 x, Fixed115 y) {
         m_rot = rotation;
@@ -114,15 +126,15 @@ private:
     };
 
     struct Edge {
+        ColorRGBA color;
         int8_t layer;
         uint8_t yAdd;
         Fixed115 x0, y0;
         Fixed115 x1, y1;
-        osbr::RGBA color;
         Edge* nextStart = 0;
 
         void Clear();
-        void Init(int x0, int y0, int x1, int y1, int layer, const osbr::RGBA& rgba);
+        void Init(int x0, int y0, int x1, int y1, int layer, osbr::RGBA rgba);
         
         void Align() {
             if (y0 > y1) {
@@ -137,15 +149,10 @@ private:
     struct ActiveEdge
     {
         int8_t layer;
-        #ifdef VECTOR_MONO
-        int8_t color;
-        #endif
+        ColorRGBA color;
         int16_t yEnd;
         Fixed115 x;
         Fixed115 slope;
-        #ifndef VECTOR_MONO
-        osbr::RGBA color;
-        #endif
     };
 
     #ifdef VECTOR_MONO
@@ -163,20 +170,11 @@ private:
 
     struct ColorEntry
     {
-        int layer;
-        #ifdef VECTOR_MONO
-        int color;
-        #else
-        osbr::RGBA color;
-        #endif
-
-        void Set(int layer, osbr::RGBA color) {
+        int8_t layer;				// actually int8_t in the active edge.
+		ColorRGBA color;
+        void Set(int layer, ColorRGBA color) {
             this->layer = layer;
-            #ifdef VECTOR_MONO
-            this->color = color.rgb().get() ? 1 : 0;
-            #else
             this->color = color;
-            #endif
         }
     };
 
@@ -186,11 +184,13 @@ private:
     void SortToStart();
     void Rasterize();
     void RasterizeLine(int y, const Rect&);
-    osbr::RGB AddToColorStack(int layer, const osbr::RGBA&);
+    ColorRGB AddToColorStack(int layer, ColorRGBA color);
 
     void IncrementActiveEdges(int y);
     void AddStartingEdges(int y);
     void SortActiveEdges();
+
+	int CalcRootHash(int y) { return ((uint32_t)y) % Y_HASH; }
 
     static const int MAX_COLOR_STACK = 8;
 
@@ -202,9 +202,9 @@ private:
     int m_nEdge = 0;
     int m_layer = 0;
     int m_nColor = 0;
-    bool m_matrixDirty = true;
     int m_start;
     int m_end;
+    bool m_immediate = false;
     FixedNorm m_rot;
     Fixed115 m_transX, m_transY, m_scaleX, m_scaleY;
 

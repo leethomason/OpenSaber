@@ -37,7 +37,7 @@ void VRender::Edge::Clear()
     this->nextStart = 0;
 }
 
-void VRender::Edge::Init(int x0, int y0, int x1, int y1, int layer, const osbr::RGBA& rgba) 
+void VRender::Edge::Init(int x0, int y0, int x1, int y1, int layer, osbr::RGBA rgba)
 {
     Clear();
 
@@ -47,10 +47,11 @@ void VRender::Edge::Init(int x0, int y0, int x1, int y1, int layer, const osbr::
     this->y1 = y1;
     this->layer = layer;
 
-    this->color.r = rgba.r;
-    this->color.g = rgba.g;
-    this->color.b = rgba.b;
-    this->color.a = rgba.a;
+#ifdef VECTOR_MONO
+    this->color = rgba.rgb().get() ? 1 : 0;
+#else
+    this->color = rgba;
+#endif
 }
 
 
@@ -62,6 +63,32 @@ void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba, int
     ASSERT(w > 0);
     ASSERT(h > 0);
     ASSERT(m_layer < 127);
+
+    if (m_immediate && m_rot == 0 && outline == 0) {
+        Fixed115 xf = x0 * m_scaleX + m_transX;
+        Fixed115 yf = y0 * m_scaleY + m_transY;
+        Fixed115 wf = w * m_scaleX;
+        Fixed115 hf = h * m_scaleY;
+
+        Rect r(xf.getInt(), yf.getInt(), (xf + wf).getInt(), (yf + hf).getInt());
+        r.Intersect(m_clip);
+        if (!r.Empty()) {
+            for (int y = r.x0; y < r.x1; ++y) {
+                BlockDrawChunk chunk;
+#ifdef VECTOR_MONO
+                chunk.rgb = rgba.rgb().get() ? 1 : 0;
+#else
+                chunk.rgb = rgba.rgb();
+#endif
+                chunk.x0 = r.x0;
+                chunk.y0 = r.y0;
+                chunk.x1 = r.x1;
+                chunk.y1 = r.y1;
+                m_blockDraw(&chunk, 1);
+            }
+        }
+        return;
+    }
 
     if (!m_layerFixed)
         m_layer++;
@@ -141,6 +168,7 @@ void VRender::EndEdges()
 void VRender::Render()
 {
     ClearTransform();
+    m_immediate = false;
 
     Rect clip = m_size.Intersect(m_clip);
     ASSERT(m_nEdge + 1 < MAX_EDGES);
@@ -190,7 +218,7 @@ void VRender::SortToStart()
             yAdd = e->y0.getInt() + 1;
         }
         e->yAdd = (uint8_t)yAdd;
-        int yHash = yAdd % Y_HASH;
+        int yHash = CalcRootHash(yAdd);
         m_edge[i].nextStart = m_rootHash[yHash];
         m_rootHash[yHash] = e;
 
@@ -224,7 +252,7 @@ void VRender::IncrementActiveEdges(int y)
 
 void VRender::AddStartingEdges(int y)
 {
-    for (Edge* e = m_rootHash[y % Y_HASH]; e; e = e->nextStart) {
+    for (Edge* e = m_rootHash[CalcRootHash(y)]; e; e = e->nextStart) {
         // Things that are added before 0 have yAdd of 0.
         // For everything else it is a hash.
         if (e->yAdd == y) {
@@ -241,11 +269,7 @@ void VRender::AddStartingEdges(int y)
             ae->x = (Fixed115(y) - e->y0) * ae->slope + e->x0;
             ae->yEnd = e->y1.getDec() ? (e->y1.getInt() + 1) : e->y1.getInt();
             ae->layer = e->layer;
-            #ifdef VECTOR_MONO
-            ae->color = e->color.rgb().get() ? 1 : 0;
-            #else
             ae->color = e->color;
-            #endif
         }
     }
 }
@@ -263,7 +287,7 @@ void VRender::SortActiveEdges()
 }
 
 
-osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color)
+ColorRGB VRender::AddToColorStack(int layer, ColorRGBA color)
 {
     for (int i = m_nColor; i >= 0; --i) {
         // Even-Odd rule. The layer toggles itself on and off.
@@ -292,10 +316,9 @@ osbr::RGB VRender::AddToColorStack(int layer, const osbr::RGBA& color)
 #endif // _DEBUG
 
     #ifdef VECTOR_MONO
-    static const osbr::RGB WHITE(255, 255, 255);
-    static const osbr::RGB BLACK(0, 0, 0);
-    if (m_colorStack[m_nColor-1].color) return WHITE;
-    return BLACK;
+    if (m_nColor)
+        return m_colorStack[m_nColor - 1].color;
+    return 0;
     #else
     int start = m_nColor - 1;
     for (; start > 0; start--) {
@@ -330,7 +353,7 @@ void VRender::RasterizeLine(int y, const Rect& clip)
 
     // Edges are sorted. Walk right to left.
     int x0 = m_activeEdges[0].x.getInt();
-    osbr::RGB rgb(0);
+    ColorRGB rgb(0);
     int clipX0 = clip.x0;
     int clipX1 = clip.x1;
 
@@ -352,11 +375,13 @@ void VRender::RasterizeLine(int y, const Rect& clip)
 
                 cache[nCache].x0 = subClipX0;
                 cache[nCache].x1 = subClipX1;
+                cache[nCache].y0 = y;
+                cache[nCache].y1 = y + 1;
                 cache[nCache].rgb = rgb;
                 nCache++;
 
                 if (nCache == CACHE) {
-                    m_blockDraw(cache, y, nCache);
+                    m_blockDraw(cache, nCache);
                     nCache = 0;
                 }
             }
@@ -366,25 +391,16 @@ void VRender::RasterizeLine(int y, const Rect& clip)
     }
     ASSERT(m_nColor == 0);  // black background always there
     if (nCache) {
-        m_blockDraw(cache, y, nCache);
+        m_blockDraw(cache, nCache);
     }
 }
 
-/*
-FPS=137 time/frame=7
-Profile:
-  display              aveTime=1.47 ms maxTime=1.48 ms nCalls=275   time to transfer to display
-  VRender::Rasterize   aveTime=4.64 ms maxTime=5.26 ms nCalls=275   scan line conversions, edges, generate bitmap
-  draw                 aveTime=0.91 ms maxTime=0.99 ms nCalls=275   the draw calls to set up the image
-
-  Using a simple split, no stall greater than 5ms.
-  Update at ~60 hz (which is crazy fast)
-*/
-
 void VRender::Rasterize()
 {
+#ifndef _MSC_VER
     static ProfileData data("VRender::Rasterize");
     ProfileBlock block(&data);
+#endif
 
     Rect clip = m_size.Intersect(m_clip);
 

@@ -72,6 +72,7 @@ void VectorUI::Draw(VRender* ren,
     const UIRenderData* data)
 {
     ren->Clear();
+    ren->SetImmediate(true);
 
     int p = data->powerLevel(8);
     CStr<5> volts;
@@ -104,8 +105,9 @@ void VectorUI::Draw(VRender* ren,
         }
     }
     else if (mode == UIMode::VOLUME) {
-        for (int i = 0; i < 5; ++i) {
-            static const int S = 6;
+        static const int S = 6;
+        ren->DrawRect(8, H / 2 - S / 2, S, S, WHITE);
+        for (int i = 1; i < 5; ++i) {
             ren->DrawRect(12 + 4 * i, H / 2 - (S + i * 4) / 2, 2, S + i * 4, WHITE);
         }
     }
@@ -157,7 +159,8 @@ void VectorUI::Draw(VRender* ren,
             Segment(ren, TEXT, 2, digits[i], WHITE);
         }
     }
-    ren->Render();
+    // Call in wrapper!
+    //ren->Render();
 
 #endif
 

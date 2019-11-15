@@ -72,16 +72,7 @@ void VectorUI::Draw(VRender* ren,
     const UIRenderData* data)
 {
     ren->Clear();
-
-    static const osbr::RGBA POWER_ON(43, 163, 255, 200);
-    static const osbr::RGBA POWER_OFF(43, 163, 255, 40);
-    static const osbr::RGBA POWER_TEXT(43, 163, 255, 200);
-
-    static const osbr::RGBA AUDIO_ON(255, 163, 0, 200);
-    static const osbr::RGBA AUDIO_OFF(43, 163, 255, 40);
-
-    static const osbr::RGBA PALETTE_ON = POWER_ON;
-    static const osbr::RGBA PALETTE_OFF = POWER_OFF;
+    ren->SetImmediate(true);
 
     int p = data->powerLevel(8);
     CStr<5> volts;
@@ -114,8 +105,9 @@ void VectorUI::Draw(VRender* ren,
         }
     }
     else if (mode == UIMode::VOLUME) {
-        for (int i = 0; i < 5; ++i) {
-            static const int S = 6;
+        static const int S = 6;
+        ren->DrawRect(8, H / 2 - S / 2, S, S, WHITE);
+        for (int i = 1; i < 5; ++i) {
             ren->DrawRect(12 + 4 * i, H / 2 - (S + i * 4) / 2, 2, S + i * 4, WHITE);
         }
     }
@@ -167,11 +159,22 @@ void VectorUI::Draw(VRender* ren,
             Segment(ren, TEXT, 2, digits[i], WHITE);
         }
     }
+    // Call in wrapper!
     //ren->Render();
 
 #endif
 
 #if false
+    static const osbr::RGBA POWER_ON(43, 163, 255, 200);
+    static const osbr::RGBA POWER_OFF(43, 163, 255, 40);
+    static const osbr::RGBA POWER_TEXT(43, 163, 255, 200);
+
+    static const osbr::RGBA AUDIO_ON(255, 163, 0, 200);
+    static const osbr::RGBA AUDIO_OFF(43, 163, 255, 40);
+
+    static const osbr::RGBA PALETTE_ON = POWER_ON;
+    static const osbr::RGBA PALETTE_OFF = POWER_OFF;
+
     static const int W = 160;
     static const int H = 80;
 
