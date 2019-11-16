@@ -125,11 +125,26 @@ void VectorUI::Draw(VRender* ren,
             FixedNorm(0, 6), FixedNorm(1, 6), FixedNorm(2, 6), 
             FixedNorm(3, 6), FixedNorm(4, 6), FixedNorm(5, 6) 
         };
+
         for (int r = 0; r < 6; ++r) {
             ren->SetTransform(rotations[r], W / 2, H / 2);
             ren->DrawRect(-1, 10, 2, 5, WHITE);
         }
 
+        /*
+        FixedNorm dt(time, 65535);
+        ren->SetTransform(dt, W / 2, H / 2);
+        ren->DrawRect(-10, -10, 20, 20, WHITE, 1);
+        */
+        /*
+        static const int N = 12;
+        FixedNorm dt(time, 65535);
+        for (int r = 0; r < N; ++r) {
+            ren->SetTransform(FixedNorm(r, N) + dt, W / 2, H / 2);
+            ren->DrawRect(-1, 6, 1, 8, WHITE);
+        }
+        */
+       
         uint8_t h, s, v;
         rgb2hsv(data->color.r, data->color.g, data->color.b, &h, &s, &v);
 
@@ -146,7 +161,6 @@ void VectorUI::Draw(VRender* ren,
         int digits[4];
         NumToDigit(data->palette, digits);
         ren->SetTransform(W - 30, H / 2 - TEXT);
-        ren->SetImmediate(true);
         Segment(ren, TEXT, 2, digits[3], WHITE);
     }
 
@@ -156,7 +170,6 @@ void VectorUI::Draw(VRender* ren,
         NumToDigit(data->mVolts, digits);
         for (int i = 0; i < 4; ++i) {
             ren->SetTransform(20 + (TEXT+2)*i, H / 2 - TEXT);
-            ren->SetImmediate(true);
             Segment(ren, TEXT, 2, digits[i], WHITE);
         }
     }
