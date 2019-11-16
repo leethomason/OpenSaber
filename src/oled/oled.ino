@@ -29,31 +29,12 @@ int split = 0;
 #endif
 
 /*
-// Immediate,
-FPS=172 time/frame=5
-Profile:
-  display              aveTime=1.47ms maxTime=1.48ms nCalls=344
-  draw                 aveTime=3.18ms maxTime=3.33ms nCalls=344
-  VRender::Rasterize   aveTime=1.01ms maxTime=1.01ms nCalls=344
-
-// Normal
-FPS=154 time/frame=6
-Profile:
-  display              aveTime=1.45ms maxTime=1.46ms nCalls=309
-  draw                 aveTime=1.02ms maxTime=1.12ms nCalls=309
-  VRender::Rasterize   aveTime=3.73ms maxTime=4.36ms nCalls=309
-
-  Nothing really moving the needle. Leaving in immediate in case it's needed.
-  Certainly immediate uses less memory.
-
   Only immediate draw text:
     FPS=212 time/frame=4
     Profile:
     display              aveTime=1.47ms maxTime=1.48ms nCalls=425
     draw                 aveTime=1.10ms maxTime=1.26ms nCalls=425
     VRender::Rasterize   aveTime=1.92ms maxTime=1.96ms nCalls=425
-
-    Huh. Well, that's the winner.
 */
 
 
