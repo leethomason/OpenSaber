@@ -29,9 +29,10 @@ class VRender
 public:
     // Defines memory use; should probably be passed in. The test UI uses 20-24 edges
     // with immediate mode on, 120 with it off. 
-    static const int MAX_EDGES = 100;    
-    static const int MAX_ACTIVE = MAX_EDGES;
+    static const int MAX_EDGES = 200;    
+    static const int MAX_ACTIVE = MAX_EDGES / 2;
     static const int Y_HASH = 32;
+    static const int MAX_COLOR_STACK = 8;
 
     template<class T> 
     static T Min(T a, T b) { return a < b ? a : b; }
@@ -117,7 +118,7 @@ public:
     void ClearTransform();
 
     int NumEdges() const {
-        return m_nEdge;
+        return m_nPool;
     }
 
 private:
@@ -125,48 +126,16 @@ private:
         LAYER_BACKGROUND = -128,
     };
 
-    struct Edge {
-        ColorRGBA color;
-        int8_t layer;
-        uint8_t yAdd;
-        Fixed115 x0, y0;
-        Fixed115 x1, y1;
-        Edge* nextStart = 0;
-
-        void Clear();
-        void Init(int x0, int y0, int x1, int y1, int layer, osbr::RGBA rgba);
-        
-        void Align() {
-            if (y0 > y1) {
-                Swap(y0, y1);
-                Swap(x0, x1);
-            }
-        }
-
-        bool Horizontal() const { return y0 == y1; }
-    };
-
     struct ActiveEdge
     {
-        int8_t layer;
         ColorRGBA color;
+        int8_t layer;
+        int16_t yAdd;
         int16_t yEnd;
         Fixed115 x;
         Fixed115 slope;
+        ActiveEdge* next;
     };
-
-    #ifdef VECTOR_MONO
-    struct ActiveEdgeProxy { int32_t dummy[2]; };
-    #else
-    struct ActiveEdgeProxy { int32_t dummy[3]; };
-    #endif
-
-    static void SwapAE(ActiveEdge* _a, ActiveEdge* _b) {
-        STATIC_ASSERT(sizeof(ActiveEdge) == sizeof(ActiveEdgeProxy));
-        ActiveEdgeProxy t = *((ActiveEdgeProxy*)_a);
-        *((ActiveEdgeProxy*)_a) = *((ActiveEdgeProxy*)_b);
-        *((ActiveEdgeProxy*)_b) = t;
-    }
 
     struct ColorEntry
     {
@@ -178,10 +147,6 @@ private:
         }
     };
 
-    void StartEdges();
-    void EndEdges();
-
-    void SortToStart();
     void Rasterize();
     void RasterizeLine(int y, const Rect&);
     ColorRGB AddToColorStack(int layer, ColorRGBA color);
@@ -190,28 +155,27 @@ private:
     void AddStartingEdges(int y);
     void SortActiveEdges();
 
-	int CalcRootHash(int y) { return ((uint32_t)y) % Y_HASH; }
+	int CalcRootHash(int y) { return y >= 0 ? ((uint32_t)y) % Y_HASH : 0; }
 
-    static const int MAX_COLOR_STACK = 8;
+    void CreateActiveEdge(int x0, int y0, int x1, int y1, ColorRGBA c);
+    void Transform4(Fixed115* e, int x0, int y0, int x1, int y1);
 
     bool m_layerFixed = false;
     BlockDraw m_blockDraw = 0;
     Rect m_size;
     Rect m_clip;
     int m_nActive;
-    int m_nEdge = 0;
     int m_layer = 0;
     int m_nColor = 0;
-    int m_start;
-    int m_end;
+    int m_nPool = 0;
     bool m_immediate = false;
     FixedNorm m_rot;
     Fixed115 m_transX, m_transY, m_scaleX, m_scaleY;
 
-    ColorEntry m_colorStack[MAX_COLOR_STACK];
-    ActiveEdge m_activeEdges[MAX_ACTIVE];
-    Edge m_edge[MAX_EDGES];
-    Edge* m_rootHash[Y_HASH];
+    ColorEntry  m_colorStack[MAX_COLOR_STACK];
+    ActiveEdge* m_activeEdges[MAX_ACTIVE];
+    ActiveEdge  m_edgePool[MAX_EDGES];
+    ActiveEdge* m_rootHash[Y_HASH];
 };
 
 

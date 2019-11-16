@@ -34,7 +34,6 @@ Profile:
   display              aveTime=1.48ms maxTime=1.48ms nCalls=434
   draw                 aveTime=1.13ms maxTime=1.26ms nCalls=434
   VRender::Rasterize   aveTime=1.79ms maxTime=1.86ms nCalls=434
-
 */
 
 
