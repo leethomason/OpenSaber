@@ -175,9 +175,15 @@ void VRender::CreateActiveEdge(int x0, int y0, int x1, int y1, ColorRGBA c)
     // If horizontal, doesn't render.
     if (p[3].getInt() == p[1].getInt())
         return;
-    m_nPool++;
     int yAdd = p[1].getInt();
+    if (yAdd >= Y_HASH)
+        return;
+
+    m_nPool++;
     ae->yEnd = p[3].getInt();
+    // For small values, this can go wrong. Need some thinging about
+    // almost flat lines. Use pixel coordinates? Not sure. Causes strange
+    // long line artifacts.
     ae->slope = (p[2] - p[0]) / (p[3] - p[1]);
 
     ae->x = p[0];
@@ -185,7 +191,8 @@ void VRender::CreateActiveEdge(int x0, int y0, int x1, int y1, ColorRGBA c)
         ae->x += ae->slope * (p[1] - yAdd);
     }
     ASSERT(Y_HASH >= m_size.CY());
-    if (yAdd < 0) yAdd = 0;
+    if (yAdd < 0) 
+        yAdd = 0;
     ae->next = m_rootHash[yAdd];
     m_rootHash[yAdd] = ae;
 }
@@ -376,19 +383,6 @@ void VRender::Rasterize()
         AddStartingEdges(j);
         SortActiveEdges();
         RasterizeLine(j, clip);
-
-#if false
-#if defined(_MSC_VER) && defined(_DEBUG)
-        if (m_nColor) {
-            printf("ASSERTION\n");
-            for (int i = 0; i < m_nColor; ++i) {
-                printf("Color: [%d] layer=%d (%d,%d,%d)\n", i, m_colorStack[i].layer,
-                    m_colorStack[i].color.r, m_colorStack[i].color.g, m_colorStack[i].color.b);
-            }
-            ASSERT(false);
-        }
-#endif
-#endif
     }
     ClearTransform();
 }

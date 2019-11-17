@@ -134,11 +134,11 @@ void VectorUI::Draw(VRender* ren,
             ren->DrawRect(-1, 10, 2, 5, WHITE);
         }
 
-        
+        /*
         FixedNorm dt(time, 65535);
         ren->SetTransform(dt, W / 2, H / 2);
         ren->DrawRect(-10, -10, 20, 20, WHITE, 1);
-        
+        */
         /*
         static const int N = 12;
         FixedNorm dt(time, 65535);

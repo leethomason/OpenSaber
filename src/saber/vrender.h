@@ -28,7 +28,7 @@ class VRender
 public:
     // Defines memory use; should probably be passed in. The test UI uses 20-24 edges
     // with immediate mode on, 120 with it off. 
-    static const int MAX_EDGES = 100;    
+    static const int MAX_EDGES = 120;    
     static const int MAX_ACTIVE = MAX_EDGES / 2;
     static const int Y_HASH = 32;
     static const int MAX_COLOR_STACK = 8;
