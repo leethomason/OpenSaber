@@ -50,6 +50,11 @@ Profile:
   draw                 aveTime=1.14ms maxTime=1.20ms nCalls=386
   VRender::Rasterize   aveTime=2.41ms maxTime=2.55ms nCalls=386
 
+FPS=225 time/frame=4 size=1612 edges=64/100
+Profile:
+  display              aveTime=1.47ms maxTime=1.48ms nCalls=450
+  draw                 aveTime=1.33ms maxTime=1.44ms nCalls=450
+  VRender::Rasterize   aveTime=1.52ms maxTime=1.58ms nCalls=450
 */
 
 

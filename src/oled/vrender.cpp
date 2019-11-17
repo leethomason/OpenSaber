@@ -50,7 +50,7 @@ void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba, int
         Rect r(xf.getInt(), yf.getInt(), (xf + wf).getInt(), (yf + hf).getInt());
         r.Intersect(m_clip);
         if (!r.Empty()) {
-            for (int y = r.x0; y < r.x1; ++y) {
+            for (int y = r.y0; y < r.y1; ++y) {
                 BlockDrawChunk chunk;
 #ifdef VECTOR_MONO
                 chunk.rgb = rgba.rgb().get() ? 1 : 0;
@@ -58,9 +58,9 @@ void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba, int
                 chunk.rgb = rgba.rgb();
 #endif
                 chunk.x0 = r.x0;
-                chunk.y0 = r.y0;
+                chunk.y0 = y;                
                 chunk.x1 = r.x1;
-                chunk.y1 = r.y1;
+                chunk.y1 = y+1;
                 m_blockDraw(&chunk, 1);
             }
         }
