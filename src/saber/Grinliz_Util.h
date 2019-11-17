@@ -389,6 +389,12 @@ T glClamp(T x, T a, T b) {
 	if (x > b) return b;
 	return x;
 }
+template<class T>
+void glSwap(T &a, T &b) {
+    T t = a;
+    a = b;
+    b = t;
+}
 
 template<class T>
 T glAbs(T x) { return x >= 0 ? x : -x; }

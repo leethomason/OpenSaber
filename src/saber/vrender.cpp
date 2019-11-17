@@ -15,10 +15,12 @@ VRender::VRender()
 
 void VRender::Clear() 
 {
-    m_nEdge = 0;
     m_nActive = 0;
     m_layer = 0;
     m_nColor = 0;
+    m_nPool = 0;
+    ASSERT(Y_HASH >= m_size.CY());
+    memset(m_rootHash, 0, sizeof(ActiveEdge*)*Y_HASH);
 }
 
 void VRender::ClearTransform()
@@ -30,35 +32,10 @@ void VRender::ClearTransform()
     m_scaleY = 1;
 }
 
-void VRender::Edge::Clear()
-{
-    this->layer = layer;
-    this->yAdd = 0;
-    this->nextStart = 0;
-}
-
-void VRender::Edge::Init(int x0, int y0, int x1, int y1, int layer, osbr::RGBA rgba)
-{
-    Clear();
-
-    this->x0 = x0;
-    this->y0 = y0;
-    this->x1 = x1;
-    this->y1 = y1;
-    this->layer = layer;
-
-#ifdef VECTOR_MONO
-    this->color = rgba.rgb().get() ? 1 : 0;
-#else
-    this->color = rgba;
-#endif
-}
-
 
 void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba, int outline)
 {
     Rect in(x0, y0, w + x0, h + y0);
-    ASSERT(m_nEdge + 4 <= MAX_EDGES);
     ASSERT(in.y0 <= in.y1);
     ASSERT(w > 0);
     ASSERT(h > 0);
@@ -73,7 +50,7 @@ void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba, int
         Rect r(xf.getInt(), yf.getInt(), (xf + wf).getInt(), (yf + hf).getInt());
         r.Intersect(m_clip);
         if (!r.Empty()) {
-            for (int y = r.x0; y < r.x1; ++y) {
+            for (int y = r.y0; y < r.y1; ++y) {
                 BlockDrawChunk chunk;
 #ifdef VECTOR_MONO
                 chunk.rgb = rgba.rgb().get() ? 1 : 0;
@@ -81,9 +58,8 @@ void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba, int
                 chunk.rgb = rgba.rgb();
 #endif
                 chunk.x0 = r.x0;
-                chunk.y0 = r.y0;
                 chunk.x1 = r.x1;
-                chunk.y1 = r.y1;
+                chunk.y = y;
                 m_blockDraw(&chunk, 1);
             }
         }
@@ -92,76 +68,126 @@ void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba, int
 
     if (!m_layerFixed)
         m_layer++;
-    StartEdges();
-    if (m_rot != 0)
-        m_edge[m_nEdge++].Init(in.x0, in.y0, in.x1, in.y0, m_layer, rgba);
-    m_edge[m_nEdge++].Init(in.x1, in.y0, in.x1, in.y1, m_layer, rgba);
-    if (m_rot != 0)
-        m_edge[m_nEdge++].Init(in.x1, in.y1, in.x0, in.y1, m_layer, rgba);
-    m_edge[m_nEdge++].Init(in.x0, in.y1, in.x0, in.y0, m_layer, rgba);
+
+#ifdef VECTOR_MONO
+    ColorRGBA c = rgba.rgb().get() ? 1 : 0;
+#else
+    ColorRGBA c = rgba;
+#endif
+
+    CreateActiveEdge(in.x0, in.y0, in.x1, in.y0, c);
+    CreateActiveEdge(in.x1, in.y0, in.x1, in.y1, c);
+    CreateActiveEdge(in.x1, in.y1, in.x0, in.y1, c);
+    CreateActiveEdge(in.x0, in.y1, in.x0, in.y0, c);
 
     if (outline) {
-        if (m_rot != 0)
-            m_edge[m_nEdge++].Init(in.x0 + outline, in.y0 + outline, in.x1 - outline, in.y0 + outline, m_layer, rgba);
-        m_edge[m_nEdge++].Init(in.x1 - outline, in.y0 + outline, in.x1 - outline, in.y1 - outline, m_layer, rgba);
-        if (m_rot != 0)
-            m_edge[m_nEdge++].Init(in.x1 - outline, in.y1 - outline, in.x0 + outline, in.y1 - outline, m_layer, rgba);
-        m_edge[m_nEdge++].Init(in.x0 + outline, in.y1 - outline, in.x0 + outline, in.y0 + outline, m_layer, rgba);
+        CreateActiveEdge(in.x0 + outline, in.y0 + outline, in.x1 - outline, in.y0 + outline, c);
+        CreateActiveEdge(in.x1 - outline, in.y0 + outline, in.x1 - outline, in.y1 - outline, c);
+        CreateActiveEdge(in.x1 - outline, in.y1 - outline, in.x0 + outline, in.y1 - outline, c);
+        CreateActiveEdge(in.x0 + outline, in.y1 - outline, in.x0 + outline, in.y0 + outline, c);
     }
-
-    EndEdges();
 }
 
 void VRender::DrawPoly(const Vec2* points, int n, const osbr::RGBA& rgba)
 {
+#ifdef VECTOR_MONO
+    ColorRGBA c = rgba.rgb().get() ? 1 : 0;
+#else
+    ColorRGBA c = rgba;
+#endif
+
     if (!m_layerFixed)
         m_layer++;
-    StartEdges();
+
     for (int i = 1; i < n; ++i) {
-        ASSERT(m_nEdge < MAX_EDGES);
-        m_edge[m_nEdge++].Init(points[i - 1].x, points[i - 1].y, points[i].x, points[i].y, m_layer, rgba);
+        CreateActiveEdge(points[i - 1].x, points[i - 1].y, points[i].x, points[i].y, c);
     }
     if (points[n - 1] != points[0]) {
-        ASSERT(m_nEdge < MAX_EDGES);
-        m_edge[m_nEdge++].Init(points[n - 1].x, points[n - 1].y, points[0].x, points[0].y, m_layer, rgba);
+        CreateActiveEdge(points[n - 1].x, points[n - 1].y, points[0].x, points[0].y, c);
     }
-    EndEdges();
 }
 
-void VRender::StartEdges()
+
+void VRender::DrawPoly(const Vec2I8* points, int n, const osbr::RGBA& rgba)
 {
-    m_start = m_nEdge;
-    m_end = m_nEdge;
+#ifdef VECTOR_MONO
+    ColorRGBA c = rgba.rgb().get() ? 1 : 0;
+#else
+    ColorRGBA c = rgba;
+#endif
+
+    if (!m_layerFixed)
+        m_layer++;
+
+    for (int i = 1; i < n; ++i) {
+        CreateActiveEdge(points[i - 1].x, points[i - 1].y, points[i].x, points[i].y, c);
+    }
+    if (points[n - 1] != points[0]) {
+        CreateActiveEdge(points[n - 1].x, points[n - 1].y, points[0].x, points[0].y, c);
+    }
 }
 
-void VRender::EndEdges()
-{
-    m_end = m_nEdge;
 
-    if (m_transX != 0 || m_transY != 0 || m_rot != 0 || m_scaleX != 1 || m_scaleY != 1) {
+void VRender::Transform4(Fixed115* e, int x0, int y0, int x1, int y1)
+{
+    if (m_rot != 0) {
         FixedNorm s = iSin(m_rot);
         FixedNorm c = iCos(m_rot);
 
-        for (int i = m_start; i < m_end; i++) {
-            Fixed115 x0 = m_edge[i].x0 * m_scaleX;
-            Fixed115 y0 = m_edge[i].y0 * m_scaleY;
-            Fixed115 x1 = m_edge[i].x1 * m_scaleX;
-            Fixed115 y1 = m_edge[i].y1 * m_scaleY;
+        Fixed115 xp0 = x0 * m_scaleX;
+        Fixed115 yp0 = y0 * m_scaleY;
+        Fixed115 xp1 = x1 * m_scaleX;
+        Fixed115 yp1 = y1 * m_scaleY;
 
-            m_edge[i].x0 = x0 * c - y0 * s + m_transX;
-            m_edge[i].y0 = x0 * s + y0 * c + m_transY;
-
-            m_edge[i].x1 = x1 * c - y1 * s + m_transX;
-            m_edge[i].y1 = x1 * s + y1 * c + m_transY;
-
-            m_edge[i].Align();
-        }
+        e[0] = xp0 * c - yp0 * s + m_transX;
+        e[1] = xp0 * s + yp0 * c + m_transY;
+        e[2] = xp1 * c - yp1 * s + m_transX;
+        e[3] = xp1 * s + yp1 * c + m_transY;
+    }
+    else if (m_scaleX != 1 || m_scaleY != 1) {
+        e[0] = x0 * m_scaleX + m_transX;
+        e[1] = y0 * m_scaleY + m_transY;
+        e[2] = x1 * m_scaleX + m_transX;
+        e[3] = y1 * m_scaleY + m_transY;
     }
     else {
-        for (int i = m_start; i < m_end; i++) {
-            m_edge[i].Align();
-        }
+        e[0] = x0 + m_transX;
+        e[1] = y0 + m_transY;
+        e[2] = x1 + m_transX;
+        e[3] = y1 + m_transY;
     }
+}
+
+void VRender::CreateActiveEdge(int x0, int y0, int x1, int y1, ColorRGBA c)
+{
+    ASSERT(m_nPool < MAX_EDGES);
+    ActiveEdge* ae = &m_edgePool[m_nPool];
+    ae->color = c;
+    ae->layer = m_layer;
+    Fixed115 p[4];
+    Transform4(p, x0, y0, x1, y1);
+
+    if (p[3] < p[1]) {
+        glSwap(p[0], p[2]);
+        glSwap(p[1], p[3]);
+    }
+
+    // If horizontal, doesn't render.
+    if (p[3].getInt() == p[1].getInt())
+        return;
+    m_nPool++;
+    int yAdd = p[1].getInt();
+    ae->yEnd = p[3].getInt();
+    ae->slope = (p[2] - p[0]) / (p[3] - p[1]);
+
+    ae->x = p[0];
+    if (p[1] > yAdd) {
+        ae->x += ae->slope * (p[1] - yAdd);
+    }
+    ASSERT(Y_HASH >= m_size.CY());
+    if (yAdd < 0) yAdd = 0;
+    ae->next = m_rootHash[yAdd];
+    m_rootHash[yAdd] = ae;
 }
 
 
@@ -171,79 +197,28 @@ void VRender::Render()
     m_immediate = false;
 
     Rect clip = m_size.Intersect(m_clip);
-    ASSERT(m_nEdge + 1 < MAX_EDGES);
-    m_edge[m_nEdge++].Init(clip.x0, clip.y0, clip.x0, clip.y1, LAYER_BACKGROUND, osbr::RGBA(0, 0, 0, 255));
-    m_edge[m_nEdge++].Init(clip.x1, clip.y0, clip.x1, clip.y1, LAYER_BACKGROUND, osbr::RGBA(0, 0, 0, 255));
+    int savedLayer = m_layer;
+    m_layer = LAYER_BACKGROUND;
+    DrawRect(clip.x0, clip.y0, clip.x1, clip.y1, osbr::RGBA(0, 0, 0, 255));
+    m_layer = savedLayer;
 
-    SortToStart();
     Rasterize();
-
-    m_nEdge -= 2;
-}
-
-void VRender::SortToStart()
-{
-    memset(m_rootHash, 0, sizeof(Edge*)*Y_HASH);
-
-    for (int i = 0; i < m_nEdge; ++i) {
-        Edge* e = m_edge + i;
-        if (e->Horizontal()) 
-            continue;
-        ASSERT(e->y0 <= e->y1);   // Should be sorted by the Start/End
-
-        int yAdd = 0;
-#if defined(_MSC_VER) && defined(_DEBUG)
-        /*  FIXME
-            The patching works. (Adding 1 or subtracting 1.) Which implies
-            there is a way to do the division so it always ends up at the correct result.
-            But haven't worked it out yet.
-
-        int x1Slope = (e->x0 + e->slope * (e->y1 - e->y0)).getInt();
-        int x1Literal = e->x1.getInt();
-        if (x1Slope < x1Literal) e->slope.setRaw(e->slope.getRaw() + 1);
-        if (x1Slope > x1Literal) e->slope.setRaw(e->slope.getRaw() - 1);
-        int x1SlopeP = (e->x0 + e->slope * (e->y1 - e->y0)).getInt();
-        int x1LiteralP = e->x1.getInt();
-        ASSERT(x1SlopeP == x1LiteralP);
-        */
-#endif
-
-        if (e->y0 < 0) {
-            yAdd = 0;
-        }
-        else if (e->y0.getDec() == 0) {
-            yAdd = e->y0.getInt();
-        }
-        else {
-            yAdd = e->y0.getInt() + 1;
-        }
-        e->yAdd = (uint8_t)yAdd;
-        int yHash = CalcRootHash(yAdd);
-        m_edge[i].nextStart = m_rootHash[yHash];
-        m_rootHash[yHash] = e;
-
-#if defined(_MSC_VER) && defined(_DEBUG)
-        //printf("Sorting start=%d (%.2f,%.2f)-(%.2f,%.2f)\n",
-        //    e->layer,
-        //    e->x0.toFloat(), e->y0.toFloat(), e->x1.toFloat(), e->y1.toFloat());
-#endif
-    }
 }
 
 
 void VRender::IncrementActiveEdges(int y)
 {
     int n = m_nActive;
-    ActiveEdge* ae = m_activeEdges;
-    for(int i=0; i<n; ++i) {
+    ActiveEdge** ae = m_activeEdges;
+    for (int i = 0; i < n; ++i) {
         // Set the new edge x value, cull the no longer active.
         // Will sort int the next stage.
-        if (y >= m_activeEdges[i].yEnd) {
-            // Do nothing; will get culled.
+        if (y >= m_activeEdges[i]->yEnd) {
+            // Do nothing; will get culled because ae isn't incremented.
         }
         else {
             *ae = m_activeEdges[i];
-            ae->x += ae->slope;   
+            (*ae)->x += (*ae)->slope;
             ++ae;
         }
     }
@@ -252,25 +227,11 @@ void VRender::IncrementActiveEdges(int y)
 
 void VRender::AddStartingEdges(int y)
 {
-    for (Edge* e = m_rootHash[CalcRootHash(y)]; e; e = e->nextStart) {
+    ASSERT(Y_HASH >= m_size.CY());
+    for (ActiveEdge* e = m_rootHash[y]; e; e = e->next) {
         // Things that are added before 0 have yAdd of 0.
         // For everything else it is a hash.
-        if (e->yAdd == y) {
-            if (e->Horizontal()) 
-                continue;
-            if (e->y1 < y) 
-                continue;
-
-            ASSERT(m_nActive < MAX_ACTIVE);
-            ActiveEdge* ae = m_activeEdges + m_nActive;
-            m_nActive++;
-            ASSERT(e->y1 >= e->y0);
-            ae->slope = (e->x1 - e->x0) / (e->y1 - e->y0);
-            ae->x = (Fixed115(y) - e->y0) * ae->slope + e->x0;
-            ae->yEnd = e->y1.getDec() ? (e->y1.getInt() + 1) : e->y1.getInt();
-            ae->layer = e->layer;
-            ae->color = e->color;
-        }
+        m_activeEdges[m_nActive++] = e;
     }
 }
 
@@ -279,11 +240,16 @@ void VRender::SortActiveEdges()
 {
     for (int i = 0; i < m_nActive; ++i) {
         int j = i;
-        while (j > 0 && m_activeEdges[j - 1].x > m_activeEdges[j].x) {
-            SwapAE(&m_activeEdges[j - 1], &m_activeEdges[j]);
+        while (j > 0 && m_activeEdges[j - 1]->x > m_activeEdges[j]->x) {
+            glSwap(m_activeEdges[j - 1], m_activeEdges[j]);
             j--;
         }
     }
+#ifdef _DEBUG
+    for (int i = 1; i < m_nActive; ++i) {
+        ASSERT(m_activeEdges[i]->x >= m_activeEdges[i - 1]->x);
+    }
+#endif
 }
 
 
@@ -350,17 +316,18 @@ void VRender::RasterizeLine(int y, const Rect& clip)
         return;
 
     ASSERT(m_nActive >= 2);
+    ASSERT(m_nActive % 2 == 0);
 
     // Edges are sorted. Walk right to left.
-    int x0 = m_activeEdges[0].x.getInt();
+    int x0 = m_activeEdges[0]->x.getInt();
     ColorRGB rgb(0);
     int clipX0 = clip.x0;
     int clipX1 = clip.x1;
 
     // Edges can go away under the current active, or abut.
     // Intentionally trying to keep this loop simple without look-ahead, etc.
-    ActiveEdge* ae = m_activeEdges;
-    for(int i=0; i<m_nActive; ++i, ++ae) {
+    for(int i=0; i<m_nActive; ++i) {
+        ActiveEdge* ae = m_activeEdges[i];
         // FIXME
         // If the color stack doesn't change, we don't need to draw. But be
         // wary of the boundary condition where it's a black bacground,
@@ -375,8 +342,7 @@ void VRender::RasterizeLine(int y, const Rect& clip)
 
                 cache[nCache].x0 = subClipX0;
                 cache[nCache].x1 = subClipX1;
-                cache[nCache].y0 = y;
-                cache[nCache].y1 = y + 1;
+                cache[nCache].y = y;
                 cache[nCache].rgb = rgb;
                 nCache++;
 
@@ -389,7 +355,8 @@ void VRender::RasterizeLine(int y, const Rect& clip)
         rgb = AddToColorStack(ae->layer, ae->color);
         x0 = x1;
     }
-    ASSERT(m_nColor == 0);  // black background always there
+    ASSERT(m_nColor == 0);
+    m_nColor = 0;
     if (nCache) {
         m_blockDraw(cache, nCache);
     }
