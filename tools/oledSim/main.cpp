@@ -102,38 +102,12 @@ void BlockDrawOLED(const BlockDrawChunk* chunks, int n)
         if (chunk.rgb.get() == 0) continue;
 #endif
         // Simple for the single row.
-        if (chunk.y0 == chunk.y1 - 1) {
-            int row = chunk.y0 / 8;
-            int bit = chunk.y0 - row * 8;
-            uint8_t mask = 1 << bit;
-            uint8_t* p = blockDrawOLEDBUffer + row * WIDTH + chunk.x0;
-            for (int nPix = chunk.x1 - chunk.x0; nPix > 0; nPix--, p++) {
-                *p |= mask;
-            }
-        }
-        else {
-            int row0 = chunk.y0 / 8;
-            int row1 = (chunk.y1 + 7) / 8;
-
-            for (int r = row0; r < row1; ++r) {
-                int bit0 = chunk.y0 - r * 8;
-                int bit1 = chunk.y1 - r * 8;
-                bit0 = glMax(bit0, 0);
-                bit1 = glMin(bit1, 8);
-#ifdef PRECOMPUTE_MASK
-                const uint8_t* m = MASK[bit0];
-                uint8_t mask = m[bit1 - bit0 - 1];
-#else
-                uint8_t mask = 0;
-                for (int b = bit0; b < bit1; ++b) {
-                    mask |= 1 << b;
-                }
-#endif
-                uint8_t* p = blockDrawOLEDBUffer + r * WIDTH + chunk.x0;
-                for (int nPix = chunk.x1 - chunk.x0; nPix > 0; nPix--, p++) {
-                    *p |= mask;
-                }
-            }
+        int row = chunk.y >> 3;
+        int bit = chunk.y - (row << 3);
+        uint8_t mask = 1 << bit;
+        uint8_t* p = blockDrawOLEDBUffer + row * WIDTH + chunk.x0;
+        for (int nPix = chunk.x1 - chunk.x0; nPix > 0; nPix--, p++) {
+            *p |= mask;
         }
     }
 }
