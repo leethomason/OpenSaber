@@ -34,6 +34,22 @@ Profile:
   display              aveTime=1.48ms maxTime=1.48ms nCalls=434
   draw                 aveTime=1.13ms maxTime=1.26ms nCalls=434
   VRender::Rasterize   aveTime=1.79ms maxTime=1.86ms nCalls=434
+
+ActiveEdge only; doesn't hold on to edges. Simpler. Smaller.
+Perf is a wash.
+FPS=215 time/frame=4 size=2012
+Profile:
+  display              aveTime=1.50ms maxTime=1.51ms nCalls=430
+  draw                 aveTime=1.46ms maxTime=1.61ms nCalls=430
+  VRender::Rasterize   aveTime=1.55ms maxTime=1.61ms nCalls=430
+
+Vector numbers. Text is always such trouble.
+FPS=193 time/frame=5 size=3012 edges=90/200
+Profile:
+  display              aveTime=1.50ms maxTime=1.51ms nCalls=386
+  draw                 aveTime=1.14ms maxTime=1.20ms nCalls=386
+  VRender::Rasterize   aveTime=2.41ms maxTime=2.55ms nCalls=386
+
 */
 
 
@@ -161,7 +177,10 @@ void loop()
         #if SERIAL_DEBUG > 0
         Log.p("SERIAL ON").eol();
         #endif
-        Log.p("FPS=").p(nFrames / SEC).p(" time/frame=").p(SEC * 1000 / nFrames).p(" size=").p(sizeof(VRender)).eol();
+        Log.p("FPS=").p(nFrames / SEC).p(" time/frame=").p(SEC * 1000 / nFrames)
+            .p(" size=").p(sizeof(VRender))
+            .p(" edges=").p(vrender.NumEdges()).p("/").p(VRender::MAX_EDGES)
+            .eol();
         DumpProfile();
         nFrames = 0;
     }

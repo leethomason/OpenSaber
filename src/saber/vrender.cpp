@@ -7,8 +7,6 @@
 #include "Grinliz_Arduino_Util.h" // profiling
 #endif
 
-#define LOG_EDGES
-
 VRender::VRender()
 {
     ClearTransform();
@@ -21,6 +19,7 @@ void VRender::Clear()
     m_layer = 0;
     m_nColor = 0;
     m_nPool = 0;
+    ASSERT(Y_HASH >= m_size.CY());
     memset(m_rootHash, 0, sizeof(ActiveEdge*)*Y_HASH);
 }
 
@@ -110,6 +109,26 @@ void VRender::DrawPoly(const Vec2* points, int n, const osbr::RGBA& rgba)
 }
 
 
+void VRender::DrawPoly(const Vec2I8* points, int n, const osbr::RGBA& rgba)
+{
+#ifdef VECTOR_MONO
+    ColorRGBA c = rgba.rgb().get() ? 1 : 0;
+#else
+    ColorRGBA c = rgba;
+#endif
+
+    if (!m_layerFixed)
+        m_layer++;
+
+    for (int i = 1; i < n; ++i) {
+        CreateActiveEdge(points[i - 1].x, points[i - 1].y, points[i].x, points[i].y, c);
+    }
+    if (points[n - 1] != points[0]) {
+        CreateActiveEdge(points[n - 1].x, points[n - 1].y, points[0].x, points[0].y, c);
+    }
+}
+
+
 void VRender::Transform4(Fixed115* e, int x0, int y0, int x1, int y1)
 {
     if (m_rot != 0) {
@@ -158,14 +177,18 @@ void VRender::CreateActiveEdge(int x0, int y0, int x1, int y1, ColorRGBA c)
     if (p[3].getInt() == p[1].getInt())
         return;
     m_nPool++;
-    ae->yAdd = p[1].getInt();
+    int yAdd = p[1].getInt();
     ae->yEnd = p[3].getInt();
-    ae->x = p[0];
     ae->slope = (p[2] - p[0]) / (p[3] - p[1]);
 
-    int id = CalcRootHash(p[1].getInt());
-    ae->next = m_rootHash[id];
-    m_rootHash[id] = ae;
+    ae->x = p[0];
+    if (p[1] > yAdd) {
+        ae->x += ae->slope * (p[1] - yAdd);
+    }
+    ASSERT(Y_HASH >= m_size.CY());
+    if (yAdd < 0) yAdd = 0;
+    ae->next = m_rootHash[yAdd];
+    m_rootHash[yAdd] = ae;
 }
 
 
@@ -205,14 +228,11 @@ void VRender::IncrementActiveEdges(int y)
 
 void VRender::AddStartingEdges(int y)
 {
-    int id = CalcRootHash(y);
-    for (ActiveEdge* e = m_rootHash[id]; e; e = e->next) {
+    ASSERT(Y_HASH >= m_size.CY());
+    for (ActiveEdge* e = m_rootHash[y]; e; e = e->next) {
         // Things that are added before 0 have yAdd of 0.
         // For everything else it is a hash.
-        if (e->yAdd == y || (y == 0 && e->yAdd <= 0)) {
-            ASSERT(m_nActive < MAX_ACTIVE);
-            m_activeEdges[m_nActive++] = e;
-        }
+        m_activeEdges[m_nActive++] = e;
     }
 }
 

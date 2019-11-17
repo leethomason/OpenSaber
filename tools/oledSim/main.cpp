@@ -332,7 +332,7 @@ int main(int, char**) {
             vrender.Clear();
             VectorUI::Draw(&vrender, t, mode.mode(), bladeOn, &data);
             if (firstRender) {
-                printf("Render: numEdges=%d/%d\n", vrender.NumEdges(), VRender::MAX_EDGES);
+                printf("Render: numEdges=%d/%d size=%d\n", vrender.NumEdges(), VRender::MAX_EDGES, (int)sizeof(VRender));
                 firstRender = false;
             }
             vrender.Render();

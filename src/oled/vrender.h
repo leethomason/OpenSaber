@@ -29,7 +29,7 @@ class VRender
 public:
     // Defines memory use; should probably be passed in. The test UI uses 20-24 edges
     // with immediate mode on, 120 with it off. 
-    static const int MAX_EDGES = 200;    
+    static const int MAX_EDGES = 100;    
     static const int MAX_ACTIVE = MAX_EDGES / 2;
     static const int Y_HASH = 32;
     static const int MAX_COLOR_STACK = 8;
@@ -58,6 +58,21 @@ public:
             return rhs.x != x || rhs.y != y;
         }
     };
+
+    struct Vec2I8
+    {
+        int8_t x;
+        int8_t y;
+
+        const bool operator== (const Vec2I8& rhs) const {
+            return rhs.x == x && rhs.y == y;
+        }
+
+        const bool operator!= (const Vec2I8& rhs) const {
+            return rhs.x != x || rhs.y != y;
+        }
+    };
+
 
     struct Rect
     {
@@ -102,6 +117,7 @@ public:
     void DrawRect(int x0, int y0, int width, int height, const osbr::RGBA& rgba, int outline=0);
 
     void DrawPoly(const Vec2* points, int n, const osbr::RGBA& rgba);
+    void DrawPoly(const Vec2I8* points, int n, const osbr::RGBA& rgba);
     void PushLayer() { m_layerFixed = true; m_layer++; }
     void PopLayer() { m_layerFixed = false; }
     void SetImmediate(bool val) { m_immediate = val; }
@@ -130,7 +146,6 @@ private:
     {
         ColorRGBA color;
         int8_t layer;
-        int16_t yAdd;
         int16_t yEnd;
         Fixed115 x;
         Fixed115 slope;
@@ -154,8 +169,6 @@ private:
     void IncrementActiveEdges(int y);
     void AddStartingEdges(int y);
     void SortActiveEdges();
-
-	int CalcRootHash(int y) { return y >= 0 ? ((uint32_t)y) % Y_HASH : 0; }
 
     void CreateActiveEdge(int x0, int y0, int x1, int y1, ColorRGBA c);
     void Transform4(Fixed115* e, int x0, int y0, int x1, int y1);

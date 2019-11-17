@@ -27,12 +27,16 @@ void VectorUI::Segment(VRender* ren, int width, int s, int num, osbr::RGBA rgba)
         33    7
     */
 
-    static const uint8_t segments[10] = {0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f};
-
     if (num < 0) num = 0;
     if (num > 9) num = 9;
+
+#if true
+
+    static const uint8_t segments[10] = { 0x3f, 0x06, 0x5b, 0x4f, 0x66, 0x6d, 0x7d, 0x07, 0x7f, 0x6f };
+
     uint8_t bit = segments[num];
 
+    ren->SetImmediate(true);
     if (bit & (1 << 0))
         ren->DrawRect(0, 0, width, s, rgba);
     if (bit & (1 << 1))
@@ -47,6 +51,114 @@ void VectorUI::Segment(VRender* ren, int width, int s, int num, osbr::RGBA rgba)
         ren->DrawRect(0, 0, s, width, rgba);
     if (bit & (1 << 6))
         ren->DrawRect(0, width - s / 2, width, s, rgba);
+    ren->SetImmediate(false);
+#else
+    static const int8_t X = 5;
+    static const int8_t D = 2;
+
+    static const int8_t x0 = 0;
+    static const int8_t x1 = D;
+    static const int8_t x2 = X - D;
+    static const int8_t x3 = X;
+    static const int8_t y0 = 0;
+    static const int8_t y1 = D;
+    static const int8_t y2 = X - D / 2;
+    static const int8_t y3 = X + D / 2;
+    static const int8_t y4 = X * 2 - D;
+    static const int8_t y5 = X * 2;
+
+    static const VRender::Vec2I8 zeroA[4] = { {x0, y0}, {x3,y0}, {x3,y5}, {x0,y5} };
+    static const VRender::Vec2I8 zeroB[4] = { {x1, y1}, {x2,y1}, {x2,y4}, {x1,y4} };
+
+    static const VRender::Vec2I8 one[4] = { {x2, y0}, {x3, y0}, {x3, y5}, {x2,y5} };
+
+    static const VRender::Vec2I8 two[12] = {
+        {x0,y0}, {x3,y0}, {x3,y3}, {x1,y3}, {x1,y4}, {x3, y4}, {x3,y5}, {x0,y5},
+        {x0,y2}, {x2,y2}, {x2, y1}, {x0, y1} };
+
+    static const VRender::Vec2I8 three[12] = {
+        {x0, y0}, {x3,y0}, {x3, y5}, {x0, y5}, {x0, y4}, {x2, y4}, {x2,y3}, 
+        {x0,y3}, {x0,y2}, {x2,y2}, {x2,y1}, {x0,y1}
+    };
+
+    static const VRender::Vec2I8 four[10] = {
+        {x0,y0}, {x0, y3}, {x2,y3}, {x2,y5}, {x3,y5}, {x3,y0}, {x2,y0}, {x2,y2}, {x1, y2}, {x1,y0} 
+    };
+
+    static const VRender::Vec2I8 five[12] = {
+        {x3,y0}, {x0,y0}, {x0,y3}, {x2,y3}, {x2,y4}, {x0, y4}, {x0,y5}, {x3,y5},
+        {x3,y2}, {x1,y2}, {x1, y1}, {x3, y1} };
+
+    static const VRender::Vec2I8 sixA[6] = {
+        {x0,y0}, {x0,y5}, {x3,y5}, {x3,y2}, {x1,y2}, {x1,y0}
+    };
+    static const VRender::Vec2I8 sixB[4] = { {x1,y3}, {x2,y3}, {x2,y4}, {x1,y4} };
+
+    static const VRender::Vec2I8 seven[6] = { {x0, y0}, {x3,y0}, {x3,y5}, {x2,y5}, {x2,y1}, {x0,y1} };
+
+    static const VRender::Vec2I8 eightA[4] = { {x0,y0}, {x3,y0}, {x3, y5}, {x0,y5} };
+    static const VRender::Vec2I8 eightB[4] = { {x1,y1}, {x2,y1}, {x2,y2}, {x1,y2} };
+    static const VRender::Vec2I8 eightC[4] = { {x1,y3}, {x2,y3}, {x2,y4}, {x1,y4} };
+
+    static const VRender::Vec2I8 nineA[6] = { {x0,y0}, {x3,y0}, {x3,y5}, {x2,y5}, {x2,y3}, {x0,y3} };
+    static const VRender::Vec2I8 nineB[4] = { {x1,y1}, {x2,y1}, {x2,y2}, {x1,y2} };
+
+    switch (num) {
+    case 0:
+        ren->PushLayer();
+        ren->DrawPoly(zeroA, 4, rgba);
+        ren->DrawPoly(zeroB, 4, rgba);
+        ren->PopLayer();
+        break;
+
+    case 1:
+        ren->DrawPoly(one, 4, rgba);
+        break;
+
+    case 2:
+        ren->DrawPoly(two, 12, rgba);
+        break;
+
+    case 3:
+        ren->DrawPoly(three, 12, rgba);
+        break;
+
+    case 4:
+        ren->DrawPoly(four, 10, rgba);
+        break;
+
+    case 5:
+        ren->DrawPoly(five, 12, rgba);
+        break;
+
+    case 6:
+        ren->PushLayer();
+        ren->DrawPoly(sixA, 6, rgba);
+        ren->DrawPoly(sixB, 4, rgba);
+        ren->PopLayer();
+        break;
+
+    case 7:
+        ren->DrawPoly(seven, 6, rgba);
+        break;
+
+    case 8:
+        ren->PushLayer();
+        ren->DrawPoly(eightA, 4, rgba);
+        ren->DrawPoly(eightB, 4, rgba);
+        ren->DrawPoly(eightC, 4, rgba);
+        ren->PopLayer();
+        break;
+
+    case 9:
+        ren->PushLayer();
+        ren->DrawPoly(nineA, 6, rgba);
+        ren->DrawPoly(nineB, 4, rgba);
+        ren->PopLayer();
+        break;
+    }
+
+#endif
 }
 
 void VectorUI::DrawBar(VRender* ren, int x, int y, int width, const osbr::RGBA& color, int fraction)
