@@ -62,7 +62,11 @@ uint8_t* blockDrawOLEDBUffer = 0;
 void BlockDrawRGB(const BlockDrawChunk* chunk, int y, int n)
 {
     for (int i = 0; i < n; ++i, ++chunk) {
+#ifdef VECTOR_MONO
+        uint32_t c = chunk->rgb ? 0xffffffff : 0;
+#else
         uint32_t c = (chunk->rgb.r << 24) | (chunk->rgb.g << 16) | (chunk->rgb.b << 8) | 0xff;
+#endif
         uint32_t* pixels = ((uint32_t*)blockDrawRGBABuffer) + y * WIDTH + chunk->x0;
 
         int n = chunk->x1 - chunk->x0;
@@ -72,28 +76,39 @@ void BlockDrawRGB(const BlockDrawChunk* chunk, int y, int n)
     }
 }
 
-void BlockDrawOLED(const BlockDrawChunk* chunks, int y, int n)
+void BlockDrawOLED(const BlockDrawChunk* chunks, int n)
 {
+#ifdef PRECOMPUTE_MASK
+    static const uint8_t MASK0[] = { 1, 3, 7, 15, 31, 63, 127, 255 };
+    static const uint8_t MASK1[] = { 2, 6, 14, 30, 62, 126, 254 };
+    static const uint8_t MASK2[] = { 4, 12, 28, 60, 124, 252 };
+    static const uint8_t MASK3[] = { 8, 24, 56, 120, 248 };
+    static const uint8_t MASK4[] = { 16, 48, 112, 240 };
+    static const uint8_t MASK5[] = { 32, 96, 224 };
+    static const uint8_t MASK6[] = { 64, 192 };
+    static const uint8_t MASK7[] = { 128 };
+    static const uint8_t* MASK[] = {
+        MASK0, MASK1, MASK2, MASK3, MASK4, MASK5, MASK6, MASK7
+    };
+#endif
+
+    // Clear to black beforehand; don't need to set black runs.
     for (int i = 0; i < n; ++i) {
         const BlockDrawChunk& chunk = chunks[i];
-        int row = y / 8;
-        int bit = 1 << (y & 7);
 
-        if (chunk.rgb.get()) {
-            uint8_t* p = blockDrawOLEDBUffer + row * WIDTH + chunk.x0;
-            for(int nPix = chunk.x1 - chunk.x0; nPix > 0; nPix--, p++) {
-                 *p |= bit;
-            }
+#ifdef VECTOR_MONO
+        if (chunk.rgb == 0) continue;
+#else
+        if (chunk.rgb.get() == 0) continue;
+#endif
+        // Simple for the single row.
+        int row = chunk.y >> 3;
+        int bit = chunk.y - (row << 3);
+        uint8_t mask = 1 << bit;
+        uint8_t* p = blockDrawOLEDBUffer + row * WIDTH + chunk.x0;
+        for (int nPix = chunk.x1 - chunk.x0; nPix > 0; nPix--, p++) {
+            *p |= mask;
         }
-        // Clear to black beforehand; don't need to set black runs.
-        /*
-        else {
-            int mask = ~bit;
-            for (int x = chunk.x0; x < chunk.x1; ++x) {
-                blockDrawOLEDBUffer[row * WIDTH + x] &= mask;
-            }
-        }
-        */
     }
 }
 
@@ -189,7 +204,6 @@ int main(int, char**) {
     vrender.PopLayer();
 
     vrender.Render();
-    bool firstRender = true;
 #endif
 
     Pixel_7_5_UI pixel75;
@@ -212,6 +226,7 @@ int main(int, char**) {
 	bool bladeOn = false;
 	int count = 0;
 	uint32_t lastUpdate = SDL_GetTicks();
+    bool firstRender = true;
 
     enum {
         RENDER_OLED,
@@ -246,6 +261,7 @@ int main(int, char**) {
 			break;
 		}
 		else if (e.type == SDL_KEYDOWN) {
+            firstRender = true;
 			if (e.key.keysym.sym >= SDLK_1 && e.key.keysym.sym <= SDLK_8) {
 				scale = e.key.keysym.sym - SDLK_0;
 			}
@@ -289,6 +305,11 @@ int main(int, char**) {
             memset(displayBuffer, 0, WIDTH * HEIGHT / 8);
             vrender.Clear();
             VectorUI::Draw(&vrender, t, mode.mode(), bladeOn, &data);
+            if (firstRender) {
+                printf("Render: numEdges=%d/%d size=%d\n", vrender.NumEdges(), VRender::MAX_EDGES, (int)sizeof(VRender));
+                firstRender = false;
+            }
+            vrender.Render();
 #   else
             sketcher.Draw(&renderer, t, mode.mode(), bladeOn, &data);
 #   endif

@@ -11,6 +11,7 @@
 OLED_SSD1306 display(PIN_OLED_DC, PIN_OLED_RESET, PIN_OLED_CS);
 
 static const int OLED_WIDTH = 128;
+static const int OLED_WIDTH_SHIFT = 7;
 static const int OLED_HEIGHT = 32;
 static const int OLED_BYTES = OLED_WIDTH * OLED_HEIGHT / 8;
 
@@ -20,25 +21,54 @@ UIRenderData data;
 uint32_t lastProfile = 0;
 int nFrames = 0;
 
-#define USE_SPLIT
-#ifdef USE_SPLIT
-// goes from 4.6 for full frame to 3.5 for half frame. Not a huge win.
-// probably just ping ponging render vs. transfer will do.
-int split = 0;
-#endif
+/*
+FPS=217 time/frame=4 size=2620
+Profile:
+  display              aveTime=1.48ms maxTime=1.48ms nCalls=434
+  draw                 aveTime=1.13ms maxTime=1.26ms nCalls=434
+  VRender::Rasterize   aveTime=1.79ms maxTime=1.86ms nCalls=434
 
-void BlockDrawOLED(const BlockDrawChunk* chunks, int y, int n)
+ActiveEdge only; doesn't hold on to edges. Simpler. Smaller.
+Perf is a wash.
+FPS=215 time/frame=4 size=2012
+Profile:
+  display              aveTime=1.50ms maxTime=1.51ms nCalls=430
+  draw                 aveTime=1.46ms maxTime=1.61ms nCalls=430
+  VRender::Rasterize   aveTime=1.55ms maxTime=1.61ms nCalls=430
+
+Vector numbers. Text is always such trouble.
+FPS=193 time/frame=5 size=3012 edges=90/200
+Profile:
+  display              aveTime=1.50ms maxTime=1.51ms nCalls=386
+  draw                 aveTime=1.14ms maxTime=1.20ms nCalls=386
+  VRender::Rasterize   aveTime=2.41ms maxTime=2.55ms nCalls=386
+
+ActiveEdge only, immediate text, simpler callback.
+FPS=230 time/frame=4 size=1612 edges=64/100
+Profile:
+  display              aveTime=1.50ms maxTime=1.51ms nCalls=461
+  draw                 aveTime=1.28ms maxTime=1.36ms nCalls=461
+  VRender::Rasterize   aveTime=1.43ms maxTime=1.56ms nCalls=461
+*/
+
+void BlockDrawOLED(const BlockDrawChunk* chunks, int n)
 {
+    // Clear to black beforehand; don't need to set black runs.
     for (int i = 0; i < n; ++i) {
         const BlockDrawChunk& chunk = chunks[i];
-        int row = y / 8;
-        int bit = 1 << (y & 7);
 
-        if (chunk.rgb.get()) {
-            uint8_t* p = oledBuffer + row * OLED_WIDTH + chunk.x0;
-            for(int nPix = chunk.x1 - chunk.x0; nPix > 0; nPix--, p++) {
-                 *p |= bit;
-            }
+#ifdef VECTOR_MONO
+        if (chunk.rgb == 0) continue;
+#else
+        if (chunk.rgb.get() == 0) continue;
+#endif
+        // Simple for the single row.
+        int row = chunk.y >> 3;
+        int bit = chunk.y - (row << 3);
+        uint8_t mask = 1 << bit;
+        uint8_t* p = oledBuffer + (row << OLED_WIDTH_SHIFT) + chunk.x0;
+        for (int nPix = chunk.x1 - chunk.x0; nPix > 0; nPix--, p++) {
+            *p |= mask;
         }
     }
 }
@@ -70,6 +100,7 @@ void setup()
     data.volume = 2;
     memset(oledBuffer, 0, OLED_BYTES);
     VectorUI::Draw(&vrender, 0, UIMode::NORMAL, false, &data);
+    vrender.Render();
 
     display.display(oledBuffer);
     lastProfile = millis();
@@ -77,32 +108,13 @@ void setup()
 
 void loop()
 {
-    #ifdef USE_SPLIT
-    if (split == 0) {
-        data.mVolts += 1;
-        if (data.mVolts == 4200) data.mVolts = 3200;
-        memset(oledBuffer, 0, OLED_BYTES);
-        VectorUI::Draw(&vrender, 0, UIMode::NORMAL, false, &data);
-    }
-    else if (split == 1) {
-        vrender.Render();
-    }
-    else if (split == 2) {
-        static ProfileData data("display");
-        ProfileBlock block(&data);
-        display.display(oledBuffer);
-    }
-    split++;
-    if (split == 3) split = 0;
-
-    #else
     data.mVolts += 1;
     if (data.mVolts == 4200) data.mVolts = 3200;
     memset(oledBuffer, 0, OLED_BYTES);
     {
         static ProfileData profileData("draw");
         ProfileBlock block(&profileData);
-        VectorUI::Draw(&vrender, 0, UIMode::NORMAL, false, &data);
+        VectorUI::Draw(&vrender, millis(), UIMode::NORMAL, false, &data);
     }
     {
         vrender.Render();
@@ -112,7 +124,6 @@ void loop()
         ProfileBlock block(&profileData);
         display.display(oledBuffer);
     }
-    #endif
 
     ++nFrames;
     static const int SEC = 2;
@@ -121,7 +132,10 @@ void loop()
         #if SERIAL_DEBUG > 0
         Log.p("SERIAL ON").eol();
         #endif
-        Log.p("FPS=").p(nFrames / SEC).p(" time/frame=").p(SEC * 1000 / nFrames).eol();
+        Log.p("FPS=").p(nFrames / SEC).p(" time/frame=").p(SEC * 1000 / nFrames)
+            .p(" size=").p(sizeof(VRender))
+            .p(" edges=").p(vrender.NumEdges()).p("/").p(VRender::MAX_EDGES)
+            .eol();
         DumpProfile();
         nFrames = 0;
     }
