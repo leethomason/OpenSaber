@@ -14,6 +14,7 @@ D_OUTER = 37.6
 BOLT = 20.0
 PORT = 8.0
 SWITCH = 29.0
+bottom = -H_WOOD - 1.0
 
 mat = init_material(sys.argv[1])
 print("material:", mat)
@@ -21,8 +22,6 @@ g = G(outfile='path.nc', aerotech_include=False, header=None, footer=None, print
 nomad_header(g, mat, CNC_TRAVEL_Z)
 g.absolute()
 g.move(z=0)
-
-bottom = -H_WOOD - 0.5
 
 # cut the curve
 hill(g, mat, D_OUTER, X_CAPSULE, Y_CAPSULE, True)
