@@ -24,8 +24,9 @@ g.move(z=0)
 
 bottom = -H_WOOD - 0.5
 
-# cut the curve
+# cut the curve - expects a ball cutter
 hill(g, mat, D_OUTER, X_CAPSULE, Y_CAPSULE, True)
+tool_change(g, mat, 1)
 
 #center bolt
 travel(g, mat, x=BOLT)
