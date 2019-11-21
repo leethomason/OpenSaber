@@ -23,8 +23,9 @@ nomad_header(g, mat, CNC_TRAVEL_Z)
 g.absolute()
 g.move(z=0)
 
-# cut the curve
+# cut the curve - expects a ball cutter
 hill(g, mat, D_OUTER, X_CAPSULE, Y_CAPSULE, True)
+tool_change(g, mat, 1)
 
 #center bolt
 travel(g, mat, x=BOLT)
@@ -48,5 +49,5 @@ rectangleTool(g, mat, -2.0, (X_CAPSULE - SPACE) - (SWITCH - BUTTON_HEAD_D/2), D,
 
 #### capsule cut #######
 travel(g, mat, x=0)
-rectangleTool(g, mat, bottom, X_CAPSULE, Y_CAPSULE, 3.175/2, "left", "outer", False, tab_width=2.0)
+rectangleTool(g, mat, bottom, X_CAPSULE, Y_CAPSULE, 3.175/2, "left", "outer", False)
 
