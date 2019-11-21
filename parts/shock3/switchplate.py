@@ -15,6 +15,7 @@ BOLT = 20.0
 PORT = 8.0
 SWITCH = 29.0
 bottom = -H_WOOD - 1.0
+TRIM = 0.2
 
 mat = init_material(sys.argv[1])
 print("material:", mat)
@@ -48,6 +49,6 @@ travel(g, mat, x=SWITCH - BUTTON_HEAD_D/2)
 rectangleTool(g, mat, -2.0, (X_CAPSULE - SPACE) - (SWITCH - BUTTON_HEAD_D/2), D, D/2, "left", "inner", True)
 
 #### capsule cut #######
-travel(g, mat, x=0)
-rectangleTool(g, mat, bottom, X_CAPSULE, Y_CAPSULE, 3.175/2, "left", "outer", False)
+travel(g, mat, x=TRIM/2)
+rectangleTool(g, mat, bottom, X_CAPSULE-TRIM, Y_CAPSULE-TRIM, 3.175/2, "left", "outer", False)
 
