@@ -25,7 +25,7 @@ g.absolute()
 g.move(z=0)
 
 # cut the curve - expects a ball cutter
-hill(g, mat, D_OUTER, X_CAPSULE, Y_CAPSULE, True)
+hill(g, mat, D_OUTER, X_CAPSULE, Y_CAPSULE, False)
 tool_change(g, mat, 1)
 
 #center bolt
