@@ -63,16 +63,17 @@ module columnY(dx, dyFrom0, dz, diameter, baseDX=0, baseDZ=0)
     }
 }
 
-module tjoint(outer, dz, trim0, trim1)
+module tjoint(outer, dz, yTrim, zTrim)
 {
     RATIO = 0.40; 
     DY = outer * RATIO;
     HALFY = DY * 0.7;
 
-    translate([0, -HALFY/2 - trim0, 0]) 
-        cube(size=[outer*2.0, HALFY + trim0*2, dz]);
-    translate([0, -DY/2 - trim1, dz/2 - trim0/2]) 
-        cube(size=[outer*2.0, DY + trim1*2, dz/2 + trim0]);
+    translate([0, -HALFY/2 - yTrim/2, 0]) 
+        cube(size=[100, HALFY + yTrim, dz]);
+
+    translate([0, -DY/2 - yTrim/2, dz/2 - zTrim/2]) 
+        cube(size=[100, DY + yTrim, dz/2 + zTrim*2]);
 }
 
 /*
@@ -83,28 +84,32 @@ module tjoint(outer, dz, trim0, trim1)
 */
 module keyJoint(dz, do, di, slot, angle=0)
 {
-    trim0 = slot ? 0.1 : 0;
-    trim1 = slot ? 0.4 : 0;
+    DZ = dz;
+    YTRIM = slot ? 0.4 : 0.0;
+    ZTRIM = slot ? 0.2 : 0.0;
 
     intersection() {
-        difference() {
-            union() {
-                //tube(h=dz, do=do, di=di);  
-                cylinder(h=dz-2, d=do);
-                translate([0, 0, dz-2]) cylinder(h=2, d1=do, d2=do-1);
-
-            }
-            cylinder(h=100, d=di);
+        if (slot) {
+            tube(h=DZ+2, di=di, do=do+1);
         }
+        else {
+            difference() {
+                union() {
+                    cylinder(h=dz-1, d=do);
+                    translate([0, 0, dz-1]) cylinder(h=1, d1=do, d2=do-1);
+                }
+                cylinder(h=100, d=di);
+            }
+        }
+
         union() {
             rotate([0, 0, angle]) 
-                tjoint(do, dz, trim0, trim1);
+                tjoint(do, dz, YTRIM, ZTRIM);
             rotate([0, 0, 180-angle]) 
-                tjoint(do, dz, trim0, trim1);
+                tjoint(do, dz, YTRIM, ZTRIM);
         }
     }
 }
-
 
 module cJoint(dz, dOuter, trim)
 {
@@ -573,19 +578,19 @@ module speakerHolder(outer, dz, dzToSpkrBack, type)
 }
 
 
-module powerPortRing(outer, t, dz, dzToPort, portSupportToBack=false, counter=true)
+module powerPortRing(diameter, t, dz, dzToPort, portSupportToBack=false, counter=true)
 {    
     difference() {
         union() {
-            tube(h=dz, do=outer, di=outer-t);
+            tube(h=dz, do=diameter, di=diameter-t);
             intersection() {
-                cylinder(h=dz, d=outer);
+                cylinder(h=dz, d=diameter);
                 if (portSupportToBack) {
-                    translate([-50, outer/2 - DY_PORT, 0])
+                    translate([-50, diameter/2 - DY_PORT, 0])
                         cube(size=[100, 50, D_PORT_SUPPORT/2 + dzToPort]);
                 }
                 else {
-                    translate([-50, outer/2 - DY_PORT, dzToPort - D_PORT_SUPPORT/2])
+                    translate([-50, diameter/2 - DY_PORT, dzToPort - D_PORT_SUPPORT/2])
                         cube(size=[100, 50, D_PORT_SUPPORT]);
                 }
             }
@@ -605,8 +610,9 @@ module switchRing(diameter, t, dz, dzToSwitch, counter=true, switchDY=0)
             tube(h=dz, do=diameter, di=diameter-t);
             intersection() {
                 cylinder(h=dz, d=diameter);
-                translate([-50, diameter/2 - 6, dzToSwitch - D_SWITCH_SUPPORT/2])
+                translate([-50, diameter/2 - 7, dzToSwitch - D_SWITCH_SUPPORT/2]) {
                     cube(size=[100, 50, D_SWITCH_SUPPORT]);
+                }
             }
         }
         translate([0, switchDY, dzToSwitch]) {
@@ -628,7 +634,8 @@ module baffleMCBattery( outer,          // outer diameter
                         dzFirst=0,      // make the back baffle this thicknes  (0 to use standard)
                         extraBaffle=0,  // add this much to the front baffle
                         bridgeInFront=false,    // set true to contiue bridge. Useful for attaching to a cap.
-                        bridgeStyle = 1
+                        bridgeStyle = 1,
+                        mc=true
                     )
 {
     totalN = n + nPostBaffles;
@@ -643,20 +650,22 @@ module baffleMCBattery( outer,          // outer diameter
                     cylinder(h=dzButtress*2, d=dFirst);
                     oneBaffle(outer, dzFirst, 
                             battery=hasBattery,
+                            mc=mc,
                             dExtra=dFirst - outer, 
-                            bridge=bridgeStyle);
+                            bridge=bridgeStyle
+                    );
                 }
             }
             else {
                 oneBaffle(outer, dzButtress, 
                     battery=hasBattery,
-                    bridge=bridgeInFront || (i < totalN-1) ? bridgeStyle : 0);
+                    bridge=bridgeInFront || (i < totalN-1) ? bridgeStyle : 0, mc=mc);
             }
         }
     }
     if (extraBaffle) {
         translate([0, 0, (n*2 - 1) * dzButtress]) {
-            oneBaffle(outer, extraBaffle, bridge=0);
+            oneBaffle(outer, extraBaffle, bridge=0, mc=mc);
         }
     }
 }

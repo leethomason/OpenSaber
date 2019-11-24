@@ -3,8 +3,8 @@ use <../shapes.scad>
 use <../commonUnified.scad>
 use <../inset.scad>
 
-DRAW_AFT = false;
-DRAW_FORE = true;
+DRAW_AFT = true;
+DRAW_FORE = false;
 
 $fn=60;
 EPS = 0.01;
@@ -14,7 +14,7 @@ Z_BATT     = 65 + 4;
 D_BATT     = 18.50 + 0.5;
 D_M2       = 1.7;
 D_ROD       = 3.4;
-D_ROD_PLUS  = 3.4 + 0.4;
+D_ROD_PLUS  = 3.4 + 0.2;
 
 // These are the values for the new (generic, not adafruit) screens.
 OLED_DISPLAY_W           = 20.5 + 1;
@@ -68,6 +68,33 @@ module metalArt()
             *translate([-6, 0, M_CRYSTAL_START]) 
                 cube(size=[12, 100, DZ_CRYSTAL_SECTION]);
 
+            W_OUTER = 18.5 - 3.2 * 2;
+            W_INNER = 8.2;
+            Z = WINDOW_1_START + WINDOW_1_DZ - WINDOW_0_START;
+
+            translate([-W_OUTER/2, 0, WINDOW_0_START + WINDOW_0_DZ/2]) 
+                cube(size=[W_OUTER, 100, Z-WINDOW_0_DZ/2]);
+            translate([-W_INNER/2, 0, WINDOW_0_START]) 
+                cube(size=[W_INNER, 100, Z]);
+
+            /*
+            W = 18.5;
+            translate([-W/2, 0, WINDOW_0_START]) 
+                cube(size=[W, 100, WINDOW_0_DZ]);
+            translate([-W/2, 0, WINDOW_1_START]) 
+                cube(size=[W, 100, WINDOW_1_DZ]);
+            */
+        }
+    }
+}
+
+module case()
+{
+    color("lightgrey") {
+        difference() {
+            translate([0, 0, M_METAL_ART]) {
+                tube(h=DZ_METAL_ART, do=D_OUTER, di=D_INNER);
+            }
             W = 18.5;
             translate([-W/2, 0, WINDOW_0_START]) 
                 cube(size=[W, 100, WINDOW_0_DZ]);
@@ -79,18 +106,19 @@ module metalArt()
 
 module reverseBridge()
 {
+    H = 1.5;
     translate([7, 0, 0])
-    polygonYZ(h=1, points=[
-        [8, 1],
-        [8, -6],
+    polygonYZ(h=H, points=[
+        [9, 1],
+        [9, -6],
         [2, 0]
     ]);
 
     mirror([-1,0, 0])
     translate([7, 0, 0])
-    polygonYZ(h=1, points=[
-        [8, 1],
-        [8, -6],
+    polygonYZ(h=H, points=[
+        [9, 1],
+        [9, -6],
         [2, 0]
     ]);
 }
@@ -295,12 +323,14 @@ if(DRAW_FORE) {
 
 *color("red") translate([0, 0, M_AFT_STOP]) sBattery(); 
 *color("olive") translate([0, 0, M_AFT_STOP + Z_BATT]) pcb(); 
-*color("orange") translate([0, Y_CRYSTAL, M_CRYSTAL_START]) 
-    crystal(W_CRYSTAL, H_CRYSTAL, DZ_CRYSTAL_SECTION);
 
 *color("olive") union() {
     translate([-OLED_DISPLAY_W/2 + OLED_DX, OLED_DY, M_DISPLAY-EPS]) 
         cube(size=[OLED_DISPLAY_W, 2, OLED_DISPLAY_L]);
 }
 
+
 *metalArt();
+*case();
+*color("orange") translate([0, Y_CRYSTAL, M_CRYSTAL_START]) 
+    crystal(W_CRYSTAL, H_CRYSTAL, DZ_CRYSTAL_SECTION);
