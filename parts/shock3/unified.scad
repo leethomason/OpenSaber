@@ -4,7 +4,7 @@ use <../commonUnified.scad>
 use <../inset.scad>
 
 DRAW_AFT = false;
-DRAW_FORE = true;
+DRAW_FORE = false;
 
 $fn=60;
 EPS = 0.01;
@@ -15,6 +15,9 @@ D_BATT     = 18.50 + 0.5;
 D_M2       = 1.7;
 D_ROD       = 3.4;
 D_ROD_PLUS  = 3.4 + 0.4;
+// Rod
+ROD_X = 10.5;
+ROD_Y = 6.0;
 
 // These are the values for the new (generic, not adafruit) screens.
 OLED_DISPLAY_W           = 20.5 + 1;
@@ -217,9 +220,6 @@ if (DRAW_AFT) {
         translate([-UPPER_W/2, Y_CRYSTAL, M_AFT_STOP + H_BUTTRESS*9]) 
             cube(size=[UPPER_W, 100, 100]);
 
-        // Rod
-        ROD_X = 10.5;
-        ROD_Y = 6.0;
         // Long one, structural support.
         translate([ROD_X, ROD_Y, M_AFT_STOP]) 
             cylinder(h=500, d=D_ROD);
@@ -292,6 +292,27 @@ if(DRAW_FORE) {
     }
     translate([0, 0, M_EMITTER_BASE]) tube(h=10.0, di=dynamicHeatSinkThread(), do=D_INNER);
 }
+
+
+translate([0, 0, M_AFT_STOP + H_BUTTRESS + 10*2*H_BUTTRESS]) {
+    intersection() {
+        cylinder(h=H_BUTTRESS, d=D_INNER);
+        union() {
+            difference() {
+                translate([-50, 2, 0]) cube(size=[100, 20, H_BUTTRESS]);
+                // Long one, structural support.
+                translate([ROD_X, ROD_Y, 0]) 
+                    cylinder(h=500, d=D_ROD_PLUS);
+                
+                // Short one, hold crystal.
+                translate([-ROD_X, ROD_Y, 0]) 
+                    cylinder(h=H_BUTTRESS*2, d=D_ROD_PLUS);
+            }
+        }
+    }
+    //reverseBridge();
+}
+
 
 *color("red") translate([0, 0, M_AFT_STOP]) sBattery(); 
 *color("olive") translate([0, 0, M_AFT_STOP + Z_BATT]) pcb(); 
