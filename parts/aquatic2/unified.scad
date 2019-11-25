@@ -10,12 +10,12 @@ JUNCTION = 8;
 EPS = 0.01;
 EPS2 = 2 * EPS;
 
-DRAW_AFT     = false;
-DRAW_CRYSTAL = false;
+DRAW_AFT     = true;
+DRAW_CRYSTAL = true;
 DRAW_FRONT   = true;
 
 BOTTOM_SPLIT = true;
-TOP_SPLIT = false;
+TOP_SPLIT = true;
 
 DRAW_GRIP_ALIGNMENT = false;
 
