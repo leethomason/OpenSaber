@@ -17,8 +17,8 @@ T_BATT_STOP = 3;
 JOINT_T = 3;
 JOINT_DZ = 8;
 
-ROT = -10;
-Y_TWEAK = -1;
+ROT = -20;
+Y_TWEAK = -7;
 
 module holder(diameter, dzPCB) {    
     Y_POWER = -yAtX(DX_POWER/2, diameter/2) + 1;
@@ -52,22 +52,9 @@ module holder(diameter, dzPCB) {
                 // Battery stop.
                 translate([0, 0, dzPCB-T_BATT_STOP]) 
                     oneBaffle(diameter, T_BATT_STOP, battery=false, mc=false, bridge=0, noBottom=false, bottomRail=false, conduit=true);
-
-                translate([DX_POWER/2, Y_POWER, 0]) 
-                    cube(size=[4, DY_POWER, DZ_POWER]);
-                mirror([1,0,0]) translate([DX_POWER/2, Y_POWER, 0]) 
-                    cube(size=[4, DY_POWER, DZ_POWER]);
-                
-                translate([-10, Y_POWER, DZ_POWER])
-                    cube(size=[20, 1, 2]);
             }
         }
 
-        translate([-DX_POWER/2, Y_POWER, 0]) {
-            cube(size=[DX_POWER, DY_POWER, DZ_POWER]);
-            translate([0, 1.5, 0])
-                cube(size=[DX_POWER, DY_POWER-1.5, 100]);
-        }
         translate([0, 0, dzPCB]) mirror([0, 0, -1]) 
             keyJoint(JOINT_DZ, diameter, diameter - JOINT_T, true, 0);    
 

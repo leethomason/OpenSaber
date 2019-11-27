@@ -33,7 +33,7 @@ module innerSpace()
 if (DRAW_BODY) {
     translate([0, 0, M_BAFFLES_BACK]) {
         echo("nBaffles=", N_BAFFLES);
-            baffleMCBattery(D_AFT, N_BAFFLES, H_BUTTRESS, nPostBaffles=1);
+            baffleMCBattery(D_AFT, N_BAFFLES, H_BUTTRESS, nPostBaffles=1, mc=false);
     }
 
     MOUNT = 5.5;
@@ -43,10 +43,11 @@ if (DRAW_BODY) {
         innerSpace();
         difference() {
             union() {
+                T = 3.5;
                 translate([0, 0, M_SWITCH-8])
-                    switchRing(D_AFT, 3, 20, 8, switchDY=-1.5);
+                    switchRing(D_AFT, T, 20, 8, switchDY=-1.5);
                 translate([0, 0, M_POWER-6])
-                    powerPortRing(D_AFT, 3, 14, 6);
+                    powerPortRing(D_AFT, T, 14, 6);
 
             }
             flatBottom();

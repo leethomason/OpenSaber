@@ -159,7 +159,7 @@ module insetHolder( diameter,
     USB_SLOT = 1.8;         // PCB cutout space
     X_USB_SLOT = 21.0;      // Width of PCB
     DEPTH_USB_SLOT = 11.0;   // Height of PCB
-                    
+
     difference() {
         union() {
             if (dzBolt)
@@ -244,7 +244,14 @@ module insetHolder( diameter,
                     DY = -3;
                     translate([0, DY, 0])
                         zCapsule(dzA, dzB, rCapsule+2, roundRect);
-                    zCapsule(dzA, dzB, rCapsule, roundRect);          // the actual wood
+                    
+                    // The inset doesn't need to be held to the sides - 
+                    // the case will accomplish that. Only fit on the
+                    // z axis. Let the y float.
+                    *zCapsule(dzA, dzB, rCapsule, roundRect);          // the actual wood
+                    translate([-50, 0, dzA-rCapsule])
+                        cube(size=[100, 100, rCapsule*2 + dzB - dzA]);
+
                     translate([0, DY - EPS*2, 0])
                         zCapsule(dzA, dzB, rCapsule-2, roundRect);
 

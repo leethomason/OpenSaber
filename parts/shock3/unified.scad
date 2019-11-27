@@ -5,6 +5,7 @@ use <../inset.scad>
 
 DRAW_AFT = false;
 DRAW_FORE = false;
+DRAW_DOTSTAR = true;
 
 $fn=60;
 EPS = 0.01;
@@ -14,7 +15,7 @@ Z_BATT     = 65 + 4;
 D_BATT     = 18.50 + 0.5;
 D_M2       = 1.7;
 D_ROD       = 3.4;
-D_ROD_PLUS  = 3.4 + 0.4;
+D_ROD_PLUS  = 3.4 + 0.2;
 // Rod
 ROD_X = 10.5;
 ROD_Y = 6.0;
@@ -58,19 +59,46 @@ module metalArt()
         DO_TUBE = 1.25 * 25.4;
         THICK = 0.032;
         DI_TUBE = DO_TUBE - THICK * 2 * 25.4;
+        W = 24;
+
+        echo("Metal size (x,z)", W, DZ_METAL_ART);
+        echo("First window (z0, z1)", 
+            WINDOW_0_START - M_METAL_ART, 
+            WINDOW_0_START + WINDOW_0_DZ - M_METAL_ART);
+        echo("Second window (z0, z1)", 
+            WINDOW_1_START - M_METAL_ART, 
+            WINDOW_1_START + WINDOW_1_DZ - M_METAL_ART);
 
         difference() {
             intersection() {
                 translate([0, R_INNER - DO_TUBE/2, M_METAL_ART]) {
                     tube(h=DZ_METAL_ART, do=DO_TUBE, di=DI_TUBE);
                 }
-                W = 24;
                 translate([-W/2, Y_METAL_ART, M_METAL_ART])
                     cube(size=[W, 100, DZ_METAL_ART]);
             }    
             *translate([-6, 0, M_CRYSTAL_START]) 
                 cube(size=[12, 100, DZ_CRYSTAL_SECTION]);
 
+            W_OUTER = 18.5 - 3.2 * 2;
+            W_INNER = 8.2;
+            Z = WINDOW_1_START + WINDOW_1_DZ - WINDOW_0_START;
+
+            translate([-W_OUTER/2, 0, WINDOW_0_START + WINDOW_0_DZ/2]) 
+                cube(size=[W_OUTER, 100, Z-WINDOW_0_DZ/2]);
+            translate([-W_INNER/2, 0, WINDOW_0_START]) 
+                cube(size=[W_INNER, 100, Z]);
+        }
+    }
+}
+
+module case()
+{
+    color("lightgrey") {
+        difference() {
+            translate([0, 0, M_METAL_ART]) {
+                tube(h=DZ_METAL_ART, do=D_OUTER, di=D_INNER);
+            }
             W = 18.5;
             translate([-W/2, 0, WINDOW_0_START]) 
                 cube(size=[W, 100, WINDOW_0_DZ]);
@@ -82,18 +110,19 @@ module metalArt()
 
 module reverseBridge()
 {
+    H = 1.5;
     translate([7, 0, 0])
-    polygonYZ(h=1, points=[
-        [8, 1],
-        [8, -6],
+    polygonYZ(h=H, points=[
+        [9, 1],
+        [9, -6],
         [2, 0]
     ]);
 
     mirror([-1,0, 0])
     translate([7, 0, 0])
-    polygonYZ(h=1, points=[
-        [8, 1],
-        [8, -6],
+    polygonYZ(h=H, points=[
+        [9, 1],
+        [9, -6],
         [2, 0]
     ]);
 }
@@ -293,35 +322,54 @@ if(DRAW_FORE) {
     translate([0, 0, M_EMITTER_BASE]) tube(h=10.0, di=dynamicHeatSinkThread(), do=D_INNER);
 }
 
+if (DRAW_DOTSTAR) {
+    color("yellow")
+    translate([0, 0, M_AFT_STOP + H_BUTTRESS + 12*2*H_BUTTRESS]) {
+        intersection() {
+            cylinder(h=H_BUTTRESS, d=D_INNER);
+            union() {
+                difference() {
+                    translate([-50, 6, 0]) cube(size=[100, 20, H_BUTTRESS]);
+                    //translate([-50, 2, 0]) cube(size=[100, 20, H_BUTTRESS]);
 
-translate([0, 0, M_AFT_STOP + H_BUTTRESS + 10*2*H_BUTTRESS]) {
-    intersection() {
-        cylinder(h=H_BUTTRESS, d=D_INNER);
-        union() {
-            difference() {
-                translate([-50, 2, 0]) cube(size=[100, 20, H_BUTTRESS]);
-                // Long one, structural support.
-                translate([ROD_X, ROD_Y, 0]) 
-                    cylinder(h=500, d=D_ROD_PLUS);
-                
-                // Short one, hold crystal.
-                translate([-ROD_X, ROD_Y, 0]) 
-                    cylinder(h=H_BUTTRESS*2, d=D_ROD_PLUS);
+                    translate([ROD_X, ROD_Y, 0]) 
+                        cylinder(h=500, d=D_ROD_PLUS+0.2);
+                    
+                    translate([-ROD_X, ROD_Y, 0]) 
+                        cylinder(h=H_BUTTRESS*2, d=D_ROD_PLUS+0.2);
+
+                    translate([0, 0, H_BUTTRESS]) scale([1, 1, 10]) 
+                        reverseBridge();
+
+                    // Now the actual Dotstar.
+                    W_SOLDER = 0.4 * 25.4;
+                    PITCH = 7.0;
+                    T = 1.0;
+                    W_UPPER = 7.0;
+
+                    translate([-W_SOLDER/2, Y_CRYSTAL - PITCH/2, H_BUTTRESS/2 - T/2])
+                        cube(size=[W_SOLDER, 100, 100]);
+                    translate([-W_SOLDER/2, Y_CRYSTAL - PITCH/2, -EPS])
+                        cube(size=[W_SOLDER, 7, 100]);
+
+                    translate([-DOTSTAR_STRIP/2, Y_CRYSTAL - PITCH/2 - 0.5, H_BUTTRESS/2 - T/2])
+                        cube(size=[DOTSTAR_STRIP, 100, T]);
+                }
             }
         }
     }
-    //reverseBridge();
 }
-
 
 *color("red") translate([0, 0, M_AFT_STOP]) sBattery(); 
 *color("olive") translate([0, 0, M_AFT_STOP + Z_BATT]) pcb(); 
-*color("orange") translate([0, Y_CRYSTAL, M_CRYSTAL_START]) 
-    crystal(W_CRYSTAL, H_CRYSTAL, DZ_CRYSTAL_SECTION);
 
 *color("olive") union() {
     translate([-OLED_DISPLAY_W/2 + OLED_DX, OLED_DY, M_DISPLAY-EPS]) 
         cube(size=[OLED_DISPLAY_W, 2, OLED_DISPLAY_L]);
 }
 
-*metalArt();
+
+metalArt();
+*case();
+*color("orange") translate([0, Y_CRYSTAL, M_CRYSTAL_START]) 
+    crystal(W_CRYSTAL, H_CRYSTAL, DZ_CRYSTAL_SECTION);
