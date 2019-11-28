@@ -46,7 +46,7 @@ module innerSpace() {
 
 module thisKeyJoint(slot)
 {
-    keyJoint(12, slot ? D_INNER + 1 : D_INNER, D_INNER-4, false, 0);
+    keyJoint(12, slot ? D_INNER + 1 : D_INNER, D_INNER-5, false, 0);
 }
 
 module metalArt()
@@ -145,6 +145,11 @@ if (DRAW_AFT) {
                 translate([-OLED_DISPLAY_MOUNT_W/2 + OLED_DX,  OLED_DY + EPS, M_DISPLAY + POST_DY0])
                     rotate([90, 0, 0]) cylinder(h=10, d=D_M2);
             }
+            
+            translate([-6, 2, M_AFT_STOP])
+                cube(size=[2, 3, H_BUTTRESS*8]);
+            mirror([-1, 0, 0]) translate([-6, 2, M_AFT_STOP])
+                cube(size=[2, 3, H_BUTTRESS*7.5]);
 
             for(i=[0:4]) {
                 dz = M_AFT_STOP + i*2*H_BUTTRESS;
