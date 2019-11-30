@@ -3,9 +3,9 @@ use <../shapes.scad>
 use <../commonUnified.scad>
 use <../inset.scad>
 
-DRAW_AFT = false;
+DRAW_AFT = true;
 DRAW_FORE = false;
-DRAW_DOTSTAR = true;
+DRAW_DOTSTAR = false;
 
 $fn=60;
 EPS = 0.01;
