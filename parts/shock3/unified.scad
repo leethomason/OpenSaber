@@ -133,7 +133,7 @@ if (DRAW_AFT) {
         union() {
             translate([0, 0, M_SPEAKER_BACK])
                 rotate([0, 0, 180])
-                    speakerHolder(D_AFT, M_AFT_STOP - M_SPEAKER_BACK, 3, "bass22");
+                    speakerHolder(D_AFT, M_AFT_STOP - M_SPEAKER_BACK, 3, "bass22", extraZ=2);
 
             difference() {
                 translate([0, 0, M_DISPLAY]) {
@@ -374,7 +374,7 @@ if (DRAW_DOTSTAR) {
 }
 
 
-metalArt();
+*metalArt();
 *case();
 *color("orange") translate([0, Y_CRYSTAL, M_CRYSTAL_START]) 
     crystal(W_CRYSTAL, H_CRYSTAL, DZ_CRYSTAL_SECTION);

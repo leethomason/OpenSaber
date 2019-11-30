@@ -531,27 +531,27 @@ module oneBaffle(   d,
         "bass28"
         "cls28"
  */
-module speakerHolder(outer, dz, dzToSpkrBack, type)
+module speakerHolder(outer, dz, dzToSpkrBack, type, extraZ=0)
 {
     difference() {
         union() {
             if(type == "bass22") {
                 difference() {
-                    tube(h=dz, do=outer, di=18);
+                    tube(h=dz + extraZ, do=outer, di=18);
                     translate([0, 0, dzToSpkrBack])
                         speakerBass22();
                 }
             }
             else if (type == "std28" || type == "bass28") {
                 difference() {
-                    tube(h=dz, do=outer, di=24);
+                    tube(h=dz + extraZ, do=outer, di=24);
                     translate([0, 0, dzToSpkrBack])
                         speakerStd28(type == "bass28");
                 }
             }
             else if (type=="cls28") {
                 difference() {
-                    tube(h=dz, do=outer, di=24);
+                    tube(h=dz + extraZ, do=outer, di=24);
                     translate([0, 0, dzToSpkrBack])
                         speakerCLS28(extendY=true);
                 }
