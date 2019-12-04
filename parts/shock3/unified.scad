@@ -175,7 +175,13 @@ if (DRAW_AFT) {
                         baffleHalfBridge(H_BUTTRESS, 3);                        
                 }
             }
-
+            {
+                TRAIN_W = 1.5;
+                translate([12, -6, M_AFT_STOP+H_BUTTRESS])
+                    trainBridge(TRAIN_W, 9, H_BUTTRESS*10, 5);
+                mirror([-1, 0, 0]) translate([12, -6, M_AFT_STOP+H_BUTTRESS])
+                    trainBridge(TRAIN_W, 12, H_BUTTRESS*10, 5);
+            }
             for(i=[5:9]) {
                 translate([0, 0, M_AFT_STOP + i*2*H_BUTTRESS]) {
                     oneBaffle(D_INNER, H_BUTTRESS,

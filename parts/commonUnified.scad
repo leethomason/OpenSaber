@@ -135,6 +135,23 @@ module columnJoint(dz, dOuter, trim)
     }
 }
 
+module trainBridge(x, y, z, nBridge)
+{
+    dz = z / (nBridge * 2);
+
+    difference() 
+    {
+        cube(size=[x, y, z]);
+        for(i=[0:nBridge-1]) {
+            translate([0, 0, i*dz*2]) {
+                polygonYZ(h=10, points=[
+                    [0, 0], [y*0.5, 0], [y*0.75, dz/2], [y*0.5, dz], [0, dz]
+                ]);
+            }
+        }
+    }
+}
+
 /* 
     A simple bridge at 45 degrees for
     unsupported printing. Made to hold
