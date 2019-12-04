@@ -601,20 +601,14 @@ void loopDisplays(uint32_t msec, uint32_t delta)
 
     #if defined(SABER_CRYSTAL_START)
     {
-        if (saberDB.crystalColor().get()) {
-            // It has been set on the command line for testing.
-            leds[SABER_CRYSTAL_START].set(saberDB.crystalColor(), SABER_CRYSTAL_BRIGHTNESS);
+        const RGB bladeColor = saberDB.bladeColor();
+        if (bladeState.state() == BLADE_OFF && (uiMode.mode() == UIMode::NORMAL)) {
+            osbr::RGB rgb;
+            calcCrystalColorHSV(msec, bladeColor, &rgb);
+            leds[SABER_CRYSTAL_START].set(rgb, SABER_CRYSTAL_BRIGHTNESS);
         }
         else {
-            const RGB bladeColor = saberDB.bladeColor();
-            if (bladeState.state() == BLADE_OFF && (uiMode.mode() == UIMode::NORMAL)) {
-                osbr::RGB rgb;
-                calcCrystalColorHSV(msec, bladeColor, &rgb);
-                leds[SABER_CRYSTAL_START].set(rgb, SABER_CRYSTAL_BRIGHTNESS);
-            }
-            else {
-                leds[SABER_CRYSTAL_START].set(bladeColor, SABER_CRYSTAL_BRIGHTNESS);
-            }
+            leds[SABER_CRYSTAL_START].set(bladeColor, SABER_CRYSTAL_BRIGHTNESS);
         }
     }
     #endif

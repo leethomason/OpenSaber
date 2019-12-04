@@ -125,24 +125,7 @@ bool CMDParser::push(int c)
         return processed;
     }
 }
-/*
-void CMDParser::upload(const char* path, uint32_t size)
-{
-    Serial.print("Upload. path='");
-    Serial.print(path);
-    Serial.println("'");
 
-    SD.remove(path);
-    streamFile = SD.open(path, FILE_WRITE);
-    if (!streamFile) {
-        Serial.println("Path could not be opened.");
-        return;
-    }
-    Serial.print("Upload Ready. size=");
-    Serial.println(size);
-    m_streamBytes = size;
-}
-*/
 
 bool CMDParser::processCMD() 
 {
@@ -163,7 +146,6 @@ bool CMDParser::processCMD()
     static const char ID[]      = "id";
     static const char TEST[]    = "test";
     static const char ACCEL[]   = "accel";
-    static const char CRYSTAL[] = "crys";
     static const char PLAY[]    = "play";
 
     static const int DELAY = 20;  // don't saturate the serial line. Too much for SoftwareSerial.
@@ -334,16 +316,6 @@ bool CMDParser::processCMD()
             Serial.print(" y="); Serial.print(mag.y);
             Serial.print(" z="); Serial.println(mag.z);
         }
-    }
-    else if (action == CRYSTAL) {
-        if (isSet) {
-            parseHexColor(value.c_str() + 1, &c);
-            database->setCrystalColor(c);
-        }
-        printLead(action.c_str());
-        RGB c = database->getCrystalColor();
-        printHexColor(c);
-        Serial.println("");
     }
     else if (action == PLAY) {
         printLead(action.c_str());        

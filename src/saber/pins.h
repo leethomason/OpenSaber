@@ -48,6 +48,7 @@ SOFTWARE.
 #define SABER_MODEL_KENOBI_IV	   16   // ItsyBitsy, Shield v1,Neopixel
 #define SABER_MODEL_AQUATIC_2	   17   // ItsyBitsy, Shield v1c, Dotstar
 #define SABER_MODEL_TYVOKKA		   18   // ItsyBitsy, Shield v1c, Dotstar
+#define SABER_MODEL_SHOCK3  	   19   // Itsy v2b, OLED (128x32), Dotstar crystal
 
 #define SABER_SUB_MODEL_NONE		0
 #define SABER_SUB_MODEL_LUNA		1
@@ -57,7 +58,7 @@ SOFTWARE.
 
 // ----------------------------------
 #define SERIAL_DEBUG 				1
-#define SABER_MODEL 				SABER_MODEL_TEST
+#define SABER_MODEL 				SABER_MODEL_SHOCK3
 #define SABER_SUB_MODEL				SABER_SUB_MODEL_STANDARD
 // ----------------------------------
 
@@ -89,6 +90,7 @@ SOFTWARE.
 #define PCB_ITSY_1				   16
 #define PCB_ITSY_1C				   17	// 1B was a bad run, 1C adds dotstar support
 #define PCB_ITSY_2A				   18
+#define PCB_ITSY_2B				   19   // Gyro + Accelerometer on the I2C bus. Dotstar. SPI. I2S audio. Flash mem sound.
 
 static const int EEPROM_SIZE = 512;
 
@@ -96,10 +98,11 @@ static const int32_t HIGH_VOLTAGE 		= 4000;		// "full charge" at 4.0v or above
 static const int32_t NOMINAL_VOLTAGE    = 3700;
 static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're weird.
 
-#define SABER_ACCELEROMETER_NONE 	0
-#define SABER_ACCELEROMETER_LIS3DH	1
-#define SABER_ACCELEROMETER_NXP		2
-#define SABER_ACCELEROMETER_LIS3DH_SPI 3
+#define SABER_ACCELEROMETER_NONE 		0
+#define SABER_ACCELEROMETER_LIS3DH		1
+#define SABER_ACCELEROMETER_NXP			2
+#define SABER_ACCELEROMETER_LIS3DH_SPI 	3
+#define SABER_ACCELEROMETER_LSM303 		4	// SPI, accel, gyro
 
 #define SABER_SOUND_DEF_BESPIN_ROGUE  1
 #define SABER_SOUND_DEF_BESPIN_JAINA  2
@@ -702,6 +705,48 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	static const int VOLUME_3 = 120;
 	static const int VOLUME_4 = 204;
 
+#elif (SABER_MODEL == SABER_MODEL_SHOCK3)
+	#define PCB_VERSION 			PCB_ITSY_2B
+	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
+	#define SABER_VOLTMETER			
+	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
+	#define SABER_UI_LED			SABER_LED_DOTSTAR
+
+	#define SABER_NUM_LEDS 			    1
+	//#define SABER_UI_START			0
+	//#define SABER_UI_COUNT			0
+	//#define SABER_UI_BRIGHTNESS	    16		
+	//#define SABER_UI_IDLE_MEDITATION
+	//#define SABER_UI_REVERSE
+	#define SABER_CRYSTAL_START	        0
+	#define SABER_CRYSTAL_BRIGHTNESS    64
+
+	#define SABER_DISPLAY	SABER_DISPLAY_128_32
+
+	#define SABER_SOUND_DEF 		SABER_SOUND_DEF_BESPIN_JAINA
+
+	static const int32_t UVOLT_MULT = 5612;	// FIXME
+	#define ID_STR "Shock 3 Cree XPE2 RGB"
+
+	// FIXME
+	// Heat sink compound; LED Supply advanced heat sink.
+	static const int32_t RED_VF   = 2200;   // milli-volts
+	static const int32_t RED_I    = 400;    // milli-amps
+	static const int32_t RED_R    = 4700;   // milli-ohms
+
+	static const int32_t GREEN_VF = 3200;
+	static const int32_t GREEN_I  = 400;
+	static const int32_t GREEN_R  = 1000;
+
+	static const int32_t BLUE_VF  = 3100;
+	static const int32_t BLUE_I   = 400;
+	static const int32_t BLUE_R   = 1800;
+
+	static const int VOLUME_1 = 20;
+	static const int VOLUME_2 = 60;
+	static const int VOLUME_3 = 160;
+	static const int VOLUME_4 = 256;
+
 #elif (SABER_MODEL == SABER_MODEL_TEST)
 	#define PCB_VERSION 			PCB_ITSY_2A
 	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
@@ -828,7 +873,8 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 #elif (PCB_VERSION == PCB_ITSY_1 || PCB_VERSION == PCB_ITSY_1C || PCB_VERSION == PCB_ITSY_2A)
 	/* Grinning Lizard Shield for ItsyBitys M0.
 	   Integrated memory for sound.
-	   Neopixel support.
+	   Neopixel support (early)
+	   Dotstar support (later)
 	*/
 	#define SABER_ACCELEROMETER 	SABER_ACCELEROMETER_LIS3DH_SPI
 
@@ -862,6 +908,35 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	// 13 exposed
 	
 	#define ACCEL_BLADE_DIRECTION 0	// The x direction is the blade.
+	
+#elif (PCB_VERSION == PCB_ITSY_2B)
+	/* Grinning Lizard Shield for ItsyBitys M0.
+	   Integrated memory for sound.
+	   Neopixel support (early)
+	   Dotstar support (later)
+	*/
+	#define SABER_ACCELEROMETER SABER_ACCELEROMETER_LSM303
+
+	#define PIN_VMETER        	A1
+	#define PIN_LED_A    	  	A2 
+	#define PIN_SWITCH_A		A3
+	#define PIN_DOTSTAR_EN		A4
+	#define PIN_OLED_CS		    A5
+	#define PIN_I2S_LRCLK		0
+	#define PIN_I2S_BITCLK		1
+	#define PIN_OLED_RESET 	    2
+	// CLOCK	 
+	// MOSI
+	// MISO 
+	// LRCLCK - I2S
+	// BITCLK - I2S
+	#define PIN_EMITTER_RED   	9
+	#define PIN_EMITTER_GREEN 	10
+	#define PIN_EMITTER_BLUE   	11
+	#define PIN_I2S_DATA		12
+	#define PIN_OLED_DC    	    13
+	
+	#define ACCEL_BLADE_DIRECTION 0	// The x direction is the blade. fixme
 	
 #else
 	#error Pins not defined.

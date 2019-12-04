@@ -82,14 +82,6 @@ public:
 
     static const int NUM_PALETTES = 8;
 
-    // Testing (not saved)
-    void setCrystalColor(const osbr::RGB& color) {
-        crystalColor = color;
-    }
-    const osbr::RGB& getCrystalColor() const {
-        return crystalColor;
-    }
-
     struct Palette {
         osbr::RGB bladeColor;
         osbr::RGB impactColor;
@@ -124,7 +116,6 @@ private:
         uint32_t nSetup;
     };
 
-    osbr::RGB   crystalColor;
     DataHeader	dataHeader;
     Palette 	palette[NUM_PALETTES];
 };
