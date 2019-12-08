@@ -85,24 +85,22 @@ void Blade::setRGB(const RGB& input)
     setThrottledRGB(input);
 }
 
-
-void Blade::setThrottledRGB(const osbr::RGB& input)
+void Blade::setThrottledRGB(const osbr::RGB &input)
 {
     m_color = input;
 
-    for (int i = 0; i < NCHANNELS; ++i ) {
+    for (int i = 0; i < NCHANNELS; ++i) {
         int32_t pwm = m_throttle[i].scale(input[i]);
-        
+
         ASSERT(m_throttle[i] > 0);
         ASSERT(m_throttle[i] <= 1);
         ASSERT(pwm >= 0);
         ASSERT(pwm <= 255);
 
-        m_pwm[i] =clamp<int32_t>(pwm, 0, 255);  // just in case...
+        m_pwm[i] = glClamp<int32_t>(pwm, 0, 255); // just in case...
         analogWrite(pinRGB[i], m_pwm[i]);
     }
 }
-
 
 bool Blade::setInterp(uint32_t delta, uint32_t effectTime, const RGB& startColor, const RGB& endColor)
 {
@@ -121,8 +119,8 @@ bool Blade::setInterp(uint32_t delta, uint32_t effectTime, const RGB& startColor
 
         for (int i = 0; i < NCHANNELS; ++i) {
             int32_t c = lerp1024<int32_t>(startColor[i], endColor[i], t);
-            ASSERT(inRange(c, glMin<int32_t>(startColor[i], endColor[i]), glMax<int32_t>(startColor[i], endColor[i])));
-            c = clamp<int32_t>(c, 0, 255);
+            ASSERT(glInRange(c, glMin<int32_t>(startColor[i], endColor[i]), glMax<int32_t>(startColor[i], endColor[i])));
+            c = glClamp<int32_t>(c, 0, 255);
             color[i] = uint8_t(c);
         }
         #if SERIAL_DEBUG == 1

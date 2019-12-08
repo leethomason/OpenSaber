@@ -418,7 +418,7 @@ void calcCrystalColorHSV(uint32_t msec, const osbr::RGB& base, osbr::RGB* out)
 
     dt = FixedNorm(msec % BREATH_CYCLE, BREATH_CYCLE);
     int32_t v32 = BASE + VARIATION + iSin(dt).scale(VARIATION);
-    v = uint8_t(clamp(v32, int32_t(0), int32_t(255)));
+    v = uint8_t(glClamp(v32, int32_t(0), int32_t(255)));
 
     // Hue
     static const int HUE_VAR = 20;

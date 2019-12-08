@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2016 Lee Thomason, Grinning Lizard Software
+  Copyright (c) Lee Thomason, Grinning Lizard Software
 
   Permission is hereby granted, free of charge, to any person obtaining a copy of
   this software and associated documentation files (the "Software"), to deal in
@@ -54,6 +54,8 @@
 #include "ShiftedSevenSeg.h"
 #include "i2saudiodrv.h"
 #include "manifest.h"
+#include "vrender.h"
+#include "vectorui.h"
 
 using namespace osbr;
 
@@ -87,10 +89,11 @@ SaberDB     saberDB;
 Voltmeter   voltmeter;
 
 #ifdef SABER_NUM_LEDS
-    DotStarUI dotstarUI;                // It is the DotStarUI regardless of physical pixel protocol
-    osbr::RGBA leds[SABER_NUM_LEDS];    // This file computes w/ brightness. Sketcher uses RGB, so there is some conversion.
-
-    DotStar dotstar;
+#ifdef SABER_UI_START
+DotStarUI dotstarUI;                // It is the DotStarUI regardless of physical pixel protocol
+#endif
+osbr::RGBA leds[SABER_NUM_LEDS];    // Color of the LEDs (brightness is separate)
+DotStar dotstar;                    // Hardware controller.
 #endif
 
 GrinlizLSM303 accelMag;
@@ -99,12 +102,13 @@ Timer2 vbatPrintTimer(1000);
 
 #if SABER_DISPLAY == SABER_DISPLAY_128_32
 static const int OLED_WIDTH = 128;
+static const int OLED_WIDTH_SHIFT = 7;
 static const int OLED_HEIGHT = 32;
 uint8_t oledBuffer[OLED_WIDTH * OLED_HEIGHT / 8] = {0};
 
 OLED_SSD1306 display(PIN_OLED_DC, PIN_OLED_RESET, PIN_OLED_CS);
-Sketcher    sketcher;
-Renderer    renderer;
+VRender    renderer;
+int renderStage = 0;
 #elif SABER_DISPLAY == SABER_DISPLAY_7_5_DEPRECATED
 Pixel_7_5_UI display75;
 PixelMatrix pixelMatrix;
@@ -123,6 +127,29 @@ Blade       blade;
 Timer2      vbatTimer(AveragePower::SAMPLE_INTERVAL);
 Tester      tester;
 
+void BlockDrawOLED(const BlockDrawChunk* chunks, int n)
+{
+    static const int OLED_BYTES = OLED_WIDTH * OLED_HEIGHT / 8;
+
+    // Clear to black beforehand; don't need to set black runs.
+    for (int i = 0; i < n; ++i) {
+        const BlockDrawChunk& chunk = chunks[i];
+
+#ifdef VECTOR_MONO
+        if (chunk.rgb == 0) continue;
+#else
+        if (chunk.rgb.get() == 0) continue;
+#endif
+        // Simple for the single row.
+        int row = chunk.y >> 3;
+        int bit = chunk.y - (row << 3);
+        uint8_t mask = 1 << bit;
+        uint8_t* p = oledBuffer + (row << OLED_WIDTH_SHIFT) + chunk.x0;
+        for (int nPix = chunk.x1 - chunk.x0; nPix > 0; nPix--, p++) {
+            *p |= mask;
+        }
+    }
+}
 
 void setup() {
     #if defined(SHIFTED_OUTPUT)
@@ -190,8 +217,10 @@ void setup() {
 
     #if SABER_DISPLAY == SABER_DISPLAY_128_32
         display.begin(OLED_WIDTH, OLED_HEIGHT, SSD1306_SWITCHCAPVCC);
-        renderer.Attach(OLED_WIDTH, OLED_HEIGHT, oledBuffer);
-        renderer.Fill(0);
+        renderer.Attach(BlockDrawOLED);
+        renderer.SetSize(OLED_WIDTH, OLED_HEIGHT);
+        renderer.SetClip(VRender::Rect(0, 0, OLED_WIDTH, OLED_HEIGHT));
+        renderer.Clear();
         display.display(oledBuffer);
 
         Log.p("OLED display connected.").eol();
@@ -506,13 +535,26 @@ void loopDisplays(uint32_t msec, uint32_t delta)
     ProfileBlock block(&data);
     // General display state processing. Draw to the current supported display.
 
+    #if SABER_DISPLAY == SABER_DISPLAY_128_32
+    switch(renderStage) {
+        case 0: 
+            VectorUI::Draw(&renderer, msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
+            break;
+        case 1:
+            renderer.Render();
+            break;
+        case 2:
+            display.display(oledBuffer);
+            break;
+    }
+    renderStage++;
+    if (renderStage == 3) renderStage = 0;
+    #endif
+
     if (displayTimer.tick(delta)) {
         uiRenderData.color = Blade::convertRawToPerceived(saberDB.bladeColor());
 
-        #if SABER_DISPLAY == SABER_DISPLAY_128_32
-            sketcher.Draw(&renderer, displayTimer.period(), uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
-            display.display(oledBuffer);
-        #elif SABER_DISPLAY == SABER_DISPLAY_7_5_DEPRECATED
+        #if SABER_DISPLAY == SABER_DISPLAY_7_5_DEPRECATED
             display75.Draw(msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
         #elif SABER_DISPLAY == SABER_DISPLAY_7_5
             display75.Draw(msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);

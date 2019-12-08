@@ -5,15 +5,15 @@
 uint8_t lerpU8(uint8_t a, uint8_t b, uint8_t t) 
 {
     int32_t r = int32_t(a) + (int32_t(b) - int32_t(a)) * int32_t(t) / 255;
-    return uint8_t(clamp(r, int32_t(0), int32_t(255)));
+    return uint8_t(glClamp(r, int32_t(0), int32_t(255)));
 }
 
 bool TestUtil()
 {
     //clamp()
-    TEST_IS_EQ(clamp(-10, 0, 100), 0);
-    TEST_IS_EQ(clamp(10,  0, 100), 10);
-    TEST_IS_EQ(clamp(110, 0, 100), 100);
+    TEST_IS_EQ(glClamp(-10, 0, 100), 0);
+    TEST_IS_EQ(glClamp(10,  0, 100), 10);
+    TEST_IS_EQ(glClamp(110, 0, 100), 100);
 
     // lerpU8()
 	TEST_IS_EQ(lerpU8(0, 128, 128), 64);
@@ -107,13 +107,16 @@ bool istrStarts(const char* str, const char* prefix)
 /*
     Modified Bernstein hash.
 */
-uint16_t hash8(const char* v, const char* end)
+uint32_t hash32(const char* v, const char* end)
 {
-	uint16_t h = 0;
-	for(; v<end; ++v) {
-		h = h * 33 ^ (*v);
-	}
-	return h;
+    uint32_t h = 0;
+    for (; v < end; ++v) {
+        // Simple form of the hash:
+        // h = h * 33 ^ (*v);
+        // But M0+ doesn't have 64 intermediate multiply. So use shifts:
+        h = ((h << 5) + h) ^ (*v);
+    }
+    return h;
 }
 
 
@@ -295,20 +298,33 @@ bool TestCStr()
             "hum", "poweron", "poweroff",
             "swing", "swing0", "swing1", "swing2", "swing3", "swing4"
         };
-        uint16_t result[NUM] = { 0 };
+        uint32_t result[NUM] = { 0 };
         for (int i = 0; i < NUM; ++i) {
-            uint16_t v = hash8(tests[i], tests[i] + strlen(tests[i]));
+            uint32_t v = hash32(tests[i], tests[i] + strlen(tests[i]));
             TEST_IS_TRUE(v > 0);
             for (int j = 0; j < i; ++j) {
                 TEST_IS_TRUE(result[j] != v);
             }
             result[i] = v;
         }
-        /*
-        for (int i = 0; i < NUM; ++i) {
-            Log.p(tests[i]).p(" ").p(result[i]).eol();
-        }
-        */
+    }
+    {
+        CStr<12> src = " a   b   cc  ";
+        CStr<12> t0, t1, t2;
+        CStr<12>* in[3] = { &t0, &t1, &t2 };
+        src.tokenize(' ', in, 3);
+        TEST_IS_TRUE(t0 == "a");
+        TEST_IS_TRUE(t1 == "b");
+        TEST_IS_TRUE(t2 == "cc");
+    }
+    {
+        CStr<12> src = "aa bb   cc";
+        CStr<12> t0, t1, t2;
+        CStr<12>* in[3] = { &t0, &t1, &t2 };
+        src.tokenize(' ', in, 3);
+        TEST_IS_TRUE(t0 == "aa");
+        TEST_IS_TRUE(t1 == "bb");
+        TEST_IS_TRUE(t2 == "cc");
     }
     return true;
 }
