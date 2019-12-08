@@ -60,7 +60,7 @@ DOTSTAR_STRIP       = 12.4;
 
 STOCK_H = 6.35;     // 1/4 inch aluminum
 
-BUTTON_WELL = 3.5;
+BUTTON_WELL = 4.5;      // adjusted, depending. was: 3.5
 BUTTON_HEAD_D = 7.2;
 BUTTON_HEAD_H = 1.6;
 BUTTON_THREAD_H = 4.0;

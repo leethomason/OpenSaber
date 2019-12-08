@@ -14,7 +14,6 @@ module cap() {
 }
 
 intersection() {
-    //translate([-100, -100, -100]) cube(size=[200, 100, 200]);
     translate([-100, -100, -100]) cube(size=[200, 200, 200]);
     union() {
         difference() {
@@ -28,8 +27,9 @@ intersection() {
                 cylinder(h=100 - BUTTON_THREAD_H, d=TACTILE_POST_D);
                 cylinder(h=200, d=BUTTON_THREAD_D);
             }
+            translate([BUTTON_HEAD_D/2, -50, -100])
+                cube(size=[100, 100, 100]);
         }
-
         *translate([0, 0, BUTTON_HEAD_H]) cap();
     }
 }
