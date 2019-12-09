@@ -15,7 +15,7 @@ WINDOW_X2 = 25.1
 WINDOW_X3 = 37.85
 WINDOW_W = 18.5
 
-SETBACK = 3.0   # how far to hide cuts
+SETBACK = 2.5   # how far to hide cuts
 LEDGE = 3.2     # how far the lower ledge juts into the view
 RAD = 1.0       # corner for little window
 OLED_W = 8.3
