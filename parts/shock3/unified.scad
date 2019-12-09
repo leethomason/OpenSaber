@@ -3,8 +3,8 @@ use <../shapes.scad>
 use <../commonUnified.scad>
 use <../inset.scad>
 
-DRAW_AFT = false;
-DRAW_FORE = true;
+DRAW_AFT = true;
+DRAW_FORE = false;
 DRAW_DOTSTAR = false;
 
 $fn=60;
@@ -133,7 +133,7 @@ if (DRAW_AFT) {
         union() {
             translate([0, 0, M_SPEAKER_BACK])
                 rotate([0, 0, 180])
-                    speakerHolder(D_AFT, M_AFT_STOP - M_SPEAKER_BACK, 3, "bass22", extraZ=2);
+                    speakerHolder(D_AFT, M_AFT_STOP - M_SPEAKER_BACK, 3, "std23", extraZ=2);
 
             difference() {
                 translate([0, 0, M_DISPLAY]) {

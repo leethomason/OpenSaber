@@ -394,6 +394,21 @@ module speakerStd28(bass)
     }
 }
 
+module speakerStd23(bass)
+{
+    H_SPKR        =  3.2;
+    D_SPKR        =  23;
+    X_NOTCH       =  6;
+    Z_NOTCH       =  11.5;
+
+    color("yellow") {
+        cylinder(h=H_SPKR, d=D_SPKR);
+        translate([-X_NOTCH/2, 0, 0])
+            cube(size=[X_NOTCH, D_SPKR * 0.6, Z_NOTCH]);
+    }
+}
+
+
 module speakerCLS28(extendY)
 {
     color("yellow") {
@@ -571,6 +586,13 @@ module speakerHolder(outer, dz, dzToSpkrBack, type, extraZ=0)
                     tube(h=dz + extraZ, do=outer, di=24);
                     translate([0, 0, dzToSpkrBack])
                         speakerCLS28(extendY=true);
+                }
+            }
+            else if (type=="std23") {
+                difference() {
+                    tube(h=dz + extraZ, do=outer, di=22);
+                    translate([0, 0, dzToSpkrBack])
+                        speakerStd23(extendY=true);
                 }
             }
             else
