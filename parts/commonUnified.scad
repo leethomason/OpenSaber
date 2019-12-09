@@ -93,10 +93,11 @@ module keyJoint(dz, do, di, slot, angle=0)
             tube(h=DZ+2, di=di, do=do+1);
         }
         else {
+            OVERLAP = 4.0;
             difference() {
                 union() {
-                    cylinder(h=dz-1, d=do);
-                    translate([0, 0, dz-1]) cylinder(h=1, d1=do, d2=do-1);
+                    cylinder(h=dz-OVERLAP, d=do);
+                    translate([0, 0, dz-OVERLAP]) cylinder(h=OVERLAP, d1=do, d2=do-2);
                 }
                 cylinder(h=100, d=di);
             }
@@ -590,9 +591,9 @@ module speakerHolder(outer, dz, dzToSpkrBack, type, extraZ=0)
             }
             else if (type=="std23") {
                 difference() {
-                    tube(h=dz + extraZ, do=outer, di=22);
+                    tube(h=dz + extraZ, do=outer, di=21);
                     translate([0, 0, dzToSpkrBack])
-                        speakerStd23(extendY=true);
+                        speakerStd23(type=="std23");
                 }
             }
             else

@@ -59,9 +59,10 @@ module metalArt()
         DO_TUBE = 1.25 * 25.4;
         THICK = 0.032;
         DI_TUBE = DO_TUBE - THICK * 2 * 25.4;
-        W = 24;
 
-        echo("Metal size (x,z)", W, DZ_METAL_ART);
+        echo("Metal art cut depth", yAtX(W_METAL_ART/2 + 1.6, D_INNER/2));
+
+        echo("Metal size (x,z)", W_METAL_ART, DZ_METAL_ART);
         echo("First window (z0, z1)", 
             WINDOW_0_START - M_METAL_ART, 
             WINDOW_0_START + WINDOW_0_DZ - M_METAL_ART);
@@ -74,8 +75,8 @@ module metalArt()
                 translate([0, R_INNER - DO_TUBE/2, M_METAL_ART]) {
                     tube(h=DZ_METAL_ART, do=DO_TUBE, di=DI_TUBE);
                 }
-                translate([-W/2, Y_METAL_ART, M_METAL_ART])
-                    cube(size=[W, 100, DZ_METAL_ART]);
+                translate([-W_METAL_ART/2, Y_METAL_ART, M_METAL_ART])
+                    cube(size=[W_METAL_ART, 100, DZ_METAL_ART]);
             }    
             *translate([-6, 0, M_CRYSTAL_START]) 
                 cube(size=[12, 100, DZ_CRYSTAL_SECTION]);
@@ -111,19 +112,20 @@ module case()
 module reverseBridge()
 {
     H = 1.5;
+    BY = 7;
     translate([7, 0, 0])
     polygonYZ(h=H, points=[
-        [9, 1],
-        [9, -6],
-        [2, 0]
+        [BY, 1],
+        [BY, -6],
+        [0, 0]
     ]);
 
     mirror([-1,0, 0])
     translate([7, 0, 0])
     polygonYZ(h=H, points=[
-        [9, 1],
-        [9, -6],
-        [2, 0]
+        [BY, 1],
+        [BY, -6],
+        [0, 0]
     ]);
 }
 
@@ -208,11 +210,11 @@ if (DRAW_AFT) {
             }
             intersection() {
                 innerSpace();
-                translate([OLED_DX, 0, 0]) union() {
+                union() {
                     translate([OLED_DISPLAY_MOUNT_W/2 + OLED_DX,  OLED_DY, M_DISPLAY + POST_DY1]) 
-                        pcbPillar(dBoost=2.0);
+                        pcbPillar(dBoost=0.0);
                     translate([-OLED_DISPLAY_MOUNT_W/2 + OLED_DX, OLED_DY, M_DISPLAY + POST_DY1]) 
-                        mirror([-1,0,0]) pcbPillar(dBoost=2.0);
+                        pcbPillar(dBoost=2.0);
                 }
             }
             intersection() {
@@ -230,10 +232,11 @@ if (DRAW_AFT) {
             }
         }
         // Top metal art
-        translate([-12, Y_METAL_ART+1, M_METAL_ART]) {
-            cube(size=[24, 100, DZ_METAL_ART]);
+        Y_FIX = 2.5;
+        translate([-W_METAL_ART/2, Y_METAL_ART+Y_FIX, M_METAL_ART]) {
+            cube(size=[W_METAL_ART, 100, DZ_METAL_ART]);
         }
-        metalArt();
+        //metalArt();
 
         // Bottom channel
         translate([-5, -50, M_AFT_STOP]) {
@@ -349,8 +352,11 @@ if (DRAW_DOTSTAR) {
                     translate([-ROD_X, ROD_Y, 0]) 
                         cylinder(h=H_BUTTRESS*2, d=D_ROD_PLUS+0.2);
 
-                    translate([0, 0, H_BUTTRESS]) scale([1, 1, 10]) 
-                        reverseBridge();
+                    //translate([0, 0, H_BUTTRESS]) scale([1, 1, 10]) 
+                    //    reverseBridge();
+
+                    translate([7, 0, 0]) cube(size=[10, 9, 10]);                    
+                    mirror([-1, 0, 0]) translate([7, 0, 0]) cube(size=[10, 9, 10]);
 
                     // Now the actual Dotstar.
                     W_SOLDER = 0.4 * 25.4;
@@ -384,3 +390,13 @@ if (DRAW_DOTSTAR) {
 *case();
 *color("orange") translate([0, Y_CRYSTAL, M_CRYSTAL_START]) 
     crystal(W_CRYSTAL, H_CRYSTAL, DZ_CRYSTAL_SECTION);
+
+color("gold") {
+    FRONT = M_AFT_STOP + 27*H_BUTTRESS;
+    translate([ROD_X, ROD_Y, M_AFT_STOP]) 
+        cylinder(h=FRONT - M_AFT_STOP, d=D_ROD);
+    
+    // Short one, hold crystal.
+    translate([-ROD_X, ROD_Y, M_AFT_STOP + H_BUTTRESS*10-EPS]) 
+        cylinder(h=FRONT - H_BUTTRESS*12.5, d=D_ROD);
+}

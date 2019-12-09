@@ -7,7 +7,7 @@ from rectangleTool import rectangleTool
 # cut the metal cowling for the crystal
 # origin at center left line of metal
 
-WIDTH_METAL = 24.0
+WIDTH_METAL = 20.0
 LENGTH_METAL = 44.0
 WINDOW_X0 = 9.1
 WINDOW_X1 = 16.37
@@ -37,11 +37,12 @@ half_tool = tool_size / 2
 
 g.absolute()
 travel(g, mat, x=WINDOW_X0 - SETBACK)
+X_MARK = (WINDOW_X0 + WINDOW_X1) - 1.0
 
 def absPath(g, total_plunge, plunge):
     g.move(y=OLED_W/2 - half_tool)
 
-    g.move(x=(WINDOW_X1 + WINDOW_X0)/2 - RAD + half_tool)
+    g.move(x=X_MARK - RAD + half_tool)
 
     g.relative()
     g.arc2(x=RAD, y=RAD, i=0, j=RAD, direction="CCW")
@@ -51,7 +52,7 @@ def absPath(g, total_plunge, plunge):
     g.move(x=WINDOW_X3 + SETBACK, z=total_plunge + plunge/2)
     g.move(y=-WINDOW_W/2 + LEDGE + half_tool)
 
-    g.move(x=(WINDOW_X1 + WINDOW_X0)/2 + half_tool, z=total_plunge+plunge)
+    g.move(x=X_MARK + half_tool, z=total_plunge+plunge)
     g.move(y=-OLED_W/2 - RAD + half_tool)
 
     g.relative()
