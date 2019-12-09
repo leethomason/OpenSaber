@@ -11,11 +11,7 @@
 #include <limits.h>
 #include <stdint.h>
 
-#define DEBUG_FIXED_OVERFLOW
-
-#ifdef DEBUG_FIXED_OVERFLOW
 #include "grinliz_assert.h"
-#endif
 
 template<class T> 
 struct Limit {
@@ -102,16 +98,6 @@ public:
         return (float)x / (float)FIXED_1;
     }
 
-    /*
-    // Return the floor part (as a copy).
-    FixedT getFloor() const { 
-        int fraction = x & ~(FIXED_1 - 1); 
-        FixedT f; 
-        f.x = fraction; 
-        return f; 
-    }
-    */
-
     // Query the integer part. Positive or negative.
     int32_t getInt() const { return x >> DECBITS; }
     // Query the DECBITSimal part - return as a fraction of 2^16.
@@ -122,26 +108,19 @@ public:
     
     FixedT sqrt() const {
         if (x < 0) return 0;
-        LONG target = x << DECBITS;
-        LONG low = 0;
-        LONG high = x;
-        LONG mid = low;
 
-        while (low <= high) {
-            mid = (low + high) / 2;
-            LONG guess = mid * mid;
-            if (guess > target) {
-                high = mid - 1;
-            }
-            else if (guess < target) {
-                low = mid + 1;
-            }
-            else {
-                break;
-            }
+        uint32_t v = x << DECBITS;
+        uint32_t res = 0;
+        uint16_t add = 0x8000;
+        for (int i = 0; i < 16; i++) {
+            uint16_t temp = uint16_t(res) | add;
+            uint32_t g2 = temp * temp;
+            if (v >= g2)
+                res = temp;
+            add >>= 1;
         }
         FixedT val;
-        val.x = mid;
+        val.x = res;
         return val;
     }
 

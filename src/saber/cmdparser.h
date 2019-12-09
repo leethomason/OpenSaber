@@ -56,10 +56,11 @@ private:
     SaberDB* database = 0;
     const Manifest& manifest;
 
-    CStr<30> token;
-    CStr<10> action;
-    CStr<20> value;
-    CStr<20> value2;
+    static const int ALLOCATE = 30;
+    CStr<ALLOCATE> token;
+    CStr<ALLOCATE> action;
+    CStr<ALLOCATE> value;
+    CStr<ALLOCATE> value2;
 };
 
 

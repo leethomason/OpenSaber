@@ -4,17 +4,8 @@
 #include <string.h>
 #include <stdint.h>
 
-class Stream;
-
 #include "grinliz_assert.h"
 #include "fixed.h"
-
-template<class T>
-T clamp(T value, T lower, T upper) {
-	if (value < lower) return lower;
-	if (value > upper) return upper;
-	return value;
-}
 
 template<class T>
 T lerp256(T a, T b, T t256) {
@@ -65,8 +56,8 @@ bool strStarts(const char* str, const char* prefix);
 bool istrStarts(const char* str, const char* prefix);
 void intToString(int value, char* str, int allocated, bool writeZero);
 
-// Hash suitible for short (8 char or so) strings.
-uint16_t hash8(const char* v, const char* end);
+// Modified Bernstein hash
+uint32_t hash32(const char* v, const char* end);
 
 /**
 * The CStr class is a "c string": a simple array of
@@ -202,27 +193,30 @@ public:
 		len = (int) strlen(buf);
 	}
 	
-	uint16_t hash8() const {
-		return ::hash8(buf, buf + len);
+	uint32_t hash32() const {
+		return ::hash32(buf, buf + len);
 	}
 
 	void tokenize(char sep, CStr<ALLOCATE>* tokens[], int n) const {
-		int i =0;
+		int t = 0;
 		const char* p = buf;
 
-		while(*p && i < n) {
-			if (*p == sep) {
-				while(*p == sep) ++p;
-				i++;
-			}
-			else {
-				tokens[i]->append(*p);
+		while(*p && t < n) {
+			p = skip(sep, p);
+			while(*p && *p != sep) {
+				tokens[t]->append(*p);
 				p++;
 			}
+			t++;
 		} 
 	}
 
 private:
+	const char* skip(char sep, const char* p) const {
+		while (*p == sep) ++p;
+		return p;
+	}
+
 	int len;
 	char buf[ALLOCATE];
 };
@@ -231,7 +225,7 @@ private:
 /**
 * The CStrBuf. Wraps a buffer of characters, that doesn't have
   to be null-terminated. Optimizes for space (the size of this structure
-  should just be ALLOCATE) vs. performance. Note also the abscence of the
+  should just be ALLOCATE) vs. performance. Note also the absence of the
   c_str() method, since it can't be implemented without allocating memory.
 */
 template< int ALLOCATE >
@@ -307,8 +301,8 @@ public:
             buf[i] = 0;
     }
 
-	uint16_t hash8() const {
-		return ::hash8(buf, buf + size());
+	uint32_t hash32() const {
+		return ::hash32(buf, buf + size());
 	}
 
 
@@ -375,14 +369,16 @@ bool TestCQueue();
 
 // --- Range / Min / Max --- //
 template<class T>
-bool inRange(const T& val, const T& a, const T& b) {
+bool glInRange(const T& val, const T& a, const T& b) {
 	return val >= a && val <= b;
 }
 
 template<class T>
 T glMin(T a, T b) { return (a < b) ? a : b; }
+
 template<class T>
 T glMax(T a, T b) { return (a > b) ? a : b; }
+
 template<class T>
 T glClamp(T x, T a, T b) {
 	if (x < a) return a;
@@ -401,13 +397,6 @@ T glAbs(T x) { return x >= 0 ? x : -x; }
 
 // --- Algorithm --- //
 
-template <class T> inline void	Swap(T* a, T* b) {
-	T temp = *a;
-	*a = *b;
-	*b = temp;
-};
-
-
 template <class T>
 inline void combSort(T* mem, int size)
 {
@@ -421,7 +410,7 @@ inline void combSort(T* mem, int size)
 		for (int i = 0; i < end; i++) {
 			int j = i + gap;
 			if (mem[j] < mem[i]) {
-				Swap(mem + i, mem + j);
+				glSwap(mem[i], mem[j]);
 				swapped = true;
 			}
 		}

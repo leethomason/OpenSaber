@@ -33,8 +33,6 @@
 
 using namespace osbr;
 
-//File streamFile;
-
 CMDParser::CMDParser(SaberDB* _db, const Manifest& _manifest) : manifest(_manifest) {
     database = _db;
 }
@@ -47,22 +45,8 @@ void CMDParser::tokenize()
 
     if (token.empty()) return;
 
-    int i = 0;
-    for ( ; token[i] && token[i] != ' '; i++) {
-        action.append(token[i]);
-    }
-    if (token[i] == ' ') {
-        i++;
-        for ( ; token[i] && token[i] != ' '; i++) {
-            value.append(token[i]);
-        }
-    }
-    if (token[i] == ' ') {
-        i++;
-        for ( ; token[i] && token[i] != ' '; i++) {
-            value2.append(token[i]);
-        }
-    }
+    CStr<ALLOCATE>* inputs[3] = { &action, &value, &value2 };
+    token.tokenize(' ', inputs, 3);
 }
 
 void CMDParser::printHexColor(const RGB& color) {

@@ -343,8 +343,8 @@ void VRender::RasterizeLine(int y, const Rect& clip)
 
         // Rasterize previous chunk.
         if (x1 > x0) {
-            int subClipX0 = Max(x0, clipX0);
-            int subClipX1 = Min(x1, clipX1);
+            int subClipX0 = glMax(x0, clipX0);
+            int subClipX1 = glMin(x1, clipX1);
             if (subClipX1 > subClipX0) {
 
                 cache[nCache].x0 = subClipX0;
@@ -386,40 +386,3 @@ void VRender::Rasterize()
     }
     ClearTransform();
 }
-
-
-void VRenderUtil::DrawStr(VRender* ren, const char* str, int x, int y, GlyphMetrics metrics, const osbr::RGBA& rgba)
-{
-    ren->PushLayer();
-    int cx = x;
-    while (str && *str) {
-        int advance = 0, texW = 0, texRows = 0;
-        const uint8_t* mem = metrics(*str, &advance, &texW, &texRows);
-
-        int i0 = 0;
-        while(i0 < texW) {
-            int j0 = 0;
-            uint8_t c = mem[i0];
-            int i1 = i0 + 1;
-            while (i1 < texW && mem[i1] == c)
-                ++i1;
-
-            while (j0 < 8) {
-                int j1 = j0;
-                while (c & (1 << j1) && j1 < 8) {
-                    j1++;
-                }
-                if (j1 > j0) {
-                    ren->DrawRect(cx + i0, y + j0, i1-i0, j1 - j0, rgba);
-                    j0 = j1;
-                }
-                j0++;
-            }
-            i0 = i1;
-        }
-        cx += advance;
-        ++str;
-    }
-    ren->PopLayer();
-}
-

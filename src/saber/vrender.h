@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include "rgb.h"
 #include "fixed.h"
+#include "Grinliz_Util.h"
 
 #define VECTOR_MONO
 
@@ -32,17 +33,6 @@ public:
     static const int MAX_ACTIVE = MAX_EDGES / 2;
     static const int Y_HASH = 32;
     static const int MAX_COLOR_STACK = 8;
-
-    template<class T> 
-    static T Min(T a, T b) { return a < b ? a : b; }
-    template<class T> 
-    static T Max(T a, T b) { return a > b ? a : b; }
-    template<class T>
-    static void Swap(T& a, T& b) {
-        T temp = a;
-        a = b;
-        b = temp;
-    }
 
     struct Vec2
     {
@@ -95,10 +85,10 @@ public:
 
         Rect Intersect(const Rect& rhs) const {
             Rect r = *this;
-            r.x0 = Max(this->x0, rhs.x0);
-            r.y0 = Max(this->y0, rhs.y0);
-            r.x1 = Min(this->x1, rhs.x1);
-            r.y1 = Min(this->y1, rhs.y1);
+            r.x0 = glMax(this->x0, rhs.x0);
+            r.y0 = glMax(this->y0, rhs.y0);
+            r.x1 = glMin(this->x1, rhs.x1);
+            r.y1 = glMin(this->y1, rhs.y1);
             return r;
         }
     };
@@ -188,11 +178,4 @@ private:
     ActiveEdge* m_activeEdges[MAX_ACTIVE];
     ActiveEdge  m_edgePool[MAX_EDGES];
     ActiveEdge* m_rootHash[Y_HASH];
-};
-
-
-class VRenderUtil
-{
-public:
-    static void DrawStr(VRender* vrender, const char* str, int x, int y, GlyphMetrics metrics, const osbr::RGBA&);
 };

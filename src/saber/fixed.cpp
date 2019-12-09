@@ -49,6 +49,13 @@ bool TestFixed()
         Fixed115 br = b.sqrt();
         TEST_IS_TRUE(br == 4)
     }
+    {
+        FixedNorm a(4, 100);
+        FixedNorm ar = a.sqrt();
+//        const FixedNorm answer = FixedNorm(2, 10);
+//        TEST_IS_TRUE(ar == answer);
+        TEST_IS_TRUE(ar.getRaw() == 817);
+    }
     return true;
 }
 
