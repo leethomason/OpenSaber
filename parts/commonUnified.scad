@@ -395,7 +395,7 @@ module speakerStd28(bass)
     }
 }
 
-module speakerStd23(bass)
+module speakerStd23()
 {
     H_SPKR        =  3.2;
     D_SPKR        =  23;
@@ -404,7 +404,7 @@ module speakerStd23(bass)
 
     color("yellow") {
         cylinder(h=H_SPKR, d=D_SPKR);
-        translate([-X_NOTCH/2, 0, 0])
+        *translate([-X_NOTCH/2, 0, 0])
             cube(size=[X_NOTCH, D_SPKR * 0.6, Z_NOTCH]);
     }
 }
@@ -590,10 +590,12 @@ module speakerHolder(outer, dz, dzToSpkrBack, type, extraZ=0)
                 }
             }
             else if (type=="std23") {
+                translate([0, 0, dz + extraZ - 4])
+                    tube(h=4, do=outer, di=19);
                 difference() {
                     tube(h=dz + extraZ, do=outer, di=21);
                     translate([0, 0, dzToSpkrBack])
-                        speakerStd23(type=="std23");
+                        speakerStd23();
                 }
             }
             else
@@ -602,7 +604,7 @@ module speakerHolder(outer, dz, dzToSpkrBack, type, extraZ=0)
         translate([-50, -outer, -EPS])
             cube(size=[100, outer - 6, 100]);    
 
-        THETA = 14;
+        THETA = (type == "std23") ? 10 : 14;
         for(r=[0:2]) {
             rotate([0, 0, -50 + r*50]) translate([0, 0, dzToSpkrBack]) {
                 for(x=[0:6]) {

@@ -19,8 +19,6 @@
 #define MONO_128_32 1
 //#define RGB_160_80 2
 
-Sketcher sketcher;
-
 #ifdef MONO_128_32
 static const int WIDTH = 128;
 static const int HEIGHT = 32;
@@ -299,7 +297,6 @@ int main(int, char**) {
 			uint8_t value = int(127.8 * (sin(count * 0.2) + 1.0));
 			++count;
 
-			sketcher.Push(value);
 #ifdef MONO_128_32
 #   ifdef USE_VRENDER
             memset(displayBuffer, 0, WIDTH * HEIGHT / 8);

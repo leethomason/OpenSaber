@@ -119,6 +119,14 @@ uint32_t hash32(const char* v, const char* end)
     return h;
 }
 
+uint32_t hash32(const char* v)
+{
+    uint32_t h = 0;
+    for (; *v; ++v) {
+        h = ((h << 5) + h) ^ (*v);
+    }
+    return h;
+}
 
 bool TestCStr()
 {
@@ -325,6 +333,15 @@ bool TestCStr()
         TEST_IS_TRUE(t0 == "aa");
         TEST_IS_TRUE(t1 == "bb");
         TEST_IS_TRUE(t2 == "cc");
+    }
+    {
+        CStr<12> src = " aa ";
+        CStr<12> t0, t1, t2;
+        CStr<12>* in[3] = { &t0, &t1, &t2 };
+        src.tokenize(' ', in, 3);
+        TEST_IS_TRUE(t0 == "aa");
+        TEST_IS_TRUE(t1.empty());
+        TEST_IS_TRUE(t2.empty());
     }
     return true;
 }

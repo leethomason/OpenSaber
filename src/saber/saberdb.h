@@ -101,7 +101,6 @@ private:
     struct DataHeader {
         DataHeader() :
             currentPalette(0),
-            soundOn(1),
             volume(40),
             motion(DEFAULT_G_FORCE_MOTION),
             impact(DEFAULT_G_FORCE_IMPACT),
@@ -109,7 +108,6 @@ private:
         {}
 
         uint8_t currentPalette;
-        uint8_t soundOn;            // NOT USED (only volume)
         uint8_t volume;
         float   motion;
         float   impact;

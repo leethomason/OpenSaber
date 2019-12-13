@@ -9,7 +9,7 @@
 #include "uirenderdata.h"
 
 
-/* Renders the UI to 4 RGB LEDs */
+/* Renders the UI to RGB LEDs */
 class DotStarUI
 {
 public:
@@ -62,53 +62,6 @@ private:
 	CStr<9> m_output;
 };
 
-
-class Sketcher
-{
-public:
-	enum {
-		WIDTH = 128,
-		HEIGHT = 32,
-
-		X0			= 0,
-		X1			= WIDTH,
-		CENTER		= (X0 + X1) / 2,
-
-        DIAL_WIDTH  = 28,
-		DATA_WIDTH	= WIDTH - DIAL_WIDTH * 2 - 20,
-		BAR_WIDTH   = 38,
-    };
-
-    Sketcher();
-    void Draw(Renderer* d, uint32_t time, UIMode mode, bool bladeIgnited, const UIRenderData* data);
-    void Push(uint8_t value);
-
-private:
-    TextureData GetDial(int value);
-
-	void DrawBladeMode(Renderer* d, uint32_t time, bool ignited, const UIRenderData* data);
-	void DrawPaletteMode(Renderer* d, uint32_t time, const UIRenderData* data);
-	void DrawVolumeMode(Renderer* d, uint32_t time, const UIRenderData* data);
-	void DrawMeditationMode(Renderer* d, uint32_t time, const UIRenderData* data);
-
-	void DrawDials(Renderer* d, const UIRenderData* data, bool labels=true);
-	void DrawStateDisplay(Renderer* d, const UIRenderData* data);
-
-    uint8_t  line = 0;
-    uint8_t  pos = 0;
-    uint32_t lastTime = 0;
-    uint32_t animTime = 0;
-	uint8_t  accelData[DATA_WIDTH];
-};
-
-class SketcherRGB
-{
-public:
-    SketcherRGB(Renderer* renderer);
-    void Draw(uint32_t time, UIMode mode, bool bladeIgnited, const UIRenderData* data);
-private:
-    Renderer* m_renderer = 0;
-};
 
 void calcCrystalColorRGB(uint32_t msec, 
     int32_t lowVariation,       // how much variation around dim color channels

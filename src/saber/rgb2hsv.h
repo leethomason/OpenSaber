@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+// hue:        [0, 180)
+// saturation: [0, 255]
+// value:      [0, 255]
+
 void rgb2hsv(
     uint8_t src_r, uint8_t src_g, uint8_t src_b,
     uint8_t* dst_h, uint8_t* dst_s, uint8_t* dst_v);

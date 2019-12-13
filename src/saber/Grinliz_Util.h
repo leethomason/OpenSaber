@@ -58,6 +58,7 @@ void intToString(int value, char* str, int allocated, bool writeZero);
 
 // Modified Bernstein hash
 uint32_t hash32(const char* v, const char* end);
+uint32_t hash32(const char* v);
 
 /**
 * The CStr class is a "c string": a simple array of

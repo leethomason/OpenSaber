@@ -3,8 +3,8 @@ use <../shapes.scad>
 use <../commonUnified.scad>
 use <../inset.scad>
 
-DRAW_AFT = true;
-DRAW_FORE = false;
+DRAW_AFT = false;
+DRAW_FORE = true;
 DRAW_DOTSTAR = false;
 
 $fn=60;
@@ -112,20 +112,22 @@ module case()
 module reverseBridge()
 {
     H = 1.5;
-    BY = 7;
-    translate([7, 0, 0])
+    BY = 3;
+    BY0 = -3;
+    BX = 13.0;
+    translate([BX, 0, 0])
     polygonYZ(h=H, points=[
         [BY, 1],
         [BY, -6],
-        [0, 0]
+        [BY0, 0]
     ]);
 
     mirror([-1,0, 0])
-    translate([7, 0, 0])
+    translate([BX, 0, 0])
     polygonYZ(h=H, points=[
         [BY, 1],
         [BY, -6],
-        [0, 0]
+        [BY0, 0]
     ]);
 }
 
@@ -192,7 +194,8 @@ if (DRAW_AFT) {
                         noBottom=false,
                         cutoutHigh=false,
                         bridgeOnlyBottom=true);
-                    reverseBridge();
+                    if (i != 5)
+                        reverseBridge();
                 }
             }
 
@@ -336,6 +339,21 @@ if(DRAW_FORE) {
     translate([0, 0, M_EMITTER_BASE]) tube(h=10.0, di=dynamicHeatSinkThread(), do=D_INNER);
 }
 
+module rodCut() 
+{
+    hull() {
+        translate([ROD_X, ROD_Y, 0]) 
+            cylinder(h=500, d=D_ROD_PLUS+0.2);
+        translate([ROD_X + 10, ROD_Y, 0]) 
+            cylinder(h=500, d=D_ROD_PLUS+0.2);
+        translate([ROD_X + 10, ROD_Y - 10, 0]) 
+            cylinder(h=500, d=D_ROD_PLUS+0.2);
+        translate([ROD_X, ROD_Y - 10, 0]) 
+            cylinder(h=500, d=D_ROD_PLUS+0.2);
+    }
+
+}
+
 if (DRAW_DOTSTAR) {
     color("yellow")
     translate([0, 0, M_AFT_STOP + H_BUTTRESS + 12*2*H_BUTTRESS]) {
@@ -344,19 +362,8 @@ if (DRAW_DOTSTAR) {
             union() {
                 difference() {
                     translate([-50, 6, 0]) cube(size=[100, 20, H_BUTTRESS]);
-                    //translate([-50, 2, 0]) cube(size=[100, 20, H_BUTTRESS]);
-
-                    translate([ROD_X, ROD_Y, 0]) 
-                        cylinder(h=500, d=D_ROD_PLUS+0.2);
-                    
-                    translate([-ROD_X, ROD_Y, 0]) 
-                        cylinder(h=H_BUTTRESS*2, d=D_ROD_PLUS+0.2);
-
-                    //translate([0, 0, H_BUTTRESS]) scale([1, 1, 10]) 
-                    //    reverseBridge();
-
-                    translate([7, 0, 0]) cube(size=[10, 9, 10]);                    
-                    mirror([-1, 0, 0]) translate([7, 0, 0]) cube(size=[10, 9, 10]);
+                    translate([0, 0, -EPS]) rodCut();
+                    translate([0, 0, -EPS]) mirror([-1, 0, 0]) rodCut();
 
                     // Now the actual Dotstar.
                     W_SOLDER = 0.4 * 25.4;
@@ -391,7 +398,7 @@ if (DRAW_DOTSTAR) {
 *color("orange") translate([0, Y_CRYSTAL, M_CRYSTAL_START]) 
     crystal(W_CRYSTAL, H_CRYSTAL, DZ_CRYSTAL_SECTION);
 
-color("gold") {
+*color("gold") {
     FRONT = M_AFT_STOP + 27*H_BUTTRESS;
     translate([ROD_X, ROD_Y, M_AFT_STOP]) 
         cylinder(h=FRONT - M_AFT_STOP, d=D_ROD);

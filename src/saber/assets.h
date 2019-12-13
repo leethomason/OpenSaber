@@ -3,11 +3,6 @@
 
 #include <stdint.h>
 
-const uint8_t* get_dial0(int* width, int* height);
-const uint8_t* get_dial1(int* width, int* height);
-const uint8_t* get_dial2(int* width, int* height);
-const uint8_t* get_dial3(int* width, int* height);
-const uint8_t* get_dial4(int* width, int* height);
 const uint8_t* get_jBird(int* width, int* height);
 
 // Created using the DotFactory.
