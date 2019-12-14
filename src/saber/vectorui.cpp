@@ -107,9 +107,9 @@ void VectorUI::Draw(VRender* ren,
         }
     }
     else if (mode == UIMode::VOLUME) {
-        static const int S = 6;
+        static const int S = 10;
         ren->DrawRect(8, H / 2 - S / 2, S, S, WHITE);
-        for (int i = 1; i < 5; ++i) {
+        for (int i = 2; i < 5; ++i) {
             ren->DrawRect(12 + 4 * i, H / 2 - (S + i * 4) / 2, 2, S + i * 4, WHITE);
         }
     }
