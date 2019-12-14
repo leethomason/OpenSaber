@@ -80,7 +80,6 @@ void VectorUI::Draw(VRender* ren,
     CStr<5> volts;
     volts.setFromNum(data->mVolts, true);
 
-#if true
     static const int W = 128;
     static const int H = 32;
     static const int BAR_W = 16;
@@ -178,102 +177,4 @@ void VectorUI::Draw(VRender* ren,
     }
     // Call in wrapper!
     //ren->Render();
-
-#endif
-
-#if false
-    static const osbr::RGBA POWER_ON(43, 163, 255, 200);
-    static const osbr::RGBA POWER_OFF(43, 163, 255, 40);
-    static const osbr::RGBA POWER_TEXT(43, 163, 255, 200);
-
-    static const osbr::RGBA AUDIO_ON(255, 163, 0, 200);
-    static const osbr::RGBA AUDIO_OFF(43, 163, 255, 40);
-
-    static const osbr::RGBA PALETTE_ON = POWER_ON;
-    static const osbr::RGBA PALETTE_OFF = POWER_OFF;
-
-    static const int W = 160;
-    static const int H = 80;
-
-    static const int BAR_W = 24;
-    // Power
-    {
-        for (int r = 0; r < 8; ++r) {
-            Fixed115 d = r - Fixed115(7, 2);
-            Fixed115 fx = Fixed115(11, 10) * d * d + 2;
-            ren->DrawRect(fx.getInt(), 72 - r * 10, BAR_W, 6, POWER_ON, r < p ? 0 : 1);
-        }
-    }
-
-    // Audio
-    {
-        for (int r = 0; r < 8; ++r) {
-            Fixed115 d = r - Fixed115(7, 2);
-            Fixed115 fx = Fixed115(11, 10) * d * d + 2;
-            ren->DrawRect(W - fx.getInt() - BAR_W, 72 - r * 10, BAR_W, 6, AUDIO_ON , r / 2 < data->volume ? 0 : 1);
-        }
-    }
-
-    // Crystal
-    static const int S = 14;
-    static const int T = 4;
-    {
-        static const VRender::Vec2 DIAMOND[4] = {
-            {0, -S}, {S, 0}, {0, S}, {-S, 0}
-        };
-        static const VRender::Vec2 ARROW[6] = {
-            {0, -S}, {T, -S}, {T + S, 0}, {T, S}, {0, S}, {S, 0}
-        };
-
-        ren->SetTransform(W / 2, H / 2);
-        ren->DrawPoly(DIAMOND, 4, osbr::RGBA(data->color.r, data->color.g, data->color.b));
-
-        bool drawLeft = (mode == UIMode::NORMAL || mode == UIMode::PALETTE);
-        bool drawRight = (mode == UIMode::NORMAL || mode == UIMode::VOLUME);
-
-        for (int i = 0; i < 4; ++i) {
-            osbr::RGBA c(data->color.r, data->color.g, data->color.b, 255 - i * 50);
-            
-            if (drawRight) {
-                ren->SetScale(1, 1);
-                ren->SetTransform(W / 2 + T + 2 * T * i, H / 2);
-                ren->DrawPoly(ARROW, 6, c);
-            }
-
-            if (drawLeft) {
-                ren->SetTransform(W / 2 - T - 2 * T * i, H / 2);
-                ren->SetScale(-1, 1);
-                ren->DrawPoly(ARROW, 6, c);
-            }
-        }
-        ren->ClearTransform();
-    }
-
-    for (int j = 0; j < 4; ++j) {
-        for (int i = 0; i < 4; ++i) {
-            const static int S = 18;
-            ren->DrawRect(
-                W / 2 + S * (i - 2), 
-                H / 2 + S * (j - 2), 
-                S, S, 
-                osbr::RGBA(255, 255, 255, 80), 1);
-        }
-    }
-
-    // VoltMeter
-    VRenderUtil::DrawStr(ren, volts.c_str(), W / 2 - 30, H / 2 + S + 4, getGlypth_calibri8, POWER_TEXT);
-
-
-    // Palette
-    /*{
-        static const int D = 8;
-        for (int j = 0; j < 2; ++j) {
-            for (int i = 0; i < 4; ++i) {
-                ren->DrawRect(W / 2 - 19 + i*10, 4 + j*10, D, D, POWER_ON);
-            }
-        }
-    }*/
-
-    ren->Render();
-#endif
 }
