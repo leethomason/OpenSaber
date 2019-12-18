@@ -3,8 +3,8 @@ use <../shapes.scad>
 use <../commonUnified.scad>
 use <../inset.scad>
 
-DRAW_AFT = false;
-DRAW_FORE = true;
+DRAW_AFT = true;
+DRAW_FORE = false;
 DRAW_DOTSTAR = false;
 
 $fn=60;
@@ -296,7 +296,7 @@ if(DRAW_FORE) {
                     M_INSET_START - M_START,
                     M_INSET_END - M_START,
                     M_BOLT - M_START,
-                    0, // use flat port holderM_PORT_CENTER - M_START,
+                    0, // use flat port holder M_PORT_CENTER - M_START,
                     M_SWITCH_CENTER - M_START,
                     M_USB - M_START,
 

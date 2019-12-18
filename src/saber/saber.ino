@@ -62,10 +62,12 @@ using namespace osbr;
 static const uint32_t INDICATOR_CYCLE         = 1000;
 static const uint32_t PING_PONG_INTERVAL      = 2400;
 static const uint32_t BREATH_TIME             = 1200;
+static const uint32_t IMPACT_MIN_TIME         = 1000;    // Minimum time between impact sounds. FIXME: need adjusting.
 
 uint32_t reflashTime    = 0;
 bool     flashOnClash   = false;
 uint32_t lastMotionTime = 0;    
+uint32_t lastImpactTime = 0;
 uint32_t lastLoopTime   = 0;
 
 Adafruit_FlashTransport_SPI flashTransport(SS1, &SPI1);
@@ -457,13 +459,14 @@ void processAccel(uint32_t msec)
             bool sfxOverDue = false;
 #endif
 
-            if ((g2Normal >= impact * impact))
+            if ((g2Normal >= impact * impact) && (msec - lastImpactTime) > IMPACT_MIN_TIME)
             {
                 bool sound = sfx.playSound(SFX_IMPACT, sfxOverDue ? SFX_OVERRIDE : SFX_GREATER_OR_EQUAL);
                 if (sound)
                 {
                     Log.p("Impact. g=").p(sqrt(g2)).eol();
                     bladeState.change(BLADE_FLASH);
+                    lastImpactTime = msec;
                     lastMotionTime = msec;
                 }
             }

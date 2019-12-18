@@ -37,8 +37,7 @@ void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba, int
 {
     Rect in(x0, y0, w + x0, h + y0);
     ASSERT(in.y0 <= in.y1);
-    ASSERT(w > 0);
-    ASSERT(h > 0);
+    ASSERT(in.x0 <= in.x1);
     ASSERT(m_layer < 127);
 
     if (m_immediate && m_rot == 0 && outline == 0) {
@@ -48,6 +47,8 @@ void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba, int
         Fixed115 hf = h * m_scaleY;
 
         Rect r(xf.getInt(), yf.getInt(), (xf + wf).getInt(), (yf + hf).getInt());
+        r = TransformCam(r);
+
         r.Intersect(m_clip);
         if (!r.Empty()) {
             for (int y = r.y0; y < r.y1; ++y) {
@@ -130,6 +131,11 @@ void VRender::DrawPoly(const Vec2I8* points, int n, const osbr::RGBA& rgba)
 
 void VRender::Transform4(Fixed115* e, int x0, int y0, int x1, int y1)
 {
+    Fixed115 camTX = camTrans.x;
+    Fixed115 camTY = camTrans.y;
+    Fixed115 camSX = camScale.x;
+    Fixed115 camSY = camScale.y;
+
     if (m_rot != 0) {
         FixedNorm s = iSin(m_rot);
         FixedNorm c = iCos(m_rot);
@@ -139,22 +145,22 @@ void VRender::Transform4(Fixed115* e, int x0, int y0, int x1, int y1)
         Fixed115 xp1 = x1 * m_scaleX;
         Fixed115 yp1 = y1 * m_scaleY;
 
-        e[0] = xp0 * c - yp0 * s + m_transX;
-        e[1] = xp0 * s + yp0 * c + m_transY;
-        e[2] = xp1 * c - yp1 * s + m_transX;
-        e[3] = xp1 * s + yp1 * c + m_transY;
+        e[0] = (xp0 * c - yp0 * s + m_transX) * camSX + camTX;
+        e[1] = (xp0 * s + yp0 * c + m_transY) * camSY + camTY;
+        e[2] = (xp1 * c - yp1 * s + m_transX) * camSX + camTX;
+        e[3] = (xp1 * s + yp1 * c + m_transY) * camSY + camTY;
     }
     else if (m_scaleX != 1 || m_scaleY != 1) {
-        e[0] = x0 * m_scaleX + m_transX;
-        e[1] = y0 * m_scaleY + m_transY;
-        e[2] = x1 * m_scaleX + m_transX;
-        e[3] = y1 * m_scaleY + m_transY;
+        e[0] = (x0 * m_scaleX + m_transX) * camSX + camTX;
+        e[1] = (y0 * m_scaleY + m_transY) * camSY + camTY;
+        e[2] = (x1 * m_scaleX + m_transX) * camSX + camTX;
+        e[3] = (y1 * m_scaleY + m_transY) * camSY + camTY;
     }
     else {
-        e[0] = x0 + m_transX;
-        e[1] = y0 + m_transY;
-        e[2] = x1 + m_transX;
-        e[3] = y1 + m_transY;
+        e[0] = (x0 + m_transX) * camSX + camTX;
+        e[1] = (y0 + m_transY) * camSY + camTY;
+        e[2] = (x1 + m_transX) * camSX + camTX;
+        e[3] = (y1 + m_transY) * camSY + camTY;
     }
 }
 
@@ -165,6 +171,7 @@ void VRender::CreateActiveEdge(int x0, int y0, int x1, int y1, ColorRGBA c)
     ae->color = c;
     ae->layer = m_layer;
     Fixed115 p[4];
+
     Transform4(p, x0, y0, x1, y1);
 
     if (p[3] < p[1]) {
@@ -206,7 +213,11 @@ void VRender::Render()
     Rect clip = m_size.Intersect(m_clip);
     int savedLayer = m_layer;
     m_layer = LAYER_BACKGROUND;
-    DrawRect(clip.x0, clip.y0, clip.x1, clip.y1, osbr::RGBA(0, 0, 0, 255));
+    DrawRect(clip.x0 * -camScale.x - camTrans.x, 
+        clip.y0 * -camScale.y - camTrans.y, 
+        clip.x1 * camScale.x, 
+        clip.y1 * camScale.y, 
+        osbr::RGBA(0, 0, 0, 255));
     m_layer = savedLayer;
 
     Rasterize();
@@ -236,9 +247,11 @@ void VRender::AddStartingEdges(int y)
 {
     ASSERT(Y_HASH >= m_size.CY());
     for (ActiveEdge* e = m_rootHash[y]; e; e = e->next) {
-        // Things that are added before 0 have yAdd of 0.
-        // For everything else it is a hash.
-        m_activeEdges[m_nActive++] = e;
+        if (e->yEnd > y) {
+            // Things that are added before 0 have yAdd of 0.
+            // For everything else it is a hash.
+            m_activeEdges[m_nActive++] = e;
+        }
     }
 }
 

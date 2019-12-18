@@ -71,6 +71,9 @@ public:
             this->y0 = y0;
             this->x1 = x1;
             this->y1 = y1;
+
+            if (this->x0 > this->x1) glSwap(this->x0, this->x1);
+            if (this->y0 > this->y1) glSwap(this->y0, this->y1);
         }
 
         int x0 = 0;
@@ -119,6 +122,12 @@ public:
 
     void SetTransform(int x, int y) { SetTransform(FixedNorm(0), Fixed115(x), Fixed115(y)); }
     void SetScale(Fixed115 sx, Fixed115 sy) { m_scaleX = sx; m_scaleY = sy; }
+    void SetCamera(int tx, int ty, int sx, int sy) {
+        camTrans.x = tx;
+        camTrans.y = ty;
+        camScale.x = sx;
+        camScale.y = sy;
+    }
 
     void ClearTransform();
 
@@ -161,6 +170,13 @@ private:
 
     void CreateActiveEdge(int x0, int y0, int x1, int y1, ColorRGBA c);
     void Transform4(Fixed115* e, int x0, int y0, int x1, int y1);
+    Rect TransformCam(const Rect& in) {
+        Rect r(in.x0 * camScale.x + camTrans.x,
+            in.y0 * camScale.y + camTrans.y,
+            in.x1 * camScale.x + camTrans.x,
+            in.y1 * camScale.y + camTrans.y);
+        return r;
+    }
 
     bool m_layerFixed = false;
     BlockDraw m_blockDraw = 0;
@@ -173,6 +189,8 @@ private:
     bool m_immediate = false;
     FixedNorm m_rot;
     Fixed115 m_transX, m_transY, m_scaleX, m_scaleY;
+    Vec2 camScale = { 1, 1 };
+    Vec2 camTrans = { 0, 0 };
 
     ColorEntry  m_colorStack[MAX_COLOR_STACK];
     ActiveEdge* m_activeEdges[MAX_ACTIVE];

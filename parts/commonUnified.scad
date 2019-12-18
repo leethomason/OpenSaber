@@ -1,8 +1,6 @@
 use <shapes.scad>
 use <baffles.scad>
 
-// TODO: unify the OledHolder and the PCB holder
-
 Z_BATTERY_18650     = 65 + 4;
 Z_BATTERY_18500     = 50 + 4;
 D_BATTERY           = 18.50 + 0.5;    // An 1850. Huh. 
@@ -87,19 +85,20 @@ module keyJoint(dz, do, di, slot, angle=0)
     DZ = dz;
     YTRIM = slot ? 0.4 : 0.0;
     ZTRIM = slot ? 0.2 : 0.0;
+    T = do - di;
 
     intersection() {
         if (slot) {
             tube(h=DZ+2, di=di, do=do+1);
         }
         else {
-            OVERLAP = 4.0;
+            OVERLAP = dz * 0.75;
             difference() {
                 union() {
                     cylinder(h=dz-OVERLAP, d=do);
-                    translate([0, 0, dz-OVERLAP]) cylinder(h=OVERLAP, d1=do, d2=do-2);
+                    translate([0, 0, dz-OVERLAP]) cylinder(h=OVERLAP, d1=do, d2=do-(T*0.3));
                 }
-                cylinder(h=100, d=di);
+                translate([0, 0, -EPS]) cylinder(h=100, d=di);
             }
         }
 
@@ -995,22 +994,8 @@ module forwardAdvanced(d, dz,
 }
 
 
-
-/*
-module oneBaffle(   d,
-                    dz,
-                    battery=true,       // space for the battery
-                    mc=true,            // space for the microcontroller
-                    bridge=1,           // create a bridge to the next baffle. designed to print w/o support material. 
-                    dExtra=0,           // additional diameter
-                    scallop=false,      // outside curves
-                    noBottom=true,      // bottom cutout 
-                    cutoutHigh=true     // open space to the top
-
-*/
-
 $fn = 80;
-oneBaffle(30, 4, 
+*oneBaffle(30, 4, 
     battery=false,
     mc=false,
     bridge=1,
@@ -1018,4 +1003,4 @@ oneBaffle(30, 4,
     cutoutHigh=false,
     conduit=true);
 
-//translate([0, 0, 1]) battery(30);
+keyJoint(8, 30, 26, false);

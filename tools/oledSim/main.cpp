@@ -149,11 +149,12 @@ int main(int, char**) {
 #   ifdef USE_VRENDER
     VRender vrender;
 
-
     blockDrawOLEDBUffer = displayBuffer;
     vrender.Attach(BlockDrawOLED);
     vrender.SetClip(VRender::Rect(0, 0, WIDTH, HEIGHT));
     vrender.SetSize(WIDTH, HEIGHT);
+    vrender.SetCamera(0, 0, 1, 1);
+
 #   else
     memset(displayBuffer, 0, WIDTH * HEIGHT);
 	Renderer renderer;
