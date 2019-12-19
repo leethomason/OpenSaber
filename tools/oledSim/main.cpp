@@ -153,7 +153,7 @@ int main(int, char**) {
     vrender.Attach(BlockDrawOLED);
     vrender.SetClip(VRender::Rect(0, 0, WIDTH, HEIGHT));
     vrender.SetSize(WIDTH, HEIGHT);
-    vrender.SetCamera(0, 0, 1, 1);
+    //vrender.SetCamera(WIDTH, HEIGHT, -1, -1);
 
 #   else
     memset(displayBuffer, 0, WIDTH * HEIGHT);

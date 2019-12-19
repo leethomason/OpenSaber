@@ -166,10 +166,6 @@ void VRender::Transform4(Fixed115* e, int x0, int y0, int x1, int y1)
 
 void VRender::CreateActiveEdge(int x0, int y0, int x1, int y1, ColorRGBA c)
 {
-    ASSERT(m_nPool < MAX_EDGES);
-    ActiveEdge* ae = &m_edgePool[m_nPool];
-    ae->color = c;
-    ae->layer = m_layer;
     Fixed115 p[4];
 
     Transform4(p, x0, y0, x1, y1);
@@ -179,23 +175,34 @@ void VRender::CreateActiveEdge(int x0, int y0, int x1, int y1, ColorRGBA c)
         glSwap(p[1], p[3]);
     }
 
+    InnerCreateActiveEdge(p[0], p[1], p[2], p[3], c);
+}
+
+
+void VRender::InnerCreateActiveEdge(Fixed115 x0, Fixed115 y0, Fixed115 x1, Fixed115 y1, ColorRGBA c)
+{
+    ASSERT(m_nPool < MAX_EDGES);
+    ActiveEdge* ae = &m_edgePool[m_nPool];
+    ae->color = c;
+    ae->layer = m_layer;
+
     // If horizontal, doesn't render.
-    if (p[3].getInt() == p[1].getInt())
+    if (y0.getInt() == y1.getInt())
         return;
-    int yAdd = p[1].getInt();
+    int yAdd = y0.getInt();
     if (yAdd >= Y_HASH)
         return;
 
     m_nPool++;
-    ae->yEnd = p[3].getInt();
+    ae->yEnd = y1.getInt();
     // For small values, this can go wrong. Need some thinging about
     // almost flat lines. Use pixel coordinates? Not sure. Causes strange
     // long line artifacts.
-    ae->slope = (p[2] - p[0]) / (p[3] - p[1]);
+    ae->slope = (x1 - x0) / (y1 - y0);
 
-    ae->x = p[0];
-    if (p[1] > yAdd) {
-        ae->x += ae->slope * (p[1] - yAdd);
+    ae->x = x0;
+    if (y0 > yAdd) {
+        ae->x += ae->slope * (y0 - yAdd);
     }
     ASSERT(Y_HASH >= m_size.CY());
     if (yAdd < 0) 
@@ -210,14 +217,15 @@ void VRender::Render()
     ClearTransform();
     m_immediate = false;
 
-    Rect clip = m_size.Intersect(m_clip);
+    Rect clip = Rect::Intersect(m_size, m_clip);
+    if (clip.Empty())
+        return;
     int savedLayer = m_layer;
     m_layer = LAYER_BACKGROUND;
-    DrawRect(clip.x0 * -camScale.x - camTrans.x, 
-        clip.y0 * -camScale.y - camTrans.y, 
-        clip.x1 * camScale.x, 
-        clip.y1 * camScale.y, 
-        osbr::RGBA(0, 0, 0, 255));
+
+    InnerCreateActiveEdge(Fixed115(m_size.x0), Fixed115(m_size.y0), Fixed115(m_size.x0), Fixed115(m_size.y1), 0);
+    InnerCreateActiveEdge(Fixed115(m_size.x1), Fixed115(m_size.y0), Fixed115(m_size.x1), Fixed115(m_size.y1), 0);
+
     m_layer = savedLayer;
 
     Rasterize();
@@ -389,7 +397,7 @@ void VRender::Rasterize()
     ProfileBlock block(&data);
 #endif
 
-    Rect clip = m_size.Intersect(m_clip);
+    Rect clip = Rect::Intersect(m_size, m_clip);
 
     for (int j = 0; j < clip.y1; ++j) {
         IncrementActiveEdges(j);
