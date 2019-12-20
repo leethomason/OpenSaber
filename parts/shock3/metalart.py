@@ -37,7 +37,7 @@ half_tool = tool_size / 2
 
 g.absolute()
 travel(g, mat, x=WINDOW_X0 - SETBACK)
-X_MARK = (WINDOW_X0 + WINDOW_X1) - 1.0
+X_MARK = (WINDOW_X0 + WINDOW_X1) / 2 - 1.0
 
 def absPath(g, total_plunge, plunge):
     g.move(y=OLED_W/2 - half_tool)
