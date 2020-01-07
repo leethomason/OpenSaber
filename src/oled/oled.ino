@@ -90,6 +90,7 @@ void setup()
     vrender.Attach(BlockDrawOLED);
     vrender.SetClip(VRender::Rect(0, 0, OLED_WIDTH, OLED_HEIGHT));
     vrender.SetSize(OLED_WIDTH, OLED_HEIGHT);
+    vrender.SetCamera(OLED_WIDTH, OLED_HEIGHT, -1, -1);
 
     delay(100);
 

@@ -302,7 +302,7 @@ int main(int, char**) {
 #   ifdef USE_VRENDER
             memset(displayBuffer, 0, WIDTH * HEIGHT / 8);
             vrender.Clear();
-            VectorUI::Draw(&vrender, t, mode.mode(), bladeOn, &data);
+            VectorUI::Draw(&vrender, t, mode.mode(), bladeOn, &data, displayBuffer);
             if (firstRender) {
                 printf("Render: numEdges=%d/%d size=%d\n", vrender.NumEdges(), VRender::MAX_EDGES, (int)sizeof(VRender));
                 firstRender = false;

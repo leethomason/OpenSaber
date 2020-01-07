@@ -190,18 +190,18 @@ private:
     }
 
     bool m_layerFixed = false;
-    BlockDraw m_blockDraw = 0;
-    Rect m_size;
-    Rect m_clip;
+    bool m_immediate = false;
     int m_nActive;
     int m_layer = 0;
     int m_nColor = 0;
     int m_nPool = 0;
-    bool m_immediate = false;
     FixedNorm m_rot;
     Fixed115 m_transX, m_transY, m_scaleX, m_scaleY;
+    BlockDraw m_blockDraw = 0;
     Vec2 camScale = { 1, 1 };
     Vec2 camTrans = { 0, 0 };
+    Rect m_size;
+    Rect m_clip;
 
     ColorEntry  m_colorStack[MAX_COLOR_STACK];
     ActiveEdge* m_activeEdges[MAX_ACTIVE];

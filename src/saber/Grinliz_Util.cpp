@@ -44,6 +44,14 @@ bool TestUtil()
     }
 #endif
 
+    // Combsort
+    {
+        int set[10] = { 0, 4, 4, 0, 1, 3, 3, 1, 2, 2};
+        combSort(set, 10);
+        for(int i=1; i<10; ++i)
+            TEST_IS_TRUE(set[i] >= set[i - 1]);
+    }
+
     return true;
 }
 
@@ -62,6 +70,24 @@ bool strStarts(const char* str, const char* prefix)
     }
     return true;
 }
+
+void intToDigits(int value, int* digits, int nDigits)
+{
+    uint32_t range = 1;
+    for (int i = 1; i < nDigits; ++i) {
+        range *= 10;
+    }
+    for (int i = 0; i < nDigits; ++i) {
+        digits[i] = 0;
+        uint32_t digit = value / range;
+        if (digit >= 0 && digit < 10) {
+            digits[i] = digit;
+            value -= range * digit;
+            range = range / 10;
+        }
+    }
+}
+
 
 void intToString(int value, char* buf, int allocated, bool writeZero)
 {

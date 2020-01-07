@@ -7,9 +7,6 @@
 #include <stdint.h>
 #include <assert.h>
 
-#define min_f(a, b, c)  (fminf(a, fminf(b, c)))
-#define max_f(a, b, c)  (fmaxf(a, fmaxf(b, c)))
-
 template<typename T> 
 T minFunc(T a, T b) { return a < b ? a : b; }
 template<typename T>
@@ -19,9 +16,7 @@ T minFunc(T a, T b, T c) { return minFunc(a, minFunc(b, c)); }
 template<typename T>
 T maxFunc(T a, T b, T c) { return maxFunc(a, maxFunc(b, c)); }
 
-#define min_f(a, b, c)  (fminf(a, fminf(b, c)))
-#define max_f(a, b, c)  (fmaxf(a, fmaxf(b, c)))
-#define SCALE 1024
+#define SCALE 4096
 
 // TODO: figure out range
 // https://www.rapidtables.com/convert/color/rgb-to-hsv.html 
@@ -52,7 +47,7 @@ void rgb2hsv(uint8_t src_r, uint8_t src_g, uint8_t src_b,
         h = 0;
     }
     else {
-        s = 1024 * (max - min) / max;
+        s = SCALE * (max - min) / max;
 
         if (max == r) {
             h = 60 * (g - b) / (max - min) + 0;
@@ -67,9 +62,9 @@ void rgb2hsv(uint8_t src_r, uint8_t src_g, uint8_t src_b,
 
     if (h < 0) h += 360;
 
-    assert(h >= 0 && h < 361);
-    assert(s >= 0 && s < 1025);
-    assert(v >= 0 && v < 1025);
+    assert(h >= 0 && h <= 360);
+    assert(s >= 0 && s <= SCALE);
+    assert(v >= 0 && v <= SCALE);
 
     *dst_h = (uint8_t)(h / 2);          // dst_h : 0-180
     *dst_s = (uint8_t)((s * 255 + SCALE/2) / SCALE); // dst_s : 0-255

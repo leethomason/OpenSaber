@@ -2,18 +2,9 @@
 #include "vrender.h"
 #include "Grinliz_Util.h"
 #include "rgb2hsv.h"
+#include "renderer.h"   // for drawing the bitmap directly to framebuffer
+#include "assets.h"     // source for bitmap
 
-
-void VectorUI::NumToDigit(int num, int* digits)
-{
-    digits[0] = num / 1000;
-    num -= digits[0] * 1000;
-    digits[1] = num / 100;
-    num -= digits[1] * 100;
-    digits[2] = num / 10;
-    num -= digits[2] * 10;
-    digits[3] = num;
-}
 
 void VectorUI::Segment(VRender* ren, int width, int s, int num, osbr::RGBA rgba)
 {
@@ -72,7 +63,8 @@ void VectorUI::Draw(VRender* ren,
     uint32_t time,
     UIMode mode,
     bool bladeIgnited,
-    const UIRenderData* data)
+    const UIRenderData* data,
+    uint8_t* pixels)
 {
     ren->Clear();
   
@@ -112,6 +104,13 @@ void VectorUI::Draw(VRender* ren,
             ren->DrawRect(12 + 4 * i, H / 2 - (S + i * 4) / 2, 2, S + i * 4, WHITE);
         }
     }
+    else if (mode == UIMode::MEDITATION) {
+        if (pixels) {
+            Renderer renderer;
+            renderer.Attach(W, H, pixels);
+            renderer.DrawBitmap(8, 0, get_jBird);
+        }
+    }
 
     // Audio
     {
@@ -123,7 +122,7 @@ void VectorUI::Draw(VRender* ren,
     }
     // Color indicator
     {
-        FixedNorm rotations[6] = {
+        static const FixedNorm rotations[6] = {
             FixedNorm(0, 6), FixedNorm(1, 6), FixedNorm(2, 6), 
             FixedNorm(3, 6), FixedNorm(4, 6), FixedNorm(5, 6) 
         };
@@ -161,7 +160,7 @@ void VectorUI::Draw(VRender* ren,
         }
 
         int digits[4];
-        NumToDigit(data->palette, digits);
+        intToDigits(data->palette, digits, 4);
         ren->SetTransform(W - 30, H / 2 - TEXT);
         Segment(ren, TEXT, 2, digits[3], WHITE);
     }
@@ -169,7 +168,7 @@ void VectorUI::Draw(VRender* ren,
     // Power
     if (mode == UIMode::NORMAL) {
         int digits[4];
-        NumToDigit(data->mVolts, digits);
+        intToDigits(data->mVolts, digits, 4);
         for (int i = 0; i < 4; ++i) {
             ren->SetTransform(20 + (TEXT+2)*i, H / 2 - TEXT);
             Segment(ren, TEXT, 2, digits[i], WHITE);

@@ -55,6 +55,7 @@ inline bool strEqual(const char* a, const char* b, int n) {
 bool strStarts(const char* str, const char* prefix);
 bool istrStarts(const char* str, const char* prefix);
 void intToString(int value, char* str, int allocated, bool writeZero);
+void intToDigits(int value, int* digits, int nDigits);
 
 // Modified Bernstein hash
 uint32_t hash32(const char* v, const char* end);
@@ -403,7 +404,7 @@ inline void combSort(T* mem, int size)
 {
 	int gap = size;
 	for (;;) {
-		gap = gap * 3 / 4;
+		gap = (gap * 3) >> 2;
 		if (gap == 0) gap = 1;
 
 		bool swapped = false;

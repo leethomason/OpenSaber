@@ -14,8 +14,15 @@ template<> struct CompileTimeAssert <true> {};
 #	define ASSERT assert
 #   define ASSERT2(x, y, z) assert( x )
 #else
-    #define ASSERT( x ) 		{}
-    #define ASSERT2( x, y, z )  {}
+#	if SERIAL_DEBUG == 1
+		void AssertOut(const char* message, const char* file, int line);
+		void AssertOut2(const char* message, int value0, int value1, const char* file, int line);
+		#define ASSERT( x ) 	    if (!(x)) { AssertOut(#x, __FILE__, __LINE__); while(true) {} }
+		#define ASSERT2( x, y, z ) 	if (!(x)) { AssertOut2(#x, y, z, __FILE__, __LINE__); while(true) {} }
+#	else
+		#define ASSERT( x ) 		{}
+		#define ASSERT2( x, y, z )  {}
+#	endif
 #endif
 
 #define TEST_IS_TRUE(x) {         \

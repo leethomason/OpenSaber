@@ -11,11 +11,7 @@
 #include <limits.h>
 #include <stdint.h>
 
-#define DEBUG_FIXED_OVERFLOW
-
-#ifdef DEBUG_FIXED_OVERFLOW
 #include "grinliz_assert.h"
-#endif
 
 template<class T> 
 struct Limit {
@@ -44,20 +40,16 @@ template<typename LONG, typename SHORT, int DECBITS>
 class FixedT
 {
 private:
-
-    static inline SHORT FixedMul(LONG a, LONG b) {
+    // Be careful that the M0+ has a 32 bit single instruction multiply,
+    // but no overflow. Try to help out with that.
+    static inline SHORT FixedMul(SHORT a, SHORT b) {
         static_assert(sizeof(LONG) >= sizeof(SHORT) * 2, "Long must have more bits that short.");
-        ASSERT((SHORT)a == a);
-        ASSERT((SHORT)b == b);
-
-        LONG c = LONG(a) * LONG(b);
+        LONG c = a * b;
         return SHORT(c >> DECBITS);
     }
 
-    static inline SHORT FixedDiv(LONG a, LONG b) {
+    static inline SHORT FixedDiv(SHORT a, SHORT b) {
         static_assert(sizeof(LONG) >= sizeof(SHORT) * 2, "Long must have more bits that short.");
-        ASSERT((SHORT)a == a);
-        ASSERT((SHORT)b == b);
 
         LONG c = (LONG(a) << (DECBITS)) / (LONG(b));
         return SHORT(c);
@@ -70,7 +62,7 @@ private:
         return SHORT(v << DECBITS);
     }
     static const int FIXED_1 = 1 << DECBITS;
-    int16_t x;
+    SHORT x;
 
 public:
     FixedT() {}
@@ -89,7 +81,7 @@ public:
     void set(float v) { x = SHORT(v * FIXED_1); }
     void set(double v) { x = SHORT(v * FIXED_1); }
     void setRaw(SHORT v) { x = v; }
-    LONG getRaw() const { return x; }
+    SHORT getRaw() const { return x; }
 
     // Scale up to an int, potentially out of the range of this fixed.
     int32_t scale(int32_t s) const { 
@@ -102,16 +94,6 @@ public:
         return (float)x / (float)FIXED_1;
     }
 
-    /*
-    // Return the floor part (as a copy).
-    FixedT getFloor() const { 
-        int fraction = x & ~(FIXED_1 - 1); 
-        FixedT f; 
-        f.x = fraction; 
-        return f; 
-    }
-    */
-
     // Query the integer part. Positive or negative.
     int32_t getInt() const { return x >> DECBITS; }
     // Query the DECBITSimal part - return as a fraction of 2^16.
@@ -122,26 +104,19 @@ public:
     
     FixedT sqrt() const {
         if (x < 0) return 0;
-        LONG target = x << DECBITS;
-        LONG low = 0;
-        LONG high = x;
-        LONG mid = low;
 
-        while (low <= high) {
-            mid = (low + high) / 2;
-            LONG guess = mid * mid;
-            if (guess > target) {
-                high = mid - 1;
-            }
-            else if (guess < target) {
-                low = mid + 1;
-            }
-            else {
-                break;
-            }
+        uint32_t v = x << DECBITS;
+        uint32_t res = 0;
+        uint16_t add = 0x8000;
+        for (int i = 0; i < 16; i++) {
+            uint16_t temp = uint16_t(res) | add;
+            uint32_t g2 = temp * temp;
+            if (v >= g2)
+                res = temp;
+            add >>= 1;
         }
         FixedT val;
-        val.x = mid;
+        val.x = res;
         return val;
     }
 
@@ -241,7 +216,7 @@ inline Fixed115 operator * (const Fixed115& a, const FixedNorm& b)
 
 // Sine approximation.
 // x: angle with 2^15 units/circle (32768)
-// return: sine, 12 bits (range -4096 to 4096)
+// return: sin, 12 bits (range -4096 to 4096)
 int32_t iSin_S3(int32_t x);
 
 inline int32_t iCos_S3(int32_t x) {

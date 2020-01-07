@@ -37,8 +37,7 @@ void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba, int
 {
     Rect in(x0, y0, w + x0, h + y0);
     ASSERT(in.y0 <= in.y1);
-    ASSERT(w > 0);
-    ASSERT(h > 0);
+    ASSERT(in.x0 <= in.x1);
     ASSERT(m_layer < 127);
 
     if (m_immediate && m_rot == 0 && outline == 0) {
@@ -48,6 +47,8 @@ void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba, int
         Fixed115 hf = h * m_scaleY;
 
         Rect r(xf.getInt(), yf.getInt(), (xf + wf).getInt(), (yf + hf).getInt());
+        r = TransformCam(r);
+
         r.Intersect(m_clip);
         if (!r.Empty()) {
             for (int y = r.y0; y < r.y1; ++y) {
@@ -130,6 +131,11 @@ void VRender::DrawPoly(const Vec2I8* points, int n, const osbr::RGBA& rgba)
 
 void VRender::Transform4(Fixed115* e, int x0, int y0, int x1, int y1)
 {
+    Fixed115 camTX = camTrans.x;
+    Fixed115 camTY = camTrans.y;
+    Fixed115 camSX = camScale.x;
+    Fixed115 camSY = camScale.y;
+
     if (m_rot != 0) {
         FixedNorm s = iSin(m_rot);
         FixedNorm c = iCos(m_rot);
@@ -139,32 +145,29 @@ void VRender::Transform4(Fixed115* e, int x0, int y0, int x1, int y1)
         Fixed115 xp1 = x1 * m_scaleX;
         Fixed115 yp1 = y1 * m_scaleY;
 
-        e[0] = xp0 * c - yp0 * s + m_transX;
-        e[1] = xp0 * s + yp0 * c + m_transY;
-        e[2] = xp1 * c - yp1 * s + m_transX;
-        e[3] = xp1 * s + yp1 * c + m_transY;
+        e[0] = (xp0 * c - yp0 * s + m_transX) * camSX + camTX;
+        e[1] = (xp0 * s + yp0 * c + m_transY) * camSY + camTY;
+        e[2] = (xp1 * c - yp1 * s + m_transX) * camSX + camTX;
+        e[3] = (xp1 * s + yp1 * c + m_transY) * camSY + camTY;
     }
     else if (m_scaleX != 1 || m_scaleY != 1) {
-        e[0] = x0 * m_scaleX + m_transX;
-        e[1] = y0 * m_scaleY + m_transY;
-        e[2] = x1 * m_scaleX + m_transX;
-        e[3] = y1 * m_scaleY + m_transY;
+        e[0] = (x0 * m_scaleX + m_transX) * camSX + camTX;
+        e[1] = (y0 * m_scaleY + m_transY) * camSY + camTY;
+        e[2] = (x1 * m_scaleX + m_transX) * camSX + camTX;
+        e[3] = (y1 * m_scaleY + m_transY) * camSY + camTY;
     }
     else {
-        e[0] = x0 + m_transX;
-        e[1] = y0 + m_transY;
-        e[2] = x1 + m_transX;
-        e[3] = y1 + m_transY;
+        e[0] = (x0 + m_transX) * camSX + camTX;
+        e[1] = (y0 + m_transY) * camSY + camTY;
+        e[2] = (x1 + m_transX) * camSX + camTX;
+        e[3] = (y1 + m_transY) * camSY + camTY;
     }
 }
 
 void VRender::CreateActiveEdge(int x0, int y0, int x1, int y1, ColorRGBA c)
 {
-    ASSERT(m_nPool < MAX_EDGES);
-    ActiveEdge* ae = &m_edgePool[m_nPool];
-    ae->color = c;
-    ae->layer = m_layer;
     Fixed115 p[4];
+
     Transform4(p, x0, y0, x1, y1);
 
     if (p[3] < p[1]) {
@@ -172,20 +175,38 @@ void VRender::CreateActiveEdge(int x0, int y0, int x1, int y1, ColorRGBA c)
         glSwap(p[1], p[3]);
     }
 
-    // If horizontal, doesn't render.
-    if (p[3].getInt() == p[1].getInt())
-        return;
-    m_nPool++;
-    int yAdd = p[1].getInt();
-    ae->yEnd = p[3].getInt();
-    ae->slope = (p[2] - p[0]) / (p[3] - p[1]);
+    InnerCreateActiveEdge(p[0], p[1], p[2], p[3], c);
+}
 
-    ae->x = p[0];
-    if (p[1] > yAdd) {
-        ae->x += ae->slope * (p[1] - yAdd);
+
+void VRender::InnerCreateActiveEdge(Fixed115 x0, Fixed115 y0, Fixed115 x1, Fixed115 y1, ColorRGBA c)
+{
+    ASSERT(m_nPool < MAX_EDGES);
+    ActiveEdge* ae = &m_edgePool[m_nPool];
+    ae->color = c;
+    ae->layer = m_layer;
+
+    // If horizontal, doesn't render.
+    if (y0.getInt() == y1.getInt())
+        return;
+    int yAdd = y0.getInt();
+    if (yAdd >= Y_HASH)
+        return;
+
+    m_nPool++;
+    ae->yEnd = y1.getInt();
+    // For small values, this can go wrong. Need some thinging about
+    // almost flat lines. Use pixel coordinates? Not sure. Causes strange
+    // long line artifacts.
+    ae->slope = (x1 - x0) / (y1 - y0);
+
+    ae->x = x0;
+    if (y0 > yAdd) {
+        ae->x += ae->slope * (y0 - yAdd);
     }
     ASSERT(Y_HASH >= m_size.CY());
-    if (yAdd < 0) yAdd = 0;
+    if (yAdd < 0) 
+        yAdd = 0;
     ae->next = m_rootHash[yAdd];
     m_rootHash[yAdd] = ae;
 }
@@ -196,10 +217,15 @@ void VRender::Render()
     ClearTransform();
     m_immediate = false;
 
-    Rect clip = m_size.Intersect(m_clip);
+    Rect clip = Rect::Intersect(m_size, m_clip);
+    if (clip.Empty())
+        return;
     int savedLayer = m_layer;
     m_layer = LAYER_BACKGROUND;
-    DrawRect(clip.x0, clip.y0, clip.x1, clip.y1, osbr::RGBA(0, 0, 0, 255));
+
+    InnerCreateActiveEdge(Fixed115(m_size.x0), Fixed115(m_size.y0), Fixed115(m_size.x0), Fixed115(m_size.y1), 0);
+    InnerCreateActiveEdge(Fixed115(m_size.x1), Fixed115(m_size.y0), Fixed115(m_size.x1), Fixed115(m_size.y1), 0);
+
     m_layer = savedLayer;
 
     Rasterize();
@@ -229,9 +255,11 @@ void VRender::AddStartingEdges(int y)
 {
     ASSERT(Y_HASH >= m_size.CY());
     for (ActiveEdge* e = m_rootHash[y]; e; e = e->next) {
-        // Things that are added before 0 have yAdd of 0.
-        // For everything else it is a hash.
-        m_activeEdges[m_nActive++] = e;
+        if (e->yEnd > y) {
+            // Things that are added before 0 have yAdd of 0.
+            // For everything else it is a hash.
+            m_activeEdges[m_nActive++] = e;
+        }
     }
 }
 
@@ -336,8 +364,8 @@ void VRender::RasterizeLine(int y, const Rect& clip)
 
         // Rasterize previous chunk.
         if (x1 > x0) {
-            int subClipX0 = Max(x0, clipX0);
-            int subClipX1 = Min(x1, clipX1);
+            int subClipX0 = glMax(x0, clipX0);
+            int subClipX1 = glMin(x1, clipX1);
             if (subClipX1 > subClipX0) {
 
                 cache[nCache].x0 = subClipX0;
@@ -369,63 +397,13 @@ void VRender::Rasterize()
     ProfileBlock block(&data);
 #endif
 
-    Rect clip = m_size.Intersect(m_clip);
+    Rect clip = Rect::Intersect(m_size, m_clip);
 
     for (int j = 0; j < clip.y1; ++j) {
         IncrementActiveEdges(j);
         AddStartingEdges(j);
         SortActiveEdges();
         RasterizeLine(j, clip);
-
-#if false
-#if defined(_MSC_VER) && defined(_DEBUG)
-        if (m_nColor) {
-            printf("ASSERTION\n");
-            for (int i = 0; i < m_nColor; ++i) {
-                printf("Color: [%d] layer=%d (%d,%d,%d)\n", i, m_colorStack[i].layer,
-                    m_colorStack[i].color.r, m_colorStack[i].color.g, m_colorStack[i].color.b);
-            }
-            ASSERT(false);
-        }
-#endif
-#endif
     }
     ClearTransform();
 }
-
-
-void VRenderUtil::DrawStr(VRender* ren, const char* str, int x, int y, GlyphMetrics metrics, const osbr::RGBA& rgba)
-{
-    ren->PushLayer();
-    int cx = x;
-    while (str && *str) {
-        int advance = 0, texW = 0, texRows = 0;
-        const uint8_t* mem = metrics(*str, &advance, &texW, &texRows);
-
-        int i0 = 0;
-        while(i0 < texW) {
-            int j0 = 0;
-            uint8_t c = mem[i0];
-            int i1 = i0 + 1;
-            while (i1 < texW && mem[i1] == c)
-                ++i1;
-
-            while (j0 < 8) {
-                int j1 = j0;
-                while (c & (1 << j1) && j1 < 8) {
-                    j1++;
-                }
-                if (j1 > j0) {
-                    ren->DrawRect(cx + i0, y + j0, i1-i0, j1 - j0, rgba);
-                    j0 = j1;
-                }
-                j0++;
-            }
-            i0 = i1;
-        }
-        cx += advance;
-        ++str;
-    }
-    ren->PopLayer();
-}
-
