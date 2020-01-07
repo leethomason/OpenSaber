@@ -11,6 +11,7 @@
 #include "oledsim.h"
 #include "assets.h"
 #include "sketcher.h"
+#include "bladeflash.h"
 #include "../saber/unittest.h"
 #include "../saber/rgb.h"
 #include "../saber/vrender.h"
@@ -226,6 +227,7 @@ int main(int, char**) {
 	int count = 0;
 	uint32_t lastUpdate = SDL_GetTicks();
     bool firstRender = true;
+    BladeFlash bladeFlash;
 
     enum {
         RENDER_OLED,
@@ -234,7 +236,7 @@ int main(int, char**) {
         RENDER_DOTSTAR_6,
         NUM_RENDER_MODE
     };
-	int renderMode = RENDER_OLED;
+	int renderMode = RENDER_DOTSTAR_4;
     mode.set(UIMode::NORMAL);
 
 	const char* FONT_NAMES[8] = {
@@ -251,6 +253,8 @@ int main(int, char**) {
         osbr::RGB(255, 255, 0)
     };
     data.color = colors[0];
+    bladeFlash.setBladeColor(data.color);
+    bladeFlash.setImpactInverse();
 
 	int palette = 0;
 
@@ -288,11 +292,17 @@ int main(int, char**) {
 				palette = (palette + 1) % 8;
                 data.palette = palette;
                 data.color = colors[palette];
-				data.fontName = FONT_NAMES[palette];
+                bladeFlash.setBladeColor(data.color);
+                bladeFlash.setImpactInverse();
+                data.fontName = FONT_NAMES[palette];
 			}
+            else if (e.key.keysym.sym == SDLK_f) {
+                bladeFlash.doFlash(SDL_GetTicks());
+            }
 		}
 
 		uint32_t t = SDL_GetTicks();
+        bladeFlash.tick(t);
 		if (t - lastUpdate > 100) {
 			lastUpdate = t;
 			uint8_t value = int(127.8 * (sin(count * 0.2) + 1.0));
@@ -375,10 +385,10 @@ int main(int, char**) {
             simDisplay.CommitFrom5x7(pixel75.Pixels());
         }
         else if (renderMode == RENDER_DOTSTAR_4) {
-            simDisplay.CommitFromDotstar(dotstar4, 4);
+            simDisplay.CommitFromDotstar(dotstar4, 4, &bladeFlash.getColor());
         }
         else if (renderMode == RENDER_DOTSTAR_6) {
-            simDisplay.CommitFromDotstar(dotstar6, 6);
+            simDisplay.CommitFromDotstar(dotstar6, 6, &bladeFlash.getColor());
         }
         SDL_UpdateTexture(texture, NULL, simDisplay.Pixels(), WIDTH * 4);
 #endif

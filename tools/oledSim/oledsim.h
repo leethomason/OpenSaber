@@ -18,7 +18,7 @@ public:
    
 	void CommitFromBuffer(const void* src, int w, int h);
     void CommitFrom5x7(const void* src); // use this as a dot matrix renderer
-    void CommitFromDotstar(const osbr::RGB* dotstars, int n);
+    void CommitFromDotstar(const osbr::RGB* dotstars, int n, const osbr::RGB* blade=0);
 	void Clear();
 
 private:
