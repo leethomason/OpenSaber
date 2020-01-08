@@ -64,7 +64,7 @@ void BladeState::process(Blade* blade, const SaberDB& saberDB, uint32_t time)
             change(BLADE_ON);
         }
         else {
-            RGB c = RGB::lerp1024(RGB(RGB::BLACK), saberDB.bladeColor(), (millis() - startTime()) * 1024 / igniteTime);
+            RGB c = RGB::lerp1024(RGB(RGB::BLACK), saberDB.bladeColor(), t * 1024 / igniteTime);
             blade->setRGB(c);
         }
     }
@@ -80,7 +80,7 @@ void BladeState::process(Blade* blade, const SaberDB& saberDB, uint32_t time)
             change(BLADE_OFF);
         }
         else {
-            RGB c = RGB::lerp1024(saberDB.bladeColor(), RGB(RGB::BLACK), (millis() - startTime()) * 1024 / retractTime);
+            RGB c = RGB::lerp1024(saberDB.bladeColor(), RGB(RGB::BLACK), t * 1024 / retractTime);
             blade->setRGB(c);
         }
     }
