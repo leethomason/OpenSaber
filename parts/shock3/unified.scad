@@ -26,7 +26,7 @@ OLED_DISPLAY_L           = 33 + 1;
 OLED_DISPLAY_MOUNT_W     = 0.6 * 25.4;
 OLED_DISPLAY_MOUNT_L     = 27.6; //1.1 * 25.4;
 
-OLED_DX = -1.3;     // fixme; account for offset screen
+OLED_DX = -0.5;     // fixme; account for offset screen
 OLED_DY = 9;
 POST_DY0 = (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L) / 2;
 POST_DY1 = OLED_DISPLAY_L - (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L) / 2;
@@ -141,7 +141,7 @@ if (DRAW_AFT) {
 
             difference() {
                 translate([0, 0, M_DISPLAY]) {
-                    tube(h=4, do=D_THREAD, di=10);
+                    tube(h=3.5, do=D_THREAD, di=10);
                     tube(h=5.5, do=D_INNER, di=10);
                 }
                 translate([-OLED_DISPLAY_W/2 + OLED_DX, OLED_DY, M_DISPLAY-EPS]) 
@@ -193,7 +193,8 @@ if (DRAW_AFT) {
                         mc=false,
                         noBottom=false,
                         cutoutHigh=false,
-                        bridgeOnlyBottom=true);
+                        bridgeOnlyBottom=true,
+                        slopeFront=true);
                     if (i != 5)
                         reverseBridge();
                 }
@@ -207,6 +208,7 @@ if (DRAW_AFT) {
                         noBottom=true,
                         cutoutHigh=false,
                         bridgeOnlyBottom=true,
+                        slopeFront=true,
                         bridge=i < 13 ? 1 : 0);
                     reverseBridge();
                 }
@@ -249,10 +251,6 @@ if (DRAW_AFT) {
         // Battery
         translate([0, -R_INNER + D_BATT/2, M_AFT_STOP])
             cylinder(h=Z_BATT, d=D_BATT);
-
-        // OLED
-        *translate([-OLED_DISPLAY_W/2, OLED_DY, 0])
-            cube(size=[OLED_DISPLAY_W, 100, OLED_DISPLAY_L]);
 
         // crystal
         translate([0, Y_CRYSTAL, M_AFT_STOP + H_BUTTRESS*9]) 
@@ -303,7 +301,7 @@ if(DRAW_FORE) {
                     roundRect = 3.175/2,
                     firstButtressFullRing = false,
                     dyInset=3.7,
-                    dySwitch=10.5
+                    dySwitch=10.0
                 );
             }
             intersection() {
