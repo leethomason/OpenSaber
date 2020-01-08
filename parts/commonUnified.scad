@@ -469,13 +469,26 @@ module oneBaffle(   d,
                     noBottom=true,      // bottom cutout 
                     cutoutHigh=true,    // open space to the top
                     bottomRail=true,    // bridge must be >0 for a bottom rail
-                    conduit=false
+                    conduit=false,
+                    slopeFront=false
                     )     
 {
     yMC = -yAtX(X_MC/2, d/2) + 1.0;
 
     difference() {
-        cylinder(h=dz, d=d + dExtra);
+        if (slopeFront) {
+            OVERLAP = 0.8;
+            REDUCE = 1;
+
+            cylinder(h=dz - OVERLAP, d=d + dExtra);
+            translate([0, 0, dz-OVERLAP])
+                cylinder(h=OVERLAP, d1=d + dExtra, 
+                         d2=d + dExtra - 1);
+        }
+        else {
+            cylinder(h=dz, d=d + dExtra);
+        }
+
         if (battery) {
             translate([0, 0, -EPS]) battery(d);
         }
