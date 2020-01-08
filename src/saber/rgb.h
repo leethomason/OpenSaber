@@ -71,6 +71,14 @@ struct RGB {
 	}
 
     int size() const { return 3; } // number of components
+
+    static RGB lerp1024(const RGB& a, const RGB& b, int t1024) {
+        RGB r;
+        r.r = (a.r * (1024 - t1024) + b.r * t1024) / 1024;
+        r.g = (a.g * (1024 - t1024) + b.g * t1024) / 1024;
+        r.b = (a.b * (1024 - t1024) + b.b * t1024) / 1024;
+        return r;
+    }
 };
 
 struct RGBA {

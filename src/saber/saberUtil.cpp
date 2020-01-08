@@ -56,27 +56,32 @@ void BladeState::process(Blade* blade, const SaberDB& saberDB, uint32_t time)
 
     case BLADE_IGNITE:
     {
-        uint32_t igniteTime = 1000;
-        #ifdef SABER_SOUND_ON
-        igniteTime = sfx->getIgniteTime();
-        #endif
+        uint32_t igniteTime = sfx->getIgniteTime();
+        uint32_t t = millis() - startTime();
 
-        bool done = blade->setInterp(millis() - startTime(), igniteTime, RGB(RGB::BLACK), saberDB.bladeColor());
-        if (done) {
+        if (t >= igniteTime) {
+            blade->setRGB(saberDB.bladeColor());
             change(BLADE_ON);
+        }
+        else {
+            RGB c = RGB::lerp1024(RGB(RGB::BLACK), saberDB.bladeColor(), (millis() - startTime()) * 1024 / igniteTime);
+            blade->setRGB(c);
         }
     }
     break;
 
     case BLADE_RETRACT:
     {
-        uint32_t retractTime = 1000;
-        #ifdef SABER_SOUND_ON
-            retractTime = sfx->getRetractTime();
-        #endif
-        bool done = blade->setInterp(millis() - startTime(), retractTime, saberDB.bladeColor(), RGB(RGB::BLACK));
-        if (done) {
+        uint32_t retractTime = retractTime = sfx->getRetractTime();
+        uint32_t t = millis() - startTime();
+
+        if (t >= retractTime) {
+            blade->setRGB(RGB(RGB::BLACK));
             change(BLADE_OFF);
+        }
+        else {
+            RGB c = RGB::lerp1024(saberDB.bladeColor(), RGB(RGB::BLACK), (millis() - startTime()) * 1024 / retractTime);
+            blade->setRGB(c);
         }
     }
     break;

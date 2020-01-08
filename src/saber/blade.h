@@ -41,10 +41,7 @@ public:
     }
 
     void setVoltage(int milliVolts);
-    int32_t voltage() const { return m_vbat; }
-
-    bool setInterp(uint32_t delta, uint32_t effectTime, const osbr::RGB& startColor, const osbr::RGB& endColor);
-    void setRGB(const osbr::RGB& input);
+    void setRGB(const osbr::RGB& rgb);
 
     // power utilization, from 0-100 for a channel
     int32_t util(int i) const   { return m_throttle[i].scale(100); }
@@ -54,15 +51,10 @@ public:
         return m_pwm[i];
     }
 
-    // Current color of the blade.
-    const osbr::RGB& getColor() {
-        return m_color;
-    }
-
     static osbr::RGB convertRawToPerceived(const osbr::RGB& raw);
 
 private:
-    void setThrottledRGB(const osbr::RGB& input);
+    void setThrottledRGB();
 
     static const int8_t pinRGB[NCHANNELS];
     static Blade* instance;
@@ -71,9 +63,6 @@ private:
     int32_t m_vbat;
     FixedNorm m_throttle[NCHANNELS];  // throttle = f(vbat).
     uint8_t m_pwm[NCHANNELS];         // pwm = f(color, throttle)
-
-    enum {NO_INTERP, IGNITE, RETRACT};
-    int m_interpMode = NO_INTERP;
 };
 
 #endif // BLADE_INCLUDED

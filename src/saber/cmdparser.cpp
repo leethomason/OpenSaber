@@ -30,6 +30,7 @@
 #include "saberUtil.h"
 #include "GrinlizLSM303.h"
 #include "manifest.h"
+#include "voltmeter.h"
 
 using namespace osbr;
 
@@ -210,7 +211,7 @@ bool CMDParser::processCMD()
     }
     else if (action == VOLTS) {
         printLead(action.c_str());
-        Serial.println(Blade::blade().voltage());
+        Serial.println(Voltmeter::instance()->averagePower());
     }
     else if (action == UTIL) {
         printLead(action.c_str());
@@ -348,7 +349,7 @@ bool CMDParser::processCMD()
 
         delay(DELAY);
         printLead(VOLTS);
-        Serial.println(Blade::blade().voltage());
+        Serial.println(Voltmeter::instance()->averagePower());
 
         #if 0
         ComRF24* com = ComRF24::instance();

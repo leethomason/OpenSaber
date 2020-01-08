@@ -30,7 +30,8 @@ private:
 class Voltmeter
 {
 public:
-    Voltmeter() {}
+    Voltmeter() { _instance = this; }
+    static Voltmeter* instance() { return _instance; }
 
     void begin();
 
@@ -43,6 +44,8 @@ public:
     uint32_t takeSample();
 
 private:
+    static Voltmeter* _instance;
+
     AveragePower m_averagePower;
 };
 

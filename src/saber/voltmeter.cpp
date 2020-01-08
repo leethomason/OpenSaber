@@ -39,6 +39,8 @@ uint32_t AveragePower::power() const
 
 
 #ifndef _WIN32
+Voltmeter* Voltmeter::_instance = 0;
+
 void Voltmeter::begin()
 {
     #ifdef SABER_VOLTMETER

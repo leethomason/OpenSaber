@@ -79,18 +79,16 @@ Blade::Blade() {
 }
 
 
-void Blade::setRGB(const RGB& input)
+void Blade::setRGB(const RGB& rgb)
 {
-    ASSERT(m_interpMode == NO_INTERP);      // blade ignite / retract can't be interupted
-    setThrottledRGB(input);
+    m_color = rgb;
+    setThrottledRGB();
 }
 
-void Blade::setThrottledRGB(const osbr::RGB &input)
+void Blade::setThrottledRGB()
 {
-    m_color = input;
-
     for (int i = 0; i < NCHANNELS; ++i) {
-        int32_t pwm = m_throttle[i].scale(input[i]);
+        int32_t pwm = m_throttle[i].scale(m_color[i]);
 
         ASSERT(m_throttle[i] > 0);
         ASSERT(m_throttle[i] <= 1);
@@ -101,45 +99,6 @@ void Blade::setThrottledRGB(const osbr::RGB &input)
         analogWrite(pinRGB[i], m_pwm[i]);
     }
 }
-
-bool Blade::setInterp(uint32_t delta, uint32_t effectTime, const RGB& startColor, const RGB& endColor)
-{
-    if (delta >= effectTime) {
-        setThrottledRGB(endColor);
-        m_interpMode = NO_INTERP;
-        return true;
-    }
-    else {
-        m_interpMode = (startColor.sum() < endColor.sum() ? IGNITE : RETRACT);
-        RGB color;
-
-        int32_t t = (delta * uint32_t(1024) / effectTime);
-        ASSERT(t >= 0);
-        ASSERT(t < 1024);
-
-        for (int i = 0; i < NCHANNELS; ++i) {
-            int32_t c = lerp1024<int32_t>(startColor[i], endColor[i], t);
-            ASSERT(glInRange(c, glMin<int32_t>(startColor[i], endColor[i]), glMax<int32_t>(startColor[i], endColor[i])));
-            c = glClamp<int32_t>(c, 0, 255);
-            color[i] = uint8_t(c);
-        }
-        #if SERIAL_DEBUG == 1
-            if (m_interpMode == IGNITE) {
-                ASSERT(color.r >= m_color.r);
-                ASSERT(color.g >= m_color.g);
-                ASSERT(color.b >= m_color.b);
-            }
-            else {
-                ASSERT(color.r <= m_color.r);
-                ASSERT(color.g <= m_color.g);
-                ASSERT(color.b <= m_color.b);
-            }
-        #endif
-        setThrottledRGB(color);
-    }
-    return false;
-}
-
 
 void Blade::setVoltage(int milliVolts) {
     static const int32_t vF[NCHANNELS]   = { RED_VF, GREEN_VF, BLUE_VF };
@@ -164,11 +123,7 @@ void Blade::setVoltage(int milliVolts) {
         if (m_throttle[i] > 1)
             m_throttle[i] = 1;
     }
-    // This bug took forever to find. But obivous here: don't set the color
-    // if the color in currently changing!
-    if (m_interpMode == NO_INTERP) {
-        setRGB(m_color);
-    }
+    setThrottledRGB();
 }
 
 
