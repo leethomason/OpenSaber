@@ -25,8 +25,6 @@
 
 #include <stdint.h>
 #include "fixed.h"
-
-#include "pins.h"
 #include "rgb.h"
 
 

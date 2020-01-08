@@ -105,7 +105,7 @@ void Blade::setVoltage(int milliVolts) {
     static const int32_t amps[NCHANNELS] = { RED_I,  GREEN_I,  BLUE_I };
     static const int32_t res[NCHANNELS]  = { RED_R,  GREEN_R,  BLUE_R };
 
-    if (milliVolts < 3400 || milliVolts > 5400) {
+    if (milliVolts < 3000 || milliVolts > 5400) {
         Log.p("Blade::setVoltage() vBat=").p(m_vbat).p(" mV=").p(milliVolts).eol();
         ASSERT(false);
     }
