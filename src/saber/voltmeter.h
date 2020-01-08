@@ -23,7 +23,7 @@ public:
 private:
     mutable uint32_t m_power = 0;
     int m_pos = 0;
-    uint32_t m_sample[NUM_SAMPLES];
+    uint16_t m_sample[NUM_SAMPLES];
 };
 
 
