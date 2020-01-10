@@ -4,7 +4,6 @@
 #include "sfx.h"
 #include "bladeflash.h"
 
-//#define USE_PS_NXP
 using namespace osbr;
 
 void BladeState::change(uint8_t state)
@@ -14,18 +13,11 @@ void BladeState::change(uint8_t state)
     m_startTime = millis();
 
     switch(m_currentState) {
-    case BLADE_OFF:
-        EventQ.event("[BLADE_OFF]");
-        break;
-    case BLADE_IGNITE:
-        EventQ.event("[BLADE_IGNITE]");
-        break;
-    case BLADE_ON:
-        EventQ.event("[BLADE_ON]");
-        break;
-    case BLADE_RETRACT:
-        EventQ.event("[BLADE_RETRACT]");
-        break;
+    case BLADE_OFF:     EventQ.event("[BLADE_OFF]");        break;
+    case BLADE_IGNITE:  EventQ.event("[BLADE_IGNITE]");     break;
+    case BLADE_ON:      EventQ.event("[BLADE_ON]");         break;
+    case BLADE_RETRACT: EventQ.event("[BLADE_RETRACT]");    break;
+    
     default:
         ASSERT(false);
         break;
