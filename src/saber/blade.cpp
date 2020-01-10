@@ -27,13 +27,20 @@
     - is it fixed point?        
         Unlikely; bug existed before fixed.
     - is it LERP?
-        Unlikely; test okay.
+        Unlikely; test okay. Error would be in middle of lerp.
     - is it interupting calls?
         Unlikely; this has been addressed.
-        Weirness: bug (set volts calling setRGB was fixed - should have caused then fixed issue)
+        Weirdness in Blade code (setVolts / setRGB coupling) has been addressed. LERP
+            is outside.
     - PWM hardware?
         Maybe? but setting different values doesn't seem to matter.
+        Is the set atomic?
+    - Error in the state?
+        Again, don't see anything. The BLADE_FLASH seems to be set correctly.
     x interrupts don't matter
+
+    Does have to have something to do with the interpolation / color change. Don't see in-use
+    flashes. Only during ignite / retract.
 */
 
 #include <Arduino.h>
@@ -112,10 +119,16 @@ void Blade::setVoltage(int milliVolts) {
 
     m_vbat = milliVolts;
     for (int i = 0; i < NCHANNELS; ++i) {
+        // Unlikely low power scenario.
+        if (m_vbat <= vF[i]) {
+            m_throttle[i] = 1;
+            continue;
+        }
+
         // throttle = I * R / (Vbat - Vf)
         // Denominator x1000 corrects for units (mAmps, mOhms, mVolts)
         m_throttle[i] = FixedNorm(amps[i] * res[i] / 1000, m_vbat - vF[i] );
-        if (m_throttle[i] < 0) {
+        if (m_throttle[i] <= 0) {
             Log.p(i).p(": ").p(amps[i]).p(" ").p(res[i]).p(" ").p(m_vbat).p(" ").p(vF[i]).eol();
             ASSERT(false);
         }

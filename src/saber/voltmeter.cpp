@@ -19,8 +19,10 @@ AveragePower::AveragePower()
 
 void AveragePower::push(uint32_t milliVolts)
 {
+    ASSERT(milliVolts > 2000 && milliVolts < 6500);
     m_sample[m_pos] = milliVolts;
-    m_pos = (m_pos + 1) % NUM_SAMPLES;
+    m_pos++;
+    if (m_pos == NUM_SAMPLES) m_pos = 0;
     m_power = 0;
 }
  
