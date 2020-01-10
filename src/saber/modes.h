@@ -13,7 +13,6 @@ enum {
     BLADE_OFF,
     BLADE_IGNITE,
     BLADE_ON,
-    BLADE_FLASH,
     BLADE_RETRACT
 };
 

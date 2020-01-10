@@ -70,7 +70,10 @@ void calcGravity2(float ax, float ay, float az, float* g2, float* g2Normal)
 const int8_t Blade::pinRGB[NCHANNELS] = { PIN_EMITTER_RED, PIN_EMITTER_GREEN, PIN_EMITTER_BLUE };
 Blade* Blade::instance = 0;
 
-Blade::Blade() {
+Blade::Blade() 
+{
+    m_color.set(0);
+    
     for (int i = 0; i < NCHANNELS; ++i) {
         pinMode(pinRGB[i], OUTPUT);
         digitalWrite(pinRGB[i], LOW);
@@ -88,8 +91,10 @@ Blade::Blade() {
 
 void Blade::setRGB(const RGB& rgb)
 {
-    m_color = rgb;
-    setThrottledRGB();
+    if (rgb != m_color) {
+        m_color = rgb;
+        setThrottledRGB();
+    }
 }
 
 void Blade::setThrottledRGB()
@@ -107,10 +112,14 @@ void Blade::setThrottledRGB()
     }
 }
 
-void Blade::setVoltage(int milliVolts) {
+void Blade::setVoltage(int milliVolts) 
+{
     static const int32_t vF[NCHANNELS]   = { RED_VF, GREEN_VF, BLUE_VF };
     static const int32_t amps[NCHANNELS] = { RED_I,  GREEN_I,  BLUE_I };
     static const int32_t res[NCHANNELS]  = { RED_R,  GREEN_R,  BLUE_R };
+
+    if (m_vbat == milliVolts)
+        return;
 
     if (milliVolts < 3000 || milliVolts > 5400) {
         Log.p("Blade::setVoltage() vBat=").p(m_vbat).p(" mV=").p(milliVolts).eol();
