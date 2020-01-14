@@ -78,17 +78,20 @@ Adafruit_ZeroI2S i2s(PIN_I2S_LRCLK, PIN_I2S_BITCLK, PIN_I2S_DATA, 2);
 I2SAudioDriver i2sAudioDriver(&dma, &i2s, &spiFlash, manifest);
 SFX sfx(&i2sAudioDriver, manifest);
 
-BladeState  bladeState;
-
 ButtonCB    buttonA(PIN_SWITCH_A, SABER_BUTTON);
 LEDManager  ledA(PIN_LED_A, false);
 
 UIRenderData uiRenderData;
-
+BladeState  bladeState;
 UIModeUtil  uiMode;
 SaberDB     saberDB;
 Voltmeter   voltmeter;
 BladeFlash  bladeFlash;
+CMDParser   cmdParser(&saberDB, manifest);
+Blade       blade;
+Timer2      vbatTimer(AveragePower::SAMPLE_INTERVAL);
+Tester      tester;
+
 
 #ifdef SABER_NUM_LEDS
 #ifdef SABER_UI_START
@@ -123,11 +126,6 @@ ShiftedSevenSegment shifted7;
 Digit4UI digit4UI;
 #define SHIFTED_OUTPUT
 #endif
-
-CMDParser   cmdParser(&saberDB, manifest);
-Blade       blade;
-Timer2      vbatTimer(AveragePower::SAMPLE_INTERVAL);
-Tester      tester;
 
 void BlockDrawOLED(const BlockDrawChunk* chunks, int n)
 {
@@ -354,7 +352,6 @@ void buttonAClickHandler(const Button&)
     }
     else if (bladeState.state() == BLADE_ON) {
         bladeFlash.doFlash(millis());
-        EventQ.event("[FlashOnClash]");
         sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
     }
 }
@@ -411,7 +408,6 @@ void processSerial() {
     }
 }
 
-
 void processAccel(uint32_t msec)
 {
     static ProfileData profData("processAccel");
@@ -463,7 +459,6 @@ void processAccel(uint32_t msec)
             {
                 bladeFlash.doFlash(millis());
                 if ((msec - lastImpactTime) > IMPACT_MIN_TIME) {
-                    EventQ.event("[FlashOnClash]");
                     bool sound = sfx.playSound(SFX_IMPACT, sfxOverDue ? SFX_OVERRIDE : SFX_GREATER_OR_EQUAL);
                     if (sound)
                     {
