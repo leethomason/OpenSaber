@@ -403,4 +403,3 @@ bool CMDParser::processCMD()
     token.clear();
     return isSet;
 }
-

@@ -227,6 +227,7 @@ class ChannelTest : public Test
 };
 
 
+/*
 class AveragePowerTest : public Test
 {
 public:
@@ -285,6 +286,7 @@ public:
         return TEST_CONTINUE;
     }
 };
+*/
 
 
 class AccelerometerTest : public Test
@@ -406,7 +408,7 @@ ButtonTest buttonTest;
 IgniteRetractTest igniteRetractTest;
 ChannelTest channelTest;
 BlasterTest blasterTest;
-AveragePowerTest averagePowerTest;
+//AveragePowerTest averagePowerTest;
 AccelerometerTest accelerometerTest;
 
 Test* gTests[] = {
@@ -414,7 +416,7 @@ Test* gTests[] = {
     &igniteRetractTest,
     &channelTest,
     &blasterTest,
-    &averagePowerTest,
+    //&averagePowerTest,
     &accelerometerTest,
     0
 };
