@@ -17,21 +17,15 @@ module tube(h=1, inner=0, outer=0, di=0, do=0) {
 	}
 }
 
-module roundedRect(h, d)
+module roundedRect(size, r)
 {
-	D0 = d * 0.8;
-	D1 = d * 0.2;
-	H = h;
-
+	H = size[2];
 	hull()
 	{
-		translate([-D0/2, -D0/2, 0]) {
-			cube([D0, D0, H]);
-		}
-		translate([-D0/2, -D0/2, 0])  cylinder(d=D1, h=H);
-		translate([ D0/2, -D0/2, 0])  cylinder(d=D1, h=H);
-		translate([-D0/2,  D0/2, 0])  cylinder(d=D1, h=H);
-		translate([ D0/2,  D0/2, 0])  cylinder(d=D1, h=H);
+		translate([r, r, 0])  cylinder(r=r, h=H);
+		translate([size[0] - r, r, 0])  cylinder(r=r, h=H);
+		translate([r, size[1] - r, 0])  cylinder(r=r, h=H);
+		translate([size[0] - r, size[1] - r, 0])  cylinder(r=r, h=H);
 	}
 }
 
