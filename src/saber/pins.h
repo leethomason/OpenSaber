@@ -921,10 +921,10 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define PIN_LED_A    	  	A2 
 	#define PIN_SWITCH_A		A3
 	#define PIN_DOTSTAR_EN		A4
-	#define PIN_OLED_CS		    A5
+	#define PIN_OLED_DC		    A5
 	#define PIN_I2S_LRCLK		0
 	#define PIN_I2S_BITCLK		1
-	#define PIN_OLED_RESET 	    2
+	#define PIN_OLED_CS  	    2
 	// CLOCK	 
 	// MOSI
 	// MISO 
@@ -934,7 +934,7 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define PIN_EMITTER_GREEN 	10
 	#define PIN_EMITTER_BLUE   	11
 	#define PIN_I2S_DATA		12
-	#define PIN_OLED_DC    	    13
+	#define PIN_OLED_RESET 	    13
 	
 	#define ACCEL_BLADE_DIRECTION 0	// The x direction is the blade. fixme
 	
