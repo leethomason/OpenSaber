@@ -23,7 +23,9 @@ module drawFore()
             N_BATTERY_BAFFLES,
             DZ_BUTTRESS,
             nPostBaffles=N_POST_BAFFLES,
-            bridgeStyle=1);
+            bridgeStyle=1,
+            mcFullDrop=true,
+            bottomRail=false);
 
         difference() {
             translate([0, 0, -TRANSITION_DZ]) {

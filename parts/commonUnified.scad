@@ -470,7 +470,8 @@ module oneBaffle(   d,
                     cutoutHigh=true,    // open space to the top
                     bottomRail=true,    // bridge must be >0 for a bottom rail
                     conduit=false,
-                    slopeFront=false
+                    slopeFront=false,
+                    mcFullDrop=false
                     )     
 {
     yMC = -yAtX(X_MC/2, d/2) + 1.0;
@@ -498,6 +499,10 @@ module oneBaffle(   d,
         if (mc) {
             translate([0, yMC, -EPS]) 
                 mc();
+        }
+        if (mcFullDrop) {
+            translate([-X_MC/2, yMC-20, -EPS])
+                cube(size=[X_MC, 20, dz+EPS2]);
         }
 
         if (scallop) {
@@ -689,7 +694,9 @@ module baffleMCBattery( outer,          // outer diameter
                         extraBaffle=0,  // add this much to the front baffle
                         bridgeInFront=false,    // set true to contiue bridge. Useful for attaching to a cap.
                         bridgeStyle = 1,
-                        mc=true
+                        mc=true,
+                        mcFullDrop=false,
+                        bottomRail=true
                     )
 {
     totalN = n + nPostBaffles;
@@ -706,20 +713,29 @@ module baffleMCBattery( outer,          // outer diameter
                             battery=hasBattery,
                             mc=mc,
                             dExtra=dFirst - outer, 
-                            bridge=bridgeStyle
+                            bridge=bridgeStyle,
+                            mcFullDrop=mcFullDrop,
+                            bottomRail=bottomRail
                     );
                 }
             }
             else {
                 oneBaffle(outer, dzButtress, 
                     battery=hasBattery,
-                    bridge=bridgeInFront || (i < totalN-1) ? bridgeStyle : 0, mc=mc);
+                    bridge=bridgeInFront || (i < totalN-1) ? bridgeStyle : 0, 
+                    mc=mc,
+                    mcFullDrop=mcFullDrop,
+                    bottomRail=bottomRail);
             }
         }
     }
     if (extraBaffle) {
         translate([0, 0, (n*2 - 1) * dzButtress]) {
-            oneBaffle(outer, extraBaffle, bridge=0, mc=mc);
+            oneBaffle(outer, extraBaffle, 
+                bridge=0, 
+                mc=mc, 
+                mcFullDrop=mcFullDrop,
+                bottomRail=bottomRail);
         }
     }
 }
