@@ -14,10 +14,10 @@ D_PORT_SUPPORT      =  12;
 H_PORT              =  16;
 DY_PORT             =  6;
 
-// Dimensions for Teensy3.5 with OpenSaber shield
-X_MC                =  18.5;
+INCHES_TO_MM        = 25.4;
+X_MC                =   0.7 * INCHES_TO_MM;
 Y_MC                =   9.0;
-Z_MC                =  71.0;     // includes SD
+Z_MC                =   2.2 * INCHES_TO_MM;
 DY_MC               = -12.5;
 
 X_CRYSTAL           =  11;
@@ -857,7 +857,6 @@ module oledHolder(diameter, t, dz, dzToPCB, dyPCB)
     }
 */
 
-INCHES_TO_MM        = 25.4;
 H_TEETH             = 4.0;
 H_ADVANCED_THREAD   = 13.8; // larger to make threading easier
 H_RING              = 3.0;
