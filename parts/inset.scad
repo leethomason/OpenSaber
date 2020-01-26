@@ -263,8 +263,8 @@ module insetHolder( diameter,
                     // The inset doesn't need to be held to the sides - 
                     // the case will accomplish that. Only fit on the
                     // z axis. Let the y float.
-                    *zCapsule(dzA, dzB, rCapsule, roundRect);          // the actual wood
-                    translate([-50, 0, dzA-rCapsule])
+                    zCapsule(dzA, dzB, rCapsule, roundRect);          // the actual wood
+                    *translate([-50, 0, dzA-rCapsule])
                         cube(size=[100, 100, rCapsule*2 + dzB - dzA]);
 
                     translate([0, DY - EPS*2, 0])

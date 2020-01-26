@@ -3,20 +3,28 @@ use <../shapes.scad>
 use <../inset.scad>
 include <dim.scad>
 
-DRAW_FORE = false;
-DRAW_AFT = true;
+DRAW_FORE = true;
+DRAW_AFT  = false;
 
 EPS = 0.01;
 EPS2 = EPS*2;
 
 SPKR_Z = 10;
+INCHES_TO_MM = 25.4;
 
 N_BATTERY_BAFFLES = nBafflesNeeded(DZ_BUTTRESS, "18650");
 N_TOTAL_BAFFLES = floor(DZ_FORE / (DZ_BUTTRESS * 2)) - 1;
 N_POST_BAFFLES = N_TOTAL_BAFFLES - N_BATTERY_BAFFLES;
 
-TRANSITION_DZ = 8.0;
 TRANSITION_CUTOUT = 10.0;
+Z_END_INSET   = M_T - DZ_THREAD - 2.0;
+
+DZ_T_RING = 4.0;
+Z_T_RING = M_T - DZ_T_RING;
+JOINT = 8;
+
+*color("red") translate([0, 0, M_T - 4])
+    tube(h=4, do=D_INNER_AFT, di=D_INNER_AFT - 4);
 
 module drawFore()
 {
@@ -28,15 +36,17 @@ module drawFore()
             bridgeStyle=1);
 
         difference() {
-            translate([0, 0, -TRANSITION_DZ]) {
-                tube(h=TRANSITION_DZ, do=D_INNER_AFT, di=D_INNER_FORE-4, $fn=80);
+            translate([0, 0, -DZ_T_RING]) {
+                tube(h=DZ_T_RING, do=D_INNER_AFT, di=D_INNER_FORE-4, $fn=80);
             }
-            translate([-TRANSITION_CUTOUT/2, -50, -TRANSITION_DZ - EPS]) {
-                cube(size=[TRANSITION_CUTOUT, 100, TRANSITION_DZ + EPS2]);
+            translate([-TRANSITION_CUTOUT/2, -50, -DZ_T_RING - EPS]) {
+                cube(size=[TRANSITION_CUTOUT, 100, DZ_T_RING + EPS2]);
             }
-            //translate([0, 0, -TRANSITION_DZ]) keyJoint(TRANSITION_DZ, D_INNER_AFT, D_INNER_AFT - 4, true);
         }
     }
+    translate([0, 0, Z_T_RING]) rotate([180, 0, 0])
+        keyJoint(JOINT, D_INNER_AFT, D_INNER_AFT - 4, false);
+ 
     // Connect up.
     for(i=[1:2]) {
         translate([0, 0, M_FORE + zLenOfBaffles(N_TOTAL_BAFFLES, DZ_BUTTRESS) - (i * 2 + 1) * DZ_BUTTRESS]) {
@@ -51,42 +61,64 @@ module drawFore()
 
 module drawAft()
 {
-    DZ_INSET = 42.0;
-    DX_INSET = 17.0;
-    DZ_SECTION = DZ_INSET + 10.0;
-    THREAD_OFFSET = 12.0;
+    Z_START_INSET = Z_END_INSET - DZ_INSET;
+    SPACE = 8.0;
 
-    DZ_START = 5.0;
-    DZ_END = DZ_SECTION - 3.0;
-    DZ_BOLT = (DZ_START + DZ_END) / 2;
-    DZ_PORT = (DZ_START + DZ_END) / 2 - 10.5;
-    DZ_SWITCH = (DZ_START + DZ_END) / 2 + 10.5;
+    Z_START_SECTION = Z_START_INSET - SPACE;
+    Z_END_SECTION   = Z_END_INSET + SPACE;
 
-    translate([0, 0, M_T - THREAD_OFFSET - DZ_SECTION]) {
-        insetHolder(
-            D_INNER_AFT,
-            D_OUTER_AFT,
-            DX_INSET,,
-            DZ_SECTION,
-            DZ_BUTTRESS,
-            DZ_START, 
-            DZ_END,     
-            DZ_BOLT,  
-            DZ_PORT,
-            DZ_SWITCH,
-            roundRect = 3.175/2,
-            frontBridge=false
-        );
+    DZ_SECTION = Z_END_SECTION - Z_START_SECTION;
+
+    DZ_BOLT   = DZ_SECTION / 2;
+    DZ_PORT   = DZ_SECTION / 2 + 12.0;
+    DZ_SWITCH = DZ_SECTION / 2 - 12.0;
+
+    difference() 
+    {
+        union() {
+            translate([0, 0, Z_START_SECTION]) {
+                insetHolder(
+                    D_INNER_AFT,
+                    D_OUTER_AFT,
+                    DX_INSET,
+                    DZ_SECTION,
+                    DZ_BUTTRESS,
+                    Z_START_INSET - Z_START_SECTION, 
+                    Z_END_INSET - Z_START_SECTION,     
+                    DZ_BOLT,  
+                    DZ_PORT,
+                    DZ_SWITCH,
+                    roundRect = 3.175/2,
+                    frontBridge=false
+                );
+            }
+            translate([0, 0, SPKR_Z]) difference() {
+                tube(h=DZ_BUTTRESS, do=D_INNER_AFT, di=D_INNER_AFT - 6);
+            }
+        }
+        X_MC = 0.5 * INCHES_TO_MM;
+        translate([-X_MC/2, -20, 0])
+            cube(size=[X_MC, 20, 50]);
+        translate([0, -11, 0]) scale([1, 1, 2])
+            color("green") mc();
+        translate([0, 0, Z_T_RING]) rotate([180, 0, 0])
+            keyJoint(JOINT, D_INNER_AFT, D_INNER_AFT - 4, true);
+    }
+    for(i=[0:2]) {
+        translate([0, 0, i * 2 * DZ_BUTTRESS + SPKR_Z]) {
+            oneBaffle(D_INNER_AFT,
+                DZ_BUTTRESS,
+                battery=false);
+        }
     }
     translate([0, 0, 1]) {
         speakerHolder(D_INNER_AFT, SPKR_Z-1, 2, "std28");
     }
-    translate([0, 0, M_T-10]) tube(h=10, do=D_INNER_AFT, di=D_INNER_AFT-1);
-    //translate([0, 0, M_FORE - TRANSITION_DZ]) keyJoint(TRANSITION_DZ, D_INNER_AFT, D_INNER_AFT - 4, false);
+    //color("red") translate([0, 0, M_T - DZ_THREAD]) tube(h=DZ_THREAD, do=D_INNER_AFT-0.5, di=D_INNER_AFT-1);
 }
 
 if (DRAW_FORE) drawFore();
 if (DRAW_AFT) drawAft();
 
 //color("red") battery(D_INNER_FORE, "18650");
-translate([0, -11, SPKR_Z]) color("green") mc();
+//translate([0, -11, SPKR_Z - 2]) color("green") mc();
