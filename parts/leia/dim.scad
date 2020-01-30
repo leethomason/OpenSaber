@@ -13,3 +13,8 @@ DZ_THREAD = 10.0;
 
 DZ_INSET = 42.0;    // could be 40
 DX_INSET = 17.0;
+
+BOLT_TO_PORT = 12.0;  // has to be forward to clear the microcontroller
+BOLT_TO_SWITCH = -12.0;
+
+D_BUTTON_HEAD = 9.0;    // fixme

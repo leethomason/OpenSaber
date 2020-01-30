@@ -1,10 +1,11 @@
 use <../commonUnified.scad>
 use <../shapes.scad>
 use <../inset.scad>
+use <testplate.scad>
 include <dim.scad>
 
-DRAW_FORE = true;
-DRAW_AFT  = false;
+DRAW_FORE = false;
+DRAW_AFT  = true;
 
 EPS = 0.01;
 EPS2 = EPS*2;
@@ -73,9 +74,16 @@ module drawAft()
     DZ_PORT   = DZ_SECTION / 2 + 12.0;
     DZ_SWITCH = DZ_SECTION / 2 - 12.0;
 
+    DY_INSET = 4.0;
+
+    color("lightgrey") translate([0, D_INNER_AFT/2 - DY_INSET, Z_START_INSET]) {
+        switchPlate();
+    }
+
     difference() 
     {
         union() {
+            // stock = 6.35 (1/4 inch)
             translate([0, 0, Z_START_SECTION]) {
                 insetHolder(
                     D_INNER_AFT,
@@ -89,7 +97,9 @@ module drawAft()
                     DZ_PORT,
                     DZ_SWITCH,
                     roundRect = 3.175/2,
-                    frontBridge=false
+                    frontBridge=false,
+                    bridgeStyle=2,
+                    dyInset=DY_INSET
                 );
             }
             translate([0, 0, SPKR_Z]) difference() {
