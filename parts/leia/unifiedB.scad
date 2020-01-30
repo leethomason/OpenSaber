@@ -74,9 +74,9 @@ module drawAft()
     DZ_PORT   = DZ_SECTION / 2 + 12.0;
     DZ_SWITCH = DZ_SECTION / 2 - 12.0;
 
-    DY_INSET = 4.0;
+    DY_INSET = D_INNER_AFT/2 - yAtX(DX_INSET/2, D_INNER_AFT/2);
 
-    color("lightgrey") translate([0, D_INNER_AFT/2 - DY_INSET, Z_START_INSET]) {
+    *color("lightgrey") translate([0, D_INNER_AFT/2 - DY_INSET, Z_START_INSET]) {
         switchPlate();
     }
 
@@ -117,8 +117,13 @@ module drawAft()
         dotstarZ = dotstarStripZLen(4);
         dotstarX = 12.4;    // of the strip, not the LED
         rotate([0, 0, -60])
+        {
             translate([-dotstarX/2, D_INNER_AFT/2 - 2.0, DZ_BOLT + Z_START_SECTION - dotstarZ/2])
                 cube(size=[dotstarX, 10, dotstarZ]);
+            DX_WIRE = 8;
+            translate([-DX_WIRE/2, D_INNER_AFT/2 - 5.0, Z_START_SECTION + DZ_BUTTRESS * 11])
+                cube(size=[DX_WIRE, 20, DZ_BUTTRESS]);
+        }
     }
     for(i=[0:2]) {
         translate([0, 0, i * 2 * DZ_BUTTRESS + SPKR_Z]) {
