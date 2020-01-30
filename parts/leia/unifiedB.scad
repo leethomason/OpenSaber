@@ -113,6 +113,12 @@ module drawAft()
             color("green") mc();
         translate([0, 0, Z_T_RING]) rotate([180, 0, 0])
             keyJoint(JOINT, D_INNER_AFT, D_INNER_AFT - 4, true);
+
+        dotstarZ = dotstarStripZLen(4);
+        dotstarX = 12.4;    // of the strip, not the LED
+        rotate([0, 0, -60])
+            translate([-dotstarX/2, D_INNER_AFT/2 - 2.0, DZ_BOLT + Z_START_SECTION - dotstarZ/2])
+                cube(size=[dotstarX, 10, dotstarZ]);
     }
     for(i=[0:2]) {
         translate([0, 0, i * 2 * DZ_BUTTRESS + SPKR_Z]) {
