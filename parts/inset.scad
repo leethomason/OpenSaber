@@ -86,6 +86,7 @@ module insetBaffle(diameter, dzBaffle, bridge, noBottom=false)
             translate([0, -2.5, 0])
                 cylinder(h=dzBaffle*1.1, d=diameter * 0.7);
         }
+        
     }
 }
 
@@ -298,7 +299,8 @@ module insetHolder( diameter,
             }
 
             // Add some support around the joint.
-            intersection() {
+            intersection() 
+            {
                 H = 16;
                 translate([-100, -H/2, 0]) cube(size=[200, H, dzBaffle*2 + EPS]);
                 tube(h=dzBaffle*2 + EPS, do=diameter, di=diameter - 8);
@@ -306,7 +308,8 @@ module insetHolder( diameter,
             
         }
         // Removes the front bridge hanging out.
-        translate([0, 0, dzSection]) cylinder(h=dzBaffle*2, d=diameter);
+        translate([0, 0, dzSection]) 
+            cylinder(h=dzBaffle*2, d=diameter);
 
         // Removes the space for the inset.
         translate([0, yInset - 4, 0])

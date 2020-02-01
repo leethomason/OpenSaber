@@ -38,7 +38,7 @@ module drawFore()
 
         difference() {
             translate([0, 0, -DZ_T_RING]) {
-                tube(h=DZ_T_RING, do=D_INNER_AFT, di=D_INNER_FORE-4, $fn=80);
+                tube(h=DZ_T_RING, do=D_INNER_AFT, di=D_INNER_FORE-8, $fn=80);
             }
             translate([-TRANSITION_CUTOUT/2, -50, -DZ_T_RING - EPS]) {
                 cube(size=[TRANSITION_CUTOUT, 100, DZ_T_RING + EPS2]);
@@ -75,6 +75,8 @@ module drawAft()
     DZ_SWITCH = DZ_SECTION / 2 - 12.0;
 
     DY_INSET = D_INNER_AFT/2 - yAtX(DX_INSET/2, D_INNER_AFT/2);
+
+    echo("DZ from section front:", DZ_FORE_OUTER - Z_END_INSET);
 
     *color("lightgrey") translate([0, D_INNER_AFT/2 - DY_INSET, Z_START_INSET]) {
         switchPlate();
@@ -116,7 +118,16 @@ module drawAft()
 
         dotstarZ = dotstarStripZLen(4);
         dotstarX = 12.4;    // of the strip, not the LED
-        rotate([0, 0, -60])
+        translate([D_INNER_AFT/2 - 3.0, 0, DZ_BOLT + Z_START_SECTION - dotstarZ/2]) {
+            polygonXY(h=dotstarZ, points = [
+                [0, -dotstarX/2],
+                [10, -dotstarX/2 + 10],
+                [10, dotstarX/2 + 10],
+                [0, dotstarX/2]
+            ]);
+        }
+
+        /*rotate([0, 0, -90])
         {
             translate([-dotstarX/2, D_INNER_AFT/2 - 2.0, DZ_BOLT + Z_START_SECTION - dotstarZ/2])
                 cube(size=[dotstarX, 10, dotstarZ]);
@@ -124,6 +135,7 @@ module drawAft()
             translate([-DX_WIRE/2, D_INNER_AFT/2 - 5.0, Z_START_SECTION + DZ_BUTTRESS * 11])
                 cube(size=[DX_WIRE, 20, DZ_BUTTRESS]);
         }
+        */
     }
     for(i=[0:2]) {
         translate([0, 0, i * 2 * DZ_BUTTRESS + SPKR_Z]) {
@@ -141,5 +153,5 @@ module drawAft()
 if (DRAW_FORE) drawFore();
 if (DRAW_AFT) drawAft();
 
-//color("red") battery(D_INNER_FORE, "18650");
+//color("red") translate([0, 0, M_FORE]) battery(D_INNER_FORE, "18650");
 //translate([0, -11, SPKR_Z - 2]) color("green") mc();

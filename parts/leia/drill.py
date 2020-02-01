@@ -1,6 +1,6 @@
 from utility import *
 from material import init_material
-from rectangleTool import rectangleTool
+from drill import drill
 from mecode import G
 
 # inner line to inner line: 47mm
@@ -11,7 +11,14 @@ mat = init_material("np883-aluminum-3.175")
 g = G(outfile='path.nc', aerotech_include=False, header=None, footer=None)
 nomad_header(g, mat, CNC_TRAVEL_Z)
 
-# origin at bottom center.
-g.move(y=22.2)
-g.move(z=0)
-rectangleTool(g, mat, -10, 18.0, 42.0, 3.175/2, "bottom", 'inner')
+CY = 42.0 / 2.0
+PITCH = 7
+
+travel(g, mat, y = CY - 1.5 * PITCH)
+drill(g, mat, -1.0)
+travel(g, mat, y = CY - 0.5 * PITCH)
+drill(g, mat, -1.0)
+travel(g, mat, y = CY + 0.5 * PITCH)
+drill(g, mat, -1.0)
+travel(g, mat, y = CY + 1.5 * PITCH)
+drill(g, mat, -1.0)
