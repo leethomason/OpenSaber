@@ -14,4 +14,4 @@ nomad_header(g, mat, CNC_TRAVEL_Z)
 # origin at bottom center.
 g.move(y=22.2)
 g.move(z=0)
-rectangleTool(g, mat, -10, 18.0, 42.0, 3.175/2, "bottom", 'inner')
+rectangleTool(g, mat, -10, 18.0, 42.0, 0, "bottom", 'inner')
