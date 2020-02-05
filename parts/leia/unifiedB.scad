@@ -18,7 +18,6 @@ N_TOTAL_BAFFLES = floor(DZ_FORE / (DZ_BUTTRESS * 2)) - 1;
 N_POST_BAFFLES = N_TOTAL_BAFFLES - N_BATTERY_BAFFLES;
 
 TRANSITION_CUTOUT = 10.0;
-Z_END_INSET   = M_T - DZ_THREAD - 2.0;
 
 DZ_T_RING = 4.0;
 Z_T_RING = M_T - DZ_T_RING;
@@ -118,13 +117,18 @@ module drawAft()
 
         dotstarZ = dotstarStripZLen(4);
         dotstarX = 12.4;    // of the strip, not the LED
-        translate([D_INNER_AFT/2 - 3.0, 0, DZ_BOLT + Z_START_SECTION - dotstarZ/2]) {
-            polygonXY(h=dotstarZ, points = [
-                [0, -dotstarX/2],
-                [10, -dotstarX/2 + 10],
-                [10, dotstarX/2 + 10],
-                [0, dotstarX/2]
-            ]);
+        rotate([0, 0, 15])
+        {
+            translate([D_INNER_AFT/2 - 2.5, 0, DZ_BOLT + Z_START_SECTION - dotstarZ/2]) 
+                polygonXY(h=dotstarZ, points = [
+                    [0, -dotstarX/2],
+                    [10, -dotstarX/2 + 10],
+                    [10, dotstarX/2 + 10],
+                    [0, dotstarX/2]
+                ]);
+            DX_WIRE = 8;
+            translate([D_INNER_AFT/2 - 5.0, -DX_WIRE/2, Z_START_SECTION + DZ_BUTTRESS * 11])
+                cube(size=[20, DX_WIRE, DZ_BUTTRESS]);
         }
 
         /*rotate([0, 0, -90])
