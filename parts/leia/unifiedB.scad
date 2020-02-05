@@ -5,7 +5,7 @@ use <testplate.scad>
 include <dim.scad>
 
 DRAW_FORE = false;
-DRAW_AFT  = true;
+DRAW_AFT  = false;
 
 EPS = 0.01;
 EPS2 = EPS*2;
@@ -59,9 +59,11 @@ module drawFore()
     }
 }
 
+Z_START_INSET = Z_END_INSET - DZ_INSET;
+DY_INSET = D_INNER_AFT/2 - yAtX(DX_INSET/2, D_INNER_AFT/2);
+
 module drawAft()
 {
-    Z_START_INSET = Z_END_INSET - DZ_INSET;
     SPACE = 8.0;
 
     Z_START_SECTION = Z_START_INSET - SPACE;
@@ -73,13 +75,8 @@ module drawAft()
     DZ_PORT   = DZ_SECTION / 2 + 12.0;
     DZ_SWITCH = DZ_SECTION / 2 - 12.0;
 
-    DY_INSET = D_INNER_AFT/2 - yAtX(DX_INSET/2, D_INNER_AFT/2);
 
     echo("DZ from section front:", DZ_FORE_OUTER - Z_END_INSET);
-
-    *color("lightgrey") translate([0, D_INNER_AFT/2 - DY_INSET, Z_START_INSET]) {
-        switchPlate();
-    }
 
     difference() 
     {
@@ -156,6 +153,11 @@ module drawAft()
 
 if (DRAW_FORE) drawFore();
 if (DRAW_AFT) drawAft();
+
+color("lightgrey") translate([0, D_INNER_AFT/2 - DY_INSET, Z_START_INSET]) {
+    switchPlate();
+}
+
 
 //color("red") translate([0, 0, M_FORE]) battery(D_INNER_FORE, "18650");
 //translate([0, -11, SPKR_Z - 2]) color("green") mc();

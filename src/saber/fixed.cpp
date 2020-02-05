@@ -101,3 +101,33 @@ int32_t iSin_S3(int32_t x)
     return x * ((3 << qP) - (x*x >> qR)) >> qS;
 }
 
+int32_t iInvSize_S3(int32_t x)
+{
+    static const int16_t TABLE[65] = {
+        0,    81,   163,  245,  326,  408,  490,  572, 654, 
+        736,  818,  901,  984,  1067, 1150, 1234, 1318, 
+        1402, 1487, 1572, 1658, 1744, 1830, 1917, 2005, 
+        2093, 2182, 2271, 2362, 2453, 2544, 2637, 2731, 
+        2825, 2921, 3018, 3116, 3215, 3315, 3417, 3521, 
+        3626, 3733, 3842, 3953, 4067, 4183, 4301, 4423, 
+        4548, 4676, 4809, 4946, 5089, 5237, 5393, 5556, 
+        5730, 5916, 6117, 6338, 6589, 6885, 7269, 8192
+    };
+    if (x > ISINE_ONE) x = ISINE_ONE;
+    if (x < -ISINE_ONE) x = -ISINE_ONE;
+    int sign = 1;
+    if (x < 0) {
+        x = -x;  // symmetric
+        sign = -1;
+    }
+    
+    static const int DIV = ISINE_ONE / 64;
+    int index = x / DIV;
+    int fraction = x - index * DIV;
+    int16_t a = TABLE[index];
+    int16_t b = TABLE[index + 1];
+    int32_t result = lerp1024<int16_t>(a, b, fraction * 1024 / DIV);
+
+    return result * sign;
+}
+

@@ -214,10 +214,23 @@ inline Fixed115 operator * (const Fixed115& a, const FixedNorm& b)
     return f;
 }
 
+static const int32_t ISINE_360 = 32768;
+static const int32_t ISINE_180 = (ISINE_360 / 2);
+static const int32_t ISINE_90  = (ISINE_360 / 4);
+static const int32_t ISINE_45  = (ISINE_360 / 8);
+static const int32_t ISINE_30  = (2731);
+static const int32_t ISINE_ONE  = 4096;
+static const int32_t ISINE_HALF = 2048;
+
 // Sine approximation.
-// x: angle with 2^15 units/circle (32768)
+// theta: angle with 2^15 units/circle (32768)
 // return: sin, 12 bits (range -4096 to 4096)
-int32_t iSin_S3(int32_t x);
+int32_t iSin_S3(int32_t theta);
+
+// Inverse sine.
+// x: -4096 to 4096 (12 bits)
+// returns: angle as above (-2^15 to +2^15) but range -ISINE_90 to ISINE_90
+int32_t iInvSize_S3(int32_t x);
 
 inline int32_t iCos_S3(int32_t x) {
     return iSin_S3(x + 8192);
