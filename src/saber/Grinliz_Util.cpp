@@ -29,7 +29,12 @@ bool TestUtil()
     TEST_IS_TRUE(iSin(FixedNorm(1, 4)) == 1);
     TEST_IS_TRUE(iSin(FixedNorm(2, 4)) == 0);
     TEST_IS_TRUE(iSin(FixedNorm(3, 4)) == -1);
-    
+
+    TEST_IS_TRUE(iInvSize_S3(0) == 0);          
+    TEST_IS_TRUE(iInvSize_S3(ISINE_ONE) == ISINE_90);
+    TEST_IS_TRUE(iInvSize_S3(-ISINE_ONE) == -ISINE_90);
+    TEST_IS_TRUE(iInvSize_S3(ISINE_HALF) == ISINE_30);
+
 #ifdef _WIN32
     for (float r = 0; r <= 1.0f; r += 0.01f) {
         float f = sinf(r * 2.0f * 3.1415926535897932384626433832795f);
@@ -489,7 +494,7 @@ int base64CharToBits(char c)
     return 0;
 }
 
-void encodeBase64(const uint8_t* src, int nBytes, char* dst)
+void encodeBase64(const uint8_t* src, int nBytes, char* dst, bool writeNull)
 {
     // base64 - 6 bits per char of output
     // every 3 bytes (24 bits) is 4 char
@@ -508,7 +513,8 @@ void encodeBase64(const uint8_t* src, int nBytes, char* dst)
         *t++ = base64BitsToChar((accum >> 12) & 63);
         *t++ = base64BitsToChar((accum >> 18) & 63);
     }
-    *t = 0;
+    if (writeNull)
+        *t = 0;
 }
 
 void decodeBase64(const char* src, int nBytes, uint8_t* dst)
@@ -538,7 +544,7 @@ bool TestBase64()
         for (int j = 0; j < i; ++j) {
             src0[j] = random.rand();
         }
-        encodeBase64(src0, i, dst);
+        encodeBase64(src0, i, dst, true);
         decodeBase64(dst, i, src1);
         TEST_IS_TRUE(memcmp(src0, src1, i) == 0);
     }

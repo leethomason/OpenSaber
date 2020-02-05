@@ -57,7 +57,7 @@ bool istrStarts(const char* str, const char* prefix);
 void intToString(int value, char* str, int allocated, bool writeZero);
 void intToDigits(int value, int* digits, int nDigits);
 
-void encodeBase64(const uint8_t* bytes, int nBytes, const char* target, bool writeNull=true);
+void encodeBase64(const uint8_t* bytes, int nBytes, const char* target, bool writeNull);
 void decodeBase64(const char* src, int nBytes, uint8_t* dst);
 bool TestBase64();
 
@@ -425,6 +425,7 @@ inline void combSort(T* mem, int size)
 		}
 	}
 }
+
 
 class Random
 {
