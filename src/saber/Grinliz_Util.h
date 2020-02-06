@@ -7,14 +7,12 @@
 #include "grinliz_assert.h"
 #include "fixed.h"
 
-template<class T>
-T lerp256(T a, T b, T t256) {
-    return (a * (256 - t256) + b * t256) / 256;
+inline int32_t lerp1024(int16_t a, int16_t b, int32_t t1024) {
+    return (a * (1024 - t1024) + b * t1024) / 1024;
 }
 
-template<class T>
-T lerp1024(T a, T b, T t1024) {
-    return (a * (1024 - t1024) + b * t1024) / 1024;
+inline int32_t lerp255(int16_t a, int16_t b, int32_t t255) {
+    return (a * (255 - t255) + b * t255) / 255;
 }
 
 bool TestUtil();
@@ -56,6 +54,10 @@ bool strStarts(const char* str, const char* prefix);
 bool istrStarts(const char* str, const char* prefix);
 void intToString(int value, char* str, int allocated, bool writeZero);
 void intToDigits(int value, int* digits, int nDigits);
+
+void encodeBase64(const uint8_t* bytes, int nBytes, const char* target, bool writeNull);
+void decodeBase64(const char* src, int nBytes, uint8_t* dst);
+bool TestBase64();
 
 // Modified Bernstein hash
 uint32_t hash32(const char* v, const char* end);
@@ -422,10 +424,14 @@ inline void combSort(T* mem, int size)
 	}
 }
 
+
 class Random
 {
 public:
 	Random() : s(1) {}
+    Random(int seed) {
+        setSeed(seed);
+    }
 
 	void setSeed(uint32_t seed) {
 		s = (seed > 0) ? seed : 1;

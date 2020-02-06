@@ -16,9 +16,9 @@ void BladeFlash::tick(uint32_t msec)
         FixedNorm sn = iSin(fn);
         int t = sn.scale(1024);
 #endif
-        color.r = lerp1024<int>(impactColor.r, bladeColor.r, t);
-        color.g = lerp1024<int>(impactColor.g, bladeColor.g, t);
-        color.b = lerp1024<int>(impactColor.b, bladeColor.b, t);
+        color.r = lerp1024(impactColor.r, bladeColor.r, t);
+        color.g = lerp1024(impactColor.g, bladeColor.g, t);
+        color.b = lerp1024(impactColor.b, bladeColor.b, t);
     }
 }
 

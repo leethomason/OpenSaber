@@ -17,21 +17,37 @@ module tube(h=1, inner=0, outer=0, di=0, do=0) {
 	}
 }
 
-module roundedRect(h, d)
+module roundedRect(size, r, up="z")
 {
-	D0 = d * 0.8;
-	D1 = d * 0.2;
-	H = h;
-
-	hull()
-	{
-		translate([-D0/2, -D0/2, 0]) {
-			cube([D0, D0, H]);
+	if (up == "x") {
+		H = size[0];
+		hull()
+		{
+			translate([0, r, r]) rotate([0, 90, 0]) cylinder(r=r, h=H);
+			translate([0, size[1] - r, r]) rotate([0, 90, 0]) cylinder(r=r, h=H);
+			translate([0, r, size[2] - r]) rotate([0, 90, 0]) cylinder(r=r, h=H);
+			translate([0, size[1] - r, size[2] - r]) rotate([0, 90, 0]) cylinder(r=r, h=H);
 		}
-		translate([-D0/2, -D0/2, 0])  cylinder(d=D1, h=H);
-		translate([ D0/2, -D0/2, 0])  cylinder(d=D1, h=H);
-		translate([-D0/2,  D0/2, 0])  cylinder(d=D1, h=H);
-		translate([ D0/2,  D0/2, 0])  cylinder(d=D1, h=H);
+	}
+	else if (up == "y") {
+		H = size[1];
+		hull()
+		{
+			translate([r, 0, r]) rotate([-90, 0, 0]) cylinder(r=r, h=H);
+			translate([size[0] - r, 0, r]) rotate([-90, 0, 0]) cylinder(r=r, h=H);
+			translate([r, 0, size[2] - r]) rotate([-90, 0, 0]) cylinder(r=r, h=H);
+			translate([size[0] - r, 0, size[2] - r]) rotate([-90, 0, 0]) cylinder(r=r, h=H);
+		}
+	}
+	else {
+		H = size[2];
+		hull()
+		{
+			translate([r, r, 0])  cylinder(r=r, h=H);
+			translate([size[0] - r, r, 0])  cylinder(r=r, h=H);
+			translate([r, size[1] - r, 0])  cylinder(r=r, h=H);
+			translate([size[0] - r, size[1] - r, 0])  cylinder(r=r, h=H);
+		}
 	}
 }
 

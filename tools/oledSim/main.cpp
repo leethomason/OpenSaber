@@ -143,6 +143,21 @@ int main(int, char**) {
 	SDL_Texture* texture = SDL_CreateTexture(ren, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, WIDTH, HEIGHT);
 	assert(texture);
 
+#if false
+    static const int NLIN = 64;
+    for (int i = 0; i < (NLIN + 1); i++) {
+        const double PI = 3.14159265359;
+        // degrees:
+        // double v = asin(i / 32.0) * 360.0 / (2.0 * PI);
+        // printf("%f, ", v);
+        // ISINE_ONE
+        double v = asin(i / (double)NLIN) * ISINE_360 / (2.0 * PI);
+        printf("%d, ", (int)(v + 0.5));
+    }
+    printf("\n");
+    exit(0);
+#endif
+
 #ifdef MONO_128_32
     SimDisplay simDisplay(WIDTH, HEIGHT, 1);
     uint8_t* displayBuffer = new uint8_t[WIDTH*HEIGHT/8];

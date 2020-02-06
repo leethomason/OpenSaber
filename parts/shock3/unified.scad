@@ -3,9 +3,9 @@ use <../shapes.scad>
 use <../commonUnified.scad>
 use <../inset.scad>
 
-DRAW_AFT = true;
+DRAW_AFT = false;
 DRAW_FORE = false;
-DRAW_DOTSTAR = false;
+DRAW_DOTSTAR = true;
 
 $fn=60;
 EPS = 0.01;
@@ -296,7 +296,7 @@ if(DRAW_FORE) {
                     M_BOLT - M_START,
                     0, // use flat port holder M_PORT_CENTER - M_START,
                     M_SWITCH_CENTER - M_START,
-                    M_USB - M_START,
+                    0, // M_USB - M_START,
 
                     roundRect = 3.175/2,
                     firstButtressFullRing = false,
@@ -309,7 +309,7 @@ if(DRAW_FORE) {
                 union() {
                     BASE_Y = R_INNER - 3.7;
 
-                    difference() {
+                    *difference() {
                         translate([-100, -R_INNER, M_START]) {
                             cube(size=[200, 3.5, H_BUTTRESS*2]);
                         }
