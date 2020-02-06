@@ -2,11 +2,6 @@
 #include <math.h>
 
 //#define DEBUG_EVENT
-uint8_t lerpU8(uint8_t a, uint8_t b, uint8_t t) 
-{
-    int32_t r = int32_t(a) + (int32_t(b) - int32_t(a)) * int32_t(t) / 255;
-    return uint8_t(glClamp(r, int32_t(0), int32_t(255)));
-}
 
 bool TestUtil()
 {
@@ -15,14 +10,18 @@ bool TestUtil()
     TEST_IS_EQ(glClamp(10,  0, 100), 10);
     TEST_IS_EQ(glClamp(110, 0, 100), 100);
 
-    // lerpU8()
-	TEST_IS_EQ(lerpU8(0, 128, 128), 64);
-	TEST_IS_EQ(lerpU8(0, 128, 0), 0);
-	TEST_IS_EQ(lerpU8(0, 128, 255), 128);
+    // lerp255()
+	TEST_IS_EQ(lerp255(0, 128, 128), 64);
+	TEST_IS_EQ(lerp255(0, 128, 0), 0);
+	TEST_IS_EQ(lerp255(0, 128, 255), 128);
 
-	TEST_IS_EQ(lerpU8(0, 255, 128), 128);
-	TEST_IS_EQ(lerpU8(0, 255, 0), 0);
-	TEST_IS_EQ(lerpU8(0, 255, 255), 255);
+	TEST_IS_EQ(lerp255(0, 255, 128), 128);
+	TEST_IS_EQ(lerp255(0, 255, 0), 0);
+	TEST_IS_EQ(lerp255(0, 255, 255), 255);
+
+    // lerp1204
+    TEST_IS_EQ(lerp1024(0, 16, 512), 8);
+    TEST_IS_EQ(lerp1024(-16, 0, 512), -8);
 
     // iSin, iSin255 madness
     TEST_IS_TRUE(iSin(0) == 0);
@@ -30,10 +29,14 @@ bool TestUtil()
     TEST_IS_TRUE(iSin(FixedNorm(2, 4)) == 0);
     TEST_IS_TRUE(iSin(FixedNorm(3, 4)) == -1);
 
-    TEST_IS_TRUE(iInvSize_S3(0) == 0);          
-    TEST_IS_TRUE(iInvSize_S3(ISINE_ONE) == ISINE_90);
-    TEST_IS_TRUE(iInvSize_S3(-ISINE_ONE) == -ISINE_90);
-    TEST_IS_TRUE(iInvSize_S3(ISINE_HALF) == ISINE_30);
+    TEST_IS_TRUE(iInvSin_S3(0) == 0);
+    TEST_IS_TRUE(iInvSin_S3(ISINE_ONE) == ISINE_90);
+    TEST_IS_TRUE(iInvSin_S3(-ISINE_ONE) == -ISINE_90);
+    TEST_IS_TRUE(iInvSin_S3(ISINE_HALF) == ISINE_30);
+
+    TEST_IS_TRUE(iInvCos_S3(0) == ISINE_90);
+    TEST_IS_TRUE(iInvCos_S3(ISINE_ONE) == 0);
+    TEST_IS_TRUE(iInvCos_S3(-ISINE_ONE) == ISINE_180);
 
 #ifdef _WIN32
     for (float r = 0; r <= 1.0f; r += 0.01f) {

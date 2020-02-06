@@ -101,7 +101,7 @@ int32_t iSin_S3(int32_t x)
     return x * ((3 << qP) - (x*x >> qR)) >> qS;
 }
 
-int32_t iInvSize_S3(int32_t x)
+int32_t iInvSin_S3(int32_t x)
 {
     static const int16_t TABLE[65] = {
         0,    81,   163,  245,  326,  408,  490,  572, 654, 
@@ -126,7 +126,7 @@ int32_t iInvSize_S3(int32_t x)
     int fraction = x - index * DIV;
     int16_t a = TABLE[index];
     int16_t b = TABLE[index + 1];
-    int32_t result = lerp1024<int16_t>(a, b, fraction * 1024 / DIV);
+    int32_t result = lerp1024(a, b, fraction * 1024 / DIV);
 
     return result * sign;
 }
