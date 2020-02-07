@@ -96,5 +96,8 @@
     <ClInclude Include="..\..\src\saber\bladeflash.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\saber\voltmeter.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

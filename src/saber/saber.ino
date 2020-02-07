@@ -89,9 +89,9 @@ Voltmeter   voltmeter;
 BladeFlash  bladeFlash;
 CMDParser   cmdParser(&saberDB, manifest);
 Blade       blade;
-Timer2      vbatTimer(AveragePower::SAMPLE_INTERVAL);
+Timer2      vbatTimer(Voltmeter::SAMPLE_INTERVAL);
 Tester      tester;
-
+AverageSample<Vec3<int32_t>, Vec3<int32_t>, 8> averageAccel(Vec3<int32_t>(0, 0, 0));
 
 #ifdef SABER_NUM_LEDS
 #ifdef SABER_UI_START
@@ -127,6 +127,7 @@ Digit4UI digit4UI;
 #define SHIFTED_OUTPUT
 #endif
 
+#if SABER_DISPLAY == SABER_DISPLAY_128_32
 void BlockDrawOLED(const BlockDrawChunk* chunks, int n)
 {
     static const int OLED_BYTES = OLED_WIDTH * OLED_HEIGHT / 8;
@@ -150,6 +151,7 @@ void BlockDrawOLED(const BlockDrawChunk* chunks, int n)
         }
     }
 }
+#endif
 
 void setup() {
     #if defined(SHIFTED_OUTPUT)
@@ -294,6 +296,10 @@ void buttonAReleaseHandler(const Button& b)
 {
     ledA.blink(0, 0);
     ledA.set(true); // power is on.
+
+    if (uiMode.mode() == UIMode::COLOR_CHANGE) {
+        blade.setRGB(osbr::RGB(0));
+    }
 }
 
 bool setVolumeFromHoldCount(int count)
@@ -346,7 +352,7 @@ void buttonAClickHandler(const Button&)
         // the modes are cycled. But haven't yet
         // figured out a better option.
         if (uiMode.mode() == UIMode::NORMAL) {
-            int power = AveragePower::vbatToPowerLevel(voltmeter.averagePower(), 4);
+            int power = Voltmeter::vbatToPowerLevel(voltmeter.averagePower(), 4);
             ledA.blink(power, INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
         }
     }
@@ -362,8 +368,8 @@ void buttonAHoldHandler(const Button& button)
     //Log.p("buttonAHoldHandler nHolds=").p(button.nHolds()).eol();
     
     if (bladeState.state() == BLADE_OFF) {
-        bool buttonOn = false;
-        int cycle = button.cycle(&buttonOn);
+        bool buttonLEDOn = false;
+        int cycle = button.cycle(&buttonLEDOn);
         //Log.p("button nHolds=").p(button.nHolds()).p(" cycle=").p(cycle).p(" on=").p(buttonOn).eol();
 
         if (uiMode.mode() == UIMode::NORMAL) {
@@ -373,19 +379,22 @@ void buttonAHoldHandler(const Button& button)
         }
         else 
         {
-            // Only respond to the rising edge:
-            if (buttonOn) {
+            if (buttonLEDOn) {
                 if (uiMode.mode() == UIMode::PALETTE) {
                     if (!setPaletteFromHoldCount(cycle))
-                        buttonOn = false;
+                        buttonLEDOn = false;
                 }
                 else if (uiMode.mode() == UIMode::VOLUME) {
                     if (!setVolumeFromHoldCount(cycle))
-                        buttonOn = false;
+                        buttonLEDOn = false;
                 }
             }
+            if (uiMode.mode() == UIMode::COLOR_CHANGE) {
+                buttonLEDOn = true;
+                // blade.setRGB();
+            }
         }
-        ledA.set(buttonOn);
+        ledA.set(buttonLEDOn);
     }
     else if (bladeState.state() != BLADE_RETRACT) {
         if (button.nHolds() == 1) {
@@ -394,10 +403,6 @@ void buttonAHoldHandler(const Button& button)
     }
 }
 
-bool buttonsReleased()
-{
-    return !buttonA.isDown();
-}
 
 void processSerial() {
     while (Serial.available()) {
@@ -417,6 +422,7 @@ void processAccel(uint32_t msec)
     // Also look for stalls and hitches.
     static const int N_ACCEL = 4;
     Vec3<float> data[N_ACCEL];
+    Vec3<int32_t> intData[N_ACCEL];
 
     #if SERIAL_DEBUG == 1
     uint32_t start = millis();
@@ -428,8 +434,12 @@ void processAccel(uint32_t msec)
         Log.p("Accelerometer samples disposed=").p(available - N_ACCEL).eol();
     }
 
-    int n = accelMag.read(data, N_ACCEL);
+    int n = accelMag.readInner(intData, data, N_ACCEL);
     ASSERT(n <= N_ACCEL);
+
+    for(int i=0; i<n; ++i) {
+        averageAccel.push(intData[i]);
+    }
 
     if (bladeState.state() == BLADE_ON) {
         for (int i = 0; i < n; ++i)

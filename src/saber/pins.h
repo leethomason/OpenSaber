@@ -48,7 +48,8 @@ SOFTWARE.
 #define SABER_MODEL_KENOBI_IV	   16   // ItsyBitsy, Shield v1,Neopixel
 #define SABER_MODEL_AQUATIC_2	   17   // ItsyBitsy, Shield v1c, Dotstar
 #define SABER_MODEL_TYVOKKA		   18   // ItsyBitsy, Shield v1c, Dotstar
-#define SABER_MODEL_SHOCK3  	   19   // Itsy v2b, OLED (128x32), Dotstar crystal
+//#define SABER_MODEL_SHOCK3  	   19   // Itsy v2b, OLED (128x32), Dotstar crystal
+#define SABER_MODEL_LEIA  	   	   20   // Itsy v2b, Dotstar UI
 
 #define SABER_SUB_MODEL_NONE		0
 #define SABER_SUB_MODEL_LUNA		1
@@ -58,7 +59,7 @@ SOFTWARE.
 
 // ----------------------------------
 #define SERIAL_DEBUG 				1
-#define SABER_MODEL 				SABER_MODEL_SHOCK3
+#define SABER_MODEL 				SABER_MODEL_LEIA
 #define SABER_SUB_MODEL				SABER_SUB_MODEL_STANDARD
 // ----------------------------------
 
@@ -705,31 +706,27 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	static const int VOLUME_3 = 120;
 	static const int VOLUME_4 = 204;
 
-#elif (SABER_MODEL == SABER_MODEL_SHOCK3)
+#elif (SABER_MODEL == SABER_MODEL_LEIA)
 	#define PCB_VERSION 			PCB_ITSY_2B
 	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
 	#define SABER_VOLTMETER			
 	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 	#define SABER_UI_LED			SABER_LED_DOTSTAR
 
-	#define SABER_NUM_LEDS 			    1
-	//#define SABER_UI_START			0
-	//#define SABER_UI_COUNT			0
-	//#define SABER_UI_BRIGHTNESS	    16		
-	//#define SABER_UI_IDLE_MEDITATION
+	#define SABER_NUM_LEDS 			    4
+	#define SABER_UI_START				0
+	#define SABER_UI_COUNT				4
+	#define SABER_UI_BRIGHTNESS	    	16		
+	#define SABER_UI_IDLE_MEDITATION
 	//#define SABER_UI_REVERSE
-	#define SABER_CRYSTAL_START	        0
-	#define SABER_CRYSTAL_BRIGHTNESS    64
-
-	#define SABER_DISPLAY	SABER_DISPLAY_128_32
+	#define SABER_UI_COLOR_CHANGE
 
 	#define SABER_SOUND_DEF 		SABER_SOUND_DEF_BESPIN_JAINA
 
 	static const int32_t UVOLT_MULT = 5612;	// FIXME
-	#define ID_STR "Shock 3 Cree XPE2 RGB"
+	#define ID_STR "Leia Cree XPE2 RGB"
 
 	// FIXME
-	// Heat sink compound; LED Supply advanced heat sink.
 	static const int32_t RED_VF   = 2200;   // milli-volts
 	static const int32_t RED_I    = 400;    // milli-amps
 	static const int32_t RED_R    = 4700;   // milli-ohms

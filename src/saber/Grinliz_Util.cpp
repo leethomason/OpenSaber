@@ -162,6 +162,35 @@ uint32_t hash32(const char* v)
     return h;
 }
 
+bool TestAverageSample()
+{
+    {
+        AverageSample<Vec3<int>, Vec3<int>, 4> ave(Vec3<int>(2, 4, 8));
+        Vec3<int> r = ave.average();
+        TEST_IS_TRUE(r.x == 2);
+        TEST_IS_TRUE(r.y == 4);
+        TEST_IS_TRUE(r.z == 8);
+
+        ave.push(Vec3<int>(0, 0, 0));
+        ave.push(Vec3<int>(0, 0, 0));
+
+        r = ave.average();
+        TEST_IS_TRUE(r.x == 1);
+        TEST_IS_TRUE(r.y == 2);
+        TEST_IS_TRUE(r.z == 4);
+    }
+    {
+        AverageSample<uint16_t, uint32_t, 256> ave(4000);
+        TEST_IS_TRUE(ave.average() == 4000);
+        for (int i = 0; i < 128; i++) {
+            ave.push(8000);
+        }
+        TEST_IS_TRUE(ave.average() == 6000);
+    }
+    return true;
+}
+
+
 bool TestCStr()
 {
     TEST_IS_TRUE(strStarts("FooBar", "Foo"));

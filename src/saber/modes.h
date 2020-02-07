@@ -6,7 +6,8 @@ enum class UIMode {
     NORMAL,
     PALETTE,
     VOLUME,
-    MEDITATION
+    MEDITATION,
+    COLOR_CHANGE
 };
 
 enum {

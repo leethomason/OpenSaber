@@ -20,6 +20,7 @@ bool runUnitTests()
     RUN_TEST(TestEvent);
 	RUN_TEST(DotStarUI::Test);
 	RUN_TEST(TestCStr);
+    RUN_TEST(TestAverageSample);
     RUN_TEST(TestCQueue);
     RUN_TEST(Random::Test);
     RUN_TEST(TestUtil);

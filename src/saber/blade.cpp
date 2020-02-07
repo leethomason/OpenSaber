@@ -40,7 +40,7 @@
     x interrupts don't matter
 
     Does have to have something to do with the interpolation / color change. Don't see in-use
-    flashes. Only during ignite / retract.
+    flashes. Only during ignite / retract. 
 */
 
 #include <Arduino.h>

@@ -119,7 +119,7 @@ UIModeUtil::UIModeUtil()
 
 void UIModeUtil::nextMode()
 {
-	static const int NUM = (int)UIMode::MEDITATION + 1;
+	static const int NUM = (int)UIMode::PALETTE + 1;
 	m_mode = (UIMode)((int(m_mode) + 1) % NUM);
 }
 

@@ -24,6 +24,10 @@ struct Vec3
 	T y;
 	T z;
 
+	Vec3() {}
+    Vec3(T t) { x = t; y = t; z = t; }
+	Vec3(T _x, T _y, T _z) { x = _x; y = _y; z = _z; }
+
 	void setZero() { x = y = z = 0; }
 	void scale(T s) { x *= s; y *= s; z *= s; }
 
@@ -32,6 +36,7 @@ struct Vec3
 
     inline friend Vec3<T> operator +  (const Vec3<T>& a, const Vec3<T>& b) { Vec3<T> t;  t.x = a.x + b.x; t.y = a.y + b.y; t.z = a.z + b.z; return t; }
     inline friend Vec3<T> operator -  (const Vec3<T>& a, const Vec3<T>& b) { Vec3<T> t;  t.x = a.x - b.x; t.y = a.y - b.y; t.z = a.z - b.z; return t; }
+    inline friend Vec3<T> operator /  (const Vec3<T>& a, T b) { Vec3<T> t;  t.x = a.x / b; t.y = a.y / b; t.z = a.z / b; return t; }
 };
 
 /**
@@ -456,6 +461,51 @@ private:
 	uint32_t s;
 };
 
+
+/**
+ * Power changes over time, and higher
+ * draw changes the power. A small class
+ * to average out power changes.
+ */
+template<typename TYPE, typename SUMTYPE, int N>
+class AverageSample
+{
+public:
+    AverageSample(TYPE initialValue) {
+        for (int i = 0; i < N; ++i) m_sample[i] = initialValue;
+        m_average = initialValue;
+        m_valid = true;
+    }
+
+    void push(TYPE value) {
+        m_sample[m_pos] = value;
+        m_pos++;
+        if (m_pos == N) m_pos = 0;
+        m_valid = false;
+    }
+
+    TYPE average() const {
+        if (m_valid == false) {
+            SUMTYPE total = 0;
+            for (int i = 0; i < N; ++i) {
+                total += m_sample[i];
+            }
+            m_average = total / N;
+            m_valid = true;
+        }
+        return m_average;
+    }
+
+    int numSamples() const { return N; }
+
+private:
+    mutable TYPE m_average;
+    mutable bool m_valid;
+    int m_pos = 0;
+    TYPE m_sample[N];
+};
+
+bool TestAverageSample();
 
 class Timer2
 {
