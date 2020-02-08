@@ -1,6 +1,7 @@
 #pragma once
 
 #include "rgb.h"
+#include "fixed.h"
 
 class BladeFlash
 {
@@ -23,3 +24,9 @@ private:
     osbr::RGB impactColor;
     osbr::RGB color;
 };
+
+// Could be someplace better, but shared code (with win32) in this location.
+osbr::RGB AccelToColor(FixedNorm x, FixedNorm z);
+
+bool TestAccelToColor();
+

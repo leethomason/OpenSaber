@@ -120,6 +120,8 @@ public:
         return val;
     }
 
+    FixedT abs() const { return x > 0 ? *this : -(*this); }
+
     FixedT& operator = (const FixedT &v) { x = v.x; return *this; }
     FixedT& operator = (const int v) { x = IntToFixed(v); return *this; }
 
@@ -206,6 +208,9 @@ typedef FixedT<int32_t, int16_t, 6> Fixed115;
 // Good for [1, -1] type functions, general near one.
 typedef FixedT<int32_t, int16_t, 12> FixedNorm;
 
+static const FixedNorm fixedNormHalf(1, 2);
+static const FixedNorm fixedNormSqrt2Over2(0.7071067811);
+
 inline Fixed115 operator * (const Fixed115& a, const FixedNorm& b)
 {
     FixedT<int32_t, int16_t, 6> f;
@@ -250,11 +255,14 @@ inline FixedNorm iCos(FixedNorm f) {
     return FixedNorm(c12, ISINE_ONE);
 }
 
+
+// [-90, 90]
 inline FixedNorm iInvSin(FixedNorm f) {
     int32_t angle = iInvSin_S3(f.scale(ISINE_ONE));
     return FixedNorm(angle, ISINE_360);
 }
 
+// [180, 0]
 inline FixedNorm iInvCos(FixedNorm f) {
     int32_t angle = iInvCos_S3(f.scale(ISINE_ONE));
     return FixedNorm(angle, ISINE_360);

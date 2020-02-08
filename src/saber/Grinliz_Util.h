@@ -15,6 +15,10 @@ inline int32_t lerp255(int16_t a, int16_t b, int32_t t255) {
     return (a * (255 - t255) + b * t255) / 255;
 }
 
+inline FixedNorm lerp(FixedNorm a, FixedNorm b, FixedNorm t) {
+    return (a * (1 - t) + b * t);
+}
+
 bool TestUtil();
 
 template<typename T>

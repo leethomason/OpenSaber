@@ -61,8 +61,6 @@
 using namespace osbr;
 
 static const uint32_t INDICATOR_CYCLE         = 1000;
-static const uint32_t PING_PONG_INTERVAL      = 2400;
-static const uint32_t BREATH_TIME             = 1200;
 static const uint32_t IMPACT_MIN_TIME         = 1000;    // Minimum time between impact sounds. FIXME: need adjusting.
 
 uint32_t lastMotionTime = 0;    
