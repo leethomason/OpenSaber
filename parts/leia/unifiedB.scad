@@ -4,8 +4,9 @@ use <../inset.scad>
 use <testplate.scad>
 include <dim.scad>
 
+DRAW_AFT  = true;
 DRAW_FORE = false;
-DRAW_AFT  = false;
+DRAW_PLATE = false;
 
 EPS = 0.01;
 EPS2 = EPS*2;
@@ -94,6 +95,7 @@ module drawAft()
                     DZ_BOLT,  
                     DZ_PORT,
                     DZ_SWITCH,
+                    dzFore = DZ_BUTTRESS * 2,
                     roundRect = 3.175/2,
                     frontBridge=false,
                     bridgeStyle=2,
@@ -112,31 +114,25 @@ module drawAft()
         translate([0, 0, Z_T_RING]) rotate([180, 0, 0])
             keyJoint(JOINT, D_INNER_AFT, D_INNER_AFT - 4, true);
 
-        dotstarZ = dotstarStripZLen(4);
-        dotstarX = 12.4;    // of the strip, not the LED
-        rotate([0, 0, 15])
-        {
-            translate([D_INNER_AFT/2 - 2.5, 0, DZ_BOLT + Z_START_SECTION - dotstarZ/2]) 
-                polygonXY(h=dotstarZ, points = [
-                    [0, -dotstarX/2],
-                    [10, -dotstarX/2 + 10],
-                    [10, dotstarX/2 + 10],
-                    [0, dotstarX/2]
-                ]);
-            DX_WIRE = 8;
-            translate([D_INNER_AFT/2 - 5.0, -DX_WIRE/2, Z_START_SECTION + DZ_BUTTRESS * 11])
-                cube(size=[20, DX_WIRE, DZ_BUTTRESS]);
+        mirror([-1, 0, 0]) {
+            dotstarZ = dotstarStripZLen(4);
+            dotstarX = 12.4;    // of the strip, not the LED
+            rotate([0, 0, 15])
+            {
+                translate([D_INNER_AFT/2 - 2.5, 0, DZ_BOLT + Z_START_SECTION - dotstarZ/2]) 
+                    polygonXY(h=dotstarZ, points = [
+                        [0, -dotstarX/2],
+                        [10, -dotstarX/2 + 10],
+                        [10, dotstarX/2 + 10],
+                        [0, dotstarX/2]
+                    ]);
+                
+                // Wire access
+                DX_WIRE = 9;
+                translate([D_INNER_AFT/2 - 5.0, -DX_WIRE/2, Z_START_SECTION + DZ_BUTTRESS * 3])
+                    cube(size=[20, DX_WIRE, DZ_BUTTRESS]);
+            }
         }
-
-        /*rotate([0, 0, -90])
-        {
-            translate([-dotstarX/2, D_INNER_AFT/2 - 2.0, DZ_BOLT + Z_START_SECTION - dotstarZ/2])
-                cube(size=[dotstarX, 10, dotstarZ]);
-            DX_WIRE = 8;
-            translate([-DX_WIRE/2, D_INNER_AFT/2 - 5.0, Z_START_SECTION + DZ_BUTTRESS * 11])
-                cube(size=[DX_WIRE, 20, DZ_BUTTRESS]);
-        }
-        */
     }
     for(i=[0:2]) {
         translate([0, 0, i * 2 * DZ_BUTTRESS + SPKR_Z]) {
@@ -154,10 +150,11 @@ module drawAft()
 if (DRAW_FORE) drawFore();
 if (DRAW_AFT) drawAft();
 
-color("lightgrey") translate([0, D_INNER_AFT/2 - DY_INSET, Z_START_INSET]) {
-    switchPlate();
+if (DRAW_PLATE) {
+    color("lightgrey") translate([0, D_INNER_AFT/2 - DY_INSET, Z_START_INSET]) {
+        switchPlate();
+    }
 }
-
 
 //color("red") translate([0, 0, M_FORE]) battery(D_INNER_FORE, "18650");
 //translate([0, -11, SPKR_Z - 2]) color("green") mc();

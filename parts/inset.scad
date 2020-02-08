@@ -136,6 +136,7 @@ module insetHolder( diameter,
                     pinHeaderHolder=false,
                     firstButtressFullRing=true,
                     roundRect=0,
+                    dzFore=0,      // make the first baffle this thicknes  (0 to use standard)
                     dyInset=5,
                     dySwitch=5.5,
                     flushPort=true,
@@ -265,8 +266,8 @@ module insetHolder( diameter,
                     // the case will accomplish that. Only fit on the
                     // z axis. Let the y float.
                     zCapsule(dzA, dzB, rCapsule, roundRect);          // the actual wood
-                    *translate([-50, 0, dzA-rCapsule])
-                        cube(size=[100, 100, rCapsule*2 + dzB - dzA]);
+                    //translate([-50, 0, dzA-rCapsule])
+                    //    cube(size=[100, 100, rCapsule*2 + dzB - dzA]);
 
                     translate([0, DY - EPS*2, 0])
                         zCapsule(dzA, dzB, rCapsule-2, roundRect);
@@ -326,8 +327,9 @@ module insetHolder( diameter,
                     cylinder(h=50, d=13.0);
     }
     // Cap the end.
-    translate([0, 0, dzSection - dzBaffle]) {
-        insetBaffle(diameter, dzBaffle, frontBridge ? bridgeStyle : 0);
+    dzF = dzFore > 0 ? dzFore : dzBaffle;
+    translate([0, 0, dzSection - dzF]) {
+        insetBaffle(diameter, dzF, frontBridge ? bridgeStyle : 0);
     }
 }
 

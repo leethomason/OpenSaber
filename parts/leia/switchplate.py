@@ -7,14 +7,12 @@ from hole import hole
 from rectangleTool import rectangleTool
 
 H_WOOD = 25.4 / 4
-X_CAPSULE = 40.0
-Y_CAPSULE = 18.5
-D_OUTER = 37.6
+X_CAPSULE = 42.0
+Y_CAPSULE = 18.0
 
-BOLT = 20.0
-PORT = 8.0
-SWITCH = 29.0
-bottom = -H_WOOD - 1.0
+BOLT = 21.0
+PORT = BOLT + 12.0
+SWITCH = BOLT - 12.0
 TRIM = 0.2
 
 mat = init_material(sys.argv[1])
