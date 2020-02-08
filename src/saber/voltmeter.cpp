@@ -34,7 +34,7 @@ uint32_t AveragePower::power() const
         for (int i = 0; i < NUM_SAMPLES; ++i) {
             total += m_sample[i];
         }
-        m_power = total / NUM_SAMPLES;
+        m_power = total >> SAMPLE_SHIFT;
     }
     return m_power;
 }

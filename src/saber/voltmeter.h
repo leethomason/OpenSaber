@@ -15,7 +15,9 @@ public:
     void push(uint32_t milliVolts);     // circular buffer of samples; seeded with nominal
 
     uint32_t power() const;
-    enum { NUM_SAMPLES = 100 };
+    enum { NUM_SAMPLES = 64,
+           SAMPLE_SHIFT = 6
+    };
     enum { SAMPLE_INTERVAL = 12 };
 
     static int vbatToPowerLevel(int32_t vbat, int nLevels);
@@ -30,7 +32,10 @@ private:
 class Voltmeter
 {
 public:
-    Voltmeter() { _instance = this; }
+    Voltmeter() { 
+        ASSERT(_instance == 0);
+        _instance = this; 
+    }
     static Voltmeter* instance() { return _instance; }
 
     void begin();
@@ -38,7 +43,7 @@ public:
     /// Instantaneous power. (Noisy).
     uint32_t readVBat();
     /// Average power.
-    uint32_t averagePower() { return m_averagePower.power(); }
+    uint32_t averagePower() const { return m_averagePower.power(); }
 
     /// Add a sample to the average power.
     uint32_t takeSample();

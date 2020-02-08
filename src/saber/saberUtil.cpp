@@ -1,10 +1,9 @@
 #include "saberUtil.h"
 #include "Grinliz_Arduino_Util.h"
 #include "blade.h"
-#include "saberDB.h"
 #include "sfx.h"
+#include "bladeflash.h"
 
-//#define USE_PS_NXP
 using namespace osbr;
 
 void BladeState::change(uint8_t state)
@@ -14,21 +13,11 @@ void BladeState::change(uint8_t state)
     m_startTime = millis();
 
     switch(m_currentState) {
-    case BLADE_OFF:
-        EventQ.event("[BLADE_OFF]");
-        break;
-    case BLADE_IGNITE:
-        EventQ.event("[BLADE_IGNITE]");
-        break;
-    case BLADE_ON:
-        EventQ.event("[BLADE_ON]");
-        break;
-    case BLADE_FLASH:
-        EventQ.event("[BLADE_FLASH]");
-        break;
-    case BLADE_RETRACT:
-        EventQ.event("[BLADE_RETRACT]");
-        break;
+    case BLADE_OFF:     EventQ.event("[BLADE_OFF]");        break;
+    case BLADE_IGNITE:  EventQ.event("[BLADE_IGNITE]");     break;
+    case BLADE_ON:      EventQ.event("[BLADE_ON]");         break;
+    case BLADE_RETRACT: EventQ.event("[BLADE_RETRACT]");    break;
+    
     default:
         ASSERT(false);
         break;
@@ -41,7 +30,7 @@ bool BladeState::bladeOn() const
     return m_currentState >= BLADE_ON && m_currentState < BLADE_RETRACT;
 }
 
-void BladeState::process(Blade* blade, const SaberDB& saberDB, uint32_t time)
+void BladeState::process(Blade* blade, const BladeFlash& saber, uint32_t time)
 {
     static const uint32_t FLASH_TIME = 120;
     SFX* sfx = SFX::instance();
@@ -51,7 +40,7 @@ void BladeState::process(Blade* blade, const SaberDB& saberDB, uint32_t time)
         break;
 
     case BLADE_ON:
-        blade->setRGB(saberDB.bladeColor());
+        blade->setRGB(saber.getColor());
         break;
 
     case BLADE_IGNITE:
@@ -60,11 +49,11 @@ void BladeState::process(Blade* blade, const SaberDB& saberDB, uint32_t time)
         uint32_t t = millis() - startTime();
 
         if (t >= igniteTime) {
-            blade->setRGB(saberDB.bladeColor());
+            blade->setRGB(saber.getColor());
             change(BLADE_ON);
         }
         else {
-            RGB c = RGB::lerp1024(RGB(RGB::BLACK), saberDB.bladeColor(), t * 1024 / igniteTime);
+            RGB c = RGB::lerp1024(RGB(RGB::BLACK), saber.getColor(), t * 1024 / igniteTime);
             blade->setRGB(c);
         }
     }
@@ -80,22 +69,8 @@ void BladeState::process(Blade* blade, const SaberDB& saberDB, uint32_t time)
             change(BLADE_OFF);
         }
         else {
-            RGB c = RGB::lerp1024(saberDB.bladeColor(), RGB(RGB::BLACK), t * 1024 / retractTime);
+            RGB c = RGB::lerp1024(saber.getColor(), RGB(RGB::BLACK), t * 1024 / retractTime);
             blade->setRGB(c);
-        }
-    }
-    break;
-
-    case BLADE_FLASH:
-        // interpolate?
-    {
-        uint32_t delta = time - startTime();
-        if (delta > FLASH_TIME) {
-            blade->setRGB(saberDB.bladeColor());
-            change(BLADE_ON);
-        }
-        else {
-            blade->setRGB(saberDB.impactColor());
         }
     }
     break;

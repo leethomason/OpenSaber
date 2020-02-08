@@ -10,7 +10,7 @@
 #include "modes.h"
 
 class Blade;
-class SaberDB;
+class BladeFlash;
 
 class BladeState
 {
@@ -32,7 +32,7 @@ public:
         return m_startTime;
     }
 
-    void process(Blade* blade, const SaberDB& saberDB, uint32_t time);
+    void process(Blade* blade, const BladeFlash& bladeFlash, uint32_t time);
 
 private:
     uint8_t  m_currentState = BLADE_OFF;

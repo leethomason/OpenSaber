@@ -56,6 +56,7 @@
 #include "manifest.h"
 #include "vrender.h"
 #include "vectorui.h"
+#include "bladeflash.h"
 
 using namespace osbr;
 
@@ -64,8 +65,6 @@ static const uint32_t PING_PONG_INTERVAL      = 2400;
 static const uint32_t BREATH_TIME             = 1200;
 static const uint32_t IMPACT_MIN_TIME         = 1000;    // Minimum time between impact sounds. FIXME: need adjusting.
 
-uint32_t reflashTime    = 0;
-bool     flashOnClash   = false;
 uint32_t lastMotionTime = 0;    
 uint32_t lastImpactTime = 0;
 uint32_t lastLoopTime   = 0;
@@ -79,16 +78,20 @@ Adafruit_ZeroI2S i2s(PIN_I2S_LRCLK, PIN_I2S_BITCLK, PIN_I2S_DATA, 2);
 I2SAudioDriver i2sAudioDriver(&dma, &i2s, &spiFlash, manifest);
 SFX sfx(&i2sAudioDriver, manifest);
 
-BladeState  bladeState;
-
 ButtonCB    buttonA(PIN_SWITCH_A, SABER_BUTTON);
 LEDManager  ledA(PIN_LED_A, false);
 
 UIRenderData uiRenderData;
-
+BladeState  bladeState;
 UIModeUtil  uiMode;
 SaberDB     saberDB;
 Voltmeter   voltmeter;
+BladeFlash  bladeFlash;
+CMDParser   cmdParser(&saberDB, manifest);
+Blade       blade;
+Timer2      vbatTimer(AveragePower::SAMPLE_INTERVAL);
+Tester      tester;
+
 
 #ifdef SABER_NUM_LEDS
 #ifdef SABER_UI_START
@@ -123,11 +126,6 @@ ShiftedSevenSegment shifted7;
 Digit4UI digit4UI;
 #define SHIFTED_OUTPUT
 #endif
-
-CMDParser   cmdParser(&saberDB, manifest);
-Blade       blade;
-Timer2      vbatTimer(AveragePower::SAMPLE_INTERVAL);
-Tester      tester;
 
 void BlockDrawOLED(const BlockDrawChunk* chunks, int n)
 {
@@ -273,10 +271,6 @@ void setup() {
     Log.p("Setup() done.").eol();
 }
 
-uint32_t calcReflashTime() {
-    return millis() + random(500) + 200;
-}
-
 /*
    The saberDB is the source of truth. (The Model.)
    Bring other things in sync when it changes.
@@ -291,6 +285,9 @@ void syncToDB()
     uiRenderData.palette = saberDB.paletteIndex();
     uiRenderData.mVolts = voltmeter.averagePower();
     uiRenderData.fontName = manifest.getUnit(sfx.currentFont()).getName();
+
+    bladeFlash.setBladeColor(saberDB.bladeColor());
+    bladeFlash.setImpactColor(saberDB.impactColor());
 }
 
 void buttonAReleaseHandler(const Button& b)
@@ -354,7 +351,7 @@ void buttonAClickHandler(const Button&)
         }
     }
     else if (bladeState.state() == BLADE_ON) {
-        bladeState.change(BLADE_FLASH);
+        bladeFlash.doFlash(millis());
         sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
     }
 }
@@ -411,7 +408,6 @@ void processSerial() {
     }
 }
 
-
 void processAccel(uint32_t msec)
 {
     static ProfileData profData("processAccel");
@@ -459,15 +455,17 @@ void processAccel(uint32_t msec)
             bool sfxOverDue = false;
 #endif
 
-            if ((g2Normal >= impact * impact) && (msec - lastImpactTime) > IMPACT_MIN_TIME)
+            if ((g2Normal >= impact * impact))
             {
-                bool sound = sfx.playSound(SFX_IMPACT, sfxOverDue ? SFX_OVERRIDE : SFX_GREATER_OR_EQUAL);
-                if (sound)
-                {
-                    Log.p("Impact. g=").p(sqrt(g2)).eol();
-                    bladeState.change(BLADE_FLASH);
-                    lastImpactTime = msec;
-                    lastMotionTime = msec;
+                bladeFlash.doFlash(millis());
+                if ((msec - lastImpactTime) > IMPACT_MIN_TIME) {
+                    bool sound = sfx.playSound(SFX_IMPACT, sfxOverDue ? SFX_OVERRIDE : SFX_GREATER_OR_EQUAL);
+                    if (sound)
+                    {
+                        Log.p("Impact. g=").p(sqrt(g2)).eol();
+                        lastImpactTime = msec;
+                        lastMotionTime = msec;
+                    }
                 }
             }
             else if (g2 >= motion * motion)
@@ -502,7 +500,8 @@ void loop() {
     buttonA.process();
     ledA.process();
 
-    bladeState.process(&blade, saberDB, millis());
+    bladeFlash.tick(msec);
+    bladeState.process(&blade, bladeFlash, millis());
     processAccel(msec);
     sfx.process();
 
@@ -518,15 +517,6 @@ void loop() {
         DumpProfile();
     }
     #endif    
-
-    if (reflashTime && msec >= reflashTime) {
-        reflashTime = 0;
-        if (flashOnClash && bladeState.state() == BLADE_ON) {
-            EventQ.event("[FlashOnClash]");
-            bladeState.change(BLADE_FLASH);
-            reflashTime = calcReflashTime();
-        }
-    }
 
     loopDisplays(msec, delta);
 }

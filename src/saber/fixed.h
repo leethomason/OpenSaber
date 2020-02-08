@@ -227,23 +227,37 @@ static const int32_t ISINE_HALF = 2048;
 // return: sin, 12 bits (range -4096 to 4096)
 int32_t iSin_S3(int32_t theta);
 
+inline int32_t iCos_S3(int32_t x) {
+    return iSin_S3(x + ISINE_90);
+}
+
 // Inverse sine.
 // x: -4096 to 4096 (12 bits)
 // returns: angle as above (-2^15 to +2^15) but range -ISINE_90 to ISINE_90
-int32_t iInvSize_S3(int32_t x);
+int32_t iInvSin_S3(int32_t x);
 
-inline int32_t iCos_S3(int32_t x) {
-    return iSin_S3(x + 8192);
+inline int32_t iInvCos_S3(int32_t x) {
+    return -iInvSin_S3(x) + ISINE_90;
 }
 
 inline FixedNorm iSin(FixedNorm f) {
-    int32_t s12 = iSin_S3(f.scale(32768));
-    return FixedNorm(s12, 4096);
+    int32_t s12 = iSin_S3(f.scale(ISINE_360));
+    return FixedNorm(s12, ISINE_ONE);
 }
 
 inline FixedNorm iCos(FixedNorm f) {
-    int32_t c12 = iCos_S3(f.scale(32768));
-    return FixedNorm(c12, 4096);
+    int32_t c12 = iCos_S3(f.scale(ISINE_360));
+    return FixedNorm(c12, ISINE_ONE);
+}
+
+inline FixedNorm iInvSin(FixedNorm f) {
+    int32_t angle = iInvSin_S3(f.scale(ISINE_ONE));
+    return FixedNorm(angle, ISINE_360);
+}
+
+inline FixedNorm iInvCos(FixedNorm f) {
+    int32_t angle = iInvCos_S3(f.scale(ISINE_ONE));
+    return FixedNorm(angle, ISINE_360);
 }
 
 #endif // FIXED_16_INCLUDED

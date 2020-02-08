@@ -7,14 +7,12 @@
 #include "grinliz_assert.h"
 #include "fixed.h"
 
-template<class T>
-T lerp256(T a, T b, T t256) {
-    return (a * (256 - t256) + b * t256) / 256;
+inline int32_t lerp1024(int16_t a, int16_t b, int32_t t1024) {
+    return (a * (1024 - t1024) + b * t1024) / 1024;
 }
 
-template<class T>
-T lerp1024(T a, T b, T t1024) {
-    return (a * (1024 - t1024) + b * t1024) / 1024;
+inline int32_t lerp255(int16_t a, int16_t b, int32_t t255) {
+    return (a * (255 - t255) + b * t255) / 255;
 }
 
 bool TestUtil();
