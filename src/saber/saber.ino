@@ -127,6 +127,7 @@ Digit4UI digit4UI;
 #define SHIFTED_OUTPUT
 #endif
 
+#if SABER_DISPLAY == SABER_DISPLAY_128_32
 void BlockDrawOLED(const BlockDrawChunk* chunks, int n)
 {
     static const int OLED_BYTES = OLED_WIDTH * OLED_HEIGHT / 8;
@@ -150,6 +151,7 @@ void BlockDrawOLED(const BlockDrawChunk* chunks, int n)
         }
     }
 }
+#endif
 
 void setup() {
     #if defined(SHIFTED_OUTPUT)

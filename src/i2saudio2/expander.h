@@ -9,8 +9,6 @@
 #include <string.h>
 #include <limits.h>
 
-//#define TUNE_MODE
-
 namespace wav12 {
 
     template<class T>
