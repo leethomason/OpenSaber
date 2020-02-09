@@ -22,10 +22,6 @@ nomad_header(g, mat, CNC_TRAVEL_Z)
 g.absolute()
 g.move(z=0)
 
-# cut the curve - expects a ball cutter
-hill(g, mat, D_OUTER, X_CAPSULE, Y_CAPSULE, False)
-tool_change(g, mat, 1)
-
 #center bolt
 travel(g, mat, x=BOLT)
 hole(g, mat, bottom, d=4.4)
