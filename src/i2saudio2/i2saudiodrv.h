@@ -31,6 +31,7 @@ public:
     static int getCallbackCycle() { return callbackCycle; }
 
     void play(int index, bool loop, int channel);
+    bool isPlaying(int channel);
     void stop(int channel);
     void setVolume(int v, int channel);
     int getVolume(int channel);

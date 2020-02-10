@@ -153,6 +153,7 @@ void I2SAudioDriver::begin()
 
 void I2SAudioDriver::play(int index, bool loop, int channel)
 {
+    // Log.p("I2SAudioDriver::play index=").p(index).p(" loop=").p(loop).p(" ch=").p(channel).eol();
     channel = glClamp(channel, 0, AUDDRV_NUM_CHANNELS - 1);
     const MemUnit& memUnit = manifest.getUnit(index);
 

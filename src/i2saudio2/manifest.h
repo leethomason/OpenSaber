@@ -14,6 +14,14 @@ struct MemUnit {
     uint32_t reserve : 7;
 
     uint32_t numSamples() const { return is8Bit ? size : size * 2; }
+    uint32_t timeInMSec() const {
+        return numSamples() * 1000 / 22050;
+    }
+    CStr<10> getName() const {
+        CStr<10> n;
+        name.toStr(&n);
+        return n;
+    }
 };
 
 static_assert(sizeof(MemUnit) == 16, "16 byte MemUnit");

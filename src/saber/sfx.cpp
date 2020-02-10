@@ -185,8 +185,13 @@ void SFX::stopSound()
     m_currentSound = SFX_NONE;
 }
 
-void SFX::process()
+void SFX::process(bool bladeOn)
 {
+    if (bladeOn) {
+        if (!m_driver->isPlaying(0)) {
+            playSound(SFX_IDLE, SFX_GREATER);
+        }
+    }
 }
 
 void SFX::readIgniteRetract()

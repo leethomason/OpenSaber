@@ -8,6 +8,7 @@ class Button;
 struct ButtonCBHandlers;
 class Tester;
 class SaberDB;
+class BladeFlash;
 
 namespace osbr {
 	struct RGB;
@@ -35,7 +36,7 @@ class Tester
 public:
 	Tester();
 	void attach(Button* buttonA, Button* buttonB);
-	void attachDB(SaberDB* _saberDB) { saberDB = _saberDB; }
+	void attachDB(SaberDB* _saberDB, BladeFlash* _bladeFlash) { saberDB = _saberDB; bladeFlash = _bladeFlash; }
 
 	void runTests();
 	void process();
@@ -46,7 +47,9 @@ public:
 	void fire(const char* event);
 	void press(int button, uint32_t time);
 	void delayedPress(int button, uint32_t wait, uint32_t time);
+	
 	SaberDB* getSaberDB() { return saberDB; }
+	BladeFlash* getBladeFlash() { return bladeFlash; }
 
 	int getOrder() const { return order; }
 	void incrementOrder() { order++; }
@@ -66,6 +69,7 @@ private:
 	bool running = false;
 	uint32_t delayTime = 0;
 	SaberDB* saberDB = 0;
+	BladeFlash* bladeFlash = 0;
 	int order = 0;
 
 	struct Press {

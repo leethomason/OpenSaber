@@ -210,7 +210,7 @@ void setup() {
     buttonA.setReleaseHandler(buttonAReleaseHandler);
 
     tester.attach(&buttonA, 0);
-    tester.attachDB(&saberDB);
+    tester.attachDB(&saberDB, &bladeFlash);
 
     Log.p("Average power: ").p(voltmeter.averagePower()).eol();
     blade.setVoltage(voltmeter.averagePower());
@@ -505,7 +505,7 @@ void loop() {
     bladeFlash.tick(msec);
     bladeState.process(&blade, bladeFlash, millis());
     processAccel(msec);
-    sfx.process();
+    sfx.process(bladeState.bladeOn());
 
     if (vbatTimer.tick(delta)) {
         voltmeter.takeSample();

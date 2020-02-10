@@ -48,8 +48,8 @@ SOFTWARE.
 #define SABER_MODEL_KENOBI_IV	   16   // ItsyBitsy, Shield v1,Neopixel
 #define SABER_MODEL_AQUATIC_2	   17   // ItsyBitsy, Shield v1c, Dotstar
 #define SABER_MODEL_TYVOKKA		   18   // ItsyBitsy, Shield v1c, Dotstar
-#define SABER_MODEL_SHOCK3  	   19   // Itsy v2b, OLED (128x32), Dotstar crystal
-#define SABER_MODEL_LEIA  	   19   // Itsy v2b, OLED (128x32), Dotstar crystal
+//#define SABER_MODEL_SHOCK3  	   19   // Itsy v2b, OLED (128x32), Dotstar crystal
+#define SABER_MODEL_LEIA  	   	   20   // Itsy v2b, OLED (128x32), Dotstar crystal
 
 #define SABER_SUB_MODEL_NONE		0
 #define SABER_SUB_MODEL_LUNA		1

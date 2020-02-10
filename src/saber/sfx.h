@@ -63,7 +63,7 @@ public:
 	void stopSound();
 
 	bool bladeOn() const { return m_bladeOn; }
-	void process();
+	void process(bool playIdleSound);
 
 	void setVolume(int v) { m_volume = glClamp(v, 0, 256);}
 	int getVolume() const { return m_volume; }

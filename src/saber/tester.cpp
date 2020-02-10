@@ -11,6 +11,7 @@
 #include "Button.h"
 #include "Grinliz_Arduino_Util.h"
 #include "GrinlizLSM303.h"
+#include "bladeflash.h"
 
 using namespace osbr;
 
@@ -142,6 +143,7 @@ public:
             case 1:
                 // Flash effect
                 tester->delayedPress(0, 1000, PRESS_TIME);
+                tester->delay(2000);
                 break;
 
             //case 3:
@@ -169,7 +171,6 @@ class ChannelTest : public Test
     uint32_t startTime = 0;
     uint32_t channel = uint32_t(-1);
     RGB bladeColor;
-    SaberDB* saberDB = 0;
 
     virtual const char* name() const {
         return "ChannelTest";
@@ -179,7 +180,6 @@ class ChannelTest : public Test
     {
         //Log.p("start channel").eol();
         tester->press(0, HOLD_TIME);
-        saberDB = tester->getSaberDB();
     }
 
     virtual int process(Tester* tester, EventQueue* queue)
@@ -194,6 +194,8 @@ class ChannelTest : public Test
             if (strEqual(e.name, "[BLADE_ON]")) {
                 bladeOn = true;
                 startTime = t;
+
+                SaberDB* saberDB = tester->getSaberDB();
                 if (saberDB)
                     bladeColor = saberDB->bladeColor();
             }
@@ -207,18 +209,24 @@ class ChannelTest : public Test
             if (newChannel < 3 && channel != newChannel) {
                 channel = newChannel;
 
-                if (saberDB) {
+                BladeFlash* bladeFlash = tester->getBladeFlash();
+                if (bladeFlash) {
                     switch(channel) {
-                        case 0: saberDB->setBladeColor(RGB(0x400000)); break;
-                        case 1: saberDB->setBladeColor(RGB(0x004000)); break;
-                        case 2: saberDB->setBladeColor(RGB(0x000040)); break;
+                        case 0: bladeFlash->setBladeColor(RGB(0x400000)); break;
+                        case 1: bladeFlash->setBladeColor(RGB(0x004000)); break;
+                        case 2: bladeFlash->setBladeColor(RGB(0x000040)); break;
                     }
                 }
             }
             if (newChannel >= 3) {
                 tester->press(0, HOLD_TIME);
+                SaberDB* saberDB = tester->getSaberDB();
                 if (saberDB) 
                     saberDB->setBladeColor(bladeColor);
+                BladeFlash* bladeFlash = tester->getBladeFlash();
+                if (bladeFlash)
+                    bladeFlash->setBladeColor(bladeColor);
+                    
                 bladeOn = false;
             }
         }
@@ -288,7 +296,6 @@ public:
 };
 */
 
-
 class AccelerometerTest : public Test
 {
 public:
@@ -309,24 +316,14 @@ public:
         ASSERT(accel);
         accel->flush();
         startTime = millis();
-    }
 
-    virtual int process(Tester* tester, EventQueue* queue)
-    {
-        EventQueue::Event e;
-        while (queue->hasEvent()) {
-         	e = queue->popEvent();
+        while(nSamples < NDATA) {
+            int n = accel->read(data + nSamples, NDATA - nSamples);
+            nSamples += n;
         }
-
-        GrinlizLSM303* accel = GrinlizLSM303::instance();
-        int n = accel->read(data + nSamples, NDATA - nSamples);
-        nSamples += n;
-        if (nSamples < NDATA)
-            return TEST_CONTINUE;
-
-        int32_t deltaTime = millis() - startTime;
+        uint32_t deltaTime = millis() - startTime;
         Serial.print("Time to read (ms):"); Serial.println(deltaTime);
-        TEST_IS_TRUE(deltaTime > NDATA * 8 && deltaTime < NDATA * 20);
+        ASSERT(deltaTime > NDATA * 8 && deltaTime < NDATA * 20);
 
         bool variation = false;
 
@@ -346,7 +343,11 @@ public:
                 }
             }
         }
-        TEST_IS_TRUE(variation);
+        ASSERT(variation);
+    }
+
+    virtual int process(Tester* tester, EventQueue* queue)
+    {
         return TEST_SUCCESS;
     }
 };
@@ -408,15 +409,13 @@ ButtonTest buttonTest;
 IgniteRetractTest igniteRetractTest;
 ChannelTest channelTest;
 BlasterTest blasterTest;
-//AveragePowerTest averagePowerTest;
 AccelerometerTest accelerometerTest;
 
 Test* gTests[] = {
     &buttonTest,
     &igniteRetractTest,
     &channelTest,
-    &blasterTest,
-    //&averagePowerTest,
+    //&blasterTest,
     &accelerometerTest,
     0
 };
