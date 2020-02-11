@@ -557,24 +557,37 @@ bool TestBase64()
 
 bool TestCQueue()
 {
-    CQueue<4> queue;
-    TEST_IS_TRUE(queue.empty());
-    queue.push(1);
-    queue.push(2);
-    int r = queue.pop();
-    TEST_IS_EQ(r, 1);
-    TEST_IS_FALSE(queue.empty());
-    queue.push(3);
-    queue.push(4);
-    queue.push(5);
-    r = queue.pop();
-    TEST_IS_EQ(r, 2);
-    queue.push(6);
-    TEST_IS_EQ(queue.pop(), 3);
-    TEST_IS_EQ(queue.pop(), 4);
-    TEST_IS_EQ(queue.pop(), 5);
-    TEST_IS_EQ(queue.pop(), 6);
-    TEST_IS_TRUE(queue.empty());
+    {
+        CQueue<int, 4> queue;
+        TEST_IS_TRUE(queue.empty());
+        queue.push(1);
+        queue.push(2);
+        int r = queue.pop();
+        TEST_IS_EQ(r, 1);
+        TEST_IS_FALSE(queue.empty());
+        queue.push(3);
+        queue.push(4);
+        queue.push(5);
+        r = queue.pop();
+        TEST_IS_EQ(r, 2);
+        queue.push(6);
+        TEST_IS_EQ(queue.pop(), 3);
+        TEST_IS_EQ(queue.pop(), 4);
+        TEST_IS_EQ(queue.pop(), 5);
+        TEST_IS_EQ(queue.pop(), 6);
+        TEST_IS_TRUE(queue.empty());
+    }
+    {
+        CQueue<int16_t, 4> queue;
+        queue.push(0);
+        queue.push(1);
+        queue.pushFront(-1);
+        queue.pushFront(-2);
+        TEST_IS_EQ(queue.pop(), -2);
+        TEST_IS_EQ(queue.pop(), -1);
+        TEST_IS_EQ(queue.pop(), 0);
+        TEST_IS_EQ(queue.pop(), 1);
+    }
     return true;
 }
 

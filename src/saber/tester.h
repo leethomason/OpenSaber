@@ -47,6 +47,11 @@ public:
 	void fire(const char* event);
 	void press(int button, uint32_t time);
 	void delayedPress(int button, uint32_t wait, uint32_t time);
+
+	// queue interface
+	void holdButton();
+	void tapButton();
+	void delay(uint32_t t);
 	
 	SaberDB* getSaberDB() { return saberDB; }
 	BladeFlash* getBladeFlash() { return bladeFlash; }
@@ -65,20 +70,40 @@ private:
 		TEST_STATE_DONE
 	};
 
+	enum {
+		ACTION_NONE,
+		ACTION_BUTTON,
+		ACTION_WAIT
+	};
+
+	struct Action {
+		Action() {}
+		Action(int type, int time) {
+			this->type = type;
+			this->time = time;
+		}
+		bool init = false;
+		int type = 0;
+		uint32_t time = 0;
+	};
+
+	CQueue<Action> actionQueue;
+
 	int currentTest = 0;
 	bool running = false;
 	uint32_t delayTime = 0;
 	SaberDB* saberDB = 0;
 	BladeFlash* bladeFlash = 0;
 	int order = 0;
+	uint32_t lastProcessTime = 0;
 
 	struct Press {
 		uint32_t start;
 		uint32_t end;
 		void reset() { start = end = 0; }
 	};
-	Press pressState[2];
-	Button* button[2];
+	Press pressState;
+	Button* button;
 
 	static Tester* s_instance;
 };

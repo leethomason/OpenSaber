@@ -338,34 +338,51 @@ void writeHex(const uint8_t* color3, CStr<6>* str);
 
 bool TestHex();
 
-template<int CAP>
+template<typename T, int CAP>
 class CQueue
 {
 public:
     CQueue() {}
 
-    void push(int val) {
+	T& front() {
+		ASSSERT(!empty());
+		return data[head];
+	}
+
+   	void pushFront(T val) {
         ASSERT(len < CAP);
-        int index = (head + len) % CAP;
-        data[index] = val;
+        head = dec(head);
+        data[head] = val;
         ++len;
     }
 
-    int pop() {
+	void push(T val) {
+		ASSERT(len < CAP);
+        data[tail] = val;
+        tail = inc(tail);
+		++len;
+	}
+
+    T pop() {
         ASSERT(len > 0);
-        int result = data[head];
-        head = (head + 1) % CAP;
+        T result = data[head];
+        head = inc(head);
         --len;
         return result;
     }
 
 	bool hasCap() const { return len < CAP; }
     int empty() const { return len == 0; }
+	int size() const { return len; }
 
 private:
-    int len = 0;
-    int head = 0;
-    int data[CAP];
+    int inc(int c) const { return (c + 1) % CAP; }
+    int dec(int c) const { return (c - 1 + CAP) % CAP; }
+
+	int len = 0;
+	int head = 0;
+	int tail = 0;
+    T data[CAP];
 };
 
 

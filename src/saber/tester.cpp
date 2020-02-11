@@ -114,7 +114,11 @@ public:
 
     virtual void start(Tester* tester)
     {
-        tester->press(0, HOLD_TIME);
+        tester->holdButton();   // ignite
+        tester->delay(1200);
+        tester->tapButton();    // blaster 
+        tester->delay(1000);
+        tester->holdButton();   // retract
     }
 
     virtual int process(Tester* tester, EventQueue* queue)
@@ -123,44 +127,11 @@ public:
 
         while(queue->hasEvent()) {
             EventQueue::Event e = queue->popEvent();
-            //Log.p("BasterTest: ").p(e.name).p( "order=").p(tester->getOrder()).eol();
-            if (!strStarts(e.name, "[BLADE_"))
-                continue;
-
-            static const char* EXPECTED[6] = {
-                "[BLADE_IGNITE]",
-                "[BLADE_ON]",
-                //"[BLADE_FLASH]",
-                //"[BLADE_ON]",
-                "[BLADE_RETRACT]",
-                "[BLADE_OFF]"
-            };
-
-            ASSERT(tester->getOrder() < 4);
-
-            TEST_STR_EQUAL(EXPECTED[tester->getOrder()], e.name);
-            switch(tester->getOrder()) {
-            case 1:
-                // Flash effect
-                tester->delayedPress(0, 1000, PRESS_TIME);
-                tester->delay(2000);
-                break;
-
-            //case 3:
-            //    // Turn off again.
-            //    tester->delayedPress(0, 1000, HOLD_TIME);
-            //    break;
-
-            default:
-                break;
+            if (e.name == "[BLADE_OFF]") {
+                return TEST_SUCCESS;
             }
-            if (tester->getOrder() == 3) {
-                result = TEST_SUCCESS;
-                break;
-            }
-            tester->incrementOrder();
         }
-        return result;
+        return TEST_CONTINUE;
     }
 };
 
@@ -233,68 +204,6 @@ class ChannelTest : public Test
         return result;
     }
 };
-
-
-/*
-class AveragePowerTest : public Test
-{
-public:
-
-	static const int GOAL = 100;
-	int nSamples;
-    bool bladeOn;
-    Voltmeter voltmeter;
-
-    virtual const char* name() const {
-        return "AveragePowerTest";
-    }
-
-    virtual void start(Tester* tester)
-    {
-        AveragePower ave;
-        nSamples = 0;
-        bladeOn = false;
-
-        TEST_EQUAL(NOMINAL_VOLTAGE, ave.power());
-        for(int i=0; i<AveragePower::NUM_SAMPLES; ++i) {
-            ave.push(4000);
-        }
-        TEST_EQUAL(4000, ave.power());
-        ave.push(1000);
-        TEST_EQUAL((4000*(AveragePower::NUM_SAMPLES-1) + 1000)/AveragePower::NUM_SAMPLES, ave.power());
-
-        tester->press(0, HOLD_TIME);
-        //voltmeter.begin();
-    }
-
-    virtual int process(Tester* tester, EventQueue* queue)
-    {
-        EventQueue::Event e;
-        while (queue->hasEvent()) {
-         	e = queue->popEvent();
-
-            if (strEqual("[BLADE_ON]", e.name)) {
-                bladeOn = true;
-            }
-            else if (strEqual("[BLADE_OFF]", e.name)) {
-                return TEST_SUCCESS;
-            }
-        }
-        if (bladeOn) {
-        	voltmeter.takeSample();
-            nSamples++;
-
-            if (nSamples == GOAL) {
-                Log.p("Voltage: ").p(voltmeter.averagePower()).eol();
-                TEST_RANGE(3200, 5300, voltmeter.averagePower());
-                tester->press(0, HOLD_TIME);
-                bladeOn = false;
-            }
-        }
-        return TEST_CONTINUE;
-    }
-};
-*/
 
 class AccelerometerTest : public Test
 {
@@ -465,6 +374,7 @@ void Tester::start()
     while(EventQ.hasEvent())
         EventQ.popEvent();
 
+    lastProcessTime = millis();
     test->start(this);
 }
 
@@ -506,7 +416,10 @@ void Tester::process()
     ASSERT(test);
 
     uint32_t m = millis();
+    uint32_t delta = m - lastProcessTime;
+    lastProcessTime = m;
 
+    // Older system:
     for(int i=0; i<2; ++i) {
         if (pressState[i].start && pressState[i].start <= m) {
             //Log.p("Firing press button=").p(i).eol();
@@ -522,10 +435,41 @@ void Tester::process()
             button[i]->testRelease();
             pressState[i].end = 0;
         }
-    }
+    }    
 
     if (m < delayTime) {
         return;
+    }
+
+    // Newer system:
+    if (delta > 0 && !actionQueue.empty()) {
+        Action& action = actionQueue.front();
+        if (!action.init) {
+            switch(action.type) {
+            case ACTION_BUTTON:
+                button->testPress();
+                break;
+
+            default:
+                break;
+            }
+            action.init = true;
+        }
+
+        if (delta >= action.time) {
+            switch (action.type) {
+            case ACTION_BUTTON:
+                button->testRelease();
+                break;
+            
+            default:
+                break;
+            }
+            actionQueue.pop();
+        }
+        else {
+            action.time -= delta;
+        }
     }
 
     int result = test->process(this, &EventQ);
@@ -538,11 +482,6 @@ void Tester::process()
         Log.p("Test PASS: '").p(test->name()).p("'").eol();
         done();
     }
-}
-
-void Tester::delay(uint32_t t)
-{
-    delayTime = millis() + t;
 }
 
 void Tester::press(int button, uint32_t time)
@@ -564,3 +503,22 @@ void Tester::delayedPress(int button, uint32_t delay, uint32_t time)
     pressState[button].start = m + delay;
     pressState[button].end   = m + delay + time;
 }
+
+void Tester::holdButton()
+{
+    Action action(ACTION_BUTTON, HOLD_TIME);
+    queue.push_back(action);
+}
+
+void Tester::tapButton()
+{
+    Action action(ACTION_BUTTON, PRESS_TIME);
+    queue.push_back(action);
+}
+
+void Tester::delay(uint32_t t)
+{
+    Action action(ACTION_WAIT, t);
+    queue.push_back(action);
+}
+
