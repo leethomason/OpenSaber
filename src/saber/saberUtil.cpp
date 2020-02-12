@@ -12,6 +12,7 @@ void BladeState::change(uint8_t state)
     m_currentState   = state;
     m_startTime = millis();
 
+    /*
     switch(m_currentState) {
     case BLADE_OFF:     EventQ.event("[BLADE_OFF]");        break;
     case BLADE_IGNITE:  EventQ.event("[BLADE_IGNITE]");     break;
@@ -22,6 +23,7 @@ void BladeState::change(uint8_t state)
         ASSERT(false);
         break;
     }
+    */
 }
 
 bool BladeState::bladeOn() const

@@ -655,6 +655,9 @@ int Timer2::tick(uint32_t delta)
     return true;
 }
 
+SPLog Log;
+
+#if false
 void EventQueue::event(const char* e, int data)
 {
 	ASSERT(e);
@@ -714,7 +717,6 @@ EventQueue::Event EventQueue::popEvent()
 	return e;
 }
 
-SPLog Log;
 EventQueue EventQ;
 
 void PushTestEvents(int n)
@@ -770,4 +772,4 @@ bool TestEvent()
 	EventQ.setEventLogging(true);
 	return true;
 }
-
+#endif

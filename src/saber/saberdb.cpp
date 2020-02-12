@@ -58,7 +58,7 @@ void SaberDB::setPalette(int n)
 #endif
 
     dataHeader.currentPalette = abs(n) % NUM_PALETTES;
-    EventQ.event("[PALETTE]", dataHeader.currentPalette);
+    // EventQ.event("[PALETTE]", dataHeader.currentPalette);
 }
 
 

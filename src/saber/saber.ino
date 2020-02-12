@@ -209,7 +209,7 @@ void setup() {
     buttonA.setClickHandler(buttonAClickHandler);
     buttonA.setReleaseHandler(buttonAReleaseHandler);
 
-    tester.attach(&buttonA, 0);
+    tester.attach(&buttonA);
     tester.attachDB(&saberDB, &bladeFlash);
 
     Log.p("Average power: ").p(voltmeter.averagePower()).eol();
@@ -267,7 +267,7 @@ void setup() {
 
     buttonA.setHoldRepeats(true);  // everything repeats!!
 
-    EventQ.event("[saber start]");
+    // EventQ.event("[saber start]");
     lastLoopTime = millis();    // so we don't get a big jump on the first loop()
 
     Log.p("Setup() done.").eol();

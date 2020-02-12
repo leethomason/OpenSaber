@@ -53,54 +53,24 @@ static const int PRESS_TIME = Button::DEFAULT_BOUNCE_DURATION * 2;
 		while(true) {}							\
 	}
 
-#define TEST_ORDER(index)						\
-	TEST_EQUAL(tester->order, index);			\
-	tester->order += 1;
-
 class IgniteRetractTest : public Test
 {
-    uint16_t startEn = 0;
-    uint16_t startDs = 0;
-
     virtual const char* name() const {
         return "IgniteRetractTest";
     }
 
     virtual void start(Tester* tester)
     {
-        tester->press(0, HOLD_TIME);
+        tester->holdButton();   // ignite
+        tester->delay(2000);   
+        tester->holdButton();   // retract
     }
 
-    virtual int process(Tester* tester, EventQueue* queue)
+    virtual int process(Tester* tester, uint32_t event)
     {
-        int result = TEST_CONTINUE;
-
-        while(queue->hasEvent()) {
-            EventQueue::Event e = queue->popEvent();
-            if (!strStarts(e.name, "[BLADE_"))
-                continue;
-
-            static const char* EXPECTED[4] = {
-                "[BLADE_IGNITE]",
-                "[BLADE_ON]",
-                "[BLADE_RETRACT]",
-                "[BLADE_OFF]"
-            };
-
-            ASSERT(tester->getOrder() < 4);
-
-            TEST_STR_EQUAL(EXPECTED[tester->getOrder()], e.name);
-            if (tester->getOrder() == 1) {
-                // Turn off again.
-                tester->delayedPress(0, 1000, HOLD_TIME);
-            }
-            else if (tester->getOrder() == 3) {
-                result = TEST_SUCCESS;
-                break;
-            }
-            tester->incrementOrder();
-        }
-        return result;
+        if (tester->checkOnOff())
+            return TEST_SUCCESS;
+        return TEST_CONTINUE;
     }
 };
 
@@ -121,16 +91,10 @@ public:
         tester->holdButton();   // retract
     }
 
-    virtual int process(Tester* tester, EventQueue* queue)
+    virtual int process(Tester* tester, uint32_t event)
     {
-        int result = TEST_CONTINUE;
-
-        while(queue->hasEvent()) {
-            EventQueue::Event e = queue->popEvent();
-            if (e.name == "[BLADE_OFF]") {
-                return TEST_SUCCESS;
-            }
-        }
+        if (tester->checkOnOff())
+            return TEST_SUCCESS;
         return TEST_CONTINUE;
     }
 };
@@ -138,9 +102,6 @@ public:
 
 class ChannelTest : public Test
 {
-    bool bladeOn = false;
-    uint32_t startTime = 0;
-    uint32_t channel = uint32_t(-1);
     RGB bladeColor;
 
     virtual const char* name() const {
@@ -149,59 +110,47 @@ class ChannelTest : public Test
 
     virtual void start(Tester* tester)
     {
-        //Log.p("start channel").eol();
-        tester->press(0, HOLD_TIME);
+        tester->holdButton();   // ignite
+        tester->delay(1200);
+        tester->sendEvent(0);   // red
+        tester->delay(1000);
+        tester->sendEvent(0);   // green
+        tester->delay(1000);
+        tester->sendEvent(0);   // blue
+        tester->delay(1000);
+        tester->sendEvent(0);   // restore
+        tester->delay(500);
+        tester->holdButton();   // retract
     }
 
-    virtual int process(Tester* tester, EventQueue* queue)
+    virtual int process(Tester* tester, uint32_t event)
     {
-        int result = TEST_CONTINUE;
-        uint32_t t = millis();
+        BladeFlash* bladeFlash = tester->getBladeFlash();
+        ASSERT(bladeFlash);
+        SaberDB* saberDB = tester->getSaberDB();
+        ASSERT(saberDB);
 
-        while(queue->hasEvent()) {
-            EventQueue::Event e = queue->popEvent();
-            //Log.p("event ").p(e.name).eol();
-
-            if (strEqual(e.name, "[BLADE_ON]")) {
-                bladeOn = true;
-                startTime = t;
-
-                SaberDB* saberDB = tester->getSaberDB();
-                if (saberDB)
-                    bladeColor = saberDB->bladeColor();
-            }
-            else if (strEqual(e.name, "[BLADE_OFF]")) {
-                result = TEST_SUCCESS;
-            }
+        switch(event) {
+            case 0: 
+                bladeColor = saberDB->bladeColor();
+                bladeFlash->setBladeColor(RGB(0x400000)); 
+                break;
+            case 1: 
+                bladeFlash->setBladeColor(RGB(0x004000)); 
+                break;
+            case 2: 
+                bladeFlash->setBladeColor(RGB(0x000040)); 
+                break;
+            case 3:
+                saberDB->setBladeColor(bladeColor);
+                bladeFlash->setBladeColor(bladeColor);
+                break;
+            default:
+                break;
         }
-
-        if (bladeOn) {
-            uint32_t newChannel = (t - startTime) / 1000;
-            if (newChannel < 3 && channel != newChannel) {
-                channel = newChannel;
-
-                BladeFlash* bladeFlash = tester->getBladeFlash();
-                if (bladeFlash) {
-                    switch(channel) {
-                        case 0: bladeFlash->setBladeColor(RGB(0x400000)); break;
-                        case 1: bladeFlash->setBladeColor(RGB(0x004000)); break;
-                        case 2: bladeFlash->setBladeColor(RGB(0x000040)); break;
-                    }
-                }
-            }
-            if (newChannel >= 3) {
-                tester->press(0, HOLD_TIME);
-                SaberDB* saberDB = tester->getSaberDB();
-                if (saberDB) 
-                    saberDB->setBladeColor(bladeColor);
-                BladeFlash* bladeFlash = tester->getBladeFlash();
-                if (bladeFlash)
-                    bladeFlash->setBladeColor(bladeColor);
-                    
-                bladeOn = false;
-            }
-        }
-        return result;
+        if (tester->checkOnOff())
+            return TEST_SUCCESS;
+        return TEST_CONTINUE;
     }
 };
 
@@ -255,7 +204,7 @@ public:
         ASSERT(variation);
     }
 
-    virtual int process(Tester* tester, EventQueue* queue)
+    virtual int process(Tester* tester, uint32_t event)
     {
         return TEST_SUCCESS;
     }
@@ -300,15 +249,10 @@ public:
         button.process();
         // Not it has time to catch up, after bounce filter.
         TEST_EQUAL(button.isDown(), false);
-
-        // Fire an event:
-        EventQ.event("[dummyEvent]");
     }
 
-    virtual int process(Tester* tester, EventQueue* queue)
+    virtual int process(Tester* tester, uint32_t event)
     {
-        while(queue->hasEvent())        
-            queue->popEvent();
         return TEST_SUCCESS;
     }
 };
@@ -332,17 +276,13 @@ Test* gTests[] = {
 Tester::Tester()
 {
     s_instance = this;
-    for(int i=0; i<2; ++i) {
-        pressState[i].start = pressState[i].end = 0;
-        button[i] = 0;
-    }
+    button = 0;
     running = false;
 }
 
-void Tester::attach(Button* buttonA, Button* buttonB)
+void Tester::attach(Button* buttonA)
 {
-    button[0] = buttonA;
-    button[1] = buttonB;
+    button = buttonA;
 }
 
 void Tester::runTests()
@@ -351,10 +291,8 @@ void Tester::runTests()
     runUnitTests();
 
     running = true;
-
-    for(int i=0; i<2; ++i) {
-        if (button[i]) button[i]->enableTestMode(true);
-    }
+    if (button) 
+        button->enableTestMode(true);
     currentTest = 0;
     start();
 }
@@ -364,18 +302,20 @@ void Tester::start()
     Test* test = gTests[currentTest];
     ASSERT(test);
 
-    order = 0;
-    TEST_EXISTS(button[0] != 0);
-#	ifdef SABER_TWO_BUTTON
-    TEST_EXISTS(button[1] != 0);
-#	endif
+    TEST_EXISTS(button != 0);
+    wasOn = false;
 
     Log.p("Test start: '").p(test->name()).p("'").eol();
-    while(EventQ.hasEvent())
-        EventQ.popEvent();
-
     lastProcessTime = millis();
     test->start(this);
+}
+
+bool Tester::checkOnOff()
+{
+    if (bladeFlash->getColor().get() != 0)
+        wasOn = true;
+    bool isOff = bladeFlash->getColor().get() == 0;
+    return wasOn && isOff;
 }
 
 void Tester::done()
@@ -391,12 +331,10 @@ void Tester::done()
     else {
         running = false;
         for(int i=0; i<2; ++i) {
-            if (button[i]) button[i]->enableTestMode(false);
+            if (button) 
+                button->enableTestMode(false);
         }
         Log.p("---- Test run complete. -----").eol();
-        while(EventQ.hasEvent()) {
-            EventQ.popEvent();  // Need to clear this out to prevent overflow.
-        }
 #if SERIAL_DEBUG == 0
         Log.attachSerial(0);
 #endif
@@ -406,9 +344,6 @@ void Tester::done()
 void Tester::process()
 {
     if (!running) {
-        while(EventQ.hasEvent()) {
-            EventQ.popEvent();  // Need to clear this out to prevent overflow.
-        }
         return;
     }
 
@@ -419,29 +354,8 @@ void Tester::process()
     uint32_t delta = m - lastProcessTime;
     lastProcessTime = m;
 
-    // Older system:
-    for(int i=0; i<2; ++i) {
-        if (pressState[i].start && pressState[i].start <= m) {
-            //Log.p("Firing press button=").p(i).eol();
-            button[i]->testPress();
-            // This was a hard bug to find. Sometimes we don't get around
-            // to checking; so be sure to push out the end time so the
-            // duration doesn't fall below threshold.
-            pressState[i].end = m + (pressState[i].end - pressState[i].start);
-            pressState[i].start = 0;
-        }
-        if (pressState[i].end && pressState[i].end <= m) {
-            //Log.p("Firing release button=").p(i).eol();
-            button[i]->testRelease();
-            pressState[i].end = 0;
-        }
-    }    
-
-    if (m < delayTime) {
-        return;
-    }
-
     // Newer system:
+    int event = uint32_t(-1);
     if (delta > 0 && !actionQueue.empty()) {
         Action& action = actionQueue.front();
         if (!action.init) {
@@ -456,7 +370,11 @@ void Tester::process()
             action.init = true;
         }
 
-        if (delta >= action.time) {
+        if (action.type == ACTION_EVENT) {
+            event = action.time;
+            actionQueue.pop();
+        }
+        else if (delta >= action.time) {
             switch (action.type) {
             case ACTION_BUTTON:
                 button->testRelease();
@@ -472,7 +390,7 @@ void Tester::process()
         }
     }
 
-    int result = test->process(this, &EventQ);
+    int result = test->process(this, event);
 
     if (result == Test::TEST_ERROR) {
         Log.p("Test ERROR: '").p(test->name()).p("'").eol();
@@ -484,41 +402,27 @@ void Tester::process()
     }
 }
 
-void Tester::press(int button, uint32_t time)
-{
-    ASSERT(button >= 0 && button < 2);
-    ASSERT(pressState[button].start == 0);
-    ASSERT(pressState[button].end == 0);
-    uint32_t m = millis();
-    pressState[button].start = m;
-    pressState[button].end = m + time;
-}
-
-void Tester::delayedPress(int button, uint32_t delay, uint32_t time)
-{
-    ASSERT(button >= 0 && button < 2);
-    ASSERT(pressState[button].start == 0);
-    ASSERT(pressState[button].end == 0);
-    uint32_t m = millis();
-    pressState[button].start = m + delay;
-    pressState[button].end   = m + delay + time;
-}
-
 void Tester::holdButton()
 {
     Action action(ACTION_BUTTON, HOLD_TIME);
-    queue.push_back(action);
+    actionQueue.push(action);
 }
 
 void Tester::tapButton()
 {
     Action action(ACTION_BUTTON, PRESS_TIME);
-    queue.push_back(action);
+    actionQueue.push(action);
 }
 
 void Tester::delay(uint32_t t)
 {
     Action action(ACTION_WAIT, t);
-    queue.push_back(action);
+    actionQueue.push(action);
+}
+
+void Tester::sendEvent(uint32_t t)
+{
+    Action action(ACTION_EVENT, t);
+    actionQueue.push(action);
 }
 

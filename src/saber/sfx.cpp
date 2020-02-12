@@ -153,7 +153,7 @@ bool SFX::playSound(int sound, int mode)
             .p(m_sfxType[sound].start).p(",")
             .p(m_sfxType[sound].start + m_sfxType[sound].count).p("]")
             .eol();
-        EventQ.event("[SFX play]", sound);
+        // EventQ.event("[SFX play]", sound);
 
         m_lastSFX = sound;
         m_driver->play(track, sound == SFX_IDLE, 0);

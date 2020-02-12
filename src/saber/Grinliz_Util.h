@@ -345,7 +345,7 @@ public:
     CQueue() {}
 
 	T& front() {
-		ASSSERT(!empty());
+		ASSERT(!empty());
 		return data[head];
 	}
 
@@ -572,6 +572,7 @@ private:
 	Stream* logStream = 0;
 };
 
+#if false
 class EventQueue
 {
 public:
@@ -599,11 +600,11 @@ private:
 	bool m_eventLogging = true;
 	Event m_events[NUM_EVENTS];
 };
+extern EventQueue EventQ;
+bool TestEvent();
+#endif
 
 extern SPLog Log;
-extern EventQueue EventQ;
-
-bool TestEvent();
 
 #endif // GRINLIZ_UTIL_INCLUDED
 
