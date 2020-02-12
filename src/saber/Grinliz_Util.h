@@ -572,38 +572,6 @@ private:
 	Stream* logStream = 0;
 };
 
-#if false
-class EventQueue
-{
-public:
-    // Note that the event is stored *by pointer*, so the 
-    // string needs to be in static memory.
-	void event(const char* event, int data = 0);
-
-	struct Event {
-		const char* name = 0;
-		int			data = 0;
-	};
-
-	Event popEvent();
-	bool hasEvent() const { return m_nEvents > 0; }
-	int numEvents() const			{ return m_nEvents; }
-	const Event& peek(int i) const;
-
-    // For testing.
-    void setEventLogging(bool enable) { m_eventLogging = enable; }
-
-private:
-	static const int NUM_EVENTS = 8;
-	int m_nEvents = 0;
-	int m_head = 0;
-	bool m_eventLogging = true;
-	Event m_events[NUM_EVENTS];
-};
-extern EventQueue EventQ;
-bool TestEvent();
-#endif
-
 extern SPLog Log;
 
 #endif // GRINLIZ_UTIL_INCLUDED
