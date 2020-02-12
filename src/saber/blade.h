@@ -40,6 +40,7 @@ public:
 
     void setVoltage(int milliVolts);
     void setRGB(const osbr::RGB& rgb);
+    osbr::RGB getRGB() const { return m_color; }
 
     // power utilization, from 0-100 for a channel
     int32_t util(int i) const   { return m_throttle[i].scale(100); }

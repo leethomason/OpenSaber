@@ -172,6 +172,7 @@ bool I2SAudioDriver::isPlaying(int channel)
     channel = glClamp(channel, 0, AUDDRV_NUM_CHANNELS-1);
     noInterrupts();
     bool playing = !expander[channel].done();
+    playing |= isQueued[channel];
     interrupts();
     return playing;    
 }

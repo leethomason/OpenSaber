@@ -11,6 +11,7 @@
 #include "Button.h"
 #include "Grinliz_Arduino_Util.h"
 #include "GrinlizLSM303.h"
+#include "blade.h"
 #include "bladeflash.h"
 
 using namespace osbr;
@@ -85,7 +86,9 @@ public:
     virtual void start(Tester* tester)
     {
         tester->holdButton();   // ignite
-        tester->delay(1200);
+        tester->delay(1500);
+        tester->tapButton();    // blaster 
+        tester->delay(300);
         tester->tapButton();    // blaster 
         tester->delay(1000);
         tester->holdButton();   // retract
@@ -114,17 +117,19 @@ class ChannelTest : public Test
         tester->delay(1200);
         tester->sendEvent(0);   // red
         tester->delay(1000);
-        tester->sendEvent(0);   // green
+        tester->sendEvent(1);   // green
         tester->delay(1000);
-        tester->sendEvent(0);   // blue
+        tester->sendEvent(2);   // blue
         tester->delay(1000);
-        tester->sendEvent(0);   // restore
+        tester->sendEvent(3);   // restore
         tester->delay(500);
         tester->holdButton();   // retract
     }
 
     virtual int process(Tester* tester, uint32_t event)
     {
+        Blade* blade = tester->getBlade();
+        ASSERT(blade);
         BladeFlash* bladeFlash = tester->getBladeFlash();
         ASSERT(bladeFlash);
         SaberDB* saberDB = tester->getSaberDB();
@@ -132,18 +137,21 @@ class ChannelTest : public Test
 
         switch(event) {
             case 0: 
-                bladeColor = saberDB->bladeColor();
-                bladeFlash->setBladeColor(RGB(0x400000)); 
+                bladeColor = blade->getRGB();
+                bladeFlash->setBladeColor(RGB(0x400000));
+                blade->setRGB(RGB(0x400000));
                 break;
             case 1: 
-                bladeFlash->setBladeColor(RGB(0x004000)); 
+                bladeFlash->setBladeColor(RGB(0x004000));
+                blade->setRGB(RGB(0x400000));
                 break;
             case 2: 
-                bladeFlash->setBladeColor(RGB(0x000040)); 
+                bladeFlash->setBladeColor(RGB(0x000040));
+                blade->setRGB(RGB(0x400000));
                 break;
             case 3:
-                saberDB->setBladeColor(bladeColor);
                 bladeFlash->setBladeColor(bladeColor);
+                blade->setRGB(bladeColor);
                 break;
             default:
                 break;
@@ -268,7 +276,7 @@ Test* gTests[] = {
     &buttonTest,
     &igniteRetractTest,
     &channelTest,
-    //&blasterTest,
+    &blasterTest,
     &accelerometerTest,
     0
 };
@@ -312,9 +320,14 @@ void Tester::start()
 
 bool Tester::checkOnOff()
 {
-    if (bladeFlash->getColor().get() != 0)
+    if (!wasOn && blade->getRGB().get() != 0) {
+        // Log.p("wasOn=true").eol();
         wasOn = true;
-    bool isOff = bladeFlash->getColor().get() == 0;
+    }
+    bool isOff = blade->getRGB().get() == 0;
+    //Log.p("RGB=").ptc(blade->getColor()).eol();
+    //if (wasOn && isOff)
+    //    Log.p("checkOnOff true").eol();
     return wasOn && isOff;
 }
 
@@ -361,6 +374,7 @@ void Tester::process()
         if (!action.init) {
             switch(action.type) {
             case ACTION_BUTTON:
+                // Log.p("init: ACTION_BUTTON press.").eol();
                 button->testPress();
                 break;
 
@@ -369,20 +383,22 @@ void Tester::process()
             }
             action.init = true;
         }
-
-        if (action.type == ACTION_EVENT) {
+        else if (action.type == ACTION_EVENT) {
+            // Log.p("init: ACTION_EVENT ").p(action.time).eol();
             event = action.time;
             actionQueue.pop();
         }
         else if (delta >= action.time) {
             switch (action.type) {
             case ACTION_BUTTON:
+                // Log.p("ACTION_BUTTON release.").eol();
                 button->testRelease();
                 break;
             
             default:
                 break;
             }
+            // Log.p("action pop=").p(action.type).eol();
             actionQueue.pop();
         }
         else {

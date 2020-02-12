@@ -210,7 +210,7 @@ void setup() {
     buttonA.setReleaseHandler(buttonAReleaseHandler);
 
     tester.attach(&buttonA);
-    tester.attachDB(&saberDB, &bladeFlash);
+    tester.attachDB(&saberDB, &blade, &bladeFlash);
 
     Log.p("Average power: ").p(voltmeter.averagePower()).eol();
     blade.setVoltage(voltmeter.averagePower());
@@ -339,7 +339,7 @@ void buttonAClickHandler(const Button&)
 {
     uiMode.setActive();
 
-    //Log.p("buttonAClickHandler").eol();
+    Log.p("buttonAClickHandler").eol();
     if (bladeState.bladeOff()) {
         uiMode.nextMode();
         // Turn off blinking so we aren't in a weird state when we change modes.

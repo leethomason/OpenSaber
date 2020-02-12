@@ -8,6 +8,7 @@ class Button;
 struct ButtonCBHandlers;
 class Tester;
 class SaberDB;
+class Blade;
 class BladeFlash;
 
 namespace osbr {
@@ -36,7 +37,7 @@ class Tester
 public:
 	Tester();
 	void attach(Button* buttonA);
-	void attachDB(SaberDB* _saberDB, BladeFlash* _bladeFlash) { saberDB = _saberDB; bladeFlash = _bladeFlash; }
+	void attachDB(SaberDB* _saberDB, Blade* _blade, BladeFlash* _bladeFlash) { saberDB = _saberDB; blade = _blade; bladeFlash = _bladeFlash;}
 
 	void runTests();
 	void process();
@@ -49,7 +50,8 @@ public:
 	void sendEvent(uint32_t event);
 	
 	SaberDB* getSaberDB() { return saberDB; }
-	BladeFlash* getBladeFlash() { return bladeFlash; }
+	Blade* getBlade() { return blade; }
+	BladeFlash* getBladeFlash() { return bladeFlash;}
 
 	bool checkOnOff();
 
@@ -87,6 +89,7 @@ private:
 	int currentTest = 0;
 	bool running = false;
 	SaberDB* saberDB = 0;
+	Blade* blade = 0;
 	BladeFlash* bladeFlash = 0;
 	uint32_t lastProcessTime = 0;
 	bool wasOn = false;
