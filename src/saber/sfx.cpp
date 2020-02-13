@@ -153,7 +153,7 @@ bool SFX::playSound(int sound, int mode)
             .p(m_sfxType[sound].start).p(",")
             .p(m_sfxType[sound].start + m_sfxType[sound].count).p("]")
             .eol();
-        EventQ.event("[SFX play]", sound);
+        // EventQ.event("[SFX play]", sound);
 
         m_lastSFX = sound;
         m_driver->play(track, sound == SFX_IDLE, 0);
@@ -185,8 +185,13 @@ void SFX::stopSound()
     m_currentSound = SFX_NONE;
 }
 
-void SFX::process()
+void SFX::process(bool bladeOn)
 {
+    if (bladeOn) {
+        if (!m_driver->isPlaying(0)) {
+            playSound(SFX_IDLE, SFX_GREATER);
+        }
+    }
 }
 
 void SFX::readIgniteRetract()

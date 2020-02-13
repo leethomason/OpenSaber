@@ -586,24 +586,37 @@ bool TestBase64()
 
 bool TestCQueue()
 {
-    CQueue<4> queue;
-    TEST_IS_TRUE(queue.empty());
-    queue.push(1);
-    queue.push(2);
-    int r = queue.pop();
-    TEST_IS_EQ(r, 1);
-    TEST_IS_FALSE(queue.empty());
-    queue.push(3);
-    queue.push(4);
-    queue.push(5);
-    r = queue.pop();
-    TEST_IS_EQ(r, 2);
-    queue.push(6);
-    TEST_IS_EQ(queue.pop(), 3);
-    TEST_IS_EQ(queue.pop(), 4);
-    TEST_IS_EQ(queue.pop(), 5);
-    TEST_IS_EQ(queue.pop(), 6);
-    TEST_IS_TRUE(queue.empty());
+    {
+        CQueue<int, 4> queue;
+        TEST_IS_TRUE(queue.empty());
+        queue.push(1);
+        queue.push(2);
+        int r = queue.pop();
+        TEST_IS_EQ(r, 1);
+        TEST_IS_FALSE(queue.empty());
+        queue.push(3);
+        queue.push(4);
+        queue.push(5);
+        r = queue.pop();
+        TEST_IS_EQ(r, 2);
+        queue.push(6);
+        TEST_IS_EQ(queue.pop(), 3);
+        TEST_IS_EQ(queue.pop(), 4);
+        TEST_IS_EQ(queue.pop(), 5);
+        TEST_IS_EQ(queue.pop(), 6);
+        TEST_IS_TRUE(queue.empty());
+    }
+    {
+        CQueue<int16_t, 4> queue;
+        queue.push(0);
+        queue.push(1);
+        queue.pushFront(-1);
+        queue.pushFront(-2);
+        TEST_IS_EQ(queue.pop(), -2);
+        TEST_IS_EQ(queue.pop(), -1);
+        TEST_IS_EQ(queue.pop(), 0);
+        TEST_IS_EQ(queue.pop(), 1);
+    }
     return true;
 }
 
@@ -671,119 +684,4 @@ int Timer2::tick(uint32_t delta)
     return true;
 }
 
-void EventQueue::event(const char* e, int data)
-{
-	ASSERT(e);
-	ASSERT(m_nEvents < NUM_EVENTS);
-
-    if (m_nEvents >= NUM_EVENTS) {
-        Log.p("Overflow: ");
-        for (int i = 0; i < NUM_EVENTS; ++i) {
-            int slot = (m_head + i) % NUM_EVENTS;
-            Log.p(m_events[slot].name).p(" ");
-        }
-        Log.eol();
-        return;
-    }
-
-	int slot = (m_head + m_nEvents) % NUM_EVENTS;
-
-	m_events[slot].name = e;
-	m_events[slot].data = data;
-
-    #if SERIAL_DEBUG == 1
-	if (m_eventLogging)
-		Log.p(m_events[slot].name).p(" data=").p(m_events[slot].data).eol();
-    #endif
-    #ifdef DEBUG_EVENT
-    Log.p("Event::push ").p(m_events[slot].name).p(" nEvents=").p(m_nEvents).eol();
-    #endif
-
-	++m_nEvents;
-}
-
-
-const EventQueue::Event& EventQueue::peek(int i) const
-{
-	ASSERT(i < m_nEvents);
-	int slot = (m_head + m_nEvents) % NUM_EVENTS;
-	return m_events[slot];
-}
-
-
-EventQueue::Event EventQueue::popEvent()
-{
-	Event e;
-	ASSERT(m_nEvents > 0);
-	if (m_nEvents == 0)
-		return e;
-
-	e = m_events[m_head];
-	++m_head;
-	--m_nEvents;
-	if (m_head == NUM_EVENTS)
-		m_head = 0;
-
-    #ifdef DEBUG_EVENT
-    Log.p("Event::pop ").p(e.name).p(" nRemain=").p(m_nEvents).eol();
-    #endif
-	return e;
-}
-
 SPLog Log;
-EventQueue EventQ;
-
-void PushTestEvents(int n)
-{
-	if (n >= 1) EventQ.event("Event0");
-	if (n >= 2) EventQ.event("Event1", 1);
-	if (n >= 3) EventQ.event("Event2", 2);
-	if (n >= 4) EventQ.event("Event3", 3);
-	if (n >= 5) EventQ.event("Event4", 4);
-	if (n >= 6) EventQ.event("Event5", 5);
-	if (n >= 7) EventQ.event("Event6", 6);
-	if (n >= 8) EventQ.event("Event7", 7);
-}
-
-
-bool TestEvent()
-{
-	EventQ.setEventLogging(false);
-    while(EventQ.hasEvent()) 
-        EventQ.popEvent();
-	TEST_IS_FALSE(EventQ.hasEvent());
-	{
-		PushTestEvents(1);
-		TEST_IS_TRUE(EventQ.hasEvent());
-		EventQueue::Event e = EventQ.popEvent();
-		TEST_IS_TRUE(strEqual(e.name, "Event0"));
-		TEST_IS_TRUE(e.data == 0);
-	}
-	TEST_IS_FALSE(EventQ.hasEvent());
-	{
-		PushTestEvents(3);
-		TEST_IS_TRUE(EventQ.hasEvent());
-		EventQueue::Event e = EventQ.popEvent();
-		TEST_IS_TRUE(strEqual(e.name, "Event0"));
-		TEST_IS_TRUE(e.data == 0);
-		e = EventQ.popEvent();
-		TEST_IS_TRUE(strEqual(e.name, "Event1"));
-		TEST_IS_TRUE(e.data == 1);	
-		e = EventQ.popEvent();
-		TEST_IS_TRUE(strEqual(e.name, "Event2"));
-		TEST_IS_TRUE(e.data == 2);	
-	}
-	TEST_IS_FALSE(EventQ.hasEvent());
-	{
-		PushTestEvents(8);
-		for (int i = 0; i < 7; ++i)
-			EventQ.popEvent();
-		EventQueue::Event e = EventQ.popEvent();
-		TEST_IS_TRUE(strEqual(e.name, "Event7"));
-		TEST_IS_TRUE(e.data == 7);
-	}
-	TEST_IS_FALSE(EventQ.hasEvent());
-	EventQ.setEventLogging(true);
-	return true;
-}
-

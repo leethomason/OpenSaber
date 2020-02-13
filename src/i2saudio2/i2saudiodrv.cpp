@@ -166,6 +166,16 @@ void I2SAudioDriver::play(int index, bool loop, int channel)
 }
 
 
+bool I2SAudioDriver::isPlaying(int channel)
+{
+    channel = glClamp(channel, 0, AUDDRV_NUM_CHANNELS-1);
+    noInterrupts();
+    bool playing = !expander[channel].done();
+    interrupts();
+    return playing;    
+}
+
+
 void I2SAudioDriver::stop(int channel)
 {
     channel = glClamp(channel, 0, AUDDRV_NUM_CHANNELS - 1);

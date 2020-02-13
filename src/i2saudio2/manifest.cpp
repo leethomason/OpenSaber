@@ -38,7 +38,7 @@ int Manifest::getDir(const char* name) const
 void Manifest::dirRange(int dir, int* start, int* count) const
 {
     dir = glClamp(dir, 0, MEM_IMAGE_NUM_DIR-1);
-    *start = memUnit[dir].offset;
+    *start = memUnit[dir].offset;   // gah. ugly. need to fix in the generator.
     *count = memUnit[dir].size;
 }
 

@@ -1,10 +1,13 @@
 Issues:
 
-High
-Med
-Low
+Tester: turn back on blade flash using delays
+
+Smooth Swing support
+Crackle in hum sound (how??)
+Color section mode
 
 Fixed
+x Tester: Blade doesn't change color
 x Fix analogReference(), deprecated by i2s audio
 x blade flash on retract. Neopixel not the issue. Add assert?
     x range checks in fixed

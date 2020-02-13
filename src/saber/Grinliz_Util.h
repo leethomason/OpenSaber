@@ -64,7 +64,7 @@ bool istrStarts(const char* str, const char* prefix);
 void intToString(int value, char* str, int allocated, bool writeZero);
 void intToDigits(int value, int* digits, int nDigits);
 
-void encodeBase64(const uint8_t* bytes, int nBytes, const char* target, bool writeNull);
+void encodeBase64(const uint8_t* bytes, int nBytes, char* target, bool writeNull);
 void decodeBase64(const char* src, int nBytes, uint8_t* dst);
 bool TestBase64();
 
@@ -347,34 +347,51 @@ void writeHex(const uint8_t* color3, CStr<6>* str);
 
 bool TestHex();
 
-template<int CAP>
+template<typename T, int CAP>
 class CQueue
 {
 public:
     CQueue() {}
 
-    void push(int val) {
+	T& front() {
+		ASSERT(!empty());
+		return data[head];
+	}
+
+   	void pushFront(T val) {
         ASSERT(len < CAP);
-        int index = (head + len) % CAP;
-        data[index] = val;
+        head = dec(head);
+        data[head] = val;
         ++len;
     }
 
-    int pop() {
+	void push(T val) {
+		ASSERT(len < CAP);
+        data[tail] = val;
+        tail = inc(tail);
+		++len;
+	}
+
+    T pop() {
         ASSERT(len > 0);
-        int result = data[head];
-        head = (head + 1) % CAP;
+        T result = data[head];
+        head = inc(head);
         --len;
         return result;
     }
 
 	bool hasCap() const { return len < CAP; }
     int empty() const { return len == 0; }
+	int size() const { return len; }
 
 private:
-    int len = 0;
-    int head = 0;
-    int data[CAP];
+    int inc(int c) const { return (c + 1) % CAP; }
+    int dec(int c) const { return (c - 1 + CAP) % CAP; }
+
+	int len = 0;
+	int head = 0;
+	int tail = 0;
+    T data[CAP];
 };
 
 
@@ -609,38 +626,7 @@ private:
 	Stream* logStream = 0;
 };
 
-class EventQueue
-{
-public:
-    // Note that the event is stored *by pointer*, so the 
-    // string needs to be in static memory.
-	void event(const char* event, int data = 0);
-
-	struct Event {
-		const char* name = 0;
-		int			data = 0;
-	};
-
-	Event popEvent();
-	bool hasEvent() const { return m_nEvents > 0; }
-	int numEvents() const			{ return m_nEvents; }
-	const Event& peek(int i) const;
-
-    // For testing.
-    void setEventLogging(bool enable) { m_eventLogging = enable; }
-
-private:
-	static const int NUM_EVENTS = 8;
-	int m_nEvents = 0;
-	int m_head = 0;
-	bool m_eventLogging = true;
-	Event m_events[NUM_EVENTS];
-};
-
 extern SPLog Log;
-extern EventQueue EventQ;
-
-bool TestEvent();
 
 #endif // GRINLIZ_UTIL_INCLUDED
 

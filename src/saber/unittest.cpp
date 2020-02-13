@@ -18,7 +18,6 @@ bool runUnitTests()
     bool allPass = true;
 
     RUN_TEST(TestHexDec);
-    RUN_TEST(TestEvent);
 	RUN_TEST(DotStarUI::Test);
 	RUN_TEST(TestCStr);
     RUN_TEST(TestAverageSample);

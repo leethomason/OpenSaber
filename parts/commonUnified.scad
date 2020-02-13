@@ -690,7 +690,7 @@ module baffleMCBattery( outer,          // outer diameter
                         dzButtress,     // thickness of the baffle
                         nPostBaffles=0,// number of additional baffles, that don't have the battery cutout
                         dFirst=0,       // make the back baffle this diameter (0 to use standard)
-                        dzFirst=0,      // make the back baffle this thicknes  (0 to use standard)
+                        dzFirst=0,      // make the first baffle this thicknes  (0 to use standard)
                         extraBaffle=0,  // add this much to the front baffle
                         bridgeInFront=false,    // set true to contiue bridge. Useful for attaching to a cap.
                         bridgeStyle = 1,

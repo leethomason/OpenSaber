@@ -7,13 +7,12 @@ Adafruit_FlashTransport_SPI flashTransport(SS1, &SPI1);
 Adafruit_SPIFlash spiFlash(&flashTransport);     // Use hardware SPI 
 
 static const int SERIAL_SPEED = 115200;
-CStr<200> line;
+CStr<400> line;
 bool firstLine = true;
 int size = 0;
 int nRead = 0;
-static const int LOCAL_PAGESIZE = 256;
+static const int LOCAL_PAGESIZE = 256;      // base64 encoding assumes 256
 uint8_t pageBuffer[LOCAL_PAGESIZE] = {0};
-uint32_t pageAddr = 0;
 int nPages = 0;
 bool userConfirmed = false;
 
@@ -57,13 +56,12 @@ void parseSize() {
 void sendPage()
 {
     uint32_t addr = LOCAL_PAGESIZE * nPages;
-    uint32_t nWritten = spiFlash.writeBuffer(addr, pageBuffer, pageAddr);
+    uint32_t nWritten = spiFlash.writeBuffer(addr, pageBuffer, LOCAL_PAGESIZE);
 
-    Log.p("Page ").p(nPages).p(" written. nBytes=").p(nWritten).p("/").p(pageAddr)
-        .p(" ").p(nWritten == pageAddr ? "okay" : "ERROR").eol();
+    Log.p("Page ").p(nPages).p(" written. nBytes=").p(nWritten).p("/").p(LOCAL_PAGESIZE)
+        .p(" ").p(nWritten == LOCAL_PAGESIZE ? "okay" : "ERROR").eol();
 
     nPages++;
-    pageAddr = 0;
     memset(pageBuffer, 0, LOCAL_PAGESIZE);
 }
 
@@ -85,21 +83,17 @@ void loop()
                     firstLine = false;
                 }
                 else {
-                    for(int i=0; i<line.size(); i+=2) {
-                        int v = hexToDec(line[i]) * 16;
-                        v += hexToDec(line[i+1]);
-                        pageBuffer[pageAddr++] = v;
-                        if (pageAddr == LOCAL_PAGESIZE) {
-                            sendPage();
-                        }
-                        
-                        ++nRead;
-                        if (nRead == size) {
-                            if (pageAddr) {
-                                sendPage();
-                            }
-                            Log.p("100%. Size=").p(nRead).p(" bytes read.").eol();
-                        }
+                    static const int STEP = 256;
+                    int n = STEP;
+                    if (nRead + n > size) {
+                        n = size - nRead;
+                    }
+                    decodeBase64(line.c_str(), n, pageBuffer);
+                    sendPage();
+                    nRead += n;
+
+                    if (nRead == size) {
+                        Log.p("100%. Size=").p(nRead).p(" bytes read.").eol();
                     }
                 }
             }

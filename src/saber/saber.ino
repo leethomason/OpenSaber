@@ -207,8 +207,8 @@ void setup() {
     buttonA.setClickHandler(buttonAClickHandler);
     buttonA.setReleaseHandler(buttonAReleaseHandler);
 
-    tester.attach(&buttonA, 0);
-    tester.attachDB(&saberDB);
+    tester.attach(&buttonA);
+    tester.attachDB(&saberDB, &blade, &bladeFlash);
 
     Log.p("Average power: ").p(voltmeter.averagePower()).eol();
     blade.setVoltage(voltmeter.averagePower());
@@ -265,7 +265,7 @@ void setup() {
 
     buttonA.setHoldRepeats(true);  // everything repeats!!
 
-    EventQ.event("[saber start]");
+    // EventQ.event("[saber start]");
     lastLoopTime = millis();    // so we don't get a big jump on the first loop()
 
     Log.p("Setup() done.").eol();
@@ -341,7 +341,7 @@ void buttonAClickHandler(const Button&)
 {
     uiMode.setActive();
 
-    //Log.p("buttonAClickHandler").eol();
+    Log.p("buttonAClickHandler").eol();
     if (bladeState.bladeOff()) {
         uiMode.nextMode();
         // Turn off blinking so we aren't in a weird state when we change modes.
@@ -511,7 +511,7 @@ void loop() {
     bladeFlash.tick(msec);
     bladeState.process(&blade, bladeFlash, millis());
     processAccel(msec);
-    sfx.process();
+    sfx.process(bladeState.bladeOn());
 
     if (vbatTimer.tick(delta)) {
         voltmeter.takeSample();

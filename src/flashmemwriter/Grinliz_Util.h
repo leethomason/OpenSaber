@@ -4,62 +4,35 @@
 #include <string.h>
 #include <stdint.h>
 
-#ifndef _WIN32
-#include <Arduino.h>
-#endif
+#include "grinliz_assert.h"
+#include "fixed.h"
 
-struct RGB;
-class Stream;
-
-template<bool> struct CompileTimeAssert;
-template<> struct CompileTimeAssert <true> {};
-#define STATIC_ASSERT(e) (CompileTimeAssert <(e) != 0>())
-
-#if defined(_MSC_VER)
-#	define ASSERT( x )	if ( !(x)) { _asm { int 3 } }
-#else
-	void AssertOut(const char* message, const char* file, int line);
-	#define ASSERT( x ) 	if (!(x)) { AssertOut(#x, __FILE__, __LINE__); }
-	//#define ASSERT( x ) 	if (!(x)) { AssertOut(#x, __FILE__, __LINE__); while(true) {} }
-#endif
-
-#define TEST_IS_TRUE(x) {         \
-    if((x)) {                     \
-    }                             \
-    else {                        \
-        ASSERT(false);            \
-        return false;             \
-    }                             \
+inline int32_t lerp1024(int16_t a, int16_t b, int32_t t1024) {
+    return (a * (1024 - t1024) + b * t1024) / 1024;
 }
 
-#define TEST_IS_FALSE(x) {        \
-    if(!(x)) {                    \
-    }                             \
-    else {                        \
-        ASSERT(false);            \
-        return false;             \
-    }                             \
+inline int32_t lerp255(int16_t a, int16_t b, int32_t t255) {
+    return (a * (255 - t255) + b * t255) / 255;
 }
-
-#define TEST_IS_EQ(x, y) {        \
-    if((x) == (y)) {              \
-    }                             \
-    else {                        \
-        ASSERT(false);            \
-        return false;             \
-    }                             \
-}
-
-template<class T>
-T clamp(T value, T lower, T upper) {
-	if (value < lower) return lower;
-	if (value > upper) return upper;
-	return value;
-}
-
-uint8_t lerpU8(uint8_t a, uint8_t b, uint8_t t);
 
 bool TestUtil();
+
+template<typename T>
+struct Vec3
+{
+	T x;
+	T y;
+	T z;
+
+	void setZero() { x = y = z = 0; }
+	void scale(T s) { x *= s; y *= s; z *= s; }
+
+    Vec3<T>& operator += (const Vec3<T>& v) { x += v.x; y += v.y; z += v.z; return *this; }
+    Vec3<T>& operator -= (const Vec3<T>& v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
+
+    inline friend Vec3<T> operator +  (const Vec3<T>& a, const Vec3<T>& b) { Vec3<T> t;  t.x = a.x + b.x; t.y = a.y + b.y; t.z = a.z + b.z; return t; }
+    inline friend Vec3<T> operator -  (const Vec3<T>& a, const Vec3<T>& b) { Vec3<T> t;  t.x = a.x - b.x; t.y = a.y - b.y; t.z = a.z - b.z; return t; }
+};
 
 /**
 * Returns 'true' if 2 strings are equal.
@@ -70,12 +43,25 @@ inline bool strEqual(const char* a, const char* b) {
 	return a && b && strcmp(a, b) == 0;
 }
 
+inline bool strEqual(const char* a, const char* b, int n) {
+    return a && b && strncmp(a, b, n);
+}
+
 /**
 * Returns 'true' if 'str' strarts with 'prefix'
 */
 bool strStarts(const char* str, const char* prefix);
 bool istrStarts(const char* str, const char* prefix);
 void intToString(int value, char* str, int allocated, bool writeZero);
+void intToDigits(int value, int* digits, int nDigits);
+
+void encodeBase64(const uint8_t* bytes, int nBytes, char* target, bool writeNull);
+void decodeBase64(const char* src, int nBytes, uint8_t* dst);
+bool TestBase64();
+
+// Modified Bernstein hash
+uint32_t hash32(const char* v, const char* end);
+uint32_t hash32(const char* v);
 
 /**
 * The CStr class is a "c string": a simple array of
@@ -130,7 +116,11 @@ public:
 	bool operator==(const char* str) const {
 		return strEqual(buf, str);
 	}
-	
+
+	bool operator==(char c) const {
+		return len == 1 and buf[0] == c;
+	}
+
 	bool operator!=(const char* str) const {
 		return !strEqual(buf, str);
 	}
@@ -140,10 +130,14 @@ public:
 	}
 
 	template < class T > bool operator==(const T& str) const {
-		return strEqual(buf, str.buf);
+		return strEqual(this->c_str(), str.c_str());
 	}
 	
-	bool operator<(const CStr<ALLOCATE>& str) const {
+    template < class T > bool operator!=(const T& str) const {
+        return !strEqual(this->c_str(), str.c_str());
+    }
+
+    bool operator<(const CStr<ALLOCATE>& str) const {
 		return strcmp(buf, str.buf) < 0;
 	}
 
@@ -152,6 +146,26 @@ public:
 		append(src);
 	}
 
+	void operator=(char* const src) {
+		clear();
+		append((const char*)src);
+	}
+
+    void operator=(const unsigned char* src) {
+        clear();
+        append((const char*) src);
+    }
+
+    template< class T > void operator=(const T& str) {
+		// T is presumably a CStr of a different size or a CStrBuf
+		// Possibly on c_str() method.
+        //*this = str.c_str();
+		this->clear();
+		for(int i=0; i<str.size(); ++i) {
+			this->append(str[i]);
+		}
+    }
+
 	void operator+=(const char* src) {
 		append(src);
 	}
@@ -159,6 +173,13 @@ public:
 	void append(const char* src) {
 		for (const char* q = src; q && *q; ++q) {
 			append(*q);
+		}
+	}
+
+	void append(const char* start, const char* end) {
+		while(start < end && *start) {
+			append(*start);
+			++start;
 		}
 	}
 
@@ -173,13 +194,126 @@ public:
 	void setFromNum(uint32_t value, bool writeZero) {
 		clear();
 		intToString(value, buf, ALLOCATE, writeZero);
-		len = strlen(buf);
+		len = (int) strlen(buf);
+	}
+	
+	uint32_t hash32() const {
+		return ::hash32(buf, buf + len);
+	}
+
+	void tokenize(char sep, CStr<ALLOCATE>* tokens[], int n) const {
+		int t = 0;
+		const char* p = buf;
+
+		while(*p && t < n) {
+			p = skip(sep, p);
+			while(*p && *p != sep) {
+				tokens[t]->append(*p);
+				p++;
+			}
+			t++;
+		} 
 	}
 
 private:
+	const char* skip(char sep, const char* p) const {
+		while (*p == sep) ++p;
+		return p;
+	}
+
 	int len;
 	char buf[ALLOCATE];
 };
+
+
+/**
+* The CStrBuf. Wraps a buffer of characters, that doesn't have
+  to be null-terminated. Optimizes for space (the size of this structure
+  should just be ALLOCATE) vs. performance. Note also the absence of the
+  c_str() method, since it can't be implemented without allocating memory.
+*/
+template< int ALLOCATE >
+class CStrBuf
+{
+public:
+    CStrBuf() { clear(); }
+
+    CStrBuf(const char* src) {
+        set(src);
+    }
+
+    CStrBuf(const CStrBuf<ALLOCATE>& other) {
+        memcpy(buf, other.buf, ALLOCATE);
+    }
+
+    ~CStrBuf() {}
+
+	template <typename T>
+	void toStr(T* str) const {
+		str->clear();
+		for(int i=0; i<size(); ++i) {
+			str->append(buf[i]);
+		}
+	}
+
+    int size() const {
+        for (int i = 0; i < ALLOCATE; i++) {
+            if (buf[i] == 0) return i;
+        }
+        return ALLOCATE;
+    }
+
+    bool empty() const {
+        return buf[0] == 0;
+    }
+
+    int capacity() const {
+        return ALLOCATE;
+    }
+
+    void clear() {
+        buf[0] = 0;
+    }
+
+    char operator[](int i) const {
+        return buf[i];
+    }
+
+    template < class T > bool operator==(const T& str) const {
+        const int s = this->size();
+        if (str.size() != s)
+            return false;
+
+        for (int i = 0; i < s; ++i) {
+            if ((*this)[i] != str[i])
+                return false;
+        }
+        return true;
+    }
+
+    template< class T > bool operator !=(const T& str) const {
+        // Somewhat forced syntax because I don't want to re-implement the operator==
+        return !(*this == str);
+    }
+
+    void set(const char* src) {
+        int i = 0; 
+        for (; i < ALLOCATE && src[i]; ++i) {
+            buf[i] = src[i];
+        }
+        if (i < ALLOCATE)
+            buf[i] = 0;
+    }
+
+	uint32_t hash32() const {
+		return ::hash32(buf, buf + size());
+	}
+
+
+private:
+    char buf[ALLOCATE];
+};
+
 
 bool TestCStr();
 
@@ -225,6 +359,7 @@ public:
         return result;
     }
 
+	bool hasCap() const { return len < CAP; }
     int empty() const { return len == 0; }
 
 private:
@@ -238,25 +373,40 @@ bool TestCQueue();
 
 // --- Range / Min / Max --- //
 template<class T>
-bool inRange(const T& a, const T& b, const T& c) {
-	return a >= b && a <= c;
+bool glInRange(const T& val, const T& a, const T& b) {
+	return val >= a && val <= b;
 }
 
+template<class T>
+T glMin(T a, T b) { return (a < b) ? a : b; }
+
+template<class T>
+T glMax(T a, T b) { return (a > b) ? a : b; }
+
+template<class T>
+T glClamp(T x, T a, T b) {
+	if (x < a) return a;
+	if (x > b) return b;
+	return x;
+}
+template<class T>
+void glSwap(T &a, T &b) {
+    T t = a;
+    a = b;
+    b = t;
+}
+
+template<class T>
+T glAbs(T x) { return x >= 0 ? x : -x; }
+
 // --- Algorithm --- //
-
-template <class T> inline void	Swap(T* a, T* b) {
-	T temp = *a;
-	*a = *b;
-	*b = temp;
-};
-
 
 template <class T>
 inline void combSort(T* mem, int size)
 {
 	int gap = size;
 	for (;;) {
-		gap = gap * 3 / 4;
+		gap = (gap * 3) >> 2;
 		if (gap == 0) gap = 1;
 
 		bool swapped = false;
@@ -264,7 +414,7 @@ inline void combSort(T* mem, int size)
 		for (int i = 0; i < end; i++) {
 			int j = i + gap;
 			if (mem[j] < mem[i]) {
-				Swap(mem + i, mem + j);
+				glSwap(mem[i], mem[j]);
 				swapped = true;
 			}
 		}
@@ -274,10 +424,14 @@ inline void combSort(T* mem, int size)
 	}
 }
 
+
 class Random
 {
 public:
 	Random() : s(1) {}
+    Random(int seed) {
+        setSeed(seed);
+    }
 
 	void setSeed(uint32_t seed) {
 		s = (seed > 0) ? seed : 1;
@@ -337,27 +491,12 @@ private:
 	bool m_enable;
 };
 
-/**
-Sin wave.
-Input: 0-255 (range will be clipped correctly.)
-Output: [-256, 256]
-*/
-int16_t iSin(uint16_t x);
-
-/**
-Sin wave.
-Input: 0-255 (range will be clipped correctly.)
-Output: [0, 255]
-*/
-uint8_t iSin255(uint16_t x);
-
 /* Generally try to keep Ardunino and Win332 code very separate.
 But a log class is useful to generalize, both for utility
 and testing. Therefore put up with some #define nonsense here.
 */
 #ifdef _WIN32
 class Stream;
-struct RGB;
 static const int DEC = 1;	// fixme: use correct values
 static const int HEX = 2;
 #endif
@@ -368,7 +507,7 @@ public:
 	void attachSerial(Stream* stream);
 	void attachLog(Stream* stream);
 
-	const SPLog& p(const char v[]) const;
+	const SPLog& p(const char v[], int width=0) const;
 	const SPLog& p(char v) const;
 	const SPLog& p(unsigned char v, int p = DEC) const;
 	const SPLog& p(int v, int p = DEC) const;
@@ -376,7 +515,39 @@ public:
 	const SPLog& p(long v, int p = DEC) const;
 	const SPLog& p(unsigned long v, int p = DEC) const;
 	const SPLog& p(double v, int p = 2) const;
-	const SPLog& p(const RGB& rgb) const;
+	const SPLog& v3(int32_t x, int32_t y, int32_t z, const char* bracket=0) const;
+	const SPLog& v2(int32_t x, int32_t y, const char* bracket=0) const;
+	const SPLog& v3(float x, float y, float z, const char* bracket=0) const;
+	const SPLog& v2(float x, float y, const char* bracket=0) const;
+
+	const SPLog& v3(const Vec3<float>& v, const char* bracket=0) const {
+		return v3(v.x, v.y, v.z, bracket);
+	}
+	const SPLog& v3(const Vec3<int32_t>& v, const char* bracket=0) const {
+		return v3(v.x, v.y, v.z, bracket);
+	}
+
+	// Templated print, generally of alternate string class.
+	template<class T> const SPLog& pt(const T& str) const {
+		for(int i=0; i<str.size(); ++i) {
+			(*this).p(str[i]);
+		}
+		return *this;
+	}
+
+	// Templated print, with commas.
+	template<class T> const SPLog& ptc(const T& str) const {
+		(*this).p("[");
+		for(int i=0; i<str.size(); ++i) {
+			(*this).p(str[i]);
+			if (i != str.size() - 1) {
+				(*this).p(",");
+			}
+		}
+		(*this).p("]");
+		return *this;
+	}
+
 	void eol() const;
 
 private:

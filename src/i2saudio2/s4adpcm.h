@@ -33,6 +33,7 @@ public:
         int prev2 = 0;
         int prev1 = 0;
         int shift = 0;
+        int sign = 0;   // 0 or 8
         bool high = false;
 
         int guess() const {
@@ -62,7 +63,16 @@ public:
         int32_t* samples, State* state);
 
 private:
-    static const int TABLE_SIZE = 8;
+    static const int SHIFT_LIMIT_4 = 12;
+    static const int SHIFT_LIMIT_8 = 8;
+    static const int TABLE_SIZE = 9;
+
+#ifdef S4ADPCM_OPT
+public:
+    static int DELTA_TABLE_4[TABLE_SIZE];
+    static int DELTA_TABLE_8[TABLE_SIZE];
+#else
     static const int DELTA_TABLE_4[TABLE_SIZE];
     static const int DELTA_TABLE_8[TABLE_SIZE];
+#endif
 };

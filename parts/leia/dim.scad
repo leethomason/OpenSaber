@@ -12,8 +12,9 @@ D_INNER_FORE = 29.0;
 DZ_BUTTRESS = 4.0;
 DZ_THREAD = 10.0;
 
-DZ_INSET = 42.0;    // could be 40
+DZ_INSET = 42.4;    // could be 40
 DX_INSET = 18.0;
+Z_END_INSET   = M_T - DZ_THREAD - 1.8;
 
 BOLT_TO_PORT = 12.0;  // has to be forward to clear the microcontroller
 BOLT_TO_SWITCH = -12.0;

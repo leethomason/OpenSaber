@@ -4,26 +4,15 @@
 #include <string.h>
 #include <stdint.h>
 
-class Stream;
-
 #include "grinliz_assert.h"
 #include "fixed.h"
 
-template<class T>
-T clamp(T value, T lower, T upper) {
-	if (value < lower) return lower;
-	if (value > upper) return upper;
-	return value;
-}
-
-template<class T>
-T lerp256(T a, T b, T t256) {
-    return (a * (256 - t256) + b * t256) / 256;
-}
-
-template<class T>
-T lerp1024(T a, T b, T t1024) {
+inline int32_t lerp1024(int16_t a, int16_t b, int32_t t1024) {
     return (a * (1024 - t1024) + b * t1024) / 1024;
+}
+
+inline int32_t lerp255(int16_t a, int16_t b, int32_t t255) {
+    return (a * (255 - t255) + b * t255) / 255;
 }
 
 bool TestUtil();
@@ -64,9 +53,15 @@ inline bool strEqual(const char* a, const char* b, int n) {
 bool strStarts(const char* str, const char* prefix);
 bool istrStarts(const char* str, const char* prefix);
 void intToString(int value, char* str, int allocated, bool writeZero);
+void intToDigits(int value, int* digits, int nDigits);
 
-// Hash suitible for short (8 char or so) strings.
-uint16_t hash8(const char* v, const char* end);
+void encodeBase64(const uint8_t* bytes, int nBytes, char* target, bool writeNull);
+void decodeBase64(const char* src, int nBytes, uint8_t* dst);
+bool TestBase64();
+
+// Modified Bernstein hash
+uint32_t hash32(const char* v, const char* end);
+uint32_t hash32(const char* v);
 
 /**
 * The CStr class is a "c string": a simple array of
@@ -202,27 +197,30 @@ public:
 		len = (int) strlen(buf);
 	}
 	
-	uint16_t hash8() const {
-		return ::hash8(buf, buf + len);
+	uint32_t hash32() const {
+		return ::hash32(buf, buf + len);
 	}
 
 	void tokenize(char sep, CStr<ALLOCATE>* tokens[], int n) const {
-		int i =0;
+		int t = 0;
 		const char* p = buf;
 
-		while(*p && i < n) {
-			if (*p == sep) {
-				while(*p == sep) ++p;
-				i++;
-			}
-			else {
-				tokens[i]->append(*p);
+		while(*p && t < n) {
+			p = skip(sep, p);
+			while(*p && *p != sep) {
+				tokens[t]->append(*p);
 				p++;
 			}
+			t++;
 		} 
 	}
 
 private:
+	const char* skip(char sep, const char* p) const {
+		while (*p == sep) ++p;
+		return p;
+	}
+
 	int len;
 	char buf[ALLOCATE];
 };
@@ -231,7 +229,7 @@ private:
 /**
 * The CStrBuf. Wraps a buffer of characters, that doesn't have
   to be null-terminated. Optimizes for space (the size of this structure
-  should just be ALLOCATE) vs. performance. Note also the abscence of the
+  should just be ALLOCATE) vs. performance. Note also the absence of the
   c_str() method, since it can't be implemented without allocating memory.
 */
 template< int ALLOCATE >
@@ -249,6 +247,14 @@ public:
     }
 
     ~CStrBuf() {}
+
+	template <typename T>
+	void toStr(T* str) const {
+		str->clear();
+		for(int i=0; i<size(); ++i) {
+			str->append(buf[i]);
+		}
+	}
 
     int size() const {
         for (int i = 0; i < ALLOCATE; i++) {
@@ -299,8 +305,8 @@ public:
             buf[i] = 0;
     }
 
-	uint16_t hash8() const {
-		return ::hash8(buf, buf + size());
+	uint32_t hash32() const {
+		return ::hash32(buf, buf + size());
 	}
 
 
@@ -367,19 +373,27 @@ bool TestCQueue();
 
 // --- Range / Min / Max --- //
 template<class T>
-bool inRange(const T& val, const T& a, const T& b) {
+bool glInRange(const T& val, const T& a, const T& b) {
 	return val >= a && val <= b;
 }
 
 template<class T>
 T glMin(T a, T b) { return (a < b) ? a : b; }
+
 template<class T>
 T glMax(T a, T b) { return (a > b) ? a : b; }
+
 template<class T>
 T glClamp(T x, T a, T b) {
 	if (x < a) return a;
 	if (x > b) return b;
 	return x;
+}
+template<class T>
+void glSwap(T &a, T &b) {
+    T t = a;
+    a = b;
+    b = t;
 }
 
 template<class T>
@@ -387,19 +401,12 @@ T glAbs(T x) { return x >= 0 ? x : -x; }
 
 // --- Algorithm --- //
 
-template <class T> inline void	Swap(T* a, T* b) {
-	T temp = *a;
-	*a = *b;
-	*b = temp;
-};
-
-
 template <class T>
 inline void combSort(T* mem, int size)
 {
 	int gap = size;
 	for (;;) {
-		gap = gap * 3 / 4;
+		gap = (gap * 3) >> 2;
 		if (gap == 0) gap = 1;
 
 		bool swapped = false;
@@ -407,7 +414,7 @@ inline void combSort(T* mem, int size)
 		for (int i = 0; i < end; i++) {
 			int j = i + gap;
 			if (mem[j] < mem[i]) {
-				Swap(mem + i, mem + j);
+				glSwap(mem[i], mem[j]);
 				swapped = true;
 			}
 		}
@@ -417,10 +424,14 @@ inline void combSort(T* mem, int size)
 	}
 }
 
+
 class Random
 {
 public:
 	Random() : s(1) {}
+    Random(int seed) {
+        setSeed(seed);
+    }
 
 	void setSeed(uint32_t seed) {
 		s = (seed > 0) ? seed : 1;
@@ -508,7 +519,14 @@ public:
 	const SPLog& v2(int32_t x, int32_t y, const char* bracket=0) const;
 	const SPLog& v3(float x, float y, float z, const char* bracket=0) const;
 	const SPLog& v2(float x, float y, const char* bracket=0) const;
-	
+
+	const SPLog& v3(const Vec3<float>& v, const char* bracket=0) const {
+		return v3(v.x, v.y, v.z, bracket);
+	}
+	const SPLog& v3(const Vec3<int32_t>& v, const char* bracket=0) const {
+		return v3(v.x, v.y, v.z, bracket);
+	}
+
 	// Templated print, generally of alternate string class.
 	template<class T> const SPLog& pt(const T& str) const {
 		for(int i=0; i<str.size(); ++i) {

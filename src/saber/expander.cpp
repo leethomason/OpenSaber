@@ -8,16 +8,6 @@ using namespace wav12;
 
 uint8_t ExpanderAD4::m_buffer[BUFFER_SIZE] = {0};
 
-// 8 bit version:
-// fiati:   mse=    460 -1 0 1 2 2 2 3 4
-// poweron: mse=1056136 -1 0 1 2 3 3 3 4
-// hum:     mse=     73 -1 0 1 2 2 2 3 4
-
-// 4 bit version:
-// fiati:   mse=  20122 -1 0 0 0 0 0 1 2
-// poweron: mse=4349732 -1 0 0 1 1 1 2 3
-// hum:     mse=   2437 -1 0 0 0 1 1 2 3
-
 void ExpanderAD4::init(IStream* stream)
 {
     m_stream = stream;
