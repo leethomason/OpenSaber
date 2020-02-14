@@ -128,7 +128,7 @@ class ChannelTest : public Test
 
     virtual int process(Tester* tester, uint32_t event)
     {
-        Blade* blade = tester->getBlade();
+        BladePWM* blade = tester->getBladePWM();
         ASSERT(blade);
         BladeFlash* bladeFlash = tester->getBladeFlash();
         ASSERT(bladeFlash);
@@ -320,11 +320,11 @@ void Tester::start()
 
 bool Tester::checkOnOff()
 {
-    if (!wasOn && blade->getRGB().get() != 0) {
+    if (!wasOn && bladePWM->getRGB().get() != 0) {
         // Log.p("wasOn=true").eol();
         wasOn = true;
     }
-    bool isOff = blade->getRGB().get() == 0;
+    bool isOff = bladePWM->getRGB().get() == 0;
     //Log.p("RGB=").ptc(blade->getColor()).eol();
     //if (wasOn && isOff)
     //    Log.p("checkOnOff true").eol();

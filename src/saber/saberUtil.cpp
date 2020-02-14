@@ -19,7 +19,7 @@ bool BladeState::bladeOn() const
     return m_currentState >= BLADE_ON && m_currentState < BLADE_RETRACT;
 }
 
-void BladeState::process(Blade *blade, const BladeFlash &saber, uint32_t time)
+void BladeState::process(BladePWM *blade, const BladeFlash &saber, uint32_t time)
 {
     static const uint32_t FLASH_TIME = 120;
     SFX *sfx = SFX::instance();
@@ -114,8 +114,8 @@ void UIModeUtil::nextMode()
         break;
 
     case UIMode::VOLUME:
-#ifdef SABER_UI_COLOR_CHANGE
-        m_mode = UIMode::COLOR_CHANGE;
+#ifdef SABER_UI_COLOR_WHEEL
+        m_mode = UIMode::COLOR_WHEEL;
         Log.p("mode: color change").eol();
 #else
         m_mode = UIMode::NORMAL;
@@ -123,7 +123,7 @@ void UIModeUtil::nextMode()
 #endif
         break;
 
-    case UIMode::COLOR_CHANGE:
+    case UIMode::COLOR_WHEEL:
         m_mode = UIMode::NORMAL;
         Log.p("mode: normal").eol();
         break;

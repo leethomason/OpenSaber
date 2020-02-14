@@ -29,12 +29,27 @@
 
 
 void calcGravity2(float ax, float ay, float az, float* g2, float* g2Normal);
+/*
+    SaberDB: the database that holds the blade colors.
+        Data. Just holds colors.
 
-class Blade
+    BladeFlash: Animation code for an on blade.
+        Assumes the blade is on; doesn't track the state.
+
+    BladeState: state, whether the blade is on, off, ignite, retract.
+        The 'process' method combines the state, color from BladeFlash,
+        and writes the current color to the Blade.
+
+    The BladePWM has no state (except it's target color and voltage.) It takes 
+        an input color and translates it to an output electrical signal.
+        The call to the color or voltage can be at any time, and it will update.
+*/
+class BladePWM
 {
 public:
-    Blade();
-    static Blade& blade() {
+    BladePWM();
+
+    static BladePWM& bladePWM() {
         return *instance;
     }
 
@@ -56,7 +71,7 @@ private:
     void setThrottledRGB();
 
     static const int8_t pinRGB[NCHANNELS];
-    static Blade* instance;
+    static BladePWM* instance;
 
     osbr::RGB m_color;
     int32_t m_vbat;

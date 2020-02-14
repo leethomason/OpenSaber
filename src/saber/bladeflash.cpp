@@ -48,7 +48,7 @@ osbr::RGB AccelToColor(FixedNorm x, FixedNorm z)
         angle1 *= -1;
 
     // Angle from -90 to 90 (normal)
-    FixedNorm angle = lerp(angle0, angle1, z.abs());
+    FixedNorm angle = lerp(angle0, angle1, z.absolute());
 
     // Shift to 0 to 180 (normal), which is 0.0 to 0.5
     FixedNorm theta = FixedNorm(1, 4) - angle;

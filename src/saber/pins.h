@@ -719,7 +719,7 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define SABER_UI_BRIGHTNESS	    	16		
 	#define SABER_UI_IDLE_MEDITATION
 	//#define SABER_UI_REVERSE
-	#define SABER_UI_COLOR_CHANGE
+	#define SABER_UI_COLOR_WHEEL
 
 	#define SABER_SOUND_DEF 		SABER_SOUND_DEF_BESPIN_JAINA
 

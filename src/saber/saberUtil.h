@@ -9,7 +9,7 @@
 //#include "pins.h" 
 #include "modes.h"
 
-class Blade;
+class BladePWM;
 class BladeFlash;
 
 class BladeState
@@ -32,7 +32,7 @@ public:
         return m_startTime;
     }
 
-    void process(Blade* blade, const BladeFlash& bladeFlash, uint32_t time);
+    void process(BladePWM* bladePWM, const BladeFlash& bladeFlash, uint32_t time);
 
 private:
     uint8_t  m_currentState = BLADE_OFF;

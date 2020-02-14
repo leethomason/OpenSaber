@@ -120,7 +120,7 @@ public:
         return val;
     }
 
-    FixedT abs() const { return x > 0 ? *this : -(*this); }
+    FixedT absolute() const { return x > 0 ? *this : -(*this); }
 
     FixedT& operator = (const FixedT &v) { x = v.x; return *this; }
     FixedT& operator = (const int v) { x = IntToFixed(v); return *this; }

@@ -216,7 +216,7 @@ bool CMDParser::processCMD()
     else if (action == UTIL) {
         printLead(action.c_str());
         for (int i = 0; i < NCHANNELS; ++i) {
-            Serial.print(Blade::blade().util(i));
+            Serial.print(BladePWM::bladePWM().util(i));
             Serial.print(' ');
         }
         Serial.print('\n');
@@ -224,7 +224,7 @@ bool CMDParser::processCMD()
     else if (action == PWM) {
         printLead(action.c_str());
         for (int i = 0; i < NCHANNELS; ++i) {
-            Serial.print(Blade::blade().pwmVal(i));
+            Serial.print(BladePWM::bladePWM().pwmVal(i));
             Serial.print(' ');
         }
         Serial.print('\n');
@@ -371,7 +371,7 @@ bool CMDParser::processCMD()
         
         delay(DELAY);
         for (int i = 0; i < NCHANNELS; ++i) {
-            Serial.print(Blade::blade().util(i));
+            Serial.print(BladePWM::bladePWM().util(i));
             Serial.print(' ');
         }
         Serial.print('\n');
@@ -379,7 +379,7 @@ bool CMDParser::processCMD()
         delay(DELAY);
         printLead(PWM);
         for (int i = 0; i < NCHANNELS; ++i) {
-            Serial.print(Blade::blade().pwmVal(i));
+            Serial.print(BladePWM::bladePWM().pwmVal(i));
             Serial.print(' ');
         }
         Serial.print('\n');

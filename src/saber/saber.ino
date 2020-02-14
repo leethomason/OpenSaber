@@ -86,7 +86,7 @@ SaberDB     saberDB;
 Voltmeter   voltmeter;
 BladeFlash  bladeFlash;
 CMDParser   cmdParser(&saberDB, manifest);
-Blade       blade;
+BladePWM    bladePWM;
 Timer2      vbatTimer(Voltmeter::SAMPLE_INTERVAL);
 Tester      tester;
 AverageSample<Vec3<int32_t>, Vec3<int32_t>, 8> averageAccel(Vec3<int32_t>(0, 0, 0));
@@ -201,17 +201,17 @@ void setup() {
     Log.p("Init systems.").eol();
     voltmeter.begin();
     delay(10);
-    blade.setRGB(RGB::BLACK);
+    bladePWM.setRGB(RGB::BLACK);
 
     buttonA.setHoldHandler(buttonAHoldHandler);
     buttonA.setClickHandler(buttonAClickHandler);
     buttonA.setReleaseHandler(buttonAReleaseHandler);
 
     tester.attach(&buttonA);
-    tester.attachDB(&saberDB, &blade, &bladeFlash);
+    tester.attachDB(&saberDB, &bladePWM, &bladeFlash);
 
     Log.p("Average power: ").p(voltmeter.averagePower()).eol();
-    blade.setVoltage(voltmeter.averagePower());
+    bladePWM.setVoltage(voltmeter.averagePower());
 
     Log.p("Init display.").eol();
 
@@ -281,7 +281,7 @@ void syncToDB()
     sfx.setVolume(saberDB.volume());
 
     uiRenderData.volume = saberDB.volume4();
-    uiRenderData.color = Blade::convertRawToPerceived(saberDB.bladeColor());
+    uiRenderData.color = BladePWM::convertRawToPerceived(saberDB.bladeColor());
     uiRenderData.palette = saberDB.paletteIndex();
     uiRenderData.mVolts = voltmeter.averagePower();
     uiRenderData.fontName = manifest.getUnit(sfx.currentFont()).getName();
@@ -295,8 +295,8 @@ void buttonAReleaseHandler(const Button& b)
     ledA.blink(0, 0);
     ledA.set(true); // power is on.
 
-    if (uiMode.mode() == UIMode::COLOR_CHANGE) {
-        blade.setRGB(osbr::RGB(0));
+    if (uiMode.mode() == UIMode::COLOR_WHEEL) {
+        bladePWM.setRGB(osbr::RGB(0));
     }
 }
 
@@ -387,7 +387,7 @@ void buttonAHoldHandler(const Button& button)
                         buttonLEDOn = false;
                 }
             }
-            if (uiMode.mode() == UIMode::COLOR_CHANGE) {
+            if (uiMode.mode() == UIMode::COLOR_WHEEL) {
                 buttonLEDOn = true;
                 // blade.setRGB();
             }
@@ -509,13 +509,13 @@ void loop() {
     ledA.process();
 
     bladeFlash.tick(msec);
-    bladeState.process(&blade, bladeFlash, millis());
+    bladeState.process(&bladePWM, bladeFlash, millis());
     processAccel(msec);
     sfx.process(bladeState.bladeOn());
 
     if (vbatTimer.tick(delta)) {
         voltmeter.takeSample();
-        blade.setVoltage(voltmeter.averagePower());
+        bladePWM.setVoltage(voltmeter.averagePower());
         uiRenderData.mVolts = voltmeter.averagePower();
     }
     
@@ -553,7 +553,7 @@ void loopDisplays(uint32_t msec, uint32_t delta)
     #endif
 
     if (displayTimer.tick(delta)) {
-        uiRenderData.color = Blade::convertRawToPerceived(saberDB.bladeColor());
+        uiRenderData.color = BladePWM::convertRawToPerceived(saberDB.bladeColor());
 
         #if SABER_DISPLAY == SABER_DISPLAY_7_5_DEPRECATED
             display75.Draw(msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);

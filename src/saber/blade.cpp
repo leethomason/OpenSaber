@@ -67,10 +67,10 @@ void calcGravity2(float ax, float ay, float az, float* g2, float* g2Normal)
     }
 }
 
-const int8_t Blade::pinRGB[NCHANNELS] = { PIN_EMITTER_RED, PIN_EMITTER_GREEN, PIN_EMITTER_BLUE };
-Blade* Blade::instance = 0;
+const int8_t BladePWM::pinRGB[NCHANNELS] = { PIN_EMITTER_RED, PIN_EMITTER_GREEN, PIN_EMITTER_BLUE };
+BladePWM* BladePWM::instance = 0;
 
-Blade::Blade() 
+BladePWM::BladePWM() 
 {
     m_color.set(0);
     
@@ -89,7 +89,7 @@ Blade::Blade()
 }
 
 
-void Blade::setRGB(const RGB& rgb)
+void BladePWM::setRGB(const RGB& rgb)
 {
     if (rgb != m_color) {
         m_color = rgb;
@@ -97,7 +97,7 @@ void Blade::setRGB(const RGB& rgb)
     }
 }
 
-void Blade::setThrottledRGB()
+void BladePWM::setThrottledRGB()
 {
     for (int i = 0; i < NCHANNELS; ++i) {
         int32_t pwm = m_throttle[i].scale(m_color[i]);
@@ -112,7 +112,7 @@ void Blade::setThrottledRGB()
     }
 }
 
-void Blade::setVoltage(int milliVolts) 
+void BladePWM::setVoltage(int milliVolts) 
 {
     static const int32_t vF[NCHANNELS]   = { RED_VF, GREEN_VF, BLUE_VF };
     static const int32_t amps[NCHANNELS] = { RED_I,  GREEN_I,  BLUE_I };
@@ -122,7 +122,7 @@ void Blade::setVoltage(int milliVolts)
         return;
 
     if (milliVolts < 3000 || milliVolts > 5400) {
-        Log.p("Blade::setVoltage() vBat=").p(m_vbat).p(" mV=").p(milliVolts).eol();
+        Log.p("BladePWM::setVoltage() vBat=").p(m_vbat).p(" mV=").p(milliVolts).eol();
         ASSERT(false);
     }
 
@@ -149,7 +149,7 @@ void Blade::setVoltage(int milliVolts)
 }
 
 
-/*static*/ RGB Blade::convertRawToPerceived(const RGB& raw)
+/*static*/ RGB BladePWM::convertRawToPerceived(const RGB& raw)
 {
     #ifdef LED_TYPE 
         RGB rgb;
