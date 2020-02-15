@@ -72,7 +72,7 @@ SOFTWARE.
 #define SABER_SOUND_FLASH 			2	// M0 memory
 
 #define SABER_DISPLAY_128_32		1
-#define SABER_DISPLAY_7_5_DEPRECATED 2	// NON shifted. So many wires. So many.
+// #define SABER_DISPLAY_7_5_DEPRECATED 2	// NON shifted. So many wires. So many.
 #define SABER_DISPLAY_SEGMENT		3	// Shifted
 #define SABER_DISPLAY_7_5 			4	// Shifted
 

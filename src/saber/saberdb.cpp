@@ -47,7 +47,6 @@ void SaberDB::nextPalette() {
     setPalette(dataHeader.currentPalette + 1);
 }
 
-
 void SaberDB::setPalette(int n)
 {
 #ifdef SABER_SOUND_ON
@@ -58,16 +57,13 @@ void SaberDB::setPalette(int n)
 #endif
 
     dataHeader.currentPalette = abs(n) % NUM_PALETTES;
-    // EventQ.event("[PALETTE]", dataHeader.currentPalette);
 }
-
 
 void SaberDB::getPalette(int i, Palette* pal)
 {
     i = glClamp(i, 0, NUM_PALETTES-1);
     *pal = palette[i];
 }
-
 
 void SaberDB::setVolume(int v) {
     dataHeader.volume = glClamp(v, 0, 256);

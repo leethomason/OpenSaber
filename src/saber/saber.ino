@@ -112,9 +112,6 @@ uint8_t oledBuffer[OLED_WIDTH * OLED_HEIGHT / 8] = {0};
 OLED_SSD1306 display(PIN_OLED_DC, PIN_OLED_RESET, PIN_OLED_CS);
 VRender    renderer;
 int renderStage = 0;
-#elif SABER_DISPLAY == SABER_DISPLAY_7_5_DEPRECATED
-Pixel_7_5_UI display75;
-PixelMatrix pixelMatrix;
 #elif SABER_DISPLAY == SABER_DISPLAY_7_5
 Pixel_7_5_UI display75;
 ShiftedDotMatrix dotMatrix;
@@ -224,8 +221,6 @@ void setup() {
         display.display(oledBuffer);
 
         Log.p("OLED display connected.").eol();
-    #elif SABER_DISPLAY == SABER_DISPLAY_7_5_DEPRECATED
-        Log.p("Pixel display init.").eol();
     #elif SABER_DISPLAY == SABER_DISPLAY_7_5
         // No pin 6
         // Pin 7 - decimal point - not used
@@ -574,9 +569,7 @@ void loopDisplays(uint32_t msec, uint32_t delta)
     if (displayTimer.tick(delta)) {
         uiRenderData.color = BladePWM::convertRawToPerceived(saberDB.bladeColor());
 
-        #if SABER_DISPLAY == SABER_DISPLAY_7_5_DEPRECATED
-            display75.Draw(msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
-        #elif SABER_DISPLAY == SABER_DISPLAY_7_5
+        #if SABER_DISPLAY == SABER_DISPLAY_7_5
             display75.Draw(msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
             dotMatrix.setFrom7_5(display75.Pixels());
         #elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
@@ -610,9 +603,7 @@ void loopDisplays(uint32_t msec, uint32_t delta)
     }
 
     // Now loop() the specific display.
-    #if SABER_DISPLAY == SABER_DISPLAY_7_5_DEPRECATED
-        pixelMatrix.loop(msec, display75.Pixels());
-    #elif SABER_DISPLAY == SABER_DISPLAY_7_5
+    #if SABER_DISPLAY == SABER_DISPLAY_7_5
         {
             uint8_t a=0, b=0;
             dotMatrix.loop(micros(), &a, &b);

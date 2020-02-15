@@ -12,6 +12,7 @@ public:
     void setImpactColor(const osbr::RGB& rgb) { impactColor = rgb; }
 
     void tick(uint32_t msec);
+
     void doFlash(uint32_t msec) { tStart = msec; }
 
     osbr::RGB getColor() const { return color;  }
