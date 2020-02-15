@@ -8,6 +8,9 @@ class GrinlizLSM303
 public:
     GrinlizLSM303() { s_instance = this; }
 
+    // divisor for raw data
+    static const int DIV = 4096;    
+
     bool begin();
 
     int read(Vec3<float>* data, int nData) { return readInner(0, data, nData); }

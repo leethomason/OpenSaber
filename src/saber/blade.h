@@ -29,6 +29,7 @@
 
 
 void calcGravity2(float ax, float ay, float az, float* g2, float* g2Normal);
+
 /*
     SaberDB: the database that holds the blade colors.
         Data. Just holds colors.

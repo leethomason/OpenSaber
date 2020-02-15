@@ -296,6 +296,7 @@ void buttonAReleaseHandler(const Button& b)
     ledA.set(true); // power is on.
 
     if (uiMode.mode() == UIMode::COLOR_WHEEL) {
+        processColorWheel(true);
         bladePWM.setRGB(osbr::RGB(0));
     }
 }
@@ -387,10 +388,6 @@ void buttonAHoldHandler(const Button& button)
                         buttonLEDOn = false;
                 }
             }
-            if (uiMode.mode() == UIMode::COLOR_WHEEL) {
-                buttonLEDOn = true;
-                // blade.setRGB();
-            }
         }
         ledA.set(buttonLEDOn);
     }
@@ -401,6 +398,24 @@ void buttonAHoldHandler(const Button& button)
     }
 }
 
+void processColorWheel(bool commitChange)
+{
+    if (uiMode.mode() == UIMode::COLOR_WHEEL) {
+        Vec3<int32_t> ave = averageAccel.average();
+        FixedNorm x(ave.x, GrinlizLSM303::DIV);
+        FixedNorm z(ave.z, GrinlizLSM303::DIV);
+        osbr::RGB rgb = AccelToColor(x, z);
+        osbr::RGB rgbInv = ColorInverse(rgb);
+
+        bladeFlash.setBladeColor(rgb);
+        bladeFlash.setImpactColor(rgbInv);
+        if (commitChange) {
+            saberDB.setBladeColor(rgb);
+            saberDB.setImpactColor(rgbInv);
+            syncToDB();
+        }
+    }
+}
 
 void processSerial() {
     while (Serial.available()) {
@@ -508,9 +523,13 @@ void loop() {
     buttonA.process();
     ledA.process();
 
+    if (buttonA.held()) {
+        processColorWheel(false);   
+    }
+    processAccel(msec);
+
     bladeFlash.tick(msec);
     bladeState.process(&bladePWM, bladeFlash, millis());
-    processAccel(msec);
     sfx.process(bladeState.bladeOn());
 
     if (vbatTimer.tick(delta)) {

@@ -24,12 +24,14 @@ void BladeFlash::tick(uint32_t msec)
 }
 
 
-void BladeFlash::setImpactInverse()
+osbr::RGB ColorInverse(const osbr::RGB& rgb)
 {
     uint8_t h, s, v;
-    rgb2hsv(bladeColor.r, bladeColor.g, bladeColor.b, &h, &s, &v);
+    rgb2hsv(rgb.r, rgb.g, rgb.b, &h, &s, &v);
     h += 90;
-    hsv2rgb(h, s, v, &impactColor.r, &impactColor.g, &impactColor.b);
+    osbr::RGB inv;
+    hsv2rgb(h, s, v, &inv.r, &inv.g, &inv.b);
+    return inv;
 }
 
 

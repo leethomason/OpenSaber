@@ -292,7 +292,7 @@ int GrinlizLSM303::readInner(Vec3<int32_t>* rawData, Vec3<float>* data, int n)
             rawData[i].z = z;
         }
         if (data) {
-            static const float divInv = 1.0f / 4096.0f;
+            static const float divInv = 1.0f / float(DIV);
             data[i].x = x * divInv;
             data[i].y = y * divInv;
             data[i].z = z * divInv;
