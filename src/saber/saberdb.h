@@ -38,6 +38,7 @@ public:
         return dataHeader.currentPalette;
     }
     void setPalette(int n);
+    void setPaletteFromDirHash(uint32_t h);
 
     bool soundOn() const          {
         return dataHeader.volume > 0;
