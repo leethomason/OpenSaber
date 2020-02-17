@@ -4,8 +4,8 @@ use <../inset.scad>
 use <testplate.scad>
 include <dim.scad>
 
-DRAW_AFT  = true;
-DRAW_FORE = false;
+DRAW_AFT  = false;
+DRAW_FORE = true;
 DRAW_PLATE = false;
 
 EPS = 0.01;
