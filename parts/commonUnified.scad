@@ -96,7 +96,7 @@ module keyJoint(dz, do, di, slot, angle=0)
             difference() {
                 union() {
                     cylinder(h=dz-OVERLAP, d=do);
-                    translate([0, 0, dz-OVERLAP]) cylinder(h=OVERLAP, d1=do, d2=do-(T*0.3));
+                    translate([0, 0, dz-OVERLAP]) cylinder(h=OVERLAP, d1=do, d2=do-(T*0.2));
                 }
                 translate([0, 0, -EPS]) cylinder(h=100, d=di);
             }
