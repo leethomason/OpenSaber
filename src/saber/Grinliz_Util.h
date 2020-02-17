@@ -60,8 +60,8 @@ void decodeBase64(const char* src, int nBytes, uint8_t* dst);
 bool TestBase64();
 
 // Modified Bernstein hash
-uint32_t hash32(const char* v, const char* end);
-uint32_t hash32(const char* v);
+uint32_t hash32(const char* v, const char* end, uint32_t h=0);
+uint32_t hash32(const char* v, uint32_t h=0);
 
 /**
 * The CStr class is a "c string": a simple array of

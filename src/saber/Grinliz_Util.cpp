@@ -141,9 +141,8 @@ bool istrStarts(const char* str, const char* prefix)
 /*
     Modified Bernstein hash.
 */
-uint32_t hash32(const char* v, const char* end)
+uint32_t hash32(const char* v, const char* end, uint32_t h)
 {
-    uint32_t h = 0;
     for (; v < end; ++v) {
         // Simple form of the hash:
         // h = h * 33 ^ (*v);
@@ -153,9 +152,8 @@ uint32_t hash32(const char* v, const char* end)
     return h;
 }
 
-uint32_t hash32(const char* v)
+uint32_t hash32(const char* v, uint32_t h)
 {
-    uint32_t h = 0;
     for (; *v; ++v) {
         h = ((h << 5) + h) ^ (*v);
     }

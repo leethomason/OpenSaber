@@ -191,6 +191,9 @@ void setup() {
     spiFlash.begin();
     manifest.scan(&spiFlash);
 
+    uint32_t dirHash = manifest.dirHash();
+    saberDB.setPaletteFromDirHash(dirHash);
+
     Log.p("Init audio system.").eol();
     i2sAudioDriver.begin();
 

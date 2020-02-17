@@ -34,7 +34,7 @@ travel(g, mat, x=PORT)
 hole(g, mat, bottom, d=11.0)
 
 # switch
-BUTTON_HEAD_D = 7.2
+BUTTON_HEAD_D = 8.0
 
 travel(g, mat, x=SWITCH)    
 hole(g, mat, bottom, d=BUTTON_HEAD_D + 0.2)
