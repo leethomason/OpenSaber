@@ -50,7 +50,7 @@ void SFX::scanFiles()
     const MemUnit& dirUnit = m_manifest.getUnit(m_currentFont);
     int start = dirUnit.offset;
     int count = dirUnit.size;
-    Log.p("scanning: ").p(dirUnit.getName().c_str()).p(" start=").p(start).p(" count=").p(count).eol();
+    Log.p("Scanning: ").p(dirUnit.getName().c_str()).p(" start=").p(start).p(" count=").p(count).eol();
 
     // Group the files; assume they are already
     // in swing / clash / etc. groups.
@@ -68,7 +68,7 @@ void SFX::scanFiles()
         if (slot == SFX_MOTION_HIGH)
             m_smoothMode = true;
 
-        Log.p("slot name=").pt(name).p(" slot=").p(slot).eol();
+        // Log.p("slot name=").pt(name).p(" slot=").p(slot).eol();
 
         if (slot >= 0) {
             if (m_sfxType[slot].count == 0) {
@@ -83,33 +83,43 @@ void SFX::scanFiles()
 
     static const char* NAMES[NUM_SFX_TYPES] = {
         "Idle        ",
-        "Motion      ",
-        "Motion-high ",
+        "Motion(-low)",
+        "Motion-High ",
         "Impact      ",
-        "User_Tap    ",
+        "Blaster     ",
         "Power_On    ",
         "Power_Off   "
     };
     for(int i=0; i<NUM_SFX_TYPES; ++i) {
         Log.p(NAMES[i]).p("start=").p(m_sfxType[i].start).p(" count=").p(m_sfxType[i].count).eol();
     }
+    Log.p("SFX mode=").p(m_smoothMode ? "Smooth" : "Event").eol();
     readIgniteRetract();
-}   
+}
 
-int SFX::calcSlot(const char* name )
+int SFX::calcSlot(const char *name)
 {
     int slot = -1;
 
-    if (strstr(name, "POWERONF")) return -1;
+    if (strstr(name, "POWERONF"))
+        return -1;
 
-    if      (istrStarts(name, "BLDON")   || istrStarts(name, "POWERON"))    slot = SFX_POWER_ON;
-    else if (istrStarts(name, "BLDOFF")  || istrStarts(name, "POWEROFF"))   slot = SFX_POWER_OFF;
-    else if (istrStarts(name, "IDLE")    || istrStarts(name, "HUM"))        slot = SFX_IDLE;
-    else if (istrStarts(name, "IMPACT")  || istrStarts(name, "CLASH"))      slot = SFX_IMPACT;
-    else if (istrStarts(name, "USRTAP")  || istrStarts(name, "BLASTER"))    slot = SFX_USER_TAP;
-    else if (istrStarts(name, "swingL"))                                    slot = SFX_MOTION;
-    else if (istrStarts(name, "swingH"))                                    slot = SFX_MOTION_HIGH;
-    else if (istrStarts(name, "MOTION")  || istrStarts(name, "SWING"))      slot = SFX_MOTION;
+    if (istrStarts(name, "BLDON") || istrStarts(name, "POWERON") || istrStarts(name, "out"))
+        slot = SFX_POWER_ON;
+    else if (istrStarts(name, "BLDOFF") || istrStarts(name, "POWEROFF") || istrStarts(name, "in"))
+        slot = SFX_POWER_OFF;
+    else if (istrStarts(name, "IDLE") || istrStarts(name, "HUM"))
+        slot = SFX_IDLE;
+    else if (istrStarts(name, "IMPACT") || istrStarts(name, "CLASH") || istrStarts(name, "clsh"))
+        slot = SFX_IMPACT;
+    else if (istrStarts(name, "USRTAP") || istrStarts(name, "BLASTER") || istrStarts(name, "blst"))
+        slot = SFX_USER_TAP;
+    else if (istrStarts(name, "swingL"))
+        slot = SFX_MOTION;
+    else if (istrStarts(name, "swingH"))
+        slot = SFX_MOTION_HIGH;
+    else if (istrStarts(name, "MOTION") || istrStarts(name, "SWING"))
+        slot = SFX_MOTION;
 
     return slot;
 }
