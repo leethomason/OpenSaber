@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2016 Lee Thomason, Grinning Lizard Software
+  Copyright (c) Lee Thomason, Grinning Lizard Software
 
   Permission is hereby granted, free of charge, to any person obtaining a copy of
   this software and associated documentation files (the "Software"), to deal in
@@ -34,13 +34,12 @@ SFX::SFX(I2SAudioDriver *driver, const Manifest& manifest) :
     m_manifest(manifest)
 {
     m_instance = this;
-    m_bladeOn = false;
     m_currentSound = SFX_NONE;
     m_currentFont = 0;
     m_igniteTime = 1000;
     m_retractTime = 1000;
     m_volume = 64;
-    m_lastSFX = SFX_NONE;
+    m_smoothMode = false;
 
     scanFiles();
 }
@@ -60,11 +59,14 @@ void SFX::scanFiles()
         m_sfxType[i].count = 0;
     }
 
+    m_smoothMode = false;
     for(int i=start; i < start + count; ++i) {
         const MemUnit& memUnit = m_manifest.getUnit(i);
         CStr<9> name;
         memUnit.name.toStr(&name);
         int slot = calcSlot(name.c_str());
+        if (slot == SFX_MOTION_HIGH)
+            m_smoothMode = true;
 
         Log.p("slot name=").pt(name).p(" slot=").p(slot).eol();
 
@@ -82,6 +84,7 @@ void SFX::scanFiles()
     static const char* NAMES[NUM_SFX_TYPES] = {
         "Idle        ",
         "Motion      ",
+        "Motion-high ",
         "Impact      ",
         "User_Tap    ",
         "Power_On    ",
@@ -103,33 +106,20 @@ int SFX::calcSlot(const char* name )
     else if (istrStarts(name, "BLDOFF")  || istrStarts(name, "POWEROFF"))   slot = SFX_POWER_OFF;
     else if (istrStarts(name, "IDLE")    || istrStarts(name, "HUM"))        slot = SFX_IDLE;
     else if (istrStarts(name, "IMPACT")  || istrStarts(name, "CLASH"))      slot = SFX_IMPACT;
-    else if (istrStarts(name, "MOTION")  || istrStarts(name, "SWING"))      slot = SFX_MOTION;
     else if (istrStarts(name, "USRTAP")  || istrStarts(name, "BLASTER"))    slot = SFX_USER_TAP;
+    else if (istrStarts(name, "swingL"))                                    slot = SFX_MOTION;
+    else if (istrStarts(name, "swingH"))                                    slot = SFX_MOTION_HIGH;
+    else if (istrStarts(name, "MOTION")  || istrStarts(name, "SWING"))      slot = SFX_MOTION;
 
     return slot;
 }
 
-bool SFX::playSound(int sound, int mode)
+bool SFX::playSound(int sound, int mode, int channel)
 {
     if (!m_driver) return false;
 
     ASSERT(sound >= 0);
     ASSERT(sound < NUM_SFX_TYPES);
-
-    if (!m_bladeOn && (sound != SFX_POWER_ON)) {
-        return false ; // don't play sound with blade off
-    }
-
-    if (sound == SFX_POWER_ON) {
-        if (m_bladeOn)
-            return false;  // defensive error check.
-        m_bladeOn = true;
-    }
-    else if (sound == SFX_POWER_OFF) {
-        if (!m_bladeOn)
-            return false;  // defensive error check. BUT gets in the way of meditation playback.
-        m_bladeOn = false;
-    }
 
     if (!m_driver->isPlaying(0)) {
         m_currentSound = SFX_NONE;
@@ -155,10 +145,10 @@ bool SFX::playSound(int sound, int mode)
             .eol();
         // EventQ.event("[SFX play]", sound);
 
-        m_lastSFX = sound;
-        m_driver->play(track, sound == SFX_IDLE, 0);
-        m_driver->setVolume(m_volume, 0);
-        m_currentSound = sound;
+        m_driver->play(track, sound == SFX_IDLE, channel);
+        m_driver->setVolume(m_volume, channel);
+        if (channel == 0)
+            m_currentSound = sound;
         return true;
     }
     return false;
@@ -185,11 +175,67 @@ void SFX::stopSound()
     m_currentSound = SFX_NONE;
 }
 
+void SFX::sm_ignite()
+{
+    playSound(SFX_POWER_ON, SFX_OVERRIDE, CHANNEL_IDLE);
+    m_driver->setVolume(m_volume, CHANNEL_IDLE);
+    m_driver->setVolume(0, CHANNEL_MOTION_0);
+    m_driver->setVolume(0, CHANNEL_MOTION_1);
+    m_driver->setVolume(0, CHANNEL_EVENT);
+}
+
+void SFX::sm_retract()
+{
+    playSound(SFX_POWER_OFF, SFX_OVERRIDE, CHANNEL_IDLE);
+    m_driver->setVolume(m_volume, CHANNEL_IDLE);
+    m_driver->setVolume(0, CHANNEL_MOTION_0);
+    m_driver->setVolume(0, CHANNEL_MOTION_1);
+    m_driver->setVolume(0, CHANNEL_EVENT);
+}
+
+bool SFX::sm_playEvent(int sfx)
+{
+    playSound(sfx, SFX_OVERRIDE, CHANNEL_EVENT);
+    m_driver->setVolume(m_volume, CHANNEL_EVENT);
+}
+
+// TODO: blend 2 swing sounds.
+void SFX::sm_swingToVolume(float radPerSec, int* hum, int* swing)
+{
+    static const float STILL = 1.0f;
+    static const float FAST = 5.0f;
+
+    FixedNorm motionFraction = 0;
+    if (radPerSec >= FAST) {
+        motionFraction = 1;
+    }
+    else if (radPerSec > STILL) {
+        motionFraction = (radPerSec - STILL) / (FAST - STILL);
+    }
+    *hum = 256 - motionFraction.scale(256 - 64);
+    *swing = motionFraction.scale(256);
+}
+
 void SFX::process(bool bladeOn)
 {
     if (bladeOn) {
-        if (!m_driver->isPlaying(0)) {
-            playSound(SFX_IDLE, SFX_GREATER);
+        if (m_smoothMode) {
+            if (!m_driver->isPlaying(CHANNEL_IDLE)) {
+                playSound(SFX_IDLE, SFX_OVERRIDE, CHANNEL_IDLE);
+                // TODO: change motion sounds when still
+                playSound(SFX_MOTION, SFX_OVERRIDE, CHANNEL_MOTION_0);
+                playSound(SFX_MOTION_HIGH, SFX_OVERRIDE, CHANNEL_MOTION_1);
+            }
+            int hum = 256;
+            int swing = 0;
+            sm_swingToVolume(m_speed, &hum, &swing);
+            m_driver->setVolume(scaleVolume(hum), CHANNEL_IDLE);
+            m_driver->setVolume(scaleVolume(swing), CHANNEL_MOTION_0);
+        }
+        else {
+            if (!m_driver->isPlaying(0)) {
+                playSound(SFX_IDLE, SFX_GREATER);
+            }
         }
     }
 }

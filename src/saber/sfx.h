@@ -32,13 +32,14 @@ class Manifest;
 
 // SFX in priority order!
 enum
-{				//  Max
-	SFX_IDLE,   //  1
-	SFX_MOTION, //  16
-	SFX_IMPACT,   //  16
-	SFX_USER_TAP, //  4
-	SFX_POWER_ON,  //  4
-	SFX_POWER_OFF, //  4
+{			
+	SFX_IDLE,
+	SFX_MOTION,	
+	SFX_MOTION_HIGH,	// if present, a smooth swing font, and nHigh = nLow
+	SFX_IMPACT,
+	SFX_USER_TAP,
+	SFX_POWER_ON,
+	SFX_POWER_OFF,
 
 	NUM_SFX_TYPES,
 	SFX_NONE = 255
@@ -58,17 +59,14 @@ public:
 	SFX(I2SAudioDriver *driver, const Manifest& manifest);
 	static SFX *instance() { return m_instance; }
 
-	bool playSound(int sfx, int mode);
+	bool playSound(int sfx, int mode, int channel=0);
 	bool playSound(const char *sfx);
 	void stopSound();
 
-	bool bladeOn() const { return m_bladeOn; }
 	void process(bool playIdleSound);
 
 	void setVolume(int v) { m_volume = glClamp(v, 0, 256);}
 	int getVolume() const { return m_volume; }
-
-	int lastSFX() const { return m_lastSFX; }
 
 	const uint32_t getIgniteTime() const { return m_igniteTime; }
 	const uint32_t getRetractTime() const { return m_retractTime; }
@@ -77,21 +75,37 @@ public:
 	int setFont(const char *fontName);
 	int currentFont() const { return m_currentFont; }
 
+	bool smoothMode() const { return m_smoothMode; }
+	void sm_setSwing(float radPerSec) { m_speed = radPerSec; }
+	void sm_ignite();
+	void sm_retract();
+	bool sm_playEvent(int sfx);
+
 protected:
+	enum {
+		CHANNEL_IDLE,
+		CHANNEL_MOTION_0,
+		CHANNEL_MOTION_1,
+		CHANNEL_EVENT
+	};
+
 	void readIgniteRetract();
 	void scanFiles();
 	int calcSlot(const char* name);
 
+	static void sm_swingToVolume(float radPerSec, int* hum, int* swing);
+	int scaleVolume(int v) const { return (v * m_volume) >> 8; }
+
 	I2SAudioDriver *m_driver;
 	const Manifest& m_manifest;
 
-	bool m_bladeOn;
-	int m_currentSound; // For smooth, refers to the current effect sound.
-	int m_lastSFX;
+	bool m_smoothMode;
+	int m_currentSound;
 	int m_currentFont;
 	uint32_t m_igniteTime;
 	uint32_t m_retractTime;
 	int m_volume;
+	float m_speed;
 
 	Random m_random;
 

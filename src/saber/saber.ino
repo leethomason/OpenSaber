@@ -57,6 +57,7 @@
 #include "vrender.h"
 #include "vectorui.h"
 #include "bladeflash.h"
+#include "swing.h"
 
 using namespace osbr;
 
@@ -89,6 +90,7 @@ CMDParser   cmdParser(&saberDB, manifest);
 BladePWM    bladePWM;
 Timer2      vbatTimer(Voltmeter::SAMPLE_INTERVAL);
 Tester      tester;
+Swing       swing(10);
 AverageSample<Vec3<int32_t>, Vec3<int32_t>, 8> averageAccel(Vec3<int32_t>(0, 0, 0));
 
 #ifdef SABER_NUM_LEDS
@@ -313,7 +315,10 @@ void igniteBlade()
 {
     if (bladeState.state() == BLADE_OFF) {
         bladeState.change(BLADE_IGNITE);
-        sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
+        if (sfx.smoothMode())
+            sfx.sm_ignite();
+        else
+            sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
     }
 }
 
@@ -321,7 +326,10 @@ void retractBlade()
 {
     if (bladeState.state() != BLADE_OFF && bladeState.state() != BLADE_RETRACT) {
         bladeState.change(BLADE_RETRACT);
-        sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
+        if (sfx.smoothMode())
+            sfx.sm_retract();
+        else
+            sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
     }
 }
 
@@ -355,7 +363,10 @@ void buttonAClickHandler(const Button&)
     }
     else if (bladeState.state() == BLADE_ON) {
         bladeFlash.doFlash(millis());
-        sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
+        if (sfx.smoothMode())
+            sfx.sm_playEvent(SFX_USER_TAP);
+        else
+            sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
     }
 }
 
@@ -447,11 +458,15 @@ void processAccel(uint32_t msec)
 
     int n = accelMag.readInner(intData, data, N_ACCEL);
     ASSERT(n <= N_ACCEL);
-
     for(int i=0; i<n; ++i) {
         averageAccel.push(intData[i]);
     }
 
+    Vec3<int32_t> magData;
+    if (accelMag.readMag(&magData, 0) > 0) {
+        swing.push(magData, accelMag.getMagMin(), accelMag.getMagMax());
+        sfx.sm_setSwing(swing.speed());
+    }
     if (bladeState.state() == BLADE_ON) {
         for (int i = 0; i < n; ++i)
         {
@@ -469,18 +484,24 @@ void processAccel(uint32_t msec)
             // loop...which makes sense. (Sortof). But leads to super-long
             // motion. So if time is above a threshold, allow replay.
             // Actual motion / impact sounds are usually less that 1 second.
-#ifdef SABER_SOUND_ON
-            bool sfxOverDue = ((msec - lastMotionTime) > 1500) &&
-                              ((sfx.lastSFX() == SFX_MOTION) || (sfx.lastSFX() == SFX_IMPACT));
-#else
-            bool sfxOverDue = false;
-#endif
+            // TODO this needs a different workaround.
+//#ifdef SABER_SOUND_ON
+//            bool sfxOverDue = ((msec - lastMotionTime) > 1500) &&
+//                              ((sfx.lastSFX() == SFX_MOTION) || (sfx.lastSFX() == SFX_IMPACT));
+//#else
+//            bool sfxOverDue = false;
+//#endif
 
             if ((g2Normal >= impact * impact))
             {
                 bladeFlash.doFlash(millis());
                 if ((msec - lastImpactTime) > IMPACT_MIN_TIME) {
-                    bool sound = sfx.playSound(SFX_IMPACT, sfxOverDue ? SFX_OVERRIDE : SFX_GREATER_OR_EQUAL);
+                    bool sound = false;
+                    if (sfx.smoothMode())
+                        sound = sfx.sm_playEvent(SFX_IMPACT);
+                    else
+                        sound = sfx.playSound(SFX_IMPACT, SFX_GREATER_OR_EQUAL);
+
                     if (sound)
                     {
                         Log.p("Impact. g=").p(sqrt(g2)).eol();
@@ -489,9 +510,9 @@ void processAccel(uint32_t msec)
                     }
                 }
             }
-            else if (g2 >= motion * motion)
+            else if (!sfx.smoothMode() && g2 >= motion * motion)
             {
-                bool sound = sfx.playSound(SFX_MOTION, sfxOverDue ? SFX_OVERRIDE : SFX_GREATER);
+                bool sound = sfx.playSound(SFX_MOTION, SFX_GREATER);
                 if (sound)
                 {
                     Log.p("Motion. g=").p(sqrt(g2)).eol();

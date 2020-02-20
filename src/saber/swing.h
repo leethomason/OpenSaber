@@ -31,7 +31,7 @@ class Swing
 public:
     Swing(int mSecPerSample);
 
-    void push(const Vec3<int32_t> &x, const Vec3<int32_t> &x0, const Vec3<int32_t> &x1);
+    void push(const Vec3<int32_t> &x, const Vec3<int32_t> &xMin, const Vec3<int32_t> &xMax);
     // speed in radians / second
     float speed() const { return m_speed; }
 
