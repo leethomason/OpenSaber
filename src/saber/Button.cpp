@@ -152,7 +152,7 @@ bool Button::press() const
 
 bool Button::held() const
 {
-    return isDown() && bitRead(m_state, BIT_HOLD_NOW);
+    return isDown() && bitRead(m_state, BIT_HOLD_TRIGGERED);
 }
 
 

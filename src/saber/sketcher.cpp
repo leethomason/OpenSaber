@@ -98,6 +98,17 @@ void DotStarUI::Draw(osbr::RGB *led, int nLED, uint32_t time,
         }
         break;
 
+        case UIMode::COLOR_WHEEL:
+        {
+            led[0].set(0xff0000);
+            led[1].set(0x00ff00);
+            led[2].set(0x0000ff);
+            for(int i=3; i<nLED; ++i) {
+                led[i].set(0x444444);
+            }
+        }
+        break;
+
         default:
             break;
         }

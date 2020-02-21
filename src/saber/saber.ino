@@ -282,12 +282,6 @@ void syncToDB()
     sfx.setFont(saberDB.soundFont());
     sfx.setVolume(saberDB.volume());
 
-    uiRenderData.volume = saberDB.volume4();
-    uiRenderData.color = BladePWM::convertRawToPerceived(saberDB.bladeColor());
-    uiRenderData.palette = saberDB.paletteIndex();
-    uiRenderData.mVolts = voltmeter.averagePower();
-    uiRenderData.fontName = manifest.getUnit(sfx.currentFont()).getName();
-
     bladeFlash.setBladeColor(saberDB.bladeColor());
     bladeFlash.setImpactColor(saberDB.impactColor());
 }
@@ -413,10 +407,17 @@ void processColorWheel(bool commitChange)
 {
     if (uiMode.mode() == UIMode::COLOR_WHEEL) {
         Vec3<int32_t> ave = averageAccel.average();
-        FixedNorm x(ave.x, GrinlizLSM303::DIV);
-        FixedNorm z(ave.z, GrinlizLSM303::DIV);
+        FixedNorm x(ave[ACCEL_NORMAL_BUTTON], GrinlizLSM303::DIV);
+        //FixedNorm y(ave[ACCEL_PERP_BUTTON], GrinlizLSM303::DIV);
+
+        if (x < 0)
+            x = 0;
+
+        FixedNorm z(ave[ACCEL_BLADE_DIRECTION], GrinlizLSM303::DIV);
         osbr::RGB rgb = AccelToColor(x, z);
         osbr::RGB rgbInv = ColorInverse(rgb);
+
+        // Log.p("accel to color. x=").p(x).p(" z=").p(z).p(" c=").ptc(rgb).eol();
 
         bladeFlash.setBladeColor(rgb);
         bladeFlash.setImpactColor(rgbInv);
@@ -544,19 +545,22 @@ void loop() {
     buttonA.process();
     ledA.process();
 
-    if (buttonA.held()) {
-        processColorWheel(false);   
-    }
     processAccel(msec);
 
     bladeFlash.tick(msec);
-    bladeState.process(&bladePWM, bladeFlash, millis());
+    if (uiMode.mode() == UIMode::COLOR_WHEEL && buttonA.held()) {
+        processColorWheel(false);           
+        bladePWM.setRGB(bladeFlash.getColor());
+    }
+    else {
+        bladeState.process(&bladePWM, bladeFlash, millis());
+    }
+    
     sfx.process(bladeState.bladeOn());
 
     if (vbatTimer.tick(delta)) {
         voltmeter.takeSample();
         bladePWM.setVoltage(voltmeter.averagePower());
-        uiRenderData.mVolts = voltmeter.averagePower();
     }
     
     #ifdef PROFILE
@@ -601,7 +605,11 @@ void loopDisplays(uint32_t msec, uint32_t delta)
     #endif
 
     if (displayTimer.tick(delta)) {
+        uiRenderData.volume = saberDB.volume4();
         uiRenderData.color = BladePWM::convertRawToPerceived(saberDB.bladeColor());
+        uiRenderData.palette = saberDB.paletteIndex();
+        uiRenderData.mVolts = voltmeter.averagePower();
+        uiRenderData.fontName = manifest.getUnit(sfx.currentFont()).getName();
 
         #if SABER_DISPLAY == SABER_DISPLAY_7_5
             display75.Draw(msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);

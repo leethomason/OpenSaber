@@ -35,6 +35,9 @@ struct Vec3
 	void setZero() { x = y = z = 0; }
 	void scale(T s) { x *= s; y *= s; z *= s; }
 
+	T operator[](int i) const { return *(&x + i); }
+	T& operator[](int i) { return *(&x + i); }
+
     Vec3<T>& operator += (const Vec3<T>& v) { x += v.x; y += v.y; z += v.z; return *this; }
     Vec3<T>& operator -= (const Vec3<T>& v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
 
@@ -586,6 +589,7 @@ public:
 	const SPLog& p(long v, int p = DEC) const;
 	const SPLog& p(unsigned long v, int p = DEC) const;
 	const SPLog& p(double v, int p = 2) const;
+	const SPLog& p(FixedNorm v) const { return p(v.toFloat()); }
 	const SPLog& v3(int32_t x, int32_t y, int32_t z, const char* bracket=0) const;
 	const SPLog& v2(int32_t x, int32_t y, const char* bracket=0) const;
 	const SPLog& v3(float x, float y, float z, const char* bracket=0) const;
