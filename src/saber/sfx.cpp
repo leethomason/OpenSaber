@@ -51,7 +51,7 @@ void SFX::scanFiles()
     const MemUnit& dirUnit = m_manifest.getUnit(m_currentFont);
     int start = dirUnit.offset;
     int count = dirUnit.size;
-    Log.p("scanning: ").p(dirUnit.getName().c_str()).p(" start=").p(start).p(" count=").p(count).eol();
+    //Log.p("scanning: ").p(dirUnit.getName().c_str()).p(" start=").p(start).p(" count=").p(count).eol();
 
     // Group the files; assume they are already
     // in swing / clash / etc. groups.
@@ -66,7 +66,7 @@ void SFX::scanFiles()
         memUnit.name.toStr(&name);
         int slot = calcSlot(name.c_str());
 
-        Log.p("slot name=").pt(name).p(" slot=").p(slot).eol();
+        //Log.p("slot name=").pt(name).p(" slot=").p(slot).eol();
 
         if (slot >= 0) {
             if (m_sfxType[slot].count == 0) {

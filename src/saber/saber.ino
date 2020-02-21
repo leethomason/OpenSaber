@@ -278,12 +278,6 @@ void syncToDB()
     sfx.setFont(saberDB.soundFont());
     sfx.setVolume(saberDB.volume());
 
-    uiRenderData.volume = saberDB.volume4();
-    uiRenderData.color = BladePWM::convertRawToPerceived(saberDB.bladeColor());
-    uiRenderData.palette = saberDB.paletteIndex();
-    uiRenderData.mVolts = voltmeter.averagePower();
-    uiRenderData.fontName = manifest.getUnit(sfx.currentFont()).getName();
-
     bladeFlash.setBladeColor(saberDB.bladeColor());
     bladeFlash.setImpactColor(saberDB.impactColor());
 }
@@ -533,7 +527,6 @@ void loop() {
     if (vbatTimer.tick(delta)) {
         voltmeter.takeSample();
         bladePWM.setVoltage(voltmeter.averagePower());
-        uiRenderData.mVolts = voltmeter.averagePower();
     }
     
     #ifdef PROFILE
@@ -570,7 +563,11 @@ void loopDisplays(uint32_t msec, uint32_t delta)
     #endif
 
     if (displayTimer.tick(delta)) {
+        uiRenderData.volume = saberDB.volume4();
         uiRenderData.color = BladePWM::convertRawToPerceived(saberDB.bladeColor());
+        uiRenderData.palette = saberDB.paletteIndex();
+        uiRenderData.mVolts = voltmeter.averagePower();
+        uiRenderData.fontName = manifest.getUnit(sfx.currentFont()).getName();
 
         #if SABER_DISPLAY == SABER_DISPLAY_7_5
             display75.Draw(msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
