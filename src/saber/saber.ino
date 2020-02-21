@@ -21,6 +21,7 @@
 */
 
 // #define PROFILE
+// #define AUDIO_PROFILE
 
 // Arduino Libraries
 #include <Adafruit_ZeroI2S.h>
@@ -46,7 +47,7 @@
 #include "sfx.h"
 #include "saberdb.h"
 #include "cmdparser.h"
-#include "blade.h"
+#include "bladePWM.h"
 #include "sketcher.h"
 #include "renderer.h"
 #include "saberUtil.h"
@@ -64,7 +65,7 @@ using namespace osbr;
 static const uint32_t INDICATOR_CYCLE         = 1000;
 static const uint32_t IMPACT_MIN_TIME         = 1000;    // Minimum time between impact sounds. FIXME: need adjusting.
 
-uint32_t lastMotionTime = 0;    
+// uint32_t lastMotionTime = 0;    
 uint32_t lastImpactTime = 0;
 uint32_t lastLoopTime   = 0;
 
@@ -88,7 +89,6 @@ Voltmeter   voltmeter;
 BladeFlash  bladeFlash;
 CMDParser   cmdParser(&saberDB, manifest);
 BladePWM    bladePWM;
-Timer2      vbatTimer(Voltmeter::SAMPLE_INTERVAL);
 Tester      tester;
 Swing       swing(10);
 AverageSample<Vec3<int32_t>, Vec3<int32_t>, 8> averageAccel(Vec3<int32_t>(0, 0, 0));
@@ -102,8 +102,10 @@ DotStar dotstar;                    // Hardware controller.
 #endif
 
 GrinlizLSM303 accelMag;
+Timer2 vbatTimer(Voltmeter::SAMPLE_INTERVAL);
 Timer2 displayTimer(100);
 Timer2 vbatPrintTimer(1000);
+Timer2 audioPrintTimer(2000);
 
 #if SABER_DISPLAY == SABER_DISPLAY_128_32
 static const int OLED_WIDTH = 128;
@@ -506,7 +508,7 @@ void processAccel(uint32_t msec)
                     {
                         Log.p("Impact. g=").p(sqrt(g2)).eol();
                         lastImpactTime = msec;
-                        lastMotionTime = msec;
+                        // lastMotionTime = msec;
                     }
                 }
             }
@@ -516,7 +518,7 @@ void processAccel(uint32_t msec)
                 if (sound)
                 {
                     Log.p("Motion. g=").p(sqrt(g2)).eol();
-                    lastMotionTime = msec;
+                    // lastMotionTime = msec;
                 }
             }
         }
@@ -563,6 +565,14 @@ void loop() {
         DumpProfile();
     }
     #endif    
+    #ifdef AUDIO_PROFILE
+    if (audioPrintTimer.tick(delta)) {
+        Log.p("Cycle=").p(I2SAudioDriver::getCallbackCycle())
+            .p(" Time=").p(I2SAudioDriver::callbackMicros / (10 * audioPrintTimer.period())).p("%")
+            .eol();
+        I2SAudioDriver::callbackMicros = 0;
+    }
+    #endif
 
     loopDisplays(msec, delta);
 }

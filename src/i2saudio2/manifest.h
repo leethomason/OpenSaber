@@ -39,7 +39,7 @@ class Manifest
         Manifest();
         // Only scan interacts with the SPI. Afterwards, everything is cached locally.
         void scan(Adafruit_SPIFlash* flash);
-
+        uint32_t dirHash() const;
         const MemUnit& getUnit(int id) const;
         
         int getDir(const char* dir) const;

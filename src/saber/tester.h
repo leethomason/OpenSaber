@@ -53,18 +53,13 @@ public:
 	BladePWM* getBladePWM() { return bladePWM; }
 	BladeFlash* getBladeFlash() { return bladeFlash;}
 
+	// check the common test termination - returns true
+	// if the blade has turned on and then back off again.
 	bool checkOnOff();
 
 private:	
 	void start();
 	void done();
-
-	enum {
-		TEST_STATE_NONE,
-		TEST_STATE_START,
-		TEST_STATE_RUN,
-		TEST_STATE_DONE
-	};
 
 	enum {
 		ACTION_NONE,
@@ -88,11 +83,12 @@ private:
 
 	int currentTest = 0;
 	bool running = false;
+	bool wasOn = false;
+	uint32_t lastProcessTime = 0;
+
 	SaberDB* saberDB = 0;
 	BladePWM* bladePWM = 0;
 	BladeFlash* bladeFlash = 0;
-	uint32_t lastProcessTime = 0;
-	bool wasOn = false;
 	Button* button;
 
 	static Tester* s_instance;

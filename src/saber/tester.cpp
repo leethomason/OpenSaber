@@ -1,7 +1,7 @@
 #include "pins.h"
 #include "tester.h"
 #include "sfx.h"
-#include "blade.h"
+#include "bladePWM.h"
 #include "saberUtil.h"
 #include "sketcher.h"
 #include "rgb.h"
@@ -11,7 +11,6 @@
 #include "Button.h"
 #include "Grinliz_Arduino_Util.h"
 #include "GrinlizLSM303.h"
-#include "blade.h"
 #include "bladeflash.h"
 
 using namespace osbr;
@@ -367,7 +366,6 @@ void Tester::process()
     uint32_t delta = m - lastProcessTime;
     lastProcessTime = m;
 
-    // Newer system:
     int event = uint32_t(-1);
     if (delta > 0 && !actionQueue.empty()) {
         Action& action = actionQueue.front();

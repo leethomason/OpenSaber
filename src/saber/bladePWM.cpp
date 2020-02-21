@@ -46,7 +46,7 @@
 #include <Arduino.h>
 
 #include "pins.h"
-#include "blade.h"
+#include "bladePWM.h"
 #include "Grinliz_Util.h"
 
 using namespace osbr;

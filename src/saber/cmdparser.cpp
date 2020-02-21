@@ -24,7 +24,7 @@
 
 #include "cmdparser.h"
 #include "saberdb.h"
-#include "blade.h"
+#include "bladePWM.h"
 #include "SFX.h"
 #include "Tester.h"
 #include "saberUtil.h"
@@ -85,30 +85,15 @@ void CMDParser::printLead(const char* str) {
 
 bool CMDParser::push(int c)
 {
-    /*
-    if (m_streamBytes) {
-        --m_streamBytes;
-        streamFile.write(c);
-        if (m_streamBytes == 0) {
-            Serial.print("Streaming complete. Size=");
-            Serial.println(streamFile.size());
-            streamFile.close();
-        }
-        return false;
+    bool processed = false;
+    if (c == '\n') {
+        //Serial.println("process");
+        processed = processCMD();
     }
-    else*/ 
-    {
-        //Serial.println(c);
-        bool processed = false;
-        if (c == '\n') {
-            //Serial.println("process");
-            processed = processCMD();
-        }
-        else {
-            token.append(c);
-        }
-        return processed;
+    else {
+        token.append(c);
     }
+    return processed;
 }
 
 
@@ -217,7 +202,7 @@ bool CMDParser::processCMD()
         printLead(action.c_str());
         for (int i = 0; i < NCHANNELS; ++i) {
             Serial.print(BladePWM::bladePWM().util(i));
-            Serial.print(' ');
+            Serial.print('/100 ');
         }
         Serial.print('\n');
     }
@@ -225,7 +210,7 @@ bool CMDParser::processCMD()
         printLead(action.c_str());
         for (int i = 0; i < NCHANNELS; ++i) {
             Serial.print(BladePWM::bladePWM().pwmVal(i));
-            Serial.print(' ');
+            Serial.print('/255 ');
         }
         Serial.print('\n');
     }

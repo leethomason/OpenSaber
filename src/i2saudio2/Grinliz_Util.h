@@ -15,6 +15,10 @@ inline int32_t lerp255(int16_t a, int16_t b, int32_t t255) {
     return (a * (255 - t255) + b * t255) / 255;
 }
 
+inline FixedNorm lerp(FixedNorm a, FixedNorm b, FixedNorm t) {
+    return (a * (1 - t) + b * t);
+}
+
 bool TestUtil();
 
 template<typename T>
@@ -24,6 +28,10 @@ struct Vec3
 	T y;
 	T z;
 
+	Vec3() {}
+    Vec3(T t) { x = t; y = t; z = t; }
+	Vec3(T _x, T _y, T _z) { x = _x; y = _y; z = _z; }
+
 	void setZero() { x = y = z = 0; }
 	void scale(T s) { x *= s; y *= s; z *= s; }
 
@@ -32,6 +40,7 @@ struct Vec3
 
     inline friend Vec3<T> operator +  (const Vec3<T>& a, const Vec3<T>& b) { Vec3<T> t;  t.x = a.x + b.x; t.y = a.y + b.y; t.z = a.z + b.z; return t; }
     inline friend Vec3<T> operator -  (const Vec3<T>& a, const Vec3<T>& b) { Vec3<T> t;  t.x = a.x - b.x; t.y = a.y - b.y; t.z = a.z - b.z; return t; }
+    inline friend Vec3<T> operator /  (const Vec3<T>& a, T b) { Vec3<T> t;  t.x = a.x / b; t.y = a.y / b; t.z = a.z / b; return t; }
 };
 
 /**
@@ -60,8 +69,8 @@ void decodeBase64(const char* src, int nBytes, uint8_t* dst);
 bool TestBase64();
 
 // Modified Bernstein hash
-uint32_t hash32(const char* v, const char* end);
-uint32_t hash32(const char* v);
+uint32_t hash32(const char* v, const char* end, uint32_t h=0);
+uint32_t hash32(const char* v, uint32_t h=0);
 
 /**
 * The CStr class is a "c string": a simple array of
@@ -338,34 +347,51 @@ void writeHex(const uint8_t* color3, CStr<6>* str);
 
 bool TestHex();
 
-template<int CAP>
+template<typename T, int CAP>
 class CQueue
 {
 public:
     CQueue() {}
 
-    void push(int val) {
+	T& front() {
+		ASSERT(!empty());
+		return data[head];
+	}
+
+   	void pushFront(T val) {
         ASSERT(len < CAP);
-        int index = (head + len) % CAP;
-        data[index] = val;
+        head = dec(head);
+        data[head] = val;
         ++len;
     }
 
-    int pop() {
+	void push(T val) {
+		ASSERT(len < CAP);
+        data[tail] = val;
+        tail = inc(tail);
+		++len;
+	}
+
+    T pop() {
         ASSERT(len > 0);
-        int result = data[head];
-        head = (head + 1) % CAP;
+        T result = data[head];
+        head = inc(head);
         --len;
         return result;
     }
 
 	bool hasCap() const { return len < CAP; }
     int empty() const { return len == 0; }
+	int size() const { return len; }
 
 private:
-    int len = 0;
-    int head = 0;
-    int data[CAP];
+    int inc(int c) const { return (c + 1) % CAP; }
+    int dec(int c) const { return (c - 1 + CAP) % CAP; }
+
+	int len = 0;
+	int head = 0;
+	int tail = 0;
+    T data[CAP];
 };
 
 
@@ -456,6 +482,51 @@ private:
 	uint32_t s;
 };
 
+
+/**
+ * Power changes over time, and higher
+ * draw changes the power. A small class
+ * to average out power changes.
+ */
+template<typename TYPE, typename SUMTYPE, int N>
+class AverageSample
+{
+public:
+    AverageSample(TYPE initialValue) {
+        for (int i = 0; i < N; ++i) m_sample[i] = initialValue;
+        m_average = initialValue;
+        m_valid = true;
+    }
+
+    void push(TYPE value) {
+        m_sample[m_pos] = value;
+        m_pos++;
+        if (m_pos == N) m_pos = 0;
+        m_valid = false;
+    }
+
+    TYPE average() const {
+        if (m_valid == false) {
+            SUMTYPE total = 0;
+            for (int i = 0; i < N; ++i) {
+                total += m_sample[i];
+            }
+            m_average = total / N;
+            m_valid = true;
+        }
+        return m_average;
+    }
+
+    int numSamples() const { return N; }
+
+private:
+    mutable TYPE m_average;
+    mutable bool m_valid;
+    int m_pos = 0;
+    TYPE m_sample[N];
+};
+
+bool TestAverageSample();
 
 class Timer2
 {
@@ -555,38 +626,7 @@ private:
 	Stream* logStream = 0;
 };
 
-class EventQueue
-{
-public:
-    // Note that the event is stored *by pointer*, so the 
-    // string needs to be in static memory.
-	void event(const char* event, int data = 0);
-
-	struct Event {
-		const char* name = 0;
-		int			data = 0;
-	};
-
-	Event popEvent();
-	bool hasEvent() const { return m_nEvents > 0; }
-	int numEvents() const			{ return m_nEvents; }
-	const Event& peek(int i) const;
-
-    // For testing.
-    void setEventLogging(bool enable) { m_eventLogging = enable; }
-
-private:
-	static const int NUM_EVENTS = 8;
-	int m_nEvents = 0;
-	int m_head = 0;
-	bool m_eventLogging = true;
-	Event m_events[NUM_EVENTS];
-};
-
 extern SPLog Log;
-extern EventQueue EventQ;
-
-bool TestEvent();
 
 #endif // GRINLIZ_UTIL_INCLUDED
 

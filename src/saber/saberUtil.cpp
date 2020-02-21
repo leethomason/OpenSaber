@@ -1,6 +1,6 @@
 #include "saberUtil.h"
 #include "Grinliz_Arduino_Util.h"
-#include "blade.h"
+#include "bladePWM.h"
 #include "sfx.h"
 #include "bladeflash.h"
 
