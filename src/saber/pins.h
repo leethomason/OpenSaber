@@ -58,7 +58,7 @@ SOFTWARE.
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
+#define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_LEIA
 #define SABER_SUB_MODEL				SABER_SUB_MODEL_STANDARD
 // ----------------------------------
@@ -718,8 +718,7 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define SABER_UI_COUNT				4
 	#define SABER_UI_BRIGHTNESS	    	16		
 	#define SABER_UI_IDLE_MEDITATION
-	// #define SABER_UI_REVERSE
-	// #define SABER_UI_COLOR_WHEEL
+	#define SABER_UI_COLOR_WHEEL
 
 	#define SABER_SOUND_DEF 		SABER_SOUND_DEF_BESPIN_JAINA
 
@@ -932,7 +931,9 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define PIN_I2S_DATA		12
 	#define PIN_OLED_RESET 	    13
 	
-	#define ACCEL_BLADE_DIRECTION 0	// The x direction is the blade. fixme
+	#define ACCEL_BLADE_DIRECTION 1
+	#define ACCEL_NORMAL_BUTTON   0
+	#define ACCEL_PERP_BUTTON     2
 	
 #else
 	#error Pins not defined.

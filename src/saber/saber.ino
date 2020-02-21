@@ -394,10 +394,17 @@ void processColorWheel(bool commitChange)
 {
     if (uiMode.mode() == UIMode::COLOR_WHEEL) {
         Vec3<int32_t> ave = averageAccel.average();
-        FixedNorm x(ave.x, GrinlizLSM303::DIV);
-        FixedNorm z(ave.z, GrinlizLSM303::DIV);
+        FixedNorm x(ave[ACCEL_NORMAL_BUTTON], GrinlizLSM303::DIV);
+        //FixedNorm y(ave[ACCEL_PERP_BUTTON], GrinlizLSM303::DIV);
+
+        if (x < 0)
+            x = 0;
+
+        FixedNorm z(ave[ACCEL_BLADE_DIRECTION], GrinlizLSM303::DIV);
         osbr::RGB rgb = AccelToColor(x, z);
         osbr::RGB rgbInv = ColorInverse(rgb);
+
+        // Log.p("accel to color. x=").p(x).p(" z=").p(z).p(" c=").ptc(rgb).eol();
 
         bladeFlash.setBladeColor(rgb);
         bladeFlash.setImpactColor(rgbInv);
@@ -515,13 +522,17 @@ void loop() {
     buttonA.process();
     ledA.process();
 
-    if (buttonA.held()) {
-        processColorWheel(false);   
-    }
     processAccel(msec);
 
     bladeFlash.tick(msec);
-    bladeState.process(&bladePWM, bladeFlash, millis());
+    if (uiMode.mode() == UIMode::COLOR_WHEEL && buttonA.held()) {
+        processColorWheel(false);           
+        bladePWM.setRGB(bladeFlash.getColor());
+    }
+    else {
+        bladeState.process(&bladePWM, bladeFlash, millis());
+    }
+    
     sfx.process(bladeState.bladeOn());
 
     if (vbatTimer.tick(delta)) {
