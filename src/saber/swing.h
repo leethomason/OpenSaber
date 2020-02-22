@@ -30,7 +30,7 @@ class Filter
 public:
     Filter();
 
-    // Assum constant time. Pool assumption, but variable time
+    // Assume constant time. Pool assumption, but variable time
     // is tricky to filter. Especially since the sample time
     // isn't known.
     void push(const Vec3<int32_t> sample);

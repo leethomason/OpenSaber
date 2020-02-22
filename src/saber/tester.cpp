@@ -240,6 +240,45 @@ public:
 };
 
 
+class MagnemometerTest : public Test
+{
+public:
+
+	static const int NDATA = 10;
+	int nSamples;
+    uint32_t startTime;
+
+    virtual const char* name() const {
+        return "MagnemometerTest";
+    }
+
+    virtual void start(Tester* tester)
+    {
+        nSamples = 0;
+        GrinlizLSM303* accel = GrinlizLSM303::instance();
+        ASSERT(accel);
+        startTime = millis();
+
+        while(nSamples < NDATA) {
+            Vec3<int32_t> data;
+            int n = accel->readMag(&data, 0);
+            nSamples += n;
+        }
+        uint32_t deltaTime = millis() - startTime;
+        Serial.print("Time to read (ms):"); Serial.println(deltaTime);
+        ASSERT(deltaTime > NDATA * 8 && deltaTime < NDATA * 20);
+
+        // We can't test what the data is because it almost 
+        // certainly has not been calibrated. We just test if
+        // there was data at the correct rate.
+    }
+
+    virtual int process(Tester* tester, uint32_t event)
+    {
+        return TEST_SUCCESS;
+    }
+};
+
 class ButtonTest : public Test
 {
 public:
@@ -292,6 +331,7 @@ IgniteRetractTest igniteRetractTest;
 ChannelTest channelTest;
 BlasterTest blasterTest;
 AccelerometerTest accelerometerTest;
+MagnemometerTest magnemometerTest;
 
 Test* gTests[] = {
     &buttonTest,
@@ -299,6 +339,7 @@ Test* gTests[] = {
     &channelTest,
     &blasterTest,
     &accelerometerTest,
+    &magnemometerTest,
     0
 };
 

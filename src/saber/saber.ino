@@ -39,10 +39,7 @@
 // -- Must be first. Has configuration. -- //
 #include "pins.h"
 
-#ifdef SABER_NUM_LEDS
-    #include "DotStar.h"
-#endif
-
+#include "DotStar.h"
 #include "GrinlizLSM303.h"
 #include "voltmeter.h"
 #include "sfx.h"
@@ -467,8 +464,18 @@ void processAccel(uint32_t msec)
     }
 
     Vec3<int32_t> magData;
+    // readMag() should only return >0 if there is new data from the hardware.
     if (accelMag.readMag(&magData, 0) > 0) {
-        swing.push(magData, accelMag.getMagMin(), accelMag.getMagMax());
+        // The accelerometer and magnemometer are both clocked at 100Hz.
+        // The swing is set up for constant data; assume n is the same for both.
+        // Hopefully we keep a constant enough rate this doesn't matter.
+        // int nMag = n > 0 ? n : 1;
+        // Keep waffling on this...assuming when blade is lit this will pretty
+        // consistently get hit every 10ms.
+        int nMag = 1;
+
+        for(int i=0; i<nMag; ++i)
+            swing.push(magData, accelMag.getMagMin(), accelMag.getMagMax());
         sfx.sm_setSwing(swing.speed());
     }
     if (bladeState.state() == BLADE_ON) {
