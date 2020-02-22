@@ -1,3 +1,25 @@
+/*
+  Copyright (c) Lee Thomason, Grinning Lizard Software
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+  of the Software, and to permit persons to whom the Software is furnished to do
+  so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
+
 #ifndef FIXED_16_INCLUDED	
 #define FIXED_16_INCLUDED
 
@@ -201,17 +223,19 @@ T lerpFixed(T a, T b, FIXED t) {
 
 // Max: 127
 typedef FixedT<int32_t, int16_t, 8> Fixed88;
+
 // Strange def, but useful range:
 // Max: 1023
 typedef FixedT<int32_t, int16_t, 6> Fixed115;
 
 // Good for [1, -1] type functions, general near one.
+// About -8 to 8
 typedef FixedT<int32_t, int16_t, 12> FixedNorm;
 
 static const FixedNorm fixedNormHalf(1, 2);
 static const FixedNorm fixedNormSqrt2Over2(0.7071067811);
 
-inline Fixed115 operator * (const Fixed115& a, const FixedNorm& b)
+inline Fixed115 operator* (const Fixed115& a, const FixedNorm& b)
 {
     FixedT<int32_t, int16_t, 6> f;
     int32_t x = (a.getRaw() * b.getRaw()) >> 12;
