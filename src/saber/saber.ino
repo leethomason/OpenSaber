@@ -101,8 +101,8 @@ DotStar dotstar;                    // Hardware controller.
 
 GrinlizLSM303 accelMag;
 Timer2 vbatTimer(Voltmeter::SAMPLE_INTERVAL);
-Timer2 displayTimer(100);
-Timer2 vbatPrintTimer(1000);
+Timer2 displayTimer(113);       // distribute time to minimize "slow ticks"
+Timer2 vbatPrintTimer(1217);
 Timer2 audioPrintTimer(2000);
 
 #if SABER_DISPLAY == SABER_DISPLAY_128_32
