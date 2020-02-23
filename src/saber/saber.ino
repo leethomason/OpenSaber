@@ -63,9 +63,9 @@ using namespace osbr;
 static const uint32_t INDICATOR_CYCLE         = 1000;
 static const uint32_t IMPACT_MIN_TIME         = 1000;    // Minimum time between impact sounds. FIXME: need adjusting.
 
-// uint32_t lastMotionTime = 0;    
 uint32_t lastImpactTime = 0;
 uint32_t lastLoopTime   = 0;
+bool colorWasProcessed = false;
 
 Adafruit_FlashTransport_SPI flashTransport(SS1, &SPI1);
 Adafruit_SPIFlash spiFlash(&flashTransport);
@@ -289,9 +289,10 @@ void buttonAReleaseHandler(const Button& b)
     ledA.blink(0, 0);
     ledA.set(true); // power is on.
 
-    if (uiMode.mode() == UIMode::COLOR_WHEEL) {
+    if (uiMode.mode() == UIMode::COLOR_WHEEL && colorWasProcessed) {
         processColorWheel(true);
         bladePWM.setRGB(osbr::RGB(0));
+        colorWasProcessed = false;
     }
 }
 
@@ -472,10 +473,8 @@ void processAccel(uint32_t msec)
         // int nMag = n > 0 ? n : 1;
         // Keep waffling on this...assuming when blade is lit this will pretty
         // consistently get hit every 10ms.
-        int nMag = 1;
 
-        for(int i=0; i<nMag; ++i)
-            swing.push(magData, accelMag.getMagMin(), accelMag.getMagMax());
+        swing.push(magData, accelMag.getMagMin(), accelMag.getMagMax());
         sfx.sm_setSwing(swing.speed());
     }
     if (bladeState.state() == BLADE_ON) {
@@ -557,6 +556,7 @@ void loop() {
 
     bladeFlash.tick(msec);
     if (uiMode.mode() == UIMode::COLOR_WHEEL && buttonA.held()) {
+        colorWasProcessed = true;
         processColorWheel(false);           
         bladePWM.setRGB(bladeFlash.getColor());
     }

@@ -84,7 +84,7 @@ void Swing::push(const Vec3<int32_t>& x, const Vec3<int32_t>& mMin, const Vec3<i
         m_init = true;
         m_speed = 0;
         m_prevPosNorm = normalize(x, mMin, mMax);
-        Log.p("init push: ").v3(m_prevPosNorm.x, m_prevPosNorm.y, m_prevPosNorm.z).eol();
+        Log.p("Swing initial push: ").v3(m_prevPosNorm.x, m_prevPosNorm.y, m_prevPosNorm.z).eol();
         m_filter.fill(x);
         return;
     }
