@@ -200,8 +200,8 @@ bool GrinlizLSM303::begin()
     );
     delay(10);
 
-    mMin.setZero();
-    mMax.setZero();
+    mMin.set(INT_MAX, INT_MAX, INT_MAX);
+    mMax.set(INT_MIN, INT_MIN, INT_MIN);
     return (whoAmIA == 0x33) && (whoAmIM == 0x40);
 }
 
@@ -357,29 +357,24 @@ int GrinlizLSM303::readMag(Vec3<int32_t>* rawData, Vec3<float>* data)
     mMax.y = glMax(y, mMax.y);
     mMax.z = glMax(z, mMax.z);
 
+    if (!magDataValid())
+        return 0;
+
     if (rawData) {
         rawData->x = x;
         rawData->y = y;
         rawData->z = z; 
     }
     if (data) {
-        if(magDataValid()) {
-            float vx = -1.0f + 2.0f * (x - mMin.x) / (mMax.x - mMin.x);
-            float vy = -1.0f + 2.0f * (y - mMin.y) / (mMax.y - mMin.y);
-            float vz = -1.0f + 2.0f * (z - mMin.z) / (mMax.z - mMin.z);
+        float vx = -1.0f + 2.0f * (x - mMin.x) / (mMax.x - mMin.x);
+        float vy = -1.0f + 2.0f * (y - mMin.y) / (mMax.y - mMin.y);
+        float vz = -1.0f + 2.0f * (z - mMin.z) / (mMax.z - mMin.z);
 
-            float len2 = vx * vx + vy * vy + vz * vz;
-            float lenInv = 1.0f / sqrtf(len2);
-            data->x = vx * lenInv;
-            data->y = vy * lenInv;
-            data->z = vz * lenInv;
-        }
-        else {
-            data->x = 1;
-            data->y = 0;
-            data->z = 0;
-            return 0;
-        }
+        float len2 = vx * vx + vy * vy + vz * vz;
+        float lenInv = 1.0f / sqrtf(len2);
+        data->x = vx * lenInv;
+        data->y = vy * lenInv;
+        data->z = vz * lenInv;
     }
     return 1;
 }

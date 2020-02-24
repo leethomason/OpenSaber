@@ -37,7 +37,7 @@ void SaberDB::setPaletteFromDirHash(uint32_t h)
 {
     switch (h)
     {
-    case 0xfe1a3638: // bespin2, jaina, vader
+    case 0xfe1a3638:    // bespin2, jaina, vader
     {
         Log.p("setPaletteFromDirHash=0xfe1a3638 Bespin2/Jaina/Vader").eol();
         static const int BESPIN2 = 0;
@@ -48,6 +48,24 @@ void SaberDB::setPaletteFromDirHash(uint32_t h)
         palette[1].set(0x0000ff, 0x00c8ff, BESPIN2); // blue
         palette[2].set(0x00ffff, 0x00a0ff, BESPIN2); // cyan
         palette[3].set(0xff0000, 0xa08000, VADER);   // red
+        palette[4].set(0xff6000, 0x808000, JAINA);   // orange
+        palette[5].set(0x0044ff, 0x00ccff, JAINA);   // blue-green
+        palette[6].set(0x508080, 0x30a0a0, JAINA);   // white
+        palette[7].set(0x00ff44, 0x00ffaa, JAINA);   // green-blue
+    }
+    break;
+
+    case 0x3f14313c:    // bespin2, jaina,, smoothJedi
+    {
+        Log.p("setPaletteFromDirHash=0xfe1a3638 Bespin2/Jaina/SmoothJedi").eol();
+        static const int BESPIN2 = 0;
+        static const int JAINA = 1;
+        static const int SMOOTH = 2;
+
+        palette[0].set(0x00ff00, 0x00ffa0, BESPIN2); // green
+        palette[1].set(0x0000ff, 0x00c8ff, SMOOTH);  // blue
+        palette[2].set(0x00ffff, 0x00a0ff, BESPIN2); // cyan
+        palette[3].set(0xff0000, 0xa08000, SMOOTH);   // red
         palette[4].set(0xff6000, 0x808000, JAINA);   // orange
         palette[5].set(0x0044ff, 0x00ccff, JAINA);   // blue-green
         palette[6].set(0x508080, 0x30a0a0, JAINA);   // white

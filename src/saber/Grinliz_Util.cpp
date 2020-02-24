@@ -640,6 +640,19 @@ bool TestCQueue()
     return true;
 }
 
+int AnimateProp::tick(uint32_t delta) 
+{
+    m_time += delta;
+
+    if (m_period == 0 || m_time >= m_period) {
+        m_period = 0;
+        return m_end;
+    }
+    else {
+        m_time += delta;
+        return m_start + (m_end - m_start) * int(m_time) / int(m_period);
+    }
+}
 
 int Timer2::tick(uint32_t delta)
 {

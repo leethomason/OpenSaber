@@ -202,7 +202,7 @@ bool CMDParser::processCMD()
         printLead(action.c_str());
         for (int i = 0; i < NCHANNELS; ++i) {
             Serial.print(BladePWM::bladePWM().util(i));
-            Serial.print('/100 ');
+            Serial.print("/100 ");
         }
         Serial.print('\n');
     }
@@ -210,7 +210,7 @@ bool CMDParser::processCMD()
         printLead(action.c_str());
         for (int i = 0; i < NCHANNELS; ++i) {
             Serial.print(BladePWM::bladePWM().pwmVal(i));
-            Serial.print('/255 ');
+            Serial.print("/255 ");
         }
         Serial.print('\n');
     }

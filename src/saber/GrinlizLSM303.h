@@ -54,7 +54,9 @@ public:
     const Vec3<int32_t>& getMagMax() const { return mMax; }
     bool magDataValid() const { 
         static const int T = 100;
-        return mMax.x - mMin.x > T && mMax.y - mMin.y > T && mMax.z - mMin.z > T;   
+        return     (mMax.x - mMin.x > T) 
+                && (mMax.y - mMin.y > T) 
+                && (mMax.z - mMin.z > T);   
     }
 
     void logMagStatus();

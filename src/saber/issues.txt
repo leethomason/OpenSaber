@@ -1,7 +1,12 @@
 Issues:
 
-
 Smooth Swing support
+- volume smoothing (driver)
+- volume "drag" (SFX)
+- clipping / limiting in mixer (maybe 64 bit okay??)
+
+
+powerLevel or vbatToPowerLevel...both is crazy
 Crackle in hum sound (how??)
 
 Fixed

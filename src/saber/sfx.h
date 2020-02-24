@@ -63,9 +63,9 @@ public:
 	bool playSound(const char *sfx);
 	void stopSound();
 
-	void process(bool playIdleSound);
+	void process(int bladeMode, uint32_t delta);
 
-	void setVolume(int v) { m_volume = glClamp(v, 0, 256);}
+	void setVolume(int v);
 	int getVolume() const { return m_volume; }
 
 	const uint32_t getIgniteTime() const { return m_igniteTime; }
@@ -92,6 +92,7 @@ protected:
 	void readIgniteRetract();
 	void scanFiles();
 	int calcSlot(const char* name);
+	int getTrack(int sound);
 
 	static void sm_swingToVolume(float radPerSec, int* hum, int* swing);
 	int scaleVolume(int v) const { return (v * m_volume) >> 8; }
@@ -108,6 +109,7 @@ protected:
 	float m_speed;
 
 	Random m_random;
+	AnimateProp humIginition;
 
 	struct SFXType {
 		int start;

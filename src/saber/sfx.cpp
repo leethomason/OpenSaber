@@ -26,6 +26,7 @@
 #include "sfx.h"
 #include "tester.h"
 #include "i2saudiodrv.h"
+#include "modes.h"
 
 SFX* SFX::m_instance = 0;
 
@@ -97,8 +98,8 @@ void SFX::scanFiles()
         Log.p("High/Low motion counts are not equal. Disabling smooth swing.").eol();
         m_smoothMode = false;
     }
-    Log.p("SFX mode=").p(m_smoothMode ? "Smooth" : "Event").eol();
     readIgniteRetract();
+    Log.p("SFX mode=").p(m_smoothMode ? "Smooth" : "Event").p(" ignite=").p(m_igniteTime).p(" retract=").p(m_retractTime).eol();
 }
 
 int SFX::calcSlot(const char *name)
@@ -128,9 +129,27 @@ int SFX::calcSlot(const char *name)
     return slot;
 }
 
+
+int SFX::getTrack(int sound)
+{
+    ASSERT(sound >= 0);
+    ASSERT(sound < NUM_SFX_TYPES);
+    ASSERT(m_sfxType[sound].count > 0);
+
+    int track = m_sfxType[sound].start + m_random.rand(m_sfxType[sound].count);
+
+    if (track < MEM_IMAGE_NUM_DIR || track >= MEM_IMAGE_TOTAL) {
+        Log.p("track=").p(track).p(" sound=").p(sound).eol();
+        ASSERT(track >= MEM_IMAGE_NUM_DIR);
+        ASSERT(track < MEM_IMAGE_TOTAL);
+    }
+    return track;
+}
+
 bool SFX::playSound(int sound, int mode, int channel)
 {
     if (!m_driver) return false;
+    Log.p("SFX play sound=").p(sound).eol();
 
     ASSERT(sound >= 0);
     ASSERT(sound < NUM_SFX_TYPES);
@@ -144,9 +163,7 @@ bool SFX::playSound(int sound, int mode, int channel)
             || (mode == SFX_GREATER && sound > m_currentSound)
             || (mode == SFX_GREATER_OR_EQUAL && sound >= m_currentSound))
     {
-        int track = m_sfxType[sound].start + m_random.rand(m_sfxType[sound].count);
-        ASSERT(track >= MEM_IMAGE_NUM_DIR);
-        ASSERT(track < MEM_IMAGE_TOTAL);
+        int track = getTrack(sound);
 
         CStr<9> filename;
         const MemUnit& memUnit = m_manifest.getUnit(track);
@@ -155,7 +172,7 @@ bool SFX::playSound(int sound, int mode, int channel)
         Log.p("SFX play=").p(filename.c_str()).p(" track=").p(track)
             .p(" [")
             .p(m_sfxType[sound].start).p(",")
-            .p(m_sfxType[sound].start + m_sfxType[sound].count).p("]")
+            .p(m_sfxType[sound].start + m_sfxType[sound].count).p(")")
             .eol();
         // EventQ.event("[SFX play]", sound);
 
@@ -189,35 +206,54 @@ void SFX::stopSound()
     m_currentSound = SFX_NONE;
 }
 
+
+void SFX::setVolume(int v) 
+{ 
+    m_volume = glClamp(v, 0, 256);
+    if (!m_smoothMode) {          
+        m_driver->setVolume(m_volume, 0);
+    }
+}
+
 void SFX::sm_ignite()
 {
-    playSound(SFX_POWER_ON, SFX_OVERRIDE, CHANNEL_IDLE);
-    m_driver->setVolume(m_volume, CHANNEL_IDLE);
+    Log.p("sm_ignite").eol();
+    m_driver->play(getTrack(SFX_IDLE), true, CHANNEL_IDLE);
+    m_driver->play(getTrack(SFX_MOTION), true, CHANNEL_MOTION_0);
+    m_driver->play(getTrack(SFX_MOTION_HIGH), true, CHANNEL_MOTION_1);
+    m_driver->play(getTrack(SFX_POWER_ON), false, CHANNEL_EVENT);
+
+    m_driver->setVolume(0, CHANNEL_IDLE);
     m_driver->setVolume(0, CHANNEL_MOTION_0);
     m_driver->setVolume(0, CHANNEL_MOTION_1);
-    m_driver->setVolume(0, CHANNEL_EVENT);
+    m_driver->setVolume(m_volume, CHANNEL_EVENT);
+
+    humIginition.start(m_igniteTime, 0, 256);
 }
 
 void SFX::sm_retract()
 {
-    playSound(SFX_POWER_OFF, SFX_OVERRIDE, CHANNEL_IDLE);
-    m_driver->setVolume(m_volume, CHANNEL_IDLE);
+    Log.p("sm_retract").eol();
+    m_driver->play(getTrack(SFX_POWER_OFF), false, CHANNEL_EVENT);
     m_driver->setVolume(0, CHANNEL_MOTION_0);
     m_driver->setVolume(0, CHANNEL_MOTION_1);
-    m_driver->setVolume(0, CHANNEL_EVENT);
+    m_driver->setVolume(m_volume, CHANNEL_EVENT);
+
+    humIginition.start(m_retractTime, 256, 0);
 }
 
 bool SFX::sm_playEvent(int sfx)
 {
-    playSound(sfx, SFX_OVERRIDE, CHANNEL_EVENT);
+    m_driver->play(getTrack(sfx), false, CHANNEL_EVENT);
     m_driver->setVolume(m_volume, CHANNEL_EVENT);
+    return true; // fixme
 }
 
 // TODO: blend 2 swing sounds.
 void SFX::sm_swingToVolume(float radPerSec, int* hum, int* swing)
 {
-    static const float STILL = 1.0f;
-    static const float FAST = 5.0f;
+    static const float STILL = 3.0f;
+    static const float FAST = 12.0f;
 
     FixedNorm motionFraction = 0;
     if (radPerSec >= FAST) {
@@ -228,28 +264,39 @@ void SFX::sm_swingToVolume(float radPerSec, int* hum, int* swing)
     }
     *hum = 256 - motionFraction.scale(256 - 64);
     *swing = motionFraction.scale(256);
+    // Log.p("rad/sec=").p(radPerSec).p(" motionFraction=").p(motionFraction.toFloat()).p(" hum=").p(*hum).p(" swing=").p(*swing).eol();
 }
 
-void SFX::process(bool bladeOn)
+void SFX::process(int bladeMode, uint32_t delta)
 {
-    if (bladeOn) {
-        if (m_smoothMode) {
-            if (!m_driver->isPlaying(CHANNEL_IDLE)) {
-                playSound(SFX_IDLE, SFX_OVERRIDE, CHANNEL_IDLE);
-                // TODO: change motion sounds when still
-                playSound(SFX_MOTION, SFX_OVERRIDE, CHANNEL_MOTION_0);
-                playSound(SFX_MOTION_HIGH, SFX_OVERRIDE, CHANNEL_MOTION_1);
-            }
-            int hum = 256;
+    if (m_smoothMode) {
+        if (bladeMode != BLADE_OFF) {
+            int hum = 0;
             int swing = 0;
             sm_swingToVolume(m_speed, &hum, &swing);
-            m_driver->setVolume(scaleVolume(hum), CHANNEL_IDLE);
+
+            if (!humIginition.done()) {                
+                hum = humIginition.tick(delta);
+                // Log.p("humIginition=").p(hum).eol();
+            }
+            else if (bladeMode == BLADE_RETRACT) {
+                hum = 0;
+            }
+
+            //Log.p("hum=").p(hum).p(" mode=").p(bladeMode).eol();
+            m_driver->setVolume(0 /*scaleVolume(hum)*/, CHANNEL_IDLE);
             m_driver->setVolume(scaleVolume(swing), CHANNEL_MOTION_0);
+            //m_driver->setVolume(scaleVolume(swing), CHANNEL_MOTION_1);
         }
         else {
-            if (!m_driver->isPlaying(0)) {
-                playSound(SFX_IDLE, SFX_GREATER);
+            for(int i=0; i<AUDDRV_NUM_CHANNELS; i++) {
+                m_driver->setVolume(0, i);
             }
+        }
+    }
+    else {
+        if ((bladeMode == BLADE_ON) == !m_driver->isPlaying(0)) {
+            playSound(SFX_IDLE, SFX_GREATER);
         }
     }
 }

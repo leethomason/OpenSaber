@@ -22,7 +22,7 @@
 
 
 // #define PROFILE
-// #define AUDIO_PROFILE
+#define AUDIO_PROFILE
 
 // Arduino Libraries
 #include <Adafruit_ZeroI2S.h>
@@ -473,6 +473,7 @@ void processAccel(uint32_t msec)
         // int nMag = n > 0 ? n : 1;
         // Keep waffling on this...assuming when blade is lit this will pretty
         // consistently get hit every 10ms.
+        // Log.p("magData t=").p(msec).p(" x=").v3(magData).p(" ").v3(accelMag.getMagMin()).p(" ").v3(accelMag.getMagMax()).eol();
 
         swing.push(magData, accelMag.getMagMin(), accelMag.getMagMax());
         sfx.sm_setSwing(swing.speed());
@@ -564,7 +565,7 @@ void loop() {
         bladeState.process(&bladePWM, bladeFlash, millis());
     }
     
-    sfx.process(bladeState.bladeOn());
+    sfx.process(bladeState.state(), delta);
 
     if (vbatTimer.tick(delta)) {
         voltmeter.takeSample();

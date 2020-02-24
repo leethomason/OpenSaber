@@ -145,7 +145,8 @@ public:
     FixedT absolute() const { return x > 0 ? *this : -(*this); }
 
     FixedT& operator = (const FixedT &v) { x = v.x; return *this; }
-    FixedT& operator = (const int v) { x = IntToFixed(v); return *this; }
+    FixedT& operator = (int v) { x = IntToFixed(v); return *this; }
+    FixedT& operator = (float v) { x = v * FIXED_1; return *this; }
 
     FixedT& operator +=  (const FixedT& v) { x += v.x; return *this; }
     FixedT& operator +=  (const int v) { x += IntToFixed(v); return *this; }

@@ -54,6 +54,7 @@ struct Vec3
     Vec3(T t) { x = t; y = t; z = t; }
 	Vec3(T _x, T _y, T _z) { x = _x; y = _y; z = _z; }
 
+	void set(T _x, T _y, T _z) { x = _x; y = _y; z = _z; }
 	void setZero() { x = y = z = 0; }
 	void scale(T s) { x *= s; y *= s; z *= s; }
 
@@ -552,6 +553,27 @@ private:
 };
 
 bool TestAverageSample();
+
+class AnimateProp
+{
+public:
+	AnimateProp() {}
+
+	void start(uint32_t period, int start, int end) {
+		m_time = 0;
+		m_period = period;
+		m_start = start;
+		m_end = end;
+	}
+	int tick(uint32_t delta);
+	bool done() { return m_period == 0; }
+
+private:
+	uint32_t m_time = 0;
+	uint32_t m_period = 0;
+	int m_start;
+	int m_end;
+};
 
 class Timer2
 {

@@ -34,6 +34,9 @@
 class BladePWM;
 class BladeFlash;
 
+// Update everything from a DB change.
+void syncToDB();
+
 class BladeState
 {
 public:

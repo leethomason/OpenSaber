@@ -200,7 +200,15 @@ void S4ADPCM::decode4(const uint8_t* p, int32_t nSamples,
         state->push(value);
 
         int32_t s = value * (volume << 8);
-        out[0] = out[1] = add ? (out[0] + s) : s;
+        if (add) {
+            int64_t w = s + out[0];
+            if (w > INT32_MAX) w = INT32_MAX;
+            if (w < INT32_MIN) w = INT32_MIN;
+            out[0] = out[1] = int32_t(w);
+        }
+        else {
+            out[0] = out[1] = s;
+        }
         out += 2;
 
         state->sign = sign;
