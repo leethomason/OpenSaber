@@ -137,12 +137,16 @@ void S4ADPCM::encode8(const int16_t* data, int32_t nSamples, uint8_t* target, St
 
 
 void S4ADPCM::decode4(const uint8_t* p, int32_t nSamples,
-    int volume, bool add, int32_t* out, State* state)
+    int volume,
+    bool add, 
+    int32_t* out, State* state)
 {
     uint8_t data = 0;
     uint8_t sign = 0;
     int delta = 0;
     int value = 0;
+
+    state->volumeTarget = volume << 8;
 
     for (int32_t i = 0; i < nSamples; ++i) {
         if (state->high) {
@@ -177,8 +181,18 @@ void S4ADPCM::decode4(const uint8_t* p, int32_t nSamples,
 #endif
         state->push(value);
 
-        int32_t s = value * (volume << 8);
-        out[0] = out[1] = add ? (out[0] + s) : s;
+        if (state->volumeShifted < state->volumeTarget)
+            state->volumeShifted += VOLUME_EASING;
+        else if (state->volumeShifted > state->volumeTarget)
+            state->volumeShifted -= VOLUME_EASING;
+
+        int32_t s = value * state->volumeShifted;
+        if (add) {
+            out[0] = out[1] = sat_add(s, out[0]);
+        }
+        else {
+            out[0] = out[1] = s;
+        }
         out += 2;
 
         state->sign = sign;
@@ -193,6 +207,8 @@ void S4ADPCM::decode4(const uint8_t* p, int32_t nSamples,
 void S4ADPCM::decode8(const uint8_t* p, int32_t nSamples,
     int volume, bool add, int32_t* out, State* state)
 {
+    state->volumeTarget = volume << 8;
+
     for (int32_t i = 0; i < nSamples; ++i) {
         int delta = *p & 0x7f;
         uint8_t sign = *p & 0x80;
@@ -208,9 +224,14 @@ void S4ADPCM::decode8(const uint8_t* p, int32_t nSamples,
         }
         state->push(value);
 
-        int32_t s = value * (volume << 8);
+        if (state->volumeShifted < state->volumeTarget)
+            state->volumeShifted += VOLUME_EASING;
+        else if (state->volumeShifted > state->volumeTarget)
+            state->volumeShifted -= VOLUME_EASING;
+
+        int32_t s = value * state->volumeShifted;
         if (add) {
-            out[0] = out[1] = out[0] + s;
+            out[0] = out[1] = sat_add(s, out[0]);
         }
         else {
             out[0] = out[1] = s;

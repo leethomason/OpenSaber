@@ -82,11 +82,11 @@ void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
     for(int i=0; i<AUDDRV_NUM_CHANNELS; ++i) {
         int n = 0;
         if (status[i].addr) {
-            n = expander[i].expand(fill, AUDDRV_BUFFER_SAMPLES, volume[i], i > 0, status[i].is8Bit);
+            n = expander[i].expand(fill, AUDDRV_BUFFER_SAMPLES, volume[i], i > 0, status[i].is8Bit, false);
 
             if (status[i].loop && n < AUDDRV_BUFFER_SAMPLES) {
                 expander[i].rewind();
-                expander[i].expand(fill + n*2, AUDDRV_BUFFER_SAMPLES - n, volume[i], i > 0, status[i].is8Bit);
+                expander[i].expand(fill + n*2, AUDDRV_BUFFER_SAMPLES - n, volume[i], i > 0, status[i].is8Bit, false);
                 n = AUDDRV_BUFFER_SAMPLES;
             }
         }

@@ -33,7 +33,7 @@ namespace wav12 {
         // Returns the number of samples it could expand. nSamples should be even,
         // unless it is the last sample (which can be odd if it uses up the
         // entire track.)
-        int expand(int32_t* target, uint32_t nSamples, int32_t volume, bool add, bool use8Bit);
+        int expand(int32_t* target, uint32_t nSamples, int32_t volume, bool add, bool use8Bit, bool overrideEasing);
         void rewind();
         bool done() const { return m_stream->done(); }
 

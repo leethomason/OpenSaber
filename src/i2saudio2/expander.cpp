@@ -42,10 +42,14 @@ void ExpanderAD4::compress8(const int16_t* data, int32_t nSamples,
 }
 
 
-int ExpanderAD4::expand(int32_t *target, uint32_t nSamples, int32_t volume, bool add, bool use8Bit)
+int ExpanderAD4::expand(int32_t *target, uint32_t nSamples, int32_t volume, bool add, bool use8Bit, bool overrideEasing)
 {
     if (!m_stream)
         return 0;
+
+    if (overrideEasing) {
+        m_state.volumeShifted = volume << 8;
+    }
 
     uint32_t n = 0;
 
