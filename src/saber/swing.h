@@ -30,7 +30,7 @@ class Filter
 public:
     Filter();
 
-    // Assume constant time. Pool assumption, but variable time
+    // Assume constant time. Poor assumption, but variable time
     // is tricky to filter. Especially since the sample time
     // isn't known.
     void push(const Vec3<int32_t> sample);
@@ -44,9 +44,12 @@ public:
     void calc(Vec3<int32_t> *vec3);
 
 private:
-    Vec3<int32_t> sample[N];
+    bool cached = false;
     int current = 0;
-};  
+    Vec3<int32_t> ave;
+    Vec3<int32_t> sample[N];
+};
+
 
 class Swing
 {

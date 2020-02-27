@@ -36,25 +36,32 @@ void Filter::fill(const Vec3<int32_t> v)
         sample[i] = v;
     }
     current = 0;
+    cached = true;
+    ave = v;
 }
 
 void Filter::push(const Vec3<int32_t> v)
 {
     sample[current] = v;
     current = (current + 1) % N;
+    cached = false;
 }
 
 void Filter::calc(Vec3<int32_t>* vec3)
 {
-    Vec3<int32_t> total;
-    total.setZero();
+    if (!cached) {
+        Vec3<int32_t> total;
+        total.setZero();
 
-    for(int i=0; i<N; ++i) {
-        total += sample[i];
+        for (int i = 0; i < N; ++i) {
+            total += sample[i];
+        }
+        ave.x = total.x >> SHIFT;
+        ave.y = total.y >> SHIFT;
+        ave.z = total.z >> SHIFT;
+        cached = true;
     }
-    vec3->x = total.x >> SHIFT;
-    vec3->y = total.y >> SHIFT;
-    vec3->z = total.z >> SHIFT;
+    *vec3 = ave;
 }
 
 
