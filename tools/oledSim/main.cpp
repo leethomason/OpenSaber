@@ -269,7 +269,7 @@ int main(int, char**) {
     };
     data.color = colors[0];
     bladeFlash.setBladeColor(data.color);
-    bladeFlash.setImpactColor(ColorInverse(data.color));
+    bladeFlash.setImpactColor(ColorRotated(data.color, 180));
 
 	int palette = 0;
 
@@ -308,7 +308,7 @@ int main(int, char**) {
                 data.palette = palette;
                 data.color = colors[palette];
                 bladeFlash.setBladeColor(data.color);
-                bladeFlash.setImpactColor(ColorInverse(data.color));
+                bladeFlash.setImpactColor(ColorRotated(data.color, 180));
                 data.fontName = FONT_NAMES[palette];
 			}
             else if (e.key.keysym.sym == SDLK_f) {

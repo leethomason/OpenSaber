@@ -571,8 +571,8 @@ public:
 private:
 	uint32_t m_time = 0;
 	uint32_t m_period = 0;
-	int m_start;
-	int m_end;
+	int m_start = 0;
+	int m_end = 0;
 };
 
 class Timer2

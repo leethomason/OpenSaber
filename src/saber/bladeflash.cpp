@@ -46,14 +46,14 @@ void BladeFlash::tick(uint32_t msec)
 }
 
 
-osbr::RGB ColorInverse(const osbr::RGB& rgb)
+osbr::RGB ColorRotated(const osbr::RGB& rgb, int angle360)
 {
     uint8_t h, s, v;
     rgb2hsv(rgb.r, rgb.g, rgb.b, &h, &s, &v);
-    h += 90;
-    osbr::RGB inv;
-    hsv2rgb(h, s, v, &inv.r, &inv.g, &inv.b);
-    return inv;
+    h += angle360 / 2;
+    osbr::RGB c;
+    hsv2rgb(h, s, v, &c.r, &c.g, &c.b);
+    return c;
 }
 
 

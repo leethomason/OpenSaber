@@ -49,7 +49,7 @@ private:
 
 // Could be someplace better, but shared code (with win32) in this location.
 osbr::RGB AccelToColor(FixedNorm x, FixedNorm z);
-osbr::RGB ColorInverse(const osbr::RGB& rgb);
+osbr::RGB ColorRotated(const osbr::RGB& rgb, int angle360);
 
 bool TestAccelToColor();
 
