@@ -60,7 +60,9 @@ void CMDParser::printHexColor(const RGB& color) {
 
 void CMDParser::printMAmps(const RGB& c) {
     Serial.print("(");
-    uint32_t amps = uint32_t(c[0]) * RED_I / uint32_t(255) + uint32_t(c[1]) * GREEN_I / uint32_t(255) + uint32_t(c[2]) * BLUE_I / uint32_t(255);
+    uint32_t amps =   uint32_t(c[0]) * RED_I / uint32_t(255) 
+                    + uint32_t(c[1]) * GREEN_I / uint32_t(255) 
+                    + uint32_t(c[2]) * BLUE_I / uint32_t(255);
     Serial.print(amps);
     Serial.print(" mAmps)");
 }

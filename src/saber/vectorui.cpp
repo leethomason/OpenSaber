@@ -90,7 +90,7 @@ void VectorUI::Draw(VRender* ren,
 {
     ren->Clear();
   
-    int p = data->powerLevel(8);
+    int p = UIRenderData::powerLevel(data->mVolts, 8);
     CStr<5> volts;
     volts.setFromNum(data->mVolts, true);
 

@@ -56,6 +56,7 @@ struct Vec3
 
 	void set(T _x, T _y, T _z) { x = _x; y = _y; z = _z; }
 	void setZero() { x = y = z = 0; }
+	bool isZero() const { return x==0 && y == 0 && z == 0; }
 	void scale(T s) { x *= s; y *= s; z *= s; }
 
 	T operator[](int i) const { return *(&x + i); }

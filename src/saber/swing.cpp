@@ -68,6 +68,7 @@ void Filter::calc(Vec3<int32_t>* vec3)
 Swing::Swing(int msecPerSample)
 {
     m_speed = 0;
+    m_origin.setZero();
     m_prevPosNorm.setZero();
     m_init = false;
     m_dtINV = 1000.0f / msecPerSample;
@@ -109,9 +110,20 @@ void Swing::push(const Vec3<int32_t>& x, const Vec3<int32_t>& mMin, const Vec3<i
     // sin(t) = t, for small t (in radians)
     Vec3<float> c = b - a;
     float dist = sqrtf(c.x * c.x + c.y * c.y + c.z * c.z);
-
+    
     m_speed = dist * m_dtINV;
     m_prevPosNorm = b;
+
+    if (!m_origin.isZero()) {
+        m_dotOrigin = m_origin.x * b.x + m_origin.y * b.y + m_origin.z * b.z;
+    }
+}
+
+void Swing::setOrigin()
+{
+    if (m_init) {
+        m_origin = m_prevPosNorm;
+    }
 }
 
 
@@ -119,15 +131,15 @@ bool Swing::test()
 {
     // Test filtering at 45deg / second
     static const Vec3<int32_t> mMin = {-100, -200, -300};
-    static const Vec3<int32_t> mMax = { 300, 200, 100};
+    static const Vec3<int32_t> mMax = { 300,  200,  100};
 
-    static const Vec3<int32_t> x0 = {300,  0, -100};    // (1, 0, 0)
-    static const Vec3<int32_t> x1 = {242, 142, -100};     // (0.71, 0.71, 0)
+    static const Vec3<int32_t> x0 = {300,   0, -100};    // (1, 0, 0)
+    static const Vec3<int32_t> x1 = {242, 142, -100};    // (0.71, 0.71, 0)
 
     static const float speedDeg = 3.1459f / 4.f;
 
     Swing swing(100);
-    Log.p("Target speed=").p(speedDeg).eol();
+    //Log.p("Target speed=").p(speedDeg).eol();
 
     for(int i=0; i<=10; ++i) {
         Vec3<int32_t> x;
@@ -136,10 +148,15 @@ bool Swing::test()
         x.z = x0.z + i * (x1.z - x0.z) / 10;
 
         swing.push(x, mMin, mMax);
-        Log.p("Swing speed (").p(i).p(")=").p(swing.speed()).eol();
+        //Log.p("Swing speed (").p(i).p(")=").p(swing.speed()).eol();
         TEST_IS_TRUE(swing.speed() >= 0 && swing.speed() <= speedDeg * 1.2f);
+
+        if (i == 0)
+            swing.setOrigin();
     }
     TEST_IS_TRUE(swing.speed() > speedDeg * 0.8f && swing.speed() < speedDeg * 1.2f);
+    // We won't get to 0.71 because of filtering.
+    TEST_IS_TRUE(swing.dotOrigin() > 0.71f && swing.dotOrigin() < 0.80f);
 
     return true;
 }

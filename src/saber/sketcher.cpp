@@ -73,7 +73,7 @@ void DotStarUI::Draw(osbr::RGB *led, int nLED, uint32_t time,
     {
         // Set the power level.
         int i = 0;
-        int powerLevel = data.powerLevel(nLED);
+        int powerLevel = UIRenderData::powerLevel(data.mVolts, nLED);
         for (; i < powerLevel && i < nLED; ++i)
         {
             led[i] = data.color;
@@ -255,7 +255,7 @@ void Pixel_7_5_UI::Draw(uint32_t time, UIMode mode, bool bladeIgnited, const UIR
     {
     case UIMode::NORMAL:
         getGlypth_tomThumb5('0' + data->palette, m_col + 0);
-        DrawBar(5, data->powerLevel(4));
+        DrawBar(5, UIRenderData::powerLevel(data->mVolts, 4));
         DrawBar(6, data->volume);
         break;
 

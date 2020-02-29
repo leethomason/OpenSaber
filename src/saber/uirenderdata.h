@@ -36,7 +36,7 @@ struct UIRenderData
                         // green if set to (1, 0, 0), so the bladeColor
                         // should be (0, 1, 0)
 
-    int powerLevel(int maxLevel) const {
+    static int powerLevel(uint32_t mVolts, int maxLevel) {
         static const int32_t NOMINAL = 3700;
         static const int32_t VARIATION = 400;
         static const int32_t HIGH_VOLTAGE = NOMINAL + VARIATION;

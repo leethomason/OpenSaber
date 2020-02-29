@@ -60,6 +60,13 @@ public:
     // speed in radians / second
     float speed() const { return m_speed; }
 
+    // Where the swing "starts", probably any starting location is fine.
+    // Maybe even idle times?
+    void setOrigin();
+    // Gets the dot product of current and origin, which is essentially the
+    // mix betwen swing sounds. Returns -1 to 1
+    float dotOrigin() { return m_dotOrigin; }
+
     static bool test();
 
 private:
@@ -68,6 +75,8 @@ private:
     bool m_init;
     float m_speed;
     float m_dtINV;
+    float m_dotOrigin;
     Vec3<float> m_prevPosNorm;
+    Vec3<float> m_origin;
     Filter m_filter;
 };

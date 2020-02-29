@@ -352,7 +352,7 @@ void buttonAClickHandler(const Button&)
         // the modes are cycled. But haven't yet
         // figured out a better option.
         if (uiMode.mode() == UIMode::NORMAL) {
-            int power = Voltmeter::vbatToPowerLevel(voltmeter.averagePower(), 4);
+            int power = UIRenderData::powerLevel(voltmeter.averagePower(), 4);
             ledA.blink(power, INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
         }
     }
@@ -414,7 +414,7 @@ void processColorWheel(bool commitChange)
 
         FixedNorm z(ave[ACCEL_BLADE_DIRECTION], GrinlizLSM303::DIV);
         osbr::RGB rgb = AccelToColor(x, z);
-        osbr::RGB rgbInv = ColorInverse(rgb);
+        osbr::RGB rgbInv = ColorRotated(rgb, 180);
 
         // Log.p("accel to color. x=").p(x).p(" z=").p(z).p(" c=").ptc(rgb).eol();
 

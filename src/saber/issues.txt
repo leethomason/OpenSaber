@@ -1,15 +1,22 @@
 Issues:
 
 Smooth Swing support
-- volume smoothing (driver)
-- volume "drag" (SFX)
-- clipping / limiting in mixer (maybe 64 bit okay??)
+- volume smoothing (driver) (need to verify)
+- volume "drag" (SFX) (maybe)
+- verify volume clipping
+- switch swing sounds
+- crossover
+- random crossover angle
 
-
-powerLevel or vbatToPowerLevel...both is crazy
-Crackle in hum sound (how??)
+Sound hardware
+- would be nice to get 16 bit working.
+- likewise mono
+- should memory read be "main thread"?
 
 Fixed
+x Crackle in hum sound (how??). I think this was speakure fixture. Re-open if not.
+x powerLevel or vbatToPowerLevel...both is crazy
+x clipping / limiting in mixer (maybe 64 bit okay??)
 x Color section mode
 x Tester: turn back on blade flash using delays
 x Tester: Blade doesn't change color

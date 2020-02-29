@@ -70,7 +70,7 @@ uint32_t Voltmeter::takeSample()
 }
 #endif
 
-
+/*
 int Voltmeter::vbatToPowerLevel(int32_t vbat, int maxLevel)
 {
     int32_t level = maxLevel * (vbat - LOW_VOLTAGE) / (HIGH_VOLTAGE - LOW_VOLTAGE);
@@ -79,4 +79,4 @@ int Voltmeter::vbatToPowerLevel(int32_t vbat, int maxLevel)
     if (level > maxLevel) level = maxLevel;
     return level;
 }
-
+*/
