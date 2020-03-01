@@ -108,6 +108,9 @@ protected:
 	int m_volume;
 	float m_speed;
 
+	int m_swing = 0;		// tracks current swing with decay...lots of noise from mag
+	Timer2 m_swingDecay;	// decay rate is fast
+
 	Random m_random;
 	AnimateProp humIginition;
 

@@ -159,12 +159,16 @@ void S4ADPCM::encode8(const int16_t* data, int32_t nSamples, uint8_t* target, St
 
 
 void S4ADPCM::decode4(const uint8_t* p, int32_t nSamples,
-    int volume, bool add, int32_t* out, State* state)
+    int volume,
+    bool add, 
+    int32_t* out, State* state)
 {
     uint8_t data = 0;
     uint8_t sign = 0;
     int delta = 0;
     int value = 0;
+
+    state->volumeTarget = volume << 8;
 
     for (int32_t i = 0; i < nSamples; ++i) {
         if (state->high) {
@@ -175,13 +179,11 @@ void S4ADPCM::decode4(const uint8_t* p, int32_t nSamples,
             data = *p & 0xf;
         }
 
-        if (data == 8) {
+        if (data == 8 || data == 0) {
+            // The data == 8/0 case does the same thing,
+            // and seems to get missed by the optimizer.
             sign = state->sign;
-            delta = 8;
-        }
-        else if (data == 0) {
-            sign = state->sign;
-            delta = 0;
+            delta = data;
         }
         else {
             sign = data & 8;
@@ -199,16 +201,19 @@ void S4ADPCM::decode4(const uint8_t* p, int32_t nSamples,
 #endif
         state->push(value);
 
-        int32_t s = value * (volume << 8);
-        if (add) {
-            int64_t w = s + out[0];
-            if (w > INT32_MAX) w = INT32_MAX;
-            if (w < INT32_MIN) w = INT32_MIN;
-            out[0] = out[1] = int32_t(w);
-        }
-        else {
+        if (state->volumeShifted < state->volumeTarget)
+            state->volumeShifted += VOLUME_EASING;
+        else if (state->volumeShifted > state->volumeTarget)
+            state->volumeShifted -= VOLUME_EASING;
+
+        // max: SHRT_MAX * 256 * 256
+        //      32767 * 256 * 256 = 2147418112
+        //              INT32_MAX = 2147483647
+        int32_t s = value * state->volumeShifted;
+        if (add)
+            out[0] = out[1] = sat_add(s, out[0]);
+        else
             out[0] = out[1] = s;
-        }
         out += 2;
 
         state->sign = sign;
@@ -223,6 +228,8 @@ void S4ADPCM::decode4(const uint8_t* p, int32_t nSamples,
 void S4ADPCM::decode8(const uint8_t* p, int32_t nSamples,
     int volume, bool add, int32_t* out, State* state)
 {
+    state->volumeTarget = volume << 8;
+
     for (int32_t i = 0; i < nSamples; ++i) {
         int delta = *p & 0x7f;
         uint8_t sign = *p & 0x80;
@@ -238,9 +245,14 @@ void S4ADPCM::decode8(const uint8_t* p, int32_t nSamples,
         }
         state->push(value);
 
-        int32_t s = value * (volume << 8);
+        if (state->volumeShifted < state->volumeTarget)
+            state->volumeShifted += VOLUME_EASING;
+        else if (state->volumeShifted > state->volumeTarget)
+            state->volumeShifted -= VOLUME_EASING;
+
+        int32_t s = value * state->volumeShifted;
         if (add) {
-            out[0] = out[1] = out[0] + s;
+            out[0] = out[1] = sat_add(s, out[0]);
         }
         else {
             out[0] = out[1] = s;

@@ -114,7 +114,6 @@ bool CMDParser::processCMD()
     static const char MOTION[]  = "mot";
     static const char IMPACT[]  = "imp";
     static const char STATUS[]  = "stat";
-    static const char RESET[]   = "reset";
     static const char ID[]      = "id";
     static const char TEST[]    = "test";
     static const char ACCEL[]   = "accel";
@@ -238,7 +237,6 @@ bool CMDParser::processCMD()
     }
     else if (action == FONTS) {
 #ifdef SABER_SOUND_ON
-        const SFX* sfx = SFX::instance();
         for (int i = 0; i < MEM_IMAGE_NUM_DIR; ++i) {
             Serial.print(i);
             Serial.print(": ");

@@ -22,7 +22,7 @@
 
 
 // #define PROFILE
-#define AUDIO_PROFILE
+// #define AUDIO_PROFILE
 
 // Arduino Libraries
 #include <Adafruit_ZeroI2S.h>
@@ -448,9 +448,9 @@ void processAccel(uint32_t msec)
     Vec3<float> data[N_ACCEL];
     Vec3<int32_t> intData[N_ACCEL];
 
-    #if SERIAL_DEBUG == 1
-    uint32_t start = millis();
-    #endif
+//    #if SERIAL_DEBUG == 1
+//    uint32_t start = millis();
+//    #endif
 
     int available = accelMag.available();
     if (available > N_ACCEL) {

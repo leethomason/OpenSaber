@@ -1,3 +1,25 @@
+/*
+  Copyright (c) Lee Thomason, Grinning Lizard Software
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+  of the Software, and to permit persons to whom the Software is furnished to do
+  so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
+
 #pragma once
 
 #include <stdint.h>
@@ -72,15 +94,17 @@ private:
 
     inline static int32_t sat_add(int32_t x, int32_t y)
     {
-        // A lot of code for sat-add, but don't seem to have the arm intrinsics.
-        // An the godbolt compiler, comes out to 13 instructions...which is 13x
-        // worse than an intrinsic, but better than I expected. (And the intrinsic
-        // doesn't seem to be supported.)
-        int32_t sum = (unsigned int)x + y;
-        const static int32_t w = (sizeof(int) << 3) - 1;
-        int32_t mask = (~(x ^ y) & (x ^ sum)) >> w;
-        int32_t max_min = (1 << w) ^ (sum >> w);
-        return  (~mask & sum) + (mask & max_min);
+        int32_t sum = (uint32_t)x + y;
+        const static int32_t BIT_SHIFT = sizeof(int32_t) * 8 - 1;
+        // This is a wonderfully clever way of saying:
+        // if (sign(x) != sign(y)) || (sign(x) == sign(sum)
+        //      mask = 0;    // we didn't overflow
+        // else
+        //      mask = 1111s // we did, and create an all-1 mask with sign extension
+        // I didn't think of this. Wish I had.
+        int32_t mask = (~(x ^ y) & (x ^ sum)) >> BIT_SHIFT;
+        int32_t maxOrMin = (1 << BIT_SHIFT) ^ (sum >> BIT_SHIFT);
+        return  (~mask & sum) + (mask & maxOrMin);
     }
 
 #ifdef S4ADPCM_OPT

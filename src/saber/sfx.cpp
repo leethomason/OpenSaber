@@ -28,6 +28,10 @@
 #include "i2saudiodrv.h"
 #include "modes.h"
 
+#define SMOOTH_LOG
+Timer2 smoothTimer(513);
+
+
 SFX* SFX::m_instance = 0;
 
 SFX::SFX(I2SAudioDriver *driver, const Manifest& manifest) :
@@ -41,6 +45,8 @@ SFX::SFX(I2SAudioDriver *driver, const Manifest& manifest) :
     m_retractTime = 1000;
     m_volume = 64;
     m_smoothMode = false;
+
+    m_swingDecay.setPeriod(2);
 
     scanFiles();
 }
@@ -253,7 +259,7 @@ bool SFX::sm_playEvent(int sfx)
 void SFX::sm_swingToVolume(float radPerSec, int* hum, int* swing)
 {
     static const float STILL = 3.0f;
-    static const float FAST = 12.0f;
+    static const float FAST  = 8.0f;
 
     FixedNorm motionFraction = 0;
     if (radPerSec >= FAST) {
@@ -274,6 +280,9 @@ void SFX::process(int bladeMode, uint32_t delta)
             int hum = 0;
             int swing = 0;
             sm_swingToVolume(m_speed, &hum, &swing);
+            m_swing -= m_swingDecay.tick(delta);
+            m_swing = glMax(0, m_swing);
+            swing = glMax(swing, m_swing);
 
             if (!humIginition.done()) {                
                 hum = humIginition.tick(delta);
@@ -283,8 +292,10 @@ void SFX::process(int bladeMode, uint32_t delta)
                 hum = 0;
             }
 
-            //Log.p("hum=").p(hum).p(" mode=").p(bladeMode).eol();
-            m_driver->setVolume(0 /*scaleVolume(hum)*/, CHANNEL_IDLE);
+            if (smoothTimer.tick(delta)) {
+                Log.p("speed=").p(m_speed).p(" swing=").p(swing).p(" hum=").p(hum).eol();
+            }
+            m_driver->setVolume(scaleVolume(hum), CHANNEL_IDLE);
             m_driver->setVolume(scaleVolume(swing), CHANNEL_MOTION_0);
             //m_driver->setVolume(scaleVolume(swing), CHANNEL_MOTION_1);
         }
@@ -295,7 +306,7 @@ void SFX::process(int bladeMode, uint32_t delta)
         }
     }
     else {
-        if ((bladeMode == BLADE_ON) == !m_driver->isPlaying(0)) {
+        if ((bladeMode == BLADE_ON) && !m_driver->isPlaying(0)) {
             playSound(SFX_IDLE, SFX_GREATER);
         }
     }

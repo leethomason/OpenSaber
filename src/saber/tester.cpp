@@ -254,23 +254,29 @@ public:
 
     virtual void start(Tester* tester)
     {
-        nSamples = 0;
         GrinlizLSM303* accel = GrinlizLSM303::instance();
         ASSERT(accel);
-        startTime = millis();
+        
+        if (accel->magDataValid()) {
+            nSamples = 0;
+            startTime = millis();
 
-        while(nSamples < NDATA) {
-            Vec3<int32_t> data;
-            int n = accel->readMag(&data, 0);
-            nSamples += n;
+            while(nSamples < NDATA) {
+                Vec3<int32_t> data;
+                int n = accel->readMag(&data, 0);
+                nSamples += n;
+            }
+            uint32_t deltaTime = millis() - startTime;
+            Serial.print("Time to read (ms):"); Serial.println(deltaTime);
+            ASSERT(deltaTime > NDATA * 8 && deltaTime < NDATA * 20);
+
+            // We can't test what the data is because it almost 
+            // certainly has not been calibrated. We just test if
+            // there was data at the correct rate.
         }
-        uint32_t deltaTime = millis() - startTime;
-        Serial.print("Time to read (ms):"); Serial.println(deltaTime);
-        ASSERT(deltaTime > NDATA * 8 && deltaTime < NDATA * 20);
-
-        // We can't test what the data is because it almost 
-        // certainly has not been calibrated. We just test if
-        // there was data at the correct rate.
+        else {
+            Log.p("Mag data not valid; not enough positions have been recorded.").eol();
+        }
     }
 
     virtual int process(Tester* tester, uint32_t event)

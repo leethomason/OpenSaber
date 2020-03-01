@@ -43,7 +43,6 @@ bool BladeState::bladeOn() const
 
 void BladeState::process(BladePWM *blade, const BladeFlash &saber, uint32_t time)
 {
-    static const uint32_t FLASH_TIME = 120;
     SFX *sfx = SFX::instance();
 
     switch (state())
@@ -75,7 +74,7 @@ void BladeState::process(BladePWM *blade, const BladeFlash &saber, uint32_t time
 
     case BLADE_RETRACT:
     {
-        uint32_t retractTime = retractTime = sfx->getRetractTime();
+        uint32_t retractTime = sfx->getRetractTime();
         uint32_t t = millis() - startTime();
 
         if (t >= retractTime)
@@ -116,8 +115,8 @@ bool UIModeUtil::isIdle()
 
 void UIModeUtil::nextMode()
 {
-    SFX *sfx = 0;
 #ifdef SABER_AUDIO_UI
+    SFX *sfx = 0;
     sfx = SFX::instance();
 #endif
 
