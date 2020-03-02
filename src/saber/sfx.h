@@ -76,7 +76,7 @@ public:
 	int currentFont() const { return m_currentFont; }
 
 	bool smoothMode() const { return m_smoothMode; }
-	void sm_setSwing(float radPerSec) { m_speed = radPerSec; }
+	void sm_setSwing(float radPerSec, int blend256) { m_speed = radPerSec; m_blend256 = blend256; }
 	void sm_ignite();
 	void sm_retract();
 	bool sm_playEvent(int sfx);
@@ -106,8 +106,9 @@ protected:
 	uint32_t m_igniteTime;
 	uint32_t m_retractTime;
 	int m_volume;
-	float m_speed;
 
+	float m_speed;
+	int m_blend256;
 	int m_swing = 0;		// tracks current swing with decay...lots of noise from mag
 	Timer2 m_swingDecay;	// decay rate is fast
 

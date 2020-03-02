@@ -47,6 +47,7 @@ SFX::SFX(I2SAudioDriver *driver, const Manifest& manifest) :
     m_smoothMode = false;
 
     m_swingDecay.setPeriod(2);
+    m_blend256 = 0;
 
     scanFiles();
 }
@@ -150,6 +151,15 @@ int SFX::getTrack(int sound)
         ASSERT(track < MEM_IMAGE_TOTAL);
     }
     return track;
+}
+
+void SFX::setMotionTrackes()
+{
+    ASSERT(m_sfxType[SFX_MOTION].count == m_sfxType[SFX_MOTION_HIGH].count);
+    int offset = m_random.rand(m_sfxType[SFX_MOTION].count);
+    // TODO random switch MOTION/MOTION_HIGH
+    m_driver->play(m_sfxType[SFX_MOTION].start + offset, true, CHANNEL_MOTION_0);
+    m_driver->play(m_sfxType[SFX_MOTION_HIGH].start + offset, true, CHANNEL_MOTION_1);
 }
 
 bool SFX::playSound(int sound, int mode, int channel)
@@ -296,8 +306,10 @@ void SFX::process(int bladeMode, uint32_t delta)
                 Log.p("speed=").p(m_speed).p(" swing=").p(swing).p(" hum=").p(hum).eol();
             }
             m_driver->setVolume(scaleVolume(hum), CHANNEL_IDLE);
-            m_driver->setVolume(scaleVolume(swing), CHANNEL_MOTION_0);
-            //m_driver->setVolume(scaleVolume(swing), CHANNEL_MOTION_1);
+            // FIXME better blend
+            // TODO may need filtering
+            m_driver->setVolume(scaleVolume(glClamp(swing - m_blend256, 0, 256)), CHANNEL_MOTION_0);
+            m_driver->setVolume(scaleVolume(glClamp(m_blend256, 0, 256)), CHANNEL_MOTION_1);
         }
         else {
             //for(int i=0; i<AUDDRV_NUM_CHANNELS; i++) {
