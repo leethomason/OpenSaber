@@ -476,7 +476,8 @@ void processAccel(uint32_t msec)
         // Log.p("magData t=").p(msec).p(" x=").v3(magData).p(" ").v3(accelMag.getMagMin()).p(" ").v3(accelMag.getMagMax()).eol();
 
         swing.push(magData, accelMag.getMagMin(), accelMag.getMagMax());
-        sfx.sm_setSwing(swing.speed());
+        float dot = swing.dotOrigin();
+        sfx.sm_setSwing(swing.speed(), (float+1.0f)*128.5f);
     }
     if (bladeState.state() == BLADE_ON) {
         for (int i = 0; i < n; ++i)

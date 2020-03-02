@@ -65,7 +65,7 @@ public:
     void setOrigin();
     // Gets the dot product of current and origin, which is essentially the
     // mix betwen swing sounds. Returns -1 to 1
-    float dotOrigin() { return m_dotOrigin; }
+    float dotOrigin() const { return m_dotOrigin; }
 
     static bool test();
 
