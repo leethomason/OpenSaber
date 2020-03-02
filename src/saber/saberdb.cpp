@@ -55,7 +55,7 @@ void SaberDB::setPaletteFromDirHash(uint32_t h)
     }
     break;
 
-    case 0x3f14313c:    // bespin2, jaina,, smoothJedi
+    case 0x3f14313c:    // bespin2, jaina, smoothJedi
     {
         Log.p("setPaletteFromDirHash=0xfe1a3638 Bespin2/Jaina/SmoothJedi").eol();
         static const int BESPIN2 = 0;
@@ -70,6 +70,22 @@ void SaberDB::setPaletteFromDirHash(uint32_t h)
         palette[5].set(0x0044ff, 0x00ccff, JAINA);   // blue-green
         palette[6].set(0x508080, 0x30a0a0, JAINA);   // white
         palette[7].set(0x00ff44, 0x00ffaa, JAINA);   // green-blue
+    }
+    break;
+
+
+    case 0xd447a9d5:    // corelln (Corellian SS) test font.
+    {
+        Log.p("corelln (Corellian SS) test font").eol();
+
+        palette[0].set(0x00ff00, 0x00ffa0, 0);   // green
+        palette[1].set(0x0000ff, 0x00c8ff, 0);   // blue
+        palette[2].set(0x00ffff, 0x00a0ff, 0);   // cyan
+        palette[3].set(0xff0000, 0xa08000, 0);   // red
+        palette[4].set(0xff6000, 0x808000, 0);   // orange
+        palette[5].set(0x0044ff, 0x00ccff, 0);   // blue-green
+        palette[6].set(0x508080, 0x30a0a0, 0);   // white
+        palette[7].set(0x00ff44, 0x00ffaa, 0);   // green-blue
     }
     break;
 

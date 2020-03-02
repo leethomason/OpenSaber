@@ -125,9 +125,9 @@ int SFX::calcSlot(const char *name)
         slot = SFX_IMPACT;
     else if (istrStarts(name, "USRTAP") || istrStarts(name, "BLASTER") || istrStarts(name, "blst"))
         slot = SFX_USER_TAP;
-    else if (istrStarts(name, "swingL"))
+    else if (istrStarts(name, "swingL") || istrStarts(name, "lswing"))
         slot = SFX_MOTION;
-    else if (istrStarts(name, "swingH"))
+    else if (istrStarts(name, "swingH") || istrStarts(name, "hswing"))
         slot = SFX_MOTION_HIGH;
     else if (istrStarts(name, "MOTION") || istrStarts(name, "SWING"))
         slot = SFX_MOTION;
@@ -300,9 +300,9 @@ void SFX::process(int bladeMode, uint32_t delta)
             //m_driver->setVolume(scaleVolume(swing), CHANNEL_MOTION_1);
         }
         else {
-            for(int i=0; i<AUDDRV_NUM_CHANNELS; i++) {
-                m_driver->setVolume(0, i);
-            }
+            //for(int i=0; i<AUDDRV_NUM_CHANNELS; i++) {
+            //    m_driver->setVolume(0, i);
+           //}
         }
     }
     else {

@@ -337,6 +337,15 @@ void Digit4UI::Draw(UIMode mode, const UIRenderData *data)
         scratch[3] = 'C';
         scratch[4] = 0;
         break;
+
+    case UIMode::COLOR_WHEEL:
+        scratch[0] = 'C';
+        scratch[1] = 'L';
+        scratch[2] = 'R';
+        scratch[3] = 0;
+        scratch[4] = 0;
+        break;
     }
+
     m_output = scratch;
 }
