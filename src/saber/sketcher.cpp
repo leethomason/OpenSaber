@@ -192,9 +192,9 @@ void calcCrystalColorHSV(uint32_t msec, const osbr::RGB &base, osbr::RGB *out)
     uint8_t h = 0, s = 0, v = 0;
     rgb2hsv(base.r, base.g, base.b, &h, &s, &v);
 
-    static const uint32_t BREATH_CYCLE = 13 * 1000; // milliseconds to cycle
-    static const uint32_t HUE_CYCLE = 23 * 1000;    // milliseconds to cycle
-    static const uint32_t SAT_CYCLE = 47 * 1000;    // milliseconds to cycle
+    static const uint32_t BREATH_CYCLE = 13 * 1000;     // milliseconds to cycle
+    static const uint32_t HUE_CYCLE    = 23 * 1000;     // milliseconds to cycle
+    static const uint32_t SAT_CYCLE    = 47 * 1000;     // milliseconds to cycle
 
     // "breathing" - v
     static const int32_t VARIATION = 96;
@@ -230,8 +230,6 @@ void calcCrystalColorHSV(uint32_t msec, const osbr::RGB &base, osbr::RGB *out)
 
 Pixel_7_5_UI::Pixel_7_5_UI()
 {
-    for (int i = 0; i < ALLOCATED; ++i)
-        m_col[i] = 0;
 }
 
 /*

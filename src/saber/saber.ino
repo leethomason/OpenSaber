@@ -477,7 +477,7 @@ void processAccel(uint32_t msec)
 
         swing.push(magData, accelMag.getMagMin(), accelMag.getMagMax());
         float dot = swing.dotOrigin();
-        sfx.sm_setSwing(swing.speed(), (float+1.0f)*128.5f);
+        sfx.sm_setSwing(swing.speed(), (int)((1.0f + dot)*128.5f));
     }
     if (bladeState.state() == BLADE_ON) {
         for (int i = 0; i < n; ++i)
@@ -566,7 +566,11 @@ void loop() {
         bladeState.process(&bladePWM, bladeFlash, millis());
     }
     
-    sfx.process(bladeState.state(), delta);
+    bool still = true;
+    sfx.process(bladeState.state(), delta, &still);
+    if (still) {
+        swing.setOrigin();
+    }
 
     if (vbatTimer.tick(delta)) {
         voltmeter.takeSample();

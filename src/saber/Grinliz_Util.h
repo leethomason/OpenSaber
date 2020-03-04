@@ -548,7 +548,7 @@ public:
 
 private:
     mutable TYPE m_average;
-    mutable bool m_valid;
+    mutable bool m_valid = false;
     int m_pos = 0;
     TYPE m_sample[N];
 };

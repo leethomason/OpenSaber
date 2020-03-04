@@ -153,13 +153,17 @@ int SFX::getTrack(int sound)
     return track;
 }
 
-void SFX::setMotionTrackes()
+void SFX::playMotionTracks()
 {
     ASSERT(m_sfxType[SFX_MOTION].count == m_sfxType[SFX_MOTION_HIGH].count);
     int offset = m_random.rand(m_sfxType[SFX_MOTION].count);
-    // TODO random switch MOTION/MOTION_HIGH
-    m_driver->play(m_sfxType[SFX_MOTION].start + offset, true, CHANNEL_MOTION_0);
-    m_driver->play(m_sfxType[SFX_MOTION_HIGH].start + offset, true, CHANNEL_MOTION_1);
+    int t0 = SFX_MOTION;
+    int t1 = SFX_MOTION_HIGH;
+    if (m_random.rand(3) == 0) {
+        glSwap(t0, t1);
+    }
+    m_driver->play(m_sfxType[t0].start + offset, true, CHANNEL_MOTION_0);
+    m_driver->play(m_sfxType[t1].start + offset, true, CHANNEL_MOTION_1);
 }
 
 bool SFX::playSound(int sound, int mode, int channel)
@@ -235,8 +239,7 @@ void SFX::sm_ignite()
 {
     Log.p("sm_ignite").eol();
     m_driver->play(getTrack(SFX_IDLE), true, CHANNEL_IDLE);
-    m_driver->play(getTrack(SFX_MOTION), true, CHANNEL_MOTION_0);
-    m_driver->play(getTrack(SFX_MOTION_HIGH), true, CHANNEL_MOTION_1);
+    playMotionTracks();
     m_driver->play(getTrack(SFX_POWER_ON), false, CHANNEL_EVENT);
 
     m_driver->setVolume(0, CHANNEL_IDLE);
@@ -283,7 +286,7 @@ void SFX::sm_swingToVolume(float radPerSec, int* hum, int* swing)
     // Log.p("rad/sec=").p(radPerSec).p(" motionFraction=").p(motionFraction.toFloat()).p(" hum=").p(*hum).p(" swing=").p(*swing).eol();
 }
 
-void SFX::process(int bladeMode, uint32_t delta)
+void SFX::process(int bladeMode, uint32_t delta, bool* still)
 {
     if (m_smoothMode) {
         if (bladeMode != BLADE_OFF) {
@@ -294,6 +297,17 @@ void SFX::process(int bladeMode, uint32_t delta)
             m_swing = glMax(0, m_swing);
             swing = glMax(swing, m_swing);
 
+            if (swing == 0) {
+                *still = true;
+                m_stillCount++;
+                if (m_stillCount == 4)
+                    playMotionTracks(); // new random tracks.
+            }
+            else {
+                *still = false;
+                m_stillCount = 0;
+            }
+
             if (!humIginition.done()) {                
                 hum = humIginition.tick(delta);
                 // Log.p("humIginition=").p(hum).eol();
@@ -302,16 +316,27 @@ void SFX::process(int bladeMode, uint32_t delta)
                 hum = 0;
             }
 
+            int swing0 = lerp1024(int16_t(0), int16_t(swing), m_blend256 * 4);
+            int swing1 = lerp1024(int16_t(swing), int16_t(0), m_blend256 * 4);
+
+            // Probably should be:
+            //FixedNorm t(m_blend256)
+            //int swing0a = 
+
             if (smoothTimer.tick(delta)) {
-                Log.p("speed=").p(m_speed).p(" swing=").p(swing).p(" hum=").p(hum).eol();
+                Log.p("speed=").p(m_speed).p(" swing=").p(swing).p(" hum=").p(hum)
+                .p(" blend=").p(m_blend256)
+                .p(" swing0").p(swing0).p(" swing1=").p(swing1)
+                .eol();
             }
             m_driver->setVolume(scaleVolume(hum), CHANNEL_IDLE);
             // FIXME better blend
             // TODO may need filtering
-            m_driver->setVolume(scaleVolume(glClamp(swing - m_blend256, 0, 256)), CHANNEL_MOTION_0);
-            m_driver->setVolume(scaleVolume(glClamp(m_blend256, 0, 256)), CHANNEL_MOTION_1);
+            m_driver->setVolume(scaleVolume(glClamp(swing0, 0, 256)), CHANNEL_MOTION_0);
+            m_driver->setVolume(scaleVolume(glClamp(swing1, 0, 256)), CHANNEL_MOTION_1);
         }
         else {
+            // As is, these disable "play" from the command line.
             //for(int i=0; i<AUDDRV_NUM_CHANNELS; i++) {
             //    m_driver->setVolume(0, i);
            //}

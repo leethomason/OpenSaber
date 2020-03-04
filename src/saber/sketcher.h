@@ -67,7 +67,7 @@ private:
 	static const int NROWS = 5;
 	static const int NCOLS = 7;
     static const int ALLOCATED = NCOLS + 1;
-	uint8_t m_col[ALLOCATED];		// enough memory for writing the glyphs 4+4 bytes
+    uint8_t m_col[ALLOCATED] = { 0 };		// enough memory for writing the glyphs 4+4 bytes
 };
 
 

@@ -63,7 +63,7 @@ public:
 	bool playSound(const char *sfx);
 	void stopSound();
 
-	void process(int bladeMode, uint32_t delta);
+	void process(int bladeMode, uint32_t delta, bool* still);
 
 	void setVolume(int v);
 	int getVolume() const { return m_volume; }
@@ -93,6 +93,7 @@ protected:
 	void scanFiles();
 	int calcSlot(const char* name);
 	int getTrack(int sound);
+	void playMotionTracks();
 
 	static void sm_swingToVolume(float radPerSec, int* hum, int* swing);
 	int scaleVolume(int v) const { return (v * m_volume) >> 8; }
@@ -111,6 +112,7 @@ protected:
 	int m_blend256;
 	int m_swing = 0;		// tracks current swing with decay...lots of noise from mag
 	Timer2 m_swingDecay;	// decay rate is fast
+	int m_stillCount = 0;	// how many still frames (motion sound = 0)
 
 	Random m_random;
 	AnimateProp humIginition;
