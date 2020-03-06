@@ -319,9 +319,9 @@ void SFX::process(int bladeMode, uint32_t delta, bool* still)
             int swing0 = lerp1024(int16_t(0), int16_t(swing), m_blend256 * 4);
             int swing1 = lerp1024(int16_t(swing), int16_t(0), m_blend256 * 4);
 
-            // Probably should be:
-            //FixedNorm t(m_blend256)
-            //int swing0a = 
+            // TODO Probably should be:
+            // int swing0a = iCos(FixedNorm(m_blend256, 1024)).scale(swing);
+            // int swing1a = iSin(FixedNorm(m_blend256, 1024)).scale(swing);
 
             if (smoothTimer.tick(delta)) {
                 Log.p("speed=").p(m_speed).p(" swing=").p(swing).p(" hum=").p(hum)

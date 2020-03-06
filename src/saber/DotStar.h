@@ -47,9 +47,9 @@ public:
 private:
 	void swOut(uint8_t n);
 
-    void begin();
-    void transfer(uint8_t data);
-    void end();
+  void begin();
+  void transfer(uint8_t data);
+  void end();
 
 	uint8_t 	m_enable = 0;
 	uint8_t		m_clockPin = 0;

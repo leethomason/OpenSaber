@@ -107,7 +107,8 @@ void DotStar::display(const osbr::RGB* led, int nLEDs, uint16_t brightness)
     // RGB, global brightness.
     // Brightness is 5 bits; 0-31
     // Will be fully on at either 255 or 256
-    const uint8_t bright = (brightness * 31 / 255) | 0xE0;
+    uint8_t bright = (brightness > 255) ? 31 : (brightness >> 3);
+    bright |= 0xe0;
 
     for (int i = 0; i < nLEDs; ++i, ++led) {
         // Brightness
@@ -143,12 +144,8 @@ void DotStar::display(const osbr::RGBA* led, int nLEDs)
 
     // RGBA, per-LED brightness.
     for (int i = 0; i < nLEDs; ++i, ++led) {
-        // Brightness is 5 bits; 0-31
-        // Will be fully on at either 255 or 256
-        uint8_t bright = led->a * 31 / 255;
-        // High bits are always set.
-        bright |= 0xE0;
-        // Brightness
+        // Brightness is 5 bits; 0-31 with high bits always set.
+        uint8_t bright = (led->a >> 3) | 0xe0;
         transfer(bright);
 
         // Color
