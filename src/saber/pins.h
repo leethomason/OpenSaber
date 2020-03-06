@@ -935,6 +935,37 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define ACCEL_NORMAL_BUTTON   0
 	#define ACCEL_PERP_BUTTON     2
 	
+#elif (PCB_VERSION == PCB_ITSY_2C)
+	/* Grinning Lizard Shield for ItsyBitys M0.
+	   Integrated memory for sound.
+	   Neopixel support (early)
+	   Dotstar support (later)
+	*/
+	#define SABER_ACCELEROMETER SABER_ACCELEROMETER_LSM303
+
+	#define PIN_I2S_LRCLK		0
+	#define PIN_I2S_BITCLK		1
+
+	#define PIN_VMETER        	A1
+	#define PIN_LED_A    	  	A2 
+	#define PIN_DOTSTAR_EN		A3
+	#define PIN_OLED_RESET		A4
+	#define PIN_OLED_DC		    A5
+	// CLOCK	 
+	// MOSI
+	// MISO 
+	#define PIN_OLED_CS  	    2
+	// 7 available
+	#define PIN_EMITTER_RED   	9
+	#define PIN_EMITTER_GREEN 	10
+	#define PIN_EMITTER_BLUE   	11
+	#define PIN_I2S_DATA		12
+	#define PIN_SWITCH_A		13
+	
+	#define ACCEL_BLADE_DIRECTION 1
+	#define ACCEL_NORMAL_BUTTON   0
+	#define ACCEL_PERP_BUTTON     2
+
 #else
 	#error Pins not defined.
 #endif
