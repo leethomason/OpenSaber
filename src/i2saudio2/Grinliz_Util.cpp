@@ -85,16 +85,16 @@ bool TestUtil()
     return true;
 }
 
-
-bool strStarts(const char* str, const char* prefix)
+bool strStarts(const char *str, const char *prefix)
 {
-    if (!str || !prefix)
+    if ((str == 0) || (prefix == 0))
         return false;
 
-	if (!*str || !*prefix)
-		return false;
+    if ((*str == 0) || (*prefix == 0))
+        return false;
 
-    while(*prefix) {
+    while (*prefix)
+    {
         if (*prefix++ != *str++)
             return false;
     }

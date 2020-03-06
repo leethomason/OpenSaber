@@ -1,29 +1,44 @@
+/*
+  Copyright (c) Lee Thomason, Grinning Lizard Software
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+  of the Software, and to permit persons to whom the Software is furnished to do
+  so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
+
 #ifndef GRINLIZ_UTIL_INCLUDED
 #define GRINLIZ_UTIL_INCLUDED
 
 #include <string.h>
 #include <stdint.h>
 
-class Stream;
-
 #include "grinliz_assert.h"
 #include "fixed.h"
 
-template<class T>
-T clamp(T value, T lower, T upper) {
-	if (value < lower) return lower;
-	if (value > upper) return upper;
-	return value;
-}
-
-template<class T>
-T lerp256(T a, T b, T t256) {
-    return (a * (256 - t256) + b * t256) / 256;
-}
-
-template<class T>
-T lerp1024(T a, T b, T t1024) {
+inline int32_t lerp1024(int16_t a, int16_t b, int32_t t1024) {
     return (a * (1024 - t1024) + b * t1024) / 1024;
+}
+
+inline int32_t lerp255(int16_t a, int16_t b, int32_t t255) {
+    return (a * (255 - t255) + b * t255) / 255;
+}
+
+inline FixedNorm lerp(FixedNorm a, FixedNorm b, FixedNorm t) {
+    return (a * (1 - t) + b * t);
 }
 
 bool TestUtil();
@@ -35,14 +50,24 @@ struct Vec3
 	T y;
 	T z;
 
+	Vec3() {}
+    Vec3(T t) { x = t; y = t; z = t; }
+	Vec3(T _x, T _y, T _z) { x = _x; y = _y; z = _z; }
+
+	void set(T _x, T _y, T _z) { x = _x; y = _y; z = _z; }
 	void setZero() { x = y = z = 0; }
+	bool isZero() const { return x==0 && y == 0 && z == 0; }
 	void scale(T s) { x *= s; y *= s; z *= s; }
+
+	T operator[](int i) const { return *(&x + i); }
+	T& operator[](int i) { return *(&x + i); }
 
     Vec3<T>& operator += (const Vec3<T>& v) { x += v.x; y += v.y; z += v.z; return *this; }
     Vec3<T>& operator -= (const Vec3<T>& v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
 
     inline friend Vec3<T> operator +  (const Vec3<T>& a, const Vec3<T>& b) { Vec3<T> t;  t.x = a.x + b.x; t.y = a.y + b.y; t.z = a.z + b.z; return t; }
     inline friend Vec3<T> operator -  (const Vec3<T>& a, const Vec3<T>& b) { Vec3<T> t;  t.x = a.x - b.x; t.y = a.y - b.y; t.z = a.z - b.z; return t; }
+    inline friend Vec3<T> operator /  (const Vec3<T>& a, T b) { Vec3<T> t;  t.x = a.x / b; t.y = a.y / b; t.z = a.z / b; return t; }
 };
 
 /**
@@ -64,9 +89,15 @@ inline bool strEqual(const char* a, const char* b, int n) {
 bool strStarts(const char* str, const char* prefix);
 bool istrStarts(const char* str, const char* prefix);
 void intToString(int value, char* str, int allocated, bool writeZero);
+void intToDigits(int value, int* digits, int nDigits);
 
-// Hash suitible for short (8 char or so) strings.
-uint16_t hash8(const char* v, const char* end);
+void encodeBase64(const uint8_t* bytes, int nBytes, char* target, bool writeNull);
+void decodeBase64(const char* src, int nBytes, uint8_t* dst);
+bool TestBase64();
+
+// Modified Bernstein hash
+uint32_t hash32(const char* v, const char* end, uint32_t h=0);
+uint32_t hash32(const char* v, uint32_t h=0);
 
 /**
 * The CStr class is a "c string": a simple array of
@@ -202,27 +233,30 @@ public:
 		len = (int) strlen(buf);
 	}
 	
-	uint16_t hash8() const {
-		return ::hash8(buf, buf + len);
+	uint32_t hash32() const {
+		return ::hash32(buf, buf + len);
 	}
 
 	void tokenize(char sep, CStr<ALLOCATE>* tokens[], int n) const {
-		int i =0;
+		int t = 0;
 		const char* p = buf;
 
-		while(*p && i < n) {
-			if (*p == sep) {
-				while(*p == sep) ++p;
-				i++;
-			}
-			else {
-				tokens[i]->append(*p);
+		while(*p && t < n) {
+			p = skip(sep, p);
+			while(*p && *p != sep) {
+				tokens[t]->append(*p);
 				p++;
 			}
+			t++;
 		} 
 	}
 
 private:
+	const char* skip(char sep, const char* p) const {
+		while (*p == sep) ++p;
+		return p;
+	}
+
 	int len;
 	char buf[ALLOCATE];
 };
@@ -231,7 +265,7 @@ private:
 /**
 * The CStrBuf. Wraps a buffer of characters, that doesn't have
   to be null-terminated. Optimizes for space (the size of this structure
-  should just be ALLOCATE) vs. performance. Note also the abscence of the
+  should just be ALLOCATE) vs. performance. Note also the absence of the
   c_str() method, since it can't be implemented without allocating memory.
 */
 template< int ALLOCATE >
@@ -307,8 +341,8 @@ public:
             buf[i] = 0;
     }
 
-	uint16_t hash8() const {
-		return ::hash8(buf, buf + size());
+	uint32_t hash32() const {
+		return ::hash32(buf, buf + size());
 	}
 
 
@@ -340,34 +374,51 @@ void writeHex(const uint8_t* color3, CStr<6>* str);
 
 bool TestHex();
 
-template<int CAP>
+template<typename T, int CAP>
 class CQueue
 {
 public:
     CQueue() {}
 
-    void push(int val) {
+	T& front() {
+		ASSERT(!empty());
+		return data[head];
+	}
+
+   	void pushFront(T val) {
         ASSERT(len < CAP);
-        int index = (head + len) % CAP;
-        data[index] = val;
+        head = dec(head);
+        data[head] = val;
         ++len;
     }
 
-    int pop() {
+	void push(T val) {
+		ASSERT(len < CAP);
+        data[tail] = val;
+        tail = inc(tail);
+		++len;
+	}
+
+    T pop() {
         ASSERT(len > 0);
-        int result = data[head];
-        head = (head + 1) % CAP;
+        T result = data[head];
+        head = inc(head);
         --len;
         return result;
     }
 
 	bool hasCap() const { return len < CAP; }
     int empty() const { return len == 0; }
+	int size() const { return len; }
 
 private:
-    int len = 0;
-    int head = 0;
-    int data[CAP];
+    int inc(int c) const { return (c + 1) % CAP; }
+    int dec(int c) const { return (c - 1 + CAP) % CAP; }
+
+	int len = 0;
+	int head = 0;
+	int tail = 0;
+    T data[CAP];
 };
 
 
@@ -375,19 +426,27 @@ bool TestCQueue();
 
 // --- Range / Min / Max --- //
 template<class T>
-bool inRange(const T& val, const T& a, const T& b) {
+bool glInRange(const T& val, const T& a, const T& b) {
 	return val >= a && val <= b;
 }
 
 template<class T>
 T glMin(T a, T b) { return (a < b) ? a : b; }
+
 template<class T>
 T glMax(T a, T b) { return (a > b) ? a : b; }
+
 template<class T>
 T glClamp(T x, T a, T b) {
 	if (x < a) return a;
 	if (x > b) return b;
 	return x;
+}
+template<class T>
+void glSwap(T &a, T &b) {
+    T t = a;
+    a = b;
+    b = t;
 }
 
 template<class T>
@@ -395,19 +454,12 @@ T glAbs(T x) { return x >= 0 ? x : -x; }
 
 // --- Algorithm --- //
 
-template <class T> inline void	Swap(T* a, T* b) {
-	T temp = *a;
-	*a = *b;
-	*b = temp;
-};
-
-
 template <class T>
 inline void combSort(T* mem, int size)
 {
 	int gap = size;
 	for (;;) {
-		gap = gap * 3 / 4;
+		gap = (gap * 3) >> 2;
 		if (gap == 0) gap = 1;
 
 		bool swapped = false;
@@ -415,7 +467,7 @@ inline void combSort(T* mem, int size)
 		for (int i = 0; i < end; i++) {
 			int j = i + gap;
 			if (mem[j] < mem[i]) {
-				Swap(mem + i, mem + j);
+				glSwap(mem[i], mem[j]);
 				swapped = true;
 			}
 		}
@@ -425,10 +477,14 @@ inline void combSort(T* mem, int size)
 	}
 }
 
+
 class Random
 {
 public:
 	Random() : s(1) {}
+    Random(int seed) {
+        setSeed(seed);
+    }
 
 	void setSeed(uint32_t seed) {
 		s = (seed > 0) ? seed : 1;
@@ -453,6 +509,72 @@ private:
 	uint32_t s;
 };
 
+
+/**
+ * Power changes over time, and higher
+ * draw changes the power. A small class
+ * to average out power changes.
+ */
+template<typename TYPE, typename SUMTYPE, int N>
+class AverageSample
+{
+public:
+    AverageSample(TYPE initialValue) {
+        for (int i = 0; i < N; ++i) m_sample[i] = initialValue;
+        m_average = initialValue;
+        m_valid = true;
+    }
+
+    void push(TYPE value) {
+        m_sample[m_pos] = value;
+        m_pos++;
+        if (m_pos == N) m_pos = 0;
+        m_valid = false;
+    }
+
+    TYPE average() const {
+        if (m_valid == false) {
+            SUMTYPE total = 0;
+            for (int i = 0; i < N; ++i) {
+                total += m_sample[i];
+            }
+            m_average = total / N;
+            m_valid = true;
+        }
+        return m_average;
+    }
+
+    int numSamples() const { return N; }
+
+private:
+    mutable TYPE m_average;
+    mutable bool m_valid = false;
+    int m_pos = 0;
+    TYPE m_sample[N];
+};
+
+bool TestAverageSample();
+
+class AnimateProp
+{
+public:
+	AnimateProp() {}
+
+	void start(uint32_t period, int start, int end) {
+		m_time = 0;
+		m_period = period;
+		m_start = start;
+		m_end = end;
+	}
+	int tick(uint32_t delta);
+	bool done() { return m_period == 0; }
+
+private:
+	uint32_t m_time = 0;
+	uint32_t m_period = 0;
+	int m_start = 0;
+	int m_end = 0;
+};
 
 class Timer2
 {
@@ -512,6 +634,7 @@ public:
 	const SPLog& p(long v, int p = DEC) const;
 	const SPLog& p(unsigned long v, int p = DEC) const;
 	const SPLog& p(double v, int p = 2) const;
+	const SPLog& p(FixedNorm v) const { return p(v.toFloat()); }
 	const SPLog& v3(int32_t x, int32_t y, int32_t z, const char* bracket=0) const;
 	const SPLog& v2(int32_t x, int32_t y, const char* bracket=0) const;
 	const SPLog& v3(float x, float y, float z, const char* bracket=0) const;
@@ -552,38 +675,7 @@ private:
 	Stream* logStream = 0;
 };
 
-class EventQueue
-{
-public:
-    // Note that the event is stored *by pointer*, so the 
-    // string needs to be in static memory.
-	void event(const char* event, int data = 0);
-
-	struct Event {
-		const char* name = 0;
-		int			data = 0;
-	};
-
-	Event popEvent();
-	bool hasEvent() const { return m_nEvents > 0; }
-	int numEvents() const			{ return m_nEvents; }
-	const Event& peek(int i) const;
-
-    // For testing.
-    void setEventLogging(bool enable) { m_eventLogging = enable; }
-
-private:
-	static const int NUM_EVENTS = 8;
-	int m_nEvents = 0;
-	int m_head = 0;
-	bool m_eventLogging = true;
-	Event m_events[NUM_EVENTS];
-};
-
 extern SPLog Log;
-extern EventQueue EventQ;
-
-bool TestEvent();
 
 #endif // GRINLIZ_UTIL_INCLUDED
 

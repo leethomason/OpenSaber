@@ -1,35 +1,65 @@
+/*
+  Copyright (c) Lee Thomason, Grinning Lizard Software
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+  of the Software, and to permit persons to whom the Software is furnished to do
+  so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
+
 #include "Grinliz_Util.h"
 #include <math.h>
 
 //#define DEBUG_EVENT
-uint8_t lerpU8(uint8_t a, uint8_t b, uint8_t t) 
-{
-    int32_t r = int32_t(a) + (int32_t(b) - int32_t(a)) * int32_t(t) / 255;
-    return uint8_t(clamp(r, int32_t(0), int32_t(255)));
-}
 
 bool TestUtil()
 {
     //clamp()
-    TEST_IS_EQ(clamp(-10, 0, 100), 0);
-    TEST_IS_EQ(clamp(10,  0, 100), 10);
-    TEST_IS_EQ(clamp(110, 0, 100), 100);
+    TEST_IS_EQ(glClamp(-10, 0, 100), 0);
+    TEST_IS_EQ(glClamp(10,  0, 100), 10);
+    TEST_IS_EQ(glClamp(110, 0, 100), 100);
 
-    // lerpU8()
-	TEST_IS_EQ(lerpU8(0, 128, 128), 64);
-	TEST_IS_EQ(lerpU8(0, 128, 0), 0);
-	TEST_IS_EQ(lerpU8(0, 128, 255), 128);
+    // lerp255()
+	TEST_IS_EQ(lerp255(0, 128, 128), 64);
+	TEST_IS_EQ(lerp255(0, 128, 0), 0);
+	TEST_IS_EQ(lerp255(0, 128, 255), 128);
 
-	TEST_IS_EQ(lerpU8(0, 255, 128), 128);
-	TEST_IS_EQ(lerpU8(0, 255, 0), 0);
-	TEST_IS_EQ(lerpU8(0, 255, 255), 255);
+	TEST_IS_EQ(lerp255(0, 255, 128), 128);
+	TEST_IS_EQ(lerp255(0, 255, 0), 0);
+	TEST_IS_EQ(lerp255(0, 255, 255), 255);
+
+    // lerp1204
+    TEST_IS_EQ(lerp1024(0, 16, 512), 8);
+    TEST_IS_EQ(lerp1024(-16, 0, 512), -8);
 
     // iSin, iSin255 madness
     TEST_IS_TRUE(iSin(0) == 0);
     TEST_IS_TRUE(iSin(FixedNorm(1, 4)) == 1);
     TEST_IS_TRUE(iSin(FixedNorm(2, 4)) == 0);
     TEST_IS_TRUE(iSin(FixedNorm(3, 4)) == -1);
-    
+
+    TEST_IS_TRUE(iInvSin_S3(0) == 0);
+    TEST_IS_TRUE(iInvSin_S3(ISINE_ONE) == ISINE_90);
+    TEST_IS_TRUE(iInvSin_S3(-ISINE_ONE) == -ISINE_90);
+    TEST_IS_TRUE(iInvSin_S3(ISINE_HALF) == ISINE_30);
+
+    TEST_IS_TRUE(iInvCos_S3(0) == ISINE_90);
+    TEST_IS_TRUE(iInvCos_S3(ISINE_ONE) == 0);
+    TEST_IS_TRUE(iInvCos_S3(-ISINE_ONE) == ISINE_180);
+
 #ifdef _WIN32
     for (float r = 0; r <= 1.0f; r += 0.01f) {
         float f = sinf(r * 2.0f * 3.1415926535897932384626433832795f);
@@ -44,24 +74,50 @@ bool TestUtil()
     }
 #endif
 
+    // Combsort
+    {
+        int set[10] = { 0, 4, 4, 0, 1, 3, 3, 1, 2, 2};
+        combSort(set, 10);
+        for(int i=1; i<10; ++i)
+            TEST_IS_TRUE(set[i] >= set[i - 1]);
+    }
+
     return true;
 }
 
-
-bool strStarts(const char* str, const char* prefix)
+bool strStarts(const char *str, const char *prefix)
 {
-    if (!str || !prefix)
+    if ((str == 0) || (prefix == 0))
         return false;
 
-	if (!*str || !*prefix)
-		return false;
+    if ((*str == 0) || (*prefix == 0))
+        return false;
 
-    while(*prefix) {
+    while (*prefix)
+    {
         if (*prefix++ != *str++)
             return false;
     }
     return true;
 }
+
+void intToDigits(int value, int* digits, int nDigits)
+{
+    uint32_t range = 1;
+    for (int i = 1; i < nDigits; ++i) {
+        range *= 10;
+    }
+    for (int i = 0; i < nDigits; ++i) {
+        digits[i] = 0;
+        uint32_t digit = value / range;
+        if (digit >= 0 && digit < 10) {
+            digits[i] = digit;
+            value -= range * digit;
+            range = range / 10;
+        }
+    }
+}
+
 
 void intToString(int value, char* buf, int allocated, bool writeZero)
 {
@@ -107,13 +163,51 @@ bool istrStarts(const char* str, const char* prefix)
 /*
     Modified Bernstein hash.
 */
-uint16_t hash8(const char* v, const char* end)
+uint32_t hash32(const char* v, const char* end, uint32_t h)
 {
-	uint16_t h = 0;
-	for(; v<end; ++v) {
-		h = h * 33 ^ (*v);
-	}
-	return h;
+    for (; v < end; ++v) {
+        // Simple form of the hash:
+        // h = h * 33 ^ (*v);
+        // But M0+ doesn't have 64 intermediate multiply. So use shifts:
+        h = ((h << 5) + h) ^ (*v);
+    }
+    return h;
+}
+
+uint32_t hash32(const char* v, uint32_t h)
+{
+    for (; *v; ++v) {
+        h = ((h << 5) + h) ^ (*v);
+    }
+    return h;
+}
+
+bool TestAverageSample()
+{
+    {
+        AverageSample<Vec3<int>, Vec3<int>, 4> ave(Vec3<int>(2, 4, 8));
+        Vec3<int> r = ave.average();
+        TEST_IS_TRUE(r.x == 2);
+        TEST_IS_TRUE(r.y == 4);
+        TEST_IS_TRUE(r.z == 8);
+
+        ave.push(Vec3<int>(0, 0, 0));
+        ave.push(Vec3<int>(0, 0, 0));
+
+        r = ave.average();
+        TEST_IS_TRUE(r.x == 1);
+        TEST_IS_TRUE(r.y == 2);
+        TEST_IS_TRUE(r.z == 4);
+    }
+    {
+        AverageSample<uint16_t, uint32_t, 256> ave(4000);
+        TEST_IS_TRUE(ave.average() == 4000);
+        for (int i = 0; i < 128; i++) {
+            ave.push(8000);
+        }
+        TEST_IS_TRUE(ave.average() == 6000);
+    }
+    return true;
 }
 
 
@@ -295,20 +389,42 @@ bool TestCStr()
             "hum", "poweron", "poweroff",
             "swing", "swing0", "swing1", "swing2", "swing3", "swing4"
         };
-        uint16_t result[NUM] = { 0 };
+        uint32_t result[NUM] = { 0 };
         for (int i = 0; i < NUM; ++i) {
-            uint16_t v = hash8(tests[i], tests[i] + strlen(tests[i]));
+            uint32_t v = hash32(tests[i], tests[i] + strlen(tests[i]));
             TEST_IS_TRUE(v > 0);
             for (int j = 0; j < i; ++j) {
                 TEST_IS_TRUE(result[j] != v);
             }
             result[i] = v;
         }
-        /*
-        for (int i = 0; i < NUM; ++i) {
-            Log.p(tests[i]).p(" ").p(result[i]).eol();
-        }
-        */
+    }
+    {
+        CStr<12> src = " a   b   cc  ";
+        CStr<12> t0, t1, t2;
+        CStr<12>* in[3] = { &t0, &t1, &t2 };
+        src.tokenize(' ', in, 3);
+        TEST_IS_TRUE(t0 == "a");
+        TEST_IS_TRUE(t1 == "b");
+        TEST_IS_TRUE(t2 == "cc");
+    }
+    {
+        CStr<12> src = "aa bb   cc";
+        CStr<12> t0, t1, t2;
+        CStr<12>* in[3] = { &t0, &t1, &t2 };
+        src.tokenize(' ', in, 3);
+        TEST_IS_TRUE(t0 == "aa");
+        TEST_IS_TRUE(t1 == "bb");
+        TEST_IS_TRUE(t2 == "cc");
+    }
+    {
+        CStr<12> src = " aa ";
+        CStr<12> t0, t1, t2;
+        CStr<12>* in[3] = { &t0, &t1, &t2 };
+        src.tokenize(' ', in, 3);
+        TEST_IS_TRUE(t0 == "aa");
+        TEST_IS_TRUE(t1.empty());
+        TEST_IS_TRUE(t2.empty());
     }
     return true;
 }
@@ -400,29 +516,143 @@ bool TestHex()
 }
 
 
-bool TestCQueue()
+char base64BitsToChar(int b)
 {
-    CQueue<4> queue;
-    TEST_IS_TRUE(queue.empty());
-    queue.push(1);
-    queue.push(2);
-    int r = queue.pop();
-    TEST_IS_EQ(r, 1);
-    TEST_IS_FALSE(queue.empty());
-    queue.push(3);
-    queue.push(4);
-    queue.push(5);
-    r = queue.pop();
-    TEST_IS_EQ(r, 2);
-    queue.push(6);
-    TEST_IS_EQ(queue.pop(), 3);
-    TEST_IS_EQ(queue.pop(), 4);
-    TEST_IS_EQ(queue.pop(), 5);
-    TEST_IS_EQ(queue.pop(), 6);
-    TEST_IS_TRUE(queue.empty());
+    if (b >= 0 && b < 26)
+        return 'A' + b;
+    if (b >= 26 && b < 52)
+        return 'a' + (b - 26);
+    if (b >= 52 && b < 62)
+        return '0' + (b - 52);
+    if (b == 62)
+        return '+';
+    if (b == 63)
+        return '-';
+    return 0;
+ }
+
+int base64CharToBits(char c)
+{
+    if (c >= 'A' && c <= 'Z')
+        return c - 'A';
+    if (c >= 'a' && c <= 'z')
+        return c - 'a' + 26;
+    if (c >= '0' && c <= '9')
+        return c - '0' + 52;
+    if (c == '+')
+        return 62;
+    if (c == '-')
+        return 63;
+    return 0;
+}
+
+void encodeBase64(const uint8_t* src, int nBytes, char* dst, bool writeNull)
+{
+    // base64 - 6 bits per char of output
+    // every 3 bytes (24 bits) is 4 char
+
+    char* t = dst;
+    for (int i = 0; i < nBytes; i += 3) {
+        uint32_t accum = 0;
+        accum = src[i];
+        if (i + 1 < nBytes)
+            accum |= src[i + 1] << 8;
+        if (i + 2 < nBytes)
+            accum |= src[i + 2] << 16;
+
+        *t++ = base64BitsToChar(accum & 63);
+        *t++ = base64BitsToChar((accum >> 6) & 63);
+        *t++ = base64BitsToChar((accum >> 12) & 63);
+        *t++ = base64BitsToChar((accum >> 18) & 63);
+    }
+    if (writeNull)
+        *t = 0;
+}
+
+void decodeBase64(const char* src, int nBytes, uint8_t* dst)
+{
+    const char* p = src;
+    for (int i = 0; i < nBytes; i += 3) {
+        uint32_t accum = 0;
+        accum = base64CharToBits(*p++);
+        accum |= base64CharToBits(*p++) << 6;
+        accum |= base64CharToBits(*p++) << 12;
+        accum |= base64CharToBits(*p++) << 18;
+
+        dst[i] = accum & 0xff;
+        if (i + 1 < nBytes) dst[i + 1] = (accum >> 8) & 0xff;
+        if (i + 2 < nBytes) dst[i + 2] = (accum >> 16) & 0xff;
+    }
+}
+
+bool TestBase64()
+{
+    uint8_t src0[32];
+    char dst[64];
+    uint8_t src1[32];
+
+    for (int i = 1; i < 32; ++i) {
+        Random random(i);
+        for (int j = 0; j < i; ++j) {
+            src0[j] = random.rand();
+        }
+        encodeBase64(src0, i, dst, true);
+        decodeBase64(dst, i, src1);
+        TEST_IS_TRUE(memcmp(src0, src1, i) == 0);
+    }
     return true;
 }
 
+
+bool TestCQueue()
+{
+    {
+        CQueue<int, 4> queue;
+        TEST_IS_TRUE(queue.empty());
+        queue.push(1);
+        queue.push(2);
+        int r = queue.pop();
+        TEST_IS_EQ(r, 1);
+        TEST_IS_FALSE(queue.empty());
+        queue.push(3);
+        queue.push(4);
+        queue.push(5);
+        r = queue.pop();
+        TEST_IS_EQ(r, 2);
+        queue.push(6);
+        TEST_IS_EQ(queue.pop(), 3);
+        TEST_IS_EQ(queue.pop(), 4);
+        TEST_IS_EQ(queue.pop(), 5);
+        TEST_IS_EQ(queue.pop(), 6);
+        TEST_IS_TRUE(queue.empty());
+    }
+    {
+        CQueue<int16_t, 4> queue;
+        queue.push(0);
+        queue.push(1);
+        queue.pushFront(-1);
+        queue.pushFront(-2);
+        TEST_IS_EQ(queue.pop(), -2);
+        TEST_IS_EQ(queue.pop(), -1);
+        TEST_IS_EQ(queue.pop(), 0);
+        TEST_IS_EQ(queue.pop(), 1);
+    }
+    return true;
+}
+
+int AnimateProp::tick(uint32_t delta) 
+{
+    m_time += delta;
+
+    if (m_period == 0 || m_time >= m_period) {
+        m_period = 0;
+        return m_end;
+    }
+    else {
+        m_time += delta;
+        return m_start + (m_end - m_start) * int(m_time) / int(m_period);
+    }
+}
 
 int Timer2::tick(uint32_t delta)
 {
@@ -487,119 +717,4 @@ int Timer2::tick(uint32_t delta)
     return true;
 }
 
-void EventQueue::event(const char* e, int data)
-{
-	ASSERT(e);
-	ASSERT(m_nEvents < NUM_EVENTS);
-
-    if (m_nEvents >= NUM_EVENTS) {
-        Log.p("Overflow: ");
-        for (int i = 0; i < NUM_EVENTS; ++i) {
-            int slot = (m_head + i) % NUM_EVENTS;
-            Log.p(m_events[slot].name).p(" ");
-        }
-        Log.eol();
-        return;
-    }
-
-	int slot = (m_head + m_nEvents) % NUM_EVENTS;
-
-	m_events[slot].name = e;
-	m_events[slot].data = data;
-
-    #if SERIAL_DEBUG == 1
-	if (m_eventLogging)
-		Log.p(m_events[slot].name).p(" data=").p(m_events[slot].data).eol();
-    #endif
-    #ifdef DEBUG_EVENT
-    Log.p("Event::push ").p(m_events[slot].name).p(" nEvents=").p(m_nEvents).eol();
-    #endif
-
-	++m_nEvents;
-}
-
-
-const EventQueue::Event& EventQueue::peek(int i) const
-{
-	ASSERT(i < m_nEvents);
-	int slot = (m_head + m_nEvents) % NUM_EVENTS;
-	return m_events[slot];
-}
-
-
-EventQueue::Event EventQueue::popEvent()
-{
-	Event e;
-	ASSERT(m_nEvents > 0);
-	if (m_nEvents == 0)
-		return e;
-
-	e = m_events[m_head];
-	++m_head;
-	--m_nEvents;
-	if (m_head == NUM_EVENTS)
-		m_head = 0;
-
-    #ifdef DEBUG_EVENT
-    Log.p("Event::pop ").p(e.name).p(" nRemain=").p(m_nEvents).eol();
-    #endif
-	return e;
-}
-
 SPLog Log;
-EventQueue EventQ;
-
-void PushTestEvents(int n)
-{
-	if (n >= 1) EventQ.event("Event0");
-	if (n >= 2) EventQ.event("Event1", 1);
-	if (n >= 3) EventQ.event("Event2", 2);
-	if (n >= 4) EventQ.event("Event3", 3);
-	if (n >= 5) EventQ.event("Event4", 4);
-	if (n >= 6) EventQ.event("Event5", 5);
-	if (n >= 7) EventQ.event("Event6", 6);
-	if (n >= 8) EventQ.event("Event7", 7);
-}
-
-
-bool TestEvent()
-{
-	EventQ.setEventLogging(false);
-    while(EventQ.hasEvent()) 
-        EventQ.popEvent();
-	TEST_IS_FALSE(EventQ.hasEvent());
-	{
-		PushTestEvents(1);
-		TEST_IS_TRUE(EventQ.hasEvent());
-		EventQueue::Event e = EventQ.popEvent();
-		TEST_IS_TRUE(strEqual(e.name, "Event0"));
-		TEST_IS_TRUE(e.data == 0);
-	}
-	TEST_IS_FALSE(EventQ.hasEvent());
-	{
-		PushTestEvents(3);
-		TEST_IS_TRUE(EventQ.hasEvent());
-		EventQueue::Event e = EventQ.popEvent();
-		TEST_IS_TRUE(strEqual(e.name, "Event0"));
-		TEST_IS_TRUE(e.data == 0);
-		e = EventQ.popEvent();
-		TEST_IS_TRUE(strEqual(e.name, "Event1"));
-		TEST_IS_TRUE(e.data == 1);	
-		e = EventQ.popEvent();
-		TEST_IS_TRUE(strEqual(e.name, "Event2"));
-		TEST_IS_TRUE(e.data == 2);	
-	}
-	TEST_IS_FALSE(EventQ.hasEvent());
-	{
-		PushTestEvents(8);
-		for (int i = 0; i < 7; ++i)
-			EventQ.popEvent();
-		EventQueue::Event e = EventQ.popEvent();
-		TEST_IS_TRUE(strEqual(e.name, "Event7"));
-		TEST_IS_TRUE(e.data == 7);
-	}
-	TEST_IS_FALSE(EventQ.hasEvent());
-	EventQ.setEventLogging(true);
-	return true;
-}
-
