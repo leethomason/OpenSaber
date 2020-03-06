@@ -29,7 +29,7 @@
 #include "modes.h"
 
 #define SMOOTH_LOG
-Timer2 smoothTimer(513);
+Timer2 smoothTimer(253);
 
 
 SFX* SFX::m_instance = 0;
@@ -46,7 +46,7 @@ SFX::SFX(I2SAudioDriver *driver, const Manifest& manifest) :
     m_volume = 64;
     m_smoothMode = false;
 
-    m_swingDecay.setPeriod(2);
+    m_swingDecay.setPeriod(1);
     m_blend256 = 0;
 
     scanFiles();
@@ -295,7 +295,8 @@ void SFX::process(int bladeMode, uint32_t delta, bool* still)
             sm_swingToVolume(m_speed, &hum, &swing);
             m_swing -= m_swingDecay.tick(delta);
             m_swing = glMax(0, m_swing);
-            swing = glMax(swing, m_swing);
+
+            swing = m_swing = glMax(swing, m_swing);
 
             if (swing == 0) {
                 *still = true;
@@ -316,21 +317,19 @@ void SFX::process(int bladeMode, uint32_t delta, bool* still)
                 hum = 0;
             }
 
-            int swing0 = lerp1024(int16_t(0), int16_t(swing), m_blend256 * 4);
-            int swing1 = lerp1024(int16_t(swing), int16_t(0), m_blend256 * 4);
+            //int swing0 = lerp1024(int16_t(0), int16_t(swing), m_blend256 * 4);
+            //int swing1 = lerp1024(int16_t(swing), int16_t(0), m_blend256 * 4);
 
-            // TODO Probably should be:
-            // int swing0a = iCos(FixedNorm(m_blend256, 1024)).scale(swing);
-            // int swing1a = iSin(FixedNorm(m_blend256, 1024)).scale(swing);
+            int swing0 = iCos(FixedNorm(m_blend256, 1024)).scale(swing);
+            int swing1 = iSin(FixedNorm(m_blend256, 1024)).scale(swing);
 
             if (smoothTimer.tick(delta)) {
                 Log.p("speed=").p(m_speed).p(" swing=").p(swing).p(" hum=").p(hum)
                 .p(" blend=").p(m_blend256)
-                .p(" swing0").p(swing0).p(" swing1=").p(swing1)
+                .p(" swing0=").p(swing0).p(" swing1=").p(swing1)
                 .eol();
             }
             m_driver->setVolume(scaleVolume(hum), CHANNEL_IDLE);
-            // FIXME better blend
             // TODO may need filtering
             m_driver->setVolume(scaleVolume(glClamp(swing0, 0, 256)), CHANNEL_MOTION_0);
             m_driver->setVolume(scaleVolume(glClamp(swing1, 0, 256)), CHANNEL_MOTION_1);
