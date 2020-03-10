@@ -1,14 +1,17 @@
 Issues:
 
-Smooth Swing support
-- volume smoothing (driver)
-- volume "drag" (SFX)
+- smooth swing decay, decay class
+t ignite / retract mode state
+t playing hum past retract
 - clipping / limiting in mixer (maybe 64 bit okay??)
-powerLevel or vbatToPowerLevel...both is crazy
-
-Crackle in hum sound (how??)
+- Crackle in hum sound (how??)
+- need to keep updating / reset magnemometer
+- correct sound font for leia
 
 Fixed
+x powerLevel or vbatToPowerLevel...both is crazy
+x volume smoothing (driver)
+x volume "drag" (SFX)
 x Color section mode
 x Tester: turn back on blade flash using delays
 x Tester: Blade doesn't change color

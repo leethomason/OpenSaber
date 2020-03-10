@@ -96,7 +96,7 @@ protected:
 	void playMotionTracks();
 
 	static void sm_swingToVolume(float radPerSec, int* hum, int* swing);
-	int scaleVolume(int v) const { return (v * m_volume) >> 8; }
+	int scaleVolume(int v) const;
 
 	I2SAudioDriver *m_driver;
 	const Manifest& m_manifest;
@@ -115,7 +115,7 @@ protected:
 	int m_stillCount = 0;	// how many still frames (motion sound = 0)
 
 	Random m_random;
-	AnimateProp humIginition;
+	AnimateProp volumeEnvelope;
 
 	struct SFXType {
 		int start;

@@ -646,11 +646,13 @@ int AnimateProp::tick(uint32_t delta)
 
     if (m_period == 0 || m_time >= m_period) {
         m_period = 0;
+        m_value = m_end;
         return m_end;
     }
     else {
         m_time += delta;
-        return m_start + (m_end - m_start) * int(m_time) / int(m_period);
+        m_value = m_start + (m_end - m_start) * int(m_time) / int(m_period);
+        return m_value;
     }
 }
 

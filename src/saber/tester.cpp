@@ -153,8 +153,6 @@ class ChannelTest : public Test
         ASSERT(blade);
         BladeFlash* bladeFlash = tester->getBladeFlash();
         ASSERT(bladeFlash);
-        SaberDB* saberDB = tester->getSaberDB();
-        ASSERT(saberDB);
 
         switch(event) {
             case 0: 

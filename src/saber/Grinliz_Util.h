@@ -565,13 +565,16 @@ public:
 		m_period = period;
 		m_start = start;
 		m_end = end;
+		m_value = start;
 	}
 	int tick(uint32_t delta);
+	int value() const;
 	bool done() { return m_period == 0; }
 
 private:
 	uint32_t m_time = 0;
 	uint32_t m_period = 0;
+	int m_value = 0;
 	int m_start = 0;
 	int m_end = 0;
 };
@@ -610,9 +613,10 @@ private:
 	bool m_enable;
 };
 
-/* Generally try to keep Ardunino and Win332 code very separate.
-But a log class is useful to generalize, both for utility
-and testing. Therefore put up with some #define nonsense here.
+/* 
+	Generally try to keep Ardunino and Win32 code very separate.
+	But a log class is useful to generalize, both for utility
+	and testing. Therefore put up with some #define nonsense here.
 */
 #ifdef _WIN32
 class Stream;
