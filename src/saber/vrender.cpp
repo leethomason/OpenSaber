@@ -332,7 +332,7 @@ ColorRGB VRender::AddToColorStack(int layer, ColorRGBA color)
 #endif // _DEBUG
 
     #ifdef VECTOR_MONO
-    if (m_nColor)
+    if (m_nColor > 0)
         return m_colorStack[m_nColor - 1].color;
     return 0;
     #else

@@ -200,8 +200,10 @@ bool GrinlizLSM303::begin()
     );
     delay(10);
 
-    mMin.set(INT_MAX, INT_MAX, INT_MAX);
-    mMax.set(INT_MIN, INT_MIN, INT_MIN);
+    m_min.set(INT_MAX, INT_MAX, INT_MAX);
+    m_max.set(INT_MIN, INT_MIN, INT_MIN);
+    m_minQueued = m_min;
+    m_maxQueued = m_max;
     return (whoAmIA == 0x33) && (whoAmIM == 0x40);
 }
 
@@ -238,10 +240,10 @@ void GrinlizLSM303::setMagDataRate(int hz)
 {
     int rateBits = 3;
     switch(hz) {
-        case 10: rateBits = 0; break;
-        case 20: rateBits = 1; break;
-        case 50: rateBits = 2; break;
-        default: rateBits = 3; break;
+        case 10: rateBits = 0; m_queueFrame = 40; break;
+        case 20: rateBits = 1; m_queueFrame = 80; break;
+        case 50: rateBits = 2; m_queueFrame = 200; break;
+        default: rateBits = 3; m_queueFrame = 400; break;
     }
     uint8_t d = read8(LSM303_ADDRESS_MAG, CFG_REG_A_M);
     d = d & (~(3<<2));
@@ -323,6 +325,26 @@ int GrinlizLSM303::readInner(Vec3<int32_t>* rawData, Vec3<float>* data, int n)
     return n;
 }
 
+void GrinlizLSM303::recalibrateMag()
+{
+    if (dataValid(m_minQueued, m_maxQueued) && dataValid(m_min, m_max)) {
+        Vec3<int32_t> a = m_max - m_min;
+        int errA = a.x + a.y + a.z;
+        
+        Vec3<int32_t> b = m_maxQueued - m_minQueued;
+        int errB = b.x + b.y + b.z;
+
+        if (errB < errA) {
+            m_min = m_minQueued;
+            m_max = m_maxQueued;
+            m_samplesSinceSwap = 0;
+            Log.p("mag recalibrated.").eol();
+        }
+        m_minQueued.set(INT_MAX, INT_MAX, INT_MAX);
+        m_maxQueued.set(INT_MIN, INT_MIN, INT_MIN);
+    }
+}
+
 int GrinlizLSM303::readMag(Vec3<int32_t>* rawData, Vec3<float>* data)
 {
     uint8_t status = read8(LSM303_ADDRESS_MAG, STATUS_REG_M);
@@ -349,16 +371,27 @@ int GrinlizLSM303::readMag(Vec3<int32_t>* rawData, Vec3<float>* data)
     int32_t y = int16_t(ylo | (yhi << 8));
     int32_t z = int16_t(zlo | (zhi << 8));
 
-    mMin.x = glMin(x, mMin.x);
-    mMin.y = glMin(y, mMin.y);
-    mMin.z = glMin(z, mMin.z);
+    m_min.x = glMin(x, m_min.x);
+    m_min.y = glMin(y, m_min.y);
+    m_min.z = glMin(z, m_min.z);
 
-    mMax.x = glMax(x, mMax.x);
-    mMax.y = glMax(y, mMax.y);
-    mMax.z = glMax(z, mMax.z);
+    m_max.x = glMax(x, m_max.x);
+    m_max.y = glMax(y, m_max.y);
+    m_max.z = glMax(z, m_max.z);
 
     if (!magDataValid())
         return 0;
+
+    ++m_samplesSinceSwap;
+    if (m_samplesSinceSwap > m_queueFrame) {
+        m_minQueued.x = glMin(x, m_minQueued.x);
+        m_minQueued.y = glMin(y, m_minQueued.y);
+        m_minQueued.z = glMin(z, m_minQueued.z);
+
+        m_maxQueued.x = glMax(x, m_maxQueued.x);
+        m_maxQueued.y = glMax(y, m_maxQueued.y);
+        m_maxQueued.z = glMax(z, m_maxQueued.z);
+    }
 
     if (rawData) {
         rawData->x = x;
@@ -366,9 +399,9 @@ int GrinlizLSM303::readMag(Vec3<int32_t>* rawData, Vec3<float>* data)
         rawData->z = z; 
     }
     if (data) {
-        float vx = -1.0f + 2.0f * (x - mMin.x) / (mMax.x - mMin.x);
-        float vy = -1.0f + 2.0f * (y - mMin.y) / (mMax.y - mMin.y);
-        float vz = -1.0f + 2.0f * (z - mMin.z) / (mMax.z - mMin.z);
+        float vx = -1.0f + 2.0f * (x - m_min.x) / (m_max.x - m_min.x);
+        float vy = -1.0f + 2.0f * (y - m_min.y) / (m_max.y - m_min.y);
+        float vz = -1.0f + 2.0f * (z - m_min.z) / (m_max.z - m_min.z);
 
         float len2 = vx * vx + vy * vy + vz * vz;
         float lenInv = 1.0f / sqrtf(len2);

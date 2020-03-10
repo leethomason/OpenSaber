@@ -68,6 +68,7 @@ void Filter::calc(Vec3<int32_t>* vec3)
 Swing::Swing(int msecPerSample)
 {
     m_speed = 0;
+    m_dotOrigin = 0;
     m_origin.setZero();
     m_prevPosNorm.setZero();
     m_init = false;

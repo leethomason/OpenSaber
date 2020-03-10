@@ -103,7 +103,7 @@ void hsv2rgb(uint8_t src_h, uint8_t src_s, uint8_t src_v,
     const int32_t s = src_s * SCALE / 255; // 0-SCALE
     const int32_t v = src_v * SCALE / 255; // 0-SCALE
 
-    int32_t r, g, b; // 0-SCALE
+    int32_t r = 0, g = 0, b = 0; // 0-SCALE
 
     const int32_t hi = h / 60;
     const int32_t f = (h - hi * 60) * SCALE / 60;

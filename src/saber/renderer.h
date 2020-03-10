@@ -64,7 +64,7 @@ private:
 	uint8_t* m_buffer = 0;
 
 	enum { MAX_ROWS = 4};
-	uint8_t m_mask[MAX_ROWS];
+	uint8_t m_mask[MAX_ROWS] = { 0 };
 };
 
 
