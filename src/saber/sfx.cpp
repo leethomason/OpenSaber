@@ -211,7 +211,7 @@ bool SFX::playSound(const char* sfx)
 
     int index = m_manifest.getFile(m_currentFont, sfx);
     if (index > 0) {
-        m_driver->play(index, false, 0);
+        m_driver->play(index, false, m_smoothMode ? CHANNEL_EVENT : 0);
         m_driver->setVolume(m_volume, 0);
         return true;
     }
@@ -247,7 +247,7 @@ void SFX::sm_ignite()
     m_driver->setVolume(0, CHANNEL_MOTION_1);
     m_driver->setVolume(m_volume, CHANNEL_EVENT);
 
-    humIginition.start(m_igniteTime, 0, 256);
+    volumeEnvelope.start(m_igniteTime, 0, 256);
 }
 
 void SFX::sm_retract()
@@ -258,7 +258,7 @@ void SFX::sm_retract()
     m_driver->setVolume(0, CHANNEL_MOTION_1);
     m_driver->setVolume(m_volume, CHANNEL_EVENT);
 
-    humIginition.start(m_retractTime, 256, 0);
+    volumeEnvelope.start(m_retractTime, 256, 0);
 }
 
 bool SFX::sm_playEvent(int sfx)
@@ -286,60 +286,57 @@ void SFX::sm_swingToVolume(float radPerSec, int* hum, int* swing)
     // Log.p("rad/sec=").p(radPerSec).p(" motionFraction=").p(motionFraction.toFloat()).p(" hum=").p(*hum).p(" swing=").p(*swing).eol();
 }
 
+int SFX::scaleVolume(int v) const
+{
+    v = glClamp(v, 0, 255);
+    // [0,255] * [0,256] * [0,256]
+    v = (v * volumeEnvelope.value() * m_volume) >> 16;
+    return v;
+}
+
+
 void SFX::process(int bladeMode, uint32_t delta, bool* still)
 {
     if (m_smoothMode) {
-        if (bladeMode != BLADE_OFF) {
-            int hum = 0;
-            int swing = 0;
-            sm_swingToVolume(m_speed, &hum, &swing);
-            m_swing -= m_swingDecay.tick(delta);
-            m_swing = glMax(0, m_swing);
+        // Animates from 0->256 on ignite, and back to 0 on retract.
+        // 256 or 0 at steady state.
+        volumeEnvelope.tick(delta);
 
-            swing = m_swing = glMax(swing, m_swing);
+        int hum = 0;
+        int swing = 0;
+        sm_swingToVolume(m_speed, &hum, &swing);
+        m_swing -= m_swingDecay.tick(delta);
+        m_swing = glMax(0, m_swing);
 
-            if (swing == 0) {
-                *still = true;
-                m_stillCount++;
-                if (m_stillCount == 4)
-                    playMotionTracks(); // new random tracks.
-            }
-            else {
-                *still = false;
-                m_stillCount = 0;
-            }
+        swing = m_swing = glMax(swing, m_swing);
 
-            if (!humIginition.done()) {                
-                hum = humIginition.tick(delta);
-                // Log.p("humIginition=").p(hum).eol();
-            }
-            else if (bladeMode == BLADE_RETRACT) {
-                hum = 0;
-            }
-
-            //int swing0 = lerp1024(int16_t(0), int16_t(swing), m_blend256 * 4);
-            //int swing1 = lerp1024(int16_t(swing), int16_t(0), m_blend256 * 4);
-
-            int swing0 = iCos(FixedNorm(m_blend256, 1024)).scale(swing);
-            int swing1 = iSin(FixedNorm(m_blend256, 1024)).scale(swing);
-
-            if (smoothTimer.tick(delta)) {
-                Log.p("speed=").p(m_speed).p(" swing=").p(swing).p(" hum=").p(hum)
-                .p(" blend=").p(m_blend256)
-                .p(" swing0=").p(swing0).p(" swing1=").p(swing1)
-                .eol();
-            }
-            m_driver->setVolume(scaleVolume(hum), CHANNEL_IDLE);
-            // TODO may need filtering
-            m_driver->setVolume(scaleVolume(glClamp(swing0, 0, 256)), CHANNEL_MOTION_0);
-            m_driver->setVolume(scaleVolume(glClamp(swing1, 0, 256)), CHANNEL_MOTION_1);
+        if (swing == 0) {
+            *still = true;
+            m_stillCount++;
+            if (m_stillCount == 4)
+                playMotionTracks(); // new random tracks.
         }
         else {
-            // As is, these disable "play" from the command line.
-            //for(int i=0; i<AUDDRV_NUM_CHANNELS; i++) {
-            //    m_driver->setVolume(0, i);
-           //}
+            *still = false;
+            m_stillCount = 0;
         }
+
+        int swing0 = iCos(FixedNorm(m_blend256, 1024)).scale(swing);
+        int swing1 = iSin(FixedNorm(m_blend256, 1024)).scale(swing);
+
+        if (smoothTimer.tick(delta)) {
+            Log.p("speed=").p(m_speed).p(" swing=").p(swing).p(" hum=").p(hum)
+            .p(" blend=").p(m_blend256)
+            .p(" swing0=").p(swing0).p(" swing1=").p(swing1)
+            .eol();
+        }
+
+        // volume is scaled by overall output volume (m_volume) and the
+        // current value of the volumeEnvelope. So this accounts for
+        // on/off/ignite/retract.
+        m_driver->setVolume(scaleVolume(hum), CHANNEL_IDLE);
+        m_driver->setVolume(scaleVolume(swing0), CHANNEL_MOTION_0);
+        m_driver->setVolume(scaleVolume(swing1), CHANNEL_MOTION_1);
     }
     else {
         if ((bladeMode == BLADE_ON) && !m_driver->isPlaying(0)) {
