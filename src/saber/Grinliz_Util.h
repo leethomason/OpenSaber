@@ -555,6 +555,26 @@ private:
 
 bool TestAverageSample();
 
+class StepProp
+{
+public:
+	StepProp() {}
+
+	void set(Fixed115 f) { step = f; }
+	void set(float f) { step = Fixed115(f); }
+
+	int tick(uint32_t delta) {
+		value += step * delta;
+		int n = value.getInt();
+		value -= n;
+		return n;
+	}
+
+public:
+	Fixed115 step = 0;
+	Fixed115 value = 0;
+};
+
 class AnimateProp
 {
 public:

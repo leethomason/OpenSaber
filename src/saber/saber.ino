@@ -570,6 +570,7 @@ void loop() {
     sfx.process(bladeState.state(), delta, &still);
     if (still) {
         swing.setOrigin();
+        // accelMag.recalibrateMag(); fixme turn on
     }
 
     if (vbatTimer.tick(delta)) {

@@ -1,11 +1,11 @@
 Issues:
 
-- smooth swing decay, decay class
+t smooth swing decay, decay class
 t ignite / retract mode state
 t playing hum past retract
+t need to keep updating / reset magnemometer
 - clipping / limiting in mixer (maybe 64 bit okay??)
 - Crackle in hum sound (how??)
-- need to keep updating / reset magnemometer
 - correct sound font for leia
 
 Fixed

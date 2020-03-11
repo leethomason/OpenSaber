@@ -46,7 +46,7 @@ SFX::SFX(I2SAudioDriver *driver, const Manifest& manifest) :
     m_volume = 64;
     m_smoothMode = false;
 
-    m_swingDecay.setPeriod(1);
+    m_swingDecay.set(1.5f);
     m_blend256 = 0;
 
     scanFiles();
@@ -164,6 +164,7 @@ void SFX::playMotionTracks()
     }
     m_driver->play(m_sfxType[t0].start + offset, true, CHANNEL_MOTION_0);
     m_driver->play(m_sfxType[t1].start + offset, true, CHANNEL_MOTION_1);
+    Log.p("playMotionTracks t0=").p(t0).p(" t1=").p(t1).eol();
 }
 
 bool SFX::playSound(int sound, int mode, int channel)
@@ -305,9 +306,9 @@ void SFX::process(int bladeMode, uint32_t delta, bool* still)
         int hum = 0;
         int swing = 0;
         sm_swingToVolume(m_speed, &hum, &swing);
+
         m_swing -= m_swingDecay.tick(delta);
         m_swing = glMax(0, m_swing);
-
         swing = m_swing = glMax(swing, m_swing);
 
         if (swing == 0) {

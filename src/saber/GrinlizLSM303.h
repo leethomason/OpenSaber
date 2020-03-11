@@ -49,14 +49,12 @@ public:
        the ones to use.
     */
     int readMag(Vec3<int32_t>* rawData, Vec3<float>* data);
+    void recalibrateMag();
 
-    const Vec3<int32_t>& getMagMin() const { return mMin; }
-    const Vec3<int32_t>& getMagMax() const { return mMax; }
+    const Vec3<int32_t>& getMagMin() const { return m_min; }
+    const Vec3<int32_t>& getMagMax() const { return m_max; }
     bool magDataValid() const { 
-        static const int T = 100;
-        return     (mMax.x - mMin.x > T) 
-                && (mMax.y - mMin.y > T) 
-                && (mMax.z - mMin.z > T);   
+        return dataValid(m_min, m_max);
     }
 
     void logMagStatus();
@@ -68,7 +66,18 @@ public:
     static GrinlizLSM303* instance() { return s_instance; }
 
 private:
-    Vec3<int32_t> mMin, mMax;
+    static bool dataValid(const Vec3<int32_t>& a, const Vec3<int32_t>& b) {
+        static const int T = 100;
+        return     (b.x - a.x > T) 
+                && (b.y - a.y > T) 
+                && (b.z - a.z > T);   
+    }
+
+    int m_samplesSinceSwap = 0;
+    int m_queueFrame = 400;
+    Vec3<int32_t> m_min, m_max;
+    Vec3<int32_t> m_minQueued, m_maxQueued;
+
     static GrinlizLSM303* s_instance;
 
     void write8(uint8_t address, uint8_t reg, uint8_t value) const;
