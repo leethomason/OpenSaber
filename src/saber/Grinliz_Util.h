@@ -568,7 +568,7 @@ public:
 		m_value = start;
 	}
 	int tick(uint32_t delta);
-	int value() const;
+	int value() const { return m_value; }
 	bool done() { return m_period == 0; }
 
 private:
