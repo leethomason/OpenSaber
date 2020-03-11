@@ -185,7 +185,7 @@ class AccelerometerTest : public Test
 {
 public:
 
-	static const int NDATA = 10;
+	static const int NDATA = 20;
 	int nSamples;
     Vec3<float> data[NDATA];
     uint32_t startTime;

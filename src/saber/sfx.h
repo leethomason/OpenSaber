@@ -95,7 +95,7 @@ protected:
 	int getTrack(int sound);
 	void playMotionTracks();
 
-	static void sm_swingToVolume(float radPerSec, int* hum, int* swing);
+	static int sm_swingToVolume(float radPerSec);
 	int scaleVolume(int v) const;
 
 	I2SAudioDriver *m_driver;
@@ -111,6 +111,7 @@ protected:
 	float m_speed;
 	int m_blend256;
 	int m_swing = 0;		// tracks current swing with decay...lots of noise from mag
+	int m_hum = 0;			// also tracks with decay
 	StepProp m_swingDecay;	// decay rate is fast; about 1.5/millisecond, so need fixed.
 	int m_stillCount = 0;	// how many still frames (motion sound = 0)
 

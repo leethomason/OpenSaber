@@ -329,16 +329,17 @@ void GrinlizLSM303::recalibrateMag()
 {
     if (dataValid(m_minQueued, m_maxQueued) && dataValid(m_min, m_max)) {
         Vec3<int32_t> a = m_max - m_min;
-        int errA = a.x + a.y + a.z;
+        int err = a.x + a.y + a.z;
         
         Vec3<int32_t> b = m_maxQueued - m_minQueued;
-        int errB = b.x + b.y + b.z;
+        int errQueue = b.x + b.y + b.z;
 
-        if (errB < errA) {
-            m_min = m_minQueued;
-            m_max = m_maxQueued;
+        if (errQueue < err) {
+            Log.p("Mag recalibrated.").eol(); // from=").ptc(m_min).ptc(m_max).p(" to=").ptc(m_minQueued).ptc(m_maxQueued).eol();
+            // Average out so it doesn't go wobbly, but we bring in the range.
+            m_min = (m_min + m_minQueued) / 2;
+            m_max = (m_max + m_maxQueued) / 2;
             m_samplesSinceSwap = 0;
-            Log.p("mag recalibrated.").eol();
         }
         m_minQueued.set(INT_MAX, INT_MAX, INT_MAX);
         m_maxQueued.set(INT_MIN, INT_MIN, INT_MIN);
