@@ -52,6 +52,8 @@ private:
     void parseHexColor(const char* str, osbr::RGB* c);
     void printLead(const char* str);
     void printMAmps(const osbr::RGB& color);
+    void printXYZ(const Vec3<int32_t>& v) const;
+    void printXYZ(const Vec3<float>& v) const;
 
     SaberDB* database = 0;
     const Manifest& manifest;

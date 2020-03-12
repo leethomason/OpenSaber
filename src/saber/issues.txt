@@ -1,5 +1,7 @@
 Issues:
 
+- less motion sensitivity
+- sensitivity up and down
 - clipping / limiting in mixer (maybe 64 bit okay??)
 - Crackle in hum sound (how??)
 - correct sound font for leia
