@@ -1,14 +1,16 @@
 Issues:
 
-t smooth swing decay, decay class
-t ignite / retract mode state
-t playing hum past retract
-t need to keep updating / reset magnemometer
+- less motion sensitivity
+- sensitivity up and down
 - clipping / limiting in mixer (maybe 64 bit okay??)
 - Crackle in hum sound (how??)
 - correct sound font for leia
 
 Fixed
+x smooth swing decay, decay class
+x ignite / retract mode state
+x playing hum past retract
+x need to keep updating / reset magnemometer
 x powerLevel or vbatToPowerLevel...both is crazy
 x volume smoothing (driver)
 x volume "drag" (SFX)

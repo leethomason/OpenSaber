@@ -21,8 +21,8 @@
 */
 
 
-// #define PROFILE
-// #define AUDIO_PROFILE
+//#define PROFILE
+//#define AUDIO_PROFILE
 
 // Arduino Libraries
 #include <Adafruit_ZeroI2S.h>
@@ -570,7 +570,7 @@ void loop() {
     sfx.process(bladeState.state(), delta, &still);
     if (still) {
         swing.setOrigin();
-        // accelMag.recalibrateMag(); fixme turn on
+        accelMag.recalibrateMag();
     }
 
     if (vbatTimer.tick(delta)) {

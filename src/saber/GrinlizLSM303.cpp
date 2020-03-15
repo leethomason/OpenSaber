@@ -240,10 +240,10 @@ void GrinlizLSM303::setMagDataRate(int hz)
 {
     int rateBits = 3;
     switch(hz) {
-        case 10: rateBits = 0; m_queueFrame = 40; break;
-        case 20: rateBits = 1; m_queueFrame = 80; break;
-        case 50: rateBits = 2; m_queueFrame = 200; break;
-        default: rateBits = 3; m_queueFrame = 400; break;
+        case 10: rateBits = 0; break;
+        case 20: rateBits = 1; break;
+        case 50: rateBits = 2; break;
+        default: rateBits = 3; break;
     }
     uint8_t d = read8(LSM303_ADDRESS_MAG, CFG_REG_A_M);
     d = d & (~(3<<2));
@@ -327,19 +327,23 @@ int GrinlizLSM303::readInner(Vec3<int32_t>* rawData, Vec3<float>* data, int n)
 
 void GrinlizLSM303::recalibrateMag()
 {
-    if (dataValid(m_minQueued, m_maxQueued) && dataValid(m_min, m_max)) {
+    if (dataValid(WARM_T, m_minQueued, m_maxQueued) && dataValid(INIT_T, m_min, m_max)) {
         Vec3<int32_t> a = m_max - m_min;
-        int errA = a.x + a.y + a.z;
+        int err = a.x + a.y + a.z;
         
         Vec3<int32_t> b = m_maxQueued - m_minQueued;
-        int errB = b.x + b.y + b.z;
+        int errQueue = b.x + b.y + b.z;
 
-        if (errB < errA) {
-            m_min = m_minQueued;
-            m_max = m_maxQueued;
-            m_samplesSinceSwap = 0;
-            Log.p("mag recalibrated.").eol();
+        if (errQueue < err) {
+            Log.p("Mag recalibrated.").eol();
+            // Average out so it doesn't go wobbly, but we bring in the range.
+            m_min = (m_min + m_minQueued) / 2;
+            m_max = (m_max + m_maxQueued) / 2;
         }
+        // Either:
+        // - we had better data, and now the Queued needs reset
+        // - we had valid Queue data, but it had too much error.
+        // Either way, throw it away and start to recompute.
         m_minQueued.set(INT_MAX, INT_MAX, INT_MAX);
         m_maxQueued.set(INT_MIN, INT_MIN, INT_MIN);
     }
@@ -382,16 +386,13 @@ int GrinlizLSM303::readMag(Vec3<int32_t>* rawData, Vec3<float>* data)
     if (!magDataValid())
         return 0;
 
-    ++m_samplesSinceSwap;
-    if (m_samplesSinceSwap > m_queueFrame) {
-        m_minQueued.x = glMin(x, m_minQueued.x);
-        m_minQueued.y = glMin(y, m_minQueued.y);
-        m_minQueued.z = glMin(z, m_minQueued.z);
+    m_minQueued.x = glMin(x, m_minQueued.x);
+    m_minQueued.y = glMin(y, m_minQueued.y);
+    m_minQueued.z = glMin(z, m_minQueued.z);
 
-        m_maxQueued.x = glMax(x, m_maxQueued.x);
-        m_maxQueued.y = glMax(y, m_maxQueued.y);
-        m_maxQueued.z = glMax(z, m_maxQueued.z);
-    }
+    m_maxQueued.x = glMax(x, m_maxQueued.x);
+    m_maxQueued.y = glMax(y, m_maxQueued.y);
+    m_maxQueued.z = glMax(z, m_maxQueued.z);
 
     if (rawData) {
         rawData->x = x;

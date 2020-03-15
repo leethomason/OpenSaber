@@ -28,7 +28,7 @@
 #include "i2saudiodrv.h"
 #include "modes.h"
 
-#define SMOOTH_LOG
+// #define SMOOTH_LOG
 Timer2 smoothTimer(253);
 
 
@@ -159,12 +159,13 @@ void SFX::playMotionTracks()
     int offset = m_random.rand(m_sfxType[SFX_MOTION].count);
     int t0 = SFX_MOTION;
     int t1 = SFX_MOTION_HIGH;
+
     if (m_random.rand(3) == 0) {
         glSwap(t0, t1);
     }
     m_driver->play(m_sfxType[t0].start + offset, true, CHANNEL_MOTION_0);
     m_driver->play(m_sfxType[t1].start + offset, true, CHANNEL_MOTION_1);
-    Log.p("playMotionTracks t0=").p(t0).p(" t1=").p(t1).eol();
+    Log.p("playMotionTracks track=").p(offset).eol();
 }
 
 bool SFX::playSound(int sound, int mode, int channel)
@@ -270,7 +271,7 @@ bool SFX::sm_playEvent(int sfx)
 }
 
 // TODO: blend 2 swing sounds.
-void SFX::sm_swingToVolume(float radPerSec, int* hum, int* swing)
+int SFX::sm_swingToVolume(float radPerSec)
 {
     static const float STILL = 3.0f;
     static const float FAST  = 8.0f;
@@ -282,9 +283,9 @@ void SFX::sm_swingToVolume(float radPerSec, int* hum, int* swing)
     else if (radPerSec > STILL) {
         motionFraction = (radPerSec - STILL) / (FAST - STILL);
     }
-    *hum = 256 - motionFraction.scale(256 - 64);
-    *swing = motionFraction.scale(256);
-    // Log.p("rad/sec=").p(radPerSec).p(" motionFraction=").p(motionFraction.toFloat()).p(" hum=").p(*hum).p(" swing=").p(*swing).eol();
+    int swing = motionFraction.scale(256);
+    // Log.p("rad/sec=").p(radPerSec).p(" motionFraction=").p(motionFraction.toFloat()).p(" swing=").p(swing).eol();
+    return swing;
 }
 
 int SFX::scaleVolume(int v) const
@@ -303,18 +304,18 @@ void SFX::process(int bladeMode, uint32_t delta, bool* still)
         // 256 or 0 at steady state.
         volumeEnvelope.tick(delta);
 
-        int hum = 0;
-        int swing = 0;
-        sm_swingToVolume(m_speed, &hum, &swing);
+        int swing = sm_swingToVolume(m_speed);
 
         m_swing -= m_swingDecay.tick(delta);
-        m_swing = glMax(0, m_swing);
+        if (m_swing < 0) m_swing = 0;        
         swing = m_swing = glMax(swing, m_swing);
+
+        int hum = 256 - swing * 192 / 256;
 
         if (swing == 0) {
             *still = true;
             m_stillCount++;
-            if (m_stillCount == 4)
+            if (m_stillCount == 30)
                 playMotionTracks(); // new random tracks.
         }
         else {
@@ -322,20 +323,25 @@ void SFX::process(int bladeMode, uint32_t delta, bool* still)
             m_stillCount = 0;
         }
 
-        int swing0 = iCos(FixedNorm(m_blend256, 1024)).scale(swing);
-        int swing1 = iSin(FixedNorm(m_blend256, 1024)).scale(swing);
+        //int swing0 = iCos(FixedNorm(m_blend256, 1024)).scale(swing);
+        //int swing1 = iSin(FixedNorm(m_blend256, 1024)).scale(swing);
+        // I think I like linear better?
+        int swing0 = lerp256(swing, 0, m_blend256);
+        int swing1 = lerp256(0, swing, m_blend256);
 
+#ifdef SMOOTH_LOG
         if (smoothTimer.tick(delta)) {
             Log.p("speed=").p(m_speed).p(" swing=").p(swing).p(" hum=").p(hum)
             .p(" blend=").p(m_blend256)
             .p(" swing0=").p(swing0).p(" swing1=").p(swing1)
             .eol();
         }
+#endif        
 
         // volume is scaled by overall output volume (m_volume) and the
         // current value of the volumeEnvelope. So this accounts for
         // on/off/ignite/retract.
-        m_driver->setVolume(scaleVolume(hum), CHANNEL_IDLE);
+        m_driver->setVolume(scaleVolume(hum),    CHANNEL_IDLE);
         m_driver->setVolume(scaleVolume(swing0), CHANNEL_MOTION_0);
         m_driver->setVolume(scaleVolume(swing1), CHANNEL_MOTION_1);
     }

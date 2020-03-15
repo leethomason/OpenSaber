@@ -99,6 +99,29 @@ bool CMDParser::push(int c)
 }
 
 
+void CMDParser::printXYZ(const Vec3<int32_t>& v) const
+{
+    Serial.print("[");
+    Serial.print(v.x);
+    Serial.print(",");
+    Serial.print(v.y);
+    Serial.print(",");
+    Serial.print(v.z);
+    Serial.print("]");
+}
+
+
+void CMDParser::printXYZ(const Vec3<float>& v) const
+{
+    Serial.print("[");
+    Serial.print(v.x);
+    Serial.print(",");
+    Serial.print(v.y);
+    Serial.print(",");
+    Serial.print(v.z);
+    Serial.print("]");
+}
+
 bool CMDParser::processCMD() 
 {
     static const char BC[]      = "bc";
@@ -261,9 +284,7 @@ bool CMDParser::processCMD()
         float samplesPerSecond = N * 1000.0f / (millis() - start);
 
         for(int i=0; i<N; ++i) {
-            Serial.print( "x="); Serial.print(data[i].x);
-            Serial.print(" y="); Serial.print(data[i].y);
-            Serial.print(" z="); Serial.print(data[i].z);
+            printXYZ(data[i]);
 
             float g2, g2n;
             calcGravity2(data[i].x, data[i].y, data[i].z, &g2, &g2n);
@@ -273,18 +294,22 @@ bool CMDParser::processCMD()
         }
         Serial.print("Samples per second: "); Serial.println(samplesPerSecond);
 
-        delay(10);
+        delay(20);
         Vec3<float> mag;
         if (accel->readMag(0, &mag) == 0) {
             Serial.println("no mag data.");
-            Log.p("Min/Max=").v3(accel->getMagMin()).p(" ").v3(accel->getMagMax()).eol();
-            accel->logMagStatus();
         }
         else {
             Serial.print("Mag:");
-            Serial.print(" x="); Serial.print(mag.x);
-            Serial.print(" y="); Serial.print(mag.y);
-            Serial.print(" z="); Serial.println(mag.z);
+            printXYZ(mag);
+            Serial.println("");
+
+            Vec3<int32_t> vMin = accel->getMagMin();
+            Vec3<int32_t> vMax = accel->getMagMax();
+            Vec3<int32_t> vDelta = vMax - vMin;
+            Serial.print("Mag delta:");
+            printXYZ(vDelta);
+            Serial.println("");
         }
     }
     else if (action == PLAY) {

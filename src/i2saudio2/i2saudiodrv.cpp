@@ -35,14 +35,17 @@
 #define DECODE_S4 2
 #define DECODE DECODE_S4
 
+//#define FILL_LEFT
+#define FILL_RIGHT
+
 //#define USE_16_BIT  // doesn't work - not sure if hardware or sw config
 
 #ifdef USE_16_BIT
 int16_t stereoBuffer0[AUDDRV_STEREO_SAMPLES];
 int16_t stereoBuffer1[AUDDRV_STEREO_SAMPLES];
 #else
-int32_t stereoBuffer0[AUDDRV_STEREO_SAMPLES];
-int32_t stereoBuffer1[AUDDRV_STEREO_SAMPLES];
+int32_t stereoBuffer0[AUDDRV_STEREO_SAMPLES] = {0};
+int32_t stereoBuffer1[AUDDRV_STEREO_SAMPLES] = {0};
 #endif
 DmacDescriptor* descriptor = 0;
 
@@ -75,22 +78,7 @@ void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
     dma->startJob();
 
     /* --- decode to fill --- */
-#if DECODE == DECODE_SIN
-    static uint32_t t = 0;
-    static const int TEST_FREQ = 220;
-    static const uint32_t MULT = 32768 * TEST_FREQ / AUDDRV_FREQ;
-
-    for(int i=0; i<AUDDRV_BUFFER_SAMPLES; i++, t++) {
-        #ifdef USE_16_BIT
-        int16_t val = iSin_S3(t * MULT);
-        #else
-        int32_t val = iSin_S3(t * MULT) * 16000 * 4;
-        #endif
-        fill[i*2 + 0] = val;
-        fill[i*2 + 1] = val;
-        ++t;
-    }
-#elif DECODE == DECODE_S4
+#if 1 || DECODE == DECODE_S4
 
     for(int i=0; i<AUDDRV_NUM_CHANNELS; ++i) {
         if (isQueued[i]) {
@@ -123,6 +111,26 @@ void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
         }
     }
 #endif
+#if DECODE == DECODE_SIN
+    static uint32_t t = 0;
+    static const int TEST_FREQ = 220;
+    static const uint32_t MULT = 32768 * TEST_FREQ / AUDDRV_FREQ;
+
+    for(int i=0; i<AUDDRV_BUFFER_SAMPLES; i++, t++) {
+        #ifdef USE_16_BIT
+        int16_t val = iSin_S3(t * MULT);
+        #else
+        int32_t val = iSin_S3(t * MULT) * 16000 * 4;
+        #endif
+        #ifdef FILL_LEFT
+        fill[i*2 + 0] = val;
+        #endif
+        #ifdef FILL_RIGHT
+        fill[i*2 + 1] = val;
+        #endif
+        ++t;
+    }
+#endif    
     uint32_t endMicros = micros();
     callbackMicros += (endMicros - startMicros);
 }

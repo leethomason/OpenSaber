@@ -73,8 +73,25 @@ void SaberDB::setPaletteFromDirHash(uint32_t h)
     }
     break;
 
+    case 0xd9a8993d: // hero - jaina
+    {
+        Log.p("Hero - Jaina").eol();
+        static const int HERO = 0;
+        static const int JAINA = 1;
+
+        palette[0].set(0x00ff00, 0x00ffa0, HERO); // green
+        palette[1].set(0x0000ff, 0x00c8ff, HERO); // blue
+        palette[2].set(0x00ffff, 0x00a0ff, HERO); // cyan
+        palette[3].set(0xff0000, 0xa08000, JAINA);   // red
+        palette[4].set(0xff6000, 0x808000, JAINA);   // orange
+        palette[5].set(0x0044ff, 0x00ccff, JAINA);   // blue-green
+        palette[6].set(0x508080, 0x30a0a0, JAINA);   // white
+        palette[7].set(0x00ff44, 0x00ffaa, JAINA);   // green-blue
+    }
+    break;
 
     case 0xd447a9d5:    // corelln (Corellian SS) test font.
+    default:
     {
         Log.p("corelln (Corellian SS) test font").eol();
 
@@ -86,22 +103,6 @@ void SaberDB::setPaletteFromDirHash(uint32_t h)
         palette[5].set(0x0044ff, 0x00ccff, 0);   // blue-green
         palette[6].set(0x508080, 0x30a0a0, 0);   // white
         palette[7].set(0x00ff44, 0x00ffaa, 0);   // green-blue
-    }
-    break;
-
-    default:
-    {
-        static const int BESPIN2 = 0;
-        static const int ROGUE = 1;
-
-        palette[0].set(0x00ff00, 0x00ffa0, BESPIN2); // green
-        palette[1].set(0x0000ff, 0x00c8ff, BESPIN2); // blue
-        palette[2].set(0x00ffff, 0x00a0ff, BESPIN2); // cyan
-        palette[3].set(0xff0000, 0xa08000, ROGUE);   // red
-        palette[4].set(0xff6000, 0x808000, ROGUE);   // orange
-        palette[5].set(0x0044ff, 0x00ccff, ROGUE);   // blue-green
-        palette[6].set(0x508080, 0x30a0a0, ROGUE);   // white
-        palette[7].set(0x00ff44, 0x00ffaa, ROGUE);   // green-blue
     }
     break;
     }

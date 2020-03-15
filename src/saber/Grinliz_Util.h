@@ -37,6 +37,10 @@ inline int32_t lerp255(int16_t a, int16_t b, int32_t t255) {
     return (a * (255 - t255) + b * t255) / 255;
 }
 
+inline int32_t lerp256(int16_t a, int16_t b, int32_t t256) {
+    return (int32_t(a) * (256 - t256) + int32_t(b) * t256) / 256;
+}
+
 inline FixedNorm lerp(FixedNorm a, FixedNorm b, FixedNorm t) {
     return (a * (1 - t) + b * t);
 }
@@ -53,6 +57,8 @@ struct Vec3
 	Vec3() {}
     Vec3(T t) { x = t; y = t; z = t; }
 	Vec3(T _x, T _y, T _z) { x = _x; y = _y; z = _z; }
+
+	int size() const { return 3; }
 
 	void set(T _x, T _y, T _z) { x = _x; y = _y; z = _z; }
 	void setZero() { x = y = z = 0; }
