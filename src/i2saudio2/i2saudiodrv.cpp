@@ -104,11 +104,14 @@ void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
     for(int i=0; i<AUDDRV_NUM_CHANNELS; ++i) {
         int n = 0;
         if (status[i].addr) {
-            n = expander[i].expand(fill, AUDDRV_BUFFER_SAMPLES, volume[i], i > 0, status[i].is8Bit, false);
+            int bits = status[i].is8Bit ? 8 : 4;
+            const int* table = S4ADPCM::getTable(bits, status[i].table);
+
+            n = expander[i].expand(fill, AUDDRV_BUFFER_SAMPLES, volume[i], i > 0, bits, table, false);
 
             if (status[i].loop && n < AUDDRV_BUFFER_SAMPLES) {
                 expander[i].rewind();
-                expander[i].expand(fill + n*2, AUDDRV_BUFFER_SAMPLES - n, volume[i], i > 0, status[i].is8Bit, false);
+                expander[i].expand(fill + n*2, AUDDRV_BUFFER_SAMPLES - n, volume[i], i > 0, bits, table, false);
                 n = AUDDRV_BUFFER_SAMPLES;
             }
         }
@@ -183,6 +186,7 @@ void I2SAudioDriver::play(int index, bool loop, int channel)
     status[channel].addr = memUnit.offset;
     status[channel].size = memUnit.size;
     status[channel].is8Bit = memUnit.is8Bit == true;
+    status[channel].table = memUnit.table;
     status[channel].loop = loop;
     isQueued[channel] = true;
     interrupts();

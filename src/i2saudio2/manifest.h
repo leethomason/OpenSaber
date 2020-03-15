@@ -33,7 +33,8 @@ struct MemUnit {
     uint32_t offset;
     uint32_t size : 24;
     uint32_t is8Bit : 1;
-    uint32_t reserve : 7;
+    uint32_t table : 2;
+    uint32_t reserve : 5;
 
     uint32_t numSamples() const { return is8Bit ? size : size * 2; }
     uint32_t timeInMSec() const {

@@ -24,6 +24,10 @@
 
 #include <stdint.h>
 #include <limits.h>
+#include <assert.h>
+
+static const int S4ADPCM_4BIT = 4;
+static const int S4ADPCM_8BIT = 8;
 
 /* 
     A 4-bit ADPCM encoder/decoder. It is not any of the "official" ADPCM codecs.
@@ -43,7 +47,7 @@
     How it works:
     Each value is predicted from the previous, based on a simple velocity 
     computation. The delta from that prediction is what is stored in the 
-    compressed data. The value of the delta (-7 to +7) scaled from 0 to 12
+    compressed data. The value of the delta (-8 to +7) scaled from 0 to 12
     bits (State.shift). A large delta will increase the scaling for the
     next sample, a small delta will decrease it, so that the codec is always
     "chasing" the correct scale for the current samples.
@@ -55,7 +59,6 @@ public:
         int prev2 = 0;
         int prev1 = 0;
         int shift = 0;
-        int sign = 0;   // 0 or 8
         bool high = false;
         int volumeShifted = 0;
         int volumeTarget = 0;
@@ -72,25 +75,42 @@ public:
         }
     };
 
-    static void encode4(const int16_t* data, int32_t nSamples, uint8_t* compressed, State* state);
-    static void decode4(const uint8_t* compressed, 
-        int32_t nSamples,  
+    static int encode4(const int16_t* data, int32_t nSamples, uint8_t* compressed, State* state, const int* table, int64_t* e16squared);
+    static void decode4(const uint8_t* compressed,
+        int32_t nSamples,
         int volume,         // 0-256 (higher values can overflow)
         bool add,           // if true, add to the 'data' buffer, else write to it
-        int32_t* samples, State* state);
+        int32_t* samples, State* state, const int* table);
 
-    static void encode8(const int16_t* data, int32_t nSamples, uint8_t* compressed, State* state);
+    static void encode8(const int16_t* data, int32_t nSamples, uint8_t* compressed, State* state, const int* table, int64_t* e16squared);
     static void decode8(const uint8_t* compressed,
         int32_t nSamples,
         int volume,         // 0-256 (higher values can overflow)
         bool add,           // if true, add to the 'data' buffer, else write to it
-        int32_t* samples, State* state);
+        int32_t* samples, State* state, const int* table);
+
+    static const int TABLE_SIZE = 9;
+    static const int* getTable(int bits, int i) {
+        assert(i >= 0 && i < N_TABLES);
+        assert(bits == 8 || bits == 4);
+        if (bits == 8) return DELTA_TABLE_8[i];
+        return DELTA_TABLE_4[i];
+    }
 
 private:
     static const int SHIFT_LIMIT_4 = 12;
     static const int SHIFT_LIMIT_8 = 8;
-    static const int TABLE_SIZE = 9;
     static const int VOLUME_EASING = 32;    // 8, 16, 32, 64? initial test on powerOn sound seemed 32 was good.
+
+    static int64_t calcError(int value, int p) 
+    {
+        // Want this is 12 bit space, so divide by 16
+        value /= 16;
+        p /= 16;
+        int64_t d = int64_t(value) - p;
+        return d * d;
+    }
+
 
     inline static int32_t sat_add(int32_t x, int32_t y)
     {
@@ -107,12 +127,8 @@ private:
         return  (~mask & sum) + (mask & maxOrMin);
     }
 
-#ifdef S4ADPCM_OPT
 public:
-    static int DELTA_TABLE_4[TABLE_SIZE];
-    static int DELTA_TABLE_8[TABLE_SIZE];
-#else
-    static const int DELTA_TABLE_4[TABLE_SIZE];
-    static const int DELTA_TABLE_8[TABLE_SIZE];
-#endif
+    static const int N_TABLES = 4;
+    static const int DELTA_TABLE_4[N_TABLES][TABLE_SIZE];
+    static const int DELTA_TABLE_8[N_TABLES][TABLE_SIZE];
 };

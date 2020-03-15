@@ -19,6 +19,7 @@ void dumpMemUnit(int id, const MemUnit& memUnit)
 {
     Log.p("[").p(id).p("] ").pt(memUnit.name).p(" addr=").p(memUnit.offset).p(" size=").p(memUnit.size)
        .p(" bits=").p(memUnit.is8Bit ? 8 : 4)
+       .p(" tabel=").p(memUnit.table)
        .p(" samples=").p(memUnit.numSamples())
       .eol();
 }
