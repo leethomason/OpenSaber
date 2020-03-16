@@ -325,7 +325,7 @@ int GrinlizLSM303::readInner(Vec3<int32_t>* rawData, Vec3<float>* data, int n)
     return n;
 }
 
-void GrinlizLSM303::recalibrateMag()
+bool GrinlizLSM303::recalibrateMag()
 {
     if (dataValid(WARM_T, m_minQueued, m_maxQueued) && dataValid(INIT_T, m_min, m_max)) {
         Vec3<int32_t> a = m_max - m_min;
@@ -346,7 +346,9 @@ void GrinlizLSM303::recalibrateMag()
         // Either way, throw it away and start to recompute.
         m_minQueued.set(INT_MAX, INT_MAX, INT_MAX);
         m_maxQueued.set(INT_MIN, INT_MIN, INT_MIN);
+        return true;
     }
+    return false;
 }
 
 int GrinlizLSM303::readMag(Vec3<int32_t>* rawData, Vec3<float>* data)

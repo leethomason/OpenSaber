@@ -66,6 +66,7 @@ public:
     // Gets the dot product of current and origin, which is essentially the
     // mix betwen swing sounds. Returns -1 to 1
     float dotOrigin() const { return m_dotOrigin; }
+    void recalibrate() { m_init = false; m_speed = 0; m_dotOrigin = 0; }
 
     static bool test();
 

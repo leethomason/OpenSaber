@@ -120,6 +120,7 @@ void Swing::push(const Vec3<int32_t>& x, const Vec3<int32_t>& mMin, const Vec3<i
     }
 }
 
+
 void Swing::setOrigin()
 {
     if (m_init) {

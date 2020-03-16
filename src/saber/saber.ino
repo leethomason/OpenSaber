@@ -570,7 +570,10 @@ void loop() {
     sfx.process(bladeState.state(), delta, &still);
     if (still) {
         swing.setOrigin();
-        accelMag.recalibrateMag();
+        bool recalibrated = accelMag.recalibrateMag();
+        if (recalibrated) {
+            swing.recalibrate();
+        }
     }
 
     if (vbatTimer.tick(delta)) {

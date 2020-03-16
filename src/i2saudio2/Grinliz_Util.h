@@ -37,6 +37,10 @@ inline int32_t lerp255(int16_t a, int16_t b, int32_t t255) {
     return (a * (255 - t255) + b * t255) / 255;
 }
 
+inline int32_t lerp256(int16_t a, int16_t b, int32_t t256) {
+    return (int32_t(a) * (256 - t256) + int32_t(b) * t256) / 256;
+}
+
 inline FixedNorm lerp(FixedNorm a, FixedNorm b, FixedNorm t) {
     return (a * (1 - t) + b * t);
 }
@@ -53,6 +57,8 @@ struct Vec3
 	Vec3() {}
     Vec3(T t) { x = t; y = t; z = t; }
 	Vec3(T _x, T _y, T _z) { x = _x; y = _y; z = _z; }
+
+	int size() const { return 3; }
 
 	void set(T _x, T _y, T _z) { x = _x; y = _y; z = _z; }
 	void setZero() { x = y = z = 0; }
@@ -555,6 +561,26 @@ private:
 
 bool TestAverageSample();
 
+class StepProp
+{
+public:
+	StepProp() {}
+
+	void set(Fixed115 f) { step = f; }
+	void set(float f) { step = Fixed115(f); }
+
+	int tick(uint32_t delta) {
+		value += step * delta;
+		int n = value.getInt();
+		value -= n;
+		return n;
+	}
+
+public:
+	Fixed115 step = 0;
+	Fixed115 value = 0;
+};
+
 class AnimateProp
 {
 public:
@@ -565,13 +591,16 @@ public:
 		m_period = period;
 		m_start = start;
 		m_end = end;
+		m_value = start;
 	}
 	int tick(uint32_t delta);
+	int value() const { return m_value; }
 	bool done() { return m_period == 0; }
 
 private:
 	uint32_t m_time = 0;
 	uint32_t m_period = 0;
+	int m_value = 0;
 	int m_start = 0;
 	int m_end = 0;
 };
@@ -610,9 +639,10 @@ private:
 	bool m_enable;
 };
 
-/* Generally try to keep Ardunino and Win332 code very separate.
-But a log class is useful to generalize, both for utility
-and testing. Therefore put up with some #define nonsense here.
+/* 
+	Generally try to keep Ardunino and Win32 code very separate.
+	But a log class is useful to generalize, both for utility
+	and testing. Therefore put up with some #define nonsense here.
 */
 #ifdef _WIN32
 class Stream;

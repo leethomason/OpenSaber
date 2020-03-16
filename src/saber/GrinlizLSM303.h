@@ -49,7 +49,7 @@ public:
        the ones to use.
     */
     int readMag(Vec3<int32_t>* rawData, Vec3<float>* data);
-    void recalibrateMag();
+    bool recalibrateMag();
 
     const Vec3<int32_t>& getMagMin() const { return m_min; }
     const Vec3<int32_t>& getMagMax() const { return m_max; }
