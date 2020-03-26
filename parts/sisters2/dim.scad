@@ -1,0 +1,8 @@
+M_START = 10.0 + 1.0;
+M_END = 177.6 - 10.0 - 1.0;
+DZ_SPKR = 12.5;
+M_MC_BATTERY = M_START + DZ_SPKR;
+
+D_INNER = 31.60;
+
+DZ_BAFFLE = 3.0;

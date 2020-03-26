@@ -304,15 +304,28 @@ void SFX::process(int bladeMode, uint32_t delta, bool* still)
         // 256 or 0 at steady state.
         volumeEnvelope.tick(delta);
 
-        int swing = sm_swingToVolume(m_speed);
+        int ticks = m_swingDecay.tick(delta);
+        m_swingTarget -= ticks;
+        if (m_swingTarget < 0)
+            m_swingTarget = 0;
 
-        m_swing -= m_swingDecay.tick(delta);
-        if (m_swing < 0) m_swing = 0;        
-        swing = m_swing = glMax(swing, m_swing);
+        int sw = sm_swingToVolume(m_speed);
+        m_swingTarget = glMax(sw, m_swingTarget);
 
-        int hum = 256 - swing * 192 / 256;
+        if (abs(m_swing - m_swingTarget) <= ticks) {
+            m_swing = m_swingTarget;
+        }
+        else if (m_swing < m_swingTarget) {
+            m_swing += ticks;
+        }
+        else if (m_swing > m_swingTarget) {
+            m_swing -= ticks;
+        }
+        if (m_swing < 0) m_swing = 0;
 
-        if (swing == 0) {
+        int hum = 256 - m_swing * 192 / 256;
+
+        if (m_swing == 0) {
             *still = true;
             m_stillCount++;
             if (m_stillCount == 30)
@@ -326,12 +339,12 @@ void SFX::process(int bladeMode, uint32_t delta, bool* still)
         //int swing0 = iCos(FixedNorm(m_blend256, 1024)).scale(swing);
         //int swing1 = iSin(FixedNorm(m_blend256, 1024)).scale(swing);
         // I think I like linear better?
-        int swing0 = lerp256(swing, 0, m_blend256);
-        int swing1 = lerp256(0, swing, m_blend256);
+        int swing0 = lerp256(m_swing, 0, m_blend256);
+        int swing1 = lerp256(0, m_swing, m_blend256);
 
 #ifdef SMOOTH_LOG
         if (smoothTimer.tick(delta)) {
-            Log.p("speed=").p(m_speed).p(" swing=").p(swing).p(" hum=").p(hum)
+            Log.p("speed=").p(m_speed).p(" swing=").p(m_swing).p(" hum=").p(hum)
             .p(" blend=").p(m_blend256)
             .p(" swing0=").p(swing0).p(" swing1=").p(swing1)
             .eol();

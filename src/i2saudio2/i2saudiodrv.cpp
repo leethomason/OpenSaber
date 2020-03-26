@@ -78,7 +78,7 @@ void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
     dma->startJob();
 
     /* --- decode to fill --- */
-    #if 1 DECODE == DECODE_S4
+    #if DECODE == DECODE_S4
     for(int i=0; i<AUDDRV_NUM_CHANNELS; ++i) {
         if (isQueued[i]) {
             isQueued[i] = false;

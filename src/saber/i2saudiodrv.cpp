@@ -31,8 +31,8 @@
 #include <stdint.h>
 
 #define DECODE_NONE 0
-#define DECODE_SIN 1
-#define DECODE_S4 2
+#define DECODE_SIN  1
+#define DECODE_S4   2
 #define DECODE DECODE_S4
 
 #define FILL_LEFT
