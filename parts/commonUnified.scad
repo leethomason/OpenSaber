@@ -662,6 +662,53 @@ module powerPortRing(diameter, t, dz, dzToPort, portSupportToBack=false, counter
 }
 
 
+module boltRing(diameter, t, dz, dzToBolt)
+{
+    BOLT_D = 4.5;
+    NUT_W = 8.6;
+    NUT_Y = 3.4;
+    DZ_BRIDGE = 8.0;
+    DZ_SLOT = 2.0;
+
+    if (dz < DZ_BRIDGE) {
+        echo("Warning: boltRing dz too small. Should be:", DZ_BRIDGE);
+    }
+
+    intersection() {
+        cylinder(h=dz, d=diameter);
+        union() {
+            difference() {
+                union() {
+                    tube(h=dz, do=diameter, di=diameter - t);
+                    // Top of the holder aligns witht the port, so the nut can be slid in.
+                    translate([-50, DY_PORT, dzToBolt - DZ_BRIDGE/2]) cube(size=[100, 100, DZ_BRIDGE]);                    
+                }
+
+                translate([0, 0, dzToBolt]) rotate([-90, 0, 0]) cylinder(h=100, d=BOLT_D);
+                translate([-NUT_W/2, 0, dzToBolt - DZ_SLOT/2]) cube(size=[NUT_W, 100, DZ_SLOT]);
+            }
+            // Side blocks
+            translate([-50, DY_PORT - NUT_Y, dzToBolt - DZ_BRIDGE/2]) cube(size=[50 - NUT_W/2, NUT_Y, DZ_BRIDGE]);
+            mirror([-1, 0, 0]) translate([-50, DY_PORT - NUT_Y, dzToBolt - DZ_BRIDGE/2]) cube(size=[50 - NUT_W/2, NUT_Y, DZ_BRIDGE]);
+            
+            // Triangle holders
+            translate([0, 0, dzToBolt - DZ_SLOT/2]) {
+                polygonXY(h=DZ_SLOT, points=[
+                    [-50, DY_PORT - NUT_Y],
+                    [-BOLT_D/2, DY_PORT - NUT_Y],
+                    [-50, -50]
+                ]);                
+                mirror([-1, 0, 0]) polygonXY(h=DZ_SLOT, points=[
+                    [-50, DY_PORT - NUT_Y],
+                    [-BOLT_D/2, DY_PORT - NUT_Y],
+                    [-50, -50]
+                ]);                
+            }
+        }
+    }
+}
+
+
 module switchRing(diameter, t, dz, dzToSwitch, counter=true, switchDY=0)
 {
     difference() {
@@ -1031,4 +1078,6 @@ $fn = 80;
     cutoutHigh=false,
     conduit=true);
 
-keyJoint(8, 30, 26, false);
+*keyJoint(8, 30, 26, false);
+
+boltRing(30.0, 4.0, 12.0, 6.0);
