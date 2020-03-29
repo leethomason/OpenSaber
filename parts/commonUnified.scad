@@ -385,7 +385,7 @@ module speakerStd28(bass)
     H_SPKR        =  3.2;
     D_SPKR        =  28;
     X_NOTCH       =  6;
-    Z_NOTCH       =  11.5;
+    Z_NOTCH       =  6.0;
 
     color("yellow") {
         cylinder(h=H_SPKR, d=D_SPKR);
@@ -823,7 +823,7 @@ module pcbPillar(dBoost=0) {
     angle: rotation of the pcb
 */
 module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount, 
-    makeSection=true, sizePad=0, holeAccess=false, angle=0)
+    makeSection=true, sizePad=0, holeAccess=false, angle=0, xShift=0)
 {
     difference() 
     {
@@ -831,7 +831,7 @@ module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount,
             if (makeSection) {
                 difference() {
                     tube(h=dz, do=outer, di=outer-t);
-                    translate([-size[0]/2 - sizePad, dyPCB, dzToPCB - sizePad]) 
+                    translate([-size[0]/2 - sizePad + xShift, dyPCB, dzToPCB - sizePad]) 
                         cube(size=[size[0] + 2 * sizePad, size[1], size[2] + 2 * sizePad]);
                 }
             }
@@ -843,7 +843,7 @@ module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount,
 
                     translate([0, dyPCB, dz/2])
                     rotate([angle, 0, 0])
-                    translate([0, 0, -dz/2])
+                    translate([xShift, 0, -dz/2])
                     color("plum") union() {
                         x = m[0];
                         z = m[1];
