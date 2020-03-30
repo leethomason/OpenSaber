@@ -10,7 +10,7 @@ EPS2 = 2 * EPS;
 
 //N_BATT_BAFFLES = nBafflesNeeded(DZ_BAFFLE);
 M_JOINT = M_MC_BATTERY + zLenOfBaffles(N_BATT_BAFFLES, DZ_BAFFLE);
-T_SECTION = 4;
+T_SECTION = 5;
 T_JOINT = 4;
 DZ_JOINT = 8;
 
@@ -37,6 +37,7 @@ if (DRAW_AFT) {
 }
 
 if (DRAW_FORE) {
+    *keyJoint(DZ_JOINT, D_INNER, D_INNER - T_JOINT, true, 0);
     difference() {
         union() {
             translate([0, 0, M_JOINT]) {
@@ -54,7 +55,8 @@ if (DRAW_FORE) {
                                 [-OLED_DISPLAY_MOUNT_W/2, OLED_DISPLAY_MOUNT_L + (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L)/2, "buttress" ],
                                 [ OLED_DISPLAY_MOUNT_W/2, OLED_DISPLAY_MOUNT_L + (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L)/2, "buttress" ]
                             ],
-                            xShift = OLED_DX
+                            xShift = OLED_DX,
+                            buffButtress=2.0
                         );
                         intersection() {
                             T0 = 6;
@@ -85,13 +87,15 @@ if (DRAW_FORE) {
         }
         for(i=[0:1])
             translate([0, 0, M_JOINT + 16 + i*8]) capsule(70, 110, 2, true);
-        for(i=[-1:1])
+        for(i=[-1:2])
             translate([0, 0, M_JOINT + 16 + i*8]) capsule(160, 200, 2, true);
-        for(i=[0:2])
+        for(i=[0:1])
             translate([0, 0, M_POWER + i*8]) capsule(70, 110, 2, true);
         
         // Flat bottom
         translate([-50, -D_INNER/2 - EPS, 0]) cube(size=[100, 1, 500]);
+        // Flat top
+        translate([-50, D_INNER/2 - 0.4, 0]) cube(size=[100, 100, 500]);
     }
 }
 

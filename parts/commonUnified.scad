@@ -61,17 +61,38 @@ module columnY(dx, dyFrom0, dz, diameter, baseDX=0, baseDZ=0)
     }
 }
 
-module tjoint(outer, dz, yTrim, zTrim)
+module tjoint(dz, do, di, yTrim, zTrim, slot)
 {
     RATIO = 0.40; 
-    DY = outer * RATIO;
+    DY = do * RATIO;
     HALFY = DY * 0.7;
+    RI = di / 2;
+    BOOST = 1.0;
 
-    translate([0, -HALFY/2 - yTrim/2, 0]) 
+    TRI = [
+        [0, 0,], [10, 0], [10, 15]
+    ];
+
+    translate([0, -HALFY/2 - yTrim/2, 0]) {
         cube(size=[100, HALFY + yTrim, dz]);
+    }
+    // Adjust the top to be >45 degrees so it can be printed
+    // without support. Less junk getting cleanup up in the 
+    // slot is a good thing.
+    if (slot) {
+        hy = HALFY / 2;
+        x = sqrt(RI*RI - hy*hy);
+        translate([x, hy, 0]) polygonXY(h=dz, points=TRI);
+    }
 
-    translate([0, -DY/2 - yTrim/2, dz/2 - zTrim/2]) 
-        cube(size=[100, DY + yTrim, dz/2 + zTrim*2]);
+    translate([0, -DY/2 - yTrim/2, dz/2 - zTrim/2]) {
+        cube(size=[100, DY + yTrim + BOOST, dz/2 + zTrim*2]);
+    }
+    if (slot) {
+        hy = DY / 2 + BOOST;
+        x = sqrt(RI*RI - hy*hy);
+        translate([x, hy, dz/2 - zTrim/2]) polygonXY(h=dz/2 + zTrim*2, points=TRI);
+    }
 }
 
 /*
@@ -104,9 +125,9 @@ module keyJoint(dz, do, di, slot, angle=0)
 
         union() {
             rotate([0, 0, angle]) 
-                tjoint(do, dz, YTRIM, ZTRIM);
-            rotate([0, 0, 180-angle]) 
-                tjoint(do, dz, YTRIM, ZTRIM);
+                tjoint(dz, do, di, YTRIM, ZTRIM, slot);
+            mirror([-1, 0, 0 ]) rotate([0, 0, angle]) 
+                tjoint(dz, do, di, YTRIM, ZTRIM, slot);
         }
     }
 }
@@ -670,6 +691,8 @@ module boltRing(diameter, t, dz, dzToBolt)
     DZ_BRIDGE = 8.0;
     DZ_SLOT = 2.0;
 
+    TRI = [[-50, 0], [0, 0], [-50, -50]];
+
     if (dz < DZ_BRIDGE) {
         echo("Warning: boltRing dz too small. Should be:", DZ_BRIDGE);
     }
@@ -688,22 +711,27 @@ module boltRing(diameter, t, dz, dzToBolt)
                 translate([-NUT_W/2, 0, dzToBolt - DZ_SLOT/2]) cube(size=[NUT_W, 100, DZ_SLOT]);
             }
             // Side blocks
-            translate([-50, DY_PORT - NUT_Y, dzToBolt - DZ_BRIDGE/2]) cube(size=[50 - NUT_W/2, NUT_Y, DZ_BRIDGE]);
-            mirror([-1, 0, 0]) translate([-50, DY_PORT - NUT_Y, dzToBolt - DZ_BRIDGE/2]) cube(size=[50 - NUT_W/2, NUT_Y, DZ_BRIDGE]);
+            {
+                translate([-50, DY_PORT - NUT_Y, dzToBolt - DZ_BRIDGE/2]) 
+                    cube(size=[50 - NUT_W/2, NUT_Y, DZ_BRIDGE]);
+                translate([-NUT_W/2, DY_PORT - NUT_Y, dzToBolt - DZ_BRIDGE/2]) 
+                    polygonXY(h=DZ_BRIDGE, points=TRI);
+            }
+            mirror([-1, 0, 0]) {
+                translate([-50, DY_PORT - NUT_Y, dzToBolt - DZ_BRIDGE/2]) 
+                    cube(size=[50 - NUT_W/2, NUT_Y, DZ_BRIDGE]);
+                translate([-NUT_W/2, DY_PORT - NUT_Y, dzToBolt - DZ_BRIDGE/2]) 
+                    polygonXY(h=DZ_BRIDGE, points=TRI);
+            }
             
             // Triangle holders
-            translate([0, 0, dzToBolt - DZ_SLOT/2]) {
-                polygonXY(h=DZ_SLOT, points=[
-                    [-50, DY_PORT - NUT_Y],
-                    [-BOLT_D/2, DY_PORT - NUT_Y],
-                    [-50, -50]
-                ]);                
-                mirror([-1, 0, 0]) polygonXY(h=DZ_SLOT, points=[
-                    [-50, DY_PORT - NUT_Y],
-                    [-BOLT_D/2, DY_PORT - NUT_Y],
-                    [-50, -50]
-                ]);                
+            translate([-BOLT_D/2, DY_PORT - NUT_Y, dzToBolt - DZ_SLOT/2]) {
+                polygonXY(h=DZ_SLOT, points=TRI);
             }
+            mirror([-1, 0, 0]) translate([-BOLT_D/2, DY_PORT - NUT_Y, dzToBolt - DZ_SLOT/2]) {
+                polygonXY(h=DZ_SLOT, points=TRI);
+            }
+
         }
     }
 }
@@ -787,12 +815,14 @@ module baffleMCBattery( outer,          // outer diameter
     }
 }
 
-module pcbButtress()
+module pcbButtress(buff=0)
 {    
-    BUTTRESS_T = 5;
+    BUTTRESS_T = 5 + buff;
     difference() {
         translate([0,0,-BUTTRESS_T/2])
-            polygonXY(BUTTRESS_T, [[-2,0], [-2,-2], [14,-30], [14,0]]);
+            polygonXY(BUTTRESS_T, 
+                [[-2,0], [-2,-2], [14,-30], [14,0]]
+            );
         translate([0, -50, 0]) rotate([-90, 0, 0]) cylinder(h=50, d=D_M2);
     } 
 }
@@ -823,7 +853,7 @@ module pcbPillar(dBoost=0) {
     angle: rotation of the pcb
 */
 module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount, 
-    makeSection=true, sizePad=0, holeAccess=false, angle=0, xShift=0)
+    makeSection=true, sizePad=0, holeAccess=false, angle=0, xShift=0, buffButtress=0)
 {
     difference() 
     {
@@ -838,8 +868,7 @@ module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount,
 
             for(m = mount) {
                 intersection() {
-                    translate([0, 0, -20]) 
-                        cylinder(h=dz+40, d=outer ? outer : 100);
+                    cylinder(h=dz, d=outer ? outer : 100);
 
                     translate([0, dyPCB, dz/2])
                     rotate([angle, 0, 0])
@@ -856,9 +885,9 @@ module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount,
                             else if (type == "buttress") {
                                 shouldMirror = x < 0;
                                 if (shouldMirror)
-                                    mirror([1,0,0]) pcbButtress();
+                                    mirror([1,0,0]) pcbButtress(buffButtress);
                                 else
-                                    pcbButtress();
+                                    pcbButtress(buffButtress);
                             }
                         }
                         
