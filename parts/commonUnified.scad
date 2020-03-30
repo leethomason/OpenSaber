@@ -67,7 +67,7 @@ module tjoint(dz, do, di, yTrim, zTrim, slot)
     DY = do * RATIO;
     HALFY = DY * 0.7;
     RI = di / 2;
-    BOOST = 1.0;
+    BOOST = 0.0;
 
     TRI = [
         [0, 0,], [10, 0], [10, 15]
@@ -79,7 +79,7 @@ module tjoint(dz, do, di, yTrim, zTrim, slot)
     // Adjust the top to be >45 degrees so it can be printed
     // without support. Less junk getting cleanup up in the 
     // slot is a good thing.
-    if (slot) {
+    *if (slot) {
         hy = HALFY / 2;
         x = sqrt(RI*RI - hy*hy);
         translate([x, hy, 0]) polygonXY(h=dz, points=TRI);
