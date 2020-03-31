@@ -2,8 +2,8 @@ use <../shapes.scad>
 use <../commonUnified.scad>
 include <dim.scad>
 
-DRAW_AFT = false;
-DRAW_FORE = true;
+DRAW_AFT = true;
+DRAW_FORE = false;
 
 EPS = 0.01;
 EPS2 = 2 * EPS;
@@ -11,7 +11,7 @@ EPS2 = 2 * EPS;
 //N_BATT_BAFFLES = nBafflesNeeded(DZ_BAFFLE);
 M_JOINT = M_MC_BATTERY + zLenOfBaffles(N_BATT_BAFFLES, DZ_BAFFLE);
 T_SECTION = 5;
-T_JOINT = 4;
+T_JOINT = 4.5;
 DZ_JOINT = 8;
 
 M_BOLT_SECTION =  M_JOINT + DZ_DISPLAY_SECTION;
@@ -27,7 +27,7 @@ if (DRAW_AFT) {
     }
 
     translate([0, 0, M_MC_BATTERY]) {
-        baffleMCBattery(D_INNER, N_BATT_BAFFLES, DZ_BAFFLE, bridgeStyle=3);
+        baffleMCBattery(D_INNER, N_BATT_BAFFLES, DZ_BAFFLE, bridgeStyle=2);
         *color("red") battery(D_INNER, "18650");
     }
 
