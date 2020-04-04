@@ -2,8 +2,8 @@ use <../shapes.scad>
 use <../commonUnified.scad>
 include <dim.scad>
 
-DRAW_AFT = true;
-DRAW_FORE = false;
+DRAW_AFT = false;
+DRAW_FORE = true;
 
 EPS = 0.01;
 EPS2 = 2 * EPS;
