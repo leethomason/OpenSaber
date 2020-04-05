@@ -50,6 +50,7 @@
 #define SABER_MODEL_TYVOKKA		   18   // ItsyBitsy, Shield v1c, Dotstar
 //#define SABER_MODEL_SHOCK3  	   19   // Itsy v2b, OLED (128x32), Dotstar crystal
 #define SABER_MODEL_LEIA  	   	   20   // Itsy v2b, Dotstar UI
+#define SABER_MODEL_SISTERS2  	   21   // Itsy v2b, OLED (128x32)
 
 #define SABER_SUB_MODEL_NONE		0
 #define SABER_SUB_MODEL_LUNA		1
@@ -58,8 +59,8 @@
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_LEIA
+#define SERIAL_DEBUG 				1
+#define SABER_MODEL 				SABER_MODEL_SISTERS2
 #define SABER_SUB_MODEL				SABER_SUB_MODEL_STANDARD
 // ----------------------------------
 
@@ -740,6 +741,35 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	static const int VOLUME_3 = 160;
 	static const int VOLUME_4 = 256;
 
+#elif (SABER_MODEL == SABER_MODEL_SISTERS2)
+	#define PCB_VERSION 			PCB_ITSY_2C
+	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
+	#define SABER_VOLTMETER			
+	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
+	#define SABER_DISPLAY			SABER_DISPLAY_128_32
+
+	#define SABER_UI_COLOR_WHEEL
+
+	static const int32_t UVOLT_MULT = 5000;
+	#define ID_STR "Leia Cree XPE2 RGB"
+
+	static const int32_t RED_VF   = 2200;
+	static const int32_t RED_I    = 400;
+	static const int32_t RED_R    = 4300;
+
+	static const int32_t GREEN_VF = 3200;
+	static const int32_t GREEN_I  = 400;
+	static const int32_t GREEN_R  = 1000;
+
+	static const int32_t BLUE_VF  = 3100;
+	static const int32_t BLUE_I   = 400;
+	static const int32_t BLUE_R   = 1800;
+
+	static const int VOLUME_1 = 20;
+	static const int VOLUME_2 = 60;
+	static const int VOLUME_3 = 160;
+	static const int VOLUME_4 = 256;
+
 #elif (SABER_MODEL == SABER_MODEL_TEST)
 	#define PCB_VERSION 			PCB_ITSY_2A
 	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
@@ -947,12 +977,12 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define PIN_VMETER        	A1
 	#define PIN_LED_A    	  	A2 
 	#define PIN_DOTSTAR_EN		A3
-	#define PIN_OLED_RESET		A4
+	#define PIN_OLED_CS  		A4
 	#define PIN_OLED_DC		    A5
 	// CLOCK	 
 	// MOSI
 	// MISO 
-	#define PIN_OLED_CS  	    2
+	#define PIN_OLED_RESET	    2
 	// 7 available
 	#define PIN_EMITTER_RED   	9
 	#define PIN_EMITTER_GREEN 	10

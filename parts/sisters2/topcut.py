@@ -7,20 +7,20 @@ from hole import hole
 # positioned so that body is in the y axis
 # origin is at the emitter end
 
-DEPTH = -6.0 # fixme
+DEPTH = -6.0
 
 M_END = 177.5
 M_BOLT = 130.5
-M_POWER = 142
+M_POWER = 142.0
 M_SWITCH = 157.0
 
 D_SWITCH = 12.0
-D_DISPLAY = 8.3  # fixme measure
-M_DISPAY0 = 92.5 # fixme
-M_DISPAY1 = 118.5 # fixme - confirm display size
+D_DISPLAY = 8.3  
+M_DISPAY0 = 93.0
+M_DISPAY1 = 119.0
 D_BOLT = 8.0
 
-mat = init_material("np883-aluminum-3.175")
+mat = init_material(argv[1])
 g = G(outfile='path.nc', aerotech_include=False, header=None, footer=None)
 nomad_header(g, mat, CNC_TRAVEL_Z)
 
