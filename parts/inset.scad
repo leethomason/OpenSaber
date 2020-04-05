@@ -1,5 +1,5 @@
-include <shapes.scad>
-include <commonUnified.scad>
+use <shapes.scad>
+use <commonUnified.scad>
 
 $fn = 80;
 
@@ -9,7 +9,7 @@ INNER_VIEW = false;
 WOOD_DY = -8;
 POWER_DY = 2.5;
 EPS = 0.01;
-ESP2 = EPS*2;
+EPS2 = EPS*2;
 
 module attachPost(diameter, postDY, capsuleWidth)
 {

@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2016 Lee Thomason, Grinning Lizard Software
+  Copyright (c) Lee Thomason, Grinning Lizard Software
 
   Permission is hereby granted, free of charge, to any person obtaining a copy of
   this software and associated documentation files (the "Software"), to deal in
@@ -24,7 +24,7 @@
 
 #include "cmdparser.h"
 #include "saberdb.h"
-#include "blade.h"
+#include "bladePWM.h"
 #include "SFX.h"
 #include "Tester.h"
 #include "saberUtil.h"
@@ -60,7 +60,9 @@ void CMDParser::printHexColor(const RGB& color) {
 
 void CMDParser::printMAmps(const RGB& c) {
     Serial.print("(");
-    uint32_t amps = uint32_t(c[0]) * RED_I / uint32_t(255) + uint32_t(c[1]) * GREEN_I / uint32_t(255) + uint32_t(c[2]) * BLUE_I / uint32_t(255);
+    uint32_t amps =   uint32_t(c[0]) * RED_I / uint32_t(255) 
+                    + uint32_t(c[1]) * GREEN_I / uint32_t(255) 
+                    + uint32_t(c[2]) * BLUE_I / uint32_t(255);
     Serial.print(amps);
     Serial.print(" mAmps)");
 }
@@ -85,32 +87,40 @@ void CMDParser::printLead(const char* str) {
 
 bool CMDParser::push(int c)
 {
-    /*
-    if (m_streamBytes) {
-        --m_streamBytes;
-        streamFile.write(c);
-        if (m_streamBytes == 0) {
-            Serial.print("Streaming complete. Size=");
-            Serial.println(streamFile.size());
-            streamFile.close();
-        }
-        return false;
+    bool processed = false;
+    if (c == '\n') {
+        //Serial.println("process");
+        processed = processCMD();
     }
-    else*/ 
-    {
-        //Serial.println(c);
-        bool processed = false;
-        if (c == '\n') {
-            //Serial.println("process");
-            processed = processCMD();
-        }
-        else {
-            token.append(c);
-        }
-        return processed;
+    else {
+        token.append(c);
     }
+    return processed;
 }
 
+
+void CMDParser::printXYZ(const Vec3<int32_t>& v) const
+{
+    Serial.print("[");
+    Serial.print(v.x);
+    Serial.print(",");
+    Serial.print(v.y);
+    Serial.print(",");
+    Serial.print(v.z);
+    Serial.print("]");
+}
+
+
+void CMDParser::printXYZ(const Vec3<float>& v) const
+{
+    Serial.print("[");
+    Serial.print(v.x);
+    Serial.print(",");
+    Serial.print(v.y);
+    Serial.print(",");
+    Serial.print(v.z);
+    Serial.print("]");
+}
 
 bool CMDParser::processCMD() 
 {
@@ -127,7 +137,6 @@ bool CMDParser::processCMD()
     static const char MOTION[]  = "mot";
     static const char IMPACT[]  = "imp";
     static const char STATUS[]  = "stat";
-    static const char RESET[]   = "reset";
     static const char ID[]      = "id";
     static const char TEST[]    = "test";
     static const char ACCEL[]   = "accel";
@@ -216,16 +225,16 @@ bool CMDParser::processCMD()
     else if (action == UTIL) {
         printLead(action.c_str());
         for (int i = 0; i < NCHANNELS; ++i) {
-            Serial.print(Blade::blade().util(i));
-            Serial.print(' ');
+            Serial.print(BladePWM::bladePWM().util(i));
+            Serial.print("/100 ");
         }
         Serial.print('\n');
     }
     else if (action == PWM) {
         printLead(action.c_str());
         for (int i = 0; i < NCHANNELS; ++i) {
-            Serial.print(Blade::blade().pwmVal(i));
-            Serial.print(' ');
+            Serial.print(BladePWM::bladePWM().pwmVal(i));
+            Serial.print("/255 ");
         }
         Serial.print('\n');
     }
@@ -251,7 +260,6 @@ bool CMDParser::processCMD()
     }
     else if (action == FONTS) {
 #ifdef SABER_SOUND_ON
-        const SFX* sfx = SFX::instance();
         for (int i = 0; i < MEM_IMAGE_NUM_DIR; ++i) {
             Serial.print(i);
             Serial.print(": ");
@@ -276,9 +284,7 @@ bool CMDParser::processCMD()
         float samplesPerSecond = N * 1000.0f / (millis() - start);
 
         for(int i=0; i<N; ++i) {
-            Serial.print( "x="); Serial.print(data[i].x);
-            Serial.print(" y="); Serial.print(data[i].y);
-            Serial.print(" z="); Serial.print(data[i].z);
+            printXYZ(data[i]);
 
             float g2, g2n;
             calcGravity2(data[i].x, data[i].y, data[i].z, &g2, &g2n);
@@ -288,18 +294,22 @@ bool CMDParser::processCMD()
         }
         Serial.print("Samples per second: "); Serial.println(samplesPerSecond);
 
-        delay(10);
+        delay(20);
         Vec3<float> mag;
         if (accel->readMag(0, &mag) == 0) {
             Serial.println("no mag data.");
-            Log.p("Min/Max=").v3(accel->getMagMin()).p(" ").v3(accel->getMagMax()).eol();
-            accel->logMagStatus();
         }
         else {
             Serial.print("Mag:");
-            Serial.print(" x="); Serial.print(mag.x);
-            Serial.print(" y="); Serial.print(mag.y);
-            Serial.print(" z="); Serial.println(mag.z);
+            printXYZ(mag);
+            Serial.println("");
+
+            Vec3<int32_t> vMin = accel->getMagMin();
+            Vec3<int32_t> vMax = accel->getMagMax();
+            Vec3<int32_t> vDelta = vMax - vMin;
+            Serial.print("Mag delta:");
+            printXYZ(vDelta);
+            Serial.println("");
         }
     }
     else if (action == PLAY) {
@@ -371,7 +381,7 @@ bool CMDParser::processCMD()
         
         delay(DELAY);
         for (int i = 0; i < NCHANNELS; ++i) {
-            Serial.print(Blade::blade().util(i));
+            Serial.print(BladePWM::bladePWM().util(i));
             Serial.print(' ');
         }
         Serial.print('\n');
@@ -379,7 +389,7 @@ bool CMDParser::processCMD()
         delay(DELAY);
         printLead(PWM);
         for (int i = 0; i < NCHANNELS; ++i) {
-            Serial.print(Blade::blade().pwmVal(i));
+            Serial.print(BladePWM::bladePWM().pwmVal(i));
             Serial.print(' ');
         }
         Serial.print('\n');

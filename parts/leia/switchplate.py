@@ -35,6 +35,7 @@ hole(g, mat, bottom, d=11.0)
 
 # switch
 BUTTON_HEAD_D = 8.0
+
 travel(g, mat, x=SWITCH)    
 hole(g, mat, bottom, d=BUTTON_HEAD_D)
 

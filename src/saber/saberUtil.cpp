@@ -1,6 +1,28 @@
+/*
+  Copyright (c) Lee Thomason, Grinning Lizard Software
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+  of the Software, and to permit persons to whom the Software is furnished to do
+  so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
+
 #include "saberUtil.h"
 #include "Grinliz_Arduino_Util.h"
-#include "blade.h"
+#include "bladePWM.h"
 #include "sfx.h"
 #include "bladeflash.h"
 
@@ -9,21 +31,8 @@ using namespace osbr;
 void BladeState::change(uint8_t state)
 {
     ASSERT(state >= BLADE_OFF && state <= BLADE_RETRACT);
-    m_currentState   = state;
+    m_currentState = state;
     m_startTime = millis();
-
-    /*
-    switch(m_currentState) {
-    case BLADE_OFF:     EventQ.event("[BLADE_OFF]");        break;
-    case BLADE_IGNITE:  EventQ.event("[BLADE_IGNITE]");     break;
-    case BLADE_ON:      EventQ.event("[BLADE_ON]");         break;
-    case BLADE_RETRACT: EventQ.event("[BLADE_RETRACT]");    break;
-    
-    default:
-        ASSERT(false);
-        break;
-    }
-    */
 }
 
 bool BladeState::bladeOn() const
@@ -32,12 +41,12 @@ bool BladeState::bladeOn() const
     return m_currentState >= BLADE_ON && m_currentState < BLADE_RETRACT;
 }
 
-void BladeState::process(Blade* blade, const BladeFlash& saber, uint32_t time)
+void BladeState::process(BladePWM *blade, const BladeFlash &saber, uint32_t time)
 {
-    static const uint32_t FLASH_TIME = 120;
-    SFX* sfx = SFX::instance();
+    SFX *sfx = SFX::instance();
 
-    switch (state()) {
+    switch (state())
+    {
     case BLADE_OFF:
         break;
 
@@ -50,11 +59,13 @@ void BladeState::process(Blade* blade, const BladeFlash& saber, uint32_t time)
         uint32_t igniteTime = sfx->getIgniteTime();
         uint32_t t = millis() - startTime();
 
-        if (t >= igniteTime) {
+        if (t >= igniteTime)
+        {
             blade->setRGB(saber.getColor());
             change(BLADE_ON);
         }
-        else {
+        else
+        {
             RGB c = RGB::lerp1024(RGB(RGB::BLACK), saber.getColor(), t * 1024 / igniteTime);
             blade->setRGB(c);
         }
@@ -63,14 +74,16 @@ void BladeState::process(Blade* blade, const BladeFlash& saber, uint32_t time)
 
     case BLADE_RETRACT:
     {
-        uint32_t retractTime = retractTime = sfx->getRetractTime();
+        uint32_t retractTime = sfx->getRetractTime();
         uint32_t t = millis() - startTime();
 
-        if (t >= retractTime) {
+        if (t >= retractTime)
+        {
             blade->setRGB(RGB(RGB::BLACK));
             change(BLADE_OFF);
         }
-        else {
+        else
+        {
             RGB c = RGB::lerp1024(saber.getColor(), RGB(RGB::BLACK), t * 1024 / retractTime);
             blade->setRGB(c);
         }
@@ -82,7 +95,6 @@ void BladeState::process(Blade* blade, const BladeFlash& saber, uint32_t time)
         break;
     }
 }
-
 
 UIModeUtil::UIModeUtil()
 {
@@ -103,31 +115,43 @@ bool UIModeUtil::isIdle()
 
 void UIModeUtil::nextMode()
 {
-    SFX* sfx = 0;
-    #ifdef SABER_AUDIO_UI
+#ifdef SABER_AUDIO_UI
+    SFX *sfx = 0;
     sfx = SFX::instance();
-    #endif
+#endif
 
-    switch(m_mode) {
-        case UIMode::NORMAL:        
-            m_mode = UIMode::PALETTE;       
-            Log.p("mode: palette").eol();    
-            //if (sfx) sfx->playUISound("palette");
-            break;
-        case UIMode::PALETTE:       
-            m_mode = UIMode::VOLUME;        
-            Log.p("mode: volume").eol();     
-            //if (sfx) sfx->playUISound("audio");
-            break;
-        case UIMode::VOLUME:        
-            m_mode = UIMode::NORMAL;        
-            Log.p("mode: normal").eol();     
-            //if (sfx) sfx->playUISound("ready");
-            break;
-        default:
-            ASSERT(false);
-            m_mode = UIMode::NORMAL;
-            break;
+    switch (m_mode)
+    {
+    case UIMode::NORMAL:
+        m_mode = UIMode::PALETTE;
+        Log.p("mode: palette").eol();
+        //if (sfx) sfx->playUISound("palette");
+        break;
+
+    case UIMode::PALETTE:
+        m_mode = UIMode::VOLUME;
+        Log.p("mode: volume").eol();
+        //if (sfx) sfx->playUISound("audio");
+        break;
+
+    case UIMode::VOLUME:
+#ifdef SABER_UI_COLOR_WHEEL
+        m_mode = UIMode::COLOR_WHEEL;
+        Log.p("mode: color change").eol();
+#else
+        m_mode = UIMode::NORMAL;
+        Log.p("mode: normal").eol();
+#endif
+        break;
+
+    case UIMode::COLOR_WHEEL:
+        m_mode = UIMode::NORMAL;
+        Log.p("mode: normal").eol();
+        break;
+
+    default:
+        ASSERT(false);
+        m_mode = UIMode::NORMAL;
+        break;
     }
 }
-

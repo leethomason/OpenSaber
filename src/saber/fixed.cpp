@@ -1,3 +1,25 @@
+/*
+  Copyright (c) Lee Thomason, Grinning Lizard Software
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+  of the Software, and to permit persons to whom the Software is furnished to do
+  so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
+
 #include "fixed.h"
 #include "Grinliz_Util.h"
 
@@ -103,7 +125,7 @@ int32_t iSin_S3(int32_t x)
 
 int32_t iInvSin_S3(int32_t x)
 {
-    static const int16_t TABLE[65] = {
+    static const int16_t TABLE[66] = {
         0,    81,   163,  245,  326,  408,  490,  572, 654, 
         736,  818,  901,  984,  1067, 1150, 1234, 1318, 
         1402, 1487, 1572, 1658, 1744, 1830, 1917, 2005, 
@@ -111,7 +133,7 @@ int32_t iInvSin_S3(int32_t x)
         2825, 2921, 3018, 3116, 3215, 3315, 3417, 3521, 
         3626, 3733, 3842, 3953, 4067, 4183, 4301, 4423, 
         4548, 4676, 4809, 4946, 5089, 5237, 5393, 5556, 
-        5730, 5916, 6117, 6338, 6589, 6885, 7269, 8192
+        5730, 5916, 6117, 6338, 6589, 6885, 7269, 8192, 8192
     };
     if (x > ISINE_ONE) x = ISINE_ONE;
     if (x < -ISINE_ONE) x = -ISINE_ONE;

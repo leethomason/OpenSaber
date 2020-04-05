@@ -1,23 +1,23 @@
 /*
-Copyright (c) 2016 Lee Thomason, Grinning Lizard Software
+  Copyright (c) Lee Thomason, Grinning Lizard Software
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of 
-this software and associated documentation files (the "Software"), to deal in 
-the Software without restriction, including without limitation the rights to 
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies 
-of the Software, and to permit persons to whom the Software is furnished to do 
-so, subject to the following conditions:
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+  of the Software, and to permit persons to whom the Software is furnished to do
+  so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all 
-copies or substantial portions of the Software.
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
-SOFTWARE.
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
 */
 
 #ifndef PINS_HEADER
@@ -49,7 +49,8 @@ SOFTWARE.
 #define SABER_MODEL_AQUATIC_2	   17   // ItsyBitsy, Shield v1c, Dotstar
 #define SABER_MODEL_TYVOKKA		   18   // ItsyBitsy, Shield v1c, Dotstar
 //#define SABER_MODEL_SHOCK3  	   19   // Itsy v2b, OLED (128x32), Dotstar crystal
-#define SABER_MODEL_LEIA  	   	   20   // Itsy v2b, OLED (128x32), Dotstar crystal
+#define SABER_MODEL_LEIA  	   	   20   // Itsy v2b, Dotstar UI
+#define SABER_MODEL_SISTERS2  	   21   // Itsy v2b, OLED (128x32)
 
 #define SABER_SUB_MODEL_NONE		0
 #define SABER_SUB_MODEL_LUNA		1
@@ -59,7 +60,7 @@ SOFTWARE.
 
 // ----------------------------------
 #define SERIAL_DEBUG 				1
-#define SABER_MODEL 				SABER_MODEL_LEIA
+#define SABER_MODEL 				SABER_MODEL_SISTERS2
 #define SABER_SUB_MODEL				SABER_SUB_MODEL_STANDARD
 // ----------------------------------
 
@@ -72,7 +73,7 @@ SOFTWARE.
 #define SABER_SOUND_FLASH 			2	// M0 memory
 
 #define SABER_DISPLAY_128_32		1
-#define SABER_DISPLAY_7_5_DEPRECATED 2	// NON shifted. So many wires. So many.
+// #define SABER_DISPLAY_7_5_DEPRECATED 2	// NON shifted. So many wires. So many.
 #define SABER_DISPLAY_SEGMENT		3	// Shifted
 #define SABER_DISPLAY_7_5 			4	// Shifted
 
@@ -713,27 +714,48 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 	#define SABER_UI_LED			SABER_LED_DOTSTAR
 
-	#define SABER_NUM_LEDS 			4
-	#define SABER_UI_START			0
-	#define SABER_UI_COUNT			4
-	#define SABER_UI_BRIGHTNESS	    12			// fixme 16
+	#define SABER_NUM_LEDS 			    4
+	#define SABER_UI_START				0
+	#define SABER_UI_COUNT				4
+	#define SABER_UI_BRIGHTNESS	    	16		
 	#define SABER_UI_IDLE_MEDITATION
-	//#define SABER_UI_REVERSE
-	//#define SABER_CRYSTAL_START	        0
-	//#define SABER_CRYSTAL_BRIGHTNESS    64
+	#define SABER_UI_COLOR_WHEEL
 
-	//#define SABER_DISPLAY	SABER_DISPLAY_128_32
-
-	#define SABER_SOUND_DEF 		SABER_SOUND_DEF_BESPIN_JAINA
-
-	static const int32_t UVOLT_MULT = 5612;	// FIXME
+	static const int32_t UVOLT_MULT = 5809;
 	#define ID_STR "Leia Cree XPE2 RGB"
 
-	// FIXME
-	// Heat sink compound; LED Supply advanced heat sink.
-	static const int32_t RED_VF   = 2200;   // milli-volts
-	static const int32_t RED_I    = 400;    // milli-amps
-	static const int32_t RED_R    = 4700;   // milli-ohms
+	static const int32_t RED_VF   = 2200;
+	static const int32_t RED_I    = 400;
+	static const int32_t RED_R    = 4300;
+
+	static const int32_t GREEN_VF = 3200;
+	static const int32_t GREEN_I  = 400;
+	static const int32_t GREEN_R  = 1000;
+
+	static const int32_t BLUE_VF  = 3100;
+	static const int32_t BLUE_I   = 400;
+	static const int32_t BLUE_R   = 1800;
+
+	static const int VOLUME_1 = 20;
+	static const int VOLUME_2 = 60;
+	static const int VOLUME_3 = 160;
+	static const int VOLUME_4 = 256;
+
+#elif (SABER_MODEL == SABER_MODEL_SISTERS2)
+	#define PCB_VERSION 			PCB_ITSY_2C
+	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
+	#define SABER_VOLTMETER			
+	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
+	#define SABER_DISPLAY			SABER_DISPLAY_128_32
+
+	#define SABER_UI_COLOR_WHEEL
+
+	static const int32_t UVOLT_MULT = 5000;
+	#define ID_STR "Leia Cree XPE2 RGB"
+
+	static const int32_t RED_VF   = 2200;
+	static const int32_t RED_I    = 400;
+	static const int32_t RED_R    = 4300;
 
 	static const int32_t GREEN_VF = 3200;
 	static const int32_t GREEN_I  = 400;
@@ -937,8 +959,41 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define PIN_I2S_DATA		12
 	#define PIN_OLED_RESET 	    13
 	
-	#define ACCEL_BLADE_DIRECTION 0	// The x direction is the blade. fixme
+	#define ACCEL_BLADE_DIRECTION 1
+	#define ACCEL_NORMAL_BUTTON   0
+	#define ACCEL_PERP_BUTTON     2
 	
+#elif (PCB_VERSION == PCB_ITSY_2C)
+	/* Grinning Lizard Shield for ItsyBitys M0.
+	   Integrated memory for sound.
+	   Neopixel support (early)
+	   Dotstar support (later)
+	*/
+	#define SABER_ACCELEROMETER SABER_ACCELEROMETER_LSM303
+
+	#define PIN_I2S_LRCLK		0
+	#define PIN_I2S_BITCLK		1
+
+	#define PIN_VMETER        	A1
+	#define PIN_LED_A    	  	A2 
+	#define PIN_DOTSTAR_EN		A3
+	#define PIN_OLED_CS  		A4
+	#define PIN_OLED_DC		    A5
+	// CLOCK	 
+	// MOSI
+	// MISO 
+	#define PIN_OLED_RESET	    2
+	// 7 available
+	#define PIN_EMITTER_RED   	9
+	#define PIN_EMITTER_GREEN 	10
+	#define PIN_EMITTER_BLUE   	11
+	#define PIN_I2S_DATA		12
+	#define PIN_SWITCH_A		13
+	
+	#define ACCEL_BLADE_DIRECTION 1
+	#define ACCEL_NORMAL_BUTTON   0
+	#define ACCEL_PERP_BUTTON     2
+
 #else
 	#error Pins not defined.
 #endif

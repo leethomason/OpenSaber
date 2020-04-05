@@ -61,17 +61,38 @@ module columnY(dx, dyFrom0, dz, diameter, baseDX=0, baseDZ=0)
     }
 }
 
-module tjoint(outer, dz, yTrim, zTrim)
+module tjoint(dz, do, di, yTrim, zTrim, slot)
 {
     RATIO = 0.40; 
-    DY = outer * RATIO;
+    DY = do * RATIO;
     HALFY = DY * 0.7;
+    RI = di / 2;
+    BOOST = 0.0;
 
-    translate([0, -HALFY/2 - yTrim/2, 0]) 
+    TRI = [
+        [0, 0,], [10, 0], [10, 15]
+    ];
+
+    translate([0, -HALFY/2 - yTrim/2, 0]) {
         cube(size=[100, HALFY + yTrim, dz]);
+    }
+    // Adjust the top to be >45 degrees so it can be printed
+    // without support. Less junk getting cleanup up in the 
+    // slot is a good thing.
+    *if (slot) {
+        hy = HALFY / 2;
+        x = sqrt(RI*RI - hy*hy);
+        translate([x, hy, 0]) polygonXY(h=dz, points=TRI);
+    }
 
-    translate([0, -DY/2 - yTrim/2, dz/2 - zTrim/2]) 
-        cube(size=[100, DY + yTrim, dz/2 + zTrim*2]);
+    translate([0, -DY/2 - yTrim/2, dz/2 - zTrim/2]) {
+        cube(size=[100, DY + yTrim + BOOST, dz/2 + zTrim*2]);
+    }
+    if (slot) {
+        hy = DY / 2 + BOOST;
+        x = sqrt(RI*RI - hy*hy);
+        translate([x, hy, dz/2 - zTrim/2]) polygonXY(h=dz/2 + zTrim*2, points=TRI);
+    }
 }
 
 /*
@@ -96,7 +117,7 @@ module keyJoint(dz, do, di, slot, angle=0)
             difference() {
                 union() {
                     cylinder(h=dz-OVERLAP, d=do);
-                    translate([0, 0, dz-OVERLAP]) cylinder(h=OVERLAP, d1=do, d2=do-(T*0.3));
+                    translate([0, 0, dz-OVERLAP]) cylinder(h=OVERLAP, d1=do, d2=do-(T*0.2));
                 }
                 translate([0, 0, -EPS]) cylinder(h=100, d=di);
             }
@@ -104,9 +125,9 @@ module keyJoint(dz, do, di, slot, angle=0)
 
         union() {
             rotate([0, 0, angle]) 
-                tjoint(do, dz, YTRIM, ZTRIM);
-            rotate([0, 0, 180-angle]) 
-                tjoint(do, dz, YTRIM, ZTRIM);
+                tjoint(dz, do, di, YTRIM, ZTRIM, slot);
+            mirror([-1, 0, 0 ]) rotate([0, 0, angle]) 
+                tjoint(dz, do, di, YTRIM, ZTRIM, slot);
         }
     }
 }
@@ -385,7 +406,7 @@ module speakerStd28(bass)
     H_SPKR        =  3.2;
     D_SPKR        =  28;
     X_NOTCH       =  6;
-    Z_NOTCH       =  11.5;
+    Z_NOTCH       =  6.0;
 
     color("yellow") {
         cylinder(h=H_SPKR, d=D_SPKR);
@@ -662,6 +683,60 @@ module powerPortRing(diameter, t, dz, dzToPort, portSupportToBack=false, counter
 }
 
 
+module boltRing(diameter, t, dz, dzToBolt)
+{
+    BOLT_D = 4.5;
+    NUT_W = 8.6;
+    NUT_Y = 3.4;
+    DZ_BRIDGE = 8.0;
+    DZ_SLOT = 2.0;
+
+    TRI = [[-50, 0], [0, 0], [-50, -50]];
+
+    if (dz < DZ_BRIDGE) {
+        echo("Warning: boltRing dz too small. Should be:", DZ_BRIDGE);
+    }
+
+    intersection() {
+        cylinder(h=dz, d=diameter);
+        union() {
+            difference() {
+                union() {
+                    tube(h=dz, do=diameter, di=diameter - t);
+                    // Top of the holder aligns witht the port, so the nut can be slid in.
+                    translate([-50, DY_PORT, dzToBolt - DZ_BRIDGE/2]) cube(size=[100, 100, DZ_BRIDGE]);                    
+                }
+
+                translate([0, 0, dzToBolt]) rotate([-90, 0, 0]) cylinder(h=100, d=BOLT_D);
+                translate([-NUT_W/2, 0, dzToBolt - DZ_SLOT/2]) cube(size=[NUT_W, 100, DZ_SLOT]);
+            }
+            // Side blocks
+            {
+                translate([-50, DY_PORT - NUT_Y, dzToBolt - DZ_BRIDGE/2]) 
+                    cube(size=[50 - NUT_W/2, NUT_Y, DZ_BRIDGE]);
+                translate([-NUT_W/2, DY_PORT - NUT_Y, dzToBolt - DZ_BRIDGE/2]) 
+                    polygonXY(h=DZ_BRIDGE, points=TRI);
+            }
+            mirror([-1, 0, 0]) {
+                translate([-50, DY_PORT - NUT_Y, dzToBolt - DZ_BRIDGE/2]) 
+                    cube(size=[50 - NUT_W/2, NUT_Y, DZ_BRIDGE]);
+                translate([-NUT_W/2, DY_PORT - NUT_Y, dzToBolt - DZ_BRIDGE/2]) 
+                    polygonXY(h=DZ_BRIDGE, points=TRI);
+            }
+            
+            // Triangle holders
+            translate([-BOLT_D/2, DY_PORT - NUT_Y, dzToBolt - DZ_SLOT/2]) {
+                polygonXY(h=DZ_SLOT, points=TRI);
+            }
+            mirror([-1, 0, 0]) translate([-BOLT_D/2, DY_PORT - NUT_Y, dzToBolt - DZ_SLOT/2]) {
+                polygonXY(h=DZ_SLOT, points=TRI);
+            }
+
+        }
+    }
+}
+
+
 module switchRing(diameter, t, dz, dzToSwitch, counter=true, switchDY=0)
 {
     difference() {
@@ -740,12 +815,14 @@ module baffleMCBattery( outer,          // outer diameter
     }
 }
 
-module pcbButtress()
+module pcbButtress(buff=0)
 {    
-    BUTTRESS_T = 5;
+    BUTTRESS_T = 5 + buff;
     difference() {
         translate([0,0,-BUTTRESS_T/2])
-            polygonXY(BUTTRESS_T, [[-2,0], [-2,-2], [14,-30], [14,0]]);
+            polygonXY(BUTTRESS_T, 
+                [[-2,0], [-2,-2], [14,-30], [14,0]]
+            );
         translate([0, -50, 0]) rotate([-90, 0, 0]) cylinder(h=50, d=D_M2);
     } 
 }
@@ -776,7 +853,7 @@ module pcbPillar(dBoost=0) {
     angle: rotation of the pcb
 */
 module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount, 
-    makeSection=true, sizePad=0, holeAccess=false, angle=0)
+    makeSection=true, sizePad=0, holeAccess=false, angle=0, xShift=0, buffButtress=0)
 {
     difference() 
     {
@@ -784,19 +861,18 @@ module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount,
             if (makeSection) {
                 difference() {
                     tube(h=dz, do=outer, di=outer-t);
-                    translate([-size[0]/2 - sizePad, dyPCB, dzToPCB - sizePad]) 
+                    translate([-size[0]/2 - sizePad + xShift, dyPCB, dzToPCB - sizePad]) 
                         cube(size=[size[0] + 2 * sizePad, size[1], size[2] + 2 * sizePad]);
                 }
             }
 
             for(m = mount) {
                 intersection() {
-                    translate([0, 0, -20]) 
-                        cylinder(h=dz+40, d=outer ? outer : 100);
+                    cylinder(h=dz, d=outer ? outer : 100);
 
                     translate([0, dyPCB, dz/2])
                     rotate([angle, 0, 0])
-                    translate([0, 0, -dz/2])
+                    translate([xShift, 0, -dz/2])
                     color("plum") union() {
                         x = m[0];
                         z = m[1];
@@ -809,9 +885,9 @@ module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount,
                             else if (type == "buttress") {
                                 shouldMirror = x < 0;
                                 if (shouldMirror)
-                                    mirror([1,0,0]) pcbButtress();
+                                    mirror([1,0,0]) pcbButtress(buffButtress);
                                 else
-                                    pcbButtress();
+                                    pcbButtress(buffButtress);
                             }
                         }
                         
@@ -1031,4 +1107,6 @@ $fn = 80;
     cutoutHigh=false,
     conduit=true);
 
-keyJoint(8, 30, 26, false);
+*keyJoint(8, 30, 26, false);
+
+boltRing(30.0, 4.0, 12.0, 6.0);

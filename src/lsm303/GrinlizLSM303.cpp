@@ -1,3 +1,25 @@
+/*
+  Copyright (c) Lee Thomason, Grinning Lizard Software
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+  of the Software, and to permit persons to whom the Software is furnished to do
+  so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
+
 #include <Arduino.h>
 #include <Wire.h>
 #include <math.h>
@@ -178,8 +200,8 @@ bool GrinlizLSM303::begin()
     );
     delay(10);
 
-    mMin.setZero();
-    mMax.setZero();
+    mMin.set(INT_MAX, INT_MAX, INT_MAX);
+    mMax.set(INT_MIN, INT_MIN, INT_MIN);
     return (whoAmIA == 0x33) && (whoAmIM == 0x40);
 }
 
@@ -292,7 +314,7 @@ int GrinlizLSM303::readInner(Vec3<int32_t>* rawData, Vec3<float>* data, int n)
             rawData[i].z = z;
         }
         if (data) {
-            static const float divInv = 1.0f / 4096.0f;
+            static const float divInv = 1.0f / float(DIV);
             data[i].x = x * divInv;
             data[i].y = y * divInv;
             data[i].z = z * divInv;
@@ -335,29 +357,24 @@ int GrinlizLSM303::readMag(Vec3<int32_t>* rawData, Vec3<float>* data)
     mMax.y = glMax(y, mMax.y);
     mMax.z = glMax(z, mMax.z);
 
+    if (!magDataValid())
+        return 0;
+
     if (rawData) {
         rawData->x = x;
         rawData->y = y;
         rawData->z = z; 
     }
     if (data) {
-        if(magDataValid()) {
-            float vx = -1.0f + 2.0f * (x - mMin.x) / (mMax.x - mMin.x);
-            float vy = -1.0f + 2.0f * (y - mMin.y) / (mMax.y - mMin.y);
-            float vz = -1.0f + 2.0f * (z - mMin.z) / (mMax.z - mMin.z);
+        float vx = -1.0f + 2.0f * (x - mMin.x) / (mMax.x - mMin.x);
+        float vy = -1.0f + 2.0f * (y - mMin.y) / (mMax.y - mMin.y);
+        float vz = -1.0f + 2.0f * (z - mMin.z) / (mMax.z - mMin.z);
 
-            float len2 = vx * vx + vy * vy + vz * vz;
-            float lenInv = 1.0f / sqrtf(len2);
-            data->x = vx * lenInv;
-            data->y = vy * lenInv;
-            data->z = vz * lenInv;
-        }
-        else {
-            data->x = 1;
-            data->y = 0;
-            data->z = 0;
-            return 0;
-        }
+        float len2 = vx * vx + vy * vy + vz * vz;
+        float lenInv = 1.0f / sqrtf(len2);
+        data->x = vx * lenInv;
+        data->y = vy * lenInv;
+        data->z = vz * lenInv;
     }
     return 1;
 }

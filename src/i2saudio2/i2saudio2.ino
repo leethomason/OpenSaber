@@ -15,10 +15,27 @@ I2SAudioDriver i2sAudioDriver(&dma, &i2s, &spiFlash, manifest);
 
 int currentDir = 0;
 
+void scan()
+{
+    Log.p("p: play track channel=0").eol();
+    Log.p("l: loop track channel=0").eol();
+    Log.p("s: stop channel (stop all if no channel)").eol();
+    Log.p("v: volume value=0,256 channel").eol();
+
+    int start = 0, count = 0;
+    manifest.dirRange(currentDir, &start, &count);
+    Log.p("Dir range. start=").p(start).p(" count=").p(count).eol();
+    for(int i=0; i<count; ++i)
+        dumpMemUnit(i + start, manifest.getUnit(i + start));
+
+}
+
+
 void dumpMemUnit(int id, const MemUnit& memUnit)
 {
     Log.p("[").p(id).p("] ").pt(memUnit.name).p(" addr=").p(memUnit.offset).p(" size=").p(memUnit.size)
        .p(" bits=").p(memUnit.is8Bit ? 8 : 4)
+       .p(" table=").p(memUnit.table)
        .p(" samples=").p(memUnit.numSamples())
       .eol();
 }
@@ -57,6 +74,8 @@ void processCmd(const CStr<32>& str)
         }
     }
     else if (action == 'v') {
+        if (value1 < 0) value1 = 0;
+
         if (value0 >= 0 && value1 >= 0) {
             Log.p("Volume=").p(value0).p(" channel=").p(value1).eol();
             i2sAudioDriver.setVolume(value0, value1);
@@ -65,8 +84,16 @@ void processCmd(const CStr<32>& str)
             Log.p("Volume=").p(i2sAudioDriver.getVolume(value0)).eol();
         }
     }
+    else if (action == 'd') {
+        for(int i=0; i<AUDDRV_NUM_CHANNELS; ++i) {
+            i2sAudioDriver.stop(i);
+        }
+        if (value0 >=0 && value0 < 4) {
+            currentDir = value0;
+            scan();
+        }
+    }
 }
-
 
 void setup()
 {
@@ -76,22 +103,13 @@ void setup()
     Log.attachSerial(&Serial);
 
     Log.p("Serial open.").eol();
-    Log.p("p: play track channel=0").eol();
-    Log.p("l: loop track channel=0").eol();
-    Log.p("s: stop channel (stop all if no channel)").eol();
-    Log.p("v: volume value=0,256 channel").eol();
 
     flashTransport.begin();
     spiFlash.begin();
     manifest.scan(&spiFlash);
-
-    int start = 0, count = 0;
-    manifest.dirRange(currentDir, &start, &count);
-    Log.p("Dir range. start=").p(start).p(" count=").p(count).eol();
-    for(int i=0; i<count; ++i)
-        dumpMemUnit(i + start, manifest.getUnit(i + start));
-
     i2sAudioDriver.begin();
+
+    scan();
 
     Log.p("setup() complete.").eol();
 }

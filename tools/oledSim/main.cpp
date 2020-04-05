@@ -119,7 +119,7 @@ UIModeUtil::UIModeUtil()
 
 void UIModeUtil::nextMode()
 {
-	static const int NUM = (int)UIMode::MEDITATION + 1;
+	static const int NUM = (int)UIMode::PALETTE + 1;
 	m_mode = (UIMode)((int(m_mode) + 1) % NUM);
 }
 
@@ -269,7 +269,7 @@ int main(int, char**) {
     };
     data.color = colors[0];
     bladeFlash.setBladeColor(data.color);
-    bladeFlash.setImpactInverse();
+    bladeFlash.setImpactColor(ColorRotated(data.color, 180));
 
 	int palette = 0;
 
@@ -308,7 +308,7 @@ int main(int, char**) {
                 data.palette = palette;
                 data.color = colors[palette];
                 bladeFlash.setBladeColor(data.color);
-                bladeFlash.setImpactInverse();
+                bladeFlash.setImpactColor(ColorRotated(data.color, 180));
                 data.fontName = FONT_NAMES[palette];
 			}
             else if (e.key.keysym.sym == SDLK_f) {

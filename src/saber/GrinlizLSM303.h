@@ -1,3 +1,25 @@
+/*
+  Copyright (c) Lee Thomason, Grinning Lizard Software
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+  of the Software, and to permit persons to whom the Software is furnished to do
+  so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
+
 #pragma once
 
 #include <stdint.h>
@@ -7,6 +29,9 @@ class GrinlizLSM303
 {
 public:
     GrinlizLSM303() { s_instance = this; }
+
+    // divisor for raw data
+    static const int DIV = 4096;    
 
     bool begin();
 
@@ -24,12 +49,13 @@ public:
        the ones to use.
     */
     int readMag(Vec3<int32_t>* rawData, Vec3<float>* data);
+    bool recalibrateMag();
 
-    const Vec3<int32_t>& getMagMin() const { return mMin; }
-    const Vec3<int32_t>& getMagMax() const { return mMax; }
+    const Vec3<int32_t>& getMagMin() const { return m_min; }
+    const Vec3<int32_t>& getMagMax() const { return m_max; }
+
     bool magDataValid() const { 
-        static const int T = 100;
-        return mMax.x - mMin.x > T && mMax.y - mMin.y > T && mMax.z - mMin.z > T;   
+        return dataValid(INIT_T, m_min, m_max);
     }
 
     void logMagStatus();
@@ -41,7 +67,21 @@ public:
     static GrinlizLSM303* instance() { return s_instance; }
 
 private:
-    Vec3<int32_t> mMin, mMax;
+    static bool dataValid(int t, const Vec3<int32_t>& a, const Vec3<int32_t>& b) {
+        return     (b.x - a.x > t) 
+                && (b.y - a.y > t) 
+                && (b.z - a.z > t);   
+    }
+
+    // how much delta do we need to operate? On the one hand, want to get the
+    // swing on quickly. But after that, recalibrate should really have good 
+    // data. So 2 constants: INIT_T and WARM_T
+    static const int INIT_T = 100;  
+    static const int WARM_T = 400;
+
+    Vec3<int32_t> m_min, m_max;
+    Vec3<int32_t> m_minQueued, m_maxQueued;
+
     static GrinlizLSM303* s_instance;
 
     void write8(uint8_t address, uint8_t reg, uint8_t value) const;

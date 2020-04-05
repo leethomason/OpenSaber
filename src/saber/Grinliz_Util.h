@@ -1,3 +1,25 @@
+/*
+  Copyright (c) Lee Thomason, Grinning Lizard Software
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+  of the Software, and to permit persons to whom the Software is furnished to do
+  so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
+
 #ifndef GRINLIZ_UTIL_INCLUDED
 #define GRINLIZ_UTIL_INCLUDED
 
@@ -15,6 +37,14 @@ inline int32_t lerp255(int16_t a, int16_t b, int32_t t255) {
     return (a * (255 - t255) + b * t255) / 255;
 }
 
+inline int32_t lerp256(int16_t a, int16_t b, int32_t t256) {
+    return (int32_t(a) * (256 - t256) + int32_t(b) * t256) / 256;
+}
+
+inline FixedNorm lerp(FixedNorm a, FixedNorm b, FixedNorm t) {
+    return (a * (1 - t) + b * t);
+}
+
 bool TestUtil();
 
 template<typename T>
@@ -24,14 +54,26 @@ struct Vec3
 	T y;
 	T z;
 
+	Vec3() {}
+    Vec3(T t) { x = t; y = t; z = t; }
+	Vec3(T _x, T _y, T _z) { x = _x; y = _y; z = _z; }
+
+	int size() const { return 3; }
+
+	void set(T _x, T _y, T _z) { x = _x; y = _y; z = _z; }
 	void setZero() { x = y = z = 0; }
+	bool isZero() const { return x==0 && y == 0 && z == 0; }
 	void scale(T s) { x *= s; y *= s; z *= s; }
+
+	T operator[](int i) const { return *(&x + i); }
+	T& operator[](int i) { return *(&x + i); }
 
     Vec3<T>& operator += (const Vec3<T>& v) { x += v.x; y += v.y; z += v.z; return *this; }
     Vec3<T>& operator -= (const Vec3<T>& v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
 
     inline friend Vec3<T> operator +  (const Vec3<T>& a, const Vec3<T>& b) { Vec3<T> t;  t.x = a.x + b.x; t.y = a.y + b.y; t.z = a.z + b.z; return t; }
     inline friend Vec3<T> operator -  (const Vec3<T>& a, const Vec3<T>& b) { Vec3<T> t;  t.x = a.x - b.x; t.y = a.y - b.y; t.z = a.z - b.z; return t; }
+    inline friend Vec3<T> operator /  (const Vec3<T>& a, T b) { Vec3<T> t;  t.x = a.x / b; t.y = a.y / b; t.z = a.z / b; return t; }
 };
 
 /**
@@ -60,8 +102,8 @@ void decodeBase64(const char* src, int nBytes, uint8_t* dst);
 bool TestBase64();
 
 // Modified Bernstein hash
-uint32_t hash32(const char* v, const char* end);
-uint32_t hash32(const char* v);
+uint32_t hash32(const char* v, const char* end, uint32_t h=0);
+uint32_t hash32(const char* v, uint32_t h=0);
 
 /**
 * The CStr class is a "c string": a simple array of
@@ -474,6 +516,95 @@ private:
 };
 
 
+/**
+ * Power changes over time, and higher
+ * draw changes the power. A small class
+ * to average out power changes.
+ */
+template<typename TYPE, typename SUMTYPE, int N>
+class AverageSample
+{
+public:
+    AverageSample(TYPE initialValue) {
+        for (int i = 0; i < N; ++i) m_sample[i] = initialValue;
+        m_average = initialValue;
+        m_valid = true;
+    }
+
+    void push(TYPE value) {
+        m_sample[m_pos] = value;
+        m_pos++;
+        if (m_pos == N) m_pos = 0;
+        m_valid = false;
+    }
+
+    TYPE average() const {
+        if (m_valid == false) {
+            SUMTYPE total = 0;
+            for (int i = 0; i < N; ++i) {
+                total += m_sample[i];
+            }
+            m_average = total / N;
+            m_valid = true;
+        }
+        return m_average;
+    }
+
+    int numSamples() const { return N; }
+
+private:
+    mutable TYPE m_average;
+    mutable bool m_valid = false;
+    int m_pos = 0;
+    TYPE m_sample[N];
+};
+
+bool TestAverageSample();
+
+class StepProp
+{
+public:
+	StepProp() {}
+
+	void set(Fixed115 f) { step = f; }
+	void set(float f) { step = Fixed115(f); }
+
+	int tick(uint32_t delta) {
+		value += step * delta;
+		int n = value.getInt();
+		value -= n;
+		return n;
+	}
+
+public:
+	Fixed115 step = 0;
+	Fixed115 value = 0;
+};
+
+class AnimateProp
+{
+public:
+	AnimateProp() {}
+
+	void start(uint32_t period, int start, int end) {
+		m_time = 0;
+		m_period = period;
+		m_start = start;
+		m_end = end;
+		m_value = start;
+	}
+	int tick(uint32_t delta);
+	int value() const { return m_value; }
+	bool done() { return m_period == 0; }
+
+private:
+	uint32_t m_time = 0;
+	uint32_t m_period = 0;
+	int m_value = 0;
+	int m_start = 0;
+	int m_end = 0;
+};
+
 class Timer2
 {
 public:
@@ -508,9 +639,10 @@ private:
 	bool m_enable;
 };
 
-/* Generally try to keep Ardunino and Win332 code very separate.
-But a log class is useful to generalize, both for utility
-and testing. Therefore put up with some #define nonsense here.
+/* 
+	Generally try to keep Ardunino and Win32 code very separate.
+	But a log class is useful to generalize, both for utility
+	and testing. Therefore put up with some #define nonsense here.
 */
 #ifdef _WIN32
 class Stream;
@@ -532,6 +664,7 @@ public:
 	const SPLog& p(long v, int p = DEC) const;
 	const SPLog& p(unsigned long v, int p = DEC) const;
 	const SPLog& p(double v, int p = 2) const;
+	const SPLog& p(FixedNorm v) const { return p(v.toFloat()); }
 	const SPLog& v3(int32_t x, int32_t y, int32_t z, const char* bracket=0) const;
 	const SPLog& v2(int32_t x, int32_t y, const char* bracket=0) const;
 	const SPLog& v3(float x, float y, float z, const char* bracket=0) const;

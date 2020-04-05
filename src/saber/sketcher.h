@@ -1,3 +1,25 @@
+/*
+  Copyright (c) Lee Thomason, Grinning Lizard Software
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+  of the Software, and to permit persons to whom the Software is furnished to do
+  so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
+
 #ifndef SKETCHER_INCLUDED
 #define SKETCHER_INCLUDED
 
@@ -45,7 +67,7 @@ private:
 	static const int NROWS = 5;
 	static const int NCOLS = 7;
     static const int ALLOCATED = NCOLS + 1;
-	uint8_t m_col[ALLOCATED];		// enough memory for writing the glyphs 4+4 bytes
+    uint8_t m_col[ALLOCATED] = { 0 };		// enough memory for writing the glyphs 4+4 bytes
 };
 
 
@@ -61,12 +83,6 @@ public:
 private:
 	CStr<9> m_output;
 };
-
-
-void calcCrystalColorRGB(uint32_t msec, 
-    int32_t lowVariation,       // how much variation around dim color channels
-    int32_t highVariation,      // how much variation around bright color channels
-    const osbr::RGB& base, osbr::RGB* out);
 
 void calcCrystalColorHSV(uint32_t msec, const osbr::RGB& base, osbr::RGB* out);
 

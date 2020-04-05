@@ -1,3 +1,25 @@
+/*
+  Copyright (c) Lee Thomason, Grinning Lizard Software
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+  of the Software, and to permit persons to whom the Software is furnished to do
+  so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
+
 #include "s4adpcm.h"
 
 #ifdef _MSC_VER
@@ -5,219 +27,196 @@
 #define ASSERT assert
 #endif
 
-#ifndef S4ADPCM_OPT
-const
-#endif
-int S4ADPCM::DELTA_TABLE_4[TABLE_SIZE] = {
-    // The last entry is used for the special delta=8 case
-    -1, 0, 0, 0, 1, 1, 1, 2, 3
+const int S4ADPCM::DELTA_TABLE_4[N_TABLES][TABLE_SIZE] = {
+    {-1, 0, 0, 0, 0, 1, 1, 2, 2},
+    {-1, 0, 0, 1, 1, 1, 2, 3, 3},
+    {-1, 0, 0, 1, 1, 2, 3, 4, 4},
+    {-1, -1, 0, 1, 2, 3, 4, 5, 5}
 };
 
-#ifndef S4ADPCM_OPT
-const
-#endif
-int S4ADPCM::DELTA_TABLE_8[TABLE_SIZE] = {
-    // 8-bit version doesn't use the last entry
-    -1, 0, 1, 2, 3, 3, 4, 4, 4  
+const int S4ADPCM::DELTA_TABLE_8[N_TABLES][TABLE_SIZE] = {
+    {-1, 0, 1, 2, 3, 3, 3, 3, 4 },
+    {-1, 0, 1, 2, 3, 4, 4, 4, 4},
+    {-1, 0, 1, 2, 3, 4, 4, 4, 5},
+    {-1, 0, 1, 2, 3, 4, 5, 6, 6},
 };
 
-void S4ADPCM::encode4(const int16_t* data, int32_t nSamples, uint8_t* target, State* state)
+void S4ADPCM::encode8(const int16_t* data, int32_t nSamples, uint8_t* target, State* state, const int* table, int64_t* e2)
 {
     for (int i = 0; i < nSamples; ++i) {
         int value = data[i];
         int guess = state->guess();
         int error = value - guess;
-        int positiveGuess = guess;
-
-        uint8_t sign = 0;
-        if (error < 0) {
-            sign = 8;
-            error = -error;
-            positiveGuess = -guess;
-        }
-#ifdef _MSC_VER
-        ASSERT(positiveGuess >= SHRT_MIN && positiveGuess <= SHRT_MAX);
-#endif
-        // Bias up so we round up and down equally.
-        // Error always positive, delta always positive.
-        int bias = ((1 << state->shift) - 1)/2;
-        int delta = (error + bias) >> state->shift;
-
-        int maxDelta = 7;
-        if (state->sign == sign)
-            maxDelta = 8;
-        if (delta > maxDelta)
-            delta = maxDelta;
-
-        if ((positiveGuess + (delta << state->shift)) > SHRT_MAX) {
-            delta = (SHRT_MAX - positiveGuess) >> state->shift;
-            if (delta > maxDelta) 
-                delta = maxDelta;
-        }
-
-#ifdef _MSC_VER
-        if (positiveGuess + (delta << state->shift) > SHRT_MAX) {
-            ASSERT(false);
-        }
-#endif
-        if (delta == 8) {
-            if (state->high)
-                *target++ |= (8 << 4);
-            else
-                *target = 8;
-        }
-        else if (delta == 0) {
-            if (state->high)
-                *target++ |= 0;
-            else
-                *target = 0;
-        }
-        else {
-            state->sign = sign;
-            if (state->high)
-                *target++ |= (delta | sign) << 4;
-            else
-                *target = (delta | sign);
-        }
-
-        state->high = !state->high;
-
-        int p = guess + (delta << state->shift) * (sign ? -1 : 1);
-#ifdef _MSC_VER
-        ASSERT(p >= SHRT_MIN && p <= SHRT_MAX);
-#endif
-        state->push(p);
-
-        state->shift += DELTA_TABLE_4[delta];
-        if (state->shift < 0) state->shift = 0;
-        if (state->shift > SHIFT_LIMIT_4) state->shift = SHIFT_LIMIT_4;
-    }
-}
-
-
-void S4ADPCM::encode8(const int16_t* data, int32_t nSamples, uint8_t* target, State* state)
-{
-    for (int i = 0; i < nSamples; ++i) {
-        int value = data[i];
-        int guess = state->guess();
-        int error = value - guess;
-        int positiveGuess = guess;
-
-        uint8_t sign = 0;
-        if (error < 0) {
-            sign = 0x80;
-            error = -error;
-            positiveGuess = -positiveGuess;
-        }
-#ifdef _MSC_VER
-        ASSERT(positiveGuess >= SHRT_MIN && positiveGuess <= SHRT_MAX);
-#endif
 
         // Bias up so we round up and down equally.
-        // Error always positive, delta always positive.
-        int bias = ((1 << state->shift) - 1) / 2;
-        int delta = (error + bias) >> state->shift;
+        int mult = 1 << state->shift;                
+        int bias = error >= 0 ? mult / 2 : -mult / 2;
+        int delta = (error + bias) / mult;
+
         if (delta > 127) delta = 127;
+        if (delta < -128) delta = -128;
 
-        if ((positiveGuess + (delta << state->shift)) > SHRT_MAX) {
-            delta = (SHRT_MAX - positiveGuess) >> state->shift;
-            if (delta > 127) delta = 127;
-        }
+        while (guess + (delta << state->shift) > SHRT_MAX)
+            --delta;
+        while (guess + (delta << state->shift) < SHRT_MIN)
+            ++delta;
 
-        *target++ = delta | sign;
+        assert(delta >= -128 && delta <= 127);
 
-        int p = guess + (delta << state->shift) * (sign ? -1 : 1);
+        *target++ = int8_t(delta);
+
+        int p = guess + (delta << state->shift);
+#ifdef _MSC_VER
+        assert(p >= SHRT_MIN && p <= SHRT_MAX);
+#endif
         state->push(p);
 
-        state->shift += DELTA_TABLE_8[delta >> 4];
+        *e2 += calcError(value, p);
+        assert(*e2 >= 0);    // check for overflow
+
+        int dTable = (delta >= 0 ? delta : -delta) >> 4;
+        state->shift += table[dTable];
         if (state->shift < 0) state->shift = 0;
         if (state->shift > SHIFT_LIMIT_8) state->shift = SHIFT_LIMIT_8;
     }
 }
 
 
-void S4ADPCM::decode4(const uint8_t* p, int32_t nSamples,
-    int volume, bool add, int32_t* out, State* state)
+int S4ADPCM::encode4(const int16_t* data, int32_t nSamples, uint8_t* target, State* state, const int* table, int64_t* e2)
 {
-    uint8_t data = 0;
-    uint8_t sign = 0;
-    int delta = 0;
-    int value = 0;
+    const uint8_t* start = target;
+    for (int i = 0; i < nSamples; ++i) {
+        int value = data[i];
+        int guess = state->guess();
+        int error = value - guess;
+
+        // Bias up so we round up and down equally.
+        int mult = 1 << state->shift;
+        int bias = (error >= 0) ? (mult / 2) : -(mult / 2);
+        int delta = (error + bias) / mult;
+
+        if (delta > 7) delta = 7;
+        if (delta < -8) delta = -8;
+
+        while (guess + (delta << state->shift) > SHRT_MAX)
+            --delta;
+        while (guess + (delta << state->shift) < SHRT_MIN)
+            ++delta;
+
+        assert(delta >= -8 && delta <= 7);
+
+        uint8_t d = (delta >= 0) ? uint8_t(delta) : uint8_t(delta & 0x0f);
+        assert((d & 0xf0) == 0);
+
+        if (state->high)
+            *target++ |= d << 4;
+        else
+            *target = d;
+
+        state->high = !state->high;
+
+        int p = guess + (delta << state->shift);
+#ifdef _MSC_VER
+        ASSERT(p >= SHRT_MIN && p <= SHRT_MAX);
+#endif
+
+        state->push(p);
+
+        *e2 += calcError(value, p);
+        assert(*e2 >= 0);    // check for overflow
+
+        state->shift += table[delta >= 0 ? delta : -delta];
+        if (state->shift < 0) state->shift = 0;
+        if (state->shift > SHIFT_LIMIT_4) state->shift = SHIFT_LIMIT_4;
+    }
+    if (state->high) target++;
+    return int(target - start);
+}
+
+void S4ADPCM::decode4(const uint8_t* p, int32_t nSamples,
+    int volume,
+    bool add,
+    int32_t* out, State* state, const int* table)
+{
+    state->volumeTarget = volume << 8;
 
     for (int32_t i = 0; i < nSamples; ++i) {
+        uint8_t d = 0;
         if (state->high) {
-            data = *p >> 4;
+            d = *p >> 4;
             p++;
         }
         else {
-            data = *p & 0xf;
+            d = *p & 0xf;
         }
-
-        if (data == 8) {
-            sign = state->sign;
-            delta = 8;
-        }
-        else if (data == 0) {
-            sign = state->sign;
-            delta = 0;
-        }
-        else {
-            sign = data & 8;
-            delta = data & 0x7;
-        }
+        int8_t delta = int8_t(d << 4) >> 4;
 
         int guess = state->guess();
-        value = sign ? (guess - (delta << state->shift))
-                     : (guess + (delta << state->shift));
+        int value = guess + (delta << state->shift);
 
 #ifdef _MSC_VER
         if (value < SHRT_MIN || value > SHRT_MAX) {
-            ASSERT(false);
+            assert(false);
         }
 #endif
         state->push(value);
 
-        int32_t s = value * (volume << 8);
-        out[0] = out[1] = add ? (out[0] + s) : s;
+        if (state->volumeShifted < state->volumeTarget)
+            state->volumeShifted += VOLUME_EASING;
+        else if (state->volumeShifted > state->volumeTarget)
+            state->volumeShifted -= VOLUME_EASING;
+
+        // max: SHRT_MAX * 256 * 256
+        //      32767 * 256 * 256 = 2147418112
+        //              INT32_MAX = 2147483647
+        int32_t s = value * state->volumeShifted;
+        if (add)
+            out[0] = out[1] = sat_add(s, out[0]);
+        else
+            out[0] = out[1] = s;
         out += 2;
 
-        state->sign = sign;
-        state->shift += DELTA_TABLE_4[delta];
+        state->shift += table[delta >= 0 ? delta : -delta];
         if (state->shift < 0) state->shift = 0;
         if (state->shift > SHIFT_LIMIT_4) state->shift = SHIFT_LIMIT_4;
         state->high = !state->high;
     }
 }
 
-
 void S4ADPCM::decode8(const uint8_t* p, int32_t nSamples,
-    int volume, bool add, int32_t* out, State* state)
+    int volume, bool add, int32_t* out, State* state, const int* table)
 {
+    state->volumeTarget = volume << 8;
+
     for (int32_t i = 0; i < nSamples; ++i) {
-        int delta = *p & 0x7f;
-        uint8_t sign = *p & 0x80;
-        p++;
+        int delta = int8_t(*p++);
 
         int guess = state->guess();
-        int value = 0;
-        if (sign) {
-            value = guess - (delta << state->shift);
+        int value = guess + (delta << state->shift);
+
+#ifdef _MSC_VER
+        if (value < SHRT_MIN || value > SHRT_MAX) {
+            assert(false);
         }
-        else {
-            value = guess + (delta << state->shift);
-        }
+#endif
         state->push(value);
 
-        int32_t s = value * (volume << 8);
+        if (state->volumeShifted < state->volumeTarget)
+            state->volumeShifted += VOLUME_EASING;
+        else if (state->volumeShifted > state->volumeTarget)
+            state->volumeShifted -= VOLUME_EASING;
+
+        int32_t s = value * state->volumeShifted;
         if (add) {
-            out[0] = out[1] = out[0] + s;
+            out[0] = out[1] = sat_add(s, out[0]);
         }
         else {
             out[0] = out[1] = s;
         }
         out += 2;
 
-        state->shift += DELTA_TABLE_8[delta >> 4];
+        int dTable = (delta >= 0 ? delta : -delta) >> 4;
+        state->shift += table[dTable];
         if (state->shift < 0) state->shift = 0;
         if (state->shift > SHIFT_LIMIT_8) state->shift = SHIFT_LIMIT_8;
     }

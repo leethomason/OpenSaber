@@ -1,3 +1,25 @@
+/*
+  Copyright (c) Lee Thomason, Grinning Lizard Software
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+  of the Software, and to permit persons to whom the Software is furnished to do
+  so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
+
 #ifndef WAV_COMPRESSION
 #define WAV_COMPRESSION
 
@@ -33,7 +55,7 @@ namespace wav12 {
         // Returns the number of samples it could expand. nSamples should be even,
         // unless it is the last sample (which can be odd if it uses up the
         // entire track.)
-        int expand(int32_t* target, uint32_t nSamples, int32_t volume, bool add, bool use8Bit);
+        int expand(int32_t* target, uint32_t nSamples, int32_t volume, bool add, int codec, const int* table, bool overrideEasing);
         void rewind();
         bool done() const { return m_stream->done(); }
 
@@ -51,9 +73,36 @@ namespace wav12 {
         // Codec 4/4-bit is a kind of ADPCM. (Although simpler than the standard algorithm.)
         // Simpler and cleaner. Tuned on the lightsaber sounds and a sample of classical music.
         // The quality is shockingly good for such a simple algorithm at 4 bits / samples.
-        static void compress4(const int16_t* data, int32_t nSamples, uint8_t** compressed, uint32_t* nCompressed);
+        static void compress4(const int16_t* data, int32_t nSamples, uint8_t** compressed, uint32_t* nCompressed, const int* table, int64_t* e16squared);
+        static void compress8(const int16_t* data, int32_t nSamples, uint8_t** compressed, uint32_t* nCompressed, const int* table, int64_t* e16squared);
 
-        static void compress8(const int16_t* data, int32_t nSamples, uint8_t** compressed, uint32_t* nCompressed);
+        static void compress(int codec, const int16_t* data, int32_t nSamples, uint8_t** compressed, uint32_t* nCompressed, const int* table, int64_t* e16squared)
+        {
+            switch (codec) {
+            case S4ADPCM_4BIT:  compress4(data, nSamples, compressed, nCompressed, table, e16squared);   break;
+            case S4ADPCM_8BIT:  compress8(data, nSamples, compressed, nCompressed, table, e16squared);   break;
+            }
+        }
+
+        // Exact; but there can be extra. For 7 samples, 4 bytes are needed, but a nibble is unused.
+        static int samplesToBytes(int n, int codec) {
+            switch (codec) {
+            case S4ADPCM_4BIT:   return (n + 1) / 2;
+            case S4ADPCM_8BIT:   return n;
+            }
+            assert(false);
+            return 0;
+        }
+
+        // Exact; returns the possible number of samples. (Could be one less.)
+        static int bytesToSamples(int b, int codec) {
+            switch (codec) {
+            case S4ADPCM_4BIT:   return b * 2;
+            case S4ADPCM_8BIT:   return b;
+            }
+            assert(false);
+            return 0;
+        }
 
     private:
         static uint8_t m_buffer[BUFFER_SIZE];

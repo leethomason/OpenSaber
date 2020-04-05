@@ -1,3 +1,25 @@
+/*
+  Copyright (c) Lee Thomason, Grinning Lizard Software
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+  of the Software, and to permit persons to whom the Software is furnished to do
+  so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
+
 #include "Grinliz_Util.h"
 #include <math.h>
 
@@ -63,16 +85,16 @@ bool TestUtil()
     return true;
 }
 
-
-bool strStarts(const char* str, const char* prefix)
+bool strStarts(const char *str, const char *prefix)
 {
-    if (!str || !prefix)
+    if ((str == 0) || (prefix == 0))
         return false;
 
-	if (!*str || !*prefix)
-		return false;
+    if ((*str == 0) || (*prefix == 0))
+        return false;
 
-    while(*prefix) {
+    while (*prefix)
+    {
         if (*prefix++ != *str++)
             return false;
     }
@@ -141,9 +163,8 @@ bool istrStarts(const char* str, const char* prefix)
 /*
     Modified Bernstein hash.
 */
-uint32_t hash32(const char* v, const char* end)
+uint32_t hash32(const char* v, const char* end, uint32_t h)
 {
-    uint32_t h = 0;
     for (; v < end; ++v) {
         // Simple form of the hash:
         // h = h * 33 ^ (*v);
@@ -153,14 +174,42 @@ uint32_t hash32(const char* v, const char* end)
     return h;
 }
 
-uint32_t hash32(const char* v)
+uint32_t hash32(const char* v, uint32_t h)
 {
-    uint32_t h = 0;
     for (; *v; ++v) {
         h = ((h << 5) + h) ^ (*v);
     }
     return h;
 }
+
+bool TestAverageSample()
+{
+    {
+        AverageSample<Vec3<int>, Vec3<int>, 4> ave(Vec3<int>(2, 4, 8));
+        Vec3<int> r = ave.average();
+        TEST_IS_TRUE(r.x == 2);
+        TEST_IS_TRUE(r.y == 4);
+        TEST_IS_TRUE(r.z == 8);
+
+        ave.push(Vec3<int>(0, 0, 0));
+        ave.push(Vec3<int>(0, 0, 0));
+
+        r = ave.average();
+        TEST_IS_TRUE(r.x == 1);
+        TEST_IS_TRUE(r.y == 2);
+        TEST_IS_TRUE(r.z == 4);
+    }
+    {
+        AverageSample<uint16_t, uint32_t, 256> ave(4000);
+        TEST_IS_TRUE(ave.average() == 4000);
+        for (int i = 0; i < 128; i++) {
+            ave.push(8000);
+        }
+        TEST_IS_TRUE(ave.average() == 6000);
+    }
+    return true;
+}
+
 
 bool TestCStr()
 {
@@ -591,6 +640,21 @@ bool TestCQueue()
     return true;
 }
 
+int AnimateProp::tick(uint32_t delta) 
+{
+    m_time += delta;
+
+    if (m_period == 0 || m_time >= m_period) {
+        m_period = 0;
+        m_value = m_end;
+        return m_end;
+    }
+    else {
+        m_time += delta;
+        m_value = m_start + (m_end - m_start) * int(m_time) / int(m_period);
+        return m_value;
+    }
+}
 
 int Timer2::tick(uint32_t delta)
 {

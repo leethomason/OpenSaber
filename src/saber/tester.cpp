@@ -1,7 +1,29 @@
+/*
+  Copyright (c) Lee Thomason, Grinning Lizard Software
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+  of the Software, and to permit persons to whom the Software is furnished to do
+  so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
+
 #include "pins.h"
 #include "tester.h"
 #include "sfx.h"
-#include "blade.h"
+#include "bladePWM.h"
 #include "saberUtil.h"
 #include "sketcher.h"
 #include "rgb.h"
@@ -11,7 +33,6 @@
 #include "Button.h"
 #include "Grinliz_Arduino_Util.h"
 #include "GrinlizLSM303.h"
-#include "blade.h"
 #include "bladeflash.h"
 
 using namespace osbr;
@@ -128,12 +149,10 @@ class ChannelTest : public Test
 
     virtual int process(Tester* tester, uint32_t event)
     {
-        Blade* blade = tester->getBlade();
+        BladePWM* blade = tester->getBladePWM();
         ASSERT(blade);
         BladeFlash* bladeFlash = tester->getBladeFlash();
         ASSERT(bladeFlash);
-        SaberDB* saberDB = tester->getSaberDB();
-        ASSERT(saberDB);
 
         switch(event) {
             case 0: 
@@ -166,7 +185,7 @@ class AccelerometerTest : public Test
 {
 public:
 
-	static const int NDATA = 10;
+	static const int NDATA = 20;
 	int nSamples;
     Vec3<float> data[NDATA];
     uint32_t startTime;
@@ -189,7 +208,7 @@ public:
         }
         uint32_t deltaTime = millis() - startTime;
         Serial.print("Time to read (ms):"); Serial.println(deltaTime);
-        ASSERT(deltaTime > NDATA * 8 && deltaTime < NDATA * 20);
+        ASSERT(deltaTime > NDATA * 7 && deltaTime < NDATA * 13);
 
         bool variation = false;
 
@@ -218,6 +237,51 @@ public:
     }
 };
 
+
+class MagnemometerTest : public Test
+{
+public:
+
+	static const int NDATA = 10;
+	int nSamples;
+    uint32_t startTime;
+
+    virtual const char* name() const {
+        return "MagnemometerTest";
+    }
+
+    virtual void start(Tester* tester)
+    {
+        GrinlizLSM303* accel = GrinlizLSM303::instance();
+        ASSERT(accel);
+        
+        if (accel->magDataValid()) {
+            nSamples = 0;
+            startTime = millis();
+
+            while(nSamples < NDATA) {
+                Vec3<int32_t> data;
+                int n = accel->readMag(&data, 0);
+                nSamples += n;
+            }
+            uint32_t deltaTime = millis() - startTime;
+            Serial.print("Time to read (ms):"); Serial.println(deltaTime);
+            ASSERT(deltaTime > NDATA * 8 && deltaTime < NDATA * 20);
+
+            // We can't test what the data is because it almost 
+            // certainly has not been calibrated. We just test if
+            // there was data at the correct rate.
+        }
+        else {
+            Log.p("Mag data not valid; not enough positions have been recorded.").eol();
+        }
+    }
+
+    virtual int process(Tester* tester, uint32_t event)
+    {
+        return TEST_SUCCESS;
+    }
+};
 
 class ButtonTest : public Test
 {
@@ -271,6 +335,7 @@ IgniteRetractTest igniteRetractTest;
 ChannelTest channelTest;
 BlasterTest blasterTest;
 AccelerometerTest accelerometerTest;
+MagnemometerTest magnemometerTest;
 
 Test* gTests[] = {
     &buttonTest,
@@ -278,6 +343,7 @@ Test* gTests[] = {
     &channelTest,
     &blasterTest,
     &accelerometerTest,
+    &magnemometerTest,
     0
 };
 
@@ -320,11 +386,11 @@ void Tester::start()
 
 bool Tester::checkOnOff()
 {
-    if (!wasOn && blade->getRGB().get() != 0) {
+    if (!wasOn && bladePWM->getRGB().get() != 0) {
         // Log.p("wasOn=true").eol();
         wasOn = true;
     }
-    bool isOff = blade->getRGB().get() == 0;
+    bool isOff = bladePWM->getRGB().get() == 0;
     //Log.p("RGB=").ptc(blade->getColor()).eol();
     //if (wasOn && isOff)
     //    Log.p("checkOnOff true").eol();
@@ -367,7 +433,6 @@ void Tester::process()
     uint32_t delta = m - lastProcessTime;
     lastProcessTime = m;
 
-    // Newer system:
     int event = uint32_t(-1);
     if (delta > 0 && !actionQueue.empty()) {
         Action& action = actionQueue.front();

@@ -20,7 +20,9 @@
   SOFTWARE.
 */
 
-// #define PROFILE
+
+//#define PROFILE
+//#define AUDIO_PROFILE
 
 // Arduino Libraries
 #include <Adafruit_ZeroI2S.h>
@@ -37,16 +39,13 @@
 // -- Must be first. Has configuration. -- //
 #include "pins.h"
 
-#ifdef SABER_NUM_LEDS
-    #include "DotStar.h"
-#endif
-
+#include "DotStar.h"
 #include "GrinlizLSM303.h"
 #include "voltmeter.h"
 #include "sfx.h"
 #include "saberdb.h"
 #include "cmdparser.h"
-#include "blade.h"
+#include "bladePWM.h"
 #include "sketcher.h"
 #include "renderer.h"
 #include "saberUtil.h"
@@ -57,17 +56,16 @@
 #include "vrender.h"
 #include "vectorui.h"
 #include "bladeflash.h"
+#include "swing.h"
 
 using namespace osbr;
 
 static const uint32_t INDICATOR_CYCLE         = 1000;
-static const uint32_t PING_PONG_INTERVAL      = 2400;
-static const uint32_t BREATH_TIME             = 1200;
 static const uint32_t IMPACT_MIN_TIME         = 1000;    // Minimum time between impact sounds. FIXME: need adjusting.
 
-uint32_t lastMotionTime = 0;    
 uint32_t lastImpactTime = 0;
 uint32_t lastLoopTime   = 0;
+bool colorWasProcessed = false;
 
 Adafruit_FlashTransport_SPI flashTransport(SS1, &SPI1);
 Adafruit_SPIFlash spiFlash(&flashTransport);
@@ -88,10 +86,10 @@ SaberDB     saberDB;
 Voltmeter   voltmeter;
 BladeFlash  bladeFlash;
 CMDParser   cmdParser(&saberDB, manifest);
-Blade       blade;
-Timer2      vbatTimer(AveragePower::SAMPLE_INTERVAL);
+BladePWM    bladePWM;
 Tester      tester;
-
+Swing       swing(10);
+AverageSample<Vec3<int32_t>, Vec3<int32_t>, 8> averageAccel(Vec3<int32_t>(0, 0, 0));
 
 #ifdef SABER_NUM_LEDS
 #ifdef SABER_UI_START
@@ -102,8 +100,10 @@ DotStar dotstar;                    // Hardware controller.
 #endif
 
 GrinlizLSM303 accelMag;
-Timer2 displayTimer(100);
-Timer2 vbatPrintTimer(1000);
+Timer2 vbatTimer(Voltmeter::SAMPLE_INTERVAL);
+Timer2 displayTimer(113);       // distribute time to minimize "slow ticks"
+Timer2 vbatPrintTimer(1217);
+Timer2 audioPrintTimer(2000);
 
 #if SABER_DISPLAY == SABER_DISPLAY_128_32
 static const int OLED_WIDTH = 128;
@@ -114,9 +114,6 @@ uint8_t oledBuffer[OLED_WIDTH * OLED_HEIGHT / 8] = {0};
 OLED_SSD1306 display(PIN_OLED_DC, PIN_OLED_RESET, PIN_OLED_CS);
 VRender    renderer;
 int renderStage = 0;
-#elif SABER_DISPLAY == SABER_DISPLAY_7_5_DEPRECATED
-Pixel_7_5_UI display75;
-PixelMatrix pixelMatrix;
 #elif SABER_DISPLAY == SABER_DISPLAY_7_5
 Pixel_7_5_UI display75;
 ShiftedDotMatrix dotMatrix;
@@ -191,6 +188,9 @@ void setup() {
     spiFlash.begin();
     manifest.scan(&spiFlash);
 
+    uint32_t dirHash = manifest.dirHash();
+    saberDB.setPaletteFromDirHash(dirHash);
+
     Log.p("Init audio system.").eol();
     i2sAudioDriver.begin();
 
@@ -203,17 +203,17 @@ void setup() {
     Log.p("Init systems.").eol();
     voltmeter.begin();
     delay(10);
-    blade.setRGB(RGB::BLACK);
+    bladePWM.setRGB(RGB::BLACK);
 
     buttonA.setHoldHandler(buttonAHoldHandler);
     buttonA.setClickHandler(buttonAClickHandler);
     buttonA.setReleaseHandler(buttonAReleaseHandler);
 
     tester.attach(&buttonA);
-    tester.attachDB(&saberDB, &blade, &bladeFlash);
+    tester.attachDB(&saberDB, &bladePWM, &bladeFlash);
 
     Log.p("Average power: ").p(voltmeter.averagePower()).eol();
-    blade.setVoltage(voltmeter.averagePower());
+    bladePWM.setVoltage(voltmeter.averagePower());
 
     Log.p("Init display.").eol();
 
@@ -226,8 +226,6 @@ void setup() {
         display.display(oledBuffer);
 
         Log.p("OLED display connected.").eol();
-    #elif SABER_DISPLAY == SABER_DISPLAY_7_5_DEPRECATED
-        Log.p("Pixel display init.").eol();
     #elif SABER_DISPLAY == SABER_DISPLAY_7_5
         // No pin 6
         // Pin 7 - decimal point - not used
@@ -282,12 +280,6 @@ void syncToDB()
     sfx.setFont(saberDB.soundFont());
     sfx.setVolume(saberDB.volume());
 
-    uiRenderData.volume = saberDB.volume4();
-    uiRenderData.color = Blade::convertRawToPerceived(saberDB.bladeColor());
-    uiRenderData.palette = saberDB.paletteIndex();
-    uiRenderData.mVolts = voltmeter.averagePower();
-    uiRenderData.fontName = manifest.getUnit(sfx.currentFont()).getName();
-
     bladeFlash.setBladeColor(saberDB.bladeColor());
     bladeFlash.setImpactColor(saberDB.impactColor());
 }
@@ -296,6 +288,12 @@ void buttonAReleaseHandler(const Button& b)
 {
     ledA.blink(0, 0);
     ledA.set(true); // power is on.
+
+    if (uiMode.mode() == UIMode::COLOR_WHEEL && colorWasProcessed) {
+        processColorWheel(true);
+        bladePWM.setRGB(osbr::RGB(0));
+        colorWasProcessed = false;
+    }
 }
 
 bool setVolumeFromHoldCount(int count)
@@ -312,7 +310,10 @@ void igniteBlade()
 {
     if (bladeState.state() == BLADE_OFF) {
         bladeState.change(BLADE_IGNITE);
-        sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
+        if (sfx.smoothMode())
+            sfx.sm_ignite();
+        else
+            sfx.playSound(SFX_POWER_ON, SFX_OVERRIDE);
     }
 }
 
@@ -320,7 +321,10 @@ void retractBlade()
 {
     if (bladeState.state() != BLADE_OFF && bladeState.state() != BLADE_RETRACT) {
         bladeState.change(BLADE_RETRACT);
-        sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
+        if (sfx.smoothMode())
+            sfx.sm_retract();
+        else
+            sfx.playSound(SFX_POWER_OFF, SFX_OVERRIDE);
     }
 }
 
@@ -348,13 +352,16 @@ void buttonAClickHandler(const Button&)
         // the modes are cycled. But haven't yet
         // figured out a better option.
         if (uiMode.mode() == UIMode::NORMAL) {
-            int power = AveragePower::vbatToPowerLevel(voltmeter.averagePower(), 4);
+            int power = UIRenderData::powerLevel(voltmeter.averagePower(), 4);
             ledA.blink(power, INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
         }
     }
     else if (bladeState.state() == BLADE_ON) {
         bladeFlash.doFlash(millis());
-        sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
+        if (sfx.smoothMode())
+            sfx.sm_playEvent(SFX_USER_TAP);
+        else
+            sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
     }
 }
 
@@ -364,8 +371,8 @@ void buttonAHoldHandler(const Button& button)
     //Log.p("buttonAHoldHandler nHolds=").p(button.nHolds()).eol();
     
     if (bladeState.state() == BLADE_OFF) {
-        bool buttonOn = false;
-        int cycle = button.cycle(&buttonOn);
+        bool buttonLEDOn = false;
+        int cycle = button.cycle(&buttonLEDOn);
         //Log.p("button nHolds=").p(button.nHolds()).p(" cycle=").p(cycle).p(" on=").p(buttonOn).eol();
 
         if (uiMode.mode() == UIMode::NORMAL) {
@@ -375,19 +382,18 @@ void buttonAHoldHandler(const Button& button)
         }
         else 
         {
-            // Only respond to the rising edge:
-            if (buttonOn) {
+            if (buttonLEDOn) {
                 if (uiMode.mode() == UIMode::PALETTE) {
                     if (!setPaletteFromHoldCount(cycle))
-                        buttonOn = false;
+                        buttonLEDOn = false;
                 }
                 else if (uiMode.mode() == UIMode::VOLUME) {
                     if (!setVolumeFromHoldCount(cycle))
-                        buttonOn = false;
+                        buttonLEDOn = false;
                 }
             }
         }
-        ledA.set(buttonOn);
+        ledA.set(buttonLEDOn);
     }
     else if (bladeState.state() != BLADE_RETRACT) {
         if (button.nHolds() == 1) {
@@ -396,9 +402,30 @@ void buttonAHoldHandler(const Button& button)
     }
 }
 
-bool buttonsReleased()
+void processColorWheel(bool commitChange)
 {
-    return !buttonA.isDown();
+    if (uiMode.mode() == UIMode::COLOR_WHEEL) {
+        Vec3<int32_t> ave = averageAccel.average();
+        FixedNorm x(ave[ACCEL_NORMAL_BUTTON], GrinlizLSM303::DIV);
+        //FixedNorm y(ave[ACCEL_PERP_BUTTON], GrinlizLSM303::DIV);
+
+        if (x < 0)
+            x = 0;
+
+        FixedNorm z(ave[ACCEL_BLADE_DIRECTION], GrinlizLSM303::DIV);
+        osbr::RGB rgb = AccelToColor(x, z);
+        osbr::RGB rgbInv = ColorRotated(rgb, 180);
+
+        // Log.p("accel to color. x=").p(x).p(" z=").p(z).p(" c=").ptc(rgb).eol();
+
+        bladeFlash.setBladeColor(rgb);
+        bladeFlash.setImpactColor(rgbInv);
+        if (commitChange) {
+            saberDB.setBladeColor(rgb);
+            saberDB.setImpactColor(rgbInv);
+            syncToDB();
+        }
+    }
 }
 
 void processSerial() {
@@ -419,10 +446,11 @@ void processAccel(uint32_t msec)
     // Also look for stalls and hitches.
     static const int N_ACCEL = 4;
     Vec3<float> data[N_ACCEL];
+    Vec3<int32_t> intData[N_ACCEL];
 
-    #if SERIAL_DEBUG == 1
-    uint32_t start = millis();
-    #endif
+//    #if SERIAL_DEBUG == 1
+//    uint32_t start = millis();
+//    #endif
 
     int available = accelMag.available();
     if (available > N_ACCEL) {
@@ -430,9 +458,27 @@ void processAccel(uint32_t msec)
         Log.p("Accelerometer samples disposed=").p(available - N_ACCEL).eol();
     }
 
-    int n = accelMag.read(data, N_ACCEL);
+    int n = accelMag.readInner(intData, data, N_ACCEL);
     ASSERT(n <= N_ACCEL);
+    for(int i=0; i<n; ++i) {
+        averageAccel.push(intData[i]);
+    }
 
+    Vec3<int32_t> magData;
+    // readMag() should only return >0 if there is new data from the hardware.
+    if (accelMag.readMag(&magData, 0) > 0) {
+        // The accelerometer and magnemometer are both clocked at 100Hz.
+        // The swing is set up for constant data; assume n is the same for both.
+        // Hopefully we keep a constant enough rate this doesn't matter.
+        // int nMag = n > 0 ? n : 1;
+        // Keep waffling on this...assuming when blade is lit this will pretty
+        // consistently get hit every 10ms.
+        // Log.p("magData t=").p(msec).p(" x=").v3(magData).p(" ").v3(accelMag.getMagMin()).p(" ").v3(accelMag.getMagMax()).eol();
+
+        swing.push(magData, accelMag.getMagMin(), accelMag.getMagMax());
+        float dot = swing.dotOrigin();
+        sfx.sm_setSwing(swing.speed(), (int)((1.0f + dot)*128.5f));
+    }
     if (bladeState.state() == BLADE_ON) {
         for (int i = 0; i < n; ++i)
         {
@@ -450,33 +496,39 @@ void processAccel(uint32_t msec)
             // loop...which makes sense. (Sortof). But leads to super-long
             // motion. So if time is above a threshold, allow replay.
             // Actual motion / impact sounds are usually less that 1 second.
-#ifdef SABER_SOUND_ON
-            bool sfxOverDue = ((msec - lastMotionTime) > 1500) &&
-                              ((sfx.lastSFX() == SFX_MOTION) || (sfx.lastSFX() == SFX_IMPACT));
-#else
-            bool sfxOverDue = false;
-#endif
+            // TODO this needs a different workaround.
+//#ifdef SABER_SOUND_ON
+//            bool sfxOverDue = ((msec - lastMotionTime) > 1500) &&
+//                              ((sfx.lastSFX() == SFX_MOTION) || (sfx.lastSFX() == SFX_IMPACT));
+//#else
+//            bool sfxOverDue = false;
+//#endif
 
             if ((g2Normal >= impact * impact))
             {
                 bladeFlash.doFlash(millis());
                 if ((msec - lastImpactTime) > IMPACT_MIN_TIME) {
-                    bool sound = sfx.playSound(SFX_IMPACT, sfxOverDue ? SFX_OVERRIDE : SFX_GREATER_OR_EQUAL);
+                    bool sound = false;
+                    if (sfx.smoothMode())
+                        sound = sfx.sm_playEvent(SFX_IMPACT);
+                    else
+                        sound = sfx.playSound(SFX_IMPACT, SFX_GREATER_OR_EQUAL);
+
                     if (sound)
                     {
                         Log.p("Impact. g=").p(sqrt(g2)).eol();
                         lastImpactTime = msec;
-                        lastMotionTime = msec;
+                        // lastMotionTime = msec;
                     }
                 }
             }
-            else if (g2 >= motion * motion)
+            else if (!sfx.smoothMode() && g2 >= motion * motion)
             {
-                bool sound = sfx.playSound(SFX_MOTION, sfxOverDue ? SFX_OVERRIDE : SFX_GREATER);
+                bool sound = sfx.playSound(SFX_MOTION, SFX_GREATER);
                 if (sound)
                 {
                     Log.p("Motion. g=").p(sqrt(g2)).eol();
-                    lastMotionTime = msec;
+                    // lastMotionTime = msec;
                 }
             }
         }
@@ -502,15 +554,31 @@ void loop() {
     buttonA.process();
     ledA.process();
 
-    bladeFlash.tick(msec);
-    bladeState.process(&blade, bladeFlash, millis());
     processAccel(msec);
-    sfx.process(bladeState.bladeOn());
+
+    bladeFlash.tick(msec);
+    if (uiMode.mode() == UIMode::COLOR_WHEEL && buttonA.held()) {
+        colorWasProcessed = true;
+        processColorWheel(false);           
+        bladePWM.setRGB(bladeFlash.getColor());
+    }
+    else {
+        bladeState.process(&bladePWM, bladeFlash, millis());
+    }
+    
+    bool still = true;
+    sfx.process(bladeState.state(), delta, &still);
+    if (still) {
+        swing.setOrigin();
+        bool recalibrated = accelMag.recalibrateMag();
+        if (recalibrated) {
+            swing.recalibrate();
+        }
+    }
 
     if (vbatTimer.tick(delta)) {
         voltmeter.takeSample();
-        blade.setVoltage(voltmeter.averagePower());
-        uiRenderData.mVolts = voltmeter.averagePower();
+        bladePWM.setVoltage(voltmeter.averagePower());
     }
     
     #ifdef PROFILE
@@ -519,6 +587,14 @@ void loop() {
         DumpProfile();
     }
     #endif    
+    #ifdef AUDIO_PROFILE
+    if (audioPrintTimer.tick(delta)) {
+        Log.p("Cycle=").p(I2SAudioDriver::getCallbackCycle())
+            .p(" Time=").p(I2SAudioDriver::callbackMicros / (10 * audioPrintTimer.period())).p("%")
+            .eol();
+        I2SAudioDriver::callbackMicros = 0;
+    }
+    #endif
 
     loopDisplays(msec, delta);
 }
@@ -547,11 +623,13 @@ void loopDisplays(uint32_t msec, uint32_t delta)
     #endif
 
     if (displayTimer.tick(delta)) {
-        uiRenderData.color = Blade::convertRawToPerceived(saberDB.bladeColor());
+        uiRenderData.volume = saberDB.volume4();
+        uiRenderData.color = BladePWM::convertRawToPerceived(saberDB.bladeColor());
+        uiRenderData.palette = saberDB.paletteIndex();
+        uiRenderData.mVolts = voltmeter.averagePower();
+        uiRenderData.fontName = manifest.getUnit(sfx.currentFont()).getName();
 
-        #if SABER_DISPLAY == SABER_DISPLAY_7_5_DEPRECATED
-            display75.Draw(msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
-        #elif SABER_DISPLAY == SABER_DISPLAY_7_5
+        #if SABER_DISPLAY == SABER_DISPLAY_7_5
             display75.Draw(msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
             dotMatrix.setFrom7_5(display75.Pixels());
         #elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
@@ -585,9 +663,7 @@ void loopDisplays(uint32_t msec, uint32_t delta)
     }
 
     // Now loop() the specific display.
-    #if SABER_DISPLAY == SABER_DISPLAY_7_5_DEPRECATED
-        pixelMatrix.loop(msec, display75.Pixels());
-    #elif SABER_DISPLAY == SABER_DISPLAY_7_5
+    #if SABER_DISPLAY == SABER_DISPLAY_7_5
         {
             uint8_t a=0, b=0;
             dotMatrix.loop(micros(), &a, &b);

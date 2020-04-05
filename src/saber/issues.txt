@@ -1,12 +1,21 @@
 Issues:
 
-Tester: turn back on blade flash using delays
-
-Smooth Swing support
-Crackle in hum sound (how??)
-Color section mode
+- less motion sensitivity
+- sensitivity up and down
+- clipping / limiting in mixer (maybe 64 bit okay??)
+- Crackle in hum sound (how??)
+- correct sound font for leia
 
 Fixed
+x smooth swing decay, decay class
+x ignite / retract mode state
+x playing hum past retract
+x need to keep updating / reset magnemometer
+x powerLevel or vbatToPowerLevel...both is crazy
+x volume smoothing (driver)
+x volume "drag" (SFX)
+x Color section mode
+x Tester: turn back on blade flash using delays
 x Tester: Blade doesn't change color
 x Fix analogReference(), deprecated by i2s audio
 x blade flash on retract. Neopixel not the issue. Add assert?

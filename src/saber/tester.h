@@ -1,3 +1,25 @@
+/*
+  Copyright (c) Lee Thomason, Grinning Lizard Software
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+  of the Software, and to permit persons to whom the Software is furnished to do
+  so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
+
 #ifndef SABER_TESTER_INCLUDED
 #define SABER_TESTER_INCLUDED
 
@@ -8,7 +30,7 @@ class Button;
 struct ButtonCBHandlers;
 class Tester;
 class SaberDB;
-class Blade;
+class BladePWM;
 class BladeFlash;
 
 namespace osbr {
@@ -37,7 +59,7 @@ class Tester
 public:
 	Tester();
 	void attach(Button* buttonA);
-	void attachDB(SaberDB* _saberDB, Blade* _blade, BladeFlash* _bladeFlash) { saberDB = _saberDB; blade = _blade; bladeFlash = _bladeFlash;}
+	void attachDB(SaberDB* _saberDB, BladePWM* _blade, BladeFlash* _bladeFlash) { saberDB = _saberDB; bladePWM = _blade; bladeFlash = _bladeFlash;}
 
 	void runTests();
 	void process();
@@ -50,21 +72,16 @@ public:
 	void sendEvent(uint32_t event);
 	
 	SaberDB* getSaberDB() { return saberDB; }
-	Blade* getBlade() { return blade; }
+	BladePWM* getBladePWM() { return bladePWM; }
 	BladeFlash* getBladeFlash() { return bladeFlash;}
 
+	// check the common test termination - returns true
+	// if the blade has turned on and then back off again.
 	bool checkOnOff();
 
 private:	
 	void start();
 	void done();
-
-	enum {
-		TEST_STATE_NONE,
-		TEST_STATE_START,
-		TEST_STATE_RUN,
-		TEST_STATE_DONE
-	};
 
 	enum {
 		ACTION_NONE,
@@ -88,11 +105,12 @@ private:
 
 	int currentTest = 0;
 	bool running = false;
-	SaberDB* saberDB = 0;
-	Blade* blade = 0;
-	BladeFlash* bladeFlash = 0;
-	uint32_t lastProcessTime = 0;
 	bool wasOn = false;
+	uint32_t lastProcessTime = 0;
+
+	SaberDB* saberDB = 0;
+	BladePWM* bladePWM = 0;
+	BladeFlash* bladeFlash = 0;
 	Button* button;
 
 	static Tester* s_instance;

@@ -1,3 +1,25 @@
+/*
+  Copyright (c) Lee Thomason, Grinning Lizard Software
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+  of the Software, and to permit persons to whom the Software is furnished to do
+  so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
+
 #include "dotstar.h"
 #include <Arduino.h>
 #include <SPI.h>
@@ -85,7 +107,8 @@ void DotStar::display(const osbr::RGB* led, int nLEDs, uint16_t brightness)
     // RGB, global brightness.
     // Brightness is 5 bits; 0-31
     // Will be fully on at either 255 or 256
-    const uint8_t bright = (brightness * 31 / 255) | 0xE0;
+    uint8_t bright = (brightness > 255) ? 31 : (brightness >> 3);
+    bright |= 0xe0;
 
     for (int i = 0; i < nLEDs; ++i, ++led) {
         // Brightness
@@ -121,12 +144,8 @@ void DotStar::display(const osbr::RGBA* led, int nLEDs)
 
     // RGBA, per-LED brightness.
     for (int i = 0; i < nLEDs; ++i, ++led) {
-        // Brightness is 5 bits; 0-31
-        // Will be fully on at either 255 or 256
-        uint8_t bright = led->a * 31 / 255;
-        // High bits are always set.
-        bright |= 0xE0;
-        // Brightness
+        // Brightness is 5 bits; 0-31 with high bits always set.
+        uint8_t bright = (led->a >> 3) | 0xe0;
         transfer(bright);
 
         // Color

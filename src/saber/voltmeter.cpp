@@ -1,3 +1,25 @@
+/*
+  Copyright (c) Lee Thomason, Grinning Lizard Software
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+  of the Software, and to permit persons to whom the Software is furnished to do
+  so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
+
 #ifndef _WIN32
 #include <Arduino.h>
 #include "Grinliz_Arduino_Util.h"
@@ -6,39 +28,6 @@
 #include "Grinliz_Util.h"
 #include "pins.h"
 #include "voltmeter.h"
-
-
-AveragePower::AveragePower()
-{
-    for(int i=0; i<NUM_SAMPLES; ++i) {
-        m_sample[i] = NOMINAL_VOLTAGE;
-    }
-    m_power = NOMINAL_VOLTAGE;
-}
-
-
-void AveragePower::push(uint32_t milliVolts)
-{
-    ASSERT(milliVolts > 2000 && milliVolts < 6500);
-    m_sample[m_pos] = milliVolts;
-    m_pos++;
-    if (m_pos == NUM_SAMPLES) m_pos = 0;
-    m_power = 0;
-}
- 
-
-uint32_t AveragePower::power() const
-{
-    if (m_power == 0) {
-        uint32_t total = 0;
-        for (int i = 0; i < NUM_SAMPLES; ++i) {
-            total += m_sample[i];
-        }
-        m_power = total >> SAMPLE_SHIFT;
-    }
-    return m_power;
-}
-
 
 #ifndef _WIN32
 Voltmeter* Voltmeter::_instance = 0;
@@ -52,7 +41,7 @@ void Voltmeter::begin()
     delay(50);
     #endif
 
-    for(int i=0; i<AveragePower::NUM_SAMPLES; ++i) {
+    for(int i=0; i<m_averagePower.numSamples(); ++i) {
         m_averagePower.push(readVBat());
     }
     Log.p("Vbat: ").p(readVBat()).p(" Ave:").p(averagePower()).eol();
@@ -81,8 +70,8 @@ uint32_t Voltmeter::takeSample()
 }
 #endif
 
-
-int AveragePower::vbatToPowerLevel(int32_t vbat, int maxLevel)
+/*
+int Voltmeter::vbatToPowerLevel(int32_t vbat, int maxLevel)
 {
     int32_t level = maxLevel * (vbat - LOW_VOLTAGE) / (HIGH_VOLTAGE - LOW_VOLTAGE);
 
@@ -90,4 +79,4 @@ int AveragePower::vbatToPowerLevel(int32_t vbat, int maxLevel)
     if (level > maxLevel) level = maxLevel;
     return level;
 }
-
+*/

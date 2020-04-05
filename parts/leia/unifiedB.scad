@@ -4,8 +4,8 @@ use <../inset.scad>
 use <testplate.scad>
 include <dim.scad>
 
-DRAW_AFT  = true;
-DRAW_FORE = false;
+DRAW_AFT  = false;
+DRAW_FORE = true;
 DRAW_PLATE = false;
 
 EPS = 0.01;
@@ -76,7 +76,6 @@ module drawAft()
     DZ_PORT   = DZ_SECTION / 2 + 12.0;
     DZ_SWITCH = DZ_SECTION / 2 - 12.0;
 
-
     echo("DZ from section front:", DZ_FORE_OUTER - Z_END_INSET);
 
     difference() 
@@ -99,7 +98,8 @@ module drawAft()
                     roundRect = 3.175/2,
                     frontBridge=false,
                     bridgeStyle=2,
-                    dyInset=DY_INSET
+                    dyInset=DY_INSET,
+                    dySwitch=5.5 + 3.7
                 );
             }
             translate([0, 0, SPKR_Z]) difference() {
@@ -119,6 +119,7 @@ module drawAft()
             dotstarX = 12.4;    // of the strip, not the LED
             rotate([0, 0, 15])
             {
+                // should set back 3.0 or 3.5!!!
                 translate([D_INNER_AFT/2 - 2.5, 0, DZ_BOLT + Z_START_SECTION - dotstarZ/2]) 
                     polygonXY(h=dotstarZ, points = [
                         [0, -dotstarX/2],
