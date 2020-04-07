@@ -29,23 +29,22 @@
 #include "pins.h"
 #include "voltmeter.h"
 
-#ifndef _WIN32
 Voltmeter* Voltmeter::_instance = 0;
 
 void Voltmeter::begin()
 {
+    m_averagePower.fill(3800);
+
     #ifdef SABER_VOLTMETER
-    analogReference(AR_INTERNAL1V0);    // FIXME: also 1.65 - need to check range.
     analogRead(PIN_VMETER);     // warm up the ADC to avoid spurious initial value.
     Log.p("Voltmeter open.").eol();
-    delay(50);
-    #endif
+    delay(10);
 
     for(int i=0; i<m_averagePower.numSamples(); ++i) {
         m_averagePower.push(readVBat());
+        delay(2);
     }
     Log.p("Vbat: ").p(readVBat()).p(" Ave:").p(averagePower()).eol();
-    #ifdef SABER_VOLTMETER
     Log.p("Voltmeter initialized.").eol();
     #endif
 }
@@ -55,7 +54,16 @@ uint32_t Voltmeter::readVBat()
 {
     #ifdef SABER_VOLTMETER
         uint32_t analog = analogRead(PIN_VMETER);
-        uint32_t mV = analog * UVOLT_MULT / uint32_t(1000);
+        
+        // Voltage divider:
+        //        Vref * s    (Rl + Rh)
+        // Vhi = (--------) * --------- * k
+        //          range         Rl
+
+        // But don't want to overflow, so go in stages.
+        uint32_t term0 = m_vRef * analog / m_range;
+        uint32_t term1 = (m_rLower + m_rHigher) * m_tune / m_rLower;
+        uint32_t mV = term0 * term1 / 1000; // 1000 normalizes k
         return mV;
     #else
         return NOMINAL_VOLTAGE;
@@ -68,15 +76,3 @@ uint32_t Voltmeter::takeSample()
     m_averagePower.push(sample);
     return sample;
 }
-#endif
-
-/*
-int Voltmeter::vbatToPowerLevel(int32_t vbat, int maxLevel)
-{
-    int32_t level = maxLevel * (vbat - LOW_VOLTAGE) / (HIGH_VOLTAGE - LOW_VOLTAGE);
-
-    if (level < 0) level = 0;
-    if (level > maxLevel) level = maxLevel;
-    return level;
-}
-*/

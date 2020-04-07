@@ -83,7 +83,7 @@ UIRenderData uiRenderData;
 BladeState  bladeState;
 UIModeUtil  uiMode;
 SaberDB     saberDB;
-Voltmeter   voltmeter;
+Voltmeter   voltmeter(3300, 10000, 47000, 4095, 1000);
 BladeFlash  bladeFlash;
 CMDParser   cmdParser(&saberDB, manifest);
 BladePWM    bladePWM;
@@ -201,6 +201,8 @@ void setup() {
     delay(10);
 
     Log.p("Init systems.").eol();
+    analogReadResolution(12);
+    analogReference(AR_DEFAULT);
     voltmeter.begin();
     delay(10);
     bladePWM.setRGB(RGB::BLACK);
