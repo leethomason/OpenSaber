@@ -138,8 +138,9 @@ void BladePWM::setVoltage(int milliVolts)
         // Denominator x1000 corrects for units (mAmps, mOhms, mVolts)
         m_throttle[i] = FixedNorm(amps[i] * res[i] / 1000, m_vbat - vF[i] );
         if (m_throttle[i] <= 0) {
-            Log.p(i).p(": ").p(amps[i]).p(" ").p(res[i]).p(" ").p(m_vbat).p(" ").p(vF[i]).eol();
-            ASSERT(false);
+            Log.p(i).p(": mAmps").p(amps[i]).p(" res: ").p(res[i]).p(" vbat: ").p(m_vbat).p(" vF: ").p(vF[i]).eol();
+            //ASSERT(false);
+            m_throttle[i] = 0;
         }
         // Want more power than we have as the battery goes down:
         if (m_throttle[i] > 1)
