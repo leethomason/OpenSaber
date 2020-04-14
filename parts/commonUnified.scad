@@ -104,8 +104,8 @@ module tjoint(dz, do, di, yTrim, zTrim, slot)
 module keyJoint(dz, do, di, slot, angle=0)
 {
     DZ = dz;
-    YTRIM = slot ? 0.4 : 0.0;
-    ZTRIM = slot ? 0.2 : 0.0;
+    YTRIM = slot ? 0.6 : 0.0;
+    ZTRIM = slot ? 0.4 : 0.0;
     T = do - di;
 
     intersection() {
@@ -475,6 +475,40 @@ module oneBaffleBottonRail(d, dz)
     }    
 }
 
+module bridgeAndRail(bridge, d, dz, bottomRail=true)
+{
+
+    if (bridge > 0) {
+        if (bridge == 1) 
+        {
+            yBridge = yAtX(X_BRIDGE+T_BRIDGE, d/2);
+
+            translate([X_BRIDGE, -yBridge, dz]) 
+                baffleHalfBridge(dz, T_BRIDGE);        
+            mirror([1, 0, 0]) translate([X_BRIDGE, -yBridge, dz]) 
+                baffleHalfBridge(dz, T_BRIDGE);
+            if (!bridgeOnlyBottom) {
+                translate([X_BRIDGE, yBridge - dz*2, dz]) 
+                    baffleHalfBridge(dz, T_BRIDGE);        
+                mirror([1, 0, 0]) translate([X_BRIDGE, yBridge - dz*2, dz]) 
+                    baffleHalfBridge(dz, T_BRIDGE);
+            }
+        }
+        else {
+            translate([0, 0, dz]) {
+                if (bridge == 2)
+                    bridge2(d, dz);
+                else if (bridge == 3)
+                    bridge3(d, dz);
+            }
+        }
+        if (bottomRail) {
+            oneBaffleBottonRail(d, dz);
+            mirror([1,0,0]) oneBaffleBottonRail(d, dz);
+        }
+    }
+}
+
 TROUGH_0 = 10;
 TROUGH_1 = 10;
 TROUGH_2 = 14;
@@ -498,17 +532,20 @@ module oneBaffle(   d,
     yMC = -yAtX(X_MC/2, d/2) + 1.0;
 
     difference() {
-        if (slopeFront) {
-            OVERLAP = 0.8;
-            REDUCE = 1;
+        union() {
+            if (slopeFront) {
+                OVERLAP = 0.8;
+                REDUCE = 1;
 
-            cylinder(h=dz - OVERLAP, d=d + dExtra);
-            translate([0, 0, dz-OVERLAP])
-                cylinder(h=OVERLAP, d1=d + dExtra, 
-                         d2=d + dExtra - 1);
-        }
-        else {
-            cylinder(h=dz, d=d + dExtra);
+                cylinder(h=dz - OVERLAP, d=d + dExtra);
+                translate([0, 0, dz-OVERLAP])
+                    cylinder(h=OVERLAP, d1=d + dExtra, 
+                            d2=d + dExtra - 1);
+            }
+            else {
+                cylinder(h=dz, d=d + dExtra);
+            }
+            bridgeAndRail(bridge, d, dz, bottomRail=bottomRail);
         }
 
         if (battery) {
@@ -559,36 +596,6 @@ module oneBaffle(   d,
                 translate([-TROUGH_0/2, 0]) 
                     cube(size=[TROUGH_0, 30, dz + EPS2]);
             }
-        }
-    }
-
-    if (bridge > 0) {
-        if (bridge == 1) 
-        {
-            yBridge = yAtX(X_BRIDGE+T_BRIDGE, d/2);
-
-            translate([X_BRIDGE, -yBridge, dz]) 
-                baffleHalfBridge(dz, T_BRIDGE);        
-            mirror([1, 0, 0]) translate([X_BRIDGE, -yBridge, dz]) 
-                baffleHalfBridge(dz, T_BRIDGE);
-            if (!bridgeOnlyBottom) {
-                translate([X_BRIDGE, yBridge - dz*2, dz]) 
-                    baffleHalfBridge(dz, T_BRIDGE);        
-                mirror([1, 0, 0]) translate([X_BRIDGE, yBridge - dz*2, dz]) 
-                    baffleHalfBridge(dz, T_BRIDGE);
-            }
-        }
-        else {
-            translate([0, 0, dz]) {
-                if (bridge == 2)
-                    bridge2(d, dz);
-                else if (bridge == 3)
-                    bridge3(d, dz);
-            }
-        }
-        if (bottomRail) {
-            oneBaffleBottonRail(d, dz);
-            mirror([1,0,0]) oneBaffleBottonRail(d, dz);
         }
     }
 }

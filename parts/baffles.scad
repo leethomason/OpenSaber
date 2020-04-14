@@ -62,7 +62,9 @@ module bridge2(d, dz)
             tube(h=dz, do=d - D_OUTER, di=d - D_INNER);
             union() {
                 translate([-d, d*0.10, 0]) {
-                    polygonYZ(d*2, [[0,0], [dz*2, dz*2], [dz*2, 0]]);
+                    polygonYZ(d*2, [
+                        [0,0], [dz*2, dz*2], [dz*4, dz*2], [dz*2, 0]
+                    ]);
                 }        
                 translate([-d, -d*0.32, 0]) {
                     polygonYZ(d*2, [[0,0], [dz*2, dz*2], [dz*2, 0]]);
