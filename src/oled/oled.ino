@@ -5,9 +5,15 @@
 
 #include "Grinliz_Arduino_Util.h"
 
+/*
 #define PIN_OLED_DC 7
 #define PIN_OLED_RESET 9
 #define PIN_OLED_CS 10
+*/
+#define PIN_OLED_DC A5
+#define PIN_OLED_RESET 2
+#define PIN_OLED_CS A4
+
 OLED_SSD1306 display(PIN_OLED_DC, PIN_OLED_RESET, PIN_OLED_CS);
 
 static const int OLED_WIDTH = 128;
@@ -90,7 +96,7 @@ void setup()
     vrender.Attach(BlockDrawOLED);
     vrender.SetClip(VRender::Rect(0, 0, OLED_WIDTH, OLED_HEIGHT));
     vrender.SetSize(OLED_WIDTH, OLED_HEIGHT);
-    vrender.SetCamera(OLED_WIDTH, OLED_HEIGHT, -1, -1);
+    //vrender.SetCamera(OLED_WIDTH, OLED_HEIGHT, -1, -1);
 
     delay(100);
 

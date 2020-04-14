@@ -115,6 +115,33 @@ module headerHolder(diameter, dy)
     }
 }
 
+module switchHolder(diameter, dzSwitch, dyInset, dySwitch)
+{
+    echo(diameter, dzSwitch, dyInset, dySwitch);
+
+    rInner = diameter / 2;
+    X_SWITCH = 6.5;
+    Y_SWITCH = 3.0;
+
+    intersection() {
+        BRIDGE_T = 3;
+        cylinder(h=300, d=diameter);
+        translate([0, 0, dzSwitch - SWITCH_BRIDGE_DZ/2]) {
+            translate([-20, rInner - dySwitch - dyInset - BRIDGE_T]) {
+                cube(size=[40, BRIDGE_T, SWITCH_BRIDGE_DZ]);
+            }
+
+            translate([X_SWITCH/2, rInner - dySwitch - dyInset, 0]) {
+                cube(size=[50, Y_SWITCH, SWITCH_BRIDGE_DZ]);
+            }
+
+            mirror([-1, 0, 0]) translate([X_SWITCH/2, rInner - dySwitch - dyInset, 0]) {
+                cube(size=[50, Y_SWITCH, SWITCH_BRIDGE_DZ]);
+            }
+        }
+    }
+}
+
 
 /*
     Creates a section with an inset holder, intended to give access to the switch
@@ -133,7 +160,6 @@ module insetHolder( diameter,
                     dzUSB = 0,
                     bridgeStyle=1,
                     bridgeStyleArray=undef,
-                    pinHeaderHolder=false,
                     firstButtressFullRing=true,
                     roundRect=0,
                     dzFore=0,      // make the first baffle this thicknes  (0 to use standard)
@@ -187,9 +213,6 @@ module insetHolder( diameter,
                         mirror([-1, 0, 0]) translate([X_SWITCH/2, rInner - dySwitch - dyInset, 0]) {
                             cube(size=[50, Y_SWITCH, SWITCH_BRIDGE_DZ]);
                         }
-
-                        if (pinHeaderHolder)
-                            headerHolder(diameter, rInner - SWITCH_DY - dyInset - 9.9);
                     }
                 }
             }

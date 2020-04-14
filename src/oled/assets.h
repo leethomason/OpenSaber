@@ -20,33 +20,27 @@
   SOFTWARE.
 */
 
-#pragma once
+#ifndef DRAW_INCLUDED
+#define DRAW_INCLUDED
+
 #include <stdint.h>
-#include "rgb.h"
-#include "Grinliz_Util.h"
 
-struct UIRenderData
-{
-    uint8_t volume = 0;     // 0-4
-    uint8_t palette = 0;    // 0-7
-    uint32_t mVolts = 0;    // actual voltage in milli-volts
-    CStr<10> fontName;
+const uint8_t* get_jBird(int* width, int* height);
 
-    osbr::RGB color;	// NOT the RGB of the LED. An GGB LED would be
-                        // green if set to (1, 0, 0), so the bladeColor
-                        // should be (0, 1, 0)
+// Created using the DotFactory.
+// Fonts:
+//		Y: fixed
+//		X: tightest
+//		Bit layout: Column Major
+//		Bit order: MSB first
+// Images:
+//		Bit layout: Column Major
+//		Bit order: MSB first
 
-    static int powerLevel(uint32_t mVolts, int maxLevel) {
-        static const int32_t NOMINAL = 3700;
-        static const int32_t VARIATION = 400;
-        static const int32_t HIGH_VOLTAGE = NOMINAL + VARIATION;
-        static const int32_t LOW_VOLTAGE = NOMINAL - VARIATION;
+const uint8_t* getGlypth_aurekBesh6(int charID, int* advance, int* w, int* rows);
+const uint8_t* getGlypth_calibri8(int charID, int* advance, int* w, int* rows);
 
-        int32_t level = maxLevel * (mVolts - LOW_VOLTAGE) / (HIGH_VOLTAGE - LOW_VOLTAGE);
-        if (level < 0) level = 0;
-        if (level > maxLevel) level = maxLevel;
-        return level;
-    }
+void getGlypth_tomThumb5(int charID, uint8_t* glyph, int* advance=0, int* w=0, int* rows=0);
+const uint8_t* getGlypth_tomThumb5(int charID, int* advance, int* w, int* rows);
 
-    UIRenderData() {}
-};
+#endif // DRAW_INCLUDED

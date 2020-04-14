@@ -74,5 +74,8 @@ uint32_t Voltmeter::takeSample()
 {
     uint32_t sample = readVBat();
     m_averagePower.push(sample);
+    if (m_averagePower.origin())
+        m_eased.push(m_averagePower.average());
+
     return sample;
 }

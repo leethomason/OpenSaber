@@ -552,13 +552,14 @@ public:
             m_average = total / N;
             m_valid = true;
         }
-        return m_average;
+        return (TYPE) m_average;
     }
 
     int numSamples() const { return N; }
+	bool origin() const { return m_pos == 0; }
 
 private:
-    mutable TYPE m_average;
+    mutable SUMTYPE m_average;
     mutable bool m_valid = false;
     int m_pos = 0;
     TYPE m_sample[N];

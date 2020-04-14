@@ -37,7 +37,7 @@ public:
     // range max reading of vRef; 1023 or 4095
     // tune constant multiplied to answer 1000
     Voltmeter(uint32_t vRef, uint32_t rLower, uint32_t rHigher, uint32_t range, uint32_t tune)
-        : m_averagePower(NOMINAL_VOLTAGE) 
+        : m_averagePower(NOMINAL_VOLTAGE), m_eased(NOMINAL_VOLTAGE)
     {       
         ASSERT(_instance == 0);
         _instance = this; 
@@ -57,6 +57,8 @@ public:
     uint32_t readVBat();
     /// Average power.
     uint32_t averagePower() const { return m_averagePower.average(); }
+    /// For display
+    uint32_t easedPower() const { return m_eased.average(); }
 
     /// Add a sample to the average power.
     uint32_t takeSample();
@@ -71,6 +73,7 @@ private:
     uint32_t m_range = 0;
     uint32_t m_tune = 0;
     AverageSample<uint16_t, uint32_t, 64> m_averagePower;
+    AverageSample<uint16_t, uint32_t, 4> m_eased;
 };
 
 #endif // SABER_VOLTMETER_INCLUDED
