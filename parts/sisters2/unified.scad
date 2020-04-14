@@ -59,13 +59,16 @@ if (DRAW_FORE) {
                             buffButtress=2.0
                         );
                         intersection() {
-                            T0 = 6;
-                            T1 = 4;
-                            cylinder(h=DZ_DISPLAY_SECTION, d=D_INNER);
+                            // Buff up the buttresses and the key slot
+                            // Buffing "all the way front" because having trouble
+                            // with vents cracking.
+                            DZ = M_END - M_JOINT;
+                            T0 = 4.5;
+                            T1 = 4.5;
+                            cylinder(h=DZ, d=D_INNER);
                             union() {
-                                // Buff up the buttresses and the key slot
-                                translate([D_INNER/2 - T0, -50, 0]) cube(size=[T0, 100, DZ_DISPLAY_SECTION]);
-                                mirror([-1, 0, 0]) translate([D_INNER/2 - T1, -50, 0]) cube(size=[T1, 100, DZ_DISPLAY_SECTION]);
+                                translate([D_INNER/2 - T0, -50, 0]) cube(size=[T0, 100, DZ]);
+                                mirror([-1, 0, 0]) translate([D_INNER/2 - T1, -50, 0]) cube(size=[T1, 100, DZ]);
                             }                    
                         }
                     }
@@ -89,7 +92,7 @@ if (DRAW_FORE) {
             translate([0, 0, M_JOINT + 16 + i*8]) capsule(70, 110, 2, true);
         for(i=[-1:2])
             translate([0, 0, M_JOINT + 16 + i*8]) capsule(160, 200, 2, true);
-        for(i=[0:1])
+        for(i=[0:2])
             translate([0, 0, M_POWER + i*8]) capsule(70, 110, 2, true);
         
         // Flat bottom
@@ -119,3 +122,6 @@ module cap(z0, z1, d)
         8.0);
     cap(M_BOLT, M_BOLT, 8.0);
 }
+
+*color("blue") translate([-OLED_DISPLAY_W/2, OLED_DY, M_JOINT + DZ_TO_PCB])
+    cube(size=[OLED_DISPLAY_W, OLED_SCREEN_DY, OLED_DISPLAY_L]);
