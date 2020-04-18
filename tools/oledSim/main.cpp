@@ -119,8 +119,7 @@ UIModeUtil::UIModeUtil()
 
 void UIModeUtil::nextMode()
 {
-	static const int NUM = (int)UIMode::PALETTE + 1;
-	m_mode = (UIMode)((int(m_mode) + 1) % NUM);
+	m_mode = (UIMode)((int(m_mode) + 1) % int(UIMode::NUM_MODES));
 }
 
 
@@ -251,7 +250,7 @@ int main(int, char**) {
         RENDER_DOTSTAR_6,
         NUM_RENDER_MODE
     };
-	int renderMode = RENDER_DOTSTAR_4;
+	int renderMode = RENDER_OLED;
     mode.set(UIMode::NORMAL);
 
 	const char* FONT_NAMES[8] = {

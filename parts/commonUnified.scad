@@ -73,18 +73,12 @@ module tjoint(dz, do, di, yTrim, zTrim, slot)
         [0, 0,], [10, 0], [10, 15]
     ];
 
-    translate([0, -HALFY/2 - yTrim/2, 0]) {
+    translate([0, -DY/2 - yTrim/2, 0]) {
         cube(size=[100, HALFY + yTrim, dz]);
     }
     // Adjust the top to be >45 degrees so it can be printed
     // without support. Less junk getting cleanup up in the 
     // slot is a good thing.
-    *if (slot) {
-        hy = HALFY / 2;
-        x = sqrt(RI*RI - hy*hy);
-        translate([x, hy, 0]) polygonXY(h=dz, points=TRI);
-    }
-
     translate([0, -DY/2 - yTrim/2, dz/2 - zTrim/2]) {
         cube(size=[100, DY + yTrim + BOOST, dz/2 + zTrim*2]);
     }
@@ -665,7 +659,7 @@ module speakerHolder(outer, dz, dzToSpkrBack, type, extraZ=0)
 }
 
 
-module powerPortRing(diameter, t, dz, dzToPort, portSupportToBack=false, counter=true)
+module powerPortRing(diameter, t, dz, dzToPort, portSupportToBack=false, counter=true, addY=0)
 {    
     difference() {
         union() {
@@ -673,11 +667,11 @@ module powerPortRing(diameter, t, dz, dzToPort, portSupportToBack=false, counter
             intersection() {
                 cylinder(h=dz, d=diameter);
                 if (portSupportToBack) {
-                    translate([-50, diameter/2 - DY_PORT, 0])
+                    translate([-50, diameter/2 - DY_PORT - addY, 0])
                         cube(size=[100, 50, D_PORT_SUPPORT/2 + dzToPort]);
                 }
                 else {
-                    translate([-50, diameter/2 - DY_PORT, dzToPort - D_PORT_SUPPORT/2])
+                    translate([-50, diameter/2 - DY_PORT - addY, dzToPort - D_PORT_SUPPORT/2])
                         cube(size=[100, 50, D_PORT_SUPPORT]);
                 }
             }

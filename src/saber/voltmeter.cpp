@@ -33,41 +33,41 @@ Voltmeter* Voltmeter::_instance = 0;
 
 void Voltmeter::begin()
 {
-    m_averagePower.fill(3800);
+    m_averagePower.fill(NOMINAL_VOLTAGE);
 
-    #ifdef SABER_VOLTMETER
+#if defined(SABER_VOLTMETER) && !defined(_WIN32)
     analogRead(PIN_VMETER);     // warm up the ADC to avoid spurious initial value.
     Log.p("Voltmeter open.").eol();
     delay(10);
 
-    for(int i=0; i<m_averagePower.numSamples(); ++i) {
+    for (int i = 0; i < m_averagePower.numSamples(); ++i) {
         m_averagePower.push(readVBat());
         delay(2);
     }
     Log.p("Vbat: ").p(readVBat()).p(" Ave:").p(averagePower()).eol();
     Log.p("Voltmeter initialized.").eol();
-    #endif
+#endif
 }
 
 
-uint32_t Voltmeter::readVBat() 
+uint32_t Voltmeter::readVBat()
 {
-    #ifdef SABER_VOLTMETER
-        uint32_t analog = analogRead(PIN_VMETER);
-        
-        // Voltage divider:
-        //        Vref * s    (Rl + Rh)
-        // Vhi = (--------) * --------- * k
-        //          range         Rl
+#if defined(SABER_VOLTMETER) && !defined(_WIN32)
+    uint32_t analog = analogRead(PIN_VMETER);
 
-        // But don't want to overflow, so go in stages.
-        uint32_t term0 = m_vRef * analog / m_range;
-        uint32_t term1 = (m_rLower + m_rHigher) * m_tune / m_rLower;
-        uint32_t mV = term0 * term1 / 1000; // 1000 normalizes k
-        return mV;
-    #else
-        return NOMINAL_VOLTAGE;
-    #endif
+    // Voltage divider:
+    //        Vref * s    (Rl + Rh)
+    // Vhi = (--------) * --------- * k
+    //          range         Rl
+
+    // But don't want to overflow, so go in stages.
+    uint32_t term0 = m_vRef * analog / m_range;
+    uint32_t term1 = (m_rLower + m_rHigher) * m_tune / m_rLower;
+    uint32_t mV = term0 * term1 / 1000; // 1000 normalizes k
+    return mV;
+#else
+    return NOMINAL_VOLTAGE;
+#endif
 }
 
 uint32_t Voltmeter::takeSample()
