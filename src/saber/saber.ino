@@ -83,7 +83,7 @@ UIRenderData uiRenderData;
 BladeState  bladeState;
 UIModeUtil  uiMode;
 SaberDB     saberDB;
-Voltmeter   voltmeter;
+Voltmeter   voltmeter(1650, 10000, 47000, 4095, 1000);
 BladeFlash  bladeFlash;
 CMDParser   cmdParser(&saberDB, manifest);
 BladePWM    bladePWM;
@@ -201,7 +201,8 @@ void setup() {
     delay(10);
 
     Log.p("Init systems.").eol();
-    analogReference(AR_DEFAULT);    // 3.3v
+    analogReadResolution(12);
+    analogReference(AR_INTERNAL1V65);
     voltmeter.begin();
     delay(10);
     bladePWM.setRGB(RGB::BLACK);
@@ -616,7 +617,7 @@ void loopDisplays(uint32_t msec, uint32_t delta)
         uiRenderData.volume = saberDB.volume4();
         uiRenderData.color = BladePWM::convertRawToPerceived(saberDB.bladeColor());
         uiRenderData.palette = saberDB.paletteIndex();
-        uiRenderData.mVolts = voltmeter.averagePower();
+        uiRenderData.mVolts = voltmeter.easedPower();
         uiRenderData.fontName = manifest.getUnit(sfx.currentFont()).getName();
     }
 

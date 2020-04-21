@@ -31,18 +31,34 @@ class Voltmeter
 public:
     enum {SAMPLE_INTERVAL = 12};
 
-    Voltmeter() : m_averagePower(NOMINAL_VOLTAGE) { 
+    // vRef reference voltage in mVolts
+    // rLower lower resistor (10000)
+    // rUpper higher resistor (47000)
+    // range max reading of vRef; 1023 or 4095
+    // tune constant multiplied to answer 1000
+    Voltmeter(uint32_t vRef, uint32_t rLower, uint32_t rHigher, uint32_t range, uint32_t tune)
+        : m_averagePower(NOMINAL_VOLTAGE), m_eased(NOMINAL_VOLTAGE)
+    {       
         ASSERT(_instance == 0);
         _instance = this; 
+
+        m_vRef = vRef;
+        m_rLower = rLower;
+        m_rHigher = rHigher;
+        m_range = range;
+        m_tune = tune;
     }
     static Voltmeter* instance() { return _instance; }
 
+    // set the analog reference before calling
     void begin();
 
     /// Instantaneous power. (Noisy).
     uint32_t readVBat();
     /// Average power.
     uint32_t averagePower() const { return m_averagePower.average(); }
+    /// For display
+    uint32_t easedPower() const { return m_eased.average(); }
 
     /// Add a sample to the average power.
     uint32_t takeSample();
@@ -51,7 +67,13 @@ public:
 
 private:
     static Voltmeter* _instance;
+    uint32_t m_vRef = 0;
+    uint32_t m_rLower = 0;
+    uint32_t m_rHigher = 0;
+    uint32_t m_range = 0;
+    uint32_t m_tune = 0;
     AverageSample<uint16_t, uint32_t, 64> m_averagePower;
+    AverageSample<uint16_t, uint32_t, 4> m_eased;
 };
 
 #endif // SABER_VOLTMETER_INCLUDED

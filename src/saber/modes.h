@@ -29,7 +29,8 @@ enum class UIMode {
     PALETTE,
     VOLUME,
     MEDITATION,
-    COLOR_WHEEL
+    COLOR_WHEEL,
+    NUM_MODES
 };
 
 enum {

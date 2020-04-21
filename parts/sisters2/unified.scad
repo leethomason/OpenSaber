@@ -3,7 +3,7 @@ use <../commonUnified.scad>
 include <dim.scad>
 
 DRAW_AFT = true;
-DRAW_FORE = true;
+DRAW_FORE = false;
 
 EPS = 0.01;
 EPS2 = 2 * EPS;
@@ -63,13 +63,16 @@ if (DRAW_FORE) {
                             // Buffing "all the way front" because having trouble
                             // with vents cracking.
                             DZ = M_END - M_JOINT;
-                            T0 = 4.5;
-                            T1 = 4.5;
+                            T0 = 5.0;
+                            T1 = 5.0;
                             cylinder(h=DZ, d=D_INNER);
-                            union() {
-                                translate([D_INNER/2 - T0, -50, 0]) cube(size=[T0, 100, DZ]);
-                                mirror([-1, 0, 0]) translate([D_INNER/2 - T1, -50, 0]) cube(size=[T1, 100, DZ]);
-                            }                    
+                            difference() {
+                                union() {
+                                    translate([D_INNER/2 - T0, -50, 0]) cube(size=[T0, 100, DZ]);
+                                    mirror([-1, 0, 0]) translate([D_INNER/2 - T1, -50, 0]) cube(size=[T1, 100, DZ]);
+                                }    
+                                cylinder(h=DZ, d=D_INNER - 7, $fn=40);         
+                            }       
                         }
                     }
                     keyJoint(DZ_JOINT, D_INNER, D_INNER - T_JOINT, true, 0);

@@ -102,6 +102,9 @@ void VectorUI::Draw(VRender* ren,
     static const osbr::RGBA WHITE(255, 255, 255);
     static const osbr::RGBA BLACK(0, 0, 0, 255);
 
+    uint8_t h, s, v;
+    rgb2hsv(data->color.r, data->color.g, data->color.b, &h, &s, &v);
+
     // Power
     if (mode == UIMode::NORMAL) {
         for (int r = 0; r < 8; ++r) {
@@ -121,9 +124,10 @@ void VectorUI::Draw(VRender* ren,
     }
     else if (mode == UIMode::VOLUME) {
         static const int S = 10;
-        ren->DrawRect(8, H / 2 - S / 2, S, S, WHITE);
+        static const int XS = 12;
+        ren->DrawRect(XS, H / 2 - S / 2, S, S, WHITE);
         for (int i = 2; i < 5; ++i) {
-            ren->DrawRect(12 + 4 * i, H / 2 - (S + i * 4) / 2, 2, S + i * 4, WHITE);
+            ren->DrawRect(XS + 4 + 4 * i, H / 2 - (S + i * 4) / 2, 2, S + i * 4, WHITE);
         }
     }
     else if (mode == UIMode::MEDITATION) {
@@ -133,9 +137,18 @@ void VectorUI::Draw(VRender* ren,
             renderer.DrawBitmap(8, 0, get_jBird);
         }
     }
+    else if (mode == UIMode::COLOR_WHEEL) {
+        static const int S = 24;
+        for (int i = 0; i < 6; ++i) {
+            ren->SetTransform(FixedNorm(i * 30, 180), W / 4 - 6, H / 2);
+            ren->DrawRect(-S / 2, -1, S, 2, WHITE);
+        }
+        ren->ClearTransform();
+        ren->DrawRect(W / 4 - 6 - 10, H / 2 - 10, 20, 20, WHITE, 1);
+    }
 
     // Audio
-    {
+    if (mode == UIMode::NORMAL || mode == UIMode::VOLUME) {
         for (int r = 0; r < 8; ++r) {
             Fixed115 d = r - Fixed115(7, 2);
             Fixed115 fx = Fixed115(8, 10) * d * d;
@@ -153,23 +166,6 @@ void VectorUI::Draw(VRender* ren,
             ren->SetTransform(rotations[r], W / 2, H / 2);
             ren->DrawRect(-1, 10, 2, 5, WHITE);
         }
-
-        /*
-        FixedNorm dt(time, 65535);
-        ren->SetTransform(dt, W / 2, H / 2);
-        ren->DrawRect(-10, -10, 20, 20, WHITE, 1);
-        */
-        /*
-        static const int N = 12;
-        FixedNorm dt(time, 65535);
-        for (int r = 0; r < N; ++r) {
-            ren->SetTransform(FixedNorm(r, N) + dt, W / 2, H / 2);
-            ren->DrawRect(-1, 6, 1, 8, WHITE);
-        }
-        */
-       
-        uint8_t h, s, v;
-        rgb2hsv(data->color.r, data->color.g, data->color.b, &h, &s, &v);
 
         ren->SetTransform(FixedNorm(h, 180), W / 2, H / 2);
         ren->DrawRect(-2, 0, 4, 12, WHITE);

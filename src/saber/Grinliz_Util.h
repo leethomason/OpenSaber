@@ -538,6 +538,11 @@ public:
         m_valid = false;
     }
 
+	void fill(TYPE value) {
+		for(int i=0; i<N; ++i)
+			push(value);
+	}
+
     TYPE average() const {
         if (m_valid == false) {
             SUMTYPE total = 0;
@@ -551,6 +556,7 @@ public:
     }
 
     int numSamples() const { return N; }
+	bool origin() const { return m_pos == 0; }
 
 private:
     mutable SUMTYPE m_average;

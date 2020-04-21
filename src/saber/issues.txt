@@ -2,11 +2,11 @@ Issues:
 
 - less motion sensitivity
 - sensitivity up and down
-- clipping / limiting in mixer (maybe 64 bit okay??)
-- Crackle in hum sound (how??)
-- correct sound font for leia
 
 Fixed
+x clipping / limiting in mixer (maybe 64 bit okay??)
+x Crackle in hum sound (how??)
+x correct sound font for leia
 x smooth swing decay, decay class
 x ignite / retract mode state
 x playing hum past retract

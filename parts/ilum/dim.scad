@@ -1,0 +1,40 @@
+use <../commonUnified.scad>
+M_0 = 0;
+
+// Test trims - rather tight.
+M_START = -((42.0 - 10.0) - 0.5);
+DZ_SPKR = 12.5;
+M_MC_BATTERY = M_START + DZ_SPKR;
+
+DZ_BODY = 101.5;
+M_AFT_FRONT = DZ_BODY - 10.5 - 0.5;
+// No thread cut:
+//M_AFT_THREAD_FRONT = DZ_BODY - 15.6 - 0.5;
+// No used cut:
+M_AFT_THREAD_FRONT = DZ_BODY - 10.0 - 0.5;
+DZ_AFT = M_AFT_FRONT - M_START;
+
+//DZ_FORE = 18.0;
+//M_FORE_FRONT = M_AFT_FRONT + DZ_FORE;
+
+D_INNER_FORE = 25.0;
+D_INNER = 31.60;
+D_OUTER = 36.9;
+
+DZ_BAFFLE = 3.0;
+
+N_BATT_BAFFLES = nBafflesNeeded(DZ_BAFFLE, "18650");
+M_JOINT = M_MC_BATTERY + zLenOfBaffles(N_BATT_BAFFLES, DZ_BAFFLE);
+
+DZ_POWER_RING = 18.0;
+DZ_BOLT = 8.0;          // switch to allen head for space?
+DZ_SWITCH = (M_AFT_THREAD_FRONT - M_JOINT - DZ_POWER_RING - DZ_BOLT);
+DZ_FORE = M_AFT_THREAD_FRONT - M_JOINT;
+
+M_BOLT_START = M_JOINT + DZ_POWER_RING;
+M_SWITCH_START = M_BOLT_START + DZ_BOLT;
+
+M_BOLT = M_BOLT_START + DZ_BOLT / 2;
+M_PORT = M_JOINT + DZ_POWER_RING / 2;
+M_SWITCH = M_SWITCH_START + DZ_SWITCH / 2;
+
