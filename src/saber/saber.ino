@@ -83,7 +83,7 @@ UIRenderData uiRenderData;
 BladeState  bladeState;
 UIModeUtil  uiMode;
 SaberDB     saberDB;
-Voltmeter   voltmeter(1650, 10000, 47000, 4095, 1000);
+Voltmeter   voltmeter(1650, 10000, 47000, 4095, VOLTMETER_TUNE);
 BladeFlash  bladeFlash;
 CMDParser   cmdParser(&saberDB, manifest);
 BladePWM    bladePWM;

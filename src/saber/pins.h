@@ -61,7 +61,7 @@
 // ----------------------------------
 #define SERIAL_DEBUG 				1
 #define SABER_MODEL 				SABER_MODEL_SISTERS2
-#define SABER_SUB_MODEL				SABER_SUB_MODEL_STANDARD
+#define SABER_SUB_MODEL				SABER_SUB_MODEL_CELESTIA
 // ----------------------------------
 
 #define LED_TYPE_RGB				1   // red-green-blue
@@ -744,26 +744,38 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 #elif (SABER_MODEL == SABER_MODEL_SISTERS2)
 	#define PCB_VERSION 			PCB_ITSY_2C
 	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
-	#define SABER_VOLTMETER			
 	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 	#define SABER_DISPLAY			SABER_DISPLAY_128_32
 
+	#define SABER_VOLTMETER			
 	#define SABER_UI_COLOR_WHEEL
 
-	static const int32_t UVOLT_MULT = 5000;
-	#define ID_STR "Leia Cree XPE2 RGB"
+#if SABER_SUB_MODEL ==  SABER_SUB_MODEL_CELESTIA	
+	#define ID_STR "Sisters-2 Celestia Cree XPE2 RGB"
+	static const int32_t VOLTMETER_TUNE = 1000; // fixme
+
+	static const int32_t RED_R    = 4300;	// fixme
+	static const int32_t GREEN_R  = 1000;	// fixme
+	static const int32_t BLUE_R   = 1800;	// fixme
+#elif SABER_SUB_MODEL == SABER_SUB_MODEL_LUNA
+	#define ID_STR "Sisters-2 Luna Luxeon RGB"
+	static const int32_t VOLTMETER_TUNE = 1000; // fixme
+
+	static const int32_t RED_R    = 4300;	// fixme
+	static const int32_t GREEN_R  = 1000;	// fixme
+	static const int32_t BLUE_R   = 1800;	// fixme
+#else
+	#error secondary saber not defined
+#endif
 
 	static const int32_t RED_VF   = 2200;
-	static const int32_t RED_I    = 400;
-	static const int32_t RED_R    = 4300;
+	static const int32_t RED_I    = 350;
 
 	static const int32_t GREEN_VF = 3200;
-	static const int32_t GREEN_I  = 400;
-	static const int32_t GREEN_R  = 1000;
+	static const int32_t GREEN_I  = 350;
 
 	static const int32_t BLUE_VF  = 3100;
-	static const int32_t BLUE_I   = 400;
-	static const int32_t BLUE_R   = 1800;
+	static const int32_t BLUE_I   = 350;
 
 	static const int VOLUME_1 = 20;
 	static const int VOLUME_2 = 60;
