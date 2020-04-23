@@ -6,6 +6,8 @@ include <dim.scad>
 $fn = 80;
 DRAW_AFT = false;
 DRAW_FORE = true;
+DRAW_RING0 = false;
+DRAW_RING1 = false;
 
 EPS = 0.01;
 ESP2 = 2 * EPS;
@@ -37,8 +39,8 @@ module ring(dz)
     }
 }
 
-translate([0, 0, M_AFT_FRONT - DZ_RING0]) ring(DZ_RING0);
-translate([0, 0, M_AFT_FRONT + 20.0]) mirror([0, 0, -1]) ring(DZ_RING1);
+if (DRAW_RING0) translate([0, 0, M_AFT_FRONT - DZ_RING0]) ring(DZ_RING0);
+if (DRAW_RING1) translate([0, 0, M_AFT_FRONT + 20.0]) mirror([0, 0, -1]) ring(DZ_RING1);
 
 module bottomDotstar()
 {
@@ -56,7 +58,7 @@ module bottomDotstar()
         translate([-DOTSTAR_STRIP_XZ/2, -D_INNER/2 + T/2 + OFFSETY, DOTSTAR_Z - 3*DOTSTAR_XZ/2 + 2 - EXTRAZ])
             cube(size=[DOTSTAR_STRIP_XZ, H0, DOTSTAR_PITCH * 5 + EXTRAZ]);
         translate([-(DOTSTAR_STRIP_XZ-D)/2, -D_INNER/2 + T/2 + OFFSETY, DOTSTAR_Z - 3*DOTSTAR_XZ/2 + 2 - EXTRAZ])
-            cube(size=[DOTSTAR_STRIP_XZ-D, H1, DOTSTAR_PITCH * 5 + EXTRAZ]);
+            cube(size=[DOTSTAR_STRIP_XZ - D, H1, DOTSTAR_PITCH * 5 + EXTRAZ]);
     }
 }
 
@@ -147,7 +149,3 @@ if (DRAW_FORE) {
 *color("blue") translate([0, 0, M_START-1]) cylinder(h=1, d=D_OUTER);
 *color("blue") translate([0, 0, M_AFT_THREAD_FRONT]) cylinder(h=1, d=D_OUTER);
 *color("blue") translate([0, 0, M_AFT_FRONT]) cylinder(h=1, d=D_OUTER);
-
-
-
-
