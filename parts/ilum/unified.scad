@@ -7,22 +7,52 @@ $fn = 40;
 DRAW_AFT = false;
 DRAW_FORE = true;
 
+EPS = 0.01;
+ESP2 = 2 * EPS;
+
 PLATE_TRIM = 1.0;
 JOINT = 8;
 T = 4;
+
+module dotStarCut()
+{
+    mirror([-1, 0, 0]) {
+        dotstarZ = dotstarStripZLen(4);
+        dotstarX = 12.4;    // of the strip, not the LED
+        rotate([0, 0, 10])  // FIXME correct rotation
+        {
+            // at least 3.0!
+            translate([D_INNER/2 - 3.5, 0, 0]) 
+                polygonXY(h=dotstarZ, points = [
+                    [0, -dotstarX/2],
+                    [10, -dotstarX/2 + 10],
+                    [10, dotstarX/2 + 10],
+                    [0, dotstarX/2]
+                ]);
+            
+            // Wire access
+            DX_WIRE = 9;
+            *translate([D_INNER_AFT/2 - 5.0, -DX_WIRE/2, Z_START_SECTION + DZ_BUTTRESS * 3])
+                cube(size=[20, DX_WIRE, DZ_BUTTRESS]);
+        }
+    }
+}
+
 
 if (DRAW_AFT) {
     translate([0, 0, M_START]) {
         speakerHolder(D_INNER, DZ_SPKR, 3.0, "std28");
     }
 
-    translate([0, 0, M_MC_BATTERY]) {
-        baffleMCBattery(D_INNER, N_BATT_BAFFLES, DZ_BAFFLE, bridgeStyle=2);
-        *color("red") battery(D_INNER, "18650");
+    difference() {
+        translate([0, 0, M_MC_BATTERY]) {
+            baffleMCBattery(D_INNER, N_BATT_BAFFLES, DZ_BAFFLE, bridgeStyle=2);
+            *color("red") battery(D_INNER, "18650");
+        }
     }
-
     translate([0, 0, M_JOINT]) rotate([0, 0, 0])
         keyJoint(JOINT, D_INNER, D_INNER - 4, false);
+
 }
 
 if (DRAW_FORE) {
@@ -66,6 +96,11 @@ if (DRAW_FORE) {
         
         translate([0, 0, M_JOINT]) rotate([0, 0, 0])
             keyJoint(JOINT, D_INNER, D_INNER - 4, true);
+
+        //translate([0, 0, M_JOINT + 8]) dotStarCut();
+
+        // Flat bottom
+        translate([-50, -D_INNER/2 - EPS, 0]) cube(size=[100, 1, 500]);
     }
 }
 
