@@ -7,6 +7,9 @@ $fn = 80;
 DRAW_AFT = false;
 DRAW_FORE = true;
 
+EPS = 0.01;
+ESP2 = 2 * EPS;
+
 PLATE_TRIM = 1.0;
 JOINT = 8;
 T = 4;
@@ -62,13 +65,15 @@ if (DRAW_AFT) {
         speakerHolder(D_INNER, DZ_SPKR, 3.0, "std28");
     }
 
-    translate([0, 0, M_MC_BATTERY]) {
-        baffleMCBattery(D_INNER, N_BATT_BAFFLES, DZ_BAFFLE, bridgeStyle=2);
-        *color("red") battery(D_INNER, "18650");
+    difference() {
+        translate([0, 0, M_MC_BATTERY]) {
+            baffleMCBattery(D_INNER, N_BATT_BAFFLES, DZ_BAFFLE, bridgeStyle=2);
+            *color("red") battery(D_INNER, "18650");
+        }
     }
-
     translate([0, 0, M_JOINT]) rotate([0, 0, 0])
         keyJoint(JOINT, D_INNER, D_INNER - 4, false);
+
 }
 
 if (DRAW_FORE) {
@@ -122,6 +127,11 @@ if (DRAW_FORE) {
         
         translate([0, 0, M_JOINT]) rotate([0, 0, 0])
             keyJoint(JOINT, D_INNER, D_INNER - 4, true);
+
+        //translate([0, 0, M_JOINT + 8]) dotStarCut();
+
+        // Flat bottom
+        translate([-50, -D_INNER/2 - EPS, 0]) cube(size=[100, 1, 500]);
     }
 }
 
