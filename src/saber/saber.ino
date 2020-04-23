@@ -76,7 +76,7 @@ Adafruit_ZeroI2S i2s(PIN_I2S_LRCLK, PIN_I2S_BITCLK, PIN_I2S_DATA, 2);
 I2SAudioDriver i2sAudioDriver(&dma, &i2s, &spiFlash, manifest);
 SFX sfx(&i2sAudioDriver, manifest);
 
-ButtonCB    buttonA(PIN_SWITCH_A, SABER_BUTTON);
+ButtonCB    buttonA(PIN_SWITCH_A, Button::INTERNAL_PULLUP);
 LEDManager  ledA(PIN_LED_A, false);
 
 UIRenderData uiRenderData;

@@ -3,13 +3,59 @@ use <../shapes.scad>
 use <../inset.scad>
 include <dim.scad>
 
-$fn = 40;
+$fn = 80;
 DRAW_AFT = false;
 DRAW_FORE = true;
 
 PLATE_TRIM = 1.0;
 JOINT = 8;
 T = 4;
+
+DOTSTAR_XZ = 5.6;
+DOTSTAR_PITCH = 7;
+DOTSTAR_STRIP_XZ = 12.4;
+DOTSTAR_Z = 52.0;   // center of first, fixme
+
+module ring(dz)
+{
+    difference() {
+        cylinder(h=dz, d=D_RING);
+ 
+        translate([R_TUBE, 0, 0]) cylinder(h=dz, d=D_TUBE_INNER);
+        translate([R_TUBE, 0, dz/2]) cylinder(h=dz, d=D_TUBE_OUTER);
+ 
+        translate([-R_TUBE, 0, 0]) cylinder(h=dz, d=D_TUBE_INNER);
+        translate([-R_TUBE, 0, dz/2]) cylinder(h=dz, d=D_TUBE_OUTER);
+
+        scale([1.4, 1, 1]) hull() {
+            translate([0, R_TUBE, 0])  cylinder(h=dz, d=6.0);
+            translate([0, -R_TUBE, 0]) cylinder(h=dz, d=6.0);
+        }
+    }
+}
+
+translate([0, 0, M_AFT_FRONT - DZ_RING0]) ring(DZ_RING0);
+translate([0, 0, M_AFT_FRONT + 20.0]) mirror([0, 0, -1]) ring(DZ_RING1);
+
+module bottomDotstar()
+{
+    H0 = 0.8;
+    H1 = 8;
+    D = 10;
+    OFFSETY = 0.1;
+
+    for(i=[0:3]) {
+        translate([-DOTSTAR_XZ/2, -D_INNER/2, DOTSTAR_Z + i * DOTSTAR_PITCH - DOTSTAR_XZ/2])
+            cube(size=[DOTSTAR_XZ, 8, DOTSTAR_XZ]);
+    }
+    EXTRAZ = 5.0;
+    hull() {
+        translate([-DOTSTAR_STRIP_XZ/2, -D_INNER/2 + T/2 + OFFSETY, DOTSTAR_Z - 3*DOTSTAR_XZ/2 + 2 - EXTRAZ])
+            cube(size=[DOTSTAR_STRIP_XZ, H0, DOTSTAR_PITCH * 5 + EXTRAZ]);
+        translate([-(DOTSTAR_STRIP_XZ-D)/2, -D_INNER/2 + T/2 + OFFSETY, DOTSTAR_Z - 3*DOTSTAR_XZ/2 + 2 - EXTRAZ])
+            cube(size=[DOTSTAR_STRIP_XZ-D, H1, DOTSTAR_PITCH * 5 + EXTRAZ]);
+    }
+}
 
 if (DRAW_AFT) {
     translate([0, 0, M_START]) {
@@ -31,7 +77,7 @@ if (DRAW_FORE) {
     difference() {
         union() {
             translate([0, 0, M_JOINT]) {
-                powerPortRing(D_INNER, T, DZ_POWER_RING, DZ_POWER_RING/2, addY=TOP_FLATTEN);
+                powerPortRing(D_INNER, T, DZ_POWER_RING, DZ_POWER_RING/2, addY=TOP_FLATTEN, counter=false);
             }
 
             translate([0, 0, M_BOLT_START]) {
@@ -41,7 +87,7 @@ if (DRAW_FORE) {
             translate([0, 0, M_SWITCH_START]) {
                 difference() {
                     W = 22;
-                    tube(h=M_AFT_THREAD_FRONT - M_SWITCH_START, do=D_INNER, di=D_INNER - T, $fn=80);
+                    tube(h=M_AFT_THREAD_FRONT - DZ_RING0 - M_SWITCH_START, do=D_INNER, di=D_INNER - T);
                     translate([-W/2, 0, 0]) cube(size=[W, 100, 100]);
                 }
                 switchHolder(D_INNER, M_SWITCH - M_SWITCH_START, 0, 10.0);
@@ -51,7 +97,7 @@ if (DRAW_FORE) {
             difference() {
                 THICK = 5.0;
                 translate([0, 0, M_JOINT]) intersection() {
-                    cylinder(d=D_INNER, h=DZ_FORE);
+                    cylinder(d=D_INNER, h=DZ_FORE_TRIM);
                     union() {
                         translate([D_INNER/2 - THICK, -50, 0]) cube(size=[10, 100, 100]);
                         mirror([-1, 0, 0]) translate([D_INNER/2 - THICK, -50, 0]) cube(size=[10, 100, 100]);
@@ -59,7 +105,17 @@ if (DRAW_FORE) {
                 }
                 cylinder(h=100, d=D_INNER - 8);
             }
+
+            // thicken the bottom for dotstar
+            intersection() 
+            {
+                DY = 4;
+                translate([0, 0, M_JOINT]) cylinder(h=DZ_FORE_TRIM, d=D_INNER);
+                translate([-50, -D_INNER/2, M_JOINT]) cube(size=[100, DY, DZ_FORE_TRIM]);
+            }
         }
+        bottomDotstar();
+
         // Flat area for switch plate.
         translate([-50, D_INNER/2 - TOP_FLATTEN, M_JOINT]) // + PLATE_TRIM])
             cube(size=[100, 10, 100]);
@@ -69,7 +125,6 @@ if (DRAW_FORE) {
     }
 }
 
-INSET_W = 14.0;
 *difference() {
     translate([-INSET_W/2, D_INNER/2, M_JOINT + PLATE_TRIM])
         roundedRect(size=[INSET_W, 1, M_AFT_THREAD_FRONT - M_JOINT - 2.0*PLATE_TRIM], r=1.6, up="y");

@@ -37,7 +37,7 @@ module baseShape()
     }
 }
 
-difference() {
+*difference() {
     baseShape();
 
     translate([0, 0, M_PORT]) rotate([-90, 0, 0]) cylinder(h=100, d=8.0);

@@ -119,7 +119,6 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define SABER_VOLTMETER
 	#define SABER_TWO_BUTTON
 	#define SABER_LOCK
-	#define SABER_BUTTON 				Button::PULL_DOWN
 
 	static const int32_t UVOLT_MULT = 6680;
 	#define ID_STR "Gecko (Sentris Body) RGB Luxeon"
@@ -266,7 +265,6 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
 	#define LED_TYPE 					LED_TYPE_BBG
-	#define SABER_BUTTON 				Button::INTERNAL_PULLUP
 
 	#define SABER_NUM_LEDS 			4
 	#define SABER_UI_START  		0
@@ -301,7 +299,6 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define SABER_INTEGRATED_SD
 	#define SABER_COMRF24
 	#define SABER_AUDIO_UI
-	#define SABER_BUTTON 				Button::INTERNAL_PULLUP
 
 	#define SABER_ADDR_0 "1Sist"
 	#define SABER_ADDR_1 "2Sist"
@@ -339,8 +336,6 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define SABER_INTEGRATED_SD
 //	#define SABER_AUDIO_UI
 	#define SABER_DISPLAY			SABER_DISPLAY_7_5_DEPRECATED
-
-	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 
 	static const int32_t UVOLT_MULT = 6691;		
 	#define ID_STR "Aquatic Cree XPE2 RGB"
@@ -388,8 +383,6 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define SABER_CRYSTAL			80
 	#define SABER_CRYSTAL_LOW		24
 
-	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
-
 	static const int32_t UVOLT_MULT = 6691;		
 	#define ID_STR "Shock-2 Cree XPE2 RGB"
 
@@ -425,7 +418,6 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define SABER_CRYSTAL_LOW		16
 	#define SABER_NUM_LEDS 			2
 	#define SABER_FLASH_LED			1
-	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 	#define SABER_DISPLAY			SABER_DISPLAY_SEGMENT
 
 	static const int32_t UVOLT_MULT = 6734;		
@@ -468,8 +460,6 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define SABER_VOLTMETER
 	#define SABER_AUDIO_UI
 
-	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
-
 	static const int32_t UVOLT_MULT = 6691;		
 
 	// Thermal paste heat sinking to the case.
@@ -505,8 +495,6 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define SABER_BOOT_SOUND
 	#define LED_TYPE 				LED_TYPE_GGC
 
-	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
-
 	static const int32_t UVOLT_MULT = 6691;
 
 	// Thermal paste heat sinking to the case.
@@ -539,7 +527,6 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
  
 	#define SABER_NUM_LEDS 			4
 	#define SABER_UI_START			0
-	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 	#define SABER_UI_BRIGHTNESS		8
 
 	static const int32_t UVOLT_MULT = 6780; // 6734;		
@@ -570,7 +557,6 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
 	#define SABER_DISPLAY			SABER_DISPLAY_7_5
-	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 	
 	static const int32_t UVOLT_MULT = 6730;	
 	#define ID_STR "Sisters V2 Cree XPE2 RGB"
@@ -600,7 +586,6 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define PCB_VERSION 			PCB_ITSY_1
 	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
 	#define SABER_VOLTMETER			
-	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 	#define SABER_UI_LED			SABER_LED_NEOPIXEL
 	
 	#define SABER_NUM_LEDS 			4
@@ -636,7 +621,6 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define PCB_VERSION 			PCB_ITSY_1C
 	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
 	#define SABER_VOLTMETER			
-	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 	#define SABER_UI_LED			SABER_LED_DOTSTAR
 
 	#define SABER_NUM_LEDS 			7
@@ -677,7 +661,6 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define PCB_VERSION 			PCB_ITSY_1C
 	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
 	#define SABER_VOLTMETER			
-	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 	#define SABER_UI_LED			SABER_LED_DOTSTAR
 
 	#define SABER_NUM_LEDS 			4
@@ -714,7 +697,6 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define PCB_VERSION 			PCB_ITSY_2B
 	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
 	#define SABER_VOLTMETER			
-	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 	#define SABER_UI_LED			SABER_LED_DOTSTAR
 
 	#define SABER_NUM_LEDS 			    4
@@ -747,7 +729,6 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 #elif (SABER_MODEL == SABER_MODEL_SISTERS2)
 	#define PCB_VERSION 			PCB_ITSY_2D
 	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
-	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 	#define SABER_DISPLAY			SABER_DISPLAY_128_32
 
 	#define SABER_VOLTMETER			
@@ -789,7 +770,6 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define PCB_VERSION 				PCB_ITSY_2C
 	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
 	#define SABER_VOLTMETER			
-	#define SABER_BUTTON 				Button::INTERNAL_PULLUP
 	#define SABER_UI_LED				SABER_LED_DOTSTAR
 
 	#define SABER_NUM_LEDS 			    4
@@ -822,7 +802,6 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 	#define PCB_VERSION 			PCB_ITSY_2A
 	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
 	#define SABER_VOLTMETER			
-	#define SABER_BUTTON 			Button::INTERNAL_PULLUP
 	#define SABER_UI_LED			SABER_LED_DOTSTAR
 
 	#define SABER_NUM_LEDS 			4
@@ -1014,8 +993,7 @@ static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're w
 #elif (PCB_VERSION == PCB_ITSY_2C)
 	/* Grinning Lizard Shield for ItsyBitys M0.
 	   Integrated memory for sound.
-	   Neopixel support (early)
-	   Dotstar support (later)
+	   Dotstar support
 	*/
 	#define SABER_ACCELEROMETER SABER_ACCELEROMETER_LSM303
 
