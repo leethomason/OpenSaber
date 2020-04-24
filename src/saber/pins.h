@@ -28,7 +28,6 @@
 // --- Configuration ---
 // Note: Serial connection should be set to 19200 baud with a newline after commands.
 
-
 #define SABER_MODEL_TEST			255
 #define SABER_MODEL_GECKO			1	// PCB, Teensy 3, external amp and accel
 #define SABER_MODEL_BLACK			2	// PCB, Prop Shield, Teensy 3, Dotstar UI
@@ -97,20 +96,11 @@
 #define PCB_ITSY_2C				   20   // Gyro + Accelerometer on the I2C bus. Dotstar. SPI. I2S audio. Flash mem sound.
 #define PCB_ITSY_2D				   21   // Gyro + Accelerometer on the I2C bus. Dotstar. SPI. I2S audio. Flash mem sound.
 
-static const int EEPROM_SIZE = 512;
-
-static const int32_t HIGH_VOLTAGE 		= 4000;		// "full charge" at 4.0v or above
-static const int32_t NOMINAL_VOLTAGE    = 3700;
-static const int32_t LOW_VOLTAGE 		= 3400;		// 3500 gets sketchy. By 3.4 we're weird.
-
 #define SABER_ACCELEROMETER_NONE 		0
 #define SABER_ACCELEROMETER_LIS3DH		1
 #define SABER_ACCELEROMETER_NXP			2
 #define SABER_ACCELEROMETER_LIS3DH_SPI 	3
 #define SABER_ACCELEROMETER_LSM303 		4	// SPI, accel, gyro
-
-#define SABER_SOUND_DEF_BESPIN_ROGUE  1
-#define SABER_SOUND_DEF_BESPIN_JAINA  2
 
 #if SABER_MODEL == SABER_MODEL_GECKO
 	#define PCB_VERSION 				PCB_VERSION_1
