@@ -81,6 +81,41 @@ void VectorUI::DrawBar(VRender* ren, int x, int y, int width, const osbr::RGBA& 
     }
 }
 
+void VectorUI::DrawMultiBar(VRender* ren, int x, bool flip, int yCutoff)
+{
+    static const osbr::RGBA WHITE(255, 255, 255);
+    int bias = flip ? -1 : 1;
+
+    for (int r = 0; r < 8; ++r) {
+        Fixed115 d = r - Fixed115(7, 2);
+        Fixed115 fx = Fixed115(8, 10) * d * d;
+        DrawBar(ren, x + fx.getInt() * bias , 29 - r * 4, BAR_W, WHITE, r < yCutoff ? 255 : 0);
+    }
+
+}
+
+
+void VectorUI::DrawColorHSV(VRender* ren, int x, int h)
+{
+    static const osbr::RGBA WHITE(255, 255, 255);
+
+    static const FixedNorm rotations[6] = {
+        FixedNorm(0, 6), FixedNorm(1, 6), FixedNorm(2, 6),
+        FixedNorm(3, 6), FixedNorm(4, 6), FixedNorm(5, 6)
+    };
+
+    for (int r = 0; r < 6; ++r) {
+        ren->SetTransform(rotations[r], x, H / 2);
+        ren->DrawRect(-1, 10, 2, 5, WHITE);
+    }
+
+    ren->SetTransform(FixedNorm(h, 180), x, H / 2);
+    ren->DrawRect(-2, 0, 4, 12, WHITE);
+
+    ren->ClearTransform();
+}
+
+
 void VectorUI::Draw(VRender* ren,
     uint32_t time,
     UIMode mode,
@@ -88,16 +123,15 @@ void VectorUI::Draw(VRender* ren,
     const UIRenderData* data,
     uint8_t* pixels)
 {
+    if (lastTime == 0) lastTime = time;
+    uint32_t deltaTime = time - lastTime;
+    lastTime = time;
+
     ren->Clear();
   
     int p = UIRenderData::powerLevel(data->mVolts, 8);
     CStr<5> volts;
     volts.setFromNum(data->mVolts, true);
-
-    static const int W = 128;
-    static const int H = 32;
-    static const int BAR_W = 16;
-    static const int TEXT = 5;
 
     static const osbr::RGBA WHITE(255, 255, 255);
     static const osbr::RGBA BLACK(0, 0, 0, 255);
@@ -107,11 +141,7 @@ void VectorUI::Draw(VRender* ren,
 
     // Power
     if (mode == UIMode::NORMAL) {
-        for (int r = 0; r < 8; ++r) {
-            Fixed115 d = r - Fixed115(7, 2);
-            Fixed115 fx = Fixed115(8, 10) * d * d;
-            DrawBar(ren, fx.getInt(), 29 - r * 4, BAR_W, WHITE, r < p ? 255 : 0);
-        }
+        DrawMultiBar(ren, 0, false, p);
     }
     else if (mode == UIMode::PALETTE) {
         for (int j = 0; j < 2; j++) {
@@ -149,29 +179,15 @@ void VectorUI::Draw(VRender* ren,
 
     // Audio
     if (mode == UIMode::NORMAL || mode == UIMode::VOLUME) {
-        for (int r = 0; r < 8; ++r) {
-            Fixed115 d = r - Fixed115(7, 2);
-            Fixed115 fx = Fixed115(8, 10) * d * d;
-            DrawBar(ren, W - fx.getInt() - BAR_W, 29 - r * 4, BAR_W, WHITE, r / 2 < data->volume ? 255 : 0);
-        }
+        DrawMultiBar(ren, W - BAR_W, true, data->volume * 2);
     }
     // Color indicator
     {
-        static const FixedNorm rotations[6] = {
-            FixedNorm(0, 6), FixedNorm(1, 6), FixedNorm(2, 6), 
-            FixedNorm(3, 6), FixedNorm(4, 6), FixedNorm(5, 6) 
-        };
-
-        for (int r = 0; r < 6; ++r) {
-            ren->SetTransform(rotations[r], W / 2, H / 2);
-            ren->DrawRect(-1, 10, 2, 5, WHITE);
-        }
-
-        ren->SetTransform(FixedNorm(h, 180), W / 2, H / 2);
-        ren->DrawRect(-2, 0, 4, 12, WHITE);
-
-        ren->ClearTransform();
-
+        
+        if (currentH < h) currentH++; // += deltaTime / 10;
+        if (currentH > h) currentH--; // -= deltaTime / 10;
+        DrawColorHSV(ren, W / 2, currentH);
+        /*
         for (int i = 0; i < 3; ++i) {
             int y = H / 2 - 2 - 6 + 6 * i + 1;
             DrawBar(ren, W / 2 + 19, y, 12, WHITE, data->color[i]);
@@ -181,6 +197,7 @@ void VectorUI::Draw(VRender* ren,
         intToDigits(data->palette, digits, 4);
         ren->SetTransform(W - 30, H / 2 - TEXT);
         Segment(ren, TEXT, 2, digits[3], WHITE);
+        */
     }
 
     // Power
