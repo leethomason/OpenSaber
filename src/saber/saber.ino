@@ -76,14 +76,14 @@ Adafruit_ZeroI2S i2s(PIN_I2S_LRCLK, PIN_I2S_BITCLK, PIN_I2S_DATA, 2);
 I2SAudioDriver i2sAudioDriver(&dma, &i2s, &spiFlash, manifest);
 SFX sfx(&i2sAudioDriver, manifest);
 
-ButtonCB    buttonA(PIN_SWITCH_A, SABER_BUTTON);
+ButtonCB    buttonA(PIN_SWITCH_A, Button::INTERNAL_PULLUP);
 LEDManager  ledA(PIN_LED_A, false);
 
 UIRenderData uiRenderData;
 BladeState  bladeState;
 UIModeUtil  uiMode;
 SaberDB     saberDB;
-Voltmeter   voltmeter;
+Voltmeter   voltmeter(1650, 10000, 47000, 4095, VOLTMETER_TUNE);
 BladeFlash  bladeFlash;
 CMDParser   cmdParser(&saberDB, manifest);
 BladePWM    bladePWM;
@@ -201,6 +201,8 @@ void setup() {
     delay(10);
 
     Log.p("Init systems.").eol();
+    analogReadResolution(12);
+    analogReference(AR_INTERNAL1V65);
     voltmeter.begin();
     delay(10);
     bladePWM.setRGB(RGB::BLACK);
@@ -606,29 +608,39 @@ void loopDisplays(uint32_t msec, uint32_t delta)
     ProfileBlock block(&data);
     // General display state processing. Draw to the current supported display.
 
+    int dTick = displayTimer.tick(delta);
     #if SABER_DISPLAY == SABER_DISPLAY_128_32
-    switch(renderStage) {
-        case 0: 
-            VectorUI::Draw(&renderer, msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
-            break;
-        case 1:
-            renderer.Render();
-            break;
-        case 2:
-            display.display(oledBuffer);
-            break;
-    }
-    renderStage++;
-    if (renderStage == 3) renderStage = 0;
+    dTick = (renderStage == 0 ? 1 : 0);
     #endif
 
-    if (displayTimer.tick(delta)) {
+    if (dTick) {
         uiRenderData.volume = saberDB.volume4();
         uiRenderData.color = BladePWM::convertRawToPerceived(saberDB.bladeColor());
         uiRenderData.palette = saberDB.paletteIndex();
-        uiRenderData.mVolts = voltmeter.averagePower();
+        uiRenderData.mVolts = voltmeter.easedPower();
         uiRenderData.fontName = manifest.getUnit(sfx.currentFont()).getName();
+    }
 
+    #if SABER_DISPLAY == SABER_DISPLAY_128_32
+    switch(renderStage) {
+        case 0:
+            memset(oledBuffer, 0, OLED_HEIGHT * OLED_WIDTH / 8);
+            break;
+        case 1: 
+            VectorUI::Draw(&renderer, msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
+            break;
+        case 2:
+            renderer.Render();
+            break;
+        case 3:
+            display.display(oledBuffer);
+            break;        
+    }
+    renderStage++;
+    if (renderStage == 4) renderStage = 0;
+    #endif
+
+    if (dTick) {
         #if SABER_DISPLAY == SABER_DISPLAY_7_5
             display75.Draw(msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
             dotMatrix.setFrom7_5(display75.Pixels());

@@ -1,3 +1,25 @@
+/*
+  Copyright (c) Lee Thomason, Grinning Lizard Software
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+  of the Software, and to permit persons to whom the Software is furnished to do
+  so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
+
 #ifndef FIXED_16_INCLUDED	
 #define FIXED_16_INCLUDED
 
@@ -120,8 +142,11 @@ public:
         return val;
     }
 
+    FixedT absolute() const { return x > 0 ? *this : -(*this); }
+
     FixedT& operator = (const FixedT &v) { x = v.x; return *this; }
-    FixedT& operator = (const int v) { x = IntToFixed(v); return *this; }
+    FixedT& operator = (int v) { x = IntToFixed(v); return *this; }
+    FixedT& operator = (float v) { x = v * FIXED_1; return *this; }
 
     FixedT& operator +=  (const FixedT& v) { x += v.x; return *this; }
     FixedT& operator +=  (const int v) { x += IntToFixed(v); return *this; }
@@ -199,14 +224,19 @@ T lerpFixed(T a, T b, FIXED t) {
 
 // Max: 127
 typedef FixedT<int32_t, int16_t, 8> Fixed88;
+
 // Strange def, but useful range:
 // Max: 1023
 typedef FixedT<int32_t, int16_t, 6> Fixed115;
 
 // Good for [1, -1] type functions, general near one.
+// About -8 to 8
 typedef FixedT<int32_t, int16_t, 12> FixedNorm;
 
-inline Fixed115 operator * (const Fixed115& a, const FixedNorm& b)
+static const FixedNorm fixedNormHalf(1, 2);
+static const FixedNorm fixedNormSqrt2Over2(0.7071067811);
+
+inline Fixed115 operator* (const Fixed115& a, const FixedNorm& b)
 {
     FixedT<int32_t, int16_t, 6> f;
     int32_t x = (a.getRaw() * b.getRaw()) >> 12;
@@ -214,23 +244,53 @@ inline Fixed115 operator * (const Fixed115& a, const FixedNorm& b)
     return f;
 }
 
+static const int32_t ISINE_360 = 32768;
+static const int32_t ISINE_180 = (ISINE_360 / 2);
+static const int32_t ISINE_90  = (ISINE_360 / 4);
+static const int32_t ISINE_45  = (ISINE_360 / 8);
+static const int32_t ISINE_30  = (2731);
+static const int32_t ISINE_ONE  = 4096;
+static const int32_t ISINE_HALF = 2048;
+
 // Sine approximation.
-// x: angle with 2^15 units/circle (32768)
+// theta: angle with 2^15 units/circle (32768)
 // return: sin, 12 bits (range -4096 to 4096)
-int32_t iSin_S3(int32_t x);
+int32_t iSin_S3(int32_t theta);
 
 inline int32_t iCos_S3(int32_t x) {
-    return iSin_S3(x + 8192);
+    return iSin_S3(x + ISINE_90);
+}
+
+// Inverse sine.
+// x: -4096 to 4096 (12 bits)
+// returns: angle as above (-2^15 to +2^15) but range -ISINE_90 to ISINE_90
+int32_t iInvSin_S3(int32_t x);
+
+inline int32_t iInvCos_S3(int32_t x) {
+    return -iInvSin_S3(x) + ISINE_90;
 }
 
 inline FixedNorm iSin(FixedNorm f) {
-    int32_t s12 = iSin_S3(f.scale(32768));
-    return FixedNorm(s12, 4096);
+    int32_t s12 = iSin_S3(f.scale(ISINE_360));
+    return FixedNorm(s12, ISINE_ONE);
 }
 
 inline FixedNorm iCos(FixedNorm f) {
-    int32_t c12 = iCos_S3(f.scale(32768));
-    return FixedNorm(c12, 4096);
+    int32_t c12 = iCos_S3(f.scale(ISINE_360));
+    return FixedNorm(c12, ISINE_ONE);
+}
+
+
+// [-90, 90]
+inline FixedNorm iInvSin(FixedNorm f) {
+    int32_t angle = iInvSin_S3(f.scale(ISINE_ONE));
+    return FixedNorm(angle, ISINE_360);
+}
+
+// [180, 0]
+inline FixedNorm iInvCos(FixedNorm f) {
+    int32_t angle = iInvCos_S3(f.scale(ISINE_ONE));
+    return FixedNorm(angle, ISINE_360);
 }
 
 #endif // FIXED_16_INCLUDED

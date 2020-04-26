@@ -29,6 +29,9 @@
 #include "grinliz_assert.h"
 #include "fixed.h"
 
+static const uint32_t NOMINAL_VOLTAGE = 3700;
+static const uint32_t VOLTAGE_RANGE	  =  300;
+
 inline int32_t lerp1024(int16_t a, int16_t b, int32_t t1024) {
     return (a * (1024 - t1024) + b * t1024) / 1024;
 }
@@ -538,6 +541,11 @@ public:
         m_valid = false;
     }
 
+	void fill(TYPE value) {
+		for(int i=0; i<N; ++i)
+			push(value);
+	}
+
     TYPE average() const {
         if (m_valid == false) {
             SUMTYPE total = 0;
@@ -547,13 +555,14 @@ public:
             m_average = total / N;
             m_valid = true;
         }
-        return m_average;
+        return (TYPE) m_average;
     }
 
     int numSamples() const { return N; }
+	bool origin() const { return m_pos == 0; }
 
 private:
-    mutable TYPE m_average;
+    mutable SUMTYPE m_average;
     mutable bool m_valid = false;
     int m_pos = 0;
     TYPE m_sample[N];
