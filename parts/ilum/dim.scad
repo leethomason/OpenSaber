@@ -11,7 +11,7 @@ M_AFT_FRONT = DZ_BODY - 10.5 - 0.5;
 // No thread cut:
 //M_AFT_THREAD_FRONT = DZ_BODY - 15.6 - 0.5;
 // No used cut:
-M_AFT_THREAD_FRONT = DZ_BODY - 10.0 - 0.5;
+M_AFT_THREAD_FRONT = DZ_BODY - 10.0 - 1.0;
 DZ_AFT = M_AFT_FRONT - M_START;
 
 //DZ_FORE = 18.0;
@@ -48,3 +48,4 @@ D_TUBE_INNER = 3.0; // fixme
 D_TUBE_OUTER = 4.0;
 R_TUBE = 10.0;
 
+DX_SWITCH_PLATE = 16.5;

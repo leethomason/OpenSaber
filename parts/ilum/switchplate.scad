@@ -5,15 +5,16 @@ include <dim.scad>
 use <../shapes.scad>
 //use <../inset.scad>
 
-START = M_PORT - 8.0;
-END   = M_SWITCH + 8.0;
+START = max(M_PORT - 8.0, M_JOINT + 1.0);
+END   = min(M_SWITCH + 7.0, M_AFT_THREAD_FRONT);    // aft thread front has padding
+
+echo("Plate cut, start", START, "end", END, "width", DX_SWITCH_PLATE);
 
 W = 16.0;
 L = END - START;
 M_PLATE = 0.0;
 DY_PLATE = 1.8;
 
-CUT_W = 16.0;
 CUT_L = M_AFT_THREAD_FRONT - M_JOINT;
 
 T = 25.4 / 4;
@@ -21,35 +22,29 @@ T0 = 3.0;
 
 $fn = 80;
 
-/*
-module baseShape()
-{
-    difference() {
-        translate([-W/2, D_OUTER/2 - DY_PLATE, START]) 
-            roundedRect([W, T - T0, L], r=3.175/2, up="y");
-        // Remove case.
-        cylinder(h=300, d=D_OUTER);
-    }
-    // add connection
-    intersection() {
-        tube(h=300, do=D_OUTER, di=D_INNER);
-        translate([-CUT_W/2, D_OUTER/2 - T0, M_JOINT])
-            roundedRect([CUT_W, 100, CUT_L], r=3.175/2, up="y");
-    }
+if (START < (M_JOINT - 1.0)) {
+    echo("ERROR switchplate start can't push on joint (battery)");
 }
-*/
+
+TOP = D_OUTER/2 - T0 + T;
 
 module baseShape()
 {
-    translate([-CUT_W/2, D_OUTER/2 - T0, START])
-        roundedRect([CUT_W, T, END - START], r=3.175/2, up="y");
+    translate([-DX_SWITCH_PLATE/2, D_OUTER/2 - T0, START])
+        roundedRect([DX_SWITCH_PLATE, T, END - START], r=3.175/2, up="y");
 }
 
-*difference() {
+difference() {
     baseShape();
 
     translate([0, 0, M_PORT]) rotate([-90, 0, 0]) cylinder(h=100, d=11.0);
     translate([0, 0, M_BOLT]) rotate([-90, 0, 0]) cylinder(h=100, d=4.2);
     translate([0, 0, M_SWITCH]) rotate([-90, 0, 0]) cylinder(h=100, d=8.0);
+
+    translate([0, TOP - 2, M_BOLT]) rotate([-90, 0, 0]) cylinder(h=100, d=8.0);
+    hull() {
+        translate([0, TOP - 2, M_SWITCH]) rotate([-90, 0, 0]) cylinder(h=100, d=11.0);
+        translate([0, TOP - 2, M_SWITCH + 20]) rotate([-90, 0, 0]) cylinder(h=100, d=11.0);
+    }
 }
 
