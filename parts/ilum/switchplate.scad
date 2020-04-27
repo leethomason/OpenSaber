@@ -19,6 +19,7 @@ CUT_L = M_AFT_THREAD_FRONT - M_JOINT;
 
 T = 25.4 / 4;
 T0 = 3.0;
+SINK = 1.0;
 
 $fn = 80;
 
@@ -41,10 +42,10 @@ difference() {
     translate([0, 0, M_BOLT]) rotate([-90, 0, 0]) cylinder(h=100, d=4.2);
     translate([0, 0, M_SWITCH]) rotate([-90, 0, 0]) cylinder(h=100, d=8.0);
 
-    translate([0, TOP - 2, M_BOLT]) rotate([-90, 0, 0]) cylinder(h=100, d=8.0);
+    translate([0, TOP - SINK, M_BOLT]) rotate([-90, 0, 0]) cylinder(h=100, d=8.0);
     hull() {
-        translate([0, TOP - 2, M_SWITCH]) rotate([-90, 0, 0]) cylinder(h=100, d=11.0);
-        translate([0, TOP - 2, M_SWITCH + 20]) rotate([-90, 0, 0]) cylinder(h=100, d=11.0);
+        translate([0, TOP - SINK, M_SWITCH]) rotate([-90, 0, 0]) cylinder(h=100, d=11.0);
+        translate([0, TOP - SINK, M_SWITCH + 20]) rotate([-90, 0, 0]) cylinder(h=100, d=11.0);
     }
 }
 
