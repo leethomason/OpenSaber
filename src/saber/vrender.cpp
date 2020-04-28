@@ -55,7 +55,7 @@ void VRender::ClearTransform()
 }
 
 
-void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba, int outline)
+void VRender::DrawRect(int x0, int y0, int w, int h, int c, int outline)
 {
     Rect in(x0, y0, w + x0, h + y0);
     ASSERT(in.y0 <= in.y1);
@@ -75,11 +75,8 @@ void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba, int
         if (!r.Empty()) {
             for (int y = r.y0; y < r.y1; ++y) {
                 BlockDrawChunk chunk;
-#ifdef VECTOR_MONO
-                chunk.rgb = rgba.rgb().get() ? 1 : 0;
-#else
-                chunk.rgb = rgba.rgb();
-#endif
+
+                chunk.color = c;
                 chunk.x0 = r.x0;
                 chunk.x1 = r.x1;
                 chunk.y = y;
@@ -91,12 +88,6 @@ void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba, int
 
     if (!m_layerFixed)
         m_layer++;
-
-#ifdef VECTOR_MONO
-    ColorRGBA c = rgba.rgb().get() ? 1 : 0;
-#else
-    ColorRGBA c = rgba;
-#endif
 
     CreateActiveEdge(in.x0, in.y0, in.x1, in.y0, c);
     CreateActiveEdge(in.x1, in.y0, in.x1, in.y1, c);
@@ -111,42 +102,30 @@ void VRender::DrawRect(int x0, int y0, int w, int h, const osbr::RGBA& rgba, int
     }
 }
 
-void VRender::DrawPoly(const Vec2* points, int n, const osbr::RGBA& rgba)
+void VRender::DrawPoly(const Vec2* points, int n, int color)
 {
-#ifdef VECTOR_MONO
-    ColorRGBA c = rgba.rgb().get() ? 1 : 0;
-#else
-    ColorRGBA c = rgba;
-#endif
-
     if (!m_layerFixed)
         m_layer++;
 
     for (int i = 1; i < n; ++i) {
-        CreateActiveEdge(points[i - 1].x, points[i - 1].y, points[i].x, points[i].y, c);
+        CreateActiveEdge(points[i - 1].x, points[i - 1].y, points[i].x, points[i].y, color);
     }
     if (points[n - 1] != points[0]) {
-        CreateActiveEdge(points[n - 1].x, points[n - 1].y, points[0].x, points[0].y, c);
+        CreateActiveEdge(points[n - 1].x, points[n - 1].y, points[0].x, points[0].y, color);
     }
 }
 
 
-void VRender::DrawPoly(const Vec2I8* points, int n, const osbr::RGBA& rgba)
+void VRender::DrawPoly(const Vec2I8* points, int n, int color)
 {
-#ifdef VECTOR_MONO
-    ColorRGBA c = rgba.rgb().get() ? 1 : 0;
-#else
-    ColorRGBA c = rgba;
-#endif
-
     if (!m_layerFixed)
         m_layer++;
 
     for (int i = 1; i < n; ++i) {
-        CreateActiveEdge(points[i - 1].x, points[i - 1].y, points[i].x, points[i].y, c);
+        CreateActiveEdge(points[i - 1].x, points[i - 1].y, points[i].x, points[i].y, color);
     }
     if (points[n - 1] != points[0]) {
-        CreateActiveEdge(points[n - 1].x, points[n - 1].y, points[0].x, points[0].y, c);
+        CreateActiveEdge(points[n - 1].x, points[n - 1].y, points[0].x, points[0].y, color);
     }
 }
 
@@ -186,7 +165,7 @@ void VRender::Transform4(Fixed115* e, int x0, int y0, int x1, int y1)
     }
 }
 
-void VRender::CreateActiveEdge(int x0, int y0, int x1, int y1, ColorRGBA c)
+void VRender::CreateActiveEdge(int x0, int y0, int x1, int y1, int c)
 {
     Fixed115 p[4];
 
@@ -201,7 +180,7 @@ void VRender::CreateActiveEdge(int x0, int y0, int x1, int y1, ColorRGBA c)
 }
 
 
-void VRender::InnerCreateActiveEdge(Fixed115 x0, Fixed115 y0, Fixed115 x1, Fixed115 y1, ColorRGBA c)
+void VRender::InnerCreateActiveEdge(Fixed115 x0, Fixed115 y0, Fixed115 x1, Fixed115 y1, int c)
 {
     ASSERT(m_nPool < MAX_EDGES);
     ActiveEdge* ae = &m_edgePool[m_nPool];
@@ -303,7 +282,7 @@ void VRender::SortActiveEdges()
 }
 
 
-ColorRGB VRender::AddToColorStack(int layer, ColorRGBA color)
+int VRender::AddToColorStack(int layer, int color)
 {
     for (int i = m_nColor; i >= 0; --i) {
         // Even-Odd rule. The layer toggles itself on and off.
@@ -331,28 +310,9 @@ ColorRGB VRender::AddToColorStack(int layer, ColorRGBA color)
     }
 #endif // _DEBUG
 
-    #ifdef VECTOR_MONO
     if (m_nColor > 0)
         return m_colorStack[m_nColor - 1].color;
     return 0;
-    #else
-    int start = m_nColor - 1;
-    for (; start > 0; start--) {
-        if (m_colorStack[start].color == 255)
-            break;
-    }
-
-    osbr::RGB rgb = m_colorStack[start].color.rgb();
-    for (int i = start+1; i < m_nColor; ++i) {
-        // Everything left is translucent.
-        // ARM M0+ doesn't have division.
-        osbr::RGBA c = m_colorStack[i].color;
-        rgb.r = (c.r * c.a + rgb.r * (255 - c.a)) >> 8;
-        rgb.g = (c.g * c.a + rgb.g * (255 - c.a)) >> 8;
-        rgb.b = (c.b * c.a + rgb.b * (255 - c.a)) >> 8;
-    }
-    return rgb;
-    #endif
 }
 
 void VRender::RasterizeLine(int y, const Rect& clip)
@@ -370,7 +330,7 @@ void VRender::RasterizeLine(int y, const Rect& clip)
 
     // Edges are sorted. Walk right to left.
     int x0 = m_activeEdges[0]->x.getInt();
-    ColorRGB rgb(0);
+    int rgb = 0;
     int clipX0 = clip.x0;
     int clipX1 = clip.x1;
 
@@ -393,7 +353,7 @@ void VRender::RasterizeLine(int y, const Rect& clip)
                 cache[nCache].x0 = subClipX0;
                 cache[nCache].x1 = subClipX1;
                 cache[nCache].y = y;
-                cache[nCache].rgb = rgb;
+                cache[nCache].color = rgb;
                 nCache++;
 
                 if (nCache == CACHE) {

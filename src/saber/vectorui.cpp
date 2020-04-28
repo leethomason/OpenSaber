@@ -28,7 +28,7 @@
 #include "assets.h"     // source for bitmap
 
 
-void VectorUI::Segment(VRender* ren, int width, int s, int num, osbr::RGBA rgba)
+void VectorUI::Segment(VRender* ren, int width, int s, int num, int rgba)
 {
     /*
         00
@@ -65,7 +65,7 @@ void VectorUI::Segment(VRender* ren, int width, int s, int num, osbr::RGBA rgba)
     ren->SetImmediate(false);
 }
 
-void VectorUI::DrawBar(VRender* ren, int x, int y, int width, const osbr::RGBA& color, int fraction)
+void VectorUI::DrawBar(VRender* ren, int x, int y, int width, int color, int fraction)
 {
     int w = (width * fraction) >> 8;
 
@@ -83,13 +83,12 @@ void VectorUI::DrawBar(VRender* ren, int x, int y, int width, const osbr::RGBA& 
 
 void VectorUI::DrawMultiBar(VRender* ren, int x, bool flip, int yCutoff)
 {
-    static const osbr::RGBA WHITE(255, 255, 255);
     int bias = flip ? -1 : 1;
 
     for (int r = 0; r < 8; ++r) {
         Fixed115 d = r - Fixed115(7, 2);
         Fixed115 fx = Fixed115(8, 10) * d * d;
-        DrawBar(ren, x + fx.getInt() * bias , 29 - r * 4, BAR_W, WHITE, r < yCutoff ? 255 : 0);
+        DrawBar(ren, x + fx.getInt() * bias , 29 - r * 4, BAR_W, 1, r < yCutoff ? 255 : 0);
     }
 
 }
@@ -97,7 +96,7 @@ void VectorUI::DrawMultiBar(VRender* ren, int x, bool flip, int yCutoff)
 
 void VectorUI::DrawColorHSV(VRender* ren, int x, int h)
 {
-    static const osbr::RGBA WHITE(255, 255, 255);
+    static const int WHITE = 1;
 
     static const FixedNorm rotations[6] = {
         FixedNorm(0, 6), FixedNorm(1, 6), FixedNorm(2, 6),
@@ -123,6 +122,8 @@ void VectorUI::Draw(VRender* ren,
     const UIRenderData* data,
     uint8_t* pixels)
 {
+    static const int WHITE = 1;
+
     if (lastTime == 0) lastTime = time;
     uint32_t deltaTime = time - lastTime;
     lastTime = time;
@@ -132,9 +133,6 @@ void VectorUI::Draw(VRender* ren,
     int p = UIRenderData::powerLevel(data->mVolts, 8);
     CStr<5> volts;
     volts.setFromNum(data->mVolts, true);
-
-    static const osbr::RGBA WHITE(255, 255, 255);
-    static const osbr::RGBA BLACK(0, 0, 0, 255);
 
     uint8_t h, s, v;
     rgb2hsv(data->color.r, data->color.g, data->color.b, &h, &s, &v);

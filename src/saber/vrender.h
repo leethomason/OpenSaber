@@ -27,21 +27,11 @@
 #include "fixed.h"
 #include "Grinliz_Util.h"
 
-#define VECTOR_MONO
-
-#ifdef VECTOR_MONO
-typedef uint8_t ColorRGB;
-typedef uint8_t ColorRGBA;
-#else
-typedef osbr::RGB ColorRGB;
-typedef osbr::RGBA ColorRGBA;
-#endif
-
 struct BlockDrawChunk {
     int x0;
     int x1;
     int y;
-    ColorRGB rgb;
+    int color;
 };
 typedef void (*BlockDraw)(const BlockDrawChunk* chunks, int n);
 typedef const uint8_t* (*GlyphMetrics)(int charID, int* advance, int* w, int* rows);
@@ -136,10 +126,10 @@ public:
     void Render();
 
     void Clear();
-    void DrawRect(int x0, int y0, int width, int height, const osbr::RGBA& rgba, int outline=0);
+    void DrawRect(int x0, int y0, int width, int height, int color, int outline=0);
 
-    void DrawPoly(const Vec2* points, int n, const osbr::RGBA& rgba);
-    void DrawPoly(const Vec2I8* points, int n, const osbr::RGBA& rgba);
+    void DrawPoly(const Vec2* points, int n, int rgba);
+    void DrawPoly(const Vec2I8* points, int n, int rgba);
     void PushLayer() { m_layerFixed = true; m_layer++; }
     void PopLayer() { m_layerFixed = false; }
     void SetImmediate(bool val) { m_immediate = val; }
@@ -173,7 +163,7 @@ private:
 
     struct ActiveEdge
     {
-        ColorRGBA color;
+        int color;
         int8_t layer;
         int16_t yEnd;
         Fixed115 x;
@@ -184,8 +174,8 @@ private:
     struct ColorEntry
     {
         int8_t layer;				// actually int8_t in the active edge.
-		ColorRGBA color;
-        void Set(int layer, ColorRGBA color) {
+		int color;
+        void Set(int layer, int color) {
             this->layer = layer;
             this->color = color;
         }
@@ -193,14 +183,14 @@ private:
 
     void Rasterize();
     void RasterizeLine(int y, const Rect&);
-    ColorRGB AddToColorStack(int layer, ColorRGBA color);
+    int AddToColorStack(int layer, int color);
 
     void IncrementActiveEdges(int y);
     void AddStartingEdges(int y);
     void SortActiveEdges();
 
-    void CreateActiveEdge(int x0, int y0, int x1, int y1, ColorRGBA c);
-    void InnerCreateActiveEdge(Fixed115 x0, Fixed115 y0, Fixed115 x1, Fixed115 y1, ColorRGBA c);
+    void CreateActiveEdge(int x0, int y0, int x1, int y1, int c);
+    void InnerCreateActiveEdge(Fixed115 x0, Fixed115 y0, Fixed115 x1, Fixed115 y1, int c);
 
     void Transform4(Fixed115* e, int x0, int y0, int x1, int y1);
     Rect TransformCam(const Rect& in) {
