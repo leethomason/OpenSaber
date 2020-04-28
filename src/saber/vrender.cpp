@@ -192,12 +192,6 @@ void VRender::InnerCreateActiveEdge(Fixed115 x0, Fixed115 y0, Fixed115 x1, Fixed
 }
 
 
-void VRender::Render()
-{
-    ClearTransform();
-}
-
-
 void VRender::IncrementActiveEdges(int y)
 {
     int n = m_nActive;

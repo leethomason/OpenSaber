@@ -319,7 +319,7 @@ int main(int, char**) {
             memset(displayBuffer, 0, WIDTH * HEIGHT / 8);
             vrender.Clear();
             vectorUI.Draw(&vrender, t, mode.mode(), bladeOn, &data, displayBuffer);
-            vrender.Render();
+            vrender.ClearTransform();
 #   else
             sketcher.Draw(&renderer, t, mode.mode(), bladeOn, &data);
 #   endif

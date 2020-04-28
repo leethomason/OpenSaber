@@ -120,8 +120,6 @@ public:
     void SetClip(const Rect& clip) { m_clip = clip; }
     void ClearClip() { m_clip = m_size; }
 
-    void Render();
-
     void Clear();
     void DrawRect(int x0, int y0, int width, int height, int color, int outline=0);
 
