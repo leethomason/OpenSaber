@@ -66,35 +66,23 @@ private:
     // but no overflow. Try to help out with that.
     static inline SHORT FixedMul(SHORT a, SHORT b) {
         SHORT v = ((a * b) >> DECBITS);
-#if  defined(_WIN32)
-        ASSERT(((a * b) >> DECBITS) == v);
-#endif //  defined(_DEBUG) && defined(_WIN32)
-
         return v;
     }
 
     static inline SHORT FixedDiv(SHORT a, SHORT b) {
         SHORT v = (a << DECBITS) / b;
-#if  defined(_WIN32)
-        ASSERT(((a << DECBITS) / b) == v);
-#endif //  defined(_DEBUG) && defined(_WIN32)
-
         return v;
     }
 
     static inline SHORT IntToFixed(int a) {
         SHORT v = (a << DECBITS);
-
-#if  defined(_WIN32)
-        ASSERT((a << DECBITS) == v);
-#endif //  defined(_DEBUG) && defined(_WIN32)
-
         return v;
     }
+
+public:
     static const int FIXED_1 = 1 << DECBITS;
     SHORT x;
 
-public:
     FixedT() {}
     FixedT(const FixedT& f) : x(f.x) {}
     FixedT(int v) : x(v << DECBITS) {}
@@ -110,8 +98,14 @@ public:
     void set(int v) { x = SHORT(v * FIXED_1); }
     void set(float v) { x = SHORT(v * FIXED_1); }
     void set(double v) { x = SHORT(v * FIXED_1); }
-    void setRaw(SHORT v) { x = v; }
-    SHORT getRaw() const { return x; }
+
+    int32_t convertRaw(int nBits) {
+        if (nBits > DECBITS)
+            return x << (nBits - DECBITS);
+        else if (DECBITS < nBits)
+            return x >> (nBits - DECBITS);
+        return x;
+    }
 
     // Scale up to an int, potentially out of the range of this fixed.
     int32_t scale(int32_t s) const { 
@@ -126,6 +120,7 @@ public:
 
     // Query the integer part. Positive or negative.
     int32_t getInt() const { return x >> DECBITS; }
+
     // Query the DECBITSimal part - return as a fraction of 2^16.
     // Always positive.
     uint32_t getDec() const { return (unsigned(x) & (FIXED_1 - 1)) << (16 - DECBITS); }
@@ -247,8 +242,8 @@ static const FixedNorm fixedNormSqrt2Over2(0.7071067811);
 inline Fixed115 operator* (const Fixed115& a, const FixedNorm& b)
 {
     FixedT<int16_t, 6> f;
-    int32_t x = (a.getRaw() * b.getRaw()) >> 12;
-    f.setRaw((int16_t)x);
+    int32_t x = (a.x * b.x) >> 12;
+    f.x = (int16_t)x;
     return f;
 }
 

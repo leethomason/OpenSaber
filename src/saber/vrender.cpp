@@ -38,7 +38,6 @@ VRender::VRender()
 void VRender::Clear() 
 {
     m_nActive = 0;
-    m_layer = 0;
     m_nColor = 0;
     m_nPool = 0;
     ASSERT(Y_HASH >= m_size.CY());
@@ -60,10 +59,6 @@ void VRender::DrawRect(int x0, int y0, int w, int h, int c, int outline)
     Rect in(x0, y0, w + x0, h + y0);
     ASSERT(in.y0 <= in.y1);
     ASSERT(in.x0 <= in.x1);
-    ASSERT(m_layer < 127);
-
-    if (!m_layerFixed)
-        m_layer++;
 
     CreateActiveEdge(in.x0, in.y0, in.x1, in.y0, c);
     CreateActiveEdge(in.x1, in.y0, in.x1, in.y1, c);
@@ -81,9 +76,6 @@ void VRender::DrawRect(int x0, int y0, int w, int h, int c, int outline)
 
 void VRender::DrawPoly(const Vec2* points, int n, int color)
 {
-    if (!m_layerFixed)
-        m_layer++;
-
     for (int i = 1; i < n; ++i) {
         CreateActiveEdge(points[i - 1].x, points[i - 1].y, points[i].x, points[i].y, color);
     }
@@ -96,9 +88,6 @@ void VRender::DrawPoly(const Vec2* points, int n, int color)
 
 void VRender::DrawPoly(const Vec2I8* points, int n, int color)
 {
-    if (!m_layerFixed)
-        m_layer++;
-
     for (int i = 1; i < n; ++i) {
         CreateActiveEdge(points[i - 1].x, points[i - 1].y, points[i].x, points[i].y, color);
     }
@@ -164,52 +153,54 @@ void VRender::InnerCreateActiveEdge(Fixed115 x0, Fixed115 y0, Fixed115 x1, Fixed
     ASSERT(m_nPool < MAX_EDGES);
     ActiveEdge* ae = &m_edgePool[m_nPool];
     ae->color = c;
-    ae->layer = m_layer;
 
     // If horizontal, doesn't render.
-    if (y0.getInt() == y1.getInt())
+    //if (y0.getInt() == y1.getInt())
+    //    return;
+
+    // yAdd will be the scan line after...unless it is zero.
+    int yAdd = 0;
+    if (y0 < 0) {
+        yAdd = 0;
+    }
+    else if (y0.getDec() == 0) {
+        yAdd = y0.getInt();
+    }
+    else {
+        yAdd = y0.getInt() + 1;
+    }
+    if (yAdd >= Y_HASH) {
+        //printf("Discard: yAdd=%d\n", yAdd);
         return;
-    int yAdd = y0.getInt();
-    if (yAdd >= Y_HASH)
-        return;
+    }
+
+    ASSERT(yAdd >= 0 && yAdd < Y_HASH);
+    ASSERT(yAdd >= y0);
 
     m_nPool++;
-    ae->yEnd = y1.getInt();
-    // For small values, this can go wrong. Need some thinging about
-    // almost flat lines. Use pixel coordinates? Not sure. Causes strange
-    // long line artifacts.
-    ae->slope = (x1 - x0) / (y1 - y0);
 
-    ae->x = x0;
-    if (y0 > yAdd) {
-        ae->x += ae->slope * (y0 - yAdd);
-    }
+    // yEnd is similarily exacting.
+    if (y1.getDec() == 0)
+        ae->yEnd = y1.getInt();
+    else
+        ae->yEnd = y1.getInt() + 1;
+
+    ae->slope16 = ((x1.x - x0.x) << 16) / (y1.x - y0.x);
+    int32_t dy16 = (yAdd << 16) - y0.convertRaw(16);
+    ae->x16 = x0.convertRaw(16) + (ae->slope16 >> 8) * (dy16 >> 8);
+
     ASSERT(Y_HASH >= m_size.CY());
-    if (yAdd < 0) 
-        yAdd = 0;
     ae->next = m_rootHash[yAdd];
     m_rootHash[yAdd] = ae;
+
+    static const float INV = 1.0f / 65536.0f;
+    //printf("Added: x=%f slope=%f yAdd=%d\n", ae->x16 * INV, ae->slope16 * INV, yAdd);
 }
 
 
 void VRender::Render()
 {
     ClearTransform();
-
-    /*
-    Rect clip = Rect::Intersect(m_size, m_clip);
-    if (clip.Empty())
-        return;
-    int savedLayer = m_layer;
-    m_layer = LAYER_BACKGROUND;
-
-    InnerCreateActiveEdge(Fixed115(m_size.x0), Fixed115(m_size.y0), Fixed115(m_size.x0), Fixed115(m_size.y1), 0);
-    InnerCreateActiveEdge(Fixed115(m_size.x1), Fixed115(m_size.y0), Fixed115(m_size.x1), Fixed115(m_size.y1), 0);
-
-    m_layer = savedLayer;
-
-    Rasterize();
-    */
 }
 
 
@@ -225,7 +216,7 @@ void VRender::IncrementActiveEdges(int y)
         }
         else {
             *ae = m_activeEdges[i];
-            (*ae)->x += (*ae)->slope;
+            (*ae)->x16 += (*ae)->slope16;
             ++ae;
         }
     }
@@ -249,50 +240,16 @@ void VRender::SortActiveEdges()
 {
     for (int i = 0; i < m_nActive; ++i) {
         int j = i;
-        while (j > 0 && m_activeEdges[j - 1]->x > m_activeEdges[j]->x) {
+        while (j > 0 && m_activeEdges[j - 1]->x16 > m_activeEdges[j]->x16) {
             glSwap(m_activeEdges[j - 1], m_activeEdges[j]);
             j--;
         }
     }
 #ifdef _DEBUG
     for (int i = 1; i < m_nActive; ++i) {
-        ASSERT(m_activeEdges[i]->x >= m_activeEdges[i - 1]->x);
+        ASSERT(m_activeEdges[i]->x16 >= m_activeEdges[i - 1]->x16);
     }
 #endif
-}
-
-
-int VRender::AddToColorStack(int layer, int color)
-{
-    for (int i = m_nColor; i >= 0; --i) {
-        // Even-Odd rule. The layer toggles itself on and off.
-        if (i > 0 && m_colorStack[i - 1].layer == layer) {
-            for (int j = i; j < m_nColor; ++j) {
-                m_colorStack[j - 1] = m_colorStack[j];
-            }
-            --m_nColor;
-            break;
-        }
-        else if (i == 0 || m_colorStack[i - 1].layer < layer) {
-            ASSERT(m_nColor < MAX_COLOR_STACK);
-            // Scoot up higher entries.
-            for (int j = m_nColor; j > i; --j) {
-                m_colorStack[j] = m_colorStack[j - 1];
-            }
-            m_colorStack[i].Set(layer, color);
-            ++m_nColor;
-            break;
-        }
-    }
-#ifdef _DEBUG
-    for (int i = 1; i < m_nColor; ++i) {
-        ASSERT(m_colorStack[i-1].layer < m_colorStack[i].layer);
-    }
-#endif // _DEBUG
-
-    if (m_nColor > 0)
-        return m_colorStack[m_nColor - 1].color;
-    return 0;
 }
 
 void VRender::RasterizeLine(int y, const Rect& clip)
@@ -307,7 +264,9 @@ void VRender::RasterizeLine(int y, const Rect& clip)
     BlockDrawChunk cache[CACHE];
     int nCache = 0;
 
-    ASSERT(m_nActive % 2 == 0);
+    //ASSERT(m_nActive % 2 == 0);
+    if (m_nActive % 2)
+        return;
 
     // Edges are sorted. Walk right to left.
     int clipX0 = clip.x0;
@@ -318,8 +277,8 @@ void VRender::RasterizeLine(int y, const Rect& clip)
         ActiveEdge* left = m_activeEdges[i];
         ActiveEdge* right = m_activeEdges[i + 1];
 
-        int x0 = left->x.getInt();
-        int x1 = right->x.getInt();
+        int x0 = left->x16 >> 16;
+        int x1 = right->x16 >> 16;
 
         // Rasterize previous chunk.
         if (x1 > x0) {

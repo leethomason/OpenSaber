@@ -121,11 +121,12 @@ void VectorUI::Draw(VRender* ren,
     uint8_t* pixels)
 {
 #if true
-    ren->DrawRect(2, 2, 10, 10, 1);
-    ren->DrawRect(20, 2, 10, 10, 1, 2);
+    //ren->DrawRect(2, 2, 10, 10, 1);
+    //ren->DrawRect(20, 2, 10, 10, 1, 2);
 
-    ren->SetTransform(FixedNorm(time % 8000, 8000), 50, 6);
-    ren->DrawRect(-5, -5, 10, 10, 1, 2);
+    //ren->SetTransform(FixedNorm(1, 64), 10, 6);
+    ren->SetTransform(FixedNorm(time % 8000, 8000), 20, 20);
+    ren->DrawRect(0, 0, 20, 20, 1, 1);
 #else
     static const int WHITE = 1;
 

@@ -130,8 +130,6 @@ public:
 
     void DrawPoly(const Vec2* points, int n, int rgba);
     void DrawPoly(const Vec2I8* points, int n, int rgba);
-    void PushLayer() { m_layerFixed = true; m_layer++; }
-    void PopLayer() { m_layerFixed = false; }
 
     void SetTransform(FixedNorm rotation, Fixed115 x, Fixed115 y) {
         m_rot = rotation;
@@ -162,27 +160,15 @@ private:
 
     struct ActiveEdge
     {
-        int color;
-        int8_t layer;
+        int16_t color;
         int16_t yEnd;
-        Fixed115 x;
-        Fixed115 slope;
+        int32_t x16;        // x in 16.16
+        int32_t slope16;    // step in slope; 64k is one pixel
         ActiveEdge* next;
-    };
-
-    struct ColorEntry
-    {
-        int8_t layer;				// actually int8_t in the active edge.
-		int color;
-        void Set(int layer, int color) {
-            this->layer = layer;
-            this->color = color;
-        }
     };
 
     void Rasterize();
     void RasterizeLine(int y, const Rect&);
-    int AddToColorStack(int layer, int color);
 
     void IncrementActiveEdges(int y);
     void AddStartingEdges(int y);
@@ -200,9 +186,7 @@ private:
         return r;
     }
 
-    bool m_layerFixed = false;
     int m_nActive;
-    int m_layer = 0;
     int m_nColor = 0;
     int m_nPool = 0;
     FixedNorm m_rot;
@@ -213,7 +197,6 @@ private:
     Rect m_size;
     Rect m_clip;
 
-    ColorEntry  m_colorStack[MAX_COLOR_STACK];
     ActiveEdge* m_activeEdges[MAX_ACTIVE];
     ActiveEdge  m_edgePool[MAX_EDGES];
     ActiveEdge* m_rootHash[Y_HASH];
