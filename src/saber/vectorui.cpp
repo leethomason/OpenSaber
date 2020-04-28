@@ -47,7 +47,6 @@ void VectorUI::Segment(VRender* ren, int width, int s, int num, int rgba)
 
     uint8_t bit = segments[num];
 
-    ren->SetImmediate(true);
     if (bit & (1 << 0))
         ren->DrawRect(0, 0, width, s, rgba);
     if (bit & (1 << 1))
@@ -62,7 +61,6 @@ void VectorUI::Segment(VRender* ren, int width, int s, int num, int rgba)
         ren->DrawRect(0, 0, s, width, rgba);
     if (bit & (1 << 6))
         ren->DrawRect(0, width - s / 2, width, s, rgba);
-    ren->SetImmediate(false);
 }
 
 void VectorUI::DrawBar(VRender* ren, int x, int y, int width, int color, int fraction)
@@ -122,6 +120,13 @@ void VectorUI::Draw(VRender* ren,
     const UIRenderData* data,
     uint8_t* pixels)
 {
+#if true
+    ren->DrawRect(2, 2, 10, 10, 1);
+    ren->DrawRect(20, 2, 10, 10, 1, 2);
+
+    ren->SetTransform(FixedNorm(time % 8000, 8000), 50, 6);
+    ren->DrawRect(-5, -5, 10, 10, 1, 2);
+#else
     static const int WHITE = 1;
 
     if (lastTime == 0) lastTime = time;
@@ -209,4 +214,5 @@ void VectorUI::Draw(VRender* ren,
     }
     // Call in wrapper!
     //ren->Render();
+#endif
 }

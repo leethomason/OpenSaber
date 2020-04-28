@@ -132,7 +132,6 @@ public:
     void DrawPoly(const Vec2I8* points, int n, int rgba);
     void PushLayer() { m_layerFixed = true; m_layer++; }
     void PopLayer() { m_layerFixed = false; }
-    void SetImmediate(bool val) { m_immediate = val; }
 
     void SetTransform(FixedNorm rotation, Fixed115 x, Fixed115 y) {
         m_rot = rotation;
@@ -202,7 +201,6 @@ private:
     }
 
     bool m_layerFixed = false;
-    bool m_immediate = false;
     int m_nActive;
     int m_layer = 0;
     int m_nColor = 0;

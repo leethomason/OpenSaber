@@ -62,30 +62,6 @@ void VRender::DrawRect(int x0, int y0, int w, int h, int c, int outline)
     ASSERT(in.x0 <= in.x1);
     ASSERT(m_layer < 127);
 
-    if (m_immediate && m_rot == 0 && outline == 0) {
-        Fixed115 xf = x0 * m_scaleX + m_transX;
-        Fixed115 yf = y0 * m_scaleY + m_transY;
-        Fixed115 wf = w * m_scaleX;
-        Fixed115 hf = h * m_scaleY;
-
-        Rect r(xf.getInt(), yf.getInt(), (xf + wf).getInt(), (yf + hf).getInt());
-        r = TransformCam(r);
-
-        r.Intersect(m_clip);
-        if (!r.Empty()) {
-            for (int y = r.y0; y < r.y1; ++y) {
-                BlockDrawChunk chunk;
-
-                chunk.color = c;
-                chunk.x0 = r.x0;
-                chunk.x1 = r.x1;
-                chunk.y = y;
-                m_blockDraw(&chunk, 1);
-            }
-        }
-        return;
-    }
-
     if (!m_layerFixed)
         m_layer++;
 
@@ -100,6 +76,7 @@ void VRender::DrawRect(int x0, int y0, int w, int h, int c, int outline)
         CreateActiveEdge(in.x1 - outline, in.y1 - outline, in.x0 + outline, in.y1 - outline, c);
         CreateActiveEdge(in.x0 + outline, in.y1 - outline, in.x0 + outline, in.y0 + outline, c);
     }
+    Rasterize();
 }
 
 void VRender::DrawPoly(const Vec2* points, int n, int color)
@@ -113,6 +90,7 @@ void VRender::DrawPoly(const Vec2* points, int n, int color)
     if (points[n - 1] != points[0]) {
         CreateActiveEdge(points[n - 1].x, points[n - 1].y, points[0].x, points[0].y, color);
     }
+    Rasterize();
 }
 
 
@@ -127,6 +105,7 @@ void VRender::DrawPoly(const Vec2I8* points, int n, int color)
     if (points[n - 1] != points[0]) {
         CreateActiveEdge(points[n - 1].x, points[n - 1].y, points[0].x, points[0].y, color);
     }
+    Rasterize();
 }
 
 
@@ -216,8 +195,8 @@ void VRender::InnerCreateActiveEdge(Fixed115 x0, Fixed115 y0, Fixed115 x1, Fixed
 void VRender::Render()
 {
     ClearTransform();
-    m_immediate = false;
 
+    /*
     Rect clip = Rect::Intersect(m_size, m_clip);
     if (clip.Empty())
         return;
@@ -230,6 +209,7 @@ void VRender::Render()
     m_layer = savedLayer;
 
     Rasterize();
+    */
 }
 
 
@@ -317,56 +297,44 @@ int VRender::AddToColorStack(int layer, int color)
 
 void VRender::RasterizeLine(int y, const Rect& clip)
 {
-    ASSERT(m_nColor == 0);
-    static const int CACHE = 8;
-    BlockDrawChunk cache[CACHE];
-    int nCache = 0;
-
+    if (m_nActive == 0)
+        return;
     if (y < clip.y0 || y >= clip.y1)
         return;
 
-    ASSERT(m_nActive >= 2);
+    ASSERT(m_nColor == 0);
+    static const int CACHE = 16;
+    BlockDrawChunk cache[CACHE];
+    int nCache = 0;
+
     ASSERT(m_nActive % 2 == 0);
 
     // Edges are sorted. Walk right to left.
-    int x0 = m_activeEdges[0]->x.getInt();
-    int rgb = 0;
     int clipX0 = clip.x0;
     int clipX1 = clip.x1;
 
-    // Edges can go away under the current active, or abut.
     // Intentionally trying to keep this loop simple without look-ahead, etc.
-    for(int i=0; i<m_nActive; ++i) {
-        ActiveEdge* ae = m_activeEdges[i];
-        // FIXME
-        // If the color stack doesn't change, we don't need to draw. But be
-        // wary of the boundary condition where it's a black bacground,
-        // which is why the empty is detected, else it will never draw.
-        int x1 = ae->x.getInt();
+    for(int i=0; i<m_nActive; i+=2) {
+        ActiveEdge* left = m_activeEdges[i];
+        ActiveEdge* right = m_activeEdges[i + 1];
+
+        int x0 = left->x.getInt();
+        int x1 = right->x.getInt();
 
         // Rasterize previous chunk.
         if (x1 > x0) {
             int subClipX0 = glMax(x0, clipX0);
             int subClipX1 = glMin(x1, clipX1);
             if (subClipX1 > subClipX0) {
-
+                ASSERT(nCache < CACHE);
                 cache[nCache].x0 = subClipX0;
                 cache[nCache].x1 = subClipX1;
                 cache[nCache].y = y;
-                cache[nCache].color = rgb;
+                cache[nCache].color = 1;
                 nCache++;
-
-                if (nCache == CACHE) {
-                    m_blockDraw(cache, nCache);
-                    nCache = 0;
-                }
             }
         }
-        rgb = AddToColorStack(ae->layer, ae->color);
-        x0 = x1;
     }
-    ASSERT(m_nColor == 0);
-    m_nColor = 0;
     if (nCache) {
         m_blockDraw(cache, nCache);
     }
@@ -387,5 +355,4 @@ void VRender::Rasterize()
         SortActiveEdges();
         RasterizeLine(j, clip);
     }
-    ClearTransform();
 }
