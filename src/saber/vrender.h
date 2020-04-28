@@ -39,13 +39,10 @@ typedef const uint8_t* (*GlyphMetrics)(int charID, int* advance, int* w, int* ro
 class VRender
 {
 public:
-    // Defines memory use; should probably be passed in. The test UI uses 20-24 edges
-    // with immediate mode on, 120 with it off. 
-    static const int MAX_EDGES = 120;    
-    static const int MAX_ACTIVE = MAX_EDGES / 2;
+    static const int MAX_EDGES = 32;    
+    static const int MAX_ACTIVE = 32;
     // Currently this must be the height or greater, so it isn't really a hash.
     static const int Y_HASH = 32;
-    static const int MAX_COLOR_STACK = 8;
 
     struct Vec2
     {
@@ -148,16 +145,7 @@ public:
     }
 
     void ClearTransform();
-
-    int NumEdges() const {
-        return m_nPool;
-    }
-
 private:
-    enum {
-        LAYER_BACKGROUND = -128,
-    };
-
     struct ActiveEdge
     {
         int16_t color;
@@ -187,7 +175,6 @@ private:
     }
 
     int m_nActive;
-    int m_nColor = 0;
     int m_nPool = 0;
     FixedNorm m_rot;
     Fixed115 m_transX, m_transY, m_scaleX, m_scaleY;

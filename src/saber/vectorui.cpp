@@ -120,7 +120,7 @@ void VectorUI::Draw(VRender* ren,
     const UIRenderData* data,
     uint8_t* pixels)
 {
-#if true
+#if false
     //ren->DrawRect(2, 2, 10, 10, 1);
     //ren->DrawRect(20, 2, 10, 10, 1, 2);
 
@@ -190,8 +190,8 @@ void VectorUI::Draw(VRender* ren,
         
         if (currentH < h) currentH++; // += deltaTime / 10;
         if (currentH > h) currentH--; // -= deltaTime / 10;
-        DrawColorHSV(ren, W / 2, currentH);
-        /*
+        DrawColorHSV(ren, W / 2, h);
+        
         for (int i = 0; i < 3; ++i) {
             int y = H / 2 - 2 - 6 + 6 * i + 1;
             DrawBar(ren, W / 2 + 19, y, 12, WHITE, data->color[i]);
@@ -201,7 +201,7 @@ void VectorUI::Draw(VRender* ren,
         intToDigits(data->palette, digits, 4);
         ren->SetTransform(W - 30, H / 2 - TEXT);
         Segment(ren, TEXT, 2, digits[3], WHITE);
-        */
+        
     }
 
     // Power

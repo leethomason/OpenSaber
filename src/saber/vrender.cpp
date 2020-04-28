@@ -38,7 +38,6 @@ VRender::VRender()
 void VRender::Clear() 
 {
     m_nActive = 0;
-    m_nColor = 0;
     m_nPool = 0;
     ASSERT(Y_HASH >= m_size.CY());
     memset(m_rootHash, 0, sizeof(ActiveEdge*)*Y_HASH);
@@ -79,9 +78,6 @@ void VRender::DrawPoly(const Vec2* points, int n, int color)
     for (int i = 1; i < n; ++i) {
         CreateActiveEdge(points[i - 1].x, points[i - 1].y, points[i].x, points[i].y, color);
     }
-    if (points[n - 1] != points[0]) {
-        CreateActiveEdge(points[n - 1].x, points[n - 1].y, points[0].x, points[0].y, color);
-    }
     Rasterize();
 }
 
@@ -90,9 +86,6 @@ void VRender::DrawPoly(const Vec2I8* points, int n, int color)
 {
     for (int i = 1; i < n; ++i) {
         CreateActiveEdge(points[i - 1].x, points[i - 1].y, points[i].x, points[i].y, color);
-    }
-    if (points[n - 1] != points[0]) {
-        CreateActiveEdge(points[n - 1].x, points[n - 1].y, points[0].x, points[0].y, color);
     }
     Rasterize();
 }
@@ -154,10 +147,11 @@ void VRender::InnerCreateActiveEdge(Fixed115 x0, Fixed115 y0, Fixed115 x1, Fixed
     ActiveEdge* ae = &m_edgePool[m_nPool];
     ae->color = c;
 
-    // If horizontal, doesn't render.
-    //if (y0.getInt() == y1.getInt())
-    //    return;
+    // If horizontal (to the pixel( doesn't render, but that will be filtered by the line walking.
+    // If the same value, pull out so it doesn't cause a divide by zero.
+    if (y0 == y1) return;
 
+    // yAdd and yEnd are fiddly.
     // yAdd will be the scan line after...unless it is zero.
     int yAdd = 0;
     if (y0 < 0) {
@@ -193,7 +187,7 @@ void VRender::InnerCreateActiveEdge(Fixed115 x0, Fixed115 y0, Fixed115 x1, Fixed
     ae->next = m_rootHash[yAdd];
     m_rootHash[yAdd] = ae;
 
-    static const float INV = 1.0f / 65536.0f;
+    //static const float INV = 1.0f / 65536.0f;
     //printf("Added: x=%f slope=%f yAdd=%d\n", ae->x16 * INV, ae->slope16 * INV, yAdd);
 }
 
@@ -259,7 +253,6 @@ void VRender::RasterizeLine(int y, const Rect& clip)
     if (y < clip.y0 || y >= clip.y1)
         return;
 
-    ASSERT(m_nColor == 0);
     static const int CACHE = 16;
     BlockDrawChunk cache[CACHE];
     int nCache = 0;
@@ -314,4 +307,5 @@ void VRender::Rasterize()
         SortActiveEdges();
         RasterizeLine(j, clip);
     }
+    Clear();
 }
