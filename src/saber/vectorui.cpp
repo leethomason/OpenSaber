@@ -28,7 +28,7 @@
 #include "assets.h"     // source for bitmap
 
 
-void VectorUI::Segment(VRender* ren, int width, int s, int num, osbr::RGBA rgba)
+void VectorUI::Segment(VRender* ren, int width, int s, int num, int rgba)
 {
     /*
         00
@@ -47,7 +47,6 @@ void VectorUI::Segment(VRender* ren, int width, int s, int num, osbr::RGBA rgba)
 
     uint8_t bit = segments[num];
 
-    ren->SetImmediate(true);
     if (bit & (1 << 0))
         ren->DrawRect(0, 0, width, s, rgba);
     if (bit & (1 << 1))
@@ -62,10 +61,9 @@ void VectorUI::Segment(VRender* ren, int width, int s, int num, osbr::RGBA rgba)
         ren->DrawRect(0, 0, s, width, rgba);
     if (bit & (1 << 6))
         ren->DrawRect(0, width - s / 2, width, s, rgba);
-    ren->SetImmediate(false);
 }
 
-void VectorUI::DrawBar(VRender* ren, int x, int y, int width, const osbr::RGBA& color, int fraction)
+void VectorUI::DrawBar(VRender* ren, int x, int y, int width, int color, int fraction)
 {
     int w = (width * fraction) >> 8;
 
@@ -83,13 +81,12 @@ void VectorUI::DrawBar(VRender* ren, int x, int y, int width, const osbr::RGBA& 
 
 void VectorUI::DrawMultiBar(VRender* ren, int x, bool flip, int yCutoff)
 {
-    static const osbr::RGBA WHITE(255, 255, 255);
     int bias = flip ? -1 : 1;
 
     for (int r = 0; r < 8; ++r) {
         Fixed115 d = r - Fixed115(7, 2);
         Fixed115 fx = Fixed115(8, 10) * d * d;
-        DrawBar(ren, x + fx.getInt() * bias , 29 - r * 4, BAR_W, WHITE, r < yCutoff ? 255 : 0);
+        DrawBar(ren, x + fx.getInt() * bias , 29 - r * 4, BAR_W, 1, r < yCutoff ? 255 : 0);
     }
 
 }
@@ -97,7 +94,7 @@ void VectorUI::DrawMultiBar(VRender* ren, int x, bool flip, int yCutoff)
 
 void VectorUI::DrawColorHSV(VRender* ren, int x, int h)
 {
-    static const osbr::RGBA WHITE(255, 255, 255);
+    static const int WHITE = 1;
 
     static const FixedNorm rotations[6] = {
         FixedNorm(0, 6), FixedNorm(1, 6), FixedNorm(2, 6),
@@ -123,6 +120,16 @@ void VectorUI::Draw(VRender* ren,
     const UIRenderData* data,
     uint8_t* pixels)
 {
+#if false
+    //ren->DrawRect(2, 2, 10, 10, 1);
+    //ren->DrawRect(20, 2, 10, 10, 1, 2);
+
+    //ren->SetTransform(FixedNorm(1, 64), 10, 6);
+    ren->SetTransform(FixedNorm(time % 8000, 8000), 20, 20);
+    ren->DrawRect(0, 0, 20, 20, 1, 1);
+#else
+    static const int WHITE = 1;
+
     if (lastTime == 0) lastTime = time;
     uint32_t deltaTime = time - lastTime;
     lastTime = time;
@@ -132,9 +139,6 @@ void VectorUI::Draw(VRender* ren,
     int p = UIRenderData::powerLevel(data->mVolts, 8);
     CStr<5> volts;
     volts.setFromNum(data->mVolts, true);
-
-    static const osbr::RGBA WHITE(255, 255, 255);
-    static const osbr::RGBA BLACK(0, 0, 0, 255);
 
     uint8_t h, s, v;
     rgb2hsv(data->color.r, data->color.g, data->color.b, &h, &s, &v);
@@ -186,8 +190,8 @@ void VectorUI::Draw(VRender* ren,
         
         if (currentH < h) currentH++; // += deltaTime / 10;
         if (currentH > h) currentH--; // -= deltaTime / 10;
-        DrawColorHSV(ren, W / 2, currentH);
-        /*
+        DrawColorHSV(ren, W / 2, h);
+        
         for (int i = 0; i < 3; ++i) {
             int y = H / 2 - 2 - 6 + 6 * i + 1;
             DrawBar(ren, W / 2 + 19, y, 12, WHITE, data->color[i]);
@@ -197,7 +201,7 @@ void VectorUI::Draw(VRender* ren,
         intToDigits(data->palette, digits, 4);
         ren->SetTransform(W - 30, H / 2 - TEXT);
         Segment(ren, TEXT, 2, digits[3], WHITE);
-        */
+        
     }
 
     // Power
@@ -211,4 +215,5 @@ void VectorUI::Draw(VRender* ren,
     }
     // Call in wrapper!
     //ren->Render();
+#endif
 }

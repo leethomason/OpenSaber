@@ -27,21 +27,11 @@
 #include "fixed.h"
 #include "Grinliz_Util.h"
 
-#define VECTOR_MONO
-
-#ifdef VECTOR_MONO
-typedef uint8_t ColorRGB;
-typedef uint8_t ColorRGBA;
-#else
-typedef osbr::RGB ColorRGB;
-typedef osbr::RGBA ColorRGBA;
-#endif
-
 struct BlockDrawChunk {
     int x0;
     int x1;
     int y;
-    ColorRGB rgb;
+    int color;
 };
 typedef void (*BlockDraw)(const BlockDrawChunk* chunks, int n);
 typedef const uint8_t* (*GlyphMetrics)(int charID, int* advance, int* w, int* rows);
@@ -49,13 +39,10 @@ typedef const uint8_t* (*GlyphMetrics)(int charID, int* advance, int* w, int* ro
 class VRender
 {
 public:
-    // Defines memory use; should probably be passed in. The test UI uses 20-24 edges
-    // with immediate mode on, 120 with it off. 
-    static const int MAX_EDGES = 120;    
-    static const int MAX_ACTIVE = MAX_EDGES / 2;
+    static const int MAX_EDGES = 32;    
+    static const int MAX_ACTIVE = 32;
     // Currently this must be the height or greater, so it isn't really a hash.
     static const int Y_HASH = 32;
-    static const int MAX_COLOR_STACK = 8;
 
     struct Vec2
     {
@@ -133,16 +120,11 @@ public:
     void SetClip(const Rect& clip) { m_clip = clip; }
     void ClearClip() { m_clip = m_size; }
 
-    void Render();
-
     void Clear();
-    void DrawRect(int x0, int y0, int width, int height, const osbr::RGBA& rgba, int outline=0);
+    void DrawRect(int x0, int y0, int width, int height, int color, int outline=0);
 
-    void DrawPoly(const Vec2* points, int n, const osbr::RGBA& rgba);
-    void DrawPoly(const Vec2I8* points, int n, const osbr::RGBA& rgba);
-    void PushLayer() { m_layerFixed = true; m_layer++; }
-    void PopLayer() { m_layerFixed = false; }
-    void SetImmediate(bool val) { m_immediate = val; }
+    void DrawPoly(const Vec2* points, int n, int rgba);
+    void DrawPoly(const Vec2I8* points, int n, int rgba);
 
     void SetTransform(FixedNorm rotation, Fixed115 x, Fixed115 y) {
         m_rot = rotation;
@@ -161,46 +143,25 @@ public:
     }
 
     void ClearTransform();
-
-    int NumEdges() const {
-        return m_nPool;
-    }
-
 private:
-    enum {
-        LAYER_BACKGROUND = -128,
-    };
-
     struct ActiveEdge
     {
-        ColorRGBA color;
-        int8_t layer;
+        int16_t color;
         int16_t yEnd;
-        Fixed115 x;
-        Fixed115 slope;
+        int32_t x16;        // x in 16.16
+        int32_t slope16;    // step in slope; 64k is one pixel
         ActiveEdge* next;
-    };
-
-    struct ColorEntry
-    {
-        int8_t layer;				// actually int8_t in the active edge.
-		ColorRGBA color;
-        void Set(int layer, ColorRGBA color) {
-            this->layer = layer;
-            this->color = color;
-        }
     };
 
     void Rasterize();
     void RasterizeLine(int y, const Rect&);
-    ColorRGB AddToColorStack(int layer, ColorRGBA color);
 
     void IncrementActiveEdges(int y);
     void AddStartingEdges(int y);
     void SortActiveEdges();
 
-    void CreateActiveEdge(int x0, int y0, int x1, int y1, ColorRGBA c);
-    void InnerCreateActiveEdge(Fixed115 x0, Fixed115 y0, Fixed115 x1, Fixed115 y1, ColorRGBA c);
+    void CreateActiveEdge(int x0, int y0, int x1, int y1, int c);
+    void InnerCreateActiveEdge(Fixed115 x0, Fixed115 y0, Fixed115 x1, Fixed115 y1, int c);
 
     void Transform4(Fixed115* e, int x0, int y0, int x1, int y1);
     Rect TransformCam(const Rect& in) {
@@ -211,11 +172,7 @@ private:
         return r;
     }
 
-    bool m_layerFixed = false;
-    bool m_immediate = false;
     int m_nActive;
-    int m_layer = 0;
-    int m_nColor = 0;
     int m_nPool = 0;
     FixedNorm m_rot;
     Fixed115 m_transX, m_transY, m_scaleX, m_scaleY;
@@ -225,7 +182,6 @@ private:
     Rect m_size;
     Rect m_clip;
 
-    ColorEntry  m_colorStack[MAX_COLOR_STACK];
     ActiveEdge* m_activeEdges[MAX_ACTIVE];
     ActiveEdge  m_edgePool[MAX_EDGES];
     ActiveEdge* m_rootHash[Y_HASH];

@@ -61,16 +61,11 @@ uint8_t* blockDrawOLEDBUffer = 0;
 void BlockDrawRGB(const BlockDrawChunk* chunk, int y, int n)
 {
     for (int i = 0; i < n; ++i, ++chunk) {
-#ifdef VECTOR_MONO
-        uint32_t c = chunk->rgb ? 0xffffffff : 0;
-#else
-        uint32_t c = (chunk->rgb.r << 24) | (chunk->rgb.g << 16) | (chunk->rgb.b << 8) | 0xff;
-#endif
         uint32_t* pixels = ((uint32_t*)blockDrawRGBABuffer) + y * WIDTH + chunk->x0;
 
         int n = chunk->x1 - chunk->x0;
         while (n--) {
-            *pixels++ = c;
+            *pixels++ = chunk->color ? 0xffffffff : 0;
         }
     }
 }
@@ -95,11 +90,7 @@ void BlockDrawOLED(const BlockDrawChunk* chunks, int n)
     for (int i = 0; i < n; ++i) {
         const BlockDrawChunk& chunk = chunks[i];
 
-#ifdef VECTOR_MONO
-        if (chunk.rgb == 0) continue;
-#else
-        if (chunk.rgb.get() == 0) continue;
-#endif
+        if (chunk.color == 0) continue;
         // Simple for the single row.
         int row = chunk.y >> 3;
         int bit = chunk.y - (row << 3);
@@ -328,11 +319,7 @@ int main(int, char**) {
             memset(displayBuffer, 0, WIDTH * HEIGHT / 8);
             vrender.Clear();
             vectorUI.Draw(&vrender, t, mode.mode(), bladeOn, &data, displayBuffer);
-            if (firstRender) {
-                printf("Render: numEdges=%d/%d size=%d\n", vrender.NumEdges(), VRender::MAX_EDGES, (int)sizeof(VRender));
-                firstRender = false;
-            }
-            vrender.Render();
+            vrender.ClearTransform();
 #   else
             sketcher.Draw(&renderer, t, mode.mode(), bladeOn, &data);
 #   endif

@@ -47,8 +47,8 @@ private:
     int currentH = 0;
     uint32_t lastTime = 0;
 
-    static void Segment(VRender* ren, int width, int s, int num, osbr::RGBA rgba);
-    static void DrawBar(VRender* ren, int x, int y, int width, const osbr::RGBA& color, int fraction);
+    static void Segment(VRender* ren, int width, int s, int num, int rgba);
+    static void DrawBar(VRender* ren, int x, int y, int width, int color, int fraction);
     static void DrawMultiBar(VRender* ren, int x, bool flip, int yCutoff);
     static void DrawColorHSV(VRender* ren, int x, int h);
 };
