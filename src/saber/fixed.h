@@ -66,7 +66,7 @@ private:
     // but no overflow. Try to help out with that.
     static inline SHORT FixedMul(SHORT a, SHORT b) {
         SHORT v = ((a * b) >> DECBITS);
-#if  defined(_DEBUG) && defined(_WIN32)
+#if  defined(_WIN32)
         ASSERT(((a * b) >> DECBITS) == v);
 #endif //  defined(_DEBUG) && defined(_WIN32)
 
@@ -75,7 +75,7 @@ private:
 
     static inline SHORT FixedDiv(SHORT a, SHORT b) {
         SHORT v = (a << DECBITS) / b;
-#if  defined(_DEBUG) && defined(_WIN32)
+#if  defined(_WIN32)
         ASSERT(((a << DECBITS) / b) == v);
 #endif //  defined(_DEBUG) && defined(_WIN32)
 
@@ -85,7 +85,7 @@ private:
     static inline SHORT IntToFixed(int a) {
         SHORT v = (a << DECBITS);
 
-#if  defined(_DEBUG) && defined(_WIN32)
+#if  defined(_WIN32)
         ASSERT((a << DECBITS) == v);
 #endif //  defined(_DEBUG) && defined(_WIN32)
 
