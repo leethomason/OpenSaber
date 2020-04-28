@@ -58,30 +58,38 @@ struct Limit<int32_t> {
     static intptr_t neg() { return INT_MIN; }
 };
 
-template<typename LONG, typename SHORT, int DECBITS>
+template<typename SHORT, int DECBITS>
 class FixedT
 {
 private:
     // Be careful that the M0+ has a 32 bit single instruction multiply,
     // but no overflow. Try to help out with that.
     static inline SHORT FixedMul(SHORT a, SHORT b) {
-        static_assert(sizeof(LONG) >= sizeof(SHORT) * 2, "Long must have more bits that short.");
-        LONG c = a * b;
-        return SHORT(c >> DECBITS);
+        SHORT v = ((a * b) >> DECBITS);
+#if  defined(_DEBUG) && defined(_WIN32)
+        ASSERT(((a * b) >> DECBITS) == v);
+#endif //  defined(_DEBUG) && defined(_WIN32)
+
+        return v;
     }
 
     static inline SHORT FixedDiv(SHORT a, SHORT b) {
-        static_assert(sizeof(LONG) >= sizeof(SHORT) * 2, "Long must have more bits that short.");
+        SHORT v = (a << DECBITS) / b;
+#if  defined(_DEBUG) && defined(_WIN32)
+        ASSERT(((a << DECBITS) / b) == v);
+#endif //  defined(_DEBUG) && defined(_WIN32)
 
-        LONG c = (LONG(a) << (DECBITS)) / (LONG(b));
-        return SHORT(c);
+        return v;
     }
 
-    static inline SHORT IntToFixed(int v) {
-        ASSERT((v << DECBITS) <= Limit<SHORT>::pos());
-        ASSERT((v << DECBITS) >= Limit<SHORT>::neg());
+    static inline SHORT IntToFixed(int a) {
+        SHORT v = (a << DECBITS);
 
-        return SHORT(v << DECBITS);
+#if  defined(_DEBUG) && defined(_WIN32)
+        ASSERT((a << DECBITS) == v);
+#endif //  defined(_DEBUG) && defined(_WIN32)
+
+        return v;
     }
     static const int FIXED_1 = 1 << DECBITS;
     SHORT x;
@@ -223,22 +231,22 @@ T lerpFixed(T a, T b, FIXED t) {
 }
 
 // Max: 127
-typedef FixedT<int32_t, int16_t, 8> Fixed88;
+typedef FixedT<int16_t, 8> Fixed88;
 
 // Strange def, but useful range:
 // Max: 1023
-typedef FixedT<int32_t, int16_t, 6> Fixed115;
+typedef FixedT<int16_t, 6> Fixed115;
 
 // Good for [1, -1] type functions, general near one.
 // About -8 to 8
-typedef FixedT<int32_t, int16_t, 12> FixedNorm;
+typedef FixedT<int16_t, 12> FixedNorm;
 
 static const FixedNorm fixedNormHalf(1, 2);
 static const FixedNorm fixedNormSqrt2Over2(0.7071067811);
 
 inline Fixed115 operator* (const Fixed115& a, const FixedNorm& b)
 {
-    FixedT<int32_t, int16_t, 6> f;
+    FixedT<int16_t, 6> f;
     int32_t x = (a.getRaw() * b.getRaw()) >> 12;
     f.setRaw((int16_t)x);
     return f;
