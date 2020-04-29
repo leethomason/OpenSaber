@@ -602,9 +602,12 @@ public:
 		m_end = end;
 		m_value = start;
 	}
-	int tick(uint32_t delta);
+	int tick(uint32_t delta, int* target=0);
 	int value() const { return m_value; }
 	bool done() { return m_period == 0; }
+
+	int start() const { return m_start; }
+	int end() const { return m_end; }
 
 private:
 	uint32_t m_time = 0;

@@ -122,9 +122,7 @@ public:
 
     void Clear();
     void DrawRect(int x0, int y0, int width, int height, int color, int outline=0);
-
     void DrawPoly(const Vec2* points, int n, int rgba);
-    void DrawPoly(const Vec2I8* points, int n, int rgba);
 
     void SetTransform(FixedNorm rotation, Fixed115 x, Fixed115 y) {
         m_rot = rotation;

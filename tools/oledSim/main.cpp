@@ -154,12 +154,15 @@ int main(int, char**) {
     
 #   ifdef USE_VRENDER
     VRender vrender;
+    Renderer bRender;
     VectorUI vectorUI;
 
     blockDrawOLEDBUffer = displayBuffer;
     vrender.Attach(BlockDrawOLED);
     vrender.SetClip(VRender::Rect(0, 0, WIDTH, HEIGHT));
     vrender.SetSize(WIDTH, HEIGHT);
+
+    bRender.Attach(WIDTH, HEIGHT, displayBuffer);
     //vrender.SetCamera(WIDTH, HEIGHT, -1, -1);
 
 #   else
@@ -318,7 +321,7 @@ int main(int, char**) {
 #   ifdef USE_VRENDER
             memset(displayBuffer, 0, WIDTH * HEIGHT / 8);
             vrender.Clear();
-            vectorUI.Draw(&vrender, t, mode.mode(), bladeOn, &data, displayBuffer);
+            vectorUI.Draw(&vrender, &bRender, t, mode.mode(), bladeOn, &data);
             vrender.ClearTransform();
 #   else
             sketcher.Draw(&renderer, t, mode.mode(), bladeOn, &data);

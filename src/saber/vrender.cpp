@@ -82,15 +82,6 @@ void VRender::DrawPoly(const Vec2* points, int n, int color)
 }
 
 
-void VRender::DrawPoly(const Vec2I8* points, int n, int color)
-{
-    for (int i = 1; i < n; ++i) {
-        CreateActiveEdge(points[i - 1].x, points[i - 1].y, points[i].x, points[i].y, color);
-    }
-    Rasterize();
-}
-
-
 void VRender::Transform4(Fixed115* e, int x0, int y0, int x1, int y1)
 {
     Fixed115 camTX = camTrans.x;
