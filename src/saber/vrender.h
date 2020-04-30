@@ -46,6 +46,9 @@ public:
 
     struct Vec2
     {
+        Vec2() {}
+        Vec2(int _x, int _y) : x(_x), y(_y) {}
+
         int x;
         int y;
 
@@ -57,6 +60,8 @@ public:
             return rhs.x != x || rhs.y != y;
         }
     };
+
+    static const Vec2 VECEND;
 
     struct Vec2I8
     {
@@ -122,7 +127,7 @@ public:
 
     void Clear();
     void DrawRect(int x0, int y0, int width, int height, int color, int outline=0);
-    void DrawPoly(const Vec2* points, int n, int rgba);
+    void DrawPoly(const Vec2* points[], int nSequence, int rgba);
 
     void SetTransform(FixedNorm rotation, Fixed115 x, Fixed115 y) {
         m_rot = rotation;
@@ -141,6 +146,7 @@ public:
     }
 
     void ClearTransform();
+
 private:
     struct ActiveEdge
     {

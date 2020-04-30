@@ -226,6 +226,7 @@ int main(int, char**) {
 	data.volume = 2;
 	data.mVolts = 3850;
 	data.fontName = "Bespin";
+    data.soundBank = 0;
 
     runUnitTests();
     
@@ -304,6 +305,7 @@ int main(int, char**) {
                 bladeFlash.setBladeColor(data.color);
                 bladeFlash.setImpactColor(ColorRotated(data.color, 180));
                 data.fontName = FONT_NAMES[palette];
+                data.soundBank = palette % 4;
 			}
             else if (e.key.keysym.sym == SDLK_f) {
                 bladeFlash.doFlash(SDL_GetTicks());

@@ -58,5 +58,7 @@ private:
     static void DrawBar(VRender* ren, int x, int y, int width, int color, int fraction);
     static void DrawMultiBar(VRender* ren, int x, bool flip, int yCutoff);
     static void DrawColorHSV(VRender* ren, int x, int h);
-    static void DrawBank(VRender* ren, int x, int y, int state);    // 0 off, 100 on, 200 off
+
+    static void DrawBanks(VRender* ren, int bank);
+    static void DrawBank(VRender* ren, int x, int y, int color);
 };

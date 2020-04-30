@@ -29,6 +29,8 @@
 #include "Grinliz_Arduino_Util.h" // profiling
 #endif
 
+const VRender::Vec2 VRender::VECEND(-111, -222);
+
 VRender::VRender()
 {
     ClearTransform();
@@ -73,10 +75,17 @@ void VRender::DrawRect(int x0, int y0, int w, int h, int c, int outline)
     Rasterize();
 }
 
-void VRender::DrawPoly(const Vec2* points, int n, int color)
+void VRender::DrawPoly(const Vec2* points[], int n, int color)
 {
-    for (int i = 1; i < n; ++i) {
-        CreateActiveEdge(points[i - 1].x, points[i - 1].y, points[i].x, points[i].y, color);
+    for (int i = 0; i < n; ++i) {
+        int j = 0;
+        const Vec2* p = points[i];
+
+        while (p[j+1] != VECEND) {
+            CreateActiveEdge(p[j].x, p[j].y, p[j+1].x, p[j+1].y, color);
+            ++j;
+        }
+        CreateActiveEdge(p[j].x, p[j].y, p[0].x, p[0].y, color);
     }
     Rasterize();
 }
@@ -242,7 +251,7 @@ void VRender::RasterizeLine(int y, const Rect& clip)
     BlockDrawChunk cache[CACHE];
     int nCache = 0;
 
-    //ASSERT(m_nActive % 2 == 0);
+    ASSERT(m_nActive % 2 == 0);
     if (m_nActive % 2)
         return;
 

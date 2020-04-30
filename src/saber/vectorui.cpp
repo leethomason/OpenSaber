@@ -98,9 +98,9 @@ void VectorUI::DrawMultiBar(VRender* ren, int x, bool flip, int yCutoff)
 }
 
 
-void VectorUI::DrawBank(VRender* ren, int x, int y, int state)
+void VectorUI::DrawBank(VRender* ren, int x, int y, int c)
 {
-    ren->DrawRect(x, y, 4, 4, 1, state == 100 ? 1 : 0);
+    ren->DrawRect(x, y, 4, 4, 1, c);
 
     /*
     static const int OUT = 4;
@@ -140,10 +140,25 @@ void VectorUI::DrawColorHSV(VRender* ren, int x, int h)
     }
 
     ren->SetTransform(FixedNorm(h, 180), x, H / 2);
-    ren->DrawRect(-2, 0, 4, 12, WHITE);
+    
+    const VRender::Vec2 p0[] = { {-4,2}, {0, 0}, {4,2}, {1,12}, {-1, 12}, VRender::VECEND };
+    const VRender::Vec2 p1[] = { {-2,3}, {2,3}, {0, 10}, VRender::VECEND };
+    const VRender::Vec2* p[] = { p0, p1 };
 
+    ren->DrawPoly(p, 2, 1);
     ren->ClearTransform();
 }
+
+
+void VectorUI::DrawBanks(VRender* ren, int bank)
+{
+    bank = bank % 4;
+    DrawBank(ren, W - BAR_W - 13, H / 2 - 5, bank == 0 ? 1 : 0);
+    DrawBank(ren, W - BAR_W - 8, H / 2 - 5, bank == 1 ? 1 : 0);
+    DrawBank(ren, W - BAR_W - 13, H / 2 - 0, bank == 2 ? 1 : 0);
+    DrawBank(ren, W - BAR_W - 8, H / 2 - 0, bank == 3 ? 1 : 0);
+}
+
 
 
 void VectorUI::Draw(
@@ -182,38 +197,48 @@ void VectorUI::Draw(
     uint8_t h, s, v;
     rgb2hsv(data->color.r, data->color.g, data->color.b, &h, &s, &v);
 
-    // Power
-    if (mode == UIMode::NORMAL) {
+    // Power bar.
+    if (mode == UIMode::NORMAL || mode == UIMode::MEDITATION) {
         DrawMultiBar(ren, 0, false, p);
     }
-    else if (mode == UIMode::PALETTE) {
+
+    // Audio
+    if (mode == UIMode::NORMAL || mode == UIMode::VOLUME || mode == UIMode::MEDITATION) {
+        DrawMultiBar(ren, W - BAR_W, true, data->volume * 2);
+    }
+
+    if (mode == UIMode::NORMAL || mode == UIMode::VOLUME) {
+        DrawBanks(ren, data->soundBank);
+    }
+
+
+    if (mode == UIMode::PALETTE) {
         for (int j = 0; j < 2; j++) {
             for (int i = 0; i < 4; i++) {
-                static const int S = 6;
+                static const int S = 8;
+                static const int X = 6;
                 int count = j * 4 + i;
-                ren->DrawRect(S + (S + 2)*i, H / 2 - 8 + 8 * j, S, S, WHITE, data->palette == count ? 1 : 0);
+                ren->DrawRect(X + (S + 2)*i, H / 2 - 10 + 10 * j, S, S, WHITE, data->palette == count ? 1 : 0);
             }
         }
+        DrawBanks(ren, data->soundBank);
     }
-    else if (mode == UIMode::VOLUME) {
-        /*
-        static const int S = 10;
-        static const int XS = 12;
-        ren->DrawRect(XS, H / 2 - S / 2, S, S, WHITE);
-        for (int i = 2; i < 5; ++i) {
-            ren->DrawRect(XS + 4 + 4 * i, H / 2 - (S + i * 4) / 2, 2, S + i * 4, WHITE);
-        }
-        */
+
+    if (mode == UIMode::VOLUME) {
         if (bRen) {
             bRen->DrawStr(data->fontName.c_str(), 2, H / 2 - 4, getGlypth_calibri8);
         }
     }
-    else if (mode == UIMode::MEDITATION) {
+
+    if (mode == UIMode::MEDITATION) {
         if (bRen) {
-            bRen->DrawBitmap(8, 0, get_jBird);
+            int w, h;
+            get_jBird(&w, &h);
+            bRen->DrawBitmap(W/2 - w/2, 0, get_jBird);
         }
     }
-    else if (mode == UIMode::COLOR_WHEEL) {
+    
+    if (mode == UIMode::COLOR_WHEEL) {
         static const int S = 24;
         for (int i = 0; i < 6; ++i) {
             ren->SetTransform(FixedNorm(i * 30, 180), W / 4 - 6, H / 2);
@@ -223,17 +248,8 @@ void VectorUI::Draw(
         ren->DrawRect(W / 4 - 6 - 10, H / 2 - 10, 20, 20, WHITE, 1);
     }
 
-    // Audio
-    if (mode == UIMode::NORMAL || mode == UIMode::VOLUME) {
-        DrawMultiBar(ren, W - BAR_W, true, data->volume * 2);
-
-        DrawBank(ren, W - BAR_W - 13, H / 2 - 5, 0);
-        DrawBank(ren, W - BAR_W - 8,  H / 2 - 5, 100);
-        DrawBank(ren, W - BAR_W - 13, H / 2 - 0, 0);
-        DrawBank(ren, W - BAR_W - 8,  H / 2 - 0, 0);
-    }
     // Color indicator
-    {
+    if (mode == UIMode::NORMAL || mode == UIMode::VOLUME || mode == UIMode::PALETTE) {
         if (hProp != h) {
             hTime += deltaTime;
             
