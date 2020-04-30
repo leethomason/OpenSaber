@@ -27,19 +27,38 @@
 #include "uirenderdata.h"
 
 class VRender;
+class Renderer;
 
 class VectorUI
 {
 public:
-    static void Draw(VRender* r, 
+    VectorUI();
+
+    void Draw(
+        VRender* vRender,   // vector renderer
+        Renderer* bRender,  // bitmap renderer
         uint32_t time, 
         UIMode mode, 
         bool bladeIgnited, 
-        const UIRenderData* data,
-        uint8_t* buffer=0);      // buffer is used to immediate draw (without renderer)
+        const UIRenderData* data);
 
 private:
-    static void Segment(VRender* ren, int width, int s, int num, osbr::RGBA rgba);
-    // 1000-100-10-1
-    static void DrawBar(VRender* ren, int x, int y, int width, const osbr::RGBA& color, int fraction);
+    static const int BAR_W = 16;
+    static const int W = 128;
+    static const int H = 32;
+    static const int TEXT = 5;
+
+    uint32_t lastTime = 0;
+
+    AnimateProp colorProp[3];
+    int hProp = 0;
+    int hTime = 0;
+
+    static void Segment(VRender* ren, int width, int s, int num, int rgba);
+    static void DrawBar(VRender* ren, int x, int y, int width, int color, int fraction);
+    static void DrawMultiBar(VRender* ren, int x, bool flip, int yCutoff);
+    static void DrawColorHSV(VRender* ren, int x, int h);
+
+    static void DrawBanks(VRender* ren, int bank);
+    static void DrawBank(VRender* ren, int x, int y, int color);
 };

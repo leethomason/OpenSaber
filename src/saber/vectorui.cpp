@@ -28,7 +28,13 @@
 #include "assets.h"     // source for bitmap
 
 
-void VectorUI::Segment(VRender* ren, int width, int s, int num, osbr::RGBA rgba)
+VectorUI::VectorUI()
+{
+
+}
+
+
+void VectorUI::Segment(VRender* ren, int width, int s, int num, int rgba)
 {
     /*
         00
@@ -47,7 +53,6 @@ void VectorUI::Segment(VRender* ren, int width, int s, int num, osbr::RGBA rgba)
 
     uint8_t bit = segments[num];
 
-    ren->SetImmediate(true);
     if (bit & (1 << 0))
         ren->DrawRect(0, 0, width, s, rgba);
     if (bit & (1 << 1))
@@ -62,10 +67,9 @@ void VectorUI::Segment(VRender* ren, int width, int s, int num, osbr::RGBA rgba)
         ren->DrawRect(0, 0, s, width, rgba);
     if (bit & (1 << 6))
         ren->DrawRect(0, width - s / 2, width, s, rgba);
-    ren->SetImmediate(false);
 }
 
-void VectorUI::DrawBar(VRender* ren, int x, int y, int width, const osbr::RGBA& color, int fraction)
+void VectorUI::DrawBar(VRender* ren, int x, int y, int width, int color, int fraction)
 {
     int w = (width * fraction) >> 8;
 
@@ -81,117 +85,214 @@ void VectorUI::DrawBar(VRender* ren, int x, int y, int width, const osbr::RGBA& 
     }
 }
 
-void VectorUI::Draw(VRender* ren,
+void VectorUI::DrawMultiBar(VRender* ren, int x, bool flip, int yCutoff)
+{
+    int bias = flip ? -1 : 1;
+
+    for (int r = 0; r < 8; ++r) {
+        Fixed115 d = r - Fixed115(7, 2);
+        Fixed115 fx = Fixed115(8, 10) * d * d;
+        DrawBar(ren, x + fx.getInt() * bias , 29 - r * 4, BAR_W, 1, r < yCutoff ? 255 : 0);
+    }
+
+}
+
+
+void VectorUI::DrawBank(VRender* ren, int x, int y, int c)
+{
+    ren->DrawRect(x, y, 4, 4, 1, c);
+
+    /*
+    static const int OUT = 4;
+    static const int IN = 1;
+    static const int TRAVEL = OUT + IN;
+
+    int left = IN;
+    int right = OUT - IN;
+    if (state < 100) {
+        left = -OUT + TRAVEL * state / 100;
+        right = left + OUT - IN * 2;
+        if (left < 0) left = 0;
+        if (right < 0) right = 0;
+    }
+
+    Vec2* points[] = {
+        // rectangle
+        {x,y}, {x + OUT, y}, {x + OUT, y + OUT}, {x, y + OUT}, {x, y},
+        //
+    };
+    ren->DrawPoly(points, n, 1);*/
+}
+
+
+void VectorUI::DrawColorHSV(VRender* ren, int x, int h)
+{
+    static const int WHITE = 1;
+
+    static const FixedNorm rotations[6] = {
+        FixedNorm(0, 6), FixedNorm(1, 6), FixedNorm(2, 6),
+        FixedNorm(3, 6), FixedNorm(4, 6), FixedNorm(5, 6)
+    };
+
+    for (int r = 0; r < 6; ++r) {
+        ren->SetTransform(rotations[r], x, H / 2);
+        ren->DrawRect(-1, 10, 2, 5, WHITE);
+    }
+
+    ren->SetTransform(FixedNorm(h, 180), x, H / 2);
+    
+    const VRender::Vec2 p0[] = { {-4,2}, {0, 0}, {4,2}, {1,12}, {-1, 12}, VRender::VECEND };
+    const VRender::Vec2 p1[] = { {-2,3}, {2,3}, {0, 10}, VRender::VECEND };
+    const VRender::Vec2* p[] = { p0, p1 };
+
+    ren->DrawPoly(p, 2, 1);
+    ren->ClearTransform();
+}
+
+
+void VectorUI::DrawBanks(VRender* ren, int bank)
+{
+    bank = bank % 4;
+    DrawBank(ren, W - BAR_W - 13, H / 2 - 5, bank == 0 ? 1 : 0);
+    DrawBank(ren, W - BAR_W - 8, H / 2 - 5, bank == 1 ? 1 : 0);
+    DrawBank(ren, W - BAR_W - 13, H / 2 - 0, bank == 2 ? 1 : 0);
+    DrawBank(ren, W - BAR_W - 8, H / 2 - 0, bank == 3 ? 1 : 0);
+}
+
+
+
+void VectorUI::Draw(
+    VRender* ren, Renderer* bRen,
     uint32_t time,
     UIMode mode,
     bool bladeIgnited,
-    const UIRenderData* data,
-    uint8_t* pixels)
+    const UIRenderData* data)
 {
+#if false
+    //ren->DrawRect(2, 2, 10, 10, 1);
+    //ren->DrawRect(20, 2, 10, 10, 1, 2);
+
+    //ren->SetTransform(FixedNorm(1, 64), 10, 6);
+    ren->SetTransform(FixedNorm(time % 8000, 8000), 20, 20);
+    ren->DrawRect(0, 0, 20, 20, 1, 1);
+#else
+    static const int WHITE = 1;
+
+    if (lastTime == 0) lastTime = time;
+    uint32_t deltaTime = time - lastTime;
+    lastTime = time;
+
+    for (int i = 0; i < 3; ++i) {
+        if (colorProp[i].end() != data->color[i]) 
+            colorProp[i].start(500, colorProp[i].value(), data->color[i]);
+        colorProp[i].tick(deltaTime);
+    }
+
     ren->Clear();
   
     int p = UIRenderData::powerLevel(data->mVolts, 8);
     CStr<5> volts;
     volts.setFromNum(data->mVolts, true);
 
-    static const int W = 128;
-    static const int H = 32;
-    static const int BAR_W = 16;
-    static const int TEXT = 5;
-
-    static const osbr::RGBA WHITE(255, 255, 255);
-    static const osbr::RGBA BLACK(0, 0, 0, 255);
-
     uint8_t h, s, v;
     rgb2hsv(data->color.r, data->color.g, data->color.b, &h, &s, &v);
 
-    // Power
-    if (mode == UIMode::NORMAL) {
-        for (int r = 0; r < 8; ++r) {
-            Fixed115 d = r - Fixed115(7, 2);
-            Fixed115 fx = Fixed115(8, 10) * d * d;
-            DrawBar(ren, fx.getInt(), 29 - r * 4, BAR_W, WHITE, r < p ? 255 : 0);
-        }
-    }
-    else if (mode == UIMode::PALETTE) {
-        for (int j = 0; j < 2; j++) {
-            for (int i = 0; i < 4; i++) {
-                static const int S = 6;
-                int count = j * 4 + i;
-                ren->DrawRect(S + (S + 2)*i, H / 2 - 8 + 8 * j, S, S, WHITE, data->palette == count ? 1 : 0);
-            }
-        }
-    }
-    else if (mode == UIMode::VOLUME) {
-        static const int S = 10;
-        static const int XS = 12;
-        ren->DrawRect(XS, H / 2 - S / 2, S, S, WHITE);
-        for (int i = 2; i < 5; ++i) {
-            ren->DrawRect(XS + 4 + 4 * i, H / 2 - (S + i * 4) / 2, 2, S + i * 4, WHITE);
-        }
-    }
-    else if (mode == UIMode::MEDITATION) {
-        if (pixels) {
-            Renderer renderer;
-            renderer.Attach(W, H, pixels);
-            renderer.DrawBitmap(8, 0, get_jBird);
-        }
-    }
-    else if (mode == UIMode::COLOR_WHEEL) {
-        static const int S = 24;
-        for (int i = 0; i < 6; ++i) {
-            ren->SetTransform(FixedNorm(i * 30, 180), W / 4 - 6, H / 2);
-            ren->DrawRect(-S / 2, -1, S, 2, WHITE);
-        }
-        ren->ClearTransform();
-        ren->DrawRect(W / 4 - 6 - 10, H / 2 - 10, 20, 20, WHITE, 1);
+    // Power bar.
+    if (mode == UIMode::NORMAL || mode == UIMode::MEDITATION) {
+        DrawMultiBar(ren, 0, false, p);
     }
 
     // Audio
+    if (mode == UIMode::NORMAL || mode == UIMode::VOLUME || mode == UIMode::MEDITATION) {
+        DrawMultiBar(ren, W - BAR_W, true, data->volume * 2);
+    }
+
+    // Sound bank
     if (mode == UIMode::NORMAL || mode == UIMode::VOLUME) {
-        for (int r = 0; r < 8; ++r) {
-            Fixed115 d = r - Fixed115(7, 2);
-            Fixed115 fx = Fixed115(8, 10) * d * d;
-            DrawBar(ren, W - fx.getInt() - BAR_W, 29 - r * 4, BAR_W, WHITE, r / 2 < data->volume ? 255 : 0);
+        DrawBanks(ren, data->soundBank);
+    }
+
+    // Font indicator
+    if (mode == UIMode::PALETTE) {
+        for (int j = 0; j < 2; j++) {
+            for (int i = 0; i < 4; i++) {
+                static const int S = 8;
+                static const int X = 6;
+                int count = j * 4 + i;
+                ren->DrawRect(X + (S + 2)*i, H / 2 - 10 + 10 * j, S, S, WHITE, data->palette == count ? 1 : 0);
+            }
+        }
+        DrawBanks(ren, data->soundBank);
+    }
+
+    // Font name
+    if (mode == UIMode::VOLUME) {
+        if (bRen) {
+            bRen->DrawStr(data->fontName.c_str(), 2, H / 2 - 4, getGlypth_calibri8);
         }
     }
-    // Color indicator
-    {
-        static const FixedNorm rotations[6] = {
-            FixedNorm(0, 6), FixedNorm(1, 6), FixedNorm(2, 6), 
-            FixedNorm(3, 6), FixedNorm(4, 6), FixedNorm(5, 6) 
-        };
 
-        for (int r = 0; r < 6; ++r) {
-            ren->SetTransform(rotations[r], W / 2, H / 2);
-            ren->DrawRect(-1, 10, 2, 5, WHITE);
+    // Meditation j-bird
+    if (mode == UIMode::MEDITATION) {
+        if (bRen) {
+            int w, h;
+            get_jBird(&w, &h);
+            bRen->DrawBitmap(W/2 - w/2, 0, get_jBird);
+        }
+    }
+    
+    // Color dial
+    if (mode == UIMode::NORMAL || mode == UIMode::VOLUME || mode == UIMode::PALETTE || mode == UIMode::COLOR_WHEEL) {
+        if (hProp != h) {
+            hTime += deltaTime;
+            
+            const int SPEED = 10;
+            int rate = hTime / SPEED;
+            hTime -= rate * SPEED;
+
+            int left = hProp - h;
+            if (left < 0) left += 180;
+            int right = h - hProp;
+            if (right < 0) right += 180;
+
+            if (left <= rate || right <= rate) {
+                hProp = h;
+                hTime = 0;
+            }
+            else {
+                if (left < right)
+                    hProp -= rate;
+                else
+                    hProp += rate;
+            }
+
+            if (hProp < 0) hProp += 180;
+            if (hProp >= 180) hProp -= 180;
         }
 
-        ren->SetTransform(FixedNorm(h, 180), W / 2, H / 2);
-        ren->DrawRect(-2, 0, 4, 12, WHITE);
-
-        ren->ClearTransform();
-
+        DrawColorHSV(ren, W / 2, hProp);
+        
         for (int i = 0; i < 3; ++i) {
             int y = H / 2 - 2 - 6 + 6 * i + 1;
-            DrawBar(ren, W / 2 + 19, y, 12, WHITE, data->color[i]);
+            DrawBar(ren, W / 2 + 19, y, 12, WHITE, colorProp[i].value());
         }
-
-        int digits[4];
-        intToDigits(data->palette, digits, 4);
-        ren->SetTransform(W - 30, H / 2 - TEXT);
-        Segment(ren, TEXT, 2, digits[3], WHITE);
     }
 
-    // Power
+    // Power and bank text
     if (mode == UIMode::NORMAL) {
         int digits[4];
         intToDigits(data->mVolts, digits, 4);
-        for (int i = 0; i < 4; ++i) {
-            ren->SetTransform(20 + (TEXT+2)*i, H / 2 - TEXT);
+
+        static const int TX = 24;
+        static const int DTX = 2;
+
+        for (int i = 0; i < 3; ++i) {
+            ren->SetTransform(TX + (TEXT + DTX) * i, H / 2 - TEXT * 2);
             Segment(ren, TEXT, 2, digits[i], WHITE);
         }
+        intToDigits(data->palette, digits, 4);
+        ren->SetTransform(TX + (TEXT + DTX) * 2, H / 2 + TEXT * 0 + 2);
+        Segment(ren, TEXT, 2, digits[3], WHITE);
     }
-    // Call in wrapper!
-    //ren->Render();
+#endif
 }

@@ -41,9 +41,9 @@ const MemUnit& Manifest::getUnit(int id) const
 
 uint32_t Manifest::dirHash() const
 {
-    uint32_t h=0;
+    uint32_t h = 0;
     for(int i=0; i<MEM_IMAGE_NUM_DIR; ++i) {
-        const char* start = (const char*)&memUnit[i];
+        const char *start = (const char *)&memUnit[i];
         const char* end = start + MemUnit::NAME_LEN;
         h = hash32(start, end, h);
     }

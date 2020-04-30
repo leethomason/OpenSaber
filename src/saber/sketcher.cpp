@@ -146,6 +146,7 @@ bool DotStarUI::Test()
     data.volume = 1;
     data.palette = 7;
     data.fontName = "FontName";
+    data.soundBank = 0;
     data.color.set(0xff, 0, 0);
 
     ASSERT(data.color.get() == 0xff0000);

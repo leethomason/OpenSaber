@@ -89,7 +89,7 @@ bool TestFixed()
     {
         FixedNorm a(4, 100);
         FixedNorm ar = a.sqrt();
-        TEST_IS_TRUE(ar.getRaw() == 817);
+        TEST_IS_TRUE(ar.x == 817);
     }
     return true;
 }
