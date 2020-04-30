@@ -33,7 +33,7 @@ DZ_BOLT = 8.0;          // switch to allen head for space?
 DZ_SWITCH = (M_AFT_THREAD_FRONT - M_JOINT - DZ_POWER_RING - DZ_BOLT);
 
 DZ_RING0 = 3.0;
-DZ_RING1 = 3.0;
+DZ_RING1 = 2.5;
 
 DZ_FORE_FULL = M_AFT_THREAD_FRONT - M_JOINT;
 DZ_FORE_TRIM = DZ_FORE_FULL - DZ_RING0;
