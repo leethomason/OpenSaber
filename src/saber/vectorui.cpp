@@ -207,11 +207,12 @@ void VectorUI::Draw(
         DrawMultiBar(ren, W - BAR_W, true, data->volume * 2);
     }
 
+    // Sound bank
     if (mode == UIMode::NORMAL || mode == UIMode::VOLUME) {
         DrawBanks(ren, data->soundBank);
     }
 
-
+    // Font indicator
     if (mode == UIMode::PALETTE) {
         for (int j = 0; j < 2; j++) {
             for (int i = 0; i < 4; i++) {
@@ -224,12 +225,14 @@ void VectorUI::Draw(
         DrawBanks(ren, data->soundBank);
     }
 
+    // Font name
     if (mode == UIMode::VOLUME) {
         if (bRen) {
             bRen->DrawStr(data->fontName.c_str(), 2, H / 2 - 4, getGlypth_calibri8);
         }
     }
 
+    // Meditation j-bird
     if (mode == UIMode::MEDITATION) {
         if (bRen) {
             int w, h;
@@ -238,18 +241,8 @@ void VectorUI::Draw(
         }
     }
     
-    if (mode == UIMode::COLOR_WHEEL) {
-        static const int S = 24;
-        for (int i = 0; i < 6; ++i) {
-            ren->SetTransform(FixedNorm(i * 30, 180), W / 4 - 6, H / 2);
-            ren->DrawRect(-S / 2, -1, S, 2, WHITE);
-        }
-        ren->ClearTransform();
-        ren->DrawRect(W / 4 - 6 - 10, H / 2 - 10, 20, 20, WHITE, 1);
-    }
-
-    // Color indicator
-    if (mode == UIMode::NORMAL || mode == UIMode::VOLUME || mode == UIMode::PALETTE) {
+    // Color dial
+    if (mode == UIMode::NORMAL || mode == UIMode::VOLUME || mode == UIMode::PALETTE || mode == UIMode::COLOR_WHEEL) {
         if (hProp != h) {
             hTime += deltaTime;
             
@@ -285,7 +278,7 @@ void VectorUI::Draw(
         }
     }
 
-    // Power
+    // Power and bank text
     if (mode == UIMode::NORMAL) {
         int digits[4];
         intToDigits(data->mVolts, digits, 4);
@@ -301,7 +294,5 @@ void VectorUI::Draw(
         ren->SetTransform(TX + (TEXT + DTX) * 2, H / 2 + TEXT * 0 + 2);
         Segment(ren, TEXT, 2, digits[3], WHITE);
     }
-    // Call in wrapper!
-    //ren->Render();
 #endif
 }
