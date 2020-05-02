@@ -4,8 +4,8 @@ use <../inset.scad>
 include <dim.scad>
 
 $fn = 80;
-DRAW_AFT = false;
-DRAW_FORE = true;
+DRAW_AFT = true;
+DRAW_FORE = false;
 //DRAW_RING0 = false;
 //DRAW_RING1 = false;
 
