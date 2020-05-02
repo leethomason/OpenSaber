@@ -768,6 +768,7 @@
 	#define SABER_UI_BRIGHTNESS	    	16
 	#define SABER_UI_IDLE_MEDITATION
 	#define SABER_UI_COLOR_WHEEL
+	#define VOLTMETER_TUNE				1000
 
 	#define ID_STR "Ilum Cree XPE2 RGB"
 
