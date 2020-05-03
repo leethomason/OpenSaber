@@ -61,16 +61,11 @@ uint8_t* blockDrawOLEDBUffer = 0;
 void BlockDrawRGB(const BlockDrawChunk* chunk, int y, int n)
 {
     for (int i = 0; i < n; ++i, ++chunk) {
-#ifdef VECTOR_MONO
-        uint32_t c = chunk->rgb ? 0xffffffff : 0;
-#else
-        uint32_t c = (chunk->rgb.r << 24) | (chunk->rgb.g << 16) | (chunk->rgb.b << 8) | 0xff;
-#endif
         uint32_t* pixels = ((uint32_t*)blockDrawRGBABuffer) + y * WIDTH + chunk->x0;
 
         int n = chunk->x1 - chunk->x0;
         while (n--) {
-            *pixels++ = c;
+            *pixels++ = chunk->color ? 0xffffffff : 0;
         }
     }
 }
@@ -95,11 +90,7 @@ void BlockDrawOLED(const BlockDrawChunk* chunks, int n)
     for (int i = 0; i < n; ++i) {
         const BlockDrawChunk& chunk = chunks[i];
 
-#ifdef VECTOR_MONO
-        if (chunk.rgb == 0) continue;
-#else
-        if (chunk.rgb.get() == 0) continue;
-#endif
+        if (chunk.color == 0) continue;
         // Simple for the single row.
         int row = chunk.y >> 3;
         int bit = chunk.y - (row << 3);
@@ -163,11 +154,15 @@ int main(int, char**) {
     
 #   ifdef USE_VRENDER
     VRender vrender;
+    Renderer bRender;
+    VectorUI vectorUI;
 
     blockDrawOLEDBUffer = displayBuffer;
     vrender.Attach(BlockDrawOLED);
     vrender.SetClip(VRender::Rect(0, 0, WIDTH, HEIGHT));
     vrender.SetSize(WIDTH, HEIGHT);
+
+    bRender.Attach(WIDTH, HEIGHT, displayBuffer);
     //vrender.SetCamera(WIDTH, HEIGHT, -1, -1);
 
 #   else
@@ -231,6 +226,7 @@ int main(int, char**) {
 	data.volume = 2;
 	data.mVolts = 3850;
 	data.fontName = "Bespin";
+    data.soundBank = 0;
 
     runUnitTests();
     
@@ -309,6 +305,7 @@ int main(int, char**) {
                 bladeFlash.setBladeColor(data.color);
                 bladeFlash.setImpactColor(ColorRotated(data.color, 180));
                 data.fontName = FONT_NAMES[palette];
+                data.soundBank = palette % 4;
 			}
             else if (e.key.keysym.sym == SDLK_f) {
                 bladeFlash.doFlash(SDL_GetTicks());
@@ -326,12 +323,8 @@ int main(int, char**) {
 #   ifdef USE_VRENDER
             memset(displayBuffer, 0, WIDTH * HEIGHT / 8);
             vrender.Clear();
-            VectorUI::Draw(&vrender, t, mode.mode(), bladeOn, &data, displayBuffer);
-            if (firstRender) {
-                printf("Render: numEdges=%d/%d size=%d\n", vrender.NumEdges(), VRender::MAX_EDGES, (int)sizeof(VRender));
-                firstRender = false;
-            }
-            vrender.Render();
+            vectorUI.Draw(&vrender, &bRender, t, mode.mode(), bladeOn, &data);
+            vrender.ClearTransform();
 #   else
             sketcher.Draw(&renderer, t, mode.mode(), bladeOn, &data);
 #   endif

@@ -2,8 +2,8 @@ use <../commonUnified.scad>
 M_0 = 0;
 
 // Test trims - rather tight.
-M_START = -((42.0 - 10.0) - 0.5);
-DZ_SPKR = 12.5;
+M_START = -((42.0 - 10.0) - 1.0);
+DZ_SPKR = 12.0;
 M_MC_BATTERY = M_START + DZ_SPKR;
 
 DZ_BODY = 101.5;
@@ -17,7 +17,9 @@ DZ_AFT = M_AFT_FRONT - M_START;
 //DZ_FORE = 18.0;
 //M_FORE_FRONT = M_AFT_FRONT + DZ_FORE;
 
-D_INNER_FORE = 25.0;
+D_COUPLER = 26.0;
+D_COUPLER_BOLT = 13.5;  // guess...
+
 D_INNER = 31.60;
 D_OUTER = 36.9;
 
@@ -30,8 +32,9 @@ DZ_POWER_RING = 18.0;
 DZ_BOLT = 8.0;          // switch to allen head for space?
 DZ_SWITCH = (M_AFT_THREAD_FRONT - M_JOINT - DZ_POWER_RING - DZ_BOLT);
 
-DZ_RING0 = 4.0; // fixme
-DZ_RING1 = 3.0; // fixme
+DZ_RING0 = 3.0;
+DZ_RING1 = 2.5;
+
 DZ_FORE_FULL = M_AFT_THREAD_FRONT - M_JOINT;
 DZ_FORE_TRIM = DZ_FORE_FULL - DZ_RING0;
 
@@ -43,9 +46,11 @@ M_PORT = M_JOINT + DZ_POWER_RING / 2;
 M_SWITCH = M_SWITCH_START + DZ_SWITCH / 2;
 
 INSET_W = 14.0;
-D_RING = 33.5;      // fixme
-D_TUBE_INNER = 3.0; // fixme
-D_TUBE_OUTER = 4.0;
-R_TUBE = 10.0;
+D_RING = 33.4;
 
 DX_SWITCH_PLATE = 16.5;
+
+D_TUBE = 4.6;
+D_TUBE_INNER = 3.3;
+D_ROD = 3.6;
+D_BOLT_CAP = 7.0;

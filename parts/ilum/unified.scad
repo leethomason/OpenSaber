@@ -5,9 +5,8 @@ include <dim.scad>
 
 $fn = 80;
 DRAW_AFT = false;
-DRAW_FORE = true;
-DRAW_RING0 = false;
-DRAW_RING1 = false;
+DRAW_FORE = false;
+DRAW_SWITCH_HOLDER = true;
 
 EPS = 0.01;
 ESP2 = 2 * EPS;
@@ -15,11 +14,13 @@ ESP2 = 2 * EPS;
 PLATE_TRIM = 1.0;
 JOINT = 8;
 T = 4;
+TOP_FLATTEN = 3.0;
 
 DOTSTAR_XZ = 5.6;
 DOTSTAR_PITCH = 7;
 DOTSTAR_STRIP_XZ = 12.4;
-DOTSTAR_Z = 52.0;   // center of first, fixme
+DOTSTAR_Z = 73.0 - 21.0;
+KEYJOINT_T = 5.0;
 
 module ring(dz)
 {
@@ -39,8 +40,8 @@ module ring(dz)
     }
 }
 
-if (DRAW_RING0) translate([0, 0, M_AFT_FRONT - DZ_RING0]) ring(DZ_RING0);
-if (DRAW_RING1) translate([0, 0, M_AFT_FRONT + 20.0]) mirror([0, 0, -1]) ring(DZ_RING1);
+//if (DRAW_RING0) translate([0, 0, M_AFT_FRONT - DZ_RING0]) ring(DZ_RING0);
+//if (DRAW_RING1) translate([0, 0, M_AFT_FRONT + 20.0]) mirror([0, 0, -1]) ring(DZ_RING1);
 
 module bottomDotstar()
 {
@@ -49,9 +50,11 @@ module bottomDotstar()
     D = 10;
     OFFSETY = 0.1;
 
-    for(i=[0:3]) {
-        translate([-DOTSTAR_XZ/2, -D_INNER/2, DOTSTAR_Z + i * DOTSTAR_PITCH - DOTSTAR_XZ/2])
-            cube(size=[DOTSTAR_XZ, 8, DOTSTAR_XZ]);
+    hull() {
+        for(i=[0:3]) {
+            translate([-DOTSTAR_XZ/2, -D_INNER/2, DOTSTAR_Z + i * DOTSTAR_PITCH - DOTSTAR_XZ/2])
+                cube(size=[DOTSTAR_XZ, 8, DOTSTAR_XZ]);
+        }
     }
     EXTRAZ = 5.0;
     hull() {
@@ -59,6 +62,27 @@ module bottomDotstar()
             cube(size=[DOTSTAR_STRIP_XZ, H0, DOTSTAR_PITCH * 5 + EXTRAZ]);
         translate([-(DOTSTAR_STRIP_XZ-D)/2, -D_INNER/2 + T/2 + OFFSETY, DOTSTAR_Z - 3*DOTSTAR_XZ/2 + 2 - EXTRAZ])
             cube(size=[DOTSTAR_STRIP_XZ - D, H1, DOTSTAR_PITCH * 5 + EXTRAZ]);
+    }
+}
+
+if (DRAW_SWITCH_HOLDER)
+{
+    HOLDER_Y = 10.0;
+    HOLDER_LOWER_Y = 2.5;
+    HOLDER_D = 7.2;
+    HOLDER_LOWER_D = 10.5;
+    INNER_D = 4.0;
+
+    Y_OFFSET = 3.0;
+
+    color("plum") translate([0, D_INNER/2 - TOP_FLATTEN - Y_OFFSET, M_SWITCH]) rotate([-90, 0, 0]) {
+        difference() {
+            union() {
+                cylinder(h=HOLDER_Y, d=HOLDER_D);
+                cylinder(h=HOLDER_LOWER_Y, d=HOLDER_LOWER_D);
+            }
+            cylinder(h=20, d=INNER_D);
+        }
     }
 }
 
@@ -74,12 +98,11 @@ if (DRAW_AFT) {
         }
     }
     translate([0, 0, M_JOINT]) rotate([0, 0, 0])
-        keyJoint(JOINT, D_INNER, D_INNER - 4, false);
+        keyJoint(JOINT, D_INNER, D_INNER - KEYJOINT_T, false);
 
 }
 
 if (DRAW_FORE) {
-    TOP_FLATTEN = 2.0;
 
     difference() {
         union() {
@@ -99,6 +122,21 @@ if (DRAW_FORE) {
                 }
                 switchHolder(D_INNER, M_SWITCH - M_SWITCH_START, 0, 10.0);
             }
+            // Pillars to toughen front.
+            PILLAR = 5;
+            //translate([0, 0, M_AFT_THREAD_FRONT - PILLAR - DZ_RING0]) {
+            PILLAR_START = M_BOLT + DZ_BOLT/2;
+            translate([0, 0, PILLAR_START]) {
+                DZS = M_AFT_THREAD_FRONT - DZ_RING0 - PILLAR_START;
+                intersection() {
+                    cylinder(h=DZS, d=D_INNER);
+                    union() {
+                        P = [[4, D_INNER/2], [D_INNER/2, D_INNER/2], [D_INNER * 0.6, -D_INNER/2]];
+                        polygonXY(h=DZS, points=P);
+                        mirror([-1, 0, 0]) polygonXY(h=DZS, points=P);
+                    }
+                }
+            }
 
             // toughen up the sides
             difference() {
@@ -116,7 +154,7 @@ if (DRAW_FORE) {
             // thicken the bottom for dotstar
             intersection() 
             {
-                DY = 4;
+                DY = 4.5;
                 translate([0, 0, M_JOINT]) cylinder(h=DZ_FORE_TRIM, d=D_INNER);
                 translate([-50, -D_INNER/2, M_JOINT]) cube(size=[100, DY, DZ_FORE_TRIM]);
             }
@@ -124,13 +162,11 @@ if (DRAW_FORE) {
         bottomDotstar();
 
         // Flat area for switch plate.
-        translate([-50, D_INNER/2 - TOP_FLATTEN, M_JOINT]) // + PLATE_TRIM])
+        translate([-50, D_INNER/2 - TOP_FLATTEN, M_JOINT])
             cube(size=[100, 10, 100]);
         
         translate([0, 0, M_JOINT]) rotate([0, 0, 0])
-            keyJoint(JOINT, D_INNER, D_INNER - 4, true);
-
-        //translate([0, 0, M_JOINT + 8]) dotStarCut();
+            keyJoint(JOINT, D_INNER, D_INNER - KEYJOINT_T, true);
 
         // Flat bottom
         translate([-50, -D_INNER/2 - EPS, 0]) cube(size=[100, 1, 500]);

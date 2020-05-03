@@ -58,35 +58,31 @@ struct Limit<int32_t> {
     static intptr_t neg() { return INT_MIN; }
 };
 
-template<typename LONG, typename SHORT, int DECBITS>
+template<typename SHORT, int DECBITS>
 class FixedT
 {
 private:
     // Be careful that the M0+ has a 32 bit single instruction multiply,
     // but no overflow. Try to help out with that.
     static inline SHORT FixedMul(SHORT a, SHORT b) {
-        static_assert(sizeof(LONG) >= sizeof(SHORT) * 2, "Long must have more bits that short.");
-        LONG c = a * b;
-        return SHORT(c >> DECBITS);
+        SHORT v = ((a * b) >> DECBITS);
+        return v;
     }
 
     static inline SHORT FixedDiv(SHORT a, SHORT b) {
-        static_assert(sizeof(LONG) >= sizeof(SHORT) * 2, "Long must have more bits that short.");
-
-        LONG c = (LONG(a) << (DECBITS)) / (LONG(b));
-        return SHORT(c);
+        SHORT v = (a << DECBITS) / b;
+        return v;
     }
 
-    static inline SHORT IntToFixed(int v) {
-        ASSERT((v << DECBITS) <= Limit<SHORT>::pos());
-        ASSERT((v << DECBITS) >= Limit<SHORT>::neg());
-
-        return SHORT(v << DECBITS);
+    static inline SHORT IntToFixed(int a) {
+        SHORT v = (a << DECBITS);
+        return v;
     }
+
+public:
     static const int FIXED_1 = 1 << DECBITS;
     SHORT x;
 
-public:
     FixedT() {}
     FixedT(const FixedT& f) : x(f.x) {}
     FixedT(int v) : x(v << DECBITS) {}
@@ -102,8 +98,14 @@ public:
     void set(int v) { x = SHORT(v * FIXED_1); }
     void set(float v) { x = SHORT(v * FIXED_1); }
     void set(double v) { x = SHORT(v * FIXED_1); }
-    void setRaw(SHORT v) { x = v; }
-    SHORT getRaw() const { return x; }
+
+    int32_t convertRaw(int nBits) {
+        if (nBits > DECBITS)
+            return x << (nBits - DECBITS);
+        else if (DECBITS < nBits)
+            return x >> (nBits - DECBITS);
+        return x;
+    }
 
     // Scale up to an int, potentially out of the range of this fixed.
     int32_t scale(int32_t s) const { 
@@ -118,6 +120,7 @@ public:
 
     // Query the integer part. Positive or negative.
     int32_t getInt() const { return x >> DECBITS; }
+
     // Query the DECBITSimal part - return as a fraction of 2^16.
     // Always positive.
     uint32_t getDec() const { return (unsigned(x) & (FIXED_1 - 1)) << (16 - DECBITS); }
@@ -223,24 +226,24 @@ T lerpFixed(T a, T b, FIXED t) {
 }
 
 // Max: 127
-typedef FixedT<int32_t, int16_t, 8> Fixed88;
+typedef FixedT<int16_t, 8> Fixed88;
 
 // Strange def, but useful range:
 // Max: 1023
-typedef FixedT<int32_t, int16_t, 6> Fixed115;
+typedef FixedT<int16_t, 6> Fixed115;
 
 // Good for [1, -1] type functions, general near one.
 // About -8 to 8
-typedef FixedT<int32_t, int16_t, 12> FixedNorm;
+typedef FixedT<int16_t, 12> FixedNorm;
 
 static const FixedNorm fixedNormHalf(1, 2);
 static const FixedNorm fixedNormSqrt2Over2(0.7071067811);
 
 inline Fixed115 operator* (const Fixed115& a, const FixedNorm& b)
 {
-    FixedT<int32_t, int16_t, 6> f;
-    int32_t x = (a.getRaw() * b.getRaw()) >> 12;
-    f.setRaw((int16_t)x);
+    FixedT<int16_t, 6> f;
+    int32_t x = (a.x * b.x) >> 12;
+    f.x = (int16_t)x;
     return f;
 }
 

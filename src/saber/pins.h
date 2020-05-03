@@ -44,7 +44,7 @@
 #define SABER_MODEL_GREEN_SKY	   13
 #define SABER_MODEL_TANO_2 		   14   // Shield v4, Teensy 3.5, Dotstar UI
 #define SABER_MODEL_SISTER_2	   15   // Shield v4, Teensy 3.5, 5x7 Display. Replaced the cool-but-useless wirelss communication
-#define SABER_MODEL_KENOBI_IV	   16   // ItsyBitsy, Shield v1,Neopixel
+#define SABER_MODEL_KENOBI_IV	   16   // ItsyBitsy, Shield v1, Neopixel
 #define SABER_MODEL_AQUATIC_2	   17   // ItsyBitsy, Shield v1c, Dotstar
 #define SABER_MODEL_TYVOKKA		   18   // ItsyBitsy, Shield v1c, Dotstar
 //#define SABER_MODEL_SHOCK3  	   19   // Itsy v2b, OLED (128x32), Dotstar crystal
@@ -765,9 +765,10 @@
 	#define SABER_NUM_LEDS 			    4
 	#define SABER_UI_START				0
 	#define SABER_UI_COUNT				4
-	#define SABER_UI_BRIGHTNESS	    	16		
+	#define SABER_UI_BRIGHTNESS	    	16
 	#define SABER_UI_IDLE_MEDITATION
 	#define SABER_UI_COLOR_WHEEL
+	#define VOLTMETER_TUNE				1000
 
 	#define ID_STR "Ilum Cree XPE2 RGB"
 
