@@ -5,10 +5,8 @@ include <dim.scad>
 
 $fn = 80;
 DRAW_AFT = false;
-DRAW_FORE = true;
+DRAW_FORE = false;
 DRAW_SWITCH_HOLDER = true;
-//DRAW_RING0 = false;
-//DRAW_RING1 = false;
 
 EPS = 0.01;
 ESP2 = 2 * EPS;
@@ -21,7 +19,7 @@ TOP_FLATTEN = 3.0;
 DOTSTAR_XZ = 5.6;
 DOTSTAR_PITCH = 7;
 DOTSTAR_STRIP_XZ = 12.4;
-DOTSTAR_Z = 52.0;   // center of first, fixme
+DOTSTAR_Z = 73.0 - 21.0;
 KEYJOINT_T = 5.0;
 
 module ring(dz)
@@ -71,9 +69,9 @@ if (DRAW_SWITCH_HOLDER)
 {
     HOLDER_Y = 10.0;
     HOLDER_LOWER_Y = 2.5;
-    HOLDER_D = 8.0;         // fixme
+    HOLDER_D = 7.2;
     HOLDER_LOWER_D = 10.5;
-    INNER_D = 4.0;          // fixme
+    INNER_D = 4.0;
 
     Y_OFFSET = 3.0;
 

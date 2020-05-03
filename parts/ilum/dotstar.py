@@ -8,7 +8,7 @@ mat = init_material("np883-aluminum-1.0")
 g = G(outfile='path.nc', aerotech_include=False, header=None, footer=None)
 nomad_header(g, mat, CNC_TRAVEL_Z)
 
-# DOTSTAR_Z = 52.0; // but check, to be sure. 1st dotstar center.
+# DOTSTAR_Z = 73.0 - 21.0 = 52.0;
 # and origin, since it is recessed in
 
 DOTSTAR_PITCH = 7.0
