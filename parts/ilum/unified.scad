@@ -4,8 +4,9 @@ use <../inset.scad>
 include <dim.scad>
 
 $fn = 80;
-DRAW_AFT = true;
-DRAW_FORE = false;
+DRAW_AFT = false;
+DRAW_FORE = true;
+DRAW_SWITCH_HOLDER = true;
 //DRAW_RING0 = false;
 //DRAW_RING1 = false;
 
@@ -15,6 +16,7 @@ ESP2 = 2 * EPS;
 PLATE_TRIM = 1.0;
 JOINT = 8;
 T = 4;
+TOP_FLATTEN = 3.0;
 
 DOTSTAR_XZ = 5.6;
 DOTSTAR_PITCH = 7;
@@ -65,6 +67,27 @@ module bottomDotstar()
     }
 }
 
+if (DRAW_SWITCH_HOLDER)
+{
+    HOLDER_Y = 10.0;
+    HOLDER_LOWER_Y = 2.5;
+    HOLDER_D = 8.0;         // fixme
+    HOLDER_LOWER_D = 10.5;
+    INNER_D = 4.0;          // fixme
+
+    Y_OFFSET = 3.0;
+
+    color("plum") translate([0, D_INNER/2 - TOP_FLATTEN - Y_OFFSET, M_SWITCH]) rotate([-90, 0, 0]) {
+        difference() {
+            union() {
+                cylinder(h=HOLDER_Y, d=HOLDER_D);
+                cylinder(h=HOLDER_LOWER_Y, d=HOLDER_LOWER_D);
+            }
+            cylinder(h=20, d=INNER_D);
+        }
+    }
+}
+
 if (DRAW_AFT) {
     translate([0, 0, M_START]) {
         speakerHolder(D_INNER, DZ_SPKR, 3.0, "std28");
@@ -82,7 +105,6 @@ if (DRAW_AFT) {
 }
 
 if (DRAW_FORE) {
-    TOP_FLATTEN = 3.0;
 
     difference() {
         union() {
@@ -104,13 +126,16 @@ if (DRAW_FORE) {
             }
             // Pillars to toughen front.
             PILLAR = 5;
-            translate([0, 0, M_AFT_THREAD_FRONT - PILLAR - DZ_RING0]) {
+            //translate([0, 0, M_AFT_THREAD_FRONT - PILLAR - DZ_RING0]) {
+            PILLAR_START = M_BOLT + DZ_BOLT/2;
+            translate([0, 0, PILLAR_START]) {
+                DZS = M_AFT_THREAD_FRONT - DZ_RING0 - PILLAR_START;
                 intersection() {
-                    cylinder(h=PILLAR, d=D_INNER);
+                    cylinder(h=DZS, d=D_INNER);
                     union() {
                         P = [[4, D_INNER/2], [D_INNER/2, D_INNER/2], [D_INNER * 0.6, -D_INNER/2]];
-                        polygonXY(h=PILLAR, points=P);
-                        mirror([-1, 0, 0]) polygonXY(h=PILLAR, points=P);
+                        polygonXY(h=DZS, points=P);
+                        mirror([-1, 0, 0]) polygonXY(h=DZS, points=P);
                     }
                 }
             }
