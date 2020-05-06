@@ -8,10 +8,17 @@ from hole import hole
 from plane import plane
 
 mat = init_material(sys.argv[1])
+mat1 = None
+
+if len(sys.argv) > 2:
+    mat1 = init_material(sys.argv[2])
 
 H = 4.0
 H_FLOOR = 1.0
-STOCK = 25.4
+
+# STOCK = 25.4   # HDPE
+STOCK = 6.0    # acrylic?
+
 PLANE_DEPTH = -(STOCK - H) 
 D = 25.2
 DEPTH_EPS = -0.5
@@ -27,10 +34,15 @@ PLANE_XY = D + mat['tool_size']
 g = G(outfile='path.nc', aerotech_include=False, header=None, footer=None)
 nomad_header(g, mat, CNC_TRAVEL_Z)
 g.absolute()
-
-plane(g, mat, PLANE_DEPTH, -PLANE_XY/2, -PLANE_XY, PLANE_XY/2, PLANE_XY/2)
+g.move(z=0)
+plane(g, mat, PLANE_DEPTH, -PLANE_XY/2, -PLANE_XY/2, PLANE_XY/2, PLANE_XY/2)
 
 g.move(x=0, y=0)
+
+if (mat1 != None):
+    tool_change(g, mat1, 1)
+    mat = mat1
+
 g.move(z=-PLANE_DEPTH)
 
 for r in range(6):
@@ -48,7 +60,7 @@ g.move(x=0, y=0)
 g.move(z=PLANE_DEPTH)
 hole(g, mat, -(H-H_FLOOR) + DEPTH_EPS, d=D_INNER)
 
-hole(g, mat, -H  + DEPTH_EPS, d=D, offset="outside")
+hole(g, mat, -H  + DEPTH_EPS, d=D, offset="outside", fill=False)
 
 g.move(z=10.0)
 g.spindle()
