@@ -17,7 +17,7 @@ H = 4.0
 H_FLOOR = 1.0
 
 # STOCK = 25.4   # HDPE
-STOCK = 6.0    # acrylic?
+STOCK = 6.0    # acrylic? yes, acrylic. I hate acrylic.
 
 PLANE_DEPTH = -(STOCK - H) 
 D = 25.2
