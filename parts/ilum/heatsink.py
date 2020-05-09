@@ -16,12 +16,12 @@ if len(sys.argv) > 2:
 H = 4.0
 H_FLOOR = 1.0
 
-# STOCK = 25.4   # HDPE
-STOCK = 6.0    # acrylic?
+STOCK = 25.95   # HDPE
+#STOCK = 6.0    # acrylic?
 
 PLANE_DEPTH = -(STOCK - H) 
 D = 25.2
-DEPTH_EPS = -0.5
+DEPTH_EPS = -0.2
 
 R_HOLE = 8.92
 D_HOLE = 4.4
