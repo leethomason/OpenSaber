@@ -67,8 +67,8 @@ module bottomDotstar()
 
 if (DRAW_SWITCH_HOLDER)
 {
-    HOLDER_Y = 10.0;
-    HOLDER_LOWER_Y = 2.5;
+    HOLDER_Y = 7.0;
+    HOLDER_LOWER_Y = 2.0;
     HOLDER_D = 7.2;
     HOLDER_LOWER_D = 10.5;
     INNER_D = 4.0;
