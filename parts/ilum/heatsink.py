@@ -13,11 +13,11 @@ mat1 = None
 if len(sys.argv) > 2:
     mat1 = init_material(sys.argv[2])
 
-H = 4.0
-H_FLOOR = 1.0
+H = 3.5
+H_FLOOR = 1.5   # needs 2mm; to H_FLOOR + 2 <= H
 
-STOCK = 25.95   # HDPE
-#STOCK = 6.0    # acrylic?
+# STOCK = 25.4   # HDPE
+STOCK = 6.0    # acrylic? yes, acrylic. I hate acrylic.
 
 PLANE_DEPTH = -(STOCK - H) 
 D = 25.2
