@@ -603,16 +603,16 @@ void loop() {
 
 void loopDisplays(uint32_t msec, uint32_t delta)
 {
-    static ProfileData data("loopDisplays");
-    ProfileBlock block(&data);
-    // General display state processing. Draw to the current supported display.
-
     int dTick = displayTimer.tick(delta);
 #if SABER_DISPLAY == SABER_DISPLAY_128_32
     dTick = 1; // always process for OLED
 #endif
     if (dTick == 0)
         return;
+
+    static ProfileData data("loopDisplays");
+    ProfileBlock block(&data);
+    // General display state processing. Draw to the current supported display.
 
     uiRenderData.volume = saberDB.volume4();
     uiRenderData.color = BladePWM::convertRawToPerceived(saberDB.bladeColor());
