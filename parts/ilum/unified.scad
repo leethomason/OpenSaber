@@ -106,7 +106,7 @@ if (DRAW_FORE) {
     difference() {
         union() {
             translate([0, 0, M_JOINT]) {
-                powerPortRing(D_INNER, T, DZ_POWER_RING, DZ_POWER_RING/2, addY=TOP_FLATTEN, counter=false);
+                powerPortRing(D_INNER, T, DZ_POWER_RING, DZ_POWER_RING/2, addY=TOP_FLATTEN, dyPort=5.0);
             }
 
             translate([0, 0, M_BOLT_START]) {
@@ -169,6 +169,13 @@ if (DRAW_FORE) {
 
         // Flat bottom
         translate([-50, -D_INNER/2 - EPS, 0]) cube(size=[100, 1, 500]);
+
+        // Access to port
+        translate([0, 0, M_PORT]) rotate([90, 0, 0]) cylinder(h=100, d=12);
+
+        // Access to bottom
+        W_ACCESS = 12.0;
+        translate([-W_ACCESS/2, -D_INNER/2, M_JOINT]) cube(size=[W_ACCESS, 2.5, 22]);
     }
 }
 

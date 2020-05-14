@@ -22,7 +22,7 @@
 
 
 //#define PROFILE
-//#define AUDIO_PROFILE
+#define AUDIO_PROFILE
 
 // Arduino Libraries
 #include <Adafruit_ZeroI2S.h>
@@ -598,7 +598,7 @@ void loop() {
     }
     #endif
 
-    loopDisplays(msec, delta);
+    //loopDisplays(msec, delta);
 }
  
 

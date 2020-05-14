@@ -659,7 +659,7 @@ module speakerHolder(outer, dz, dzToSpkrBack, type, extraZ=0)
 }
 
 
-module powerPortRing(diameter, t, dz, dzToPort, portSupportToBack=false, counter=true, addY=0)
+module powerPortRing(diameter, t, dz, dzToPort, portSupportToBack=false, counter=true, addY=0, dyPort=DY_PORT)
 {    
     difference() {
         union() {
@@ -667,11 +667,11 @@ module powerPortRing(diameter, t, dz, dzToPort, portSupportToBack=false, counter
             intersection() {
                 cylinder(h=dz, d=diameter);
                 if (portSupportToBack) {
-                    translate([-50, diameter/2 - DY_PORT - addY, 0])
+                    translate([-50, diameter/2 - dyPort - addY, 0])
                         cube(size=[100, 50, D_PORT_SUPPORT/2 + dzToPort]);
                 }
                 else {
-                    translate([-50, diameter/2 - DY_PORT - addY, dzToPort - D_PORT_SUPPORT/2])
+                    translate([-50, diameter/2 - dyPort - addY, dzToPort - D_PORT_SUPPORT/2])
                         cube(size=[100, 50, D_PORT_SUPPORT]);
                 }
             }
