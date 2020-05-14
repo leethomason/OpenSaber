@@ -67,11 +67,11 @@ module bottomDotstar()
 
 if (DRAW_SWITCH_HOLDER)
 {
-    HOLDER_Y = 7.0;
-    HOLDER_LOWER_Y = 2.0;
+    HOLDER_Y = 6.0;
+    HOLDER_LOWER_Y = 2.5;
     HOLDER_D = 7.2;
     HOLDER_LOWER_D = 10.5;
-    INNER_D = 4.0;
+    INNER_D = 4.1;
 
     Y_OFFSET = 3.0;
 
@@ -103,7 +103,6 @@ if (DRAW_AFT) {
 }
 
 if (DRAW_FORE) {
-
     difference() {
         union() {
             translate([0, 0, M_JOINT]) {
@@ -120,7 +119,7 @@ if (DRAW_FORE) {
                     tube(h=M_AFT_THREAD_FRONT - DZ_RING0 - M_SWITCH_START, do=D_INNER, di=D_INNER - T);
                     translate([-W/2, 0, 0]) cube(size=[W, 100, 100]);
                 }
-                switchHolder(D_INNER, M_SWITCH - M_SWITCH_START, 0, 10.0);
+                switchHolder(D_INNER, M_SWITCH - M_SWITCH_START, 0, 10.5);
             }
             // Pillars to toughen front.
             PILLAR = 5;

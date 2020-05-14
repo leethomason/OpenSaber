@@ -16,7 +16,7 @@ g = G(outfile='path.nc', aerotech_include=False, header=None, footer=None)
 nomad_header(g, mat, CNC_TRAVEL_Z)
 g.absolute()
 
-depth = -(25.4/4 + 0.4)
+depth = -(25.4/4 + 1.0)
 sink = -1.0
 
 LENGTH = 39.25
@@ -25,7 +25,8 @@ WIDTH = 16.5
 PORT = 8
 BOLT = 21
 SWITCH = 32.25
-TRIM = 0.2
+# Weird and tweaked because of a 3.3mm bit (grr)
+TRIM = -0.04
 
 TROUGH = 11.0
 
@@ -35,7 +36,7 @@ hole(g, mat, depth, d=11.0)
 
 travel(g, mat, y=BOLT)
 hole(g, mat, depth, d=4.4)
-hole(g, mat, sink, d=8.0)
+hole(g, mat, -2.0, d=8.0)
 
 travel(g, mat, y=SWITCH)
 hole(g, mat, depth, d=8.2)
