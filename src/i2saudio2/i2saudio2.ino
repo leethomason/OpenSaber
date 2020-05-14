@@ -6,6 +6,8 @@
 #include <Adafruit_ZeroI2S.h>
 #include <Adafruit_ZeroDMA.h>
 
+// #define LOG_PERF
+
 Adafruit_FlashTransport_SPI flashTransport(SS1, &SPI1);
 Adafruit_SPIFlash spiFlash(&flashTransport);     // Use hardware SPI 
 Adafruit_ZeroDMA dma;
@@ -21,6 +23,7 @@ void scan()
     Log.p("l: loop track channel=0").eol();
     Log.p("s: stop channel (stop all if no channel)").eol();
     Log.p("v: volume value=0,256 channel").eol();
+    Log.p("d: directory display").eol();
 
     int start = 0, count = 0;
     manifest.dirRange(currentDir, &start, &count);
@@ -119,6 +122,7 @@ static uint32_t lastLoopTime = 0;
 
 void loop()
 {
+    #ifdef LOG_PERF
     uint32_t deltaMilli = millis() - lastLoopTime;
     if (deltaMilli > 5000) {
 
@@ -128,6 +132,7 @@ void loop()
         I2SAudioDriver::callbackMicros = 0;
         lastLoopTime = millis();
     }
+    #endif
 
     while (Serial.available()) {
         int c = Serial.read();

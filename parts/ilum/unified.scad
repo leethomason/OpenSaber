@@ -5,8 +5,8 @@ include <dim.scad>
 
 $fn = 80;
 DRAW_AFT = false;
-DRAW_FORE = false;
-DRAW_SWITCH_HOLDER = true;
+DRAW_FORE = true;
+DRAW_SWITCH_HOLDER = false;
 
 EPS = 0.01;
 ESP2 = 2 * EPS;
