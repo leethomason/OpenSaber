@@ -600,7 +600,6 @@ void loop() {
 
     loopDisplays(msec, delta);
 }
- 
 
 void loopDisplays(uint32_t msec, uint32_t delta)
 {
@@ -609,86 +608,89 @@ void loopDisplays(uint32_t msec, uint32_t delta)
     // General display state processing. Draw to the current supported display.
 
     int dTick = displayTimer.tick(delta);
-    #if SABER_DISPLAY == SABER_DISPLAY_128_32
-    dTick = (renderStage == 0 ? 1 : 0);
-    #endif
+#if SABER_DISPLAY == SABER_DISPLAY_128_32
+    dTick = 1; // always process for OLED
+#endif
+    if (dTick == 0)
+        return;
 
-    if (dTick) {
-        uiRenderData.volume = saberDB.volume4();
-        uiRenderData.color = BladePWM::convertRawToPerceived(saberDB.bladeColor());
-        uiRenderData.palette = saberDB.paletteIndex();
-        uiRenderData.mVolts = voltmeter.easedPower();
-        uiRenderData.fontName = manifest.getUnit(sfx.currentFont()).getName();
-    }
+    uiRenderData.volume = saberDB.volume4();
+    uiRenderData.color = BladePWM::convertRawToPerceived(saberDB.bladeColor());
+    uiRenderData.palette = saberDB.paletteIndex();
+    uiRenderData.mVolts = voltmeter.easedPower();
+    uiRenderData.fontName = manifest.getUnit(sfx.currentFont()).getName();
 
-    #if SABER_DISPLAY == SABER_DISPLAY_128_32
-    switch(renderStage) {
-        case 0:
-            memset(oledBuffer, 0, OLED_HEIGHT * OLED_WIDTH / 8);
-            break;
-        case 1: 
-            VectorUI::Draw(&renderer, msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
-            break;
-        case 2:
-            renderer.Render();
-            break;
-        case 3:
-            display.display(oledBuffer);
-            break;        
+#if SABER_DISPLAY == SABER_DISPLAY_128_32
+    switch (renderStage)
+    {
+    case 0:
+        memset(oledBuffer, 0, OLED_HEIGHT * OLED_WIDTH / 8);
+        break;
+    case 1:
+        VectorUI::Draw(&renderer, msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
+        break;
+    case 2:
+        renderer.Render();
+        break;
+    case 3:
+        display.display(oledBuffer);
+        break;
     }
     renderStage++;
-    if (renderStage == 4) renderStage = 0;
-    #endif
+    if (renderStage == 4)
+        renderStage = 0;
+#endif
 
-    if (dTick) {
-        #if SABER_DISPLAY == SABER_DISPLAY_7_5
-            display75.Draw(msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
-            dotMatrix.setFrom7_5(display75.Pixels());
-        #elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
-            digit4UI.Draw(uiMode.mode(), &uiRenderData);
-            shifted7.set(digit4UI.Output().c_str());
-        #endif
-        #ifdef SABER_UI_START
-            osbr::RGB rgb[SABER_UI_COUNT];
+#if SABER_DISPLAY == SABER_DISPLAY_7_5
+    display75.Draw(msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
+    dotMatrix.setFrom7_5(display75.Pixels());
+#elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
+    digit4UI.Draw(uiMode.mode(), &uiRenderData);
+    shifted7.set(digit4UI.Output().c_str());
+#endif
+#ifdef SABER_UI_START
+    osbr::RGB rgb[SABER_UI_COUNT];
 
-            #ifdef SABER_UI_IDLE_MEDITATION
-                if (uiMode.mode() == UIMode::NORMAL && bladeState.state() == BLADE_OFF && uiMode.isIdle()) {
-                    dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, UIMode::MEDITATION, !bladeState.bladeOff(), uiRenderData);
-                    rgb[SABER_UI_START + SABER_UI_COUNT - 1] = uiRenderData.color;
-                }
-                else {
-                    dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
-                }
-            #else
-                dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
-            #endif
-
-            // Copy back from Draw(RGB) to Dotstar(RGBA)
-            for(int i=0; i<SABER_UI_COUNT; ++i) {
-                #ifdef SABER_UI_REVERSE
-                leds[SABER_UI_START + SABER_UI_COUNT - 1 - i].set(rgb[i], SABER_UI_BRIGHTNESS);
-                #else
-                leds[SABER_UI_START + i].set(rgb[i], SABER_UI_BRIGHTNESS);
-                #endif
-            }
-        #endif
+#ifdef SABER_UI_IDLE_MEDITATION
+    if (uiMode.mode() == UIMode::NORMAL && bladeState.state() == BLADE_OFF && uiMode.isIdle())
+    {
+        dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, UIMode::MEDITATION, !bladeState.bladeOff(), uiRenderData);
+        rgb[SABER_UI_START + SABER_UI_COUNT - 1] = uiRenderData.color;
     }
+    else
+    {
+        dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
+    }
+#else
+    dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
+#endif
 
-    // Now loop() the specific display.
-    #if SABER_DISPLAY == SABER_DISPLAY_7_5
-        {
-            uint8_t a=0, b=0;
-            dotMatrix.loop(micros(), &a, &b);
+    // Copy back from Draw(RGB) to Dotstar(RGBA)
+    for (int i = 0; i < SABER_UI_COUNT; ++i)
+    {
+#ifdef SABER_UI_REVERSE
+        leds[SABER_UI_START + SABER_UI_COUNT - 1 - i].set(rgb[i], SABER_UI_BRIGHTNESS);
+#else
+        leds[SABER_UI_START + i].set(rgb[i], SABER_UI_BRIGHTNESS);
+#endif
+    }
+#endif
 
-            // For columns / anodes.
-            //uint16_t bits = 0;  // all rows
-            //bits |= (1<<5); // column 1
-            //bits |= (1<<1); // column 2qq
-            //bits |= (1<<9); // column 3 - note the bit skip!! pin 8
-            //bits |= (1<<15); // column 4
-            //bits |= (1<<14); // column 5
+// Now loop() the specific display.
+#if SABER_DISPLAY == SABER_DISPLAY_7_5
+    {
+        uint8_t a = 0, b = 0;
+        dotMatrix.loop(micros(), &a, &b);
 
-            /*
+        // For columns / anodes.
+        //uint16_t bits = 0;  // all rows
+        //bits |= (1<<5); // column 1
+        //bits |= (1<<1); // column 2qq
+        //bits |= (1<<9); // column 3 - note the bit skip!! pin 8
+        //bits |= (1<<15); // column 4
+        //bits |= (1<<14); // column 5
+
+        /*
             // For rows / cathodes.
             uint16_t bits = ~((1<<1) | (1<<9) | (1<<15) | (1<<14));
             //bits ^= (1<<2);
@@ -699,58 +701,61 @@ void loopDisplays(uint32_t msec, uint32_t delta)
             //bits ^= (1<<11);
             bits ^= (1<<10);
             */
-            
-            //a = bits & 0xff;
-            //b = bits >> 8;  
-           
-            digitalWrite(PIN_LATCH, LOW);
-            shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, a);
-            shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, b);
-            digitalWrite(PIN_LATCH, HIGH);
 
-            // digitalWrite(PIN_LATCH, LOW);
-            // digitalWrite(PIN_CLOCK, LOW);
-            // digitalWrite(PIN_DATA, HIGH);
-        }
-    #elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
-        {
-            uint8_t a=0, b=0;
-            shifted7.loop(micros(), &a, &b);
+        //a = bits & 0xff;
+        //b = bits >> 8;
 
-            digitalWrite(PIN_LATCH, LOW);
-            shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, b);
-            shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, a);
-            digitalWrite(PIN_LATCH, HIGH);
-        }
-    #endif
+        digitalWrite(PIN_LATCH, LOW);
+        shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, a);
+        shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, b);
+        digitalWrite(PIN_LATCH, HIGH);
 
-    #if defined(SABER_CRYSTAL_START)
+        // digitalWrite(PIN_LATCH, LOW);
+        // digitalWrite(PIN_CLOCK, LOW);
+        // digitalWrite(PIN_DATA, HIGH);
+    }
+#elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
+    {
+        uint8_t a = 0, b = 0;
+        shifted7.loop(micros(), &a, &b);
+
+        digitalWrite(PIN_LATCH, LOW);
+        shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, b);
+        shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, a);
+        digitalWrite(PIN_LATCH, HIGH);
+    }
+#endif
+
+#if defined(SABER_CRYSTAL_START)
     {
         const RGB bladeColor = saberDB.bladeColor();
-        if (bladeState.state() == BLADE_OFF && (uiMode.mode() == UIMode::NORMAL)) {
+        if (bladeState.state() == BLADE_OFF && (uiMode.mode() == UIMode::NORMAL))
+        {
             osbr::RGB rgb;
             calcCrystalColorHSV(msec, bladeColor, &rgb);
             leds[SABER_CRYSTAL_START].set(rgb, SABER_CRYSTAL_BRIGHTNESS);
         }
-        else {
+        else
+        {
             leds[SABER_CRYSTAL_START].set(bladeColor, SABER_CRYSTAL_BRIGHTNESS);
         }
     }
-    #endif
+#endif
 
-    #if defined(SABER_FLASH_LED)
-        // Flashes a secondary LED with the flash on clash color.
-        RGB flashColor = saberDB.impactColor();
-        leds[SABER_FLASH_LED] = ((bladeState.state() == BLADE_FLASH) ? flashColor : RGBA::BLACK, 255);
-    #endif
+#if defined(SABER_FLASH_LED)
+    // Flashes a secondary LED with the flash on clash color.
+    RGB flashColor = saberDB.impactColor();
+    leds[SABER_FLASH_LED] = ((bladeState.state() == BLADE_FLASH) ? flashColor : RGBA::BLACK, 255);
+#endif
 
-    #if defined(SABER_BLACK_START)
-        for(int i=SABER_BLACK_START; i<SABER_BLACK_START + SABER_BLACK_COUNT; ++i) {
-            leds[i].set(0);
-        }
-    #endif
+#if defined(SABER_BLACK_START)
+    for (int i = SABER_BLACK_START; i < SABER_BLACK_START + SABER_BLACK_COUNT; ++i)
+    {
+        leds[i].set(0);
+    }
+#endif
 
-    #ifdef SABER_NUM_LEDS
-        dotstar.display(leds, SABER_NUM_LEDS);
-    #endif    
+#ifdef SABER_NUM_LEDS
+    dotstar.display(leds, SABER_NUM_LEDS);
+#endif
 }
