@@ -79,7 +79,6 @@ SFX sfx(&i2sAudioDriver, manifest);
 ButtonCB    buttonA(PIN_SWITCH_A, Button::INTERNAL_PULLUP);
 LEDManager  ledA(PIN_LED_A, false);
 
-UIRenderData uiRenderData;
 BladeState  bladeState;
 UIModeUtil  uiMode;
 SaberDB     saberDB;
@@ -92,16 +91,21 @@ Swing       swing(10);
 AverageSample<Vec3<int32_t>, Vec3<int32_t>, 8> averageAccel(Vec3<int32_t>(0, 0, 0));
 
 #ifdef SABER_NUM_LEDS
+DotStar dotstar;                    // Hardware controller.
+#endif
 #ifdef SABER_UI_START
 DotStarUI dotstarUI;                // It is the DotStarUI regardless of physical pixel protocol
-#endif
-osbr::RGBA leds[SABER_NUM_LEDS];    // Color of the LEDs (brightness is separate)
-DotStar dotstar;                    // Hardware controller.
 #endif
 
 GrinlizLSM303 accelMag;
 Timer2 vbatTimer(Voltmeter::SAMPLE_INTERVAL);
-Timer2 displayTimer(113);       // distribute time to minimize "slow ticks"
+#if SABER_DISPLAY == SABER_DISPLAY_128_32
+static const int DISPLAY_TIMER = 23;
+#else
+static const int DISPLAY_TIMER = 113;
+#endif
+
+Timer2 displayTimer(DISPLAY_TIMER);       // distribute time to minimize "slow ticks"
 Timer2 vbatPrintTimer(1217);
 Timer2 audioPrintTimer(2000);
 
@@ -129,28 +133,33 @@ void BlockDrawOLED(const BlockDrawChunk* chunks, int n)
 {
     static const int OLED_BYTES = OLED_WIDTH * OLED_HEIGHT / 8;
 
-    // Clear to black beforehand; don't need to set black runs.
+    // The renderer assumes clear to black beforehand.
+    // But does still support drawing in black.
     for (int i = 0; i < n; ++i) {
         const BlockDrawChunk& chunk = chunks[i];
 
-#ifdef VECTOR_MONO
-        if (chunk.rgb == 0) continue;
-#else
-        if (chunk.rgb.get() == 0) continue;
-#endif
         // Simple for the single row.
         int row = chunk.y >> 3;
         int bit = chunk.y - (row << 3);
         uint8_t mask = 1 << bit;
         uint8_t* p = oledBuffer + (row << OLED_WIDTH_SHIFT) + chunk.x0;
-        for (int nPix = chunk.x1 - chunk.x0; nPix > 0; nPix--, p++) {
-            *p |= mask;
+
+        if (chunk.rgb) {
+            for (int nPix = chunk.x1 - chunk.x0; nPix > 0; nPix--, p++) {
+                *p |= mask;
+            }
+        }
+        else {
+            for (int nPix = chunk.x1 - chunk.x0; nPix > 0; nPix--, p++) {
+                *p &= ~mask;
+            }
         }
     }
 }
 #endif
 
-void setup() {
+void setup() 
+{
     #if defined(SHIFTED_OUTPUT)
         // I'm a little concerned about power draw on the display, in some states.
         // Do this first thing - set all the pins to ground so they don't short / draw.
@@ -220,6 +229,7 @@ void setup() {
     Log.p("Init display.").eol();
 
     #if SABER_DISPLAY == SABER_DISPLAY_128_32
+    {
         display.begin(OLED_WIDTH, OLED_HEIGHT, SSD1306_SWITCHCAPVCC);
         renderer.Attach(BlockDrawOLED);
         renderer.SetSize(OLED_WIDTH, OLED_HEIGHT);
@@ -228,7 +238,9 @@ void setup() {
         display.display(oledBuffer);
 
         Log.p("OLED display connected.").eol();
+    }
     #elif SABER_DISPLAY == SABER_DISPLAY_7_5
+    {
         // No pin 6
         // Pin 7 - decimal point - not used
         const uint8_t cols[] = { 5, 1, 9, 15, 14};
@@ -237,29 +249,32 @@ void setup() {
         dotMatrix.attachRow(7, rows);
 
         Log.p("Shifted dot matrix 5x7 init.").eol();
+    }
     #elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
+    {
         const uint8_t digit[] = {10, 4, 13, 15};
         shifted7.attachDigit(4, digit);
         const uint8_t segment[] = {6, 5, 12, 2, 11, 3, 1, 14};
         shifted7.attachSegment(8, segment);
 
         Log.p("Shifted seven digit init.").eol();
+    }
     #endif
 
     #if defined(SABER_NUM_LEDS)
-        for(int i=0; i<SABER_NUM_LEDS; ++i) {
-            leds[i].set(2, 2, 2, 255);
-        }
+    {
+        osbr::RGBA leds[SABER_NUM_LEDS] = {0x01020304};
         #if SABER_UI_LED == SABER_LED_DOTSTAR
+        {
             dotstar.beginSPI(PIN_DOTSTAR_EN);
+            delay(2);
             dotstar.display(leds, SABER_NUM_LEDS);
+            delay(2);
             dotstar.display(leds, SABER_NUM_LEDS);
             Log.p("Dotstar initialized.").eol();
-        #else
-            neoPixels.begin();
-            neoPixels.setBrightness(SABER_UI_BRIGHTNESS);
-            Log.p("Neopixel initialized.").eol();
+        }
         #endif
+    }
     #endif
 
     syncToDB();
@@ -276,6 +291,8 @@ void setup() {
 /*
    The saberDB is the source of truth. (The Model.)
    Bring other things in sync when it changes.
+   This made...more sense when the EEPROM was supported.
+   All the modern sabers just reset on power on.
 */
 void syncToDB()
 {
@@ -430,7 +447,8 @@ void processColorWheel(bool commitChange)
     }
 }
 
-void processSerial() {
+void processSerial() 
+{
     while (Serial.available()) {
         int c = Serial.read();
         if (cmdParser.push(c)) {
@@ -449,10 +467,6 @@ void processAccel(uint32_t msec)
     static const int N_ACCEL = 4;
     Vec3<float> data[N_ACCEL];
     Vec3<int32_t> intData[N_ACCEL];
-
-//    #if SERIAL_DEBUG == 1
-//    uint32_t start = millis();
-//    #endif
 
     int available = accelMag.available();
     if (available > N_ACCEL) {
@@ -493,12 +507,16 @@ void processAccel(uint32_t msec)
             float motion = saberDB.motion();
             float impact = saberDB.impact();
 
+            // This workaround no longer makes sense with smoothswing,
+            // and the much more compressed storage.
+            //
             // The extra check here for the motion time is because some
             // motion loops are tacked on to the beginning of the idle
             // loop...which makes sense. (Sortof). But leads to super-long
             // motion. So if time is above a threshold, allow replay.
             // Actual motion / impact sounds are usually less that 1 second.
             // TODO this needs a different workaround.
+
 //#ifdef SABER_SOUND_ON
 //            bool sfxOverDue = ((msec - lastMotionTime) > 1500) &&
 //                              ((sfx.lastSFX() == SFX_MOTION) || (sfx.lastSFX() == SFX_IMPACT));
@@ -508,6 +526,8 @@ void processAccel(uint32_t msec)
 
             if ((g2Normal >= impact * impact))
             {
+                // Always flash the blade. Maybe play impact sounds.
+                // It doesn't sound good to have too many impacts chained together.
                 bladeFlash.doFlash(millis());
                 if ((msec - lastImpactTime) > IMPACT_MIN_TIME) {
                     bool sound = false;
@@ -600,33 +620,34 @@ void loop() {
 
     //loopDisplays(msec, delta);
 }
- 
 
 void loopDisplays(uint32_t msec, uint32_t delta)
 {
+    int dTick = displayTimer.tick(delta);
+    if (dTick == 0)
+        return;
+
     static ProfileData data("loopDisplays");
     ProfileBlock block(&data);
-    // General display state processing. Draw to the current supported display.
 
-    int dTick = displayTimer.tick(delta);
-    #if SABER_DISPLAY == SABER_DISPLAY_128_32
-    dTick = (renderStage == 0 ? 1 : 0);
-    #endif
+    osbr::RGBA leds[SABER_NUM_LEDS] = {0};
 
-    if (dTick) {
-        uiRenderData.volume = saberDB.volume4();
-        uiRenderData.color = BladePWM::convertRawToPerceived(saberDB.bladeColor());
-        uiRenderData.palette = saberDB.paletteIndex();
-        uiRenderData.mVolts = voltmeter.easedPower();
-        uiRenderData.fontName = manifest.getUnit(sfx.currentFont()).getName();
-    }
+    UIRenderData uiRenderData;
+    uiRenderData.volume = saberDB.volume4();
+    uiRenderData.color = BladePWM::convertRawToPerceived(saberDB.bladeColor());
+    uiRenderData.palette = saberDB.paletteIndex();
+    uiRenderData.mVolts = voltmeter.easedPower();
+    uiRenderData.fontName = manifest.getUnit(sfx.currentFont()).getName();
+    uiRenderData.soundBank = sfx.currentFont();
 
-    #if SABER_DISPLAY == SABER_DISPLAY_128_32
-    switch(renderStage) {
+#if SABER_DISPLAY == SABER_DISPLAY_128_32
+    {
+        switch (renderStage)
+        {
         case 0:
             memset(oledBuffer, 0, OLED_HEIGHT * OLED_WIDTH / 8);
             break;
-        case 1: 
+        case 1:
             VectorUI::Draw(&renderer, msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
             break;
         case 2:
@@ -634,61 +655,70 @@ void loopDisplays(uint32_t msec, uint32_t delta)
             break;
         case 3:
             display.display(oledBuffer);
-            break;        
+            break;
+        }
+        renderStage++;
+        if (renderStage == 4)
+            renderStage = 0;
     }
-    renderStage++;
-    if (renderStage == 4) renderStage = 0;
-    #endif
+#endif
 
-    if (dTick) {
-        #if SABER_DISPLAY == SABER_DISPLAY_7_5
-            display75.Draw(msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
-            dotMatrix.setFrom7_5(display75.Pixels());
-        #elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
-            digit4UI.Draw(uiMode.mode(), &uiRenderData);
-            shifted7.set(digit4UI.Output().c_str());
-        #endif
-        #ifdef SABER_UI_START
-            osbr::RGB rgb[SABER_UI_COUNT];
-
-            #ifdef SABER_UI_IDLE_MEDITATION
-                if (uiMode.mode() == UIMode::NORMAL && bladeState.state() == BLADE_OFF && uiMode.isIdle()) {
-                    dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, UIMode::MEDITATION, !bladeState.bladeOff(), uiRenderData);
-                    rgb[SABER_UI_START + SABER_UI_COUNT - 1] = uiRenderData.color;
-                }
-                else {
-                    dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
-                }
-            #else
-                dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
-            #endif
-
-            // Copy back from Draw(RGB) to Dotstar(RGBA)
-            for(int i=0; i<SABER_UI_COUNT; ++i) {
-                #ifdef SABER_UI_REVERSE
-                leds[SABER_UI_START + SABER_UI_COUNT - 1 - i].set(rgb[i], SABER_UI_BRIGHTNESS);
-                #else
-                leds[SABER_UI_START + i].set(rgb[i], SABER_UI_BRIGHTNESS);
-                #endif
-            }
-        #endif
+#if SABER_DISPLAY == SABER_DISPLAY_7_5
+    {
+        display75.Draw(msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
+        dotMatrix.setFrom7_5(display75.Pixels());
     }
+#elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
+    {
+        digit4UI.Draw(uiMode.mode(), &uiRenderData);
+        shifted7.set(digit4UI.Output().c_str());
+    }
+#endif
+#ifdef SABER_UI_START
+    {
+        osbr::RGB rgb[SABER_UI_COUNT];
 
-    // Now loop() the specific display.
-    #if SABER_DISPLAY == SABER_DISPLAY_7_5
+#ifdef SABER_UI_IDLE_MEDITATION
+        if (uiMode.mode() == UIMode::NORMAL && bladeState.state() == BLADE_OFF && uiMode.isIdle())
         {
-            uint8_t a=0, b=0;
-            dotMatrix.loop(micros(), &a, &b);
+            dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, UIMode::MEDITATION, !bladeState.bladeOff(), uiRenderData);
+            rgb[SABER_UI_START + SABER_UI_COUNT - 1] = uiRenderData.color;
+        }
+        else
+        {
+            dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
+        }
+#else
+        dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
+#endif
 
-            // For columns / anodes.
-            //uint16_t bits = 0;  // all rows
-            //bits |= (1<<5); // column 1
-            //bits |= (1<<1); // column 2qq
-            //bits |= (1<<9); // column 3 - note the bit skip!! pin 8
-            //bits |= (1<<15); // column 4
-            //bits |= (1<<14); // column 5
+        // Copy back from Draw(RGB) to Dotstar(RGBA)
+        for (int i = 0; i < SABER_UI_COUNT; ++i)
+        {
+#ifdef SABER_UI_REVERSE
+            leds[SABER_UI_START + SABER_UI_COUNT - 1 - i].set(rgb[i], SABER_UI_BRIGHTNESS);
+#else
+            leds[SABER_UI_START + i].set(rgb[i], SABER_UI_BRIGHTNESS);
+#endif
+        }
+    }
+#endif  // SABER_UI_START
 
-            /*
+// Now loop() the specific display.
+#if SABER_DISPLAY == SABER_DISPLAY_7_5
+    {
+        uint8_t a = 0, b = 0;
+        dotMatrix.loop(micros(), &a, &b);
+
+        // For columns / anodes.
+        //uint16_t bits = 0;  // all rows
+        //bits |= (1<<5); // column 1
+        //bits |= (1<<1); // column 2qq
+        //bits |= (1<<9); // column 3 - note the bit skip!! pin 8
+        //bits |= (1<<15); // column 4
+        //bits |= (1<<14); // column 5
+
+        /*
             // For rows / cathodes.
             uint16_t bits = ~((1<<1) | (1<<9) | (1<<15) | (1<<14));
             //bits ^= (1<<2);
@@ -699,58 +729,67 @@ void loopDisplays(uint32_t msec, uint32_t delta)
             //bits ^= (1<<11);
             bits ^= (1<<10);
             */
-            
-            //a = bits & 0xff;
-            //b = bits >> 8;  
-           
-            digitalWrite(PIN_LATCH, LOW);
-            shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, a);
-            shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, b);
-            digitalWrite(PIN_LATCH, HIGH);
 
-            // digitalWrite(PIN_LATCH, LOW);
-            // digitalWrite(PIN_CLOCK, LOW);
-            // digitalWrite(PIN_DATA, HIGH);
-        }
-    #elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
-        {
-            uint8_t a=0, b=0;
-            shifted7.loop(micros(), &a, &b);
+        //a = bits & 0xff;
+        //b = bits >> 8;
 
-            digitalWrite(PIN_LATCH, LOW);
-            shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, b);
-            shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, a);
-            digitalWrite(PIN_LATCH, HIGH);
-        }
-    #endif
+        digitalWrite(PIN_LATCH, LOW);
+        shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, a);
+        shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, b);
+        digitalWrite(PIN_LATCH, HIGH);
 
-    #if defined(SABER_CRYSTAL_START)
+        // digitalWrite(PIN_LATCH, LOW);
+        // digitalWrite(PIN_CLOCK, LOW);
+        // digitalWrite(PIN_DATA, HIGH);
+    }
+#elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
+    {
+        uint8_t a = 0, b = 0;
+        shifted7.loop(micros(), &a, &b);
+
+        digitalWrite(PIN_LATCH, LOW);
+        shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, b);
+        shiftOut(PIN_DATA, PIN_CLOCK, MSBFIRST, a);
+        digitalWrite(PIN_LATCH, HIGH);
+    }
+#endif
+
+#if defined(SABER_CRYSTAL_START)
     {
         const RGB bladeColor = saberDB.bladeColor();
-        if (bladeState.state() == BLADE_OFF && (uiMode.mode() == UIMode::NORMAL)) {
+        if (bladeState.state() == BLADE_OFF && (uiMode.mode() == UIMode::NORMAL))
+        {
             osbr::RGB rgb;
             calcCrystalColorHSV(msec, bladeColor, &rgb);
             leds[SABER_CRYSTAL_START].set(rgb, SABER_CRYSTAL_BRIGHTNESS);
         }
-        else {
+        else
+        {
             leds[SABER_CRYSTAL_START].set(bladeColor, SABER_CRYSTAL_BRIGHTNESS);
         }
     }
-    #endif
+#endif
 
-    #if defined(SABER_FLASH_LED)
+#if defined(SABER_FLASH_LED)
+    {
         // Flashes a secondary LED with the flash on clash color.
         RGB flashColor = saberDB.impactColor();
         leds[SABER_FLASH_LED] = ((bladeState.state() == BLADE_FLASH) ? flashColor : RGBA::BLACK, 255);
-    #endif
+    }
+#endif
 
-    #if defined(SABER_BLACK_START)
-        for(int i=SABER_BLACK_START; i<SABER_BLACK_START + SABER_BLACK_COUNT; ++i) {
+#if defined(SABER_BLACK_START)
+    {
+        for (int i = SABER_BLACK_START; i < SABER_BLACK_START + SABER_BLACK_COUNT; ++i)
+        {
             leds[i].set(0);
         }
-    #endif
+    }
+#endif
 
-    #ifdef SABER_NUM_LEDS
+#ifdef SABER_NUM_LEDS
+    {
         dotstar.display(leds, SABER_NUM_LEDS);
-    #endif    
+    }
+#endif
 }
