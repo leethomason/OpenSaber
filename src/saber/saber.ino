@@ -21,8 +21,8 @@
 */
 
 
-//#define PROFILE
-#define AUDIO_PROFILE
+// #define PROFILE
+// #define AUDIO_PROFILE
 
 // Arduino Libraries
 #include <Adafruit_ZeroI2S.h>
@@ -89,6 +89,7 @@ BladePWM    bladePWM;
 Tester      tester;
 Swing       swing(10);
 AverageSample<Vec3<int32_t>, Vec3<int32_t>, 8> averageAccel(Vec3<int32_t>(0, 0, 0));
+Timer2      swingLogTimer(200);
 
 #ifdef SABER_NUM_LEDS
 DotStar dotstar;                    // Hardware controller.
@@ -457,7 +458,7 @@ void processSerial()
     }
 }
 
-void processAccel(uint32_t msec)
+void processAccel(uint32_t msec, uint32_t delta)
 {
     static ProfileData profData("processAccel");
     ProfileBlock block(&profData);
@@ -483,17 +484,30 @@ void processAccel(uint32_t msec)
     Vec3<int32_t> magData;
     // readMag() should only return >0 if there is new data from the hardware.
     if (accelMag.readMag(&magData, 0) > 0) {
+        static ProfileData magProfData("processMag");
+        ProfileBlock magProfBlock(&magProfData);
         // The accelerometer and magnemometer are both clocked at 100Hz.
         // The swing is set up for constant data; assume n is the same for both.
         // Hopefully we keep a constant enough rate this doesn't matter.
         // int nMag = n > 0 ? n : 1;
         // Keep waffling on this...assuming when blade is lit this will pretty
         // consistently get hit every 10ms.
-        // Log.p("magData t=").p(msec).p(" x=").v3(magData).p(" ").v3(accelMag.getMagMin()).p(" ").v3(accelMag.getMagMax()).eol();
 
         swing.push(magData, accelMag.getMagMin(), accelMag.getMagMax());
         float dot = swing.dotOrigin();
         sfx.sm_setSwing(swing.speed(), (int)((1.0f + dot)*128.5f));
+
+        if (swingLogTimer.tick(delta)) {
+            Vec3<int32_t> vMin = accelMag.getMagMin();
+            Vec3<int32_t> vMax = accelMag.getMagMax();
+            Vec3<int32_t> vDelta = vMax - vMin;
+
+            float x = float(magData.x - vMin.x) / vDelta.x;
+            float y = float(magData.y - vMin.y) / vDelta.y;
+            float z = float(magData.z - vMin.z) / vDelta.z;
+
+            Log.p("mag=").v3(x, y, z).p(" delta=").v3(vDelta).p(" dot=").p(dot).p(" speed=").p(swing.speed()).eol();
+        }
     }
     if (bladeState.state() == BLADE_ON) {
         for (int i = 0; i < n; ++i)
@@ -576,7 +590,7 @@ void loop() {
     buttonA.process();
     ledA.process();
 
-    processAccel(msec);
+    processAccel(msec, delta);
 
     bladeFlash.tick(msec);
     if (uiMode.mode() == UIMode::COLOR_WHEEL && buttonA.held()) {
@@ -618,7 +632,7 @@ void loop() {
     }
     #endif
 
-    //loopDisplays(msec, delta);
+    loopDisplays(msec, delta);
 }
 
 void loopDisplays(uint32_t msec, uint32_t delta)

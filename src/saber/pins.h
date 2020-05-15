@@ -59,7 +59,7 @@
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
+#define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_DUTCHESS
 #define SABER_SUB_MODEL				
 // ----------------------------------
@@ -768,7 +768,8 @@
 	#define SABER_UI_BRIGHTNESS	    	16
 	#define SABER_UI_IDLE_MEDITATION
 	#define SABER_UI_COLOR_WHEEL
-	#define VOLTMETER_TUNE				1000
+	#define VOLTMETER_TUNE				1016
+	//#define SWING_DECAY					11
 
 	#define ID_STR "Dutchess Cree XPE2 RGB"
 

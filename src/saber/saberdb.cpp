@@ -92,7 +92,7 @@ void SaberDB::setPaletteFromDirHash(uint32_t h)
 
     case 0xe13817f5: // fulcrum-TFA graflex
     {
-        Log.p("Fulcrum - TFA Graflex").eol();
+        Log.p("Fulcrum - TFA Graflex: NOT TUNED").eol();
         static const int FULCRUM = 0;
         static const int GRAFLEX = 1;
 
@@ -104,6 +104,23 @@ void SaberDB::setPaletteFromDirHash(uint32_t h)
         palette[5].set(0x0044ff, 0x00ccff, GRAFLEX);   // blue-green
         palette[6].set(0x508080, 0x30a0a0, GRAFLEX);   // white
         palette[7].set(0x00ff44, 0x00ffaa, GRAFLEX);   // green-blue
+    }
+    break;
+
+    case 0xdf451848: // temple-jaina
+    {
+        Log.p("Temple - Jaina").eol();
+        static const int JAINA = 0;
+        static const int TEMPLE = 1;
+
+        palette[0].set(0x0044ff, 0x00ccff, JAINA);     // blue
+        palette[1].set(0x00ff00, 0x00ffa0, TEMPLE);    // green
+        palette[2].set(0x00ffff, 0x00a0ff, TEMPLE);    // cyan
+        palette[3].set(0xff0000, 0xa08000, TEMPLE);    // red
+        palette[4].set(0xff6000, 0x808000, JAINA);     // orange
+        palette[5].set(0xffcc00, 0x808080, TEMPLE);    // yellow
+        palette[6].set(0x808080, 0x30a0a0, JAINA);     // white
+        palette[7].set(0x00ff44, 0x00ffaa, JAINA);     // green-blue
     }
     break;
 
