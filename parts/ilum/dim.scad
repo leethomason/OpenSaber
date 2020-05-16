@@ -51,3 +51,5 @@ D_TUBE = 4.6;
 D_TUBE_INNER = 3.3;
 D_ROD = 3.6;
 D_BOLT_CAP = 7.0;
+D_HOLDER = 8.0;
+

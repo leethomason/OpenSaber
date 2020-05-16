@@ -13,8 +13,6 @@ M_INSET = 11.0;
 W_INSET = 13.5;
 T_INSET = 1.0;
 
-D_HOLDER = 8.0;
-
 module holes()
 {
     translate([(D_COUPLER - D_TUBE)/2, 0, 0])
@@ -59,4 +57,12 @@ module cap(dzRing, trimTop)
 
 //cap(DZ_RING0, true);
 cap(DZ_RING1, false);
+
+color("plum") {
+    W = 13;
+    intersection() {
+        cylinder(h=1, d=18.24);
+        translate([-W/2, -20, 0]) cube(size=[W, 40, 1]);
+    }
+}
 
