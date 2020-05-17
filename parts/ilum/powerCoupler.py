@@ -8,13 +8,14 @@ from hole import hole
 CUT_DEPTH = -1.8
 PCB_DEPTH = -0.3
 UNIT = 2.54
-R_BOLT = UNIT * 3
+R_BOLT = UNIT * 3.0 + 0.5
+D_OUTER = 20.24
 
 mat = init_material("np883-fr-1.0")
 g = G(outfile='path.nc', aerotech_include=False, header=None, footer=None)
 nomad_header(g, mat, CNC_TRAVEL_Z)
 
-cx, cy = nanopcb("powerCoupler.txt", g, mat, CUT_DEPTH, PCB_DEPTH, False, False, True, False, False)
+cx, cy = nanopcb("powerCoupler.txt", g, mat, PCB_DEPTH, CUT_DEPTH, False, False, True, False, False)
 
 g.absolute()
 
@@ -30,7 +31,7 @@ for h in HOLES:
 
 g.move(z=2)
 g.move(x=cx/2, y=cy/2)
-hole(g, mat, CUT_DEPTH, d=20.0, offset="outside", fill=False, z=0, return_center=False)
+hole(g, mat, CUT_DEPTH, d=D_OUTER, offset="outside", fill=False, z=0, return_center=False)
 g.move(z=2)
 
 
