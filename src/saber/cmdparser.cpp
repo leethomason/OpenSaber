@@ -300,6 +300,14 @@ bool CMDParser::processCMD()
             Serial.println("no mag data.");
         }
         else {
+            int count = 0;
+            uint32_t start = millis();
+            while(count < 10) {
+                if (accel->readMag(0, &mag))
+                    count++;
+            }
+            uint32_t end = millis();
+
             Serial.print("Mag:");
             printXYZ(mag);
             Serial.println("");
@@ -310,6 +318,7 @@ bool CMDParser::processCMD()
             Serial.print("Mag delta:");
             printXYZ(vDelta);
             Serial.println("");
+            Serial.print("Mag per second: "); Serial.println(10 * 1000.0f / (end - start));
         }
     }
     else if (action == PLAY) {

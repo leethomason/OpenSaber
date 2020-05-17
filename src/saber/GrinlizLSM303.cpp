@@ -354,7 +354,8 @@ bool GrinlizLSM303::recalibrateMag()
 int GrinlizLSM303::readMag(Vec3<int32_t>* rawData, Vec3<float>* data)
 {
     uint8_t status = read8(LSM303_ADDRESS_MAG, STATUS_REG_M);
-    if ((status & (1<<3)) == 0 && (status & (1<<7)) == 0) return 0;
+    if ((status & (1<<3)) == 0 && (status & (1<<7)) == 0) 
+        return 0;
 
     Wire.beginTransmission(LSM303_ADDRESS_MAG);
     Wire.write(OUTX_LOW_REG_M);

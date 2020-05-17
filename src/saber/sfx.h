@@ -113,7 +113,8 @@ protected:
 	int m_swing = 0;		// tracks current swing with decay...lots of noise from mag
 	int m_swingTarget = 0;	
 	int m_hum = 0;			// also tracks with decay
-	StepProp m_swingDecay;	// decay rate is fast; about 1.5/millisecond, so need fixed.
+	Timer2 m_swingDecay;
+	Timer2 m_swingDecay2;
 	int m_stillCount = 0;	// how many still frames (motion sound = 0)
 
 	Random m_random;

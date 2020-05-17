@@ -50,7 +50,7 @@
 //#define SABER_MODEL_SHOCK3  	   19   // Itsy v2b, OLED (128x32), Dotstar crystal
 #define SABER_MODEL_LEIA  	   	   20   // Itsy v2b, Dotstar UI
 #define SABER_MODEL_SISTERS2  	   21   // Itsy v2b, OLED (128x32)
-#define SABER_MODEL_ILUM  	   	   22   // Itsy v2b, Dotstar UI
+#define SABER_MODEL_DUTCHESS   	   22   // Itsy v2b, Dotstar UI
 
 #define SABER_SUB_MODEL_NONE		0
 #define SABER_SUB_MODEL_LUNA		1
@@ -59,8 +59,8 @@
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
-#define SABER_MODEL 				SABER_MODEL_ILUM
+#define SERIAL_DEBUG 				0
+#define SABER_MODEL 				SABER_MODEL_DUTCHESS
 #define SABER_SUB_MODEL				
 // ----------------------------------
 
@@ -756,7 +756,7 @@
 	static const int VOLUME_3 = 160;
 	static const int VOLUME_4 = 256;
 
-#elif (SABER_MODEL == SABER_MODEL_ILUM)
+#elif (SABER_MODEL == SABER_MODEL_DUTCHESS)
 	#define PCB_VERSION 				PCB_ITSY_2C
 	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
 	#define SABER_VOLTMETER			
@@ -768,9 +768,10 @@
 	#define SABER_UI_BRIGHTNESS	    	16
 	#define SABER_UI_IDLE_MEDITATION
 	#define SABER_UI_COLOR_WHEEL
-	#define VOLTMETER_TUNE				1000
+	#define VOLTMETER_TUNE				1016
+	//#define SWING_DECAY					11
 
-	#define ID_STR "Ilum Cree XPE2 RGB"
+	#define ID_STR "Dutchess Cree XPE2 RGB"
 
 	static const int32_t RED_VF   = 2200;
 	static const int32_t RED_I    = 400;
@@ -784,53 +785,10 @@
 	static const int32_t BLUE_I   = 400;
 	static const int32_t BLUE_R   = 1800;
 
-	static const int VOLUME_1 = 20;
-	static const int VOLUME_2 = 60;
-	static const int VOLUME_3 = 160;
+	static const int VOLUME_1 = 32;
+	static const int VOLUME_2 = 64;
+	static const int VOLUME_3 = 128;
 	static const int VOLUME_4 = 256;
-
-#elif (SABER_MODEL == SABER_MODEL_TEST)
-	#define PCB_VERSION 			PCB_ITSY_2A
-	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
-	#define SABER_VOLTMETER			
-	#define SABER_UI_LED			SABER_LED_DOTSTAR
-
-	#define SABER_NUM_LEDS 			4
-	#define SABER_UI_START			0
-	#define SABER_UI_COUNT			4
-	// There are 32 leves of brightness, expressed from 0-256 in a step size of 8.
-	#define SABER_UI_BRIGHTNESS		16
-
-	#define SABER_UI_IDLE_MEDITATION
-
-//	#define SABER_CRYSTAL_START	    7
-//	#define SABER_CRYSTAL_BRIGHTNESS 24
-
-//	#define SABER_BLACK_START		6
-//	#define SABER_BLACK_COUNT		1
-
-	#define SABER_SOUND_DEF SABER_SOUND_DEF_BESPIN_ROGUE
-
-	static const int32_t UVOLT_MULT = 5019;	
-	#define ID_STR "Test Cree XPE2 RGB"
-
-	// Heat sink compound; copper TCSS heatsink.
-	static const int32_t RED_VF   = 2200;   // milli-volts
-	static const int32_t RED_I    = 400;    // milli-amps
-	static const int32_t RED_R    = 4700;   // milli-ohms
-
-	static const int32_t GREEN_VF = 3200;
-	static const int32_t GREEN_I  = 400;
-	static const int32_t GREEN_R  = 1000;
-
-	static const int32_t BLUE_VF  = 3100;
-	static const int32_t BLUE_I   = 400;
-	static const int32_t BLUE_R   = 1800;
-
-	static const int VOLUME_1 = 15;
-	static const int VOLUME_2 = 50;
-	static const int VOLUME_3 = 120;
-	static const int VOLUME_4 = 204;
 #endif
 
 #if (PCB_VERSION == PCB_SHIELD_3)

@@ -20,32 +20,40 @@
   SOFTWARE.
 */
 
-#pragma once
+#ifndef GRINLIZ_DOTSTAR_INCLUDED
+#define GRINLIZ_DOTSTAR_INCLUDED
+
 #include <stdint.h>
+
 #include "rgb.h"
-#include "Grinliz_Util.h"
 
-struct UIRenderData
+class DotStar
 {
-    uint8_t volume = 0;     // 0-4
-    uint8_t palette = 0;    // 0-7
-    uint32_t mVolts = 0;    // actual voltage in milli-volts
-    int soundBank = 0;
-    CStr<10> fontName;
+public:
+	DotStar();
 
-    osbr::RGB color;	// NOT the RGB of the LED. An GGB LED would be
-                      // green if set to (1, 0, 0), so the bladeColor
-                      // should be (0, 1, 0)
+	void beginSPI(uint8_t enablePin);
+	void beginSW(uint8_t clockPin, uint8_t dataPin);
 
-    static int powerLevel(uint32_t mVolts, int maxLevel) {
-        static const int32_t HIGH_VOLTAGE = NOMINAL_VOLTAGE + VOLTAGE_RANGE;
-        static const int32_t LOW_VOLTAGE = NOMINAL_VOLTAGE - VOLTAGE_RANGE;
+	// Brightness is global; 0-256/255
+	void display(const osbr::RGB* leds, int nLEDs, uint16_t brightness);
+	// Brightness in the alpha channel.
+	void display(const osbr::RGBA* leds, int nLEDs);
 
-        int32_t level = maxLevel * (mVolts - LOW_VOLTAGE) / (HIGH_VOLTAGE - LOW_VOLTAGE);
-        if (level < 0) level = 0;
-        if (level > maxLevel) level = maxLevel;
-        return level;
-    }
+	bool swMode() const { return m_clockPin || m_dataPin; }
+	uint8_t swClockPin() const { return m_clockPin; }
+	uint8_t swDataPin() const { return m_dataPin; }
 
-    UIRenderData() {}
+private:
+	void swOut(uint8_t n);
+
+  void begin();
+  void transfer(uint8_t data);
+  void end();
+
+	uint8_t 	m_enable = 0;
+	uint8_t		m_clockPin = 0;
+	uint8_t		m_dataPin = 0;
 };
+
+#endif // GRINLIZ_DOTSTAR_INCLUDED

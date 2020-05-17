@@ -75,6 +75,14 @@ Swing::Swing(int msecPerSample)
     m_dtINV = 1000.0f / msecPerSample;
 }
 
+void Swing::recalibrate()
+{
+    m_init = false; 
+    m_speed = 0; 
+    m_dotOrigin = 0;
+    Log.p("Swing.recalibrate()").eol();
+}
+
 Vec3<float> Swing::normalize(const Vec3<int32_t> v, const Vec3<int32_t> &mMin, const Vec3<int32_t> &mMax)
 {
     Vec3<float> a;
@@ -111,7 +119,7 @@ void Swing::push(const Vec3<int32_t>& x, const Vec3<int32_t>& mMin, const Vec3<i
     // sin(t) = t, for small t (in radians)
     Vec3<float> c = b - a;
     float dist = sqrtf(c.x * c.x + c.y * c.y + c.z * c.z);
-    
+
     m_speed = dist * m_dtINV;
     m_prevPosNorm = b;
 

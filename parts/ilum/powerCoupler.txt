@@ -1,0 +1,9 @@
+#
+# +M 2.2  Mounting
+#
+
+  o o
+  | |
+o o o o
+|     |
++-o o-+

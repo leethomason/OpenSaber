@@ -5,8 +5,8 @@ include <dim.scad>
 
 $fn = 80;
 DRAW_AFT = false;
-DRAW_FORE = false;
-DRAW_SWITCH_HOLDER = true;
+DRAW_FORE = true;
+DRAW_SWITCH_HOLDER = false;
 
 EPS = 0.01;
 ESP2 = 2 * EPS;
@@ -67,11 +67,11 @@ module bottomDotstar()
 
 if (DRAW_SWITCH_HOLDER)
 {
-    HOLDER_Y = 7.0;
-    HOLDER_LOWER_Y = 2.0;
+    HOLDER_Y = 6.0;
+    HOLDER_LOWER_Y = 2.5;
     HOLDER_D = 7.2;
     HOLDER_LOWER_D = 10.5;
-    INNER_D = 4.0;
+    INNER_D = 4.1;
 
     Y_OFFSET = 3.0;
 
@@ -103,11 +103,10 @@ if (DRAW_AFT) {
 }
 
 if (DRAW_FORE) {
-
     difference() {
         union() {
             translate([0, 0, M_JOINT]) {
-                powerPortRing(D_INNER, T, DZ_POWER_RING, DZ_POWER_RING/2, addY=TOP_FLATTEN, counter=false);
+                powerPortRing(D_INNER, T, DZ_POWER_RING, DZ_POWER_RING/2, addY=TOP_FLATTEN, dyPort=5.0);
             }
 
             translate([0, 0, M_BOLT_START]) {
@@ -120,7 +119,7 @@ if (DRAW_FORE) {
                     tube(h=M_AFT_THREAD_FRONT - DZ_RING0 - M_SWITCH_START, do=D_INNER, di=D_INNER - T);
                     translate([-W/2, 0, 0]) cube(size=[W, 100, 100]);
                 }
-                switchHolder(D_INNER, M_SWITCH - M_SWITCH_START, 0, 10.0);
+                switchHolder(D_INNER, M_SWITCH - M_SWITCH_START, 0, 10.5);
             }
             // Pillars to toughen front.
             PILLAR = 5;
@@ -170,6 +169,13 @@ if (DRAW_FORE) {
 
         // Flat bottom
         translate([-50, -D_INNER/2 - EPS, 0]) cube(size=[100, 1, 500]);
+
+        // Access to port
+        translate([0, 0, M_PORT]) rotate([90, 0, 0]) cylinder(h=100, d=12);
+
+        // Access to bottom
+        W_ACCESS = 12.0;
+        translate([-W_ACCESS/2, -D_INNER/2, M_JOINT]) cube(size=[W_ACCESS, 2.5, 22]);
     }
 }
 
