@@ -18,12 +18,15 @@ cx, cy = nanopcb("powerCoupler.txt", g, mat, CUT_DEPTH, PCB_DEPTH, False, False,
 
 g.absolute()
 
-travel(g, mat, x=cx/2 + R_BOLT, y=cy/2)
-g.move(z=0)
-hole(g, mat, CUT_DEPTH, d=2.1)
-travel(g, mat, x=cx/2 - R_BOLT, y=cy/2)
-g.move(z=0)
-hole(g, mat, CUT_DEPTH, d=2.1)
+HOLES = [0, 180, 45, 180-45, -45, 180+45]
+
+for h in HOLES:
+    sx = math.cos(h * 2.0 * math.pi / 360)
+    sy = math.sin(h * 2.0 * math.pi / 360)
+
+    travel(g, mat, x=cx/2 + R_BOLT * sx, y=cy/2 + R_BOLT * sy)
+    g.move(z=0)
+    hole(g, mat, CUT_DEPTH, d=2.1)
 
 g.move(z=2)
 g.move(x=cx/2, y=cy/2)
