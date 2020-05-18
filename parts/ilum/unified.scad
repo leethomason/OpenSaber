@@ -2,11 +2,12 @@ use <../commonUnified.scad>
 use <../shapes.scad>
 use <../inset.scad>
 include <dim.scad>
-
+include <dimCoupler.scad>
 $fn = 80;
 DRAW_AFT = false;
 DRAW_FORE = true;
 DRAW_SWITCH_HOLDER = false;
+DRAW_COUPLER = false;    // debugging
 
 EPS = 0.01;
 ESP2 = 2 * EPS;
@@ -39,9 +40,6 @@ module ring(dz)
         }
     }
 }
-
-//if (DRAW_RING0) translate([0, 0, M_AFT_FRONT - DZ_RING0]) ring(DZ_RING0);
-//if (DRAW_RING1) translate([0, 0, M_AFT_FRONT + 20.0]) mirror([0, 0, -1]) ring(DZ_RING1);
 
 module bottomDotstar()
 {
@@ -116,17 +114,16 @@ if (DRAW_FORE) {
             translate([0, 0, M_SWITCH_START]) {
                 difference() {
                     W = 22;
-                    tube(h=M_AFT_THREAD_FRONT - DZ_RING0 - M_SWITCH_START, do=D_INNER, di=D_INNER - T);
+                    tube(h=M_AFT_FRONT - DZ_RING0 - M_SWITCH_START, do=D_INNER, di=D_INNER - T);
                     translate([-W/2, 0, 0]) cube(size=[W, 100, 100]);
                 }
                 switchHolder(D_INNER, M_SWITCH - M_SWITCH_START, 0, 10.5);
             }
             // Pillars to toughen front.
             PILLAR = 5;
-            //translate([0, 0, M_AFT_THREAD_FRONT - PILLAR - DZ_RING0]) {
             PILLAR_START = M_BOLT + DZ_BOLT/2;
             translate([0, 0, PILLAR_START]) {
-                DZS = M_AFT_THREAD_FRONT - DZ_RING0 - PILLAR_START;
+                DZS = M_AFT_FRONT - DZ_RING0 - PILLAR_START;
                 intersection() {
                     cylinder(h=DZS, d=D_INNER);
                     union() {
@@ -157,6 +154,21 @@ if (DRAW_FORE) {
                 translate([0, 0, M_JOINT]) cylinder(h=DZ_FORE_TRIM, d=D_INNER);
                 translate([-50, -D_INNER/2, M_JOINT]) cube(size=[100, DY, DZ_FORE_TRIM]);
             }
+
+            // Mounting for coupler
+            intersection() {
+                union() {
+                    cylinder(h=M_AFT_FRONT, d=D_INNER);
+                    cylinder(h=M_AFT_FRONT + 100.0, d=D_VENT);
+                }
+                SUPPORT = 6.0;
+                union() {
+                    translate([D_COUPLER_OUTER/2 - 3.0, -50, M_AFT_FRONT - SUPPORT]) 
+                        cube(size=[100, 100, SUPPORT + M_COUPLER_START - M_AFT_FRONT]);
+                    mirror([-1, 0, 0]) translate([D_COUPLER_OUTER/2 - 3.0, -50, M_AFT_FRONT - SUPPORT]) 
+                        cube(size=[100, 100, SUPPORT + M_COUPLER_START - M_AFT_FRONT]);
+                }
+            }
         }
         bottomDotstar();
 
@@ -176,12 +188,24 @@ if (DRAW_FORE) {
         // Access to bottom
         W_ACCESS = 12.0;
         translate([-W_ACCESS/2, -D_INNER/2, M_JOINT]) cube(size=[W_ACCESS, 2.5, 22]);
+
+        // Holes for coupler mounting
+        translate([D_VENT/2 - D_M2_HEAD/2, 0, M_COUPLER_START - 10]) cylinder(h=10, d=D_M2);
+        translate([-(D_VENT/2 - D_M2_HEAD/2), 0, M_COUPLER_START - 10]) cylinder(h=10, d=D_M2);
+    }
+}
+
+if (DRAW_COUPLER) {
+    translate([0, 0, M_COUPLER_START]) {
+        color("beige") cylinder(h=H_COUPLER_PCB, d=D_COUPLER_OUTER);
+        translate([0, 0, H_COUPLER_PCB]) color("plum") cylinder(h=TOOTH_HEIGHT, d=D_COUPLER_OUTER);
+        translate([0, 0, H_COUPLER_PCB + TOOTH_HEIGHT]) color("beige") cylinder(h=H_COUPLER_PCB, d=D_COUPLER_OUTER);
     }
 }
 
 *difference() {
     translate([-INSET_W/2, D_INNER/2, M_JOINT + PLATE_TRIM])
-        roundedRect(size=[INSET_W, 1, M_AFT_THREAD_FRONT - M_JOINT - 2.0*PLATE_TRIM], r=1.6, up="y");
+        roundedRect(size=[INSET_W, 1, M_AFT_FRONT - M_JOINT - 2.0*PLATE_TRIM], r=1.6, up="y");
         
     translate([0, 0, M_SWITCH]) rotate([-90, 0, 0]) cylinder(h=100, d=8.0);
     translate([0, 0, M_BOLT]) rotate([-90, 0, 0]) cylinder(h=100, d=4.2);
@@ -189,5 +213,5 @@ if (DRAW_FORE) {
 }
 
 *color("blue") translate([0, 0, M_START-1]) cylinder(h=1, d=D_OUTER);
-*color("blue") translate([0, 0, M_AFT_THREAD_FRONT]) cylinder(h=1, d=D_OUTER);
+*color("blue") translate([0, 0, M_AFT_FRONT]) cylinder(h=1, d=D_OUTER);
 *color("blue") translate([0, 0, M_AFT_FRONT]) cylinder(h=1, d=D_OUTER);

@@ -6,7 +6,7 @@ use <../shapes.scad>
 //use <../inset.scad>
 
 START = max(M_PORT - 8.0, M_JOINT + 1.0);
-END   = min(M_SWITCH + 7.0, M_AFT_THREAD_FRONT);    // aft thread front has padding
+END   = min(M_SWITCH + 7.0, M_AFT_FRONT);    // aft thread front has padding
 
 echo("Plate cut, LEN", END - START); 
 echo("width", DX_SWITCH_PLATE);
@@ -17,7 +17,7 @@ L = END - START;
 M_PLATE = 0.0;
 DY_PLATE = 1.8;
 
-CUT_L = M_AFT_THREAD_FRONT - M_JOINT;
+CUT_L = M_AFT_FRONT - M_JOINT;
 
 T = 25.4 / 4;
 T0 = 3.0;

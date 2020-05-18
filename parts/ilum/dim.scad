@@ -6,16 +6,15 @@ M_START = -((42.0 - 10.0) - 1.0);
 DZ_SPKR = 12.0;
 M_MC_BATTERY = M_START + DZ_SPKR;
 
-DZ_BODY = 101.5;
+DZ_BODY = 101.6;
 M_AFT_FRONT = DZ_BODY - 10.5 - 0.5;
-// No thread cut:
-//M_AFT_THREAD_FRONT = DZ_BODY - 15.6 - 0.5;
-// No used cut:
-M_AFT_THREAD_FRONT = DZ_BODY - 10.0 - 1.0;
+M_TRANSITION_RING = DZ_BODY - 15.0;
+M_COUPLER_START = M_AFT_FRONT + 1.0;
+
 DZ_AFT = M_AFT_FRONT - M_START;
 
-D_COUPLER = 26.0;
-D_COUPLER_BOLT = 13.5;  // guess...
+D_VENT = 26.0;
+D_VENT_BOLT = 13.5;  // guess...
 
 D_INNER = 31.70;
 D_OUTER = 36.9;
@@ -27,12 +26,12 @@ M_JOINT = M_MC_BATTERY + zLenOfBaffles(N_BATT_BAFFLES, DZ_BAFFLE);
 
 DZ_POWER_RING = 18.0;
 DZ_BOLT = 8.0;          // switch to allen head for space?
-DZ_SWITCH = (M_AFT_THREAD_FRONT - M_JOINT - DZ_POWER_RING - DZ_BOLT);
+DZ_SWITCH = (M_AFT_FRONT - M_JOINT - DZ_POWER_RING - DZ_BOLT);
 
-DZ_RING0 = 3.0;
-DZ_RING1 = 2.5;
+DZ_RING0 = 3.0; // thickness of the aft vent coupler
+DZ_RING1 = 2.5; // fore vent coupler (non-standard)
 
-DZ_FORE_FULL = M_AFT_THREAD_FRONT - M_JOINT;
+DZ_FORE_FULL = M_AFT_FRONT - M_JOINT;
 DZ_FORE_TRIM = DZ_FORE_FULL - DZ_RING0;
 
 M_BOLT_START = M_JOINT + DZ_POWER_RING;
