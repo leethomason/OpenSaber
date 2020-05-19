@@ -5,7 +5,6 @@ use <../shapes.scad>
 $fn = 80;
 EPS = 0.01;
 
-T = 4;
 DEPTH = 15.0;
 AFT_DEPTH = 20.0;
 M_TUBE = 10.0;
@@ -64,8 +63,8 @@ module cap(dzRing, isAft)
 
     difference() {
         union() {
-            tube(h=dzRing, do=D_RING, di=D_VENT - T);
-            tube(h=depth, do=D_VENT, di=D_VENT - T);
+            tube(h=dzRing, do=D_RING, di=D_VENT_INNER);
+            tube(h=depth, do=D_VENT, di=D_VENT_INNER);
 
             intersection() {
                 cylinder(h=depth, d=D_VENT);
@@ -92,7 +91,7 @@ module cap(dzRing, isAft)
         }
 
         // Wire access
-        cylinder(h=M_INNER, d=D_VENT - T);
+        cylinder(h=M_INNER, d=D_VENT_INNER);
 
         if (!isAft) {
             // Brass inset
@@ -101,11 +100,13 @@ module cap(dzRing, isAft)
         }
 
         if (isAft) {
+            // cutout to fit the switch plate
             translate([-50, D_HOLDER/2, 0]) cube(size=[100, 100, dzRing + EPS]);
         }
     }
 }
 
+// Aft cap
 difference() {
     union() {
         translate([0, 0, M_AFT_FRONT]) cap(DZ_RING0, true);
@@ -114,7 +115,7 @@ difference() {
     translate([0, 0, M_COUPLER_START]) cylinder(d=D_COUPLER_OUTER, h=2.0 * H_COUPLER_PCB + TOOTH_HEIGHT - H_COUPLER_PCB);
 }
 
-//color("plum") translate([0, 0, M_COUPLER_START]) cylinder(d=D_COUPLER_OUTER, h=2.0 * H_COUPLER_PCB + TOOTH_HEIGHT);
-
-
-//cap(DZ_RING1, false);
+// Fore cap
+*union() {
+    cap(DZ_RING1, false);
+}

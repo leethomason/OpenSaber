@@ -14,9 +14,10 @@ M_COUPLER_START = M_AFT_FRONT + 1.0;
 DZ_AFT = M_AFT_FRONT - M_START;
 
 D_VENT = 26.0;
-D_VENT_BOLT = 13.5;  // guess...
+D_VENT_BOLT = 13.5;     // guess...
+D_VENT_INNER = 20.60;    // coupler is 20.24
 
-D_INNER = 31.70;
+D_INNER = 31.60;    // 31.7 is fine for the body, but too tight for the pommel
 D_OUTER = 36.9;
 
 DZ_BAFFLE = 3.0;

@@ -63,7 +63,7 @@ module bridge2(d, dz)
             union() {
                 translate([-d, d*0.10, 0]) {
                     polygonYZ(d*2, [
-                        [0,0], [dz*2, dz*2], [dz*4, dz*2], [dz*2, 0]
+                        [0,0], [dz*2, dz*2], [dz*4, dz*1.5], [dz*2, 0]
                     ]);
                 }        
                 translate([-d, -d*0.32, 0]) {

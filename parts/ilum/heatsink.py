@@ -8,10 +8,6 @@ from hole import hole
 from plane import plane
 
 mat = init_material(sys.argv[1])
-mat1 = None
-
-if len(sys.argv) > 2:
-    mat1 = init_material(sys.argv[2])
 
 H = 3.5
 H_FLOOR = 1.5   # needs 2mm; to H_FLOOR + 2 <= H
@@ -39,11 +35,6 @@ g.move(z=0)
 plane(g, mat, PLANE_DEPTH, -PLANE_XY/2, -PLANE_XY/2, PLANE_XY/2, PLANE_XY/2)
 
 g.move(x=0, y=0)
-
-if (mat1 != None):
-    tool_change(g, mat1, 1)
-    mat = mat1
-
 g.move(z=-PLANE_DEPTH)
 
 for r in range(6):

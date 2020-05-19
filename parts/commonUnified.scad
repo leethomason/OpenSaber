@@ -1110,4 +1110,9 @@ $fn = 80;
 
 *keyJoint(8, 30, 26, false);
 
-boltRing(30.0, 4.0, 12.0, 6.0);
+*boltRing(30.0, 4.0, 12.0, 6.0);
+
+baffleMCBattery( 32,    // outer diameter 
+                 12,    // number of baffles 
+                 3,     // thickness of the baffle
+                 bridgeStyle = 2);
