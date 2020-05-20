@@ -192,8 +192,11 @@ if (DRAW_FORE) {
         // Holes for coupler mounting
         translate([D_COUPLER_OUTER/2 - D_M2_HEAD/2, 0, M_COUPLER_START - 10]) cylinder(h=10, d=D_M2);
         translate([-(D_COUPLER_OUTER/2 - D_M2_HEAD/2), 0, M_COUPLER_START - 10]) cylinder(h=10, d=D_M2);
-        // Cut out bottom for printing
+
+        // Cut out bottom for printing and inset for bolts
         translate([-20, 0, M_AFT_FRONT - DZ_RING0]) polygonYZ(h=40, points=[[-8.3, 0], [-8.3, 10], [2, 10]]);
+        mirror([0, -1, 0]) translate([-20, 0, M_AFT_FRONT - DZ_RING0]) polygonYZ(h=40, points=[[-8.3, 0], [-8.3, 10], [2, 10]]);
+        translate([10, 0, M_AFT_FRONT - DZ_RING0 + 3]) cylinder(h=10, d=4);
     }
 }
 

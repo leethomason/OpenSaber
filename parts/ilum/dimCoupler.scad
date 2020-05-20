@@ -8,3 +8,4 @@ D_COUPLER_OUTER = (2.54 * 3.0 + 1.5) * 2 + 2.0;
 D_M2_HEAD = 4.0;
 D_M2 = 1.8;
 D_COUPLER_DISC = 22.5;
+R_M2_FASTENER_BOLT = 
