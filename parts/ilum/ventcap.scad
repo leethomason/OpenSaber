@@ -14,7 +14,7 @@ M_INSET = 11.0;
 W_INSET = 13.5;
 T_INSET = 1.0;
 
-DZ_AFT_TUBE = 3.5;
+DZ_AFT_TUBE = 3.5;  // AFT_DEPTH - (2.0 * H_COUPLER_PCB + TOOTH_HEIGHT);
 W_PCB_CUT = 16.0;
 
 module holes()
@@ -112,7 +112,7 @@ difference() {
         translate([0, 0, M_AFT_FRONT]) cap(DZ_RING0, true);
     }
     pcbHolder();
-    translate([0, 0, M_COUPLER_START]) cylinder(d=D_COUPLER_OUTER, h=2.0 * H_COUPLER_PCB + TOOTH_HEIGHT - H_COUPLER_PCB);
+    *translate([0, 0, M_COUPLER_START]) cylinder(d=D_COUPLER_OUTER, h=2.0 * H_COUPLER_PCB + TOOTH_HEIGHT - H_COUPLER_PCB);
 }
 
 // Fore cap
