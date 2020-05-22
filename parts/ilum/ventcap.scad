@@ -14,8 +14,9 @@ M_INSET = 11.0;
 W_INSET = 13.5;
 T_INSET = 1.0;
 
-DZ_AFT_TUBE = 3.5;
+DZ_AFT_TUBE = 3.5;  // AFT_DEPTH - (2.0 * H_COUPLER_PCB + TOOTH_HEIGHT);
 W_PCB_CUT = 16.0;
+PCB_SLOP = 0.3;
 
 module holes()
 {
@@ -23,7 +24,6 @@ module holes()
         cylinder(h=100, d=D_TUBE_INNER);
     translate([(D_VENT - D_TUBE)/2, 0, M_TUBE])
         cylinder(h=100, d=D_TUBE);
-
 }
 
 
@@ -38,21 +38,12 @@ module aftHoles()
 
 module pcbHolder()
 {
-    /*
-    intersection() {
-        cylinder(h=200, d=D_VENT);
-        color("plum") 
-            translate([-W_PCB_CUT/2, -50, M_COUPLER_START + H_COUPLER_PCB + TOOTH_HEIGHT]) 
-                cube(size=[W_PCB_CUT, 100, H_COUPLER_PCB]);
-    }
-    */
-
     hull() {
-        translate([0, 0, M_COUPLER_START + H_COUPLER_PCB + TOOTH_HEIGHT]) {
-            cylinder(h=H_COUPLER_PCB, d=D_COUPLER_DISC);
+        translate([0, 0, M_COUPLER_START + H_COUPLER_PCB + TOOTH_HEIGHT - PCB_SLOP/2]) {
+            cylinder(h=H_COUPLER_PCB + PCB_SLOP, d=D_COUPLER_DISC);
         }
-        translate([0, 30, M_COUPLER_START + H_COUPLER_PCB + TOOTH_HEIGHT]) {
-            cylinder(h=H_COUPLER_PCB, d=D_COUPLER_DISC);
+        translate([0, 30, M_COUPLER_START + H_COUPLER_PCB + TOOTH_HEIGHT - PCB_SLOP/2]) {
+            cylinder(h=H_COUPLER_PCB + PCB_SLOP, d=D_COUPLER_DISC);
         }
     }
 }
@@ -112,7 +103,6 @@ difference() {
         translate([0, 0, M_AFT_FRONT]) cap(DZ_RING0, true);
     }
     pcbHolder();
-    translate([0, 0, M_COUPLER_START]) cylinder(d=D_COUPLER_OUTER, h=2.0 * H_COUPLER_PCB + TOOTH_HEIGHT - H_COUPLER_PCB);
 }
 
 // Fore cap
