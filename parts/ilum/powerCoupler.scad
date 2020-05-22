@@ -2,11 +2,8 @@ use <../shapes.scad>
 include <dim.scad>
 include <dimCoupler.scad>
 
-HEADER_PINS = 6.1;
 TOOTH_THETA = 3.0;
 EPS = 0.01;
-BASE_H = TOOTH_BASE - HEADER_PINS - TOOTH_CAP; // need space for teeth caps to sink in
-
 THETA_EPS = 1.0;
 
 $fn = 120;
@@ -46,7 +43,7 @@ module coupler(teeth)
     difference() {
 
         union() {
-            tube(h=BASE_H, di=D_COUPLER_INNER, do=D_COUPLER_OUTER);
+            tube(h=TOOTH_BASE_H, di=D_COUPLER_INNER, do=D_COUPLER_OUTER);
             intersection() {
                 tube(h=100, di=D_COUPLER_INNER, do=D_COUPLER_OUTER);
                 union() {
@@ -63,7 +60,7 @@ module coupler(teeth)
 
 // 0
 difference() {
-    translate([0, 0, TOOTH_HEIGHT + BASE_H]) mirror([0, 0, -1]) coupler([[-90, 60], [90, 60]]);
+    translate([0, 0, TOOTH_HEIGHT + TOOTH_BASE_H]) mirror([0, 0, -1]) coupler([[-90, 60], [90, 60]]);
     rotate([0, 0, 90]) translate([R_COUPLER_MOUNT, 0, 0]) cylinder(h=100, d=D_M2);
     rotate([0, 0, -90]) translate([R_COUPLER_MOUNT, 0, 0]) cylinder(h=100, d=D_M2);
 }

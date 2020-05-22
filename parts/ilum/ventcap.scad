@@ -6,7 +6,7 @@ $fn = 80;
 EPS = 0.01;
 
 DEPTH = 15.0;
-AFT_DEPTH = 20.0;
+AFT_DEPTH = 22.0;
 M_TUBE = 10.0;
 M_INNER = 3.0;
 M_INSET = 13.6 - 4.05;
@@ -39,13 +39,15 @@ module aftHoles()
 module pcbHolder()
 {
     hull() {
-        translate([0, 0, M_COUPLER_START + H_COUPLER_PCB + TOOTH_HEIGHT - PCB_SLOP/2]) {
-            cylinder(h=H_COUPLER_PCB + PCB_SLOP, d=D_COUPLER_DISC);
+        translate([0, 0, DZ_FORE_SUPPORT + H_COUPLER_PCB + COUPLER_PLASTIC_HEIGHT - PCB_SLOP/2]) {
+            cylinder(h=H_COUPLER_PCB + PCB_SLOP, d=D_COUPLER_DISC + 0.2);
         }
-        translate([0, 30, M_COUPLER_START + H_COUPLER_PCB + TOOTH_HEIGHT - PCB_SLOP/2]) {
-            cylinder(h=H_COUPLER_PCB + PCB_SLOP, d=D_COUPLER_DISC);
+        translate([0, 30, DZ_FORE_SUPPORT + H_COUPLER_PCB + COUPLER_PLASTIC_HEIGHT - PCB_SLOP/2]) {
+            cylinder(h=H_COUPLER_PCB + PCB_SLOP, d=D_COUPLER_DISC + 0.2);
         }
     }
+    echo("COUPLER_PLASTIC_HEIGHT", COUPLER_PLASTIC_HEIGHT)
+    echo("pcb", DZ_FORE_SUPPORT + H_COUPLER_PCB + COUPLER_PLASTIC_HEIGHT);
 }
 
 module cap(dzRing, isAft)
@@ -98,14 +100,14 @@ module cap(dzRing, isAft)
 }
 
 // Aft cap
-*difference() {
+difference() {
     union() {
-        translate([0, 0, M_AFT_FRONT]) cap(DZ_RING0, true);
+        cap(DZ_RING0, true);
     }
     pcbHolder();
 }
 
 // Fore cap
-union() {
+*union() {
     cap(DZ_RING1, false);
 }
