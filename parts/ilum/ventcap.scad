@@ -9,7 +9,7 @@ DEPTH = 15.0;
 AFT_DEPTH = 20.0;
 M_TUBE = 10.0;
 M_INNER = 3.0;
-M_INSET = 11.0;
+M_INSET = 13.6 - 4.05;
 
 W_INSET = 13.5;
 T_INSET = 1.0;
@@ -85,9 +85,9 @@ module cap(dzRing, isAft)
         cylinder(h=M_INNER, d=D_VENT_INNER);
 
         if (!isAft) {
-            // Brass inset
-            translate([-W_INSET/2, -50, M_INSET]) 
-                cube(size=[W_INSET, 100, T_INSET]);
+            // Brass inset - now PCB
+            translate([-W_INSET/2, -50, M_INSET - PCB_SLOP/2]) 
+                cube(size=[W_INSET, 100, H_COUPLER_PCB + PCB_SLOP]);
         }
 
         if (isAft) {
@@ -98,7 +98,7 @@ module cap(dzRing, isAft)
 }
 
 // Aft cap
-difference() {
+*difference() {
     union() {
         translate([0, 0, M_AFT_FRONT]) cap(DZ_RING0, true);
     }
@@ -106,6 +106,6 @@ difference() {
 }
 
 // Fore cap
-*union() {
+union() {
     cap(DZ_RING1, false);
 }
