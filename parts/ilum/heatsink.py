@@ -14,11 +14,11 @@ H_FLOOR = 1.5   # needs 2mm; to H_FLOOR + 2 <= H
 
 # STOCK = 25.4   # HDPE
 # STOCK = 6.0    # acrylic? yes, acrylic. I hate acrylic.
-STOCK = 10.0
+STOCK = 6.5      # HDPE
 
 PLANE_DEPTH = -(STOCK - H) 
 D = 25.2
-DEPTH_EPS = -0.2
+DEPTH_EPS = -1.0
 
 R_HOLE = 8.92
 D_HOLE = 4.4
