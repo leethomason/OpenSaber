@@ -10,8 +10,12 @@ CUT_DEPTH = -1.8
 PCB_DEPTH = -0.3
 UNIT = 2.54
 R_BOLT = UNIT * 3.0 + 0.5
-D_OUTER = 20.24
 D_M2 = 2.05
+
+D_COUPLER_OUTER = 20.24
+D_M2_HEAD = 4.0
+R_M2_FASTENER_BOLT = (D_COUPLER_OUTER - D_M2_HEAD) / 2
+D_COUPLER_DISC = 22.0
 
 # 0 is the aft side
 # 1 the fore side
@@ -41,7 +45,7 @@ if aftSide:
     # attach to the carriage.
 
     # r = D_VENT/2 - D_M2_HEAD/2
-    r = 26.0/2 - 4.0/2
+    r = R_M2_FASTENER_BOLT
     travel(g, mat, x=cx/2, y=cy/2 + r)
     g.move(z=0)
     hole(g, mat, CUT_DEPTH, d=D_M2)
@@ -53,7 +57,7 @@ if aftSide:
 g.move(z=2)
 g.move(x=cx/2, y=cy/2)
 
-d = D_OUTER if aftSide else 22.5 # D_COUPLER_DISC is the forward case
+d = D_COUPLER_OUTER if aftSide else D_COUPLER_DISC
 
 hole(g, mat, CUT_DEPTH, d=D_OUTER, offset="outside", fill=False, z=0, return_center=False)
 g.move(z=2)
