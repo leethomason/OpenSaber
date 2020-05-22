@@ -31,6 +31,7 @@ DZ_SWITCH = (M_AFT_FRONT - M_JOINT - DZ_POWER_RING - DZ_BOLT);
 
 DZ_RING0 = 3.0; // thickness of the aft vent coupler
 DZ_RING1 = 2.5; // fore vent coupler (non-standard)
+DZ_FORE_SUPPORT = 1.5;
 
 DZ_FORE_FULL = M_AFT_FRONT - M_JOINT;
 DZ_FORE_TRIM = DZ_FORE_FULL - DZ_RING0;
