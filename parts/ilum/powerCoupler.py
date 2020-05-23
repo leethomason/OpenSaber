@@ -6,7 +6,7 @@ from rectangleTool import rectangleTool
 from mecode import G
 from hole import hole
 
-CUT_DEPTH = -1.8
+CUT_DEPTH = -2.0
 PCB_DEPTH = -0.3
 UNIT = 2.54
 R_BOLT = UNIT * 3.0 + 0.5
@@ -70,7 +70,7 @@ else:
     dhx = math.sqrt(D_VENT*D_VENT/4 - INSET*INSET/4)
 
     bit = mat['tool_size']
-    dhx = dhx + bit / 2
+    dhx = dhx + bit / 4
     INSET = INSET + bit
 
     travel(g, mat, x=dhx, y=INSET/2)
