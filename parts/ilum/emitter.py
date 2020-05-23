@@ -6,7 +6,7 @@ from rectangleTool import rectangleTool
 from mecode import G
 from hole import hole
 
-CUT_DEPTH = -1.8
+CUT_DEPTH = -3.0
 PCB_DEPTH = -0.3
 UNIT = 2.54
 R_BOLT = UNIT * 3.0 + 0.5
@@ -23,15 +23,16 @@ D_COUPLER_DISC = 22.0
 # 1 the fore side
 
 back = sys.argv[1] == '0'
+DRILL_DEPTH = -0.8 if back else CUT_DEPTH
 
 mat = init_material("np883-fr-1.0")
 g = G(outfile='path.nc', aerotech_include=False, header=None, footer=None)
 nomad_header(g, mat, CNC_TRAVEL_Z)
 
-nanopcb("emitter.txt", g, mat, PCB_DEPTH, CUT_DEPTH, 
+nanopcb("emitter.txt", g, mat, PCB_DEPTH, DRILL_DEPTH, 
     False,  # don't cut
     False, 
-    back == False, # drill
+    True, # drill, but not it is shallow on the back
     back == True, # flip
     False)
 
@@ -46,7 +47,7 @@ if back is False:
     dhy = math.sqrt(D_VENT*D_VENT/4 - INSET*INSET/4)
 
     bit = mat['tool_size']
-    dhy = dhy + bit / 2
+    dhy = dhy + bit / 4
     INSET = INSET + bit
 
     travel(g, mat, x=INSET/2, y=dhy)
