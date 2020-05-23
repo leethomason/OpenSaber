@@ -157,16 +157,20 @@ if (DRAW_FORE) {
 
             // Mounting for coupler
             intersection() {
+                FRONT = M_AFT_FRONT - DZ_RING0;
                 union() {
-                    cylinder(h=M_AFT_FRONT - DZ_RING0, d=D_INNER);
-                    cylinder(h=M_AFT_FRONT + 100.0, d=D_VENT_INNER);
+                    cylinder(h=FRONT, d=D_INNER);
+                    intersection() {
+                        cylinder(h=500.0, d=D_VENT_INNER);
+                        translate([-50, 0, FRONT]) polygonYZ(h=100, points=[[-4,0], [-2,2], [2,2], [4,0]]);
+                    }
                 }
                 SUPPORT = 6.0;
                 union() {
-                    translate([D_COUPLER_OUTER/2 - 4.0, -50, M_AFT_FRONT - SUPPORT]) 
-                        cube(size=[100, 100, SUPPORT + M_COUPLER_START - M_AFT_FRONT]);
-                    mirror([-1, 0, 0]) translate([D_COUPLER_OUTER/2 - 4.0, -50, M_AFT_FRONT - SUPPORT]) 
-                        cube(size=[100, 100, SUPPORT + M_COUPLER_START - M_AFT_FRONT]);
+                    translate([D_COUPLER_OUTER/2 - 4.0, -50, FRONT - SUPPORT]) 
+                        cube(size=[100, 100, SUPPORT + DZ_FORE_SUPPORT]);
+                    mirror([-1, 0, 0]) translate([D_COUPLER_OUTER/2 - 4.0, -50, FRONT - SUPPORT]) 
+                        cube(size=[100, 100, SUPPORT + DZ_FORE_SUPPORT]);
                 }
             }
         }
@@ -192,10 +196,6 @@ if (DRAW_FORE) {
         // Holes for coupler mounting
         translate([D_COUPLER_OUTER/2 - D_M2_HEAD/2, 0, M_COUPLER_START - 10]) cylinder(h=10, d=D_M2);
         translate([-(D_COUPLER_OUTER/2 - D_M2_HEAD/2), 0, M_COUPLER_START - 10]) cylinder(h=10, d=D_M2);
-
-        // Cut out bottom for printing and inset for bolts
-        translate([-20, 0, M_AFT_FRONT - DZ_RING0]) polygonYZ(h=40, points=[[-8.3, 0], [-8.3, 10], [2, 10]]);
-        mirror([0, -1, 0]) translate([-20, 0, M_AFT_FRONT - DZ_RING0]) polygonYZ(h=40, points=[[-8.3, 0], [-8.3, 10], [2, 10]]);
     }
 }
 

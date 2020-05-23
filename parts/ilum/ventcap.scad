@@ -16,7 +16,7 @@ T_INSET = 1.0;
 
 DZ_AFT_TUBE = 3.5;  // AFT_DEPTH - (2.0 * H_COUPLER_PCB + TOOTH_HEIGHT);
 W_PCB_CUT = 16.0;
-PCB_SLOP = 0.3;
+PCB_SLOP = 0.6;
 
 module holes()
 {
@@ -72,7 +72,6 @@ module cap(dzRing, isAft)
                     }
                 }
             }
-
         }  
         if (isAft) {
             aftHoles();
@@ -86,12 +85,14 @@ module cap(dzRing, isAft)
         // Wire access
         cylinder(h=M_INNER, d=D_VENT_INNER);
 
-        if (!isAft) {
-            // Brass inset - now PCB
-            translate([-W_INSET/2, -50, M_INSET - PCB_SLOP/2]) 
-                cube(size=[W_INSET, 100, H_COUPLER_PCB + PCB_SLOP]);
-        }
+        ROTATE = isAft ? 30 : 0;
+        WIDTH = isAft ? W_INSET + 2 : W_INSET;
 
+        rotate([0, 0, ROTATE]) {
+            // Brass inset - now PCB
+            translate([-WIDTH/2, -50, M_INSET - PCB_SLOP/2]) 
+                cube(size=[WIDTH, 100, H_COUPLER_PCB + PCB_SLOP]);
+        }
         if (isAft) {
             // cutout to fit the switch plate
             translate([-50, D_HOLDER/2, 0]) cube(size=[100, 100, dzRing + EPS]);
@@ -104,7 +105,7 @@ difference() {
     union() {
         cap(DZ_RING0, true);
     }
-    pcbHolder();
+    *pcbHolder();
 }
 
 // Fore cap
