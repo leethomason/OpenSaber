@@ -14,7 +14,7 @@ M_INSET = 13.6 - 4.05;
 W_INSET = 13.5;
 T_INSET = 1.0;
 
-DZ_AFT_TUBE = 3.5;  // AFT_DEPTH - (2.0 * H_COUPLER_PCB + TOOTH_HEIGHT);
+DZ_AFT_TUBE = 3.0;  // AFT_DEPTH - (2.0 * H_COUPLER_PCB + TOOTH_HEIGHT);
 W_PCB_CUT = 16.0;
 PCB_SLOP = 0.6;
 
@@ -87,10 +87,11 @@ module cap(dzRing, isAft)
 
         ROTATE = isAft ? 30 : 0;
         WIDTH = isAft ? W_INSET + 2 : W_INSET;
+        POS = isAft ? DZ_FORE_SUPPORT + H_COUPLER_PCB + COUPLER_PLASTIC_HEIGHT : M_INSET;
 
         rotate([0, 0, ROTATE]) {
             // Brass inset - now PCB
-            translate([-WIDTH/2, -50, M_INSET - PCB_SLOP/2]) 
+            translate([-WIDTH/2, -50, POS - PCB_SLOP/2]) 
                 cube(size=[WIDTH, 100, H_COUPLER_PCB + PCB_SLOP]);
         }
         if (isAft) {
@@ -101,14 +102,7 @@ module cap(dzRing, isAft)
 }
 
 // Aft cap
-difference() {
-    union() {
-        cap(DZ_RING0, true);
-    }
-    *pcbHolder();
-}
+*cap(DZ_RING0, true);
 
 // Fore cap
-*union() {
-    cap(DZ_RING1, false);
-}
+cap(DZ_RING1, false);

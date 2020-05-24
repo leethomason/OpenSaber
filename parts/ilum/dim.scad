@@ -2,8 +2,9 @@ use <../commonUnified.scad>
 M_0 = 0;
 
 // Test trims - rather tight.
-M_START = -((42.0 - 10.0) - 1.0);
-DZ_SPKR = 12.0;
+M_START = -(41.5 - 0.40*25.4);
+M_MC = -19.0;
+DZ_SPKR = M_MC - M_START;
 M_MC_BATTERY = M_START + DZ_SPKR;
 
 DZ_BODY = 101.6;

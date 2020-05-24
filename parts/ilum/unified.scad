@@ -4,8 +4,8 @@ use <../inset.scad>
 include <dim.scad>
 include <dimCoupler.scad>
 $fn = 80;
-DRAW_AFT = false;
-DRAW_FORE = true;
+DRAW_AFT = true;
+DRAW_FORE = false;
 DRAW_SWITCH_HOLDER = false;
 DRAW_COUPLER = false;    // debugging
 
@@ -100,6 +100,23 @@ if (DRAW_AFT) {
 
 }
 
+module windows(start)
+{
+    for(y=[start:3]) {
+        translate([-50, -D_INNER/2 + y * 6 - 1, 0]) {
+            TH = 3.0;
+            TW = 2.0;
+            //polygonYZ(h=100, points=[
+            //    [0, 0], [0, TW], [TH, TW], [TH+TW/2, TW/2], [TH,0]
+            //]);
+            if (y==0)
+                rotate([-45, 0, 0]) translate([0, 0, -6]) cube(size=[100, 4, 8]);
+            else
+                rotate([-45, 0, 0]) cube(size=[100, 4, 2]);
+        }
+    }
+}
+
 if (DRAW_FORE) {
     difference() {
         union() {
@@ -175,6 +192,9 @@ if (DRAW_FORE) {
             }
         }
         bottomDotstar();
+
+        translate([0, 0, M_PORT + 6.5]) windows(0);
+        translate([0, 0, M_BOLT + 7.0]) windows(1);
 
         // Flat area for switch plate.
         translate([-50, D_INNER/2 - TOP_FLATTEN, M_JOINT])
