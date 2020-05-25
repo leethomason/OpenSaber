@@ -6,7 +6,6 @@ $fn = 80;
 EPS = 0.01;
 
 DEPTH = 17.0;
-AFT_DEPTH = 22.0;
 M_TUBE = 10.0;
 M_INNER = 3.0;
 M_INSET = 13.6 - 4.05;
@@ -50,9 +49,10 @@ module pcbHolder()
     echo("pcb", DZ_FORE_SUPPORT + H_COUPLER_PCB + COUPLER_PLASTIC_HEIGHT);
 }
 
-module cap(dzRing, isAft)
+module cap(dzRing)
 {
-    depth = isAft ? AFT_DEPTH : DEPTH;
+    depth = DEPTH;
+    PCB_BOTTOM = M_INSET + PCB_SLOP/2 + H_COUPLER_PCB;
 
     difference() {
         union() {
@@ -62,69 +62,57 @@ module cap(dzRing, isAft)
             intersection() {
                 cylinder(h=depth, d=D_VENT);
                 union() {
-                    if (isAft) {
-                        translate([(D_VENT - D_TUBE)/2, 0, AFT_DEPTH - DZ_AFT_TUBE]) 
-                            cylinder(h=DZ_AFT_TUBE, d=D_HOLDER);
-                        translate([-(D_VENT - D_TUBE)/2, 0, AFT_DEPTH - DZ_AFT_TUBE]) 
-                            cylinder(h=DZ_AFT_TUBE, d=D_HOLDER);
-                    }
-                    else {
-                        translate([(D_VENT - D_TUBE)/2, 0, 0]) 
-                            cylinder(h=100, d=D_HOLDER);
-                        translate([-(D_VENT - D_TUBE)/2, 0, 0]) 
-                            cylinder(h=100, d=D_HOLDER);
-                    }
+                    translate([(D_VENT - D_TUBE)/2, 0, 0]) 
+                        cylinder(h=100, d=D_HOLDER);
+                    translate([-(D_VENT - D_TUBE)/2, 0, 0]) 
+                        cylinder(h=100, d=D_HOLDER);
+                }
+            }
+
+            // cylinders to hold bolts
+            intersection()
+            {
+                cylinder(h=20, d=D_VENT);
+                union() {
+                    translate([0, (D_VENT - D_M2_HEAD)/2, 0])
+                        cylinder(h=DEPTH, d=D_M2_HEAD+2);
+                    translate([0, -(D_VENT - D_M2_HEAD)/2, 0])
+                        cylinder(h=DEPTH, d=D_M2_HEAD+2);
                 }
             }
         }  
-        if (isAft) {
-            aftHoles();
-            rotate([0, 0, 180]) aftHoles();
-        }
-        else {
-            holes();
-            rotate([0, 0, 180]) holes();
-        }
+        holes();
+        rotate([0, 0, 180]) holes();
 
         // Wire access
-        cylinder(h=isAft ? M_INNER : M_INNER + 2, d=D_VENT_INNER);
+        cylinder(h=M_INNER + 2, d=D_VENT_INNER);
 
-        ROTATE = isAft ? 30 : 0;
-        WIDTH = isAft ? W_INSET + 2 : W_INSET;
-        POS = isAft ? DZ_FORE_SUPPORT + H_COUPLER_PCB + COUPLER_PLASTIC_HEIGHT : M_INSET;
+        ROTATE = 0;
+        WIDTH = W_INSET;
+        POS = M_INSET;
 
-        rotate([0, 0, ROTATE]) {
-            translate([-WIDTH/2, -50, POS - PCB_SLOP/2]) 
-                cube(size=[WIDTH, 100, H_COUPLER_PCB + PCB_SLOP]);
+        // Slot to hold the PCB
+        intersection() {
+            cylinder(h=100, d=D_VENT);
+            translate([-W_INSET/2, -50, -EPS])
+                cube(size=[W_INSET, 100, POS + PCB_SLOP/2 + H_COUPLER_PCB]);
         }
-        if (!isAft) {
-            // Slot to hold the PCB
-            SLOT_W = W_INSET - 1.5;
-            intersection() {
-                translate([-SLOT_W/2, -50, -EPS])
-                    cube(size=[SLOT_W, 100, POS + PCB_SLOP/2 + H_COUPLER_PCB]);
-                cylinder(h=100, d=D_VENT);
-            }
+        
+        // Slide in the brass tubes
+        translate([(D_VENT - D_TUBE)/2, 0, DEPTH-2])
+            cylinder(h=2 + EPS, d1=D_TUBE, d2=D_TUBE + 2);
+        translate([-(D_VENT - D_TUBE)/2, 0, DEPTH-2])
+            cylinder(h=2 + EPS, d1=D_TUBE, d2=D_TUBE + 2);
 
-            // Slide in the brass tubes
-            translate([(D_VENT - D_TUBE)/2, 0, DEPTH-2])
-                cylinder(h=2 + EPS, d1=D_TUBE, d2=D_TUBE + 2);
-            translate([-(D_VENT - D_TUBE)/2, 0, DEPTH-2])
-                cylinder(h=2 + EPS, d1=D_TUBE, d2=D_TUBE + 2);
+        // knock out the inside for the pcb to slide in (trims cylinders)
+        translate([-W_INSET/2, -4, 0]) cube(size=[W_INSET, 8, 100]);
 
-            // knock out the inside for the pcb to slide in
-            translate([-W_INSET/2, -4, 0]) cube(size=[W_INSET, 8, 100]);
-        }
-
-        if (isAft) {
-            // cutout to fit the switch plate
-            translate([-50, D_HOLDER/2, 0]) cube(size=[100, 100, dzRing + EPS]);
-        }
+        translate([0, (D_VENT - D_M2_HEAD)/2, PCB_BOTTOM - EPS])
+            cylinder(h=100, d=1.9);
+        translate([0, -(D_VENT - D_M2_HEAD)/2, PCB_BOTTOM - EPS])
+            cylinder(h=100, d=1.9);
     }
 }
 
-// Aft cap
-*cap(DZ_RING0, true);
-
 // Fore cap
-cap(DZ_RING1, false);
+cap(DZ_RING1);
