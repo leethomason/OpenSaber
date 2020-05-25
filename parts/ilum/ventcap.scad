@@ -5,7 +5,7 @@ use <../shapes.scad>
 $fn = 80;
 EPS = 0.01;
 
-DEPTH = 15.0;
+DEPTH = 17.0;
 AFT_DEPTH = 22.0;
 M_TUBE = 10.0;
 M_INNER = 3.0;
@@ -63,12 +63,16 @@ module cap(dzRing, isAft)
                 cylinder(h=depth, d=D_VENT);
                 union() {
                     if (isAft) {
-                        translate([(D_VENT - D_TUBE)/2, 0, AFT_DEPTH - DZ_AFT_TUBE]) cylinder(h=DZ_AFT_TUBE, d=D_HOLDER);
-                        translate([-(D_VENT - D_TUBE)/2, 0, AFT_DEPTH - DZ_AFT_TUBE]) cylinder(h=DZ_AFT_TUBE, d=D_HOLDER);
+                        translate([(D_VENT - D_TUBE)/2, 0, AFT_DEPTH - DZ_AFT_TUBE]) 
+                            cylinder(h=DZ_AFT_TUBE, d=D_HOLDER);
+                        translate([-(D_VENT - D_TUBE)/2, 0, AFT_DEPTH - DZ_AFT_TUBE]) 
+                            cylinder(h=DZ_AFT_TUBE, d=D_HOLDER);
                     }
                     else {
-                        translate([(D_VENT - D_TUBE)/2, 0, 0]) cylinder(h=100, d=D_HOLDER);
-                        translate([-(D_VENT - D_TUBE)/2, 0, 0]) cylinder(h=100, d=D_HOLDER);
+                        translate([(D_VENT - D_TUBE)/2, 0, 0]) 
+                            cylinder(h=100, d=D_HOLDER);
+                        translate([-(D_VENT - D_TUBE)/2, 0, 0]) 
+                            cylinder(h=100, d=D_HOLDER);
                     }
                 }
             }
@@ -83,17 +87,35 @@ module cap(dzRing, isAft)
         }
 
         // Wire access
-        cylinder(h=M_INNER, d=D_VENT_INNER);
+        cylinder(h=isAft ? M_INNER : M_INNER + 2, d=D_VENT_INNER);
 
         ROTATE = isAft ? 30 : 0;
         WIDTH = isAft ? W_INSET + 2 : W_INSET;
         POS = isAft ? DZ_FORE_SUPPORT + H_COUPLER_PCB + COUPLER_PLASTIC_HEIGHT : M_INSET;
 
         rotate([0, 0, ROTATE]) {
-            // Brass inset - now PCB
             translate([-WIDTH/2, -50, POS - PCB_SLOP/2]) 
                 cube(size=[WIDTH, 100, H_COUPLER_PCB + PCB_SLOP]);
         }
+        if (!isAft) {
+            // Slot to hold the PCB
+            SLOT_W = W_INSET - 1.5;
+            intersection() {
+                translate([-SLOT_W/2, -50, -EPS])
+                    cube(size=[SLOT_W, 100, POS + PCB_SLOP/2 + H_COUPLER_PCB]);
+                cylinder(h=100, d=D_VENT);
+            }
+
+            // Slide in the brass tubes
+            translate([(D_VENT - D_TUBE)/2, 0, DEPTH-2])
+                cylinder(h=2 + EPS, d1=D_TUBE, d2=D_TUBE + 2);
+            translate([-(D_VENT - D_TUBE)/2, 0, DEPTH-2])
+                cylinder(h=2 + EPS, d1=D_TUBE, d2=D_TUBE + 2);
+
+            // knock out the inside for the pcb to slide in
+            translate([-W_INSET/2, -4, 0]) cube(size=[W_INSET, 8, 100]);
+        }
+
         if (isAft) {
             // cutout to fit the switch plate
             translate([-50, D_HOLDER/2, 0]) cube(size=[100, 100, dzRing + EPS]);
