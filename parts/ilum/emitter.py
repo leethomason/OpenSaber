@@ -32,11 +32,11 @@ nanopcb("emitter.txt", g, mat, PCB_DEPTH, DRILL_DEPTH,
 
 g.absolute()
 
-travel(g, mat, x=0, y=(D_VENT - D_M2)/2)
+travel(g, mat, x=0, y=(D_VENT - D_M2_HEAD)/2)
 g.move(z=0)
 hole(g, mat, CUT_DEPTH, d=D_M2)
 
-travel(g, mat, x=0, y=-(D_VENT - D_M2)/2)
+travel(g, mat, x=0, y=-(D_VENT - D_M2_HEAD)/2)
 g.move(z=0)
 hole(g, mat, CUT_DEPTH, d=D_M2)
 
