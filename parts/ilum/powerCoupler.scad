@@ -2,6 +2,9 @@ use <../shapes.scad>
 include <dim.scad>
 include <dimCoupler.scad>
 
+DRAW_0 = false;
+DRAW_1 = true;
+
 TOOTH_THETA = 3.0;
 EPS = 0.01;
 THETA_EPS = 1.0;
@@ -53,25 +56,37 @@ module coupler(teeth)
                 }
             }
         }
-        translate([(D_COUPLER - D_TUBE)/2, 0, -EPS]) cylinder(h=100, d=D_HOLDER);
-        translate([-(D_COUPLER - D_TUBE)/2, 0, -EPS]) cylinder(h=100, d=D_HOLDER);
     }
 }
 
-// 0
-difference() {
-    translate([0, 0, TOOTH_HEIGHT + TOOTH_BASE_H]) mirror([0, 0, -1]) coupler([[-90, 60], [90, 60]]);
-    rotate([0, 0, 90]) translate([R_COUPLER_MOUNT, 0, 0]) cylinder(h=100, d=D_M2);
-    rotate([0, 0, -90]) translate([R_COUPLER_MOUNT, 0, 0]) cylinder(h=100, d=D_M2);
+if (DRAW_0) {
+    difference() {
+        translate([0, 0, TOOTH_HEIGHT + TOOTH_BASE_H]) mirror([0, 0, -1]) coupler([[-90, 60], [90, 60]]);
+        rotate([0, 0, 90]) translate([R_COUPLER_MOUNT, 0, 0]) cylinder(h=100, d=D_M2);
+        rotate([0, 0, -90]) translate([R_COUPLER_MOUNT, 0, 0]) cylinder(h=100, d=D_M2);
+
+    }
 }
 
-// 1
-*difference() {
-    color("plum") coupler([[0, 120 - THETA_EPS], [180, 120 - THETA_EPS]]);
-    rotate([0, 0, 45]) translate([R_COUPLER_MOUNT, 0, 0]) cylinder(h=100, d=D_M2);
-    rotate([0, 0, 180 + 45]) translate([R_COUPLER_MOUNT, 0, 0]) cylinder(h=100, d=D_M2);
-    rotate([0, 0, -45]) translate([R_COUPLER_MOUNT, 0, 0]) cylinder(h=100, d=D_M2);
-    rotate([0, 0, 180 - 45]) translate([R_COUPLER_MOUNT, 0, 0]) cylinder(h=100, d=D_M2);
+if (DRAW_1) {
+    difference() {
+        color("plum") coupler([[0, 120 - THETA_EPS], [180, 120 - THETA_EPS]]);
+        rotate([0, 0, 45]) translate([R_COUPLER_MOUNT, 0, 0]) cylinder(h=100, d=D_M2);
+        rotate([0, 0, 180 + 45]) translate([R_COUPLER_MOUNT, 0, 0]) cylinder(h=100, d=D_M2);
+        rotate([0, 0, -45]) translate([R_COUPLER_MOUNT, 0, 0]) cylinder(h=100, d=D_M2);
+        rotate([0, 0, 180 - 45]) translate([R_COUPLER_MOUNT, 0, 0]) cylinder(h=100, d=D_M2);
+
+        translate([(D_COUPLER_OUTER - D_M2_HEAD)/2, 0, TOOTH_BASE_H]) 
+            cylinder(h=100, d=D_M2_HEAD + 0.5);
+        translate([-(D_COUPLER_OUTER - D_M2_HEAD)/2, 0, TOOTH_BASE_H]) 
+            cylinder(h=100, d=D_M2_HEAD + 0.5);
+
+        translate([(D_COUPLER_OUTER - D_M2_HEAD)/2, 0, -EPS]) 
+            cylinder(h=100, d=D_M2 + 0.2);
+        translate([-(D_COUPLER_OUTER - D_M2_HEAD)/2, 0, -EPS]) 
+            cylinder(h=100, d=D_M2 + 0.2);
+
+    }
 }
 
 *color("gray") {
