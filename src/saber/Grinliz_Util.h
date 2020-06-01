@@ -628,7 +628,13 @@ public:
 	
 	uint32_t remaining() const { return m_period - m_accum; }
 	uint32_t period() const { return m_period; }
-	void setPeriod(uint32_t period) { m_period = period; }
+
+	void setPeriod(uint32_t period) { m_period = period; m_scale = 1; }
+	void setScaledPeriod(float period) {
+		m_period = (period * SCALE);
+		m_scale = SCALE;
+	}
+
 	bool repeating() const { return m_repeating; }
 	void setRepeating(bool repeating) { m_repeating = repeating; }
 	bool enabled() const { return m_enable; }
@@ -645,7 +651,9 @@ public:
 	static bool Test();
 
 private:
+	const uint32_t SCALE = 16;
 	uint32_t m_accum = 0;
+	uint32_t m_scale = 1;
 	uint32_t m_period;
 	bool m_repeating;
 	bool m_enable;

@@ -1,9 +1,11 @@
 Issues:
 
-- less motion sensitivity
+- set max swing (so it isn't over accumulating)
 - sensitivity up and down
+- test out filtering mag but not speed vectors - may not need decay code
 
 Fixed
+x less motion sensitivity
 x clipping / limiting in mixer (maybe 64 bit okay??)
 x Crackle in hum sound (how??)
 x correct sound font for leia

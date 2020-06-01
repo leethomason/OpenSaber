@@ -661,7 +661,8 @@ int AnimateProp::tick(uint32_t delta, int* target)
 int Timer2::tick(uint32_t delta)
 {
 	int fires = 0;
-	m_accum += delta;
+	m_accum += delta * m_scale;
+
 	if (m_enable && delta && m_period && (m_accum >= m_period)) {
 		fires = m_accum / m_period;
 		if (m_repeating) {

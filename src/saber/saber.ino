@@ -89,7 +89,7 @@ BladePWM    bladePWM;
 Tester      tester;
 Swing       swing(10);
 AverageSample<Vec3<int32_t>, Vec3<int32_t>, 8> averageAccel(Vec3<int32_t>(0, 0, 0));
-Timer2      swingLogTimer(200);
+Timer2      swingLogTimer(10000); // swingLogTimer(200);
 
 // Sometimes the magnemometer needs a lot of filtering.
 #ifdef FILTER_MAG_X
