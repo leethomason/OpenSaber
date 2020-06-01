@@ -91,6 +91,17 @@ Swing       swing(10);
 AverageSample<Vec3<int32_t>, Vec3<int32_t>, 8> averageAccel(Vec3<int32_t>(0, 0, 0));
 Timer2      swingLogTimer(200);
 
+// Sometimes the magnemometer needs a lot of filtering.
+#ifdef FILTER_MAG_X
+AverageSample<int32_t, int32_t, FILTER_MAG_X> aveMagX(0);
+#endif
+#ifdef FILTER_MAG_Y
+AverageSample<int32_t, int32_t, FILTER_MAG_Y> aveMagY(0);
+#endif
+#ifdef FILTER_MAG_Z
+AverageSample<int32_t, int32_t, FILTER_MAG_Z> aveMagZ(0);
+#endif
+
 #ifdef SABER_NUM_LEDS
 DotStar dotstar;                    // Hardware controller.
 #endif
@@ -492,6 +503,16 @@ void processAccel(uint32_t msec, uint32_t delta)
         // int nMag = n > 0 ? n : 1;
         // Keep waffling on this...assuming when blade is lit this will pretty
         // consistently get hit every 10ms.
+
+        #ifdef FILTER_MAG_X
+        aveMagX.push(magData.x); magData.x = aveMagX.average();
+        #endif
+        #ifdef FILTER_MAG_Y
+        aveMagY.push(magData.y); magData.y = aveMagY.average();
+        #endif
+        #ifdef FILTER_MAG_Z
+        aveMagZ.push(magData.z); magData.z = aveMagZ.average();
+        #endif
 
         swing.push(magData, accelMag.getMagMin(), accelMag.getMagMax());
         float dot = swing.dotOrigin();

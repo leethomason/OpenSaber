@@ -4,8 +4,8 @@ use <../inset.scad>
 include <dim.scad>
 include <dimCoupler.scad>
 $fn = 80;
-DRAW_AFT = true;
-DRAW_FORE = false;
+DRAW_AFT = false;
+DRAW_FORE = true;
 DRAW_SWITCH_HOLDER = false;
 DRAW_COUPLER = false;    // debugging
 
@@ -22,6 +22,7 @@ DOTSTAR_PITCH = 7;
 DOTSTAR_STRIP_XZ = 12.4;
 DOTSTAR_Z = 73.0 - 21.0;
 KEYJOINT_T = 5.0;
+COUPLER_ANGLE = -10.0;
 
 module ring(dz)
 {
@@ -179,7 +180,8 @@ if (DRAW_FORE) {
                     cylinder(h=FRONT, d=D_INNER);
                     intersection() {
                         cylinder(h=500.0, d=D_VENT_INNER);
-                        translate([-50, 0, FRONT]) polygonYZ(h=100, points=[[-4,0], [-2,2], [2,2], [4,0]]);
+                        rotate([0, 0, COUPLER_ANGLE])
+                            translate([-50, 0, FRONT]) polygonYZ(h=100, points=[[-4,0], [-2,2], [2,2], [4,0]]);
                     }
                 }
                 SUPPORT = 6.0;
@@ -214,8 +216,10 @@ if (DRAW_FORE) {
         translate([-W_ACCESS/2, -D_INNER/2, M_JOINT]) cube(size=[W_ACCESS, 2.5, 22]);
 
         // Holes for coupler mounting
-        translate([D_COUPLER_OUTER/2 - D_M2_HEAD/2, 0, M_COUPLER_START - 10]) cylinder(h=10, d=D_M2);
-        translate([-(D_COUPLER_OUTER/2 - D_M2_HEAD/2), 0, M_COUPLER_START - 10]) cylinder(h=10, d=D_M2);
+        rotate([0, 0, COUPLER_ANGLE]) {
+            translate([D_COUPLER_OUTER/2 - D_M2_HEAD/2, 0, M_COUPLER_START - 10]) cylinder(h=10, d=D_M2);
+            translate([-(D_COUPLER_OUTER/2 - D_M2_HEAD/2), 0, M_COUPLER_START - 10]) cylinder(h=10, d=D_M2);
+        }
     }
 }
 
