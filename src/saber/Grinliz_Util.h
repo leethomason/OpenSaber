@@ -529,16 +529,22 @@ class AverageSample
 {
 public:
     AverageSample(TYPE initialValue) {
-        for (int i = 0; i < N; ++i) m_sample[i] = initialValue;
+        for (int i = 0; i < N; ++i) {
+			m_sample[i] = initialValue;
+			m_total += initialValue;
+		}
         m_average = initialValue;
-        m_valid = true;
     }
 
     void push(TYPE value) {
+		m_total -= m_sample[m_pos];
         m_sample[m_pos] = value;
+		m_total += value;
+
         m_pos++;
-        if (m_pos == N) m_pos = 0;
-        m_valid = false;
+        if (m_pos == N) 
+			m_pos = 0;
+		m_average = m_total / N;
     }
 
 	void fill(TYPE value) {
@@ -546,24 +552,13 @@ public:
 			push(value);
 	}
 
-    TYPE average() const {
-        if (m_valid == false) {
-            SUMTYPE total = 0;
-            for (int i = 0; i < N; ++i) {
-                total += m_sample[i];
-            }
-            m_average = total / N;
-            m_valid = true;
-        }
-        return (TYPE) m_average;
-    }
-
+    TYPE average() const { return m_average; }
     int numSamples() const { return N; }
 	bool origin() const { return m_pos == 0; }
 
 private:
-    mutable SUMTYPE m_average;
-    mutable bool m_valid = false;
+    SUMTYPE m_average;
+	SUMTYPE m_total = 0;
     int m_pos = 0;
     TYPE m_sample[N];
 };
@@ -631,7 +626,7 @@ public:
 
 	void setPeriod(uint32_t period) { m_period = period; m_scale = 1; }
 	void setScaledPeriod(float period) {
-		m_period = (period * SCALE);
+		m_period = int(period * SCALE);
 		m_scale = SCALE;
 	}
 
