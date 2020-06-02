@@ -335,10 +335,15 @@ bool GrinlizLSM303::recalibrateMag()
         int errQueue = b.x + b.y + b.z;
 
         if (errQueue < err) {
-            Log.p("Mag recalibrated.").eol();
+            m_min = m_minQueued;
+            m_max = m_maxQueued;
+            Log.p("Mag recalibrated. ").v3(m_min).v3(m_max).eol();
             // Average out so it doesn't go wobbly, but we bring in the range.
-            m_min = (m_min + m_minQueued) / 2;
-            m_max = (m_max + m_maxQueued) / 2;
+            //m_min = (m_min + m_minQueued) / 2;
+            //m_max = (m_max + m_maxQueued) / 2;
+        }
+        else {
+            Log.p("Mag re-calibration discarded.").eol();
         }
         // Either:
         // - we had better data, and now the Queued needs reset

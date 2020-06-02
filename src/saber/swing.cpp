@@ -71,9 +71,14 @@ void Swing::push(const Vec3<int32_t>& x, const Vec3<int32_t>& mMin, const Vec3<i
 
     // sin(t) = t, for small t (in radians)
     Vec3<float> c = b - a;
-    float dist = sqrtf(c.x * c.x + c.y * c.y + c.z * c.z);
-
-    m_speed = dist * m_dtINV;
+    float square = c.x * c.x + c.y * c.y + c.z * c.z;
+    if (square > 0.0001f) {
+        float dist = sqrtf(square);
+        m_speed = dist * m_dtINV;
+    }
+    else {
+        m_speed = 0.0f;
+    }
     m_prevPosNorm = b;
 
     if (!m_origin.isZero()) {
@@ -92,34 +97,30 @@ void Swing::setOrigin()
 
 bool Swing::test()
 {
-    // Test filtering at 45deg / second
-    static const Vec3<int32_t> mMin = {-100, -200, -300};
-    static const Vec3<int32_t> mMax = { 300,  200,  100};
+    static const Vec3<int32_t> mMin = { -100, -200, -300 };
+    static const Vec3<int32_t> mMax = { 300,  200,  100 };
+    static const Vec3<int32_t> delta = mMax - mMin;
+    static const Vec3<int32_t> half = delta / 2;
 
-    static const Vec3<int32_t> x0 = {300,   0, -100};    // (1, 0, 0)
-    static const Vec3<int32_t> x1 = {242, 142, -100};    // (0.71, 0.71, 0)
+    static const float speedDeg = 3.1459f / 2.f;
+    Swing swing(10);
 
-    static const float speedDeg = 3.1459f / 4.f;
-
-    Swing swing(100);
-    //Log.p("Target speed=").p(speedDeg).eol();
-
-    for(int i=0; i<=10; ++i) {
-        Vec3<int32_t> x;
-        x.x = x0.x + i * (x1.x - x0.x) / 10;
-        x.y = x0.y + i * (x1.y - x0.y) / 10;
-        x.z = x0.z + i * (x1.z - x0.z) / 10;
-
-        swing.push(x, mMin, mMax);
-        //Log.p("Swing speed (").p(i).p(")=").p(swing.speed()).eol();
-        TEST_IS_TRUE(swing.speed() >= 0 && swing.speed() <= speedDeg * 1.2f);
-
-        if (i == 0)
+    // 90 deg/second
+    for (int i = 0; i < 100; ++i) {
+        float x = cosf(speedDeg * i / 100.0f);
+        float y = sinf(speedDeg * i / 100.0f);
+        if (i==10)
             swing.setOrigin();
+
+        Vec3<int32_t> v;
+        v.x = int32_t(mMin.x + x * half.x + half.x);
+        v.y = int32_t(mMin.y + y * half.y + half.y);
+        v.z = int32_t(mMin.z + half.z);
+
+        swing.push(v, mMin, mMax);
     }
-    TEST_IS_TRUE(swing.speed() > speedDeg * 0.8f && swing.speed() < speedDeg * 1.2f);
-    // We won't get to 0.71 because of filtering.
-    TEST_IS_TRUE(swing.dotOrigin() > 0.71f && swing.dotOrigin() < 0.80f);
+    TEST_IS_TRUE(swing.speed() >= speedDeg * 0.8f && swing.speed() <= speedDeg * 1.2f);
+    TEST_IS_TRUE(swing.dotOrigin() > -0.3f && swing.dotOrigin() < 0.3f);
 
     return true;
 }
