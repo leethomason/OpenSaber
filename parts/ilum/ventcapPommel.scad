@@ -67,7 +67,7 @@ module cap(dzRing)
         cylinder(h=M_INNER, d=D_VENT_INNER);
 
         ROTATE = 30;
-        WIDTH = W_INSET + 2;
+        WIDTH = W_INSET + 4;
         POS = DZ_FORE_SUPPORT + H_COUPLER_PCB + COUPLER_PLASTIC_HEIGHT;
 
         rotate([0, 0, ROTATE]) {
