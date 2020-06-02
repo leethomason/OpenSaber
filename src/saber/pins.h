@@ -59,7 +59,7 @@
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
+#define SERIAL_DEBUG 				1
 #define SABER_MODEL 				SABER_MODEL_DUTCHESS
 #define SABER_SUB_MODEL				
 // ----------------------------------
@@ -767,10 +767,14 @@
 	#define SABER_UI_COUNT				4
 	#define SABER_UI_BRIGHTNESS	    	16
 	#define SABER_UI_IDLE_MEDITATION
-	#define SABER_UI_COLOR_WHEEL
+	// #define SABER_UI_COLOR_WHEEL		feels awkward on this saber
 	#define VOLTMETER_TUNE				1016
 
-	#define FILTER_MAG_Y	8
+	// Does not need to be power of 2.
+	// multiply by 10 to get ms width of filter
+	#define FILTER_MAG_X	16
+	#define FILTER_MAG_Y	16
+	#define FILTER_MAG_Z	16
 
 	#define ID_STR "Dutchess Cree XPE2 RGB"
 

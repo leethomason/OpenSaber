@@ -44,8 +44,6 @@ SFX::SFX(I2SAudioDriver *driver, const Manifest& manifest) :
     m_retractTime = 1000;
     m_volume = 64;
     m_smoothMode = false;
-
-    m_swingDecay.setScaledPeriod(1.5f);
     m_blend256 = 0;
 
     scanFiles();
@@ -303,25 +301,7 @@ void SFX::process(int bladeMode, uint32_t delta, bool* still)
         // 256 or 0 at steady state.
         volumeEnvelope.tick(delta);
 
-        int read = sm_swingToVolume(m_speed);
-        int nTick = m_swingDecay.tick(delta);
-
-        m_swing -= nTick;
-        if (m_swing < 0) m_swing = 0;    
-        m_swingTarget -= nTick;
-        if (m_swingTarget < 0) m_swingTarget = 0;
-
-        m_swingTarget = glMax(read, m_swingTarget);
-        if(m_swingTarget > m_swing) {
-            m_swing += nTick * 2;   // because we removed it above...
-            if (m_swing > m_swingTarget) m_swing = m_swingTarget;
-        }
-        int swing = m_swing;
-
-        /*
-        int swing = m_swing = glMax(read, m_swing);
-        */
-
+        int swing = sm_swingToVolume(m_speed);
         int hum = 256 - swing * 192 / 256;
 
         if (swing == 0) {

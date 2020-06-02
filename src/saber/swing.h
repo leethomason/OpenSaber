@@ -25,32 +25,6 @@
 #include <stdint.h>
 #include "Grinliz_Util.h"
 
-class Filter
-{
-public:
-    Filter();
-
-    // Assume constant time. Poor assumption, but variable time
-    // is tricky to filter. Especially since the sample time
-    // isn't known.
-    void push(const Vec3<int32_t> sample);
-    void fill(const Vec3<int32_t> sample);
-
-    static const int N = 4;
-    static const int SHIFT = 2;
-
-    // Calculate t (which is an average) and x/y/z which
-    // are just added; so they are scaled by N.
-    void calc(Vec3<int32_t> *vec3);
-
-private:
-    bool cached = false;
-    int current = 0;
-    Vec3<int32_t> ave;
-    Vec3<int32_t> sample[N];
-};
-
-
 class Swing
 {
 public:
@@ -79,5 +53,4 @@ private:
     float m_dotOrigin;
     Vec3<float> m_prevPosNorm;
     Vec3<float> m_origin;
-    Filter m_filter;
 };

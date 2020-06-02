@@ -89,18 +89,12 @@ BladePWM    bladePWM;
 Tester      tester;
 Swing       swing(10);
 AverageSample<Vec3<int32_t>, Vec3<int32_t>, 8> averageAccel(Vec3<int32_t>(0, 0, 0));
-Timer2      swingLogTimer(10000); // swingLogTimer(200);
 
 // Sometimes the magnemometer needs a lot of filtering.
-#ifdef FILTER_MAG_X
-AverageSample<int32_t, int32_t, FILTER_MAG_X> aveMagX(0);
-#endif
-#ifdef FILTER_MAG_Y
-AverageSample<int32_t, int32_t, FILTER_MAG_Y> aveMagY(0);
-#endif
-#ifdef FILTER_MAG_Z
-AverageSample<int32_t, int32_t, FILTER_MAG_Z> aveMagZ(0);
-#endif
+// {x, y, z} -> {value, min, max}
+AverageSample<Vec3<int32_t>, Vec3<int32_t>, FILTER_MAG_X> aveMagX(0);
+AverageSample<Vec3<int32_t>, Vec3<int32_t>, FILTER_MAG_Y> aveMagY(0);
+AverageSample<Vec3<int32_t>, Vec3<int32_t>, FILTER_MAG_Z> aveMagZ(0);
 
 #ifdef SABER_NUM_LEDS
 DotStar dotstar;                    // Hardware controller.
@@ -497,6 +491,8 @@ void processAccel(uint32_t msec, uint32_t delta)
     if (accelMag.readMag(&magData, 0) > 0) {
         static ProfileData magProfData("processMag");
         ProfileBlock magProfBlock(&magProfData);
+        static int32_t lastLog = 0;
+
         // The accelerometer and magnemometer are both clocked at 100Hz.
         // The swing is set up for constant data; assume n is the same for both.
         // Hopefully we keep a constant enough rate this doesn't matter.
@@ -504,30 +500,26 @@ void processAccel(uint32_t msec, uint32_t delta)
         // Keep waffling on this...assuming when blade is lit this will pretty
         // consistently get hit every 10ms.
 
-        #ifdef FILTER_MAG_X
-        aveMagX.push(magData.x); magData.x = aveMagX.average();
-        #endif
-        #ifdef FILTER_MAG_Y
-        aveMagY.push(magData.y); magData.y = aveMagY.average();
-        #endif
-        #ifdef FILTER_MAG_Z
-        aveMagZ.push(magData.z); magData.z = aveMagZ.average();
-        #endif
+        // scale everything to divide more smoothly
+        static const int32_t SCALE = 4;
+        const Vec3<int32_t>& magMin = accelMag.getMagMin();
+        const Vec3<int32_t>& magMax = accelMag.getMagMax();
 
-        swing.push(magData, accelMag.getMagMin(), accelMag.getMagMax());
+        aveMagX.push(Vec3<int32_t>(magData.x * SCALE, magMin.x * SCALE, magMax.x * SCALE));
+        aveMagY.push(Vec3<int32_t>(magData.y * SCALE, magMin.y * SCALE, magMax.y * SCALE));
+        aveMagZ.push(Vec3<int32_t>(magData.z * SCALE, magMin.z * SCALE, magMax.z * SCALE));
+
+        Vec3<int32_t> magFiltered(aveMagX.average().x, aveMagY.average().x, aveMagZ.average().x);
+        Vec3<int32_t> minFiltered(aveMagX.average().y, aveMagY.average().y, aveMagZ.average().y);
+        Vec3<int32_t> maxFiltered(aveMagX.average().z, aveMagY.average().z, aveMagZ.average().z);
+
+        swing.push(magFiltered, minFiltered, maxFiltered);
         float dot = swing.dotOrigin();
         sfx.sm_setSwing(swing.speed(), (int)((1.0f + dot)*128.5f));
 
-        if (swingLogTimer.tick(delta)) {
-            Vec3<int32_t> vMin = accelMag.getMagMin();
-            Vec3<int32_t> vMax = accelMag.getMagMax();
-            Vec3<int32_t> vDelta = vMax - vMin;
-
-            float x = float(magData.x - vMin.x) / vDelta.x;
-            float y = float(magData.y - vMin.y) / vDelta.y;
-            float z = float(magData.z - vMin.z) / vDelta.z;
-
-            Log.p("mag=").v3(x, y, z).p(" delta=").v3(vDelta).p(" dot=").p(dot).p(" speed=").p(swing.speed()).eol();
+        if (msec - lastLog > 300) {
+            Log.p("swing=").p(swing.speed()).p(" dot=").p(dot).p(" val/min/max ").v3(magFiltered).v3(minFiltered).v3(maxFiltered).eol();
+            lastLog = msec;
         }
     }
     if (bladeState.state() == BLADE_ON) {

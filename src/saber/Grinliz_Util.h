@@ -631,7 +631,7 @@ public:
 
 	void setPeriod(uint32_t period) { m_period = period; m_scale = 1; }
 	void setScaledPeriod(float period) {
-		m_period = (period * SCALE);
+		m_period = int(period * SCALE);
 		m_scale = SCALE;
 	}
 

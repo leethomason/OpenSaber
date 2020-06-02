@@ -3,6 +3,8 @@ Issues:
 - set max swing (so it isn't over accumulating)
 - sensitivity up and down
 - test out filtering mag but not speed vectors - may not need decay code
+- test button up on color wheel
+
 
 Fixed
 x less motion sensitivity

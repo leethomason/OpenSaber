@@ -23,48 +23,6 @@
 #include "swing.h"
 #include <math.h>
 
-Filter::Filter()
-{
-    for(int i=0; i<N; ++i) {
-        sample[i].setZero();
-    }
-}
-
-void Filter::fill(const Vec3<int32_t> v)
-{
-    for(int i=0; i<N; ++i) {
-        sample[i] = v;
-    }
-    current = 0;
-    cached = true;
-    ave = v;
-}
-
-void Filter::push(const Vec3<int32_t> v)
-{
-    sample[current] = v;
-    current = (current + 1) % N;
-    cached = false;
-}
-
-void Filter::calc(Vec3<int32_t>* vec3)
-{
-    if (!cached) {
-        Vec3<int32_t> total;
-        total.setZero();
-
-        for (int i = 0; i < N; ++i) {
-            total += sample[i];
-        }
-        ave.x = total.x >> SHIFT;
-        ave.y = total.y >> SHIFT;
-        ave.z = total.z >> SHIFT;
-        cached = true;
-    }
-    *vec3 = ave;
-}
-
-
 Swing::Swing(int msecPerSample)
 {
     m_speed = 0;
@@ -102,18 +60,13 @@ void Swing::push(const Vec3<int32_t>& x, const Vec3<int32_t>& mMin, const Vec3<i
         m_speed = 0;
         m_prevPosNorm = normalize(x, mMin, mMax);
         Log.p("Swing initial push: ").v3(m_prevPosNorm.x, m_prevPosNorm.y, m_prevPosNorm.z).eol();
-        m_filter.fill(x);
         return;
     }
-
-    m_filter.push(x);
-    Vec3<int32_t> newPos;
-    m_filter.calc(&newPos);
 
     // But we need normals.
     // This is a lot of math for our poor little microprocessor.
     Vec3<float> a = m_prevPosNorm;
-    Vec3<float> b = normalize(newPos, mMin, mMax);
+    Vec3<float> b = normalize(x, mMin, mMax);
     //Log.p("in: ").v3(b.x, b.y, b.z).eol();
 
     // sin(t) = t, for small t (in radians)
