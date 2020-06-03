@@ -88,7 +88,7 @@ CMDParser   cmdParser(&saberDB, manifest);
 BladePWM    bladePWM;
 Tester      tester;
 Swing       swing(10);
-AverageSample<Vec3<int32_t>, Vec3<int32_t>, 8> averageAccel(Vec3<int32_t>(0, 0, 0));
+AverageSample<Vec3<int32_t>, Vec3<int32_t>, 12> averageAccel(Vec3<int32_t>(0, 0, 0));
 
 // Sometimes the magnemometer needs a lot of filtering.
 AverageSample<int32_t, int32_t, FILTER_MAG_X> aveMagX(0);
@@ -430,8 +430,8 @@ void processColorWheel(bool commitChange)
 {
     if (uiMode.mode() == UIMode::COLOR_WHEEL) {
         Vec3<int32_t> ave = averageAccel.average();
-        FixedNorm x(ave[ACCEL_NORMAL_BUTTON], GrinlizLSM303::DIV);
-        //FixedNorm y(ave[ACCEL_PERP_BUTTON], GrinlizLSM303::DIV);
+        //FixedNorm x(ave[ACCEL_NORMAL_BUTTON], GrinlizLSM303::DIV);
+        FixedNorm x(ave[ACCEL_PERP_BUTTON], GrinlizLSM303::DIV);
 
         if (x < 0)
             x = 0;
@@ -491,6 +491,7 @@ void processAccel(uint32_t msec, uint32_t delta)
         static ProfileData magProfData("processMag");
         ProfileBlock magProfBlock(&magProfData);
         static int32_t lastLog = 0;
+        static int burstLog = 0;
 
         // The accelerometer and magnemometer are both clocked at 100Hz.
         // The swing is set up for constant data; assume n is the same for both.
@@ -515,9 +516,16 @@ void processAccel(uint32_t msec, uint32_t delta)
         float dot = swing.dotOrigin();
         sfx.sm_setSwing(swing.speed(), (int)((1.0f + dot)*128.5f));
 
-        if (msec - lastLog > 300) {
-            Log.p("swing=").p(swing.speed()).p(" dot=").p(dot).p(" val/min/max ").v3(magAve).v3(magMin).v3(magMax).eol();
+        static const int BURST = 5;
+        if (msec - lastLog > 500)
+            burstLog = BURST;
+        if (burstLog) {
+            Log.p(burstLog == BURST ? "--" : "  ")
+                .p("t=").p(millis()%1000).p(" swing=").p(swing.speed())
+                .p(" dot=").p(dot)
+                .p(" val/min/max ").v3(magAve).v3(magMin).v3(magMax).eol();
             lastLog = msec;
+            burstLog--;
         }
     }
     if (bladeState.state() == BLADE_ON) {
@@ -565,7 +573,6 @@ void processAccel(uint32_t msec, uint32_t delta)
                     {
                         Log.p("Impact. g=").p(sqrt(g2)).eol();
                         lastImpactTime = msec;
-                        // lastMotionTime = msec;
                     }
                 }
             }
@@ -575,7 +582,6 @@ void processAccel(uint32_t msec, uint32_t delta)
                 if (sound)
                 {
                     Log.p("Motion. g=").p(sqrt(g2)).eol();
-                    // lastMotionTime = msec;
                 }
             }
         }
