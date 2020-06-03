@@ -77,7 +77,7 @@ private:
     // swing on quickly. But after that, recalibrate should really have good 
     // data. So 2 constants: INIT_T and WARM_T
     static const int INIT_T = 100;  
-    static const int WARM_T = 400;
+    static const int WARM_T = 200;
 
     Vec3<int32_t> m_min, m_max;
     Vec3<int32_t> m_minQueued, m_maxQueued;

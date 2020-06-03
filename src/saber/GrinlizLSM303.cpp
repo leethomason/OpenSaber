@@ -202,8 +202,8 @@ bool GrinlizLSM303::begin()
 
     m_min.set(INT_MAX, INT_MAX, INT_MAX);
     m_max.set(INT_MIN, INT_MIN, INT_MIN);
-    m_minQueued = m_min;
-    m_maxQueued = m_max;
+    m_minQueued.set(INT_MAX, INT_MAX, INT_MAX);
+    m_maxQueued.set(INT_MIN, INT_MIN, INT_MIN);
     return (whoAmIA == 0x33) && (whoAmIM == 0x40);
 }
 
@@ -327,6 +327,13 @@ int GrinlizLSM303::readInner(Vec3<int32_t>* rawData, Vec3<float>* data, int n)
 
 bool GrinlizLSM303::recalibrateMag()
 {
+    /*Log.p("recalibrateMag()").p(" queue=")
+        .p(dataValid(WARM_T, m_min, m_max) ? 1 : 0)
+        .p(" current=")
+        .p(dataValid(WARM_T, m_minQueued, m_maxQueued) ? 1 : 0)
+        .v3(m_min).v3(m_max)
+        .eol(); */
+
     if (dataValid(WARM_T, m_minQueued, m_maxQueued) && dataValid(INIT_T, m_min, m_max)) {
         Vec3<int32_t> a = m_max - m_min;
         int err = a.x + a.y + a.z;

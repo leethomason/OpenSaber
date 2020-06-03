@@ -88,6 +88,7 @@ CMDParser   cmdParser(&saberDB, manifest);
 BladePWM    bladePWM;
 Tester      tester;
 Swing       swing(10);
+int         swingVol;
 AverageSample<Vec3<int32_t>, Vec3<int32_t>, 12> averageAccel(Vec3<int32_t>(0, 0, 0));
 
 // Sometimes the magnemometer needs a lot of filtering.
@@ -514,22 +515,27 @@ void processAccel(uint32_t msec, uint32_t delta)
 
         swing.push(magAve, magMin, magMax);
         float dot = swing.dotOrigin();
-        sfx.sm_setSwing(swing.speed(), (int)((1.0f + dot)*128.5f));
+        sfx.sm_setSwing(swing.speed(), (int)((1.0f + dot)*128.0f));
 
+        /*
         static const int BURST = 5;
         if (msec - lastLog > 500)
             burstLog = BURST;
         if (burstLog) {
+            Vec3<int32_t> range = magMax - magMin;
             Log.p(burstLog == BURST ? "--" : "  ")
                 .p("t=").p(millis()%1000)
                 .p(" swing=").p(swing.speed())
+                .p(" swingVol=").p(swingVol)
                 //.p(" pos=").v3(swing.pos()).p(" origin=").v3(swing.origin())
-                //.p(" dot=").p(dot)
-                .p(" val/min/max ").v3(magAve).v3(magMin).v3(magMax)
+                .p(" dot=").p(dot)
+                //.p(" val/min/max ").v3(magAve).v3(magMin).v3(magMax)
+                .p(" val/range ").v3(magAve - magMin).v3(range)
                 .eol();
             lastLog = msec;
             burstLog--;
         }
+        */
     }
     if (bladeState.state() == BLADE_ON) {
         for (int i = 0; i < n; ++i)
@@ -622,14 +628,10 @@ void loop() {
         bladeState.process(&bladePWM, bladeFlash, millis());
     }
     
-    bool still = true;
-    sfx.process(bladeState.state(), delta, &still);
-    if (still) {
+    sfx.process(bladeState.state(), delta, &swingVol);
+    if (swingVol == 0) {
+        accelMag.recalibrateMag();
         swing.setOrigin();
-        bool recalibrated = accelMag.recalibrateMag();
-        if (recalibrated) {
-            swing.recalibrate();
-        }
     }
 
     if (vbatTimer.tick(delta)) {

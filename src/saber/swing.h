@@ -40,9 +40,8 @@ public:
     // Gets the dot product of current and origin, which is essentially the
     // mix betwen swing sounds. Returns -1 to 1    
     float dotOrigin() const { return m_dotOrigin; }
-    void recalibrate();
 
-    const Vec3<float>& pos() const { return m_prevPosNorm; }
+    const Vec3<float>& pos() const { return m_normal; }
     const Vec3<float>& origin() const { return m_origin; }
 
     static bool test();
@@ -52,9 +51,9 @@ private:
 
     bool m_init;
     float m_speed;
-    float m_dtINV;
     float m_dotOrigin;
-    Vec3<float> m_prevPosNorm;
+    Vec3<float> m_normal;
     Vec3<float> m_origin;
     Vec3<int32_t> m_prevSample;
+    AverageSample<float ,float, 8> swingAve;
 };

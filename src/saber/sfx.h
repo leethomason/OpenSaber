@@ -63,7 +63,7 @@ public:
 	bool playSound(const char *sfx);
 	void stopSound();
 
-	void process(int bladeMode, uint32_t delta, bool* still);
+	void process(int bladeMode, uint32_t delta, int* swingVol);
 
 	void setVolume(int v);
 	int getVolume() const { return m_volume; }

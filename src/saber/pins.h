@@ -59,7 +59,7 @@
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
+#define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_DUTCHESS
 #define SABER_SUB_MODEL				
 // ----------------------------------
@@ -987,6 +987,7 @@ enum {
 
 static const float DEFAULT_G_FORCE_MOTION = 1.3f;
 static const float DEFAULT_G_FORCE_IMPACT = 3.0f;	// Was 2.3. Testing.
+static const float SWING_MAX = 8.0f;				// careful changing this - an array is indexed
 
 #endif // PINS_HEADER
 

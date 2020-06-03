@@ -23,22 +23,13 @@
 #include "swing.h"
 #include <math.h>
 
-Swing::Swing(int msecPerSample)
+Swing::Swing(int msecPerSample) : swingAve(0)
 {
     m_speed = 0;
     m_dotOrigin = 0;
     m_origin.setZero();
-    m_prevPosNorm.setZero();
+    m_normal.setZero();
     m_init = false;
-    m_dtINV = 1000.0f / msecPerSample;
-}
-
-void Swing::recalibrate()
-{
-    m_init = false; 
-    m_speed = 0; 
-    m_dotOrigin = 0;
-    Log.p("Swing.recalibrate()").eol();
 }
 
 Vec3<float> Swing::normalize(const Vec3<int32_t> v, const Vec3<int32_t> &mMin, const Vec3<int32_t> &mMax)
@@ -59,40 +50,23 @@ void Swing::push(const Vec3<int32_t>& x, const Vec3<int32_t>& mMin, const Vec3<i
         m_init = true;
         m_speed = 0;
         m_prevSample = x;
-        m_prevPosNorm = normalize(x, mMin, mMax);
-        Log.p("Swing initial push: ").v3(m_prevPosNorm.x, m_prevPosNorm.y, m_prevPosNorm.z).eol();
+        m_normal = normalize(x, mMin, mMax);
+        m_origin.set(1, 0, 0);
+        Log.p("Swing initial push: ").v3(m_normal.x, m_normal.y, m_normal.z).eol();
         return;
     }
 
-    // But we need normals.
-    // This is a lot of math for our poor little microprocessor.
-    Vec3<float> a = m_prevPosNorm;
-    Vec3<float> b = normalize(x, mMin, mMax);
-    //Log.p("in: ").v3(b.x, b.y, b.z).eol();
+    static const float MULT = 200.0f;
 
-    // sin(t) = t, for small t (in radians)
-    Vec3<float> c = b - a;
-    float square = c.x * c.x + c.y * c.y + c.z * c.z;
-    if (square > 0.0001f) {
-        float dist = sqrtf(square);
-        m_speed = dist * m_dtINV;
-    }
-    else {
-        m_speed = 0.0f;
-    }
-    m_prevPosNorm = b;
-
-    if (!m_origin.isZero()) {
-        m_dotOrigin = m_origin.x * b.x + m_origin.y * b.y + m_origin.z * b.z;
-    }
+    m_normal = normalize(x, mMin, mMax);
+    m_dotOrigin = m_normal.x * m_origin.x + m_normal.y * m_origin.y + m_normal.z * m_origin.z;
 
     Vec3<int32_t> dVec = x - m_prevSample;
-    int32_t dScalar = glAbs(dVec.x) + glAbs(dVec.y) + glAbs(dVec.z);
-    Vec3<int32_t> vecRange = mMax - mMin;
-    int32_t dRange = glAbs(vecRange.x) + glAbs(vecRange.y) + glAbs(vecRange.z);
+    Vec3<int32_t> r = mMax - mMin;
 
-    m_speed = 500.0f * dScalar / float(dRange);
-
+    float speed = MULT * glAbs(dVec.x) / r.x + MULT * glAbs(dVec.y) / r.y + MULT * glAbs(dVec.z) / r.z;
+    swingAve.push(glMin(speed, SWING_MAX));
+    m_speed = swingAve.average();
     m_prevSample = x;
 }
 
@@ -100,7 +74,7 @@ void Swing::push(const Vec3<int32_t>& x, const Vec3<int32_t>& mMin, const Vec3<i
 void Swing::setOrigin()
 {
     if (m_init) {
-        m_origin = m_prevPosNorm;
+        m_origin = m_normal;
     }
 }
 

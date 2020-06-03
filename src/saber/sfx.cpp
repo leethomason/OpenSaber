@@ -162,7 +162,7 @@ void SFX::playMotionTracks()
     }
     m_driver->play(m_sfxType[t0].start + offset, true, CHANNEL_MOTION_0);
     m_driver->play(m_sfxType[t1].start + offset, true, CHANNEL_MOTION_1);
-    //Log.p("playMotionTracks track=").p(offset).eol();
+    Log.p("playMotionTracks track=").p(offset).eol();
 }
 
 bool SFX::playSound(int sound, int mode, int channel)
@@ -270,32 +270,16 @@ bool SFX::sm_playEvent(int sfx)
 
 int SFX::sm_swingToVolume(float radPerSec)
 {
-    //static const float STILL = 3.0f;
-    //static const float FAST  = 8.0f;
-
     static const int16_t VOLUME[9] = {
         0, 0, 0, 8, 32, 64, 128, 256, 
         255
     };
-    if (radPerSec >= 8.0f) 
+    if (radPerSec >= SWING_MAX) 
         return 256;
 
     int low = (int)radPerSec;
     int fraction = int(1024.0 * (radPerSec - low));
     return lerp1024(VOLUME[low], VOLUME[low+1], fraction);
-
-    /*
-    FixedNorm motionFraction = 0;
-    if (radPerSec >= FAST) {
-        motionFraction = 1;
-    }
-    else if (radPerSec > STILL) {
-        motionFraction = (radPerSec - STILL) / (FAST - STILL);
-    }
-    int swing = motionFraction.scale(256);
-    // Log.p("rad/sec=").p(radPerSec).p(" motionFraction=").p(motionFraction.toFloat()).p(" swing=").p(swing).eol();
-    return swing;
-    */
 }
 
 int SFX::scaleVolume(int v) const
@@ -307,7 +291,7 @@ int SFX::scaleVolume(int v) const
 }
 
 
-void SFX::process(int bladeMode, uint32_t delta, bool* still)
+void SFX::process(int bladeMode, uint32_t delta, int* swingVol)
 {
     if (m_smoothMode) {
         // Animates from 0->256 on ignite, and back to 0 on retract.
@@ -316,23 +300,22 @@ void SFX::process(int bladeMode, uint32_t delta, bool* still)
 
         int swing = sm_swingToVolume(m_speed);
         int hum = 256 - swing * 192 / 256;
+        *swingVol = swing;
 
         if (swing == 0) {
-            *still = true;
             m_stillCount++;
-            if (m_stillCount == 30)
+            if (m_stillCount == 30) {
                 playMotionTracks(); // new random tracks.
+            }
         }
         else {
-            *still = false;
             m_stillCount = 0;
         }
 
-        //int swing0 = iCos(FixedNorm(m_blend256, 1024)).scale(swing);
-        //int swing1 = iSin(FixedNorm(m_blend256, 1024)).scale(swing);
-        // I think I like linear better?
-        int swing0 = lerp256(swing, 0, m_blend256);
-        int swing1 = lerp256(0, swing, m_blend256);
+        int swing0 = iCos(FixedNorm(m_blend256, 1024)).scale(swing);
+        int swing1 = iSin(FixedNorm(m_blend256, 1024)).scale(swing);
+        //int swing0 = lerp256(swing, 0, m_blend256);
+        //int swing1 = lerp256(0, swing, m_blend256);
 
 #ifdef SMOOTH_LOG
         if (smoothTimer.tick(delta)) {
