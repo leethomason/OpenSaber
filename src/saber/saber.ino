@@ -521,9 +521,12 @@ void processAccel(uint32_t msec, uint32_t delta)
             burstLog = BURST;
         if (burstLog) {
             Log.p(burstLog == BURST ? "--" : "  ")
-                .p("t=").p(millis()%1000).p(" swing=").p(swing.speed())
-                .p(" dot=").p(dot)
-                .p(" val/min/max ").v3(magAve).v3(magMin).v3(magMax).eol();
+                .p("t=").p(millis()%1000)
+                .p(" swing=").p(swing.speed())
+                //.p(" pos=").v3(swing.pos()).p(" origin=").v3(swing.origin())
+                //.p(" dot=").p(dot)
+                .p(" val/min/max ").v3(magAve).v3(magMin).v3(magMax)
+                .eol();
             lastLog = msec;
             burstLog--;
         }

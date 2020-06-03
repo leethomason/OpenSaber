@@ -772,8 +772,8 @@
 
 	// Does not need to be power of 2.
 	// multiply by 10 to get ms width of filter
-	#define FILTER_MAG_X	10
-	#define FILTER_MAG_Y	10
+	#define FILTER_MAG_X	20
+	#define FILTER_MAG_Y	30
 	#define FILTER_MAG_Z	10
 
 	#define ID_STR "Dutchess Cree XPE2 RGB"

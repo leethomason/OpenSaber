@@ -58,6 +58,7 @@ void Swing::push(const Vec3<int32_t>& x, const Vec3<int32_t>& mMin, const Vec3<i
     if (!m_init) {
         m_init = true;
         m_speed = 0;
+        m_prevSample = x;
         m_prevPosNorm = normalize(x, mMin, mMax);
         Log.p("Swing initial push: ").v3(m_prevPosNorm.x, m_prevPosNorm.y, m_prevPosNorm.z).eol();
         return;
@@ -84,6 +85,15 @@ void Swing::push(const Vec3<int32_t>& x, const Vec3<int32_t>& mMin, const Vec3<i
     if (!m_origin.isZero()) {
         m_dotOrigin = m_origin.x * b.x + m_origin.y * b.y + m_origin.z * b.z;
     }
+
+    Vec3<int32_t> dVec = x - m_prevSample;
+    int32_t dScalar = glAbs(dVec.x) + glAbs(dVec.y) + glAbs(dVec.z);
+    Vec3<int32_t> vecRange = mMax - mMin;
+    int32_t dRange = glAbs(vecRange.x) + glAbs(vecRange.y) + glAbs(vecRange.z);
+
+    m_speed = 500.0f * dScalar / float(dRange);
+
+    m_prevSample = x;
 }
 
 
@@ -97,6 +107,7 @@ void Swing::setOrigin()
 
 bool Swing::test()
 {
+    /*
     static const Vec3<int32_t> mMin = { -100, -200, -300 };
     static const Vec3<int32_t> mMax = { 300,  200,  100 };
     static const Vec3<int32_t> delta = mMax - mMin;
@@ -121,6 +132,6 @@ bool Swing::test()
     }
     TEST_IS_TRUE(swing.speed() >= speedDeg * 0.8f && swing.speed() <= speedDeg * 1.2f);
     TEST_IS_TRUE(swing.dotOrigin() > -0.3f && swing.dotOrigin() < 0.3f);
-
+    */
     return true;
 }

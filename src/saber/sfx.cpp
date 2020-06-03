@@ -270,9 +270,21 @@ bool SFX::sm_playEvent(int sfx)
 
 int SFX::sm_swingToVolume(float radPerSec)
 {
-    static const float STILL = 3.0f;
-    static const float FAST  = 8.0f;
+    //static const float STILL = 3.0f;
+    //static const float FAST  = 8.0f;
 
+    static const int16_t VOLUME[9] = {
+        0, 0, 0, 8, 32, 64, 128, 256, 
+        255
+    };
+    if (radPerSec >= 8.0f) 
+        return 256;
+
+    int low = (int)radPerSec;
+    int fraction = int(1024.0 * (radPerSec - low));
+    return lerp1024(VOLUME[low], VOLUME[low+1], fraction);
+
+    /*
     FixedNorm motionFraction = 0;
     if (radPerSec >= FAST) {
         motionFraction = 1;
@@ -283,6 +295,7 @@ int SFX::sm_swingToVolume(float radPerSec)
     int swing = motionFraction.scale(256);
     // Log.p("rad/sec=").p(radPerSec).p(" motionFraction=").p(motionFraction.toFloat()).p(" swing=").p(swing).eol();
     return swing;
+    */
 }
 
 int SFX::scaleVolume(int v) const
