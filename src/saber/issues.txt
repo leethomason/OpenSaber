@@ -1,13 +1,17 @@
 Issues:
 
-- white is causing trouble
-- set max swing (so it isn't over accumulating)
-- sensitivity up and down
-- test out filtering mag but not speed vectors - may not need decay code
+- fix floating point average to not drift
+- clean up code
+- tune swing intensity
+- dropout during green spin
 - test button up on color wheel
-
+- switch to gyro...
 
 Fixed
+x white is causing trouble
+x set max swing (so it isn't over accumulating)
+x sensitivity up and down
+x test out filtering mag but not speed vectors - may not need decay code
 x less motion sensitivity
 x clipping / limiting in mixer (maybe 64 bit okay??)
 x Crackle in hum sound (how??)

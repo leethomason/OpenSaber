@@ -517,7 +517,6 @@ void processAccel(uint32_t msec, uint32_t delta)
         float dot = swing.dotOrigin();
         sfx.sm_setSwing(swing.speed(), (int)((1.0f + dot)*128.0f));
 
-        /*
         static const int BURST = 5;
         if (msec - lastLog > 500)
             burstLog = BURST;
@@ -535,7 +534,6 @@ void processAccel(uint32_t msec, uint32_t delta)
             lastLog = msec;
             burstLog--;
         }
-        */
     }
     if (bladeState.state() == BLADE_ON) {
         for (int i = 0; i < n; ++i)
