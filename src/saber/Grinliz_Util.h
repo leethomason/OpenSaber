@@ -67,9 +67,18 @@ struct Vec3
 	void setZero() { x = y = z = 0; }
 	bool isZero() const { return x==0 && y == 0 && z == 0; }
 	void scale(T s) { x *= s; y *= s; z *= s; }
+	void div(T s) { x /= s; y /= s; z /= s; }
 
 	T operator[](int i) const { return *(&x + i); }
 	T& operator[](int i) { return *(&x + i); }
+
+	Vec3<T> vAbs() const {
+		Vec3<T> a = *this;
+		if (a.x < 0) a.x = -a.x;
+		if (a.y < 0) a.y = -a.y;
+		if (a.z < 0) a.z = -a.z;
+		return a;
+	}
 
     Vec3<T>& operator += (const Vec3<T>& v) { x += v.x; y += v.y; z += v.z; return *this; }
     Vec3<T>& operator -= (const Vec3<T>& v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
@@ -536,14 +545,30 @@ public:
         m_average = initialValue;
     }
 
+    AverageSample() {
+        for (int i = 0; i < N; ++i) {
+			m_sample[i] = 0;
+		}
+		m_total = 0;
+		m_average = 0;
+	}
+
+	void recount() {
+		m_total = 0;
+		for (int i = 0; i < N; ++i)
+			m_total += m_sample[i];
+	}
+
     void push(TYPE value) {
 		m_total -= m_sample[m_pos];
         m_sample[m_pos] = value;
 		m_total += value;
 
         m_pos++;
-        if (m_pos == N) 
+        if (m_pos == N) {
 			m_pos = 0;
+			recount();
+		}
 		m_average = m_total / N;
     }
 

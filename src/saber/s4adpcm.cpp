@@ -22,7 +22,7 @@
 
 #include "s4adpcm.h"
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 #include <assert.h>
 #define ASSERT assert
 #endif
@@ -66,7 +66,7 @@ void S4ADPCM::encode8(const int16_t* data, int32_t nSamples, uint8_t* target, St
         *target++ = int8_t(delta);
 
         int p = guess + (delta << state->shift);
-#ifdef _MSC_VER
+#ifdef _WIN32
         assert(p >= SHRT_MIN && p <= SHRT_MAX);
 #endif
         state->push(p);
@@ -116,7 +116,7 @@ int S4ADPCM::encode4(const int16_t* data, int32_t nSamples, uint8_t* target, Sta
         state->high = !state->high;
 
         int p = guess + (delta << state->shift);
-#ifdef _MSC_VER
+#ifdef _WIN32
         ASSERT(p >= SHRT_MIN && p <= SHRT_MAX);
 #endif
 
@@ -154,7 +154,7 @@ void S4ADPCM::decode4(const uint8_t* p, int32_t nSamples,
         int guess = state->guess();
         int value = guess + (delta << state->shift);
 
-#ifdef _MSC_VER
+#ifdef _WIN32
         if (value < SHRT_MIN || value > SHRT_MAX) {
             assert(false);
         }
@@ -194,7 +194,7 @@ void S4ADPCM::decode8(const uint8_t* p, int32_t nSamples,
         int guess = state->guess();
         int value = guess + (delta << state->shift);
 
-#ifdef _MSC_VER
+#ifdef _WIN32
         if (value < SHRT_MIN || value > SHRT_MAX) {
             assert(false);
         }

@@ -23,9 +23,8 @@
 #ifndef GRINLIZ_ASSERT_INCLUDED
 #define GRINLIZ_ASSERT_INCLUDED
 
-#include "pins.h"
-
 #ifndef _WIN32
+#include "pins.h"
 #include <Arduino.h>
 #endif
 

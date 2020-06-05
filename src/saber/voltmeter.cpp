@@ -23,10 +23,11 @@
 #ifndef _WIN32
 #include <Arduino.h>
 #include "Grinliz_Arduino_Util.h"
+#else
+#include "pins.h"
 #endif
 
 #include "Grinliz_Util.h"
-#include "pins.h"
 #include "voltmeter.h"
 
 Voltmeter* Voltmeter::_instance = 0;

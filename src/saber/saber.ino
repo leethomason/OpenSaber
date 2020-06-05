@@ -87,14 +87,10 @@ BladeFlash  bladeFlash;
 CMDParser   cmdParser(&saberDB, manifest);
 BladePWM    bladePWM;
 Tester      tester;
-Swing       swing(10);
+Swing       swing;
+MagFilter   magFilter;
 int         swingVol;
 AverageSample<Vec3<int32_t>, Vec3<int32_t>, 12> averageAccel(Vec3<int32_t>(0, 0, 0));
-
-// Sometimes the magnemometer needs a lot of filtering.
-AverageSample<int32_t, int32_t, FILTER_MAG_X> aveMagX(0);
-AverageSample<int32_t, int32_t, FILTER_MAG_Y> aveMagY(0);
-AverageSample<int32_t, int32_t, FILTER_MAG_Z> aveMagZ(0);
 
 #ifdef SABER_NUM_LEDS
 DotStar dotstar;                    // Hardware controller.
@@ -489,10 +485,18 @@ void processAccel(uint32_t msec, uint32_t delta)
     Vec3<int32_t> magData;
     // readMag() should only return >0 if there is new data from the hardware.
     if (accelMag.readMag(&magData, 0) > 0) {
+        
         static ProfileData magProfData("processMag");
         ProfileBlock magProfBlock(&magProfData);
-        static int32_t lastLog = 0;
-        static int burstLog = 0;
+
+        static const uint32_t MAG_INTERVAL = 16;
+        static uint32_t lastMagData = 0;
+        int nMagData = 1;
+        if (lastMagData && (msec - lastMagData) >= MAG_INTERVAL * 2) {
+            // use a little less than 10ms for error correction
+            nMagData = (msec - lastMagData) / MAG_INTERVAL;
+        }
+        lastMagData = msec;
 
         // The accelerometer and magnemometer are both clocked at 100Hz.
         // The swing is set up for constant data; assume n is the same for both.
@@ -501,23 +505,19 @@ void processAccel(uint32_t msec, uint32_t delta)
         // Keep waffling on this...assuming when blade is lit this will pretty
         // consistently get hit every 10ms.
 
-        // scale everything to divide more smoothly
-        static const int32_t SCALE = 4;
+        for (int i = 0; i < nMagData; ++i)
+            magFilter.push(magData);
+
         Vec3<int32_t> magMin = accelMag.getMagMin();
         Vec3<int32_t> magMax = accelMag.getMagMax();
-        magMin.scale(SCALE);
-        magMax.scale(SCALE);
+        swing.push(magFilter.average(), magMin, magMax);
 
-        aveMagX.push(magData.x * SCALE);
-        aveMagY.push(magData.y * SCALE);
-        aveMagZ.push(magData.z * SCALE);
-        const Vec3<int32_t> magAve(aveMagX.average(), aveMagY.average(), aveMagZ.average());
-
-        swing.push(magAve, magMin, magMax);
         float dot = swing.dotOrigin();
         sfx.sm_setSwing(swing.speed(), (int)((1.0f + dot)*128.0f));
 
         static const int BURST = 5;
+        static int32_t lastLog = 0;
+        static int burstLog = 0;
         if (msec - lastLog > 500)
             burstLog = BURST;
         if (burstLog) {
@@ -529,7 +529,7 @@ void processAccel(uint32_t msec, uint32_t delta)
                 //.p(" pos=").v3(swing.pos()).p(" origin=").v3(swing.origin())
                 .p(" dot=").p(dot)
                 //.p(" val/min/max ").v3(magAve).v3(magMin).v3(magMax)
-                .p(" val/range ").v3(magAve - magMin).v3(range)
+                .p(" val/range ").v3(magFilter.average() - magMin).v3(range)
                 .eol();
             lastLog = msec;
             burstLog--;

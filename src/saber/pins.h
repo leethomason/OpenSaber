@@ -775,7 +775,7 @@
 	#define FILTER_MAG_X	20
 	#define FILTER_MAG_Y	30
 	#define FILTER_MAG_Z	10
-
+	#define SWING_SAMPLES	8
 	#define ID_STR "Dutchess Cree XPE2 RGB"
 
 	static const int32_t RED_VF   = 2200;
@@ -987,8 +987,7 @@ enum {
 
 static const float DEFAULT_G_FORCE_MOTION = 1.3f;
 static const float DEFAULT_G_FORCE_IMPACT = 3.0f;	// Was 2.3. Testing.
-static const float SWING_MAX = 10.0f;				// careful changing this - an array is indexed
-static const int SWING_MAX_INT = 10;
+static const int SWING_MAX = 12;
 
 #endif // PINS_HEADER
 

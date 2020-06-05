@@ -270,11 +270,11 @@ bool SFX::sm_playEvent(int sfx)
 
 int SFX::sm_swingToVolume(float radPerSec)
 {
-    static const int16_t VOLUME[SWING_MAX_INT+1] = {
-        0, 0, 2, 4, 8, 16, 32, 64, 128, 256,
+    static const int16_t VOLUME[SWING_MAX+1] = {
+        0, 0, 2, 4, 8, 16, 32, 48, 64, 96, 128, 256,
         256
     };
-    if (radPerSec >= SWING_MAX) 
+    if (radPerSec >= float(SWING_MAX)) 
         return 256;
 
     int low = (int)radPerSec;

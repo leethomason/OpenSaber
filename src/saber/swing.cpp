@@ -23,7 +23,7 @@
 #include "swing.h"
 #include <math.h>
 
-Swing::Swing(int msecPerSample) : swingAve(0)
+Swing::Swing()
 {
     m_speed = 0;
     m_dotOrigin = 0;
@@ -56,17 +56,27 @@ void Swing::push(const Vec3<int32_t>& x, const Vec3<int32_t>& mMin, const Vec3<i
         return;
     }
 
-    static const float MULT = 200.0f;
+    // I used to do a very careful analysis of the normal vectors to calculate
+    // the small sin approximation. Turns out just multiplying the deltas by
+    // a constant works just as well.
+    /*
+        (dThetaX / len + dThetaY / len + dThetaZ / len) = rad/sec
 
+    */
     m_normal = normalize(x, mMin, mMax);
     m_dotOrigin = m_normal.x * m_origin.x + m_normal.y * m_origin.y + m_normal.z * m_origin.z;
 
     Vec3<int32_t> dVec = x - m_prevSample;
-    Vec3<int32_t> r = mMax - mMin;
+    Vec3<int32_t> r = (mMax - mMin) / 2;
+    Vec3<int32_t> dVecAbs = dVec.vAbs();
 
-    float speed = MULT * glAbs(dVec.x) / r.x + MULT * glAbs(dVec.y) / r.y + MULT * glAbs(dVec.z) / r.z;
-    swingAve.push(glMin(speed, SWING_MAX));
-    m_speed = swingAve.average();
+    // 100 samples a second
+    int32_t decRadsSec = 1000 * dVecAbs.x / r.x + 1000 * dVecAbs.y / r.y + 1000 * dVecAbs.z / r.z;
+    float radsPerSec = decRadsSec / 10.0f;
+
+    swingAve.push(glMin(decRadsSec, int32_t(SWING_MAX * 10)));
+    m_speed = swingAve.average() / 10.0f;
+
     m_prevSample = x;
 }
 
@@ -81,19 +91,18 @@ void Swing::setOrigin()
 
 bool Swing::test()
 {
-    /*
     static const Vec3<int32_t> mMin = { -100, -200, -300 };
     static const Vec3<int32_t> mMax = { 300,  200,  100 };
     static const Vec3<int32_t> delta = mMax - mMin;
     static const Vec3<int32_t> half = delta / 2;
 
-    static const float speedDeg = 3.1459f / 2.f;
-    Swing swing(10);
+    static const float speedRad = 3.1459f / 2.f;
+    Swing swing;
 
     // 90 deg/second
     for (int i = 0; i < 100; ++i) {
-        float x = cosf(speedDeg * i / 100.0f);
-        float y = sinf(speedDeg * i / 100.0f);
+        float x = cosf(speedRad * i / 100.0f);
+        float y = sinf(speedRad * i / 100.0f);
         if (i==10)
             swing.setOrigin();
 
@@ -104,8 +113,17 @@ bool Swing::test()
 
         swing.push(v, mMin, mMax);
     }
-    TEST_IS_TRUE(swing.speed() >= speedDeg * 0.8f && swing.speed() <= speedDeg * 1.2f);
-    TEST_IS_TRUE(swing.dotOrigin() > -0.3f && swing.dotOrigin() < 0.3f);
-    */
+    TEST_IS_TRUE(swing.speed() >= speedRad * 0.8f && swing.speed() <= speedRad * 1.2f);
+    TEST_IS_TRUE(swing.dotOrigin() > 0.0f && swing.dotOrigin() < 0.3f);
+   
     return true;
+}
+
+
+void MagFilter::push(const Vec3<int32_t> &magData)
+{
+    // scale everything to divide more smoothly
+    aveMagX.push(magData.x * SCALE);
+    aveMagY.push(magData.y * SCALE);
+    aveMagZ.push(magData.z * SCALE);
 }

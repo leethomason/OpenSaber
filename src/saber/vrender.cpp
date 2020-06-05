@@ -25,7 +25,7 @@
 #include "Grinliz_Util.h"
 #include <stdio.h>
 
-#ifndef _MSC_VER
+#ifndef _WIN32
 #include "Grinliz_Arduino_Util.h" // profiling
 #endif
 
@@ -288,7 +288,7 @@ void VRender::RasterizeLine(int y, const Rect& clip)
 
 void VRender::Rasterize()
 {
-#ifndef _MSC_VER
+#ifndef _WIN32
     static ProfileData data("VRender::Rasterize");
     ProfileBlock block(&data);
 #endif
