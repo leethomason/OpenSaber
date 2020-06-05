@@ -59,7 +59,7 @@
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
+#define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_DUTCHESS
 #define SABER_SUB_MODEL				
 // ----------------------------------
@@ -767,15 +767,16 @@
 	#define SABER_UI_COUNT				4
 	#define SABER_UI_BRIGHTNESS	    	16
 	#define SABER_UI_IDLE_MEDITATION
-	#define SABER_UI_COLOR_WHEEL
 	#define VOLTMETER_TUNE				1016
+	#define SABER_SOUND_TUNE
+	//#define SABER_UI_COLOR_WHEEL
 
 	// Does not need to be power of 2.
 	// multiply by 10 to get ms width of filter
 	#define FILTER_MAG_X	20
 	#define FILTER_MAG_Y	30
 	#define FILTER_MAG_Z	10
-	#define SWING_SAMPLES	8
+	#define SWING_SAMPLES	12
 	#define ID_STR "Dutchess Cree XPE2 RGB"
 
 	static const int32_t RED_VF   = 2200;

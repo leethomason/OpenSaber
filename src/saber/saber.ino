@@ -89,8 +89,10 @@ BladePWM    bladePWM;
 Tester      tester;
 Swing       swing;
 MagFilter   magFilter;
-int         swingVol;
+int         swingVol = 0;
+int         soundTune = 0;
 AverageSample<Vec3<int32_t>, Vec3<int32_t>, 12> averageAccel(Vec3<int32_t>(0, 0, 0));
+AverageSample<float, float, 3> fastG2;
 
 #ifdef SABER_NUM_LEDS
 DotStar dotstar;                    // Hardware controller.
@@ -412,6 +414,11 @@ void buttonAHoldHandler(const Button& button)
                     if (!setVolumeFromHoldCount(cycle))
                         buttonLEDOn = false;
                 }
+                else if (uiMode.mode() == UIMode::SOUND_TUNE) {
+                    soundTune = cycle % 4;
+                    Log.p("soundTune=").p(soundTune).eol();
+                    buttonLEDOn = false;
+                }
             }
         }
         ledA.set(buttonLEDOn);
@@ -478,9 +485,6 @@ void processAccel(uint32_t msec, uint32_t delta)
 
     int n = accelMag.readInner(intData, data, N_ACCEL);
     ASSERT(n <= N_ACCEL);
-    for(int i=0; i<n; ++i) {
-        averageAccel.push(intData[i]);
-    }
 
     Vec3<int32_t> magData;
     // readMag() should only return >0 if there is new data from the hardware.
@@ -513,8 +517,9 @@ void processAccel(uint32_t msec, uint32_t delta)
         swing.push(magFilter.average(), magMin, magMax);
 
         float dot = swing.dotOrigin();
-        sfx.sm_setSwing(swing.speed(), (int)((1.0f + dot)*128.0f));
+        sfx.sm_setSwing(swing.speed(), (int)((1.0f + dot)*128.0f), soundTune);
 
+#if false
         static const int BURST = 5;
         static int32_t lastLog = 0;
         static int burstLog = 0;
@@ -529,21 +534,27 @@ void processAccel(uint32_t msec, uint32_t delta)
                 //.p(" pos=").v3(swing.pos()).p(" origin=").v3(swing.origin())
                 .p(" dot=").p(dot)
                 //.p(" val/min/max ").v3(magAve).v3(magMin).v3(magMax)
-                .p(" val/range ").v3(magFilter.average() - magMin).v3(range)
+                //.p(" val/range ").v3(magFilter.average() - magMin).v3(range)
+                .p(" accel=").p(fastG2.average())
                 .eol();
             lastLog = msec;
             burstLog--;
         }
+#endif        
     }
-    if (bladeState.state() == BLADE_ON) {
-        for (int i = 0; i < n; ++i)
-        {
-            float g2Normal, g2;
-            float ax = data[i].x;
-            float ay = data[i].y;
-            float az = data[i].z;
-            calcGravity2(ax, ay, az, &g2, &g2Normal);
+    for (int i = 0; i < n; ++i)
+    {
+        float g2Normal, g2;
+        float ax = data[i].x;
+        float ay = data[i].y;
+        float az = data[i].z;
+        calcGravity2(ax, ay, az, &g2, &g2Normal);
 
+        averageAccel.push(intData[i]);
+        fastG2.push(g2);
+
+        if (bladeState.state() == BLADE_ON)
+        {
             float motion = saberDB.motion();
             float impact = saberDB.impact();
 
@@ -557,19 +568,20 @@ void processAccel(uint32_t msec, uint32_t delta)
             // Actual motion / impact sounds are usually less that 1 second.
             // TODO this needs a different workaround.
 
-//#ifdef SABER_SOUND_ON
-//            bool sfxOverDue = ((msec - lastMotionTime) > 1500) &&
-//                              ((sfx.lastSFX() == SFX_MOTION) || (sfx.lastSFX() == SFX_IMPACT));
-//#else
-//            bool sfxOverDue = false;
-//#endif
+            //#ifdef SABER_SOUND_ON
+            //            bool sfxOverDue = ((msec - lastMotionTime) > 1500) &&
+            //                              ((sfx.lastSFX() == SFX_MOTION) || (sfx.lastSFX() == SFX_IMPACT));
+            //#else
+            //            bool sfxOverDue = false;
+            //#endif
 
             if ((g2Normal >= impact * impact))
             {
                 // Always flash the blade. Maybe play impact sounds.
                 // It doesn't sound good to have too many impacts chained together.
                 bladeFlash.doFlash(millis());
-                if ((msec - lastImpactTime) > IMPACT_MIN_TIME) {
+                if ((msec - lastImpactTime) > IMPACT_MIN_TIME)
+                {
                     bool sound = false;
                     if (sfx.smoothMode())
                         sound = sfx.sm_playEvent(SFX_IMPACT);
@@ -673,6 +685,7 @@ void loopDisplays(uint32_t msec, uint32_t delta)
     uiRenderData.mVolts = voltmeter.easedPower();
     uiRenderData.fontName = manifest.getUnit(sfx.currentFont()).getName();
     uiRenderData.soundBank = sfx.currentFont();
+    uiRenderData.soundTune = soundTune;
 
 #if SABER_DISPLAY == SABER_DISPLAY_128_32
     {

@@ -76,7 +76,7 @@ public:
 	int currentFont() const { return m_currentFont; }
 
 	bool smoothMode() const { return m_smoothMode; }
-	void sm_setSwing(float radPerSec, int blend256) { m_speed = radPerSec; m_blend256 = blend256; }
+	void sm_setSwing(float radPerSec, int blend256, int soundTune) { m_speed = radPerSec; m_blend256 = blend256; m_soundTune = soundTune; }
 	void sm_ignite();
 	void sm_retract();
 	bool sm_playEvent(int sfx);
@@ -95,7 +95,7 @@ protected:
 	int getTrack(int sound);
 	void playMotionTracks();
 
-	static int sm_swingToVolume(float radPerSec);
+	int sm_swingToVolume(float radPerSec);
 	int scaleVolume(int v) const;
 
 	I2SAudioDriver *m_driver;
@@ -113,6 +113,7 @@ protected:
 	int m_swingTarget = 0;	
 	int m_hum = 0;			// also tracks with decay
 	int m_stillCount = 0;	// how many still frames (motion sound = 0)
+	int m_soundTune = 0;
 
 	Random m_random;
 	AnimateProp volumeEnvelope;

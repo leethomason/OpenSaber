@@ -135,7 +135,10 @@ void UIModeUtil::nextMode()
         break;
 
     case UIMode::VOLUME:
-#ifdef SABER_UI_COLOR_WHEEL
+#if defined(SABER_SOUND_TUNE)
+        m_mode = UIMode::SOUND_TUNE;
+        Log.p("mode: sound tune").eol();
+#elif defined(SABER_UI_COLOR_WHEEL)
         m_mode = UIMode::COLOR_WHEEL;
         Log.p("mode: color change").eol();
 #else
@@ -145,6 +148,7 @@ void UIModeUtil::nextMode()
         break;
 
     case UIMode::COLOR_WHEEL:
+    case UIMode::SOUND_TUNE:
         m_mode = UIMode::NORMAL;
         Log.p("mode: normal").eol();
         break;

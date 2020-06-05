@@ -29,7 +29,8 @@ enum class UIMode {
     PALETTE,
     VOLUME,
     MEDITATION,
-    COLOR_WHEEL,
+    COLOR_WHEEL,  // can't have WHEEL and TUNE
+    SOUND_TUNE,
     NUM_MODES
 };
 

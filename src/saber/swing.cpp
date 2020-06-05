@@ -72,8 +72,6 @@ void Swing::push(const Vec3<int32_t>& x, const Vec3<int32_t>& mMin, const Vec3<i
 
     // 100 samples a second
     int32_t decRadsSec = 1000 * dVecAbs.x / r.x + 1000 * dVecAbs.y / r.y + 1000 * dVecAbs.z / r.z;
-    float radsPerSec = decRadsSec / 10.0f;
-
     swingAve.push(glMin(decRadsSec, int32_t(SWING_MAX * 10)));
     m_speed = swingAve.average() / 10.0f;
 

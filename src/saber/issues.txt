@@ -1,13 +1,13 @@
 Issues:
 
-- fix floating point average to not drift
-- clean up code
-- tune swing intensity
-- dropout during green spin
-- test button up on color wheel
 - switch to gyro...
+- dropout during green spin
 
 Fixed
+x fix floating point average to not drift
+x clean up code
+x tune swing intensity
+x test button up on color wheel
 x white is causing trouble
 x set max swing (so it isn't over accumulating)
 x sensitivity up and down
