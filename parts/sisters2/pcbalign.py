@@ -50,7 +50,7 @@ g.absolute()
 # level part
 g.move(x=-D + DX/2, y=-D)
 g.move(z=0)
-rectangleTool(g, mat, H - STOCK, DX, DY, 0, "bottom", "center", fill=True) # -6.0
+rectangleTool(g, mat, H - STOCK, DX, DY, 0, "bottom", "outer", fill=True) # -6.0
 
 tool_change(g, mat, 1)
 mat = init_material("np883-hdpe-1.0")
@@ -93,6 +93,11 @@ for x in range(NDRILL):
     g.move(z=H - STOCK)
     drill(g, mat, -H - 0.2)
     g.move(z=(H - STOCK))
+
+g.move(z=0)
+g.move(x=-D, y=-D + DY/2)
+g.move(z=H - STOCK)
+rectangleTool(g, mat, -H - 0.2, DX, DY, 0, "left", "outer")
 
 # clean up
 g.move(z=5)
