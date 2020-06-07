@@ -16,14 +16,12 @@ H = 2.0
 H_TROUGH = 0.8
 DY_TROUGH = 0.55 * C
 
-ACCEL_X = 1.2904 * C
-ACCEL_Y = 0.2708 * C
 TRIM = 0.1
 HALF_TRIM = TRIM / 2
-ACCEL_SIZE = 2.0
 
 def calcY(y):
     return -D + DY - y
+
 
 def line(g, mat, cut_depth, dx, dy):
     g.comment("line")
@@ -40,6 +38,22 @@ def line(g, mat, cut_depth, dx, dy):
         g.move(x=dx/2, y=dy/2)
         g.move(z=-cut_depth)
 
+
+def part(px, py, size):
+    x = px - size/2 - HALF_TRIM
+    y = calcY(py) - size/2 - HALF_TRIM
+    g.move(z=0)
+    g.move(x=x, y=y)
+    g.move(z=(H - STOCK) - H_TROUGH)
+    d = -H_TROUGH - 0.2
+    overCut(g, mat, d, size + TRIM, size + TRIM)
+
+    x = px
+    y = calcY(py)
+    g.move(x=x, y=y)
+    g.move(z=(H - STOCK) - H_TROUGH)
+    line(g, mat, d, 0, size + 4)
+    g.move(z=0)
 
 mat = init_material("np883-hdpe-3.175")
 g = G(outfile='path.nc', aerotech_include=False, header=None, footer=None, print_lines=False)
@@ -65,19 +79,9 @@ rectangleTool(g, mat, -H_TROUGH, DX + tool, DY_TROUGH - tool, 0, "left", "center
 g.move(z=0)
 
 # accel
-x = ACCEL_X - ACCEL_SIZE/2 - HALF_TRIM
-y = calcY(ACCEL_Y) - ACCEL_SIZE/2 - HALF_TRIM
-g.move(x=x, y=y)
-g.move(z=(H - STOCK) - H_TROUGH)
-d = -H_TROUGH - 0.2
-overCut(g, mat, d, ACCEL_SIZE + TRIM, ACCEL_SIZE + TRIM)
-
-x = ACCEL_X
-y = calcY(ACCEL_Y)
-g.move(x=x, y=y)
-g.move(z=(H - STOCK) - H_TROUGH)
-line(g, mat, d, 0, ACCEL_SIZE * 2)
-g.move(z=0)
+part(1.2904*C, 0.2708*C, 2.0)
+# amp
+part(0.1429*C, 0.3045*C, 3.0)
 
 #drill
 for x in range(NDRILL):
