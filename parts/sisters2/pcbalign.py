@@ -10,18 +10,27 @@ D = 0.05 * C
 
 DX = 1.5 * C
 DY = 0.7 * C
-NDRILL = 14
-STOCK = 8.0
-H = 2.0
-H_TROUGH = 0.8
+NDRILL = 15
+
+STOCK = 6.4
+DZ_PART = 2.0
+DZ_TROUGH = 0.8
+
+Z_PART = -STOCK + DZ_PART
+Z_TROUGH_BOTTOM = Z_PART - DZ_TROUGH
+Z_BOTTOM = -STOCK
+PAD = 0.5
+
+DZ_PART_TO_BOTTOM = Z_PART - Z_BOTTOM
+DZ_TROUGH_TO_BOTTOM = Z_TROUGH_BOTTOM - Z_BOTTOM
+
 DY_TROUGH = 0.55 * C
 
-TRIM = 0.1
+TRIM = 0.15
 HALF_TRIM = TRIM / 2
 
 def calcY(y):
-    return -D + DY - y
-
+    return 0.6 * C - y
 
 def line(g, mat, cut_depth, dx, dy):
     g.comment("line")
@@ -39,20 +48,27 @@ def line(g, mat, cut_depth, dx, dy):
         g.move(z=-cut_depth)
 
 
-def part(px, py, size):
-    x = px - size/2 - HALF_TRIM
-    y = calcY(py) - size/2 - HALF_TRIM
-    g.move(z=0)
-    g.move(x=x, y=y)
-    g.move(z=(H - STOCK) - H_TROUGH)
-    d = -H_TROUGH - 0.2
-    overCut(g, mat, d, size + TRIM, size + TRIM)
-
+def part(g, mat, px, py, size):
     x = px
-    y = calcY(py)
+    y = calcY(py) - size/2 - HALF_TRIM    
+    d = -DZ_PART_TO_BOTTOM - PAD
+
+    g.move(z=0)
+
+    addY = mat['tool_size']
+    g.move(x=x, y=y-addY/2)
+    g.move(z=Z_PART)
+    rectangleTool(g, mat, d, size+TRIM, size+TRIM+addY, 0, "bottom", "inner", fill=True)
+
+    '''
+    # overcut
+    x = px - size/2 - HALF_TRIM
+    y = calcY(py) - size/2 - HALF_TRIM    
     g.move(x=x, y=y)
-    g.move(z=(H - STOCK) - H_TROUGH)
-    line(g, mat, d, 0, size + 4)
+    g.move(z=Z_PART)
+    overCut(g, mat, d, size + TRIM, size + TRIM)
+    '''
+
     g.move(z=0)
 
 mat = init_material("np883-hdpe-3.175")
@@ -64,46 +80,52 @@ g.absolute()
 # level part
 g.move(x=-D + DX/2, y=-D)
 g.move(z=0)
-rectangleTool(g, mat, H - STOCK, DX, DY, 0, "bottom", "outer", fill=True) # -6.0
+rectangleTool(g, mat, DZ_PART - STOCK, DX, DY, 0, "bottom", "outer", fill=True) # -6.0
 
-tool_change(g, mat, 1)
+tool_change(g, mat, "1")
 mat = init_material("np883-hdpe-1.0")
-
 tool = 1.0
 half = 0.5
 
-# cut trough
-g.move(x=-D - half, y=-D + (DY / 2))
-g.move(z=H - STOCK)
-rectangleTool(g, mat, -H_TROUGH, DX + tool, DY_TROUGH - tool, 0, "left", "center")
-g.move(z=0)
-
 # accel
-part(1.2904*C, 0.2708*C, 2.0)
+part(g, mat, 1.2904*C, 0.2708*C, 2.06)
 # amp
-part(0.1429*C, 0.3045*C, 3.0)
+part(g, mat, 0.1429*C, 0.3045*C, 3.10)
 
 #drill
 for x in range(NDRILL):
-    g.move(z=(H - STOCK))
+    g.move(z=(Z_PART))
     g.move(x=0.1 * C * x, y=0)
-    g.move(z=H - STOCK)
-    drill(g, mat, -H - 0.2)
-    g.move(z=(H - STOCK))
+    g.move(z=Z_PART)
+    drill(g, mat, -DZ_PART_TO_BOTTOM - PAD)
+    g.move(z=(Z_PART))
 
 for x in range(NDRILL):
-    g.move(z=(H - STOCK))
+    g.move(z=(Z_PART))
     g.move(x=0.1 * C * x, y=0.6 * C)
-    g.move(z=H - STOCK)
-    drill(g, mat, -H - 0.2)
-    g.move(z=(H - STOCK))
+    g.move(z=Z_PART)
+    drill(g, mat, -DZ_PART_TO_BOTTOM - PAD)
+    g.move(z=(Z_PART))
 
+
+tool_change(g, mat, "3")
+mat = init_material("np883-hdpe-3.175")
+tool = 3.175
+half = tool/2
+
+# cut trough
+g.move(x=-D - half, y=-D + (DY / 2))
+g.move(z=Z_PART)
+rectangleTool(g, mat, -DZ_TROUGH, DX + tool, DY_TROUGH - tool, 0, "left", "center", fill=True)
+g.move(z=0)
+
+# cut board
 g.move(z=0)
 g.move(x=-D, y=-D + DY/2)
-g.move(z=H - STOCK)
-rectangleTool(g, mat, -H - 0.2, DX, DY, 0, "left", "outer")
+g.move(z=Z_PART)
+rectangleTool(g, mat, -DZ_PART_TO_BOTTOM - PAD, DX, DY, 0, "left", "outer")
 
 # clean up
-g.move(z=5)
+g.move(z=10)
 g.spindle()
 
