@@ -519,6 +519,7 @@ void processAccel(uint32_t msec, uint32_t delta)
         float dot = swing.dotOrigin();
         float speed = swing.speed();
         
+#ifdef ACCEL_TO_SWING        
         const float impact = saberDB.impact();
         const float still = 1.1f;
         float g2 = fastG2.average();
@@ -534,7 +535,7 @@ void processAccel(uint32_t msec, uint32_t delta)
                 speed = glMax(altSpeed, speed);
             }
         }
-
+#endif
         sfx.sm_setSwing(speed, (int)((1.0f + dot)*128.0f), soundTune);
 
 #if false
