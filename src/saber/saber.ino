@@ -517,7 +517,25 @@ void processAccel(uint32_t msec, uint32_t delta)
         swing.push(magFilter.average(), magMin, magMax);
 
         float dot = swing.dotOrigin();
-        sfx.sm_setSwing(swing.speed(), (int)((1.0f + dot)*128.0f), soundTune);
+        float speed = swing.speed();
+        
+        const float impact = saberDB.impact();
+        const float still = 1.1f;
+        float g2 = fastG2.average();
+
+        if (g2 > still * still) {
+            if (g2 > impact * impact) {
+                speed = (float)SWING_MAX;
+            }
+            else {
+                float g = sqrtf(g2);
+                float altSpeed = (float)SWING_MAX * (g - still) / (impact - still);
+                Log.p("speed=").p(speed).p(" alt=").p(altSpeed).eol();
+                speed = glMax(altSpeed, speed);
+            }
+        }
+
+        sfx.sm_setSwing(speed, (int)((1.0f + dot)*128.0f), soundTune);
 
 #if false
         static const int BURST = 5;

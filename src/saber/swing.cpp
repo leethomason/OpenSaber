@@ -60,18 +60,22 @@ void Swing::push(const Vec3<int32_t>& x, const Vec3<int32_t>& mMin, const Vec3<i
     // the small sin approximation. Turns out just multiplying the deltas by
     // a constant works just as well.
     /*
-        (dThetaX / len + dThetaY / len + dThetaZ / len) = rad/sec
-
+        (|dx| + |dy| + |dz|) / len
     */
     m_normal = normalize(x, mMin, mMax);
     m_dotOrigin = m_normal.x * m_origin.x + m_normal.y * m_origin.y + m_normal.z * m_origin.z;
 
     Vec3<int32_t> dVec = x - m_prevSample;
-    Vec3<int32_t> r = (mMax - mMin) / 2;
+    Vec3<int32_t> origin = (mMax + mMin) / 2;
     Vec3<int32_t> dVecAbs = dVec.vAbs();
+    Vec3<int32_t> originToX = x - origin;
+
+    int32_t len = intSqrt(originToX.x * originToX.x + originToX.y * originToX.y + originToX.z * originToX.z);
+    if (len == 0)
+        return;
 
     // 100 samples a second
-    int32_t decRadsSec = 1000 * dVecAbs.x / r.x + 1000 * dVecAbs.y / r.y + 1000 * dVecAbs.z / r.z;
+    int32_t decRadsSec = 1000 * (dVecAbs.x + dVecAbs.y + dVecAbs.z) / len;
     swingAve.push(glMin(decRadsSec, int32_t(SWING_MAX * 10)));
     m_speed = swingAve.average() / 10.0f;
 
@@ -94,10 +98,10 @@ bool Swing::test()
     static const Vec3<int32_t> delta = mMax - mMin;
     static const Vec3<int32_t> half = delta / 2;
 
-    static const float speedRad = 3.1459f / 2.f;
+    static const float speedRad = 1.57f;
     Swing swing;
 
-    // 90 deg/second
+    // 90 deg/second, 1.57 rad/sec
     for (int i = 0; i < 100; ++i) {
         float x = cosf(speedRad * i / 100.0f);
         float y = sinf(speedRad * i / 100.0f);
@@ -108,6 +112,12 @@ bool Swing::test()
         v.x = int32_t(mMin.x + x * half.x + half.x);
         v.y = int32_t(mMin.y + y * half.y + half.y);
         v.z = int32_t(mMin.z + half.z);
+
+        float xp = cosf(speedRad * (i-1) / 100.0f);
+        float yp = sinf(speedRad * (i-1) / 100.0f);
+        float dx = x - xp;
+        float dy = y - yp;
+        float approx = 100.0f * (glAbs(dx) + glAbs(dy));
 
         swing.push(v, mMin, mMax);
     }

@@ -84,7 +84,7 @@ private:
 	Vec3<float> m_normal;
 	Vec3<float> m_origin;
 	Vec3<int32_t> m_prevSample;
-	AverageSample<int32_t, int32_t, SWING_SAMPLES> swingAve;	// mrads per sec
+	AverageSample<int32_t, int32_t, SWING_SAMPLES> swingAve;
 };
 
 class MagFilter

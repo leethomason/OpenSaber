@@ -35,6 +35,24 @@
 
 #include "grinliz_assert.h"
 
+inline int32_t intSqrt(int32_t x) 
+{
+    if (x < 0) return 0;
+
+    uint32_t v = x;
+    uint32_t res = 0;
+    uint16_t add = 0x8000;
+    for (int i = 0; i < 16; i++) {
+        uint16_t temp = uint16_t(res) | add;
+        uint32_t g2 = temp * temp;
+        if (v >= g2)
+            res = temp;
+        add >>= 1;
+    }
+    return res;
+}
+
+
 template<class T> 
 struct Limit {
     // Don't compile if the type isn't defined in the specializations below.
