@@ -530,7 +530,7 @@ void processAccel(uint32_t msec, uint32_t delta)
             else {
                 float g = sqrtf(g2);
                 float altSpeed = (float)SWING_MAX * (g - still) / (impact - still);
-                Log.p("speed=").p(speed).p(" alt=").p(altSpeed).eol();
+                // Log.p("speed=").p(speed).p(" alt=").p(altSpeed).eol();
                 speed = glMax(altSpeed, speed);
             }
         }

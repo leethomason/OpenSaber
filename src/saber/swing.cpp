@@ -56,28 +56,30 @@ void Swing::push(const Vec3<int32_t>& x, const Vec3<int32_t>& mMin, const Vec3<i
         return;
     }
 
-    // I used to do a very careful analysis of the normal vectors to calculate
-    // the small sin approximation. Turns out just multiplying the deltas by
-    // a constant works just as well.
     /*
+        I used to do a very careful analysis of the normal vectors to calculate
+        the small sin approximation. Turns out just multiplying the deltas by
+        a constant works just as well.
+  
         (|dx| + |dy| + |dz|) / len
     */
     m_normal = normalize(x, mMin, mMax);
     m_dotOrigin = m_normal.x * m_origin.x + m_normal.y * m_origin.y + m_normal.z * m_origin.z;
 
     Vec3<int32_t> dVec = x - m_prevSample;
-    Vec3<int32_t> origin = (mMax + mMin) / 2;
     Vec3<int32_t> dVecAbs = dVec.vAbs();
-    Vec3<int32_t> originToX = x - origin;
-
-    int32_t len = intSqrt(originToX.x * originToX.x + originToX.y * originToX.y + originToX.z * originToX.z);
-    if (len == 0)
-        return;
+    Vec3<int32_t> range = (mMax - mMin) / 2;
 
     // 100 samples a second
-    int32_t decRadsSec = 1000 * (dVecAbs.x + dVecAbs.y + dVecAbs.z) / len;
-    swingAve.push(glMin(decRadsSec, int32_t(SWING_MAX * 10)));
-    m_speed = swingAve.average() / 10.0f;
+    static const int32_t S0 = 2000;
+    static const int32_t S1 = 20;
+    int32_t decRadsSec = S0 * dVecAbs.x / range.x + S0 * dVecAbs.y / range.y + S0 * dVecAbs.z / range.z;
+    ASSERT(decRadsSec >= 0);
+    if (decRadsSec < 0) // overflow
+        return;
+
+    swingAve.push(glMin(decRadsSec, int32_t(SWING_MAX * S1)));
+    m_speed = swingAve.average() / float(S1);
 
     m_prevSample = x;
 }
@@ -93,37 +95,34 @@ void Swing::setOrigin()
 
 bool Swing::test()
 {
-    static const Vec3<int32_t> mMin = { -100, -200, -300 };
-    static const Vec3<int32_t> mMax = { 300,  200,  100 };
+    static const Vec3<int32_t> mMin = { -200, -200, -300 };
+    static const Vec3<int32_t> mMax = { 600,  200,  100 };
     static const Vec3<int32_t> delta = mMax - mMin;
     static const Vec3<int32_t> half = delta / 2;
 
-    static const float speedRad = 1.57f;
-    Swing swing;
+    static const int NTEST = 3;
+    static const float speedRad[NTEST] = { 1.57f, 3.14f, 6.28f };
+    static const float finalDot[NTEST] = { 0.0f, -1.0f, 1.0f };
 
-    // 90 deg/second, 1.57 rad/sec
-    for (int i = 0; i < 100; ++i) {
-        float x = cosf(speedRad * i / 100.0f);
-        float y = sinf(speedRad * i / 100.0f);
-        if (i==10)
-            swing.setOrigin();
+    for (int n = 0; n < NTEST; ++n) {
+        Swing swing;
 
-        Vec3<int32_t> v;
-        v.x = int32_t(mMin.x + x * half.x + half.x);
-        v.y = int32_t(mMin.y + y * half.y + half.y);
-        v.z = int32_t(mMin.z + half.z);
+        for (int i = 0; i < 100; ++i) {
+            float x = cosf(speedRad[n] * i / 100.0f);
+            float y = sinf(speedRad[n] * i / 100.0f);
+            if (i == 10)
+                swing.setOrigin();
 
-        float xp = cosf(speedRad * (i-1) / 100.0f);
-        float yp = sinf(speedRad * (i-1) / 100.0f);
-        float dx = x - xp;
-        float dy = y - yp;
-        float approx = 100.0f * (glAbs(dx) + glAbs(dy));
+            Vec3<int32_t> v;
+            v.x = int32_t(mMin.x + x * half.x + half.x);
+            v.y = int32_t(mMin.y + y * half.y + half.y);
+            v.z = int32_t(mMin.z + half.z);
 
-        swing.push(v, mMin, mMax);
+            swing.push(v, mMin, mMax);
+        }
+        TEST_IS_TRUE(swing.speed() >= speedRad[n] * 0.7f && swing.speed() <= speedRad[n] * 1.3f);
+        TEST_IS_TRUE(swing.dotOrigin() > finalDot[n] - 0.2f && swing.dotOrigin() < finalDot[n] + 0.2f);
     }
-    TEST_IS_TRUE(swing.speed() >= speedRad * 0.8f && swing.speed() <= speedRad * 1.2f);
-    TEST_IS_TRUE(swing.dotOrigin() > 0.0f && swing.dotOrigin() < 0.3f);
-   
     return true;
 }
 

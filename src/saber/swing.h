@@ -59,7 +59,7 @@ class Swing
 public:
 	Swing();
 
-	void push(const Vec3<int32_t> &x, const Vec3<int32_t> &xMin, const Vec3<int32_t> &xMax);
+	void push(const Vec3<int32_t>& x, const Vec3<int32_t>& xMin, const Vec3<int32_t>& xMax);
 	// speed in radians / second
 	float speed() const { return m_speed; }
 
@@ -70,13 +70,13 @@ public:
 	// mix betwen swing sounds. Returns -1 to 1
 	float dotOrigin() const { return m_dotOrigin; }
 
-	const Vec3<float> &pos() const { return m_normal; }
-	const Vec3<float> &origin() const { return m_origin; }
+	const Vec3<float>& pos() const { return m_normal; }
+	const Vec3<float>& origin() const { return m_origin; }
 
 	static bool test();
 
 private:
-	Vec3<float> normalize(const Vec3<int32_t> x, const Vec3<int32_t> &x0, const Vec3<int32_t> &x1);
+	Vec3<float> normalize(const Vec3<int32_t> x, const Vec3<int32_t>& x0, const Vec3<int32_t>& x1);
 
 	bool m_init;
 	float m_speed;
