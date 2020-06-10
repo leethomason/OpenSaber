@@ -52,7 +52,7 @@ dhy = dhy + bit / 4
 INSET = INSET + bit
 
 travel(g, mat, x=INSET/2, y=dhy)
-g.spindle('CCW', mat['spindle_speed'])
+g.spindle('CW', mat['spindle_speed'])
 g.move(z=0)
 
 g.relative()
