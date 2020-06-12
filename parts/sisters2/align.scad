@@ -1,7 +1,7 @@
 C = 25.4;
 PIN = C / 10.0;
 
-DX = 1.5 * C;
+DX = 2.2 * C;
 DY = 0.7 * C;
 PINY = 0.6 * C;
 NDRILL = 18;
