@@ -1,9 +1,10 @@
 Issues:
 
+- volume boost support for fonts
 - switch to gyro...
-- dropout during green spin
 
 Fixed
+x dropout during green spin
 x fix floating point average to not drift
 x clean up code
 x tune swing intensity
