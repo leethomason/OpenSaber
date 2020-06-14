@@ -15,6 +15,7 @@ TRIM = 0.1;
 EPS = 0.001;
 STRUCTURE = 2.0;
 ZSTRUCT = 1.0;
+HANDLE = 10.0;
 
 module pillar() {
     translate([-PILLAR/2, -PILLAR/2, 0])
@@ -54,6 +55,10 @@ difference() {
     translate([STRUCTURE, STRUCTURE, -EPS]) 
         cube(size=[DX-STRUCTURE*2, DY-STRUCTURE*2, 100]);
 }
+
+// Finger holds
+translate([DX/2 - HANDLE/2, DY, 0]) cube(size=[HANDLE, HANDLE, ZSTRUCT]);
+translate([DX/2 - HANDLE/2, -HANDLE, 0]) cube(size=[HANDLE, HANDLE, ZSTRUCT]);
 
 // accel
 support(1.2904*C, 0.2708*C, 2.06 + 0.01, 2.06 + 0.1, 1.0);
