@@ -111,6 +111,24 @@ private:
         return d * d;
     }
 
+    inline static int32_t scaleVol(int32_t value, int32_t volumeShifted)
+    {
+        #if false
+        // max: SHRT_MAX * 256 * 256
+        //      32767 * 256 * 256 = 2147418112
+        //              INT32_MAX = 2147483647
+        if (volumeShifted > (256 << 8)) {
+            int64_t s64 = value * volumeShifted;
+            if (s64 > INT32_MAX)
+                return INT32_MAX;
+            else if (s64 < INT32_MIN)
+                return INT32_MIN;
+            else
+                return (int32_t)s64;
+        }
+        #endif
+        return value * volumeShifted;
+    }
 
     inline static int32_t sat_add(int32_t x, int32_t y)
     {

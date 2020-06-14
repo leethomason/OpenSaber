@@ -166,10 +166,7 @@ void S4ADPCM::decode4(const uint8_t* p, int32_t nSamples,
         else if (state->volumeShifted > state->volumeTarget)
             state->volumeShifted -= VOLUME_EASING;
 
-        // max: SHRT_MAX * 256 * 256
-        //      32767 * 256 * 256 = 2147418112
-        //              INT32_MAX = 2147483647
-        int32_t s = value * state->volumeShifted;
+        int32_t s = scaleVol(value, state->volumeShifted);
         if (add)
             out[0] = out[1] = sat_add(s, out[0]);
         else
@@ -206,7 +203,7 @@ void S4ADPCM::decode8(const uint8_t* p, int32_t nSamples,
         else if (state->volumeShifted > state->volumeTarget)
             state->volumeShifted -= VOLUME_EASING;
 
-        int32_t s = value * state->volumeShifted;
+        int32_t s = scaleVol(value, state->volumeShifted);
         if (add) {
             out[0] = out[1] = sat_add(s, out[0]);
         }
