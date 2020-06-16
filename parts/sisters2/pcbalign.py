@@ -75,16 +75,17 @@ g.absolute()
 
 # level part
 # really need overcut support. until then...hole the corners.
-g.move(x=-D, y=-D)
+half = mat['tool_size'] / 2
+g.move(x=-D + half, y=-D + half)
 g.move(z=0)
 hole(g, mat, -DZ_EDGE, d=4.0)
-g.move(x=-D + DX, y=-D)
+g.move(x=-D + DX - half, y=-D + half)
 g.move(z=0)
 hole(g, mat, -DZ_EDGE, d=4.0)
-g.move(x=-D+DX, y=-D+DY)
+g.move(x=-D+DX - half, y=-D+DY - half)
 g.move(z=0)
 hole(g, mat, -DZ_EDGE, d=4.0)
-g.move(x=-D, y=-D+DY)
+g.move(x=-D + half, y=-D+DY - half)
 g.move(z=0)
 hole(g, mat, -DZ_EDGE, d=4.0)
 
