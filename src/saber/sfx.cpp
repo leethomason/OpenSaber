@@ -193,7 +193,6 @@ bool SFX::playSound(int sound, int mode, int channel)
             .p(m_sfxType[sound].start).p(",")
             .p(m_sfxType[sound].start + m_sfxType[sound].count).p(")")
             .eol();
-        // EventQ.event("[SFX play]", sound);
 
         m_driver->play(track, sound == SFX_IDLE, channel);
         m_driver->setVolume(m_volume, channel);

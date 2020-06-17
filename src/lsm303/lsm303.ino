@@ -10,7 +10,7 @@ uint32_t lastMillis = 0;
 int nRead = 0;
 int nMagRead = 0;
 GrinlizLSM303 accel;
-Swing swing(10);
+Swing swing;
 
 void setup() {
     Serial.begin(19200);
@@ -18,21 +18,15 @@ void setup() {
     Log.attachSerial(&Serial);
 
     Log.p("Serial connected.").eol();
-
     Log.p("Starting Accel/Gyro in I2C mode.").eol();
+    delay(10);
+
     if (!accel.begin()) {
         Log.p("Accel error.").eol();
         while(true) {}
     }
     Log.p("Accel/Gyro success").eol();
     accel.logMagStatus();
-
-    #ifdef DEBUG 
-    Log.p("DEBUG").eol();
-    #endif
-    #ifdef _DEBUG 
-    Log.p("_DEBUG").eol();
-    #endif
 
     TestFixed();
     Swing::test();

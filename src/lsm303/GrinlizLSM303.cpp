@@ -131,7 +131,9 @@ bool GrinlizLSM303::begin()
     Wire.begin();
     delay(10);  // initial warmup
 
+    Log.p("write8").eol();
     write8(LSM303_ADDRESS_ACCEL, LSM303_REGISTER_ACCEL_CTRL_REG1_A, 0x57);
+    Log.p("read8").eol();
     uint8_t reg1_a = read8(LSM303_ADDRESS_ACCEL, LSM303_REGISTER_ACCEL_CTRL_REG1_A);
 
     Log.p("ctrlA=0x").p(reg1_a, HEX).p(" ").p(reg1_a == 0x57 ? "ok" : "error").eol();
@@ -200,8 +202,10 @@ bool GrinlizLSM303::begin()
     );
     delay(10);
 
-    mMin.set(INT_MAX, INT_MAX, INT_MAX);
-    mMax.set(INT_MIN, INT_MIN, INT_MIN);
+    m_min.set(INT_MAX, INT_MAX, INT_MAX);
+    m_max.set(INT_MIN, INT_MIN, INT_MIN);
+    m_minQueued.set(INT_MAX, INT_MAX, INT_MAX);
+    m_maxQueued.set(INT_MIN, INT_MIN, INT_MIN);
     return (whoAmIA == 0x33) && (whoAmIM == 0x40);
 }
 
@@ -323,10 +327,49 @@ int GrinlizLSM303::readInner(Vec3<int32_t>* rawData, Vec3<float>* data, int n)
     return n;
 }
 
+bool GrinlizLSM303::recalibrateMag()
+{
+    /*Log.p("recalibrateMag()").p(" queue=")
+        .p(dataValid(WARM_T, m_min, m_max) ? 1 : 0)
+        .p(" current=")
+        .p(dataValid(WARM_T, m_minQueued, m_maxQueued) ? 1 : 0)
+        .v3(m_min).v3(m_max)
+        .eol(); */
+
+    if (dataValid(WARM_T, m_minQueued, m_maxQueued) && dataValid(INIT_T, m_min, m_max)) {
+        Vec3<int32_t> a = m_max - m_min;
+        int err = a.x + a.y + a.z;
+        
+        Vec3<int32_t> b = m_maxQueued - m_minQueued;
+        int errQueue = b.x + b.y + b.z;
+
+        if (errQueue < err) {
+            m_min = m_minQueued;
+            m_max = m_maxQueued;
+            Log.p("Mag recalibrated. ").v3(m_min).v3(m_max).eol();
+            // Average out so it doesn't go wobbly, but we bring in the range.
+            //m_min = (m_min + m_minQueued) / 2;
+            //m_max = (m_max + m_maxQueued) / 2;
+        }
+        else {
+            Log.p("Mag re-calibration discarded.").eol();
+        }
+        // Either:
+        // - we had better data, and now the Queued needs reset
+        // - we had valid Queue data, but it had too much error.
+        // Either way, throw it away and start to recompute.
+        m_minQueued.set(INT_MAX, INT_MAX, INT_MAX);
+        m_maxQueued.set(INT_MIN, INT_MIN, INT_MIN);
+        return true;
+    }
+    return false;
+}
+
 int GrinlizLSM303::readMag(Vec3<int32_t>* rawData, Vec3<float>* data)
 {
     uint8_t status = read8(LSM303_ADDRESS_MAG, STATUS_REG_M);
-    if ((status & (1<<3)) == 0 && (status & (1<<7)) == 0) return 0;
+    if ((status & (1<<3)) == 0 && (status & (1<<7)) == 0) 
+        return 0;
 
     Wire.beginTransmission(LSM303_ADDRESS_MAG);
     Wire.write(OUTX_LOW_REG_M);
@@ -349,16 +392,24 @@ int GrinlizLSM303::readMag(Vec3<int32_t>* rawData, Vec3<float>* data)
     int32_t y = int16_t(ylo | (yhi << 8));
     int32_t z = int16_t(zlo | (zhi << 8));
 
-    mMin.x = glMin(x, mMin.x);
-    mMin.y = glMin(y, mMin.y);
-    mMin.z = glMin(z, mMin.z);
+    m_min.x = glMin(x, m_min.x);
+    m_min.y = glMin(y, m_min.y);
+    m_min.z = glMin(z, m_min.z);
 
-    mMax.x = glMax(x, mMax.x);
-    mMax.y = glMax(y, mMax.y);
-    mMax.z = glMax(z, mMax.z);
+    m_max.x = glMax(x, m_max.x);
+    m_max.y = glMax(y, m_max.y);
+    m_max.z = glMax(z, m_max.z);
 
     if (!magDataValid())
         return 0;
+
+    m_minQueued.x = glMin(x, m_minQueued.x);
+    m_minQueued.y = glMin(y, m_minQueued.y);
+    m_minQueued.z = glMin(z, m_minQueued.z);
+
+    m_maxQueued.x = glMax(x, m_maxQueued.x);
+    m_maxQueued.y = glMax(y, m_maxQueued.y);
+    m_maxQueued.z = glMax(z, m_maxQueued.z);
 
     if (rawData) {
         rawData->x = x;
@@ -366,9 +417,9 @@ int GrinlizLSM303::readMag(Vec3<int32_t>* rawData, Vec3<float>* data)
         rawData->z = z; 
     }
     if (data) {
-        float vx = -1.0f + 2.0f * (x - mMin.x) / (mMax.x - mMin.x);
-        float vy = -1.0f + 2.0f * (y - mMin.y) / (mMax.y - mMin.y);
-        float vz = -1.0f + 2.0f * (z - mMin.z) / (mMax.z - mMin.z);
+        float vx = -1.0f + 2.0f * (x - m_min.x) / (m_max.x - m_min.x);
+        float vy = -1.0f + 2.0f * (y - m_min.y) / (m_max.y - m_min.y);
+        float vz = -1.0f + 2.0f * (z - m_min.z) / (m_max.z - m_min.z);
 
         float len2 = vx * vx + vy * vy + vz * vz;
         float lenInv = 1.0f / sqrtf(len2);

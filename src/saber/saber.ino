@@ -285,8 +285,6 @@ void setup()
     ledA.set(true); // "power on" light
 
     buttonA.setHoldRepeats(true);  // everything repeats!!
-
-    // EventQ.event("[saber start]");
     lastLoopTime = millis();    // so we don't get a big jump on the first loop()
 
     Log.p("Setup() done.").eol();

@@ -23,55 +23,13 @@
 #include "swing.h"
 #include <math.h>
 
-Filter::Filter()
-{
-    for(int i=0; i<N; ++i) {
-        sample[i].setZero();
-    }
-}
-
-void Filter::fill(const Vec3<int32_t> v)
-{
-    for(int i=0; i<N; ++i) {
-        sample[i] = v;
-    }
-    current = 0;
-    cached = true;
-    ave = v;
-}
-
-void Filter::push(const Vec3<int32_t> v)
-{
-    sample[current] = v;
-    current = (current + 1) % N;
-    cached = false;
-}
-
-void Filter::calc(Vec3<int32_t>* vec3)
-{
-    if (!cached) {
-        Vec3<int32_t> total;
-        total.setZero();
-
-        for (int i = 0; i < N; ++i) {
-            total += sample[i];
-        }
-        ave.x = total.x >> SHIFT;
-        ave.y = total.y >> SHIFT;
-        ave.z = total.z >> SHIFT;
-        cached = true;
-    }
-    *vec3 = ave;
-}
-
-
-Swing::Swing(int msecPerSample)
+Swing::Swing()
 {
     m_speed = 0;
+    m_dotOrigin = 0;
     m_origin.setZero();
-    m_prevPosNorm.setZero();
+    m_normal.setZero();
     m_init = false;
-    m_dtINV = 1000.0f / msecPerSample;
 }
 
 Vec3<float> Swing::normalize(const Vec3<int32_t> v, const Vec3<int32_t> &mMin, const Vec3<int32_t> &mMax)
@@ -91,72 +49,88 @@ void Swing::push(const Vec3<int32_t>& x, const Vec3<int32_t>& mMin, const Vec3<i
     if (!m_init) {
         m_init = true;
         m_speed = 0;
-        m_prevPosNorm = normalize(x, mMin, mMax);
-        Log.p("Swing initial push: ").v3(m_prevPosNorm.x, m_prevPosNorm.y, m_prevPosNorm.z).eol();
-        m_filter.fill(x);
+        m_prevSample = x;
+        m_normal = normalize(x, mMin, mMax);
+        m_origin.set(1, 0, 0);
+        Log.p("Swing initial push: ").v3(m_normal.x, m_normal.y, m_normal.z).eol();
         return;
     }
 
-    m_filter.push(x);
-    Vec3<int32_t> newPos;
-    m_filter.calc(&newPos);
+    /*
+        I used to do a very careful analysis of the normal vectors to calculate
+        the small sin approximation. Turns out just multiplying the deltas by
+        a constant works just as well.
+  
+        (|dx| + |dy| + |dz|) / len
+    */
+    m_normal = normalize(x, mMin, mMax);
+    m_dotOrigin = m_normal.x * m_origin.x + m_normal.y * m_origin.y + m_normal.z * m_origin.z;
 
-    // But we need normals.
-    // This is a lot of math for our poor little microprocessor.
-    Vec3<float> a = m_prevPosNorm;
-    Vec3<float> b = normalize(newPos, mMin, mMax);
-    //Log.p("in: ").v3(b.x, b.y, b.z).eol();
+    Vec3<int32_t> dVec = x - m_prevSample;
+    Vec3<int32_t> dVecAbs = dVec.vAbs();
+    Vec3<int32_t> range = (mMax - mMin) / 2;
 
-    // sin(t) = t, for small t (in radians)
-    Vec3<float> c = b - a;
-    float dist = sqrtf(c.x * c.x + c.y * c.y + c.z * c.z);
-    
-    m_speed = dist * m_dtINV;
-    m_prevPosNorm = b;
+    // 100 samples a second
+    static const int32_t S0 = 2000;
+    static const int32_t S1 = 20;
+    int32_t decRadsSec = S0 * dVecAbs.x / range.x + S0 * dVecAbs.y / range.y + S0 * dVecAbs.z / range.z;
+    ASSERT(decRadsSec >= 0);
+    if (decRadsSec < 0) // overflow
+        return;
 
-    if (!m_origin.isZero()) {
-        m_dotOrigin = m_origin.x * b.x + m_origin.y * b.y + m_origin.z * b.z;
-    }
+    swingAve.push(glMin(decRadsSec, int32_t(SWING_MAX * S1)));
+    m_speed = swingAve.average() / float(S1);
+
+    m_prevSample = x;
 }
+
 
 void Swing::setOrigin()
 {
     if (m_init) {
-        m_origin = m_prevPosNorm;
+        m_origin = m_normal;
     }
 }
 
 
 bool Swing::test()
 {
-    // Test filtering at 45deg / second
-    static const Vec3<int32_t> mMin = {-100, -200, -300};
-    static const Vec3<int32_t> mMax = { 300,  200,  100};
+    static const Vec3<int32_t> mMin = { -200, -200, -300 };
+    static const Vec3<int32_t> mMax = { 600,  200,  100 };
+    static const Vec3<int32_t> delta = mMax - mMin;
+    static const Vec3<int32_t> half = delta / 2;
 
-    static const Vec3<int32_t> x0 = {300,   0, -100};    // (1, 0, 0)
-    static const Vec3<int32_t> x1 = {242, 142, -100};    // (0.71, 0.71, 0)
+    static const int NTEST = 3;
+    static const float speedRad[NTEST] = { 1.57f, 3.14f, 6.28f };
+    static const float finalDot[NTEST] = { 0.0f, -1.0f, 1.0f };
 
-    static const float speedDeg = 3.1459f / 4.f;
+    for (int n = 0; n < NTEST; ++n) {
+        Swing swing;
 
-    Swing swing(100);
-    //Log.p("Target speed=").p(speedDeg).eol();
+        for (int i = 0; i < 100; ++i) {
+            float x = cosf(speedRad[n] * i / 100.0f);
+            float y = sinf(speedRad[n] * i / 100.0f);
+            if (i == 10)
+                swing.setOrigin();
 
-    for(int i=0; i<=10; ++i) {
-        Vec3<int32_t> x;
-        x.x = x0.x + i * (x1.x - x0.x) / 10;
-        x.y = x0.y + i * (x1.y - x0.y) / 10;
-        x.z = x0.z + i * (x1.z - x0.z) / 10;
+            Vec3<int32_t> v;
+            v.x = int32_t(mMin.x + x * half.x + half.x);
+            v.y = int32_t(mMin.y + y * half.y + half.y);
+            v.z = int32_t(mMin.z + half.z);
 
-        swing.push(x, mMin, mMax);
-        //Log.p("Swing speed (").p(i).p(")=").p(swing.speed()).eol();
-        TEST_IS_TRUE(swing.speed() >= 0 && swing.speed() <= speedDeg * 1.2f);
-
-        if (i == 0)
-            swing.setOrigin();
+            swing.push(v, mMin, mMax);
+        }
+        TEST_IS_TRUE(swing.speed() >= speedRad[n] * 0.7f && swing.speed() <= speedRad[n] * 1.3f);
+        TEST_IS_TRUE(swing.dotOrigin() > finalDot[n] - 0.2f && swing.dotOrigin() < finalDot[n] + 0.2f);
     }
-    TEST_IS_TRUE(swing.speed() > speedDeg * 0.8f && swing.speed() < speedDeg * 1.2f);
-    // We won't get to 0.71 because of filtering.
-    TEST_IS_TRUE(swing.dotOrigin() > 0.71f && swing.dotOrigin() < 0.80f);
-
     return true;
+}
+
+
+void MagFilter::push(const Vec3<int32_t> &magData)
+{
+    // scale everything to divide more smoothly
+    aveMagX.push(magData.x * SCALE);
+    aveMagY.push(magData.y * SCALE);
+    aveMagZ.push(magData.z * SCALE);
 }

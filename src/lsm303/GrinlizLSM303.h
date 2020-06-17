@@ -49,14 +49,13 @@ public:
        the ones to use.
     */
     int readMag(Vec3<int32_t>* rawData, Vec3<float>* data);
+    bool recalibrateMag();
 
-    const Vec3<int32_t>& getMagMin() const { return mMin; }
-    const Vec3<int32_t>& getMagMax() const { return mMax; }
+    const Vec3<int32_t>& getMagMin() const { return m_min; }
+    const Vec3<int32_t>& getMagMax() const { return m_max; }
+
     bool magDataValid() const { 
-        static const int T = 100;
-        return     (mMax.x - mMin.x > T) 
-                && (mMax.y - mMin.y > T) 
-                && (mMax.z - mMin.z > T);   
+        return dataValid(INIT_T, m_min, m_max);
     }
 
     void logMagStatus();
@@ -68,7 +67,21 @@ public:
     static GrinlizLSM303* instance() { return s_instance; }
 
 private:
-    Vec3<int32_t> mMin, mMax;
+    static bool dataValid(int t, const Vec3<int32_t>& a, const Vec3<int32_t>& b) {
+        return     (b.x - a.x > t) 
+                && (b.y - a.y > t) 
+                && (b.z - a.z > t);   
+    }
+
+    // how much delta do we need to operate? On the one hand, want to get the
+    // swing on quickly. But after that, recalibrate should really have good 
+    // data. So 2 constants: INIT_T and WARM_T
+    static const int INIT_T = 100;  
+    static const int WARM_T = 200;
+
+    Vec3<int32_t> m_min, m_max;
+    Vec3<int32_t> m_minQueued, m_maxQueued;
+
     static GrinlizLSM303* s_instance;
 
     void write8(uint8_t address, uint8_t reg, uint8_t value) const;

@@ -45,8 +45,13 @@ difference() {
         translate([0, DY, 0]) pillar();
     }
     T = 0.15;
-    translate([-T, -T, BASE])
-        cube(size=[DX + T*2, DY + T*2, 10]);
+    T1 = 0.35;
+    hull() {
+        translate([-T, -T, BASE])
+            cube(size=[DX + T*2, DY + T*2, 10]);
+        translate([-T1, -T1, PILLAR])
+            cube(size=[DX + T1*2, DY + T1*2, 10]);
+    }
 }
 
 // Base
