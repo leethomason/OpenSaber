@@ -198,6 +198,11 @@ bool TestAverageSample()
         TEST_IS_TRUE(r.x == 1);
         TEST_IS_TRUE(r.y == 2);
         TEST_IS_TRUE(r.z == 4);
+
+        for (int i = 0; i < 8; ++i) {
+            ave.push(Vec3<int>(0, 0, 0));
+        }
+        TEST_IS_TRUE(ave.average().isZero());
     }
     {
         AverageSample<uint16_t, uint32_t, 256> ave(4000);
@@ -206,6 +211,14 @@ bool TestAverageSample()
             ave.push(8000);
         }
         TEST_IS_TRUE(ave.average() == 6000);
+    }
+    {
+        AverageSample<float, float, 2> ave(0);
+        ave.push(1.0f);
+        ave.push(1.0f);
+        ave.push(0.0f);
+        ave.push(2.0f);
+        TEST_IS_TRUE(ave.average() == 1.0f);
     }
     return true;
 }
@@ -640,18 +653,20 @@ bool TestCQueue()
     return true;
 }
 
-int AnimateProp::tick(uint32_t delta) 
+int AnimateProp::tick(uint32_t delta, int* target) 
 {
     m_time += delta;
 
     if (m_period == 0 || m_time >= m_period) {
         m_period = 0;
         m_value = m_end;
+        if (target) *target = m_value;
         return m_end;
     }
     else {
         m_time += delta;
         m_value = m_start + (m_end - m_start) * int(m_time) / int(m_period);
+        if (target) *target = m_value;
         return m_value;
     }
 }
@@ -659,7 +674,8 @@ int AnimateProp::tick(uint32_t delta)
 int Timer2::tick(uint32_t delta)
 {
 	int fires = 0;
-	m_accum += delta;
+	m_accum += delta * m_scale;
+
 	if (m_enable && delta && m_period && (m_accum >= m_period)) {
 		fires = m_accum / m_period;
 		if (m_repeating) {

@@ -29,6 +29,9 @@
 #include "grinliz_assert.h"
 #include "fixed.h"
 
+static const uint32_t NOMINAL_VOLTAGE = 3700;
+static const uint32_t VOLTAGE_RANGE	  =  300;
+
 inline int32_t lerp1024(int16_t a, int16_t b, int32_t t1024) {
     return (a * (1024 - t1024) + b * t1024) / 1024;
 }
@@ -64,9 +67,18 @@ struct Vec3
 	void setZero() { x = y = z = 0; }
 	bool isZero() const { return x==0 && y == 0 && z == 0; }
 	void scale(T s) { x *= s; y *= s; z *= s; }
+	void div(T s) { x /= s; y /= s; z /= s; }
 
 	T operator[](int i) const { return *(&x + i); }
 	T& operator[](int i) { return *(&x + i); }
+
+	Vec3<T> vAbs() const {
+		Vec3<T> a = *this;
+		if (a.x < 0) a.x = -a.x;
+		if (a.y < 0) a.y = -a.y;
+		if (a.z < 0) a.z = -a.z;
+		return a;
+	}
 
     Vec3<T>& operator += (const Vec3<T>& v) { x += v.x; y += v.y; z += v.z; return *this; }
     Vec3<T>& operator -= (const Vec3<T>& v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
@@ -526,35 +538,52 @@ class AverageSample
 {
 public:
     AverageSample(TYPE initialValue) {
-        for (int i = 0; i < N; ++i) m_sample[i] = initialValue;
+        for (int i = 0; i < N; ++i) {
+			m_sample[i] = initialValue;
+			m_total += initialValue;
+		}
         m_average = initialValue;
-        m_valid = true;
     }
+
+    AverageSample() {
+        for (int i = 0; i < N; ++i) {
+			m_sample[i] = 0;
+		}
+		m_total = 0;
+		m_average = 0;
+	}
+
+	void recount() {
+		m_total = 0;
+		for (int i = 0; i < N; ++i)
+			m_total += m_sample[i];
+	}
 
     void push(TYPE value) {
+		m_total -= m_sample[m_pos];
         m_sample[m_pos] = value;
+		m_total += value;
+
         m_pos++;
-        if (m_pos == N) m_pos = 0;
-        m_valid = false;
+        if (m_pos == N) {
+			m_pos = 0;
+			recount();
+		}
+		m_average = m_total / N;
     }
 
-    TYPE average() const {
-        if (m_valid == false) {
-            SUMTYPE total = 0;
-            for (int i = 0; i < N; ++i) {
-                total += m_sample[i];
-            }
-            m_average = total / N;
-            m_valid = true;
-        }
-        return m_average;
-    }
+	void fill(TYPE value) {
+		for(int i=0; i<N; ++i)
+			push(value);
+	}
 
+    TYPE average() const { return m_average; }
     int numSamples() const { return N; }
+	bool origin() const { return m_pos == 0; }
 
 private:
-    mutable TYPE m_average;
-    mutable bool m_valid = false;
+    SUMTYPE m_average;
+	SUMTYPE m_total = 0;
     int m_pos = 0;
     TYPE m_sample[N];
 };
@@ -593,9 +622,12 @@ public:
 		m_end = end;
 		m_value = start;
 	}
-	int tick(uint32_t delta);
+	int tick(uint32_t delta, int* target=0);
 	int value() const { return m_value; }
 	bool done() { return m_period == 0; }
+
+	int start() const { return m_start; }
+	int end() const { return m_end; }
 
 private:
 	uint32_t m_time = 0;
@@ -616,7 +648,13 @@ public:
 	
 	uint32_t remaining() const { return m_period - m_accum; }
 	uint32_t period() const { return m_period; }
-	void setPeriod(uint32_t period) { m_period = period; }
+
+	void setPeriod(uint32_t period) { m_period = period; m_scale = 1; }
+	void setScaledPeriod(float period) {
+		m_period = int(period * SCALE);
+		m_scale = SCALE;
+	}
+
 	bool repeating() const { return m_repeating; }
 	void setRepeating(bool repeating) { m_repeating = repeating; }
 	bool enabled() const { return m_enable; }
@@ -633,7 +671,9 @@ public:
 	static bool Test();
 
 private:
+	const uint32_t SCALE = 16;
 	uint32_t m_accum = 0;
+	uint32_t m_scale = 1;
 	uint32_t m_period;
 	bool m_repeating;
 	bool m_enable;
