@@ -1,6 +1,8 @@
 #include "Grinliz_Util.h"
 #include "manifest.h"
 #include "i2saudiodrv.h"
+#include "expander.h"
+#include "s4adpcm.h"
 
 #include <Adafruit_SPIFlash.h>
 #include <Adafruit_ZeroI2S.h>
@@ -14,6 +16,13 @@ Adafruit_ZeroDMA dma;
 Adafruit_ZeroI2S i2s(0, 1, 12, 2);
 Manifest manifest;
 I2SAudioDriver i2sAudioDriver(&dma, &i2s, &spiFlash, manifest);
+
+static const int TEST_SOURCE_SAMPLES = 1024;
+static const int TEST_COMPRESSED_BYTES = 512;
+
+int16_t gSourceSamples[TEST_SOURCE_SAMPLES];
+uint8_t gCompressed[TEST_COMPRESSED_BYTES];
+int32_t gTarget[TEST_SOURCE_SAMPLES*2];
 
 int currentDir = 0;
 
@@ -98,6 +107,31 @@ void processCmd(const CStr<32>& str)
     }
 }
 
+
+void setupTest()
+{
+    wav12::ExpanderAD4::generateTestData(TEST_SOURCE_SAMPLES, gSourceSamples);
+    uint32_t nComp = 0;
+    S4ADPCM::Error err;
+    const int* table = S4ADPCM::getTable(4, 0);
+    wav12::ExpanderAD4::compress4(gSourceSamples, TEST_SOURCE_SAMPLES, gCompressed, &nComp, table, &err);
+
+    Log.p("Setup test. nComp=").p(nComp).p(" error-max=").p(err.maxError).eol();
+}
+
+int test()
+{
+    int32_t total = 0;
+
+    S4ADPCM::State state;
+    const int* table = S4ADPCM::getTable(4, 0);
+    S4ADPCM::decode4(gCompressed, TEST_SOURCE_SAMPLES, 256, false, gTarget, &state, table);
+    for(int i=0; i<TEST_SOURCE_SAMPLES*2; i++) {
+        total += gTarget[i];
+    }
+    return total;
+}
+
 void setup()
 {
     Serial.begin(19200);
@@ -113,6 +147,22 @@ void setup()
     i2sAudioDriver.begin();
 
     scan();
+    setupTest();
+    uint32_t start = micros();
+    int r = test();
+    uint32_t end = micros();
+    Log.p("test run (micro)=").p(end - start).p(" r=").p(r).eol();
+
+    int nRuns = 0;
+    Log.p("runs/sec=").eol();
+    start = millis();
+    while(true) {
+        r += test();
+        ++nRuns;
+        end = millis();
+        if (end - start >= 1000) break;
+    }
+    Log.p("runs/sec=").p(nRuns).p(" r=").p(r).eol();
 
     Log.p("setup() complete.").eol();
 }

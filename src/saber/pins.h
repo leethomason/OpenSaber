@@ -60,7 +60,7 @@
 
 // ----------------------------------
 #define SERIAL_DEBUG 				1
-#define SABER_MODEL 				SABER_MODEL_DUTCHESS
+#define SABER_MODEL 				SABER_MODEL_TEST
 #define SABER_SUB_MODEL				
 // ----------------------------------
 
@@ -795,6 +795,48 @@
 	static const int VOLUME_2 = 64;
 	static const int VOLUME_3 = 128;
 	static const int VOLUME_4 = 256;
+#elif (SABER_MODEL == SABER_MODEL_TEST)
+	#define PCB_VERSION 				PCB_ITSY_2D
+	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
+	#define SABER_VOLTMETER			
+	#define SABER_UI_LED				SABER_LED_DOTSTAR
+
+	#define SABER_DISPLAY			SABER_DISPLAY_128_32
+	/*
+	#define SABER_NUM_LEDS 			    4
+	#define SABER_UI_START				0
+	#define SABER_UI_COUNT				4
+	#define SABER_UI_BRIGHTNESS	    	16
+	#define SABER_UI_IDLE_MEDITATION
+	*/
+	#define VOLTMETER_TUNE				1016
+	//#define SABER_SOUND_TUNE
+	//#define SABER_UI_COLOR_WHEEL
+
+	// Does not need to be power of 2.
+	// multiply by 10 to get ms width of filter
+	#define FILTER_MAG_X	10
+	#define FILTER_MAG_Y	10
+	#define FILTER_MAG_Z	10
+	#define SWING_SAMPLES	12
+	#define ID_STR "Test Cree XPE2 RGB"
+
+	static const int32_t RED_VF   = 2200;
+	static const int32_t RED_I    = 400;
+	static const int32_t RED_R    = 4100;
+
+	static const int32_t GREEN_VF = 3200;
+	static const int32_t GREEN_I  = 400;
+	static const int32_t GREEN_R  = 1000;
+
+	static const int32_t BLUE_VF  = 3100;
+	static const int32_t BLUE_I   = 400;
+	static const int32_t BLUE_R   = 1350;
+
+	static const int VOLUME_1 = 32;
+	static const int VOLUME_2 = 64;
+	static const int VOLUME_3 = 128;
+	static const int VOLUME_4 = 256;
 #endif
 
 #if (PCB_VERSION == PCB_SHIELD_3)
@@ -950,6 +992,32 @@
 	   Integrated memory for sound.
 	   Dotstar support
 	*/
+	#define SABER_ACCELEROMETER SABER_ACCELEROMETER_LSM303
+
+	#define PIN_I2S_LRCLK		0
+	#define PIN_I2S_BITCLK		1
+
+	#define PIN_VMETER        	A1
+	#define PIN_LED_A    	  	A2 
+	#define PIN_DOTSTAR_EN		A3
+	#define PIN_OLED_CS  		A4
+	#define PIN_OLED_DC		    A5
+	// CLOCK	 
+	// MOSI
+	// MISO 
+	#define PIN_OLED_RESET	    2
+	// 7 available
+	#define PIN_EMITTER_RED   	9
+	#define PIN_EMITTER_GREEN 	10
+	#define PIN_EMITTER_BLUE   	11
+	#define PIN_I2S_DATA		12
+	#define PIN_SWITCH_A		13
+	
+	#define ACCEL_BLADE_DIRECTION 1
+	#define ACCEL_NORMAL_BUTTON   0
+	#define ACCEL_PERP_BUTTON     2
+
+#elif (PCB_VERSION == PCB_ITSY_2D)
 	#define SABER_ACCELEROMETER SABER_ACCELEROMETER_LSM303
 
 	#define PIN_I2S_LRCLK		0

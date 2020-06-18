@@ -120,7 +120,9 @@ static const int OLED_HEIGHT = 32;
 uint8_t oledBuffer[OLED_WIDTH * OLED_HEIGHT / 8] = {0};
 
 OLED_SSD1306 display(PIN_OLED_DC, PIN_OLED_RESET, PIN_OLED_CS);
-VRender    renderer;
+VRender    vRender;
+Renderer   renderer;
+
 int renderStage = 0;
 #elif SABER_DISPLAY == SABER_DISPLAY_7_5
 Pixel_7_5_UI display75;
@@ -135,8 +137,6 @@ Digit4UI digit4UI;
 #if SABER_DISPLAY == SABER_DISPLAY_128_32
 void BlockDrawOLED(const BlockDrawChunk* chunks, int n)
 {
-    static const int OLED_BYTES = OLED_WIDTH * OLED_HEIGHT / 8;
-
     // The renderer assumes clear to black beforehand.
     // But does still support drawing in black.
     for (int i = 0; i < n; ++i) {
@@ -148,7 +148,7 @@ void BlockDrawOLED(const BlockDrawChunk* chunks, int n)
         uint8_t mask = 1 << bit;
         uint8_t* p = oledBuffer + (row << OLED_WIDTH_SHIFT) + chunk.x0;
 
-        if (chunk.rgb) {
+        if (chunk.color) {
             for (int nPix = chunk.x1 - chunk.x0; nPix > 0; nPix--, p++) {
                 *p |= mask;
             }
@@ -235,10 +235,10 @@ void setup()
     #if SABER_DISPLAY == SABER_DISPLAY_128_32
     {
         display.begin(OLED_WIDTH, OLED_HEIGHT, SSD1306_SWITCHCAPVCC);
-        renderer.Attach(BlockDrawOLED);
-        renderer.SetSize(OLED_WIDTH, OLED_HEIGHT);
-        renderer.SetClip(VRender::Rect(0, 0, OLED_WIDTH, OLED_HEIGHT));
-        renderer.Clear();
+        vRrender.Attach(BlockDrawOLED);
+        vRrender.SetSize(OLED_WIDTH, OLED_HEIGHT);
+        vRrender.SetClip(VRender::Rect(0, 0, OLED_WIDTH, OLED_HEIGHT));
+        vRrender.Clear();
         display.display(oledBuffer);
 
         Log.p("OLED display connected.").eol();
@@ -693,7 +693,9 @@ void loopDisplays(uint32_t msec, uint32_t delta)
     static ProfileData data("loopDisplays");
     ProfileBlock block(&data);
 
+#ifdef SABER_NUM_LEDS
     osbr::RGBA leds[SABER_NUM_LEDS] = {0};
+#endif
 
     UIRenderData uiRenderData;
     uiRenderData.volume = saberDB.volume4();
@@ -712,7 +714,9 @@ void loopDisplays(uint32_t msec, uint32_t delta)
             memset(oledBuffer, 0, OLED_HEIGHT * OLED_WIDTH / 8);
             break;
         case 1:
-            VectorUI::Draw(&renderer, msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
+            VectorUI::Draw(&renderer,
+            
+             msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
             break;
         case 2:
             renderer.Render();

@@ -73,10 +73,13 @@ namespace wav12 {
         // Codec 4/4-bit is a kind of ADPCM. (Although simpler than the standard algorithm.)
         // Simpler and cleaner. Tuned on the lightsaber sounds and a sample of classical music.
         // The quality is shockingly good for such a simple algorithm at 4 bits / samples.
-        static void compress4(const int16_t* data, int32_t nSamples, uint8_t** compressed, uint32_t* nCompressed, const int* table, S4ADPCM::Error* error);
-        static void compress8(const int16_t* data, int32_t nSamples, uint8_t** compressed, uint32_t* nCompressed, const int* table, S4ADPCM::Error* error);
+        // 'compressed' must contain (nSamples + 1)/2 for 4 bit,
+        //                           nSamples for 8 bit
+        static void compress4(const int16_t* data, int32_t nSamples, uint8_t* compressed, uint32_t* nCompressed, const int* table, S4ADPCM::Error* error);
+        static void compress8(const int16_t* data, int32_t nSamples, uint8_t* compressed, uint32_t* nCompressed, const int* table, S4ADPCM::Error* error);
 
-        static void compress(int codec, const int16_t* data, int32_t nSamples, uint8_t** compressed, uint32_t* nCompressed, const int* table, S4ADPCM::Error* error)
+        // 'compressed' should be nSamples, although 4 bit will only use half
+        static void compress(int codec, const int16_t* data, int32_t nSamples, uint8_t* compressed, uint32_t* nCompressed, const int* table, S4ADPCM::Error* error)
         {
             switch (codec) {
             case S4ADPCM_4BIT:  compress4(data, nSamples, compressed, nCompressed, table, error);   break;
@@ -113,3 +116,4 @@ namespace wav12 {
     };
 }
 #endif
+    

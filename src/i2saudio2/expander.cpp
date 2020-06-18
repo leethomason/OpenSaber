@@ -43,22 +43,18 @@ void ExpanderAD4::rewind()
 }
 
 void ExpanderAD4::compress4(const int16_t* data, int32_t nSamples,
-    uint8_t** compressed, uint32_t* nCompressed, const int* table, S4ADPCM::Error* error)
+    uint8_t* compressed, uint32_t* nCompressed, const int* table, S4ADPCM::Error* error)
 {
-    *compressed = new uint8_t[(nSamples + 1)/2];
-
     S4ADPCM::State state;
-    *nCompressed = S4ADPCM::encode4(data, nSamples, *compressed, &state, table, error);
+    *nCompressed = S4ADPCM::encode4(data, nSamples, compressed, &state, table, error);
 }
 
 void ExpanderAD4::compress8(const int16_t* data, int32_t nSamples,
-    uint8_t** compressed, uint32_t* nCompressed, const int* table, S4ADPCM::Error* error)
+    uint8_t* compressed, uint32_t* nCompressed, const int* table, S4ADPCM::Error* error)
 {
     *nCompressed = nSamples;
-    *compressed = new uint8_t[nSamples];
-
     S4ADPCM::State state;
-    S4ADPCM::encode8(data, nSamples, *compressed, &state, table, error);
+    S4ADPCM::encode8(data, nSamples, compressed, &state, table, error);
 }
 
 
@@ -101,7 +97,6 @@ void ExpanderAD4::generateTestData(int nSamples, int16_t* data)
     static const int32_t WAVE0 = 440;   // A4
     static const int32_t WAVE1 = 330;   // E3
 
-    static const int RANGE = 16000;
     static const int SIN[16] = {
         0,
         6122, 11313, 14782, 16000,
