@@ -122,6 +122,7 @@ uint8_t oledBuffer[OLED_WIDTH * OLED_HEIGHT / 8] = {0};
 OLED_SSD1306 display(PIN_OLED_DC, PIN_OLED_RESET, PIN_OLED_CS);
 VRender    vRender;
 Renderer   renderer;
+VectorUI   vectorUI;
 
 int renderStage = 0;
 #elif SABER_DISPLAY == SABER_DISPLAY_7_5
@@ -235,10 +236,13 @@ void setup()
     #if SABER_DISPLAY == SABER_DISPLAY_128_32
     {
         display.begin(OLED_WIDTH, OLED_HEIGHT, SSD1306_SWITCHCAPVCC);
-        vRrender.Attach(BlockDrawOLED);
-        vRrender.SetSize(OLED_WIDTH, OLED_HEIGHT);
-        vRrender.SetClip(VRender::Rect(0, 0, OLED_WIDTH, OLED_HEIGHT));
-        vRrender.Clear();
+        vRender.Attach(BlockDrawOLED);
+        vRender.SetSize(OLED_WIDTH, OLED_HEIGHT);
+        vRender.SetClip(VRender::Rect(0, 0, OLED_WIDTH, OLED_HEIGHT));
+        vRender.Clear();
+
+        renderer.Attach(OLED_WIDTH, OLED_HEIGHT, oledBuffer);
+
         display.display(oledBuffer);
 
         Log.p("OLED display connected.").eol();
@@ -714,19 +718,16 @@ void loopDisplays(uint32_t msec, uint32_t delta)
             memset(oledBuffer, 0, OLED_HEIGHT * OLED_WIDTH / 8);
             break;
         case 1:
-            VectorUI::Draw(&renderer,
-            
-             msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
+            vectorUI.Draw(&vRender, &renderer,
+                msec, uiMode.mode(), 
+                !bladeState.bladeOff(), &uiRenderData);
             break;
         case 2:
-            renderer.Render();
-            break;
-        case 3:
             display.display(oledBuffer);
             break;
         }
         renderStage++;
-        if (renderStage == 4)
+        if (renderStage == 3)
             renderStage = 0;
     }
 #endif
