@@ -75,14 +75,24 @@ public:
         }
     };
 
-    static int encode4(const int16_t* data, int32_t nSamples, uint8_t* compressed, State* state, const int* table, int64_t* e16squared);
+    struct Error {
+        int64_t e16squared = 0;
+        int32_t maxError = 0;
+
+        void set(int e) {
+            if (e < 0) e = -e;
+            if (e > maxError) maxError = e;
+        }
+    };
+
+    static int encode4(const int16_t* data, int32_t nSamples, uint8_t* compressed, State* state, const int* table, Error* error);
     static void decode4(const uint8_t* compressed,
         int32_t nSamples,
         int volume,         // 0-256 (higher values can overflow)
         bool add,           // if true, add to the 'data' buffer, else write to it
         int32_t* samples, State* state, const int* table);
 
-    static void encode8(const int16_t* data, int32_t nSamples, uint8_t* compressed, State* state, const int* table, int64_t* e16squared);
+    static void encode8(const int16_t* data, int32_t nSamples, uint8_t* compressed, State* state, const int* table, Error* error);
     static void decode8(const uint8_t* compressed,
         int32_t nSamples,
         int volume,         // 0-256 (higher values can overflow)
@@ -111,6 +121,24 @@ private:
         return d * d;
     }
 
+    inline static int32_t scaleVol(int32_t value, int32_t volumeShifted)
+    {
+        #if false
+        // max: SHRT_MAX * 256 * 256
+        //      32767 * 256 * 256 = 2147418112
+        //              INT32_MAX = 2147483647
+        if (volumeShifted > (256 << 8)) {
+            int64_t s64 = value * volumeShifted;
+            if (s64 > INT32_MAX)
+                return INT32_MAX;
+            else if (s64 < INT32_MIN)
+                return INT32_MIN;
+            else
+                return (int32_t)s64;
+        }
+        #endif
+        return value * volumeShifted;
+    }
 
     inline static int32_t sat_add(int32_t x, int32_t y)
     {

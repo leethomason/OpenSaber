@@ -31,11 +31,11 @@
 #include <stdint.h>
 
 #define DECODE_NONE 0
-#define DECODE_SIN 1
-#define DECODE_S4 2
+#define DECODE_SIN  1
+#define DECODE_S4   2
 #define DECODE DECODE_S4
 
-//#define FILL_LEFT
+#define FILL_LEFT
 #define FILL_RIGHT
 
 //#define USE_16_BIT  // doesn't work - not sure if hardware or sw config
@@ -78,7 +78,8 @@ void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
     dma->startJob();
 
     /* --- decode to fill --- */
-    #if DECODE == DECODE_S4
+#if DECODE == DECODE_S4
+
     for(int i=0; i<AUDDRV_NUM_CHANNELS; ++i) {
         if (isQueued[i]) {
             isQueued[i] = false;
