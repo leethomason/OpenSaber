@@ -90,7 +90,6 @@ Tester      tester;
 Swing       swing;
 MagFilter   magFilter;
 int         swingVol = 0;
-int         soundTune = 0;
 AverageSample<Vec3<int32_t>, Vec3<int32_t>, 12> averageAccel(Vec3<int32_t>(0, 0, 0));
 AverageSample<float, float, 3> fastG2;
 
@@ -416,11 +415,6 @@ void buttonAHoldHandler(const Button& button)
                     if (!setVolumeFromHoldCount(cycle))
                         buttonLEDOn = false;
                 }
-                else if (uiMode.mode() == UIMode::SOUND_TUNE) {
-                    soundTune = cycle % 4;
-                    Log.p("soundTune=").p(soundTune).eol();
-                    buttonLEDOn = false;
-                }
             }
         }
         ledA.set(buttonLEDOn);
@@ -538,7 +532,7 @@ void processAccel(uint32_t msec, uint32_t delta)
             }
         }
 #endif
-        sfx.sm_setSwing(speed, (int)((1.0f + dot)*128.0f), soundTune);
+        sfx.sm_setSwing(speed, (int)((1.0f + dot)*128.0f));
 
 #if false
         static const int BURST = 5;
@@ -708,7 +702,6 @@ void loopDisplays(uint32_t msec, uint32_t delta)
     uiRenderData.mVolts = voltmeter.easedPower();
     uiRenderData.fontName = manifest.getUnit(sfx.currentFont()).getName();
     uiRenderData.soundBank = sfx.currentFont();
-    uiRenderData.soundTune = soundTune;
 
 #if SABER_DISPLAY == SABER_DISPLAY_128_32
     {

@@ -131,22 +131,6 @@ void DotStarUI::Draw(osbr::RGB *led, int nLED, uint32_t time,
         }
         break;
 
-        case UIMode::SOUND_TUNE:
-        {
-            int i=0;
-            for(i=0; i <= data.soundTune; ++i) {
-                led[i].set(0xdd0000);
-            }
-            for(i=data.soundTune+1; i<4; ++i) {
-                led[i].set(0x440044);
-            }
-            for(i=4; i<nLED; ++i) {
-                led[i].set(0x010101);
-            }
-        }
-        break;
-
-
         default:
             break;
         }
