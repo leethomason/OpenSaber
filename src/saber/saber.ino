@@ -241,9 +241,6 @@ void setup()
         vRender.Clear();
 
         renderer.Attach(OLED_WIDTH, OLED_HEIGHT, oledBuffer);
-
-        display.display(oledBuffer);
-
         Log.p("OLED display connected.").eol();
     }
     #elif SABER_DISPLAY == SABER_DISPLAY_7_5
