@@ -8,7 +8,7 @@
 #include <Adafruit_ZeroI2S.h>
 #include <Adafruit_ZeroDMA.h>
 
-// #define LOG_PERF
+#define LOG_PERF
 
 Adafruit_FlashTransport_SPI flashTransport(SS1, &SPI1);
 Adafruit_SPIFlash spiFlash(&flashTransport);     // Use hardware SPI 
@@ -25,6 +25,7 @@ uint8_t gCompressed[TEST_COMPRESSED_BYTES];
 int32_t gTarget[TEST_SOURCE_SAMPLES*2];
 
 int currentDir = 0;
+int nRunsPerSec = 0;
 
 void scan()
 {
@@ -112,11 +113,11 @@ void setupTest()
 {
     wav12::ExpanderAD4::generateTestData(TEST_SOURCE_SAMPLES, gSourceSamples);
     uint32_t nComp = 0;
-    S4ADPCM::Error err;
+    int32_t err = 0;
     const int* table = S4ADPCM::getTable(4, 0);
     wav12::ExpanderAD4::compress4(gSourceSamples, TEST_SOURCE_SAMPLES, gCompressed, &nComp, table, &err);
 
-    Log.p("Setup test. nComp=").p(nComp).p(" error-max=").p(err.maxError).eol();
+    Log.p("Setup test. nComp=").p(nComp).p(" err=").p(err).eol();
 }
 
 int test()
@@ -125,7 +126,7 @@ int test()
 
     S4ADPCM::State state;
     const int* table = S4ADPCM::getTable(4, 0);
-    S4ADPCM::decode4(gCompressed, TEST_SOURCE_SAMPLES, 256, false, gTarget, &state, table);
+    S4ADPCM::decode4(gCompressed, TEST_SOURCE_SAMPLES, 260, false, gTarget, &state, table);
     for(int i=0; i<TEST_SOURCE_SAMPLES*2; i++) {
         total += gTarget[i];
     }
@@ -153,33 +154,38 @@ void setup()
     uint32_t end = micros();
     Log.p("test run (micro)=").p(end - start).p(" r=").p(r).eol();
 
-    int nRuns = 0;
     Log.p("runs/sec=").eol();
     start = millis();
     while(true) {
         r += test();
-        ++nRuns;
+        ++nRunsPerSec;
         end = millis();
         if (end - start >= 1000) break;
     }
-    Log.p("runs/sec=").p(nRuns).p(" r=").p(r).eol();
+    Log.p("runs/sec=").p(nRunsPerSec).p(" r=").p(r).eol();
 
     Log.p("setup() complete.").eol();
 }
 
 CStr<32> cmd;
 static uint32_t lastLoopTime = 0;
+static int nTestCall = 0;
+static int testHash = 0;
 
 void loop()
 {
     #ifdef LOG_PERF
     uint32_t deltaMilli = millis() - lastLoopTime;
-    if (deltaMilli > 5000) {
+    testHash += test();
+    ++nTestCall;
+    static const int NSEC = 5;
+    if (deltaMilli > NSEC * 1000) {
 
-        Log.p("Cycle=").p(I2SAudioDriver::getCallbackCycle())
-            .p(" Time%=").p(I2SAudioDriver::callbackMicros / (10 * deltaMilli))
+        Log.p("Time(dir)%=").p(I2SAudioDriver::callbackMicros / (10 * deltaMilli))
+           .p(" Time(indirect)%=").p(100 - (100 * nTestCall / (nRunsPerSec * NSEC)))
             .eol();
         I2SAudioDriver::callbackMicros = 0;
+        nTestCall = 0;
         lastLoopTime = millis();
     }
     #endif

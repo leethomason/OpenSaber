@@ -75,15 +75,18 @@ namespace wav12 {
         // The quality is shockingly good for such a simple algorithm at 4 bits / samples.
         // 'compressed' must contain (nSamples + 1)/2 for 4 bit,
         //                           nSamples for 8 bit
-        static void compress4(const int16_t* data, int32_t nSamples, uint8_t* compressed, uint32_t* nCompressed, const int* table, S4ADPCM::Error* error);
-        static void compress8(const int16_t* data, int32_t nSamples, uint8_t* compressed, uint32_t* nCompressed, const int* table, S4ADPCM::Error* error);
+        static void compress4(const int16_t* data, int32_t nSamples, 
+            uint8_t* compressed, uint32_t* nCompressed, const int* table, int32_t* aveErrSquared);
+        static void compress8(const int16_t* data, int32_t nSamples, 
+            uint8_t* compressed, uint32_t* nCompressed, const int* table, int32_t* aveErrSquared);
 
         // 'compressed' should be nSamples, although 4 bit will only use half
-        static void compress(int codec, const int16_t* data, int32_t nSamples, uint8_t* compressed, uint32_t* nCompressed, const int* table, S4ADPCM::Error* error)
+        static void compress(int codec, const int16_t* data, int32_t nSamples, 
+            uint8_t* compressed, uint32_t* nCompressed, const int* table, int32_t* aveErrSquared)
         {
             switch (codec) {
-            case S4ADPCM_4BIT:  compress4(data, nSamples, compressed, nCompressed, table, error);   break;
-            case S4ADPCM_8BIT:  compress8(data, nSamples, compressed, nCompressed, table, error);   break;
+            case S4ADPCM_4BIT:  compress4(data, nSamples, compressed, nCompressed, table, aveErrSquared);   break;
+            case S4ADPCM_8BIT:  compress8(data, nSamples, compressed, nCompressed, table, aveErrSquared);   break;
             }
         }
 

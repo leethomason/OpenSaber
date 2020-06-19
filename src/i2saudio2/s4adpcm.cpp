@@ -41,8 +41,10 @@ const int S4ADPCM::DELTA_TABLE_8[N_TABLES][TABLE_SIZE] = {
     {-1, 0, 1, 2, 3, 4, 5, 6, 6},
 };
 
-void S4ADPCM::encode8(const int16_t* data, int32_t nSamples, uint8_t* target, State* state, const int* table, Error* pError)
+void S4ADPCM::encode8(const int16_t* data, int32_t nSamples, uint8_t* target, State* state, const int* table, int32_t* err)
 {
+    int64_t err12Squared = 0;
+
     for (int i = 0; i < nSamples; ++i) {
         int value = data[i];
         int guess = state->guess();
@@ -71,22 +73,23 @@ void S4ADPCM::encode8(const int16_t* data, int32_t nSamples, uint8_t* target, St
 #endif
         state->push(p);
 
-        if (pError) {
-            pError->e16squared += calcError(value, p);
-            assert(pError->e16squared >= 0);    // check for overflow
-            pError->set(value - p);
-        }
+        int64_t err = (value - p);
+        err12Squared += err * err;
 
         int dTable = (delta >= 0 ? delta : -delta) >> 4;
         state->shift += table[dTable];
         if (state->shift < 0) state->shift = 0;
         if (state->shift > SHIFT_LIMIT_8) state->shift = SHIFT_LIMIT_8;
     }
+    if (err) {
+        *err = int32_t(err12Squared / nSamples);
+    }
 }
 
 
-int S4ADPCM::encode4(const int16_t* data, int32_t nSamples, uint8_t* target, State* state, const int* table, Error* pError)
+int S4ADPCM::encode4(const int16_t* data, int32_t nSamples, uint8_t* target, State* state, const int* table, int32_t* err)
 {
+    int64_t err12Squared = 0;
     const uint8_t* start = target;
     for (int i = 0; i < nSamples; ++i) {
         int value = data[i];
@@ -125,15 +128,15 @@ int S4ADPCM::encode4(const int16_t* data, int32_t nSamples, uint8_t* target, Sta
 
         state->push(p);
 
-        if (pError) {
-            pError->e16squared += calcError(value, p);
-            assert(pError->e16squared >= 0);    // check for overflow
-            pError->set(value - p);
-        }
+        int64_t err = (value - p);
+        err12Squared += err * err;
 
         state->shift += table[delta >= 0 ? delta : -delta];
         if (state->shift < 0) state->shift = 0;
         if (state->shift > SHIFT_LIMIT_4) state->shift = SHIFT_LIMIT_4;
+    }
+    if (err) {
+        *err = int32_t(err12Squared / nSamples);
     }
     if (state->high) target++;
     return int(target - start);
