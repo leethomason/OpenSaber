@@ -90,7 +90,6 @@ Tester      tester;
 Swing       swing;
 MagFilter   magFilter;
 int         swingVol = 0;
-int         soundTune = 0;
 AverageSample<Vec3<int32_t>, Vec3<int32_t>, 12> averageAccel(Vec3<int32_t>(0, 0, 0));
 AverageSample<float, float, 3> fastG2;
 
@@ -122,6 +121,7 @@ uint8_t oledBuffer[OLED_WIDTH * OLED_HEIGHT / 8] = {0};
 OLED_SSD1306 display(PIN_OLED_DC, PIN_OLED_RESET, PIN_OLED_CS);
 VRender    vRender;
 Renderer   renderer;
+VectorUI   vectorUI;
 
 int renderStage = 0;
 #elif SABER_DISPLAY == SABER_DISPLAY_7_5
@@ -235,12 +235,12 @@ void setup()
     #if SABER_DISPLAY == SABER_DISPLAY_128_32
     {
         display.begin(OLED_WIDTH, OLED_HEIGHT, SSD1306_SWITCHCAPVCC);
-        vRrender.Attach(BlockDrawOLED);
-        vRrender.SetSize(OLED_WIDTH, OLED_HEIGHT);
-        vRrender.SetClip(VRender::Rect(0, 0, OLED_WIDTH, OLED_HEIGHT));
-        vRrender.Clear();
-        display.display(oledBuffer);
+        vRender.Attach(BlockDrawOLED);
+        vRender.SetSize(OLED_WIDTH, OLED_HEIGHT);
+        vRender.SetClip(VRender::Rect(0, 0, OLED_WIDTH, OLED_HEIGHT));
+        vRender.Clear();
 
+        renderer.Attach(OLED_WIDTH, OLED_HEIGHT, oledBuffer);
         Log.p("OLED display connected.").eol();
     }
     #elif SABER_DISPLAY == SABER_DISPLAY_7_5
@@ -412,11 +412,6 @@ void buttonAHoldHandler(const Button& button)
                     if (!setVolumeFromHoldCount(cycle))
                         buttonLEDOn = false;
                 }
-                else if (uiMode.mode() == UIMode::SOUND_TUNE) {
-                    soundTune = cycle % 4;
-                    Log.p("soundTune=").p(soundTune).eol();
-                    buttonLEDOn = false;
-                }
             }
         }
         ledA.set(buttonLEDOn);
@@ -534,7 +529,7 @@ void processAccel(uint32_t msec, uint32_t delta)
             }
         }
 #endif
-        sfx.sm_setSwing(speed, (int)((1.0f + dot)*128.0f), soundTune);
+        sfx.sm_setSwing(speed, (int)((1.0f + dot)*128.0f));
 
 #if false
         static const int BURST = 5;
@@ -615,8 +610,7 @@ void processAccel(uint32_t msec, uint32_t delta)
             else if (!sfx.smoothMode() && g2 >= motion * motion)
             {
                 bool sound = sfx.playSound(SFX_MOTION, SFX_GREATER);
-                if (sound)
-                {
+                if (sound) {
                     Log.p("Motion. g=").p(sqrt(g2)).eol();
                 }
             }
@@ -704,7 +698,6 @@ void loopDisplays(uint32_t msec, uint32_t delta)
     uiRenderData.mVolts = voltmeter.easedPower();
     uiRenderData.fontName = manifest.getUnit(sfx.currentFont()).getName();
     uiRenderData.soundBank = sfx.currentFont();
-    uiRenderData.soundTune = soundTune;
 
 #if SABER_DISPLAY == SABER_DISPLAY_128_32
     {
@@ -712,21 +705,20 @@ void loopDisplays(uint32_t msec, uint32_t delta)
         {
         case 0:
             memset(oledBuffer, 0, OLED_HEIGHT * OLED_WIDTH / 8);
+            vRender.Clear();
+            vRender.ClearTransform();
             break;
         case 1:
-            VectorUI::Draw(&renderer,
-            
-             msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
+            vectorUI.Draw(&vRender, &renderer,
+                msec, uiMode.mode(), 
+                !bladeState.bladeOff(), &uiRenderData);
             break;
         case 2:
-            renderer.Render();
-            break;
-        case 3:
             display.display(oledBuffer);
             break;
         }
         renderStage++;
-        if (renderStage == 4)
+        if (renderStage == 3)
             renderStage = 0;
     }
 #endif

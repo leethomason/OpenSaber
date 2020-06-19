@@ -21,17 +21,26 @@
 */
 
 #pragma once
-
-// Cross platform (no pins.h)
+#include "pins.h"
 
 enum class UIMode {
     NORMAL,
     PALETTE,
     VOLUME,
+#ifdef SABER_UI_MEDITATION
     MEDITATION,
+#endif
+#ifdef SABER_UI_COLOR_WHEEL
     COLOR_WHEEL,  // can't have WHEEL and TUNE
-    SOUND_TUNE,
-    NUM_MODES
+#endif
+    NUM_MODES,
+
+#ifndef SABER_UI_MEDITATION
+    MEDITATION = 255,
+#endif
+#ifndef SABER_UI_COLOR_WHEEL
+    COLOR_WHEEL = 256,  // can't have WHEEL and TUNE
+#endif
 };
 
 enum {

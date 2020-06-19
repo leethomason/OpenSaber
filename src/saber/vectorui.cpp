@@ -280,19 +280,33 @@ void VectorUI::Draw(
 
     // Power and bank text
     if (mode == UIMode::NORMAL) {
-        int digits[4];
+#if false
+        static const int TX = 24;
+        if (bRen) {
+            CStr<5> str;
+            str.setFromNum(data->mVolts, true);
+            bRen->DrawStr(str.c_str(), TX, H / 2 - 4, getGlypth_calibri8);
+        }
+#endif
+        #if true
+        int digits[4] = { 0 };
         intToDigits(data->mVolts, digits, 4);
 
         static const int TX = 24;
         static const int DTX = 2;
+        static const int TY = 2;
 
         for (int i = 0; i < 3; ++i) {
-            ren->SetTransform(TX + (TEXT + DTX) * i, H / 2 - TEXT * 2);
+            ren->SetTransform(TX + (TEXT + DTX) * i, H / 2 - TEXT * 2 + TY);
             Segment(ren, TEXT, 2, digits[i], WHITE);
         }
+
         intToDigits(data->palette, digits, 4);
-        ren->SetTransform(TX + (TEXT + DTX) * 2, H / 2 + TEXT * 0 + 2);
+        ren->SetTransform(TX + (TEXT + DTX) * 2, H / 2 + TEXT * 0 + 2 + TY);
         Segment(ren, TEXT, 2, digits[3], WHITE);
+
+        ren->ClearTransform();
+#endif
     }
 #endif
 }

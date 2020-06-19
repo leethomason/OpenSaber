@@ -273,30 +273,13 @@ int SFX::sm_swingToVolume(float radPerSec)
         0, 0, 0, 8, 16, 32, 48, 64, 96, 128, 180, 256,
         256
     };
-    static const int16_t VOLUME1[SWING_MAX+1] = {
-        0, 0, 4, 8, 16, 24, 32, 48, 64, 96, 128, 256,
-        256
-    };
-    static const int16_t VOLUME2[SWING_MAX+1] = {
-        0, 0, 0, 8, 12, 16, 32, 48, 64, 96, 128, 256,
-        256
-    };
-    static const int16_t VOLUME3[SWING_MAX+1] = {
-        0, 0, 4, 8, 12, 20, 40, 60, 80, 128, 180, 256,
-        256
-    };
     if (radPerSec >= float(SWING_MAX)) 
         return 256;
 
     int low = (int)radPerSec;
     int fraction = int(1024.0 * (radPerSec - low));
 
-    const int16_t* V = VOLUME;
-    if (m_soundTune == 1) V = VOLUME1;
-    else if (m_soundTune == 2) V = VOLUME2;
-    else if (m_soundTune == 3) V = VOLUME3;
-
-    return lerp1024(V[low], V[low+1], fraction);
+    return lerp1024(VOLUME[low], VOLUME[low+1], fraction);
 }
 
 int SFX::scaleVolume(int v) const

@@ -31,7 +31,6 @@ struct UIRenderData
     uint8_t palette = 0;    // 0-7
     uint32_t mVolts = 0;    // actual voltage in milli-volts
     int soundBank = 0;
-    int soundTune = 0;
     CStr<10> fontName;
 
     osbr::RGB color;	// NOT the RGB of the LED. An GGB LED would be

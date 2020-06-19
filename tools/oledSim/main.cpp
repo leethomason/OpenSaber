@@ -23,6 +23,7 @@
 #ifdef MONO_128_32
 static const int WIDTH = 128;
 static const int HEIGHT = 32;
+static const int OLED_WIDTH_SHIFT = 7;
 #define USE_VRENDER
 
 #endif
@@ -72,32 +73,26 @@ void BlockDrawRGB(const BlockDrawChunk* chunk, int y, int n)
 
 void BlockDrawOLED(const BlockDrawChunk* chunks, int n)
 {
-#ifdef PRECOMPUTE_MASK
-    static const uint8_t MASK0[] = { 1, 3, 7, 15, 31, 63, 127, 255 };
-    static const uint8_t MASK1[] = { 2, 6, 14, 30, 62, 126, 254 };
-    static const uint8_t MASK2[] = { 4, 12, 28, 60, 124, 252 };
-    static const uint8_t MASK3[] = { 8, 24, 56, 120, 248 };
-    static const uint8_t MASK4[] = { 16, 48, 112, 240 };
-    static const uint8_t MASK5[] = { 32, 96, 224 };
-    static const uint8_t MASK6[] = { 64, 192 };
-    static const uint8_t MASK7[] = { 128 };
-    static const uint8_t* MASK[] = {
-        MASK0, MASK1, MASK2, MASK3, MASK4, MASK5, MASK6, MASK7
-    };
-#endif
-
-    // Clear to black beforehand; don't need to set black runs.
+    // The renderer assumes clear to black beforehand.
+    // But does still support drawing in black.
     for (int i = 0; i < n; ++i) {
         const BlockDrawChunk& chunk = chunks[i];
 
-        if (chunk.color == 0) continue;
         // Simple for the single row.
         int row = chunk.y >> 3;
         int bit = chunk.y - (row << 3);
         uint8_t mask = 1 << bit;
-        uint8_t* p = blockDrawOLEDBUffer + row * WIDTH + chunk.x0;
-        for (int nPix = chunk.x1 - chunk.x0; nPix > 0; nPix--, p++) {
-            *p |= mask;
+        uint8_t* p = blockDrawOLEDBUffer + (row << OLED_WIDTH_SHIFT) + chunk.x0;
+
+        if (chunk.color) {
+            for (int nPix = chunk.x1 - chunk.x0; nPix > 0; nPix--, p++) {
+                *p |= mask;
+            }
+}
+        else {
+            for (int nPix = chunk.x1 - chunk.x0; nPix > 0; nPix--, p++) {
+                *p &= ~mask;
+            }
         }
     }
 }
@@ -159,8 +154,9 @@ int main(int, char**) {
 
     blockDrawOLEDBUffer = displayBuffer;
     vrender.Attach(BlockDrawOLED);
-    vrender.SetClip(VRender::Rect(0, 0, WIDTH, HEIGHT));
     vrender.SetSize(WIDTH, HEIGHT);
+    vrender.SetClip(VRender::Rect(0, 0, WIDTH, HEIGHT));
+    vrender.Clear();
 
     bRender.Attach(WIDTH, HEIGHT, displayBuffer);
     //vrender.SetCamera(WIDTH, HEIGHT, -1, -1);
