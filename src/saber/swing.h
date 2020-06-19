@@ -24,7 +24,8 @@
 
 #include <stdint.h>
 #include "Grinliz_Util.h"
-#ifdef _WIN32
+#include "pins.h"
+/*
 // The FILTER constants run an average over the accelerometer
 // data. They are turned first, to get stable accelerometer
 // readings when the saber is on or off.
@@ -38,10 +39,7 @@
 #	define SWING_SAMPLES 8
 // The maximum rad/sec of the swing. Used for the sound envelope.
 #	define SWING_MAX 12
-#else
-#	include "pins.h"
-#endif
-
+*/
 /*
 The Swing algorithm translation rotation of the blade into sound level.
 It is currently based on an LSM303 accel + mag chip. Some notes:

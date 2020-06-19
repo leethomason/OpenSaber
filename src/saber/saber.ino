@@ -610,8 +610,7 @@ void processAccel(uint32_t msec, uint32_t delta)
             else if (!sfx.smoothMode() && g2 >= motion * motion)
             {
                 bool sound = sfx.playSound(SFX_MOTION, SFX_GREATER);
-                if (sound)
-                {
+                if (sound) {
                     Log.p("Motion. g=").p(sqrt(g2)).eol();
                 }
             }
@@ -706,6 +705,8 @@ void loopDisplays(uint32_t msec, uint32_t delta)
         {
         case 0:
             memset(oledBuffer, 0, OLED_HEIGHT * OLED_WIDTH / 8);
+            vRender.Clear();
+            vRender.ClearTransform();
             break;
         case 1:
             vectorUI.Draw(&vRender, &renderer,

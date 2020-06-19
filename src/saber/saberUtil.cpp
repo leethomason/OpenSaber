@@ -115,42 +115,30 @@ bool UIModeUtil::isIdle()
 
 void UIModeUtil::nextMode()
 {
-#ifdef SABER_AUDIO_UI
-    SFX *sfx = 0;
-    sfx = SFX::instance();
-#endif
+    m_mode = (UIMode)((int)m_mode + 1);
+    if(m_mode == UIMode::NUM_MODES)
+        m_mode = UIMode::NORMAL;
 
     switch (m_mode)
     {
     case UIMode::NORMAL:
-        m_mode = UIMode::PALETTE;
-        Log.p("mode: palette").eol();
-        //if (sfx) sfx->playUISound("palette");
+        Log.p("mode: NORMAL").eol();
         break;
 
     case UIMode::PALETTE:
-        m_mode = UIMode::VOLUME;
-        Log.p("mode: volume").eol();
-        //if (sfx) sfx->playUISound("audio");
+        Log.p("mode: PALETTE").eol();
         break;
 
     case UIMode::VOLUME:
-#if defined(SABER_SOUND_TUNE)
-        m_mode = UIMode::SOUND_TUNE;
-        Log.p("mode: sound tune").eol();
-#elif defined(SABER_UI_COLOR_WHEEL)
-        m_mode = UIMode::COLOR_WHEEL;
-        Log.p("mode: color change").eol();
-#else
-        m_mode = UIMode::NORMAL;
-        Log.p("mode: normal").eol();
-#endif
+        Log.p("mode: VOLUME").eol();
         break;
 
     case UIMode::COLOR_WHEEL:
-    case UIMode::SOUND_TUNE:
-        m_mode = UIMode::NORMAL;
-        Log.p("mode: normal").eol();
+        Log.p("mode: COLOR_WHEEL").eol();
+        break;
+
+    case UIMode::MEDITATION:
+        Log.p("mode: MEDITATION").eol();
         break;
 
     default:
