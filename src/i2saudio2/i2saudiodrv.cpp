@@ -226,6 +226,7 @@ void I2SAudioDriver::stop(int channel)
 void I2SAudioDriver::setVolume(int v, int channel)
 {
     channel = glClamp(channel, 0, AUDDRV_NUM_CHANNELS - 1);
+    v = glClamp(channel, 0, 512);   // the 512 is arbitrary, but some sort of limit is good
     volume[channel] = v;
 }
 

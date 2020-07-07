@@ -298,11 +298,13 @@ void setup()
 */
 void syncToDB()
 {
+    const SaberDB::Palette *palette = saberDB.getPalette();
+
     sfx.setFont(saberDB.soundFont());
     sfx.setVolume(saberDB.volume());
 
-    bladeFlash.setBladeColor(saberDB.bladeColor());
-    bladeFlash.setImpactColor(saberDB.impactColor());
+    bladeFlash.setBladeColor(palette->bladeColor);
+    bladeFlash.setImpactColor(palette->impactColor);
 }
 
 void buttonAReleaseHandler(const Button& b)

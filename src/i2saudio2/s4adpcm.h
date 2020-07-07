@@ -76,18 +76,18 @@ public:
     };
 
     static int encode4(const int16_t* data, int32_t nSamples, uint8_t* compressed, State* state, const int* table, int32_t* aveErrSquared);
-    static void decode4(const uint8_t* compressed,
-        int32_t nSamples,
-        int volume,         // 0-256 (higher values can overflow)
-        bool add,           // if true, add to the 'data' buffer, else write to it
-        int32_t* samples, State* state, const int* table);
+    static void decode4(const uint8_t *compressed,
+                        int32_t nSamples,
+                        int volume, // 256 is neutral; normally 0-256. Above 256 can boost & clip.
+                        bool add,   // if true, add to the 'data' buffer, else write to it
+                        int32_t *samples, State *state, const int *table);
 
     static void encode8(const int16_t* data, int32_t nSamples, uint8_t* compressed, State* state, const int* table, int32_t* aveErrSquared);
-    static void decode8(const uint8_t* compressed,
-        int32_t nSamples,
-        int volume,         // 0-256 (higher values can overflow)
-        bool add,           // if true, add to the 'data' buffer, else write to it
-        int32_t* samples, State* state, const int* table);
+    static void decode8(const uint8_t *compressed,
+                        int32_t nSamples,
+                        int volume, // 256 is neutral; normally 0-256. Above 256 can boost & clip.
+                        bool add,   // if true, add to the 'data' buffer, else write to it
+                        int32_t *samples, State *state, const int *table);
 
     static const int TABLE_SIZE = 9;
     static const int* getTable(int bits, int i) {

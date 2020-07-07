@@ -32,7 +32,7 @@ void scan()
     Log.p("p: play track channel=0").eol();
     Log.p("l: loop track channel=0").eol();
     Log.p("s: stop channel (stop all if no channel)").eol();
-    Log.p("v: volume value=0,256 channel").eol();
+    Log.p("v: volume value=0,256+ channel").eol();
     Log.p("d: directory display").eol();
 
     int start = 0, count = 0;

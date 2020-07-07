@@ -31,15 +31,13 @@ const int S4ADPCM::DELTA_TABLE_4[N_TABLES][TABLE_SIZE] = {
     {-1, 0, 0, 0, 0, 1, 1, 2, 2},
     {-1, 0, 0, 1, 1, 1, 2, 3, 3},
     {-1, 0, 0, 1, 1, 2, 3, 4, 4},
-    {-1, -1, 0, 1, 2, 3, 4, 5, 5}
-};
+    {-1, -1, 0, 1, 2, 3, 4, 5, 5}};
 
 const int S4ADPCM::DELTA_TABLE_8[N_TABLES][TABLE_SIZE] = {
-    {-1, 0, 1, 2, 3, 3, 3, 3, 4 },
+    {-1, 0, 1, 2, 3, 3, 3, 3, 4},
     {-1, 0, 1, 2, 3, 4, 4, 4, 4},
     {-1, 0, 1, 2, 3, 4, 4, 4, 5},
-    {-1, 0, 1, 2, 3, 4, 5, 6, 6},
-};
+    {-1, 0, 1, 2, 3, 4, 5, 6, 6}};
 
 void S4ADPCM::encode8(const int16_t* data, int32_t nSamples, uint8_t* target, State* state, const int* table, int32_t* err)
 {

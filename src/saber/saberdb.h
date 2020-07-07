@@ -35,17 +35,17 @@ public:
 
     void nextPalette();
     int paletteIndex() const      {
-        return dataHeader.currentPalette;
+        return currentPalette;
     }
     void setPalette(int n);
     void setPaletteFromDirHash(uint32_t h);
 
     bool soundOn() const          {
-        return dataHeader.volume > 0;
+        return volume > 0;
     }
 
     uint8_t volume()              {
-        return dataHeader.volume;
+        return volume;
     }
     void setVolume(int v);
 
@@ -54,30 +54,27 @@ public:
     void setVolume4(int vol);
 
     float motion() const          {
-        return dataHeader.motion;
+        return motion;
     }
     void setMotion(float motion);
     float impact() const          {
-        return dataHeader.impact;
+        return impact;
     }
     void setImpact(float impact);
-    uint32_t numSetupCalls() const {
-        return dataHeader.nSetup;
-    }
 
     // Palette
     const osbr::RGB& bladeColor() const   {
-        return palette[dataHeader.currentPalette].bladeColor;
+        return palette[currentPalette].bladeColor;
     }
     void setBladeColor(const osbr::RGB& color);
 
     const osbr::RGB& impactColor() const  {
-        return palette[dataHeader.currentPalette].impactColor;
+        return palette[currentPalette].impactColor;
     }
     void setImpactColor(const osbr::RGB& color);
 
     int soundFont() const {
-        return palette[dataHeader.currentPalette].soundFont;
+        return palette[currentPalette].soundFont;
     }
     void setSoundFont(int f);
 
@@ -88,35 +85,31 @@ public:
         osbr::RGB impactColor;
         int soundFont;
 
-        void set(const osbr::RGB& blade, const osbr::RGB& impact, int font) {
+        static const int NAUDIO = 4;
+        int channelBoost[NAUDIO];
+
+        void set(const osbr::RGB& blade, const osbr::RGB& impact, int font, 
+                 int humBoost=256, int swingBoost=256, int eventBoost=256 ) 
+        {
             bladeColor = blade;
             impactColor = impact;
             soundFont = font;
+            channelBoost[0] = humBoost;
+            channelBoost[1] = swingBoost;
+            channelBoost[2] = swingBoost;
+            channelBoost[3] = eventBoost;
         }
     };
 
-    void getPalette(int i, Palette* palette);
+    const Palette* getPalette(int i) const;
+    const Palette* getPalette() const { return &palette[currentPalette]; }
 
 private:
-
-    struct DataHeader {
-        DataHeader() :
-            currentPalette(0),
-            volume(40),
-            motion(DEFAULT_G_FORCE_MOTION),
-            impact(DEFAULT_G_FORCE_IMPACT),
-            nSetup(0)
-        {}
-
-        uint8_t currentPalette;
-        uint8_t volume;
-        float   motion;
-        float   impact;
-        uint32_t nSetup;
-    };
-
-    DataHeader	dataHeader;
-    Palette 	palette[NUM_PALETTES];
+    uint8_t currentPalette = 0;
+    uint8_t volume = 40;
+    float   motion = DEFAULT_G_FORCE_MOTION;
+    float   impact = DEFAULT_G_FORCE_IMPACT;
+    Palette palette[NUM_PALETTES];
 };
 
 

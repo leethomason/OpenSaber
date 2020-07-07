@@ -233,6 +233,12 @@ void SFX::setVolume(int v)
     }
 }
 
+void SFX::setBoost(int boost, int ch)
+{
+    ch = glClamp(ch, 0, N_CHANNEL - 1);
+    m_boost[ch] = boost;
+}
+
 void SFX::sm_ignite()
 {
     Log.p("sm_ignite").eol();
@@ -243,7 +249,7 @@ void SFX::sm_ignite()
     m_driver->setVolume(0, CHANNEL_IDLE);
     m_driver->setVolume(0, CHANNEL_MOTION_0);
     m_driver->setVolume(0, CHANNEL_MOTION_1);
-    m_driver->setVolume(m_volume, CHANNEL_EVENT);
+    m_driver->setVolume(m_volume * m_boost[CHANNEL_EVENT] / 256, CHANNEL_EVENT);
 
     volumeEnvelope.start(m_igniteTime, 0, 256);
 }
@@ -254,7 +260,7 @@ void SFX::sm_retract()
     m_driver->play(getTrack(SFX_POWER_OFF), false, CHANNEL_EVENT);
     m_driver->setVolume(0, CHANNEL_MOTION_0);
     m_driver->setVolume(0, CHANNEL_MOTION_1);
-    m_driver->setVolume(m_volume, CHANNEL_EVENT);
+    m_driver->setVolume(m_volume * m_boost[CHANNEL_EVENT] / 256, CHANNEL_EVENT);
 
     volumeEnvelope.start(m_retractTime, 256, 0);
 }
@@ -262,7 +268,7 @@ void SFX::sm_retract()
 bool SFX::sm_playEvent(int sfx)
 {
     m_driver->play(getTrack(sfx), false, CHANNEL_EVENT);
-    m_driver->setVolume(m_volume, CHANNEL_EVENT);
+    m_driver->setVolume(m_volume * m_boost[CHANNEL_EVENT] / 256, CHANNEL_EVENT);
     return true; // fixme
 }
 
@@ -329,9 +335,9 @@ void SFX::process(int bladeMode, uint32_t delta, int* swingVol)
         // volume is scaled by overall output volume (m_volume) and the
         // current value of the volumeEnvelope. So this accounts for
         // on/off/ignite/retract.
-        m_driver->setVolume(scaleVolume(hum),    CHANNEL_IDLE);
-        m_driver->setVolume(scaleVolume(swing0), CHANNEL_MOTION_0);
-        m_driver->setVolume(scaleVolume(swing1), CHANNEL_MOTION_1);
+        m_driver->setVolume(scaleVolume(hum) * m_boost[CHANNEL_IDLE] / 256,        CHANNEL_IDLE);
+        m_driver->setVolume(scaleVolume(swing0) * m_boost[CHANNEL_MOTION_0] / 256, CHANNEL_MOTION_0);
+        m_driver->setVolume(scaleVolume(swing1) * m_boost[CHANNEL_MOTION_1] / 256, CHANNEL_MOTION_1);
     }
     else {
         if ((bladeMode == BLADE_ON) && !m_driver->isPlaying(0)) {

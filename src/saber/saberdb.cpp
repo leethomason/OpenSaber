@@ -130,14 +130,14 @@ void SaberDB::setPaletteFromDirHash(uint32_t h)
         static const int JAINA = 0;
         static const int BOLD = 1;
 
-        palette[0].set(0x0044ff, 0x00ccff, BOLD);     // blue
-        palette[1].set(0x00ff00, 0x00ffa0, BOLD);     // green
-        palette[2].set(0xC000FF, 0x80A080, JAINA);    // purple
-        palette[3].set(0xff0000, 0xa08000, JAINA);    // red
-        palette[4].set(0xff6000, 0x808000, JAINA);    // orange
-        palette[5].set(0xffff00, 0x00FF88, BOLD);     // yellow
-        palette[6].set(0x80A080, 0x30a0a0, JAINA);    // white
-        palette[7].set(0x00ff44, 0x00ffaa, BOLD);     // green-blue
+        palette[0].set(0x0044ff, 0x00ccff, BOLD, 290, 290);     // blue
+        palette[1].set(0x00ff00, 0x00ffa0, BOLD, 290, 290);     // green
+        palette[2].set(0xC000FF, 0x80A080, JAINA);              // purple
+        palette[3].set(0xff0000, 0xa08000, JAINA);              // red
+        palette[4].set(0xff6000, 0x808000, JAINA);              // orange
+        palette[5].set(0xffff00, 0x00FF88, BOLD, 290, 290);     // yellow
+        palette[6].set(0x80A080, 0x30a0a0, JAINA);              // white
+        palette[7].set(0x00ff44, 0x00ffaa, BOLD, 290, 290);     // green-blue
     }
     break;
 
@@ -176,10 +176,10 @@ void SaberDB::setPalette(int n)
     dataHeader.currentPalette = abs(n) % NUM_PALETTES;
 }
 
-void SaberDB::getPalette(int i, Palette* pal)
+const Palette* SaberDB::getPalette(int i)
 {
     i = glClamp(i, 0, NUM_PALETTES - 1);
-    *pal = palette[i];
+    return &palette[i];
 }
 
 void SaberDB::setVolume(int v) 

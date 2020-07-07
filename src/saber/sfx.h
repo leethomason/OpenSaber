@@ -67,6 +67,7 @@ public:
 
 	void setVolume(int v);
 	int getVolume() const { return m_volume; }
+	void setBoost(int boost, int channel);
 
 	const uint32_t getIgniteTime() const { return m_igniteTime; }
 	const uint32_t getRetractTime() const { return m_retractTime; }
@@ -86,7 +87,8 @@ protected:
 		CHANNEL_IDLE,
 		CHANNEL_MOTION_0,
 		CHANNEL_MOTION_1,
-		CHANNEL_EVENT
+		CHANNEL_EVENT,
+		N_CHANNEL
 	};
 
 	void readIgniteRetract();
@@ -113,6 +115,7 @@ protected:
 	int m_swingTarget = 0;	
 	int m_hum = 0;			// also tracks with decay
 	int m_stillCount = 0;	// how many still frames (motion sound = 0)
+	int m_boost[N_CHANNEL] = {256};
 
 	Random m_random;
 	AnimateProp volumeEnvelope;
