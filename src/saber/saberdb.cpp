@@ -161,7 +161,7 @@ void SaberDB::setPaletteFromDirHash(uint32_t h)
 
 void SaberDB::nextPalette()
 {
-    setPalette(dataHeader.currentPalette + 1);
+    setPalette(m_currentPalette + 1);
 }
 
 void SaberDB::setPalette(int n)
@@ -173,10 +173,10 @@ void SaberDB::setPalette(int n)
     SFX::instance()->stopSound();
 #endif
 
-    dataHeader.currentPalette = abs(n) % NUM_PALETTES;
+    m_currentPalette = abs(n) % NUM_PALETTES;
 }
 
-const Palette* SaberDB::getPalette(int i)
+const SaberDB::Palette* SaberDB::getPalette(int i) const
 {
     i = glClamp(i, 0, NUM_PALETTES - 1);
     return &palette[i];
@@ -184,7 +184,7 @@ const Palette* SaberDB::getPalette(int i)
 
 void SaberDB::setVolume(int v) 
 {
-    dataHeader.volume = glClamp(v, 0, 256);
+    m_volume = glClamp(v, 0, 256);
 }
 
 void SaberDB::setVolume4(int v)
@@ -211,15 +211,15 @@ void SaberDB::setVolume4(int v)
 
 uint8_t SaberDB::volume4() const
 {
-    if (!soundOn() || dataHeader.volume == 0)
+    if (!soundOn() || m_volume == 0)
     {
         return 0;
     }
-    if (dataHeader.volume == VOLUME_4)
+    if (m_volume == VOLUME_4)
         return 4;
-    if (dataHeader.volume >= VOLUME_3)
+    if (m_volume >= VOLUME_3)
         return 3;
-    if (dataHeader.volume >= VOLUME_2)
+    if (m_volume >= VOLUME_2)
         return 2;
     return 1;
 }
@@ -227,26 +227,26 @@ uint8_t SaberDB::volume4() const
 void SaberDB::setMotion(float v)
 {
     v = constrain(v, 1.1, 10.0);
-    dataHeader.motion = v;
+    m_motion = v;
 }
 
 void SaberDB::setImpact(float v)
 {
     v = constrain(v, 1.1, 10.0);
-    dataHeader.impact = v;
+    m_impact = v;
 }
 
 void SaberDB::setBladeColor(const RGB &color)
 {
-    palette[dataHeader.currentPalette].bladeColor = color;
+    palette[m_currentPalette].bladeColor = color;
 }
 
 void SaberDB::setImpactColor(const RGB &color)
 {
-    palette[dataHeader.currentPalette].impactColor = color;
+    palette[m_currentPalette].impactColor = color;
 }
 
 void SaberDB::setSoundFont(int f)
 {
-    palette[dataHeader.currentPalette].soundFont = glClamp(f, 0, 3); // fixme: use constants
+    palette[m_currentPalette].soundFont = glClamp(f, 0, 3); // fixme: use constants
 }

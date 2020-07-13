@@ -1,7 +1,11 @@
 Issues:
 
 - volume boost support for fonts
-- switch to gyro...
+- blade flash on retract. completely mystified
+- a little less motion sensitivity
+
+Icebock
+- switch to gyro.
 
 Fixed
 x dropout during green spin

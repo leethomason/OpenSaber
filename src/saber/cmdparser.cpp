@@ -175,8 +175,7 @@ bool CMDParser::processCMD()
     }
     else if (action == LSPAL) {
         for(int i=0; i<SaberDB::NUM_PALETTES; ++i) {
-            SaberDB::Palette pal;
-            database->getPalette(i, &pal);
+            const SaberDB::Palette* pal = database->getPalette(i);
 
             CStr<10> name;
             const MemUnit& memUnit = manifest.getUnit(database->soundFont());
@@ -185,9 +184,9 @@ bool CMDParser::processCMD()
             Log.p(i).p(": ")
                .p(name.c_str())
                .p(" ")
-               .ptc(pal.bladeColor)
+               .ptc(pal->bladeColor)
                .p(" ")
-               .ptc(pal.impactColor)
+               .ptc(pal->impactColor)
                .eol();
         }
     }

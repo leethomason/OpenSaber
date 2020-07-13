@@ -35,17 +35,17 @@ public:
 
     void nextPalette();
     int paletteIndex() const      {
-        return currentPalette;
+        return m_currentPalette;
     }
     void setPalette(int n);
     void setPaletteFromDirHash(uint32_t h);
 
     bool soundOn() const          {
-        return volume > 0;
+        return m_volume > 0;
     }
 
     uint8_t volume()              {
-        return volume;
+        return m_volume;
     }
     void setVolume(int v);
 
@@ -54,27 +54,27 @@ public:
     void setVolume4(int vol);
 
     float motion() const          {
-        return motion;
+        return m_motion;
     }
     void setMotion(float motion);
     float impact() const          {
-        return impact;
+        return m_impact;
     }
     void setImpact(float impact);
 
     // Palette
     const osbr::RGB& bladeColor() const   {
-        return palette[currentPalette].bladeColor;
+        return palette[m_currentPalette].bladeColor;
     }
     void setBladeColor(const osbr::RGB& color);
 
     const osbr::RGB& impactColor() const  {
-        return palette[currentPalette].impactColor;
+        return palette[m_currentPalette].impactColor;
     }
     void setImpactColor(const osbr::RGB& color);
 
     int soundFont() const {
-        return palette[currentPalette].soundFont;
+        return palette[m_currentPalette].soundFont;
     }
     void setSoundFont(int f);
 
@@ -101,14 +101,14 @@ public:
         }
     };
 
-    const Palette* getPalette(int i) const;
-    const Palette* getPalette() const { return &palette[currentPalette]; }
+    const SaberDB::Palette* getPalette(int i) const;
+    const SaberDB::Palette* getPalette() const { return &palette[m_currentPalette]; }
 
 private:
-    uint8_t currentPalette = 0;
-    uint8_t volume = 40;
-    float   motion = DEFAULT_G_FORCE_MOTION;
-    float   impact = DEFAULT_G_FORCE_IMPACT;
+    uint8_t m_currentPalette = 0;
+    uint8_t m_volume = 40;
+    float   m_motion = DEFAULT_G_FORCE_MOTION;
+    float   m_impact = DEFAULT_G_FORCE_IMPACT;
     Palette palette[NUM_PALETTES];
 };
 

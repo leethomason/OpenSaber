@@ -60,7 +60,7 @@
 
 // ----------------------------------
 #define SERIAL_DEBUG 				1
-#define SABER_MODEL 				SABER_MODEL_TEST
+#define SABER_MODEL 				SABER_MODEL_SISTERS2
 #define SABER_SUB_MODEL				
 // ----------------------------------
 
@@ -717,43 +717,34 @@
 	static const int VOLUME_4 = 256;
 
 #elif (SABER_MODEL == SABER_MODEL_SISTERS2)
-	#define PCB_VERSION 			PCB_ITSY_2D
+	#define PCB_VERSION 			PCB_ITSY_2E
 	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
 	#define SABER_DISPLAY			SABER_DISPLAY_128_32
 
 	#define SABER_VOLTMETER			
-	#define SABER_UI_COLOR_WHEEL
 
-#if SABER_SUB_MODEL ==  SABER_SUB_MODEL_CELESTIA	
-	#define ID_STR "Sisters-2 Celestia Cree XPE2 RGB"
+	#define FILTER_MAG_X	10
+	#define FILTER_MAG_Y	10
+	#define FILTER_MAG_Z	10
+	#define SWING_SAMPLES	12
+	#define ID_STR "Sisters Celestia/Luna Cree XPE2 RGB"
 	static const int32_t VOLTMETER_TUNE = 1000; // fixme
-
-	static const int32_t RED_R    = 4300;	// fixme
-	static const int32_t GREEN_R  = 1000;	// fixme
-	static const int32_t BLUE_R   = 1800;	// fixme
-#elif SABER_SUB_MODEL == SABER_SUB_MODEL_LUNA
-	#define ID_STR "Sisters-2 Luna Cree XPE2 RGB"
-	static const int32_t VOLTMETER_TUNE = 1000; // fixme
-
-	static const int32_t RED_R    = 4300;	// fixme
-	static const int32_t GREEN_R  = 1000;	// fixme
-	static const int32_t BLUE_R   = 1800;	// fixme
-#else
-	#error secondary saber not defined
-#endif
 
 	static const int32_t RED_VF   = 2200;
 	static const int32_t RED_I    = 350;
+	static const int32_t RED_R    = 4300;
 
 	static const int32_t GREEN_VF = 3200;
 	static const int32_t GREEN_I  = 350;
+	static const int32_t GREEN_R  = 1000;
 
 	static const int32_t BLUE_VF  = 3100;
 	static const int32_t BLUE_I   = 350;
+	static const int32_t BLUE_R   = 1350;	// fixme
 
-	static const int VOLUME_1 = 20;
-	static const int VOLUME_2 = 60;
-	static const int VOLUME_3 = 160;
+	static const int VOLUME_1 = 32;
+	static const int VOLUME_2 = 64;
+	static const int VOLUME_3 = 128;
 	static const int VOLUME_4 = 256;
 
 #elif (SABER_MODEL == SABER_MODEL_DUTCHESS)
@@ -1016,7 +1007,7 @@
 	#define ACCEL_NORMAL_BUTTON   0
 	#define ACCEL_PERP_BUTTON     2
 
-#elif (PCB_VERSION == PCB_ITSY_2D)
+#elif (PCB_VERSION == PCB_ITSY_2D || PCB_VERSION == PCB_ITSY_2E)
 	#define SABER_ACCELEROMETER SABER_ACCELEROMETER_LSM303
 
 	#define PIN_I2S_LRCLK		0
