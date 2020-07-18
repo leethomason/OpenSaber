@@ -75,19 +75,19 @@ public:
         }
     };
 
-    static int encode4(const int16_t* data, int32_t nSamples, uint8_t* compressed, State* state, const int* table, int64_t* e16squared);
-    static void decode4(const uint8_t* compressed,
-        int32_t nSamples,
-        int volume,         // 0-256 (higher values can overflow)
-        bool add,           // if true, add to the 'data' buffer, else write to it
-        int32_t* samples, State* state, const int* table);
+    static int encode4(const int16_t* data, int32_t nSamples, uint8_t* compressed, State* state, const int* table, int32_t* aveErrSquared);
+    static void decode4(const uint8_t *compressed,
+                        int32_t nSamples,
+                        int volume, // 256 is neutral; normally 0-256. Above 256 can boost & clip.
+                        bool add,   // if true, add to the 'data' buffer, else write to it
+                        int32_t *samples, State *state, const int *table);
 
-    static void encode8(const int16_t* data, int32_t nSamples, uint8_t* compressed, State* state, const int* table, int64_t* e16squared);
-    static void decode8(const uint8_t* compressed,
-        int32_t nSamples,
-        int volume,         // 0-256 (higher values can overflow)
-        bool add,           // if true, add to the 'data' buffer, else write to it
-        int32_t* samples, State* state, const int* table);
+    static void encode8(const int16_t* data, int32_t nSamples, uint8_t* compressed, State* state, const int* table, int32_t* aveErrSquared);
+    static void decode8(const uint8_t *compressed,
+                        int32_t nSamples,
+                        int volume, // 256 is neutral; normally 0-256. Above 256 can boost & clip.
+                        bool add,   // if true, add to the 'data' buffer, else write to it
+                        int32_t *samples, State *state, const int *table);
 
     static const int TABLE_SIZE = 9;
     static const int* getTable(int bits, int i) {
@@ -113,21 +113,20 @@ private:
 
     inline static int32_t scaleVol(int32_t value, int32_t volumeShifted)
     {
-        #if false
+        // Checking for overflow has an almost too-small perf impact.
+        #if true
+        int64_t s64 = value * volumeShifted;
+        if (s64 > INT32_MAX)
+            return INT32_MAX;
+        else if (s64 < INT32_MIN)
+            return INT32_MIN;
+        return (int32_t)s64;
+        #else
         // max: SHRT_MAX * 256 * 256
         //      32767 * 256 * 256 = 2147418112
         //              INT32_MAX = 2147483647
-        if (volumeShifted > (256 << 8)) {
-            int64_t s64 = value * volumeShifted;
-            if (s64 > INT32_MAX)
-                return INT32_MAX;
-            else if (s64 < INT32_MIN)
-                return INT32_MIN;
-            else
-                return (int32_t)s64;
-        }
-        #endif
         return value * volumeShifted;
+        #endif
     }
 
     inline static int32_t sat_add(int32_t x, int32_t y)

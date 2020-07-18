@@ -235,8 +235,9 @@ void SFX::setVolume(int v)
 
 void SFX::setBoost(int boost, int ch)
 {
-    ch = glClamp(ch, 0, N_CHANNEL - 1);
-    m_boost[ch] = boost;
+    if (ch >=0 && ch < N_CHANNEL) {
+        m_boost[ch] = boost;
+    }
 }
 
 void SFX::sm_ignite()
@@ -290,8 +291,6 @@ int SFX::sm_swingToVolume(float radPerSec)
 
 int SFX::scaleVolume(int v) const
 {
-    v = glClamp(v, 0, 255);
-    // [0,255] * [0,256] * [0,256]
     v = (v * volumeEnvelope.value() * m_volume) >> 16;
     return v;
 }

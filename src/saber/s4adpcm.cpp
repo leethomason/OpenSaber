@@ -31,18 +31,18 @@ const int S4ADPCM::DELTA_TABLE_4[N_TABLES][TABLE_SIZE] = {
     {-1, 0, 0, 0, 0, 1, 1, 2, 2},
     {-1, 0, 0, 1, 1, 1, 2, 3, 3},
     {-1, 0, 0, 1, 1, 2, 3, 4, 4},
-    {-1, -1, 0, 1, 2, 3, 4, 5, 5}
-};
+    {-1, -1, 0, 1, 2, 3, 4, 5, 5}};
 
 const int S4ADPCM::DELTA_TABLE_8[N_TABLES][TABLE_SIZE] = {
-    {-1, 0, 1, 2, 3, 3, 3, 3, 4 },
+    {-1, 0, 1, 2, 3, 3, 3, 3, 4},
     {-1, 0, 1, 2, 3, 4, 4, 4, 4},
     {-1, 0, 1, 2, 3, 4, 4, 4, 5},
-    {-1, 0, 1, 2, 3, 4, 5, 6, 6},
-};
+    {-1, 0, 1, 2, 3, 4, 5, 6, 6}};
 
-void S4ADPCM::encode8(const int16_t* data, int32_t nSamples, uint8_t* target, State* state, const int* table, int64_t* e2)
+void S4ADPCM::encode8(const int16_t* data, int32_t nSamples, uint8_t* target, State* state, const int* table, int32_t* err)
 {
+    int64_t err12Squared = 0;
+
     for (int i = 0; i < nSamples; ++i) {
         int value = data[i];
         int guess = state->guess();
@@ -71,19 +71,23 @@ void S4ADPCM::encode8(const int16_t* data, int32_t nSamples, uint8_t* target, St
 #endif
         state->push(p);
 
-        *e2 += calcError(value, p);
-        assert(*e2 >= 0);    // check for overflow
+        int64_t err = (value - p);
+        err12Squared += err * err;
 
         int dTable = (delta >= 0 ? delta : -delta) >> 4;
         state->shift += table[dTable];
         if (state->shift < 0) state->shift = 0;
         if (state->shift > SHIFT_LIMIT_8) state->shift = SHIFT_LIMIT_8;
     }
+    if (err) {
+        *err = int32_t(err12Squared / nSamples);
+    }
 }
 
 
-int S4ADPCM::encode4(const int16_t* data, int32_t nSamples, uint8_t* target, State* state, const int* table, int64_t* e2)
+int S4ADPCM::encode4(const int16_t* data, int32_t nSamples, uint8_t* target, State* state, const int* table, int32_t* err)
 {
+    int64_t err12Squared = 0;
     const uint8_t* start = target;
     for (int i = 0; i < nSamples; ++i) {
         int value = data[i];
@@ -116,18 +120,21 @@ int S4ADPCM::encode4(const int16_t* data, int32_t nSamples, uint8_t* target, Sta
         state->high = !state->high;
 
         int p = guess + (delta << state->shift);
-#ifdef _WIN32
+#ifdef _MSC_VER
         ASSERT(p >= SHRT_MIN && p <= SHRT_MAX);
 #endif
 
         state->push(p);
 
-        *e2 += calcError(value, p);
-        assert(*e2 >= 0);    // check for overflow
+        int64_t err = (value - p);
+        err12Squared += err * err;
 
         state->shift += table[delta >= 0 ? delta : -delta];
         if (state->shift < 0) state->shift = 0;
         if (state->shift > SHIFT_LIMIT_4) state->shift = SHIFT_LIMIT_4;
+    }
+    if (err) {
+        *err = int32_t(err12Squared / nSamples);
     }
     if (state->high) target++;
     return int(target - start);

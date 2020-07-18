@@ -302,7 +302,9 @@ void syncToDB()
 
     sfx.setFont(saberDB.soundFont());
     sfx.setVolume(saberDB.volume());
-
+    for(int i=0; i<SaberDB::Palette::NAUDIO; ++i) {
+        sfx.setBoost(palette->channelBoost[i], i);
+    }
     bladeFlash.setBladeColor(palette->bladeColor);
     bladeFlash.setImpactColor(palette->impactColor);
 }

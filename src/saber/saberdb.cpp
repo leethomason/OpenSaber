@@ -141,6 +141,22 @@ void SaberDB::setPaletteFromDirHash(uint32_t h)
     }
     break;
 
+    case 0x74288e03: // fulcrum-nightsister
+    {
+        Log.p("Fulcrum - Nightsister").eol();
+        static const int FULCRUM = 0;
+        static const int NIGHTSISTER = 1;
+        palette[0].set(0x00ff00, 0x00ffa0, FULCRUM);              // green
+        palette[1].set(0x0044ff, 0x00ccff, FULCRUM);              // blue
+        palette[2].set(0xC000FF, 0x80A080, NIGHTSISTER);          // purple
+        palette[3].set(0xff0000, 0xa08000, NIGHTSISTER);          // red
+        palette[4].set(0xff6000, 0x808000, NIGHTSISTER);          // orange
+        palette[5].set(0xffff00, 0x00FF88, FULCRUM);              // yellow
+        palette[6].set(0x80A080, 0x30a0a0, FULCRUM);              // white
+        palette[7].set(0x00ff44, 0x00ffaa, NIGHTSISTER);          // green-blue
+    }
+    break;
+
     case 0xd447a9d5:    // corelln (Corellian SS) test font.
     default:
     {

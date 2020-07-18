@@ -108,14 +108,14 @@ protected:
 	int m_currentFont;
 	uint32_t m_igniteTime;
 	uint32_t m_retractTime;
-	int m_volume;
+	int m_volume;				// 0-256
 
 	float m_speed;
 	int m_blend256;
 	int m_swingTarget = 0;	
-	int m_hum = 0;			// also tracks with decay
-	int m_stillCount = 0;	// how many still frames (motion sound = 0)
-	int m_boost[N_CHANNEL] = {256};
+	int m_hum = 0;				// also tracks with decay
+	int m_stillCount = 0;		// how many still frames (motion sound = 0)
+	int m_boost[N_CHANNEL] = {256, 256, 256, 256};
 
 	Random m_random;
 	AnimateProp volumeEnvelope;

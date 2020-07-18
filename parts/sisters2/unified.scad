@@ -2,7 +2,7 @@ use <../shapes.scad>
 use <../commonUnified.scad>
 include <dim.scad>
 
-DRAW_AFT = true;
+DRAW_AFT = false;
 DRAW_FORE = true;
 
 EPS = 0.01;
