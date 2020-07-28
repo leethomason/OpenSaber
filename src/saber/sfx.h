@@ -108,7 +108,7 @@ protected:
 	int m_currentFont;
 	uint32_t m_igniteTime;
 	uint32_t m_retractTime;
-	int m_volume;				// 0-256
+	int m_volume;				// typically 0-256, does support higher
 
 	float m_speed;
 	int m_blend256;

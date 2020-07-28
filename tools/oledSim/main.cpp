@@ -24,7 +24,6 @@
 static const int WIDTH = 128;
 static const int HEIGHT = 32;
 static const int OLED_WIDTH_SHIFT = 7;
-#define USE_VRENDER
 
 #endif
 #ifdef RGB_160_80
@@ -147,7 +146,6 @@ int main(int, char**) {
     SimDisplay simDisplay(WIDTH, HEIGHT, 1);
     uint8_t* displayBuffer = new uint8_t[WIDTH*HEIGHT/8];
     
-#   ifdef USE_VRENDER
     VRender vrender;
     Renderer bRender;
     VectorUI vectorUI;
@@ -160,12 +158,6 @@ int main(int, char**) {
 
     bRender.Attach(WIDTH, HEIGHT, displayBuffer);
     //vrender.SetCamera(WIDTH, HEIGHT, -1, -1);
-
-#   else
-    memset(displayBuffer, 0, WIDTH * HEIGHT);
-	Renderer renderer;
-    renderer.Attach(WIDTH, HEIGHT, displayBuffer);
-#   endif
 #endif
 #ifdef RGB_160_80
 
@@ -316,14 +308,17 @@ int main(int, char**) {
 			++count;
 
 #ifdef MONO_128_32
-#   ifdef USE_VRENDER
+
+#if true    // Test the DrawTestData
+            float s = sinf(t * 0.002f) + 1.0f;
+            vectorUI.PushTestData(s, 0.2f, 1.8f, t, 1.0f);
+            bladeOn = true;
+#endif
+
             memset(displayBuffer, 0, WIDTH * HEIGHT / 8);
             vrender.Clear();
             vectorUI.Draw(&vrender, &bRender, t, mode.mode(), bladeOn, &data);
             vrender.ClearTransform();
-#   else
-            sketcher.Draw(&renderer, t, mode.mode(), bladeOn, &data);
-#   endif
 #endif
 #ifdef RGB_160_80
 #if true

@@ -29,7 +29,7 @@
 class Voltmeter
 {
 public:
-    enum {SAMPLE_INTERVAL = 12};
+    enum {SAMPLE_INTERVAL = 25};
 
     // vRef reference voltage in mVolts
     // rLower lower resistor (10000)

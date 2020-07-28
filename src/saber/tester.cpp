@@ -208,7 +208,7 @@ public:
         }
         uint32_t deltaTime = millis() - startTime;
         Serial.print("Time to read (ms):"); Serial.println(deltaTime);
-        ASSERT(deltaTime > NDATA * 7 && deltaTime < NDATA * 13);
+        ASSERT(deltaTime > NDATA * 5 && deltaTime < NDATA * 20);
 
         bool variation = false;
 
@@ -266,7 +266,7 @@ public:
             }
             uint32_t deltaTime = millis() - startTime;
             Serial.print("Time to read (ms):"); Serial.println(deltaTime);
-            ASSERT(deltaTime > NDATA * 8 && deltaTime < NDATA * 20);
+            ASSERT(deltaTime > NDATA * 5 && deltaTime < NDATA * 20);
 
             // We can't test what the data is because it almost 
             // certainly has not been calibrated. We just test if

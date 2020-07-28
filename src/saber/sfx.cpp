@@ -227,7 +227,7 @@ void SFX::stopSound()
 
 void SFX::setVolume(int v) 
 { 
-    m_volume = glClamp(v, 0, 256);
+    m_volume = glClamp(v, 0, 512);
     if (!m_smoothMode) {          
         m_driver->setVolume(m_volume, 0);
     }
@@ -250,7 +250,7 @@ void SFX::sm_ignite()
     m_driver->setVolume(0, CHANNEL_IDLE);
     m_driver->setVolume(0, CHANNEL_MOTION_0);
     m_driver->setVolume(0, CHANNEL_MOTION_1);
-    m_driver->setVolume(m_volume * m_boost[CHANNEL_EVENT] / 256, CHANNEL_EVENT);
+    m_driver->setVolume(m_volume /** m_boost[CHANNEL_EVENT] / 256*/, CHANNEL_EVENT);
 
     volumeEnvelope.start(m_igniteTime, 0, 256);
 }
@@ -261,7 +261,7 @@ void SFX::sm_retract()
     m_driver->play(getTrack(SFX_POWER_OFF), false, CHANNEL_EVENT);
     m_driver->setVolume(0, CHANNEL_MOTION_0);
     m_driver->setVolume(0, CHANNEL_MOTION_1);
-    m_driver->setVolume(m_volume * m_boost[CHANNEL_EVENT] / 256, CHANNEL_EVENT);
+    m_driver->setVolume(m_volume /** m_boost[CHANNEL_EVENT] / 256*/, CHANNEL_EVENT);
 
     volumeEnvelope.start(m_retractTime, 256, 0);
 }
@@ -269,15 +269,16 @@ void SFX::sm_retract()
 bool SFX::sm_playEvent(int sfx)
 {
     m_driver->play(getTrack(sfx), false, CHANNEL_EVENT);
-    m_driver->setVolume(m_volume * m_boost[CHANNEL_EVENT] / 256, CHANNEL_EVENT);
+    m_driver->setVolume(m_volume /** m_boost[CHANNEL_EVENT] / 256*/, CHANNEL_EVENT);
     return true; // fixme
 }
 
 
 int SFX::sm_swingToVolume(float radPerSec)
 {
+    // Keep experimenting with this. *sigh.*
     static const int16_t VOLUME[SWING_MAX+1] = {
-        0, 0, 0, 8, 16, 32, 48, 64, 96, 128, 180, 256,
+        0, 0, 0, 0, 8, 16, 32, 48, 64, 96, 128, 160, 192, 256,
         256
     };
     if (radPerSec >= float(SWING_MAX)) 
@@ -291,7 +292,7 @@ int SFX::sm_swingToVolume(float radPerSec)
 
 int SFX::scaleVolume(int v) const
 {
-    v = (v * volumeEnvelope.value() * m_volume) >> 16;
+    v = (v * m_volume) >> 8;
     return v;
 }
 
@@ -334,9 +335,9 @@ void SFX::process(int bladeMode, uint32_t delta, int* swingVol)
         // volume is scaled by overall output volume (m_volume) and the
         // current value of the volumeEnvelope. So this accounts for
         // on/off/ignite/retract.
-        m_driver->setVolume(scaleVolume(hum) * m_boost[CHANNEL_IDLE] / 256,        CHANNEL_IDLE);
-        m_driver->setVolume(scaleVolume(swing0) * m_boost[CHANNEL_MOTION_0] / 256, CHANNEL_MOTION_0);
-        m_driver->setVolume(scaleVolume(swing1) * m_boost[CHANNEL_MOTION_1] / 256, CHANNEL_MOTION_1);
+        m_driver->setVolume(scaleVolume(hum * volumeEnvelope.value() / 256) /** m_boost[CHANNEL_IDLE] / 256*/,        CHANNEL_IDLE);
+        m_driver->setVolume(scaleVolume(swing0 * volumeEnvelope.value() / 256) /** m_boost[CHANNEL_MOTION_0] / 256*/, CHANNEL_MOTION_0);
+        m_driver->setVolume(scaleVolume(swing1 * volumeEnvelope.value() / 256) /** m_boost[CHANNEL_MOTION_1] / 256*/, CHANNEL_MOTION_1);
     }
     else {
         if ((bladeMode == BLADE_ON) && !m_driver->isPlaying(0)) {

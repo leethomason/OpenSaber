@@ -1,13 +1,14 @@
 Issues:
 
+- fix vol>255 not working
 - volume boost support for fonts
 - blade flash on retract. completely mystified
-- a little less motion sensitivity
 
-Icebock
+Iceblock
 - switch to gyro.
 
 Fixed
+x a little less motion sensitivity
 x dropout during green spin
 x fix floating point average to not drift
 x clean up code

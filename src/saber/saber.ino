@@ -61,7 +61,7 @@
 using namespace osbr;
 
 static const uint32_t INDICATOR_CYCLE         = 1000;
-static const uint32_t IMPACT_MIN_TIME         = 1000;    // Minimum time between impact sounds. FIXME: need adjusting.
+static const uint32_t IMPACT_MIN_TIME         =  600;   // was 1000
 
 uint32_t lastImpactTime = 0;
 uint32_t lastLoopTime   = 0;
@@ -323,6 +323,7 @@ void buttonAReleaseHandler(const Button& b)
 
 bool setVolumeFromHoldCount(int count)
 {
+    //Log.p("cycle=").p(count).eol();
     saberDB.setVolume4(count - 1);
     syncToDB();
     #ifdef SABER_AUDIO_UI
@@ -515,6 +516,7 @@ void processAccel(uint32_t msec, uint32_t delta)
 
         float dot = swing.dotOrigin();
         float speed = swing.speed();
+        //vectorUI.PushTestData(speed, 0.0f, SWING_MAX, msec, 4.0f);
         
 #ifdef ACCEL_TO_SWING        
         const float impact = saberDB.impact();
@@ -546,12 +548,12 @@ void processAccel(uint32_t msec, uint32_t delta)
             Log.p(burstLog == BURST ? "--" : "  ")
                 .p("t=").p(millis()%1000)
                 .p(" swing=").p(swing.speed())
-                .p(" swingVol=").p(swingVol)
+                //.p(" swingVol=").p(swingVol)
                 //.p(" pos=").v3(swing.pos()).p(" origin=").v3(swing.origin())
-                .p(" dot=").p(dot)
-                //.p(" val/min/max ").v3(magAve).v3(magMin).v3(magMax)
-                //.p(" val/range ").v3(magFilter.average() - magMin).v3(range)
-                .p(" accel=").p(fastG2.average())
+                //.p(" dot=").p(dot)
+                //.p(" val/min/max ").v3(magFilter.average()).v3(magMin).v3(magMax)
+                .p(" val/range ").v3(magFilter.average() - magMin).v3(range)
+                //.p(" accel=").p(fastG2.average())
                 .eol();
             lastLog = msec;
             burstLog--;

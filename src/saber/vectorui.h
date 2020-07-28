@@ -42,6 +42,11 @@ public:
         bool bladeIgnited, 
         const UIRenderData* data);
 
+    // normally called automatically
+    void DrawTestData(VRender* vRender);
+
+    void PushTestData(float value, float minRange, float maxRange, uint32_t time, float bar);
+
 private:
     static const int BAR_W = 16;
     static const int W = 128;
@@ -50,9 +55,17 @@ private:
 
     uint32_t lastTime = 0;
 
+    static const uint32_t BUCKET_TIME = 100;
+    int testBucket = 0;
+    int testBar = 0;
+    bool hasTestData = false;
     AnimateProp colorProp[3];
+    uint8_t testData[128] = { 0 };
+
     int hProp = 0;
     int hTime = 0;
+
+    int ValueTo32(float value, float minRange, float maxRange);
 
     static void Segment(VRender* ren, int width, int s, int num, int rgba);
     static void DrawBar(VRender* ren, int x, int y, int width, int color, int fraction);

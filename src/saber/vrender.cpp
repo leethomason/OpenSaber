@@ -276,7 +276,7 @@ void VRender::RasterizeLine(int y, const Rect& clip)
                 cache[nCache].x0 = subClipX0;
                 cache[nCache].x1 = subClipX1;
                 cache[nCache].y = y;
-                cache[nCache].color = 1;
+                cache[nCache].color = left->color;
                 nCache++;
             }
         }

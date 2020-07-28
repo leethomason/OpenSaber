@@ -38,7 +38,7 @@
 // small, dead spots become annoying.
 #	define SWING_SAMPLES 8
 // The maximum rad/sec of the swing. Used for the sound envelope.
-#	define SWING_MAX 12
+#	define SWING_MAX 16
 */
 /*
 The Swing algorithm translation rotation of the blade into sound level.
