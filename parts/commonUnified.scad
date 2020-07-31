@@ -67,7 +67,6 @@ module tjoint(dz, do, di, yTrim, zTrim, slot)
     DY = do * RATIO;
     HALFY = DY * 0.7;
     RI = di / 2;
-    BOOST = 0.0;
 
     TRI = [
         [0, 0,], [10, 0], [10, 15]
@@ -80,10 +79,10 @@ module tjoint(dz, do, di, yTrim, zTrim, slot)
     // without support. Less junk getting cleanup up in the 
     // slot is a good thing.
     translate([0, -DY/2 - yTrim/2, dz/2 - zTrim/2]) {
-        cube(size=[100, DY + yTrim + BOOST, dz/2 + zTrim*2]);
+        cube(size=[100, DY + yTrim, dz/2 + zTrim*2]);
     }
     if (slot) {
-        hy = DY / 2 + BOOST;
+        hy = DY / 2;
         x = sqrt(RI*RI - hy*hy);
         translate([x, hy, dz/2 - zTrim/2]) polygonXY(h=dz/2 + zTrim*2, points=TRI);
     }
