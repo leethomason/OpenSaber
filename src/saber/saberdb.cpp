@@ -37,9 +37,9 @@ void SaberDB::setPaletteFromDirHash(uint32_t h)
 {
     switch (h)
     {
-    case 0xfe1a3638:    // bespin2, jaina, vader
+    case 0xfe1a3638:
     {
-        Log.p("setPaletteFromDirHash=0xfe1a3638 Bespin2/Jaina/Vader").eol();
+        Log.p("Bespin2/Jaina/Vader").eol();
         static const int BESPIN2 = 0;
         static const int JAINA = 1;
         static const int VADER = 2;
@@ -55,9 +55,9 @@ void SaberDB::setPaletteFromDirHash(uint32_t h)
     }
     break;
 
-    case 0x3f14313c:    // bespin2, jaina, smoothJedi
+    case 0x3f14313c:
     {
-        Log.p("setPaletteFromDirHash=0xfe1a3638 Bespin2/Jaina/SmoothJedi").eol();
+        Log.p("Bespin2/Jaina/SmoothJedi").eol();
         static const int BESPIN2 = 0;
         static const int JAINA = 1;
         static const int SMOOTH = 2;
@@ -73,7 +73,7 @@ void SaberDB::setPaletteFromDirHash(uint32_t h)
     }
     break;
 
-    case 0xd9a8993d: // hero - jaina
+    case 0xd9a8993d:
     {
         Log.p("Hero - Jaina").eol();
         static const int HERO = 0;
@@ -90,7 +90,7 @@ void SaberDB::setPaletteFromDirHash(uint32_t h)
     }
     break;
 
-    case 0xe13817f5: // fulcrum-TFA graflex
+    case 0xe13817f5:
     {
         Log.p("Fulcrum - TFA Graflex: NOT TUNED").eol();
         static const int FULCRUM = 0;
@@ -107,7 +107,7 @@ void SaberDB::setPaletteFromDirHash(uint32_t h)
     }
     break;
 
-    case 0xdf451848: // temple-jaina
+    case 0xdf451848:
     {
         Log.p("Temple - Jaina").eol();
         static const int JAINA = 0;
@@ -124,13 +124,15 @@ void SaberDB::setPaletteFromDirHash(uint32_t h)
     }
     break;
 
-    case 0x1deb9709: // jaina-boldone
+    case 0x1deb9709:
     {
         Log.p("Jaina - BoldOne").eol();
         static const int JAINA = 0;
         static const int BOLD = 1;
 
-        palette[0].set(0x0044ff, 0x00ccff, BOLD, 290, 290);     // blue
+        // FIXME: boost values are not tested!
+        // And currently turned off.
+        palette[0].set(0x0088ff, 0x44ccff, BOLD, 290, 290);     // blue
         palette[1].set(0x00ff00, 0x00ffa0, BOLD, 290, 290);     // green
         palette[2].set(0xC000FF, 0x80A080, JAINA);              // purple
         palette[3].set(0xff0000, 0xa08000, JAINA);              // red
@@ -138,6 +140,25 @@ void SaberDB::setPaletteFromDirHash(uint32_t h)
         palette[5].set(0xffff00, 0x00FF88, BOLD, 290, 290);     // yellow
         palette[6].set(0x80A080, 0x30a0a0, JAINA);              // white
         palette[7].set(0x00ff44, 0x00ffaa, BOLD, 290, 290);     // green-blue
+    }
+    break;
+
+    // Sisters.
+    case 0x74288e03:
+    case 0x66b046f6:
+    {
+        Log.p("Fulcrum/Graflex - Nightsister").eol();
+        static const int FULCRUM = 0;   // Luna
+        // static const int GRAFLEX = 0;   // Celestia
+        static const int NIGHTSISTER = 1;
+        palette[0].set(0x00ff00, 0x00ffa0, FULCRUM);              // green
+        palette[1].set(0x0088ff, 0x80A080, FULCRUM);              // blue
+        palette[2].set(0xCC00FF, 0x80A080, NIGHTSISTER);          // purple
+        palette[3].set(0xff0000, 0xa08000, NIGHTSISTER);          // red
+        palette[4].set(0xff6000, 0x808000, NIGHTSISTER);          // orange
+        palette[5].set(0xffff00, 0x00FF88, FULCRUM);              // yellow
+        palette[6].set(0x80A080, 0x30a0a0, FULCRUM);              // white
+        palette[7].set(0x00ff44, 0x00ffaa, NIGHTSISTER);          // green-blue
     }
     break;
 
@@ -184,7 +205,8 @@ const SaberDB::Palette* SaberDB::getPalette(int i) const
 
 void SaberDB::setVolume(int v) 
 {
-    m_volume = glClamp(v, 0, 256);
+    m_volume = glClamp(v, 0, 512);  // can go over 256; but cap at something not crazy.
+    Log.p("setVolume=").p(v).eol();
 }
 
 void SaberDB::setVolume4(int v)
@@ -215,12 +237,15 @@ uint8_t SaberDB::volume4() const
     {
         return 0;
     }
-    if (m_volume == VOLUME_4)
+    if (m_volume >= VOLUME_4) {
         return 4;
-    if (m_volume >= VOLUME_3)
+    }
+    if (m_volume >= VOLUME_3) {
         return 3;
-    if (m_volume >= VOLUME_2)
+    }
+    if (m_volume >= VOLUME_2) {
         return 2;
+    }
     return 1;
 }
 

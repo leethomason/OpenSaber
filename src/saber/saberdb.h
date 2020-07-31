@@ -105,8 +105,8 @@ public:
     const SaberDB::Palette* getPalette() const { return &palette[m_currentPalette]; }
 
 private:
-    uint8_t m_currentPalette = 0;
-    uint8_t m_volume = 40;
+    int m_currentPalette = 0;
+    int m_volume = 40;
     float   m_motion = DEFAULT_G_FORCE_MOTION;
     float   m_impact = DEFAULT_G_FORCE_IMPACT;
     Palette palette[NUM_PALETTES];

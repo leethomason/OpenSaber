@@ -160,6 +160,52 @@ void VectorUI::DrawBanks(VRender* ren, int bank)
 }
 
 
+int VectorUI::ValueTo32(float value, float minRange, float maxRange)
+{
+    float fy = (value - minRange) / (maxRange - minRange);
+    if (fy < 0) fy = 0;
+    if (fy > 1) fy = 1;
+    int y = int(fy * 32.0f);
+    return y;
+}
+
+
+void VectorUI::PushTestData(float value, float minRange, float maxRange, uint32_t time, float bar)
+{
+    int y = ValueTo32(value, minRange, maxRange);
+    testBar = 0;
+    if (bar != 0.0f) {
+        testBar = ValueTo32(bar, minRange, maxRange);
+    }
+    hasTestData = true;
+
+    int bucket = int((time / BUCKET_TIME) % 128);
+    if (testBucket != bucket) {
+        testData[bucket] = 0;
+        static const int CLEAR = 8;
+        for (int i = bucket + 1; i < bucket + 1 + CLEAR; i++) {
+            testData[i % 128] = 0;
+        }
+    }
+    testData[bucket] = glMax(testData[bucket], (uint8_t)y);
+}
+
+
+void VectorUI::DrawTestData(VRender* vRender)
+{
+    vRender->Clear();
+    for (int i = 0; i < 128; ++i) {
+        int d = testData[i];
+        vRender->DrawRect(i, 32 - d, 1, 32, 1);
+    }
+    if (testBar) {
+        for (int i = 0; i < 128; i += 4) {
+            vRender->DrawRect(i, 32 - testBar, 2, 1, 1);
+            vRender->DrawRect(i+2, 32 - testBar, 2, 1, 0);
+        }
+    }
+}
+
 
 void VectorUI::Draw(
     VRender* ren, Renderer* bRen,
@@ -188,8 +234,13 @@ void VectorUI::Draw(
         colorProp[i].tick(deltaTime);
     }
 
+    if (hasTestData && bladeIgnited) {
+        DrawTestData(ren);
+        return;
+    }
+
     ren->Clear();
-  
+
     int p = UIRenderData::powerLevel(data->mVolts, 8);
     CStr<5> volts;
     volts.setFromNum(data->mVolts, true);

@@ -2,7 +2,7 @@ use <../shapes.scad>
 use <../commonUnified.scad>
 include <dim.scad>
 
-DRAW_AFT = true;
+DRAW_AFT = false;
 DRAW_FORE = true;
 
 EPS = 0.01;
@@ -80,7 +80,7 @@ if (DRAW_FORE) {
             }
 
             translate([0, 0, M_POWER_SECTION]) {
-                color("olive") powerPortRing(D_INNER, T_SECTION, DZ_POWER_SECTION, M_POWER - M_POWER_SECTION);
+                color("olive") powerPortRing(D_INNER, T_SECTION, DZ_POWER_SECTION, M_POWER - M_POWER_SECTION, counter=false);
             }
 
             translate([0, 0, M_BOLT_SECTION]) {
@@ -88,8 +88,9 @@ if (DRAW_FORE) {
             }
 
             translate([0, 0, M_SWITCH_SECTION]) {
-                switchRing(D_INNER, T_SECTION, DZ_SWITCH_SECTION, M_SWITCH - M_SWITCH_SECTION);
+                switchRing(D_INNER, T_SECTION, DZ_SWITCH_SECTION, M_SWITCH - M_SWITCH_SECTION, counter=false);
             }
+
         }
         for(i=[0:1])
             translate([0, 0, M_JOINT + 16 + i*8]) capsule(70, 110, 2, true);
@@ -98,6 +99,12 @@ if (DRAW_FORE) {
         for(i=[0:2])
             translate([0, 0, M_POWER + i*8]) capsule(70, 110, 2, true);
         
+        hull() {
+            BD = 14.5;
+            translate([0, 0, M_POWER-4]) rotate([90, 0, 0]) cylinder(h=100, d=BD, $fn=40);
+            translate([0, 0, M_SWITCH-4]) rotate([90, 0, 0]) cylinder(h=100, d=BD, $fn=40);
+        }
+
         // Flat bottom
         translate([-50, -D_INNER/2 - EPS, 0]) cube(size=[100, 1, 500]);
         // Flat top

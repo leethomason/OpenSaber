@@ -59,8 +59,8 @@
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
-#define SABER_MODEL 				SABER_MODEL_SISTERS2
+#define SERIAL_DEBUG 				0
+#define SABER_MODEL 				SABER_MODEL_LEIA
 #define SABER_SUB_MODEL				
 // ----------------------------------
 
@@ -695,6 +695,12 @@
 	#define SABER_UI_BRIGHTNESS	    	16		
 	#define SABER_UI_IDLE_MEDITATION
 	#define SABER_UI_COLOR_WHEEL
+	#define VOLTMETER_TUNE				1033
+
+	#define FILTER_MAG_X	20
+	#define FILTER_MAG_Y	20
+	#define FILTER_MAG_Z	20
+	#define SWING_SAMPLES	12
 
 	static const int32_t UVOLT_MULT = 5809;
 	#define ID_STR "Leia Cree XPE2 RGB"
@@ -714,7 +720,7 @@
 	static const int VOLUME_1 = 20;
 	static const int VOLUME_2 = 60;
 	static const int VOLUME_3 = 160;
-	static const int VOLUME_4 = 256;
+	static const int VOLUME_4 = 255;
 
 #elif (SABER_MODEL == SABER_MODEL_SISTERS2)
 	#define PCB_VERSION 			PCB_ITSY_2E
@@ -723,12 +729,12 @@
 
 	#define SABER_VOLTMETER			
 
-	#define FILTER_MAG_X	10
-	#define FILTER_MAG_Y	10
-	#define FILTER_MAG_Z	10
+	#define FILTER_MAG_X	20
+	#define FILTER_MAG_Y	20
+	#define FILTER_MAG_Z	20
 	#define SWING_SAMPLES	12
 	#define ID_STR "Sisters Celestia/Luna Cree XPE2 RGB"
-	static const int32_t VOLTMETER_TUNE = 1000; // fixme
+	static const int32_t VOLTMETER_TUNE = 1053; // Luna: 1053
 
 	static const int32_t RED_VF   = 2200;
 	static const int32_t RED_I    = 350;
@@ -745,7 +751,7 @@
 	static const int VOLUME_1 = 32;
 	static const int VOLUME_2 = 64;
 	static const int VOLUME_3 = 128;
-	static const int VOLUME_4 = 256;
+	static const int VOLUME_4 = 255;
 
 #elif (SABER_MODEL == SABER_MODEL_DUTCHESS)
 	#define PCB_VERSION 				PCB_ITSY_2C
@@ -784,7 +790,7 @@
 	static const int VOLUME_1 = 32;
 	static const int VOLUME_2 = 64;
 	static const int VOLUME_3 = 128;
-	static const int VOLUME_4 = 256;
+	static const int VOLUME_4 = 255;
 #elif (SABER_MODEL == SABER_MODEL_TEST)
 	#define PCB_VERSION 				PCB_ITSY_2D
 	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
@@ -826,7 +832,7 @@
 	static const int VOLUME_1 = 32;
 	static const int VOLUME_2 = 64;
 	static const int VOLUME_3 = 128;
-	static const int VOLUME_4 = 256;
+	static const int VOLUME_4 = 255;
 #endif
 
 #if (PCB_VERSION == PCB_SHIELD_3)
@@ -1045,8 +1051,8 @@ enum {
 };
 
 static const float DEFAULT_G_FORCE_MOTION = 1.3f;
-static const float DEFAULT_G_FORCE_IMPACT = 3.0f;	// Was 2.3. Testing.
-static const int SWING_MAX = 12;
+static const float DEFAULT_G_FORCE_IMPACT = 3.0f;	// Was 2.3.
+static const int SWING_MAX = 14;
 
 #endif // PINS_HEADER
 

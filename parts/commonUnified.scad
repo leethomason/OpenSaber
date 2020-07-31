@@ -67,7 +67,6 @@ module tjoint(dz, do, di, yTrim, zTrim, slot)
     DY = do * RATIO;
     HALFY = DY * 0.7;
     RI = di / 2;
-    BOOST = 0.0;
 
     TRI = [
         [0, 0,], [10, 0], [10, 15]
@@ -80,10 +79,10 @@ module tjoint(dz, do, di, yTrim, zTrim, slot)
     // without support. Less junk getting cleanup up in the 
     // slot is a good thing.
     translate([0, -DY/2 - yTrim/2, dz/2 - zTrim/2]) {
-        cube(size=[100, DY + yTrim + BOOST, dz/2 + zTrim*2]);
+        cube(size=[100, DY + yTrim, dz/2 + zTrim*2]);
     }
     if (slot) {
-        hy = DY / 2 + BOOST;
+        hy = DY / 2;
         x = sqrt(RI*RI - hy*hy);
         translate([x, hy, dz/2 - zTrim/2]) polygonXY(h=dz/2 + zTrim*2, points=TRI);
     }
@@ -659,26 +658,52 @@ module speakerHolder(outer, dz, dzToSpkrBack, type, extraZ=0)
 }
 
 
-module powerPortRing(diameter, t, dz, dzToPort, portSupportToBack=false, counter=true, addY=0, dyPort=DY_PORT)
+module powerPortRing(diameter, t, dz, dzToPort, portSupportToBack=false, counter=true, addY=0, dyPort=DY_PORT, topNut=true)
 {    
+    D_NUT = 11.6;
+    W_NUT = 10.15;
+    H_NUT =  2.15;
+    H_NUT_PRACT = H_NUT + (diameter/2 - yAtX(W_NUT/2, diameter/2));
+    H_THREAD = 5.5;
+    D_THREAD = 7.8;
+    H_THREAD_PRACT = H_THREAD + (diameter/2 - yAtX(D_THREAD/2, diameter/2));
+
     difference() {
         union() {
             tube(h=dz, do=diameter, di=diameter-t);
             intersection() {
                 cylinder(h=dz, d=diameter);
+
+                portY = topNut ? (diameter/2 - H_THREAD_PRACT) 
+                               : diameter/2 - dyPort - addY;
+
                 if (portSupportToBack) {
-                    translate([-50, diameter/2 - dyPort - addY, 0])
+                    translate([-50, portY, 0])
                         cube(size=[100, 50, D_PORT_SUPPORT/2 + dzToPort]);
                 }
                 else {
-                    translate([-50, diameter/2 - dyPort - addY, dzToPort - D_PORT_SUPPORT/2])
+                    translate([-50, portY, dzToPort - D_PORT_SUPPORT/2])
                         cube(size=[100, 50, D_PORT_SUPPORT]);
                 }
             }
         }
         translate([0, 0, dzToPort]) {
-            port(true);
-            if (counter) portCounter();
+            rotate([-90, 0, 0]) {
+                D = topNut ? D_PORT + 0.1 : D_PORT;
+                cylinder(h=100, d=D);
+            }
+            if (counter) 
+                portCounter();
+        }
+        if (topNut) {
+            translate([0, diameter/2 - H_NUT_PRACT, dzToPort]) {
+                intersection() {
+                    rotate([-90, 0, 0])
+                        cylinder(h=100, d=D_NUT);
+                    translate([-W_NUT/2, 0, -50])
+                        cube(size=[W_NUT, 100, 100]);
+                }
+            }
         }
     }
 }
