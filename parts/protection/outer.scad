@@ -4,6 +4,7 @@ include <dim.scad>
 $fn = 80;
 
 BIT = 3.175;
+WING_DZ = 3;
 
 echo("M_DESIGN_MAX_THREAD", M_DESIGN_MAX_THREAD);
 echo("M_DESIGN_MAX_COUPLER", M_DESIGN_MAX_COUPLER);
@@ -23,40 +24,55 @@ module centerCut()
     H = 20;
     DX = 8.0;
 
+    TOP = 7 * 25.4;
+    BOTTOM = (M_DESIGN_MIN + BASE) - TOP;
+
+    echo("CENTER Aluminum cut, from top of section. On tool centers.");
+    echo("P0", 0, BOTTOM);
+    echo("P1", DX, BOTTOM + DZ_GEM/2);
+    echo("P2", 0, BOTTOM + DZ_GEM);
+    echo("P3", -DX, BOTTOM + DZ_GEM/2);
+
     hull() {
         translate([0, 0, 0]) rotate([-90, 0, 0]) cylinder(h=H, d=BIT);
+        translate([DX, 0, DZ_GEM/2]) rotate([-90, 0, 0]) cylinder(h=H, d=BIT);
         translate([0, 0, DZ_GEM]) rotate([-90, 0, 0]) cylinder(h=H, d=BIT);
         translate([-DX, 0, DZ_GEM/2]) rotate([-90, 0, 0]) cylinder(h=H, d=BIT);
-        translate([DX, 0, DZ_GEM/2]) rotate([-90, 0, 0]) cylinder(h=H, d=BIT);
     }
 }
 
-module wing()
+module wing(print)
 {
-    DX0 = 11.0;
-    DZ0 = 8.0;
+    MIDX = 6.0;
+
+    DX0 = 10.0;
+    DZ0 = 7.0;
 
     DX1 = 13.0;
-    DZ1 = 19.0;
+    DZ1 = 17.0;
     H = 20;
 
+    TOP = 7 * 25.4;
+    BOTTOM = (M_DESIGN_MIN + BASE - WING_DZ) - TOP;
+
+    if (print) {
+        echo("WING Aluminum cut, from top of saber body. On tool center.");
+        echo("Right");
+        echo("P0", -MIDX, BOTTOM);
+        echo("P1", -MIDX + DX0, BOTTOM + DZ0);
+        echo("P2", -MIDX + DX1, BOTTOM + DZ1);
+        echo("Left");
+        echo("P0", -MIDX, BOTTOM);
+        echo("P1", -MIDX - DX0, BOTTOM + DZ0);
+        echo("P2", -MIDX - DX1, BOTTOM + DZ1);
+    }
+
     hull() {
-        translate([0, 0, 0]) rotate([-90, 0, 0]) cylinder(h=H, d=BIT);
-        translate([DX0, 0, DZ0]) rotate([-90, 0, 0]) cylinder(h=H, d=BIT);
-        translate([DX1, 0, DZ1]) rotate([-90, 0, 0]) cylinder(h=H, d=BIT);
+        translate([-MIDX, 0, 0]) rotate([-90, 0, 0]) cylinder(h=H, d=BIT);
+        translate([-MIDX + DX0, 0, DZ0]) rotate([-90, 0, 0]) cylinder(h=H, d=BIT);
+        translate([-MIDX + DX1, 0, DZ1]) rotate([-90, 0, 0]) cylinder(h=H, d=BIT);
     }
 
-    LDX0 = 4.0;
-    LDZ0 = -5.0;
-
-    LDX1 = 4.0;
-    LDZ1 = -3.0;
-
-    *hull() {
-        translate([0, 0, 0]) rotate([-90, 0, 0]) cylinder(h=H, d=BIT);
-        translate([LDX0, 0, LDZ0]) rotate([-90, 0, 0]) cylinder(h=H, d=BIT);
-        translate([LDX1, 0, LDZ1]) rotate([-90, 0, 0]) cylinder(h=H, d=BIT);
-    }
 }
 
 module brassCenterCut()
@@ -68,7 +84,7 @@ module brassCenterCut()
     M_TOP = M_BRASS + DZ_BRASS;
     BOTTOM = (M_DESIGN_MIN + BASE) - M_TOP;
 
-    echo("Brass cut, from top of brass section. On tool centers.");
+    echo("Brass center cut, from top of brass section. On tool centers.");
     echo("Length of section", DZ_BRASS);
     echo("P0", 0, BOTTOM + ZOFF);
     echo("P1", DX, BOTTOM + DZ_GEM/2);
@@ -87,16 +103,16 @@ module brassCenterCut()
 module switchCut()
 {
     hull() {
-        translate([0, 0, M_SWITCH]) rotate([-90, 0, 0]) cylinder(h=100, d=12.0);
-        translate([0, 0, M_PORT]) rotate([-90, 0, 0]) cylinder(h=100, d=12.0);
+        translate([0, 0, M_SWITCH]) rotate([-90, 0, 0]) cylinder(h=100, d=D_CAPSULE);
+        translate([0, 0, M_PORT]) rotate([-90, 0, 0]) cylinder(h=100, d=D_CAPSULE);
     }
 }
 
 // Outer case
-*difference() {
+difference() {
     union() {
         color("Gainsboro") tube(h=M_BODY_END - M_0, do=D_OUTER, di=D_INNER);
-        color("LightGray") translate([0, 0, M_BODY_END]) tube(h=M_EXT_END - M_BODY_END, do=D_OUTER, di=D_INNER);
+        *color("LightGray") translate([0, 0, M_BODY_END]) tube(h=M_EXT_END - M_BODY_END, do=D_OUTER, di=D_INNER);
 
         color("LightGray") translate([0, -D_OUTER/2 + 2, M_ALIGN])
             rotate([90, 0, 0])
@@ -105,11 +121,10 @@ module switchCut()
 
     translate([0, 0, M_DESIGN_MIN + BASE]) centerCut();
 
-    WING_ROTATE = -18;
-    WING_DZ = 3;
+    WING_ROTATE = -38; //-18;
 
     translate([0, 0, M_DESIGN_MIN + BASE - WING_DZ]) rotate([0, 0, WING_ROTATE])
-        wing();
+        wing(true);
     translate([0, 0, M_DESIGN_MIN + BASE - WING_DZ]) rotate([0, 0, -WING_ROTATE])
         mirror([-1, 0, 0]) wing();
 

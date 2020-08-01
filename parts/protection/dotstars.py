@@ -20,7 +20,7 @@ g.absolute()
 g.feed(mat['feed_rate'])
 g.spindle('CW', mat['spindle_speed'])
 
-for p in range(0, 4):
+for p in range(0, 6):
     for i in range(0, 4):
         g.move(z=2)
         g.move(y=DOTSTAR + i * 7.0)
@@ -30,4 +30,13 @@ for p in range(0, 4):
 
 g.move(z=15)
 g.spindle()
+
+
+# D = 36.83
+# Circ = 115.70
+# dist(38) = 12.21
+# dist(180-38) = 45.64
+# dist(180) = 57.85
+# dist(180+38) = 70.06
+# dist(360-38) = 103.49
 
