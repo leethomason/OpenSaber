@@ -63,7 +63,9 @@ if frontFace == 1:
 if frontFace == 0:
     # plate for screw head
     g.move(y = -BODY + M_ALIGN)
-    hole(g, mat, -1.0, d=D_BOLT)        # fixme test
+    g.move(z=0)
+    hole(g, mat, -1.0, d=D_BOLT)
+    g.move(z=0)
     hole(g, mat, DEPTH, d=4.2)
 
 

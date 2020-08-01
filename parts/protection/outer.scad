@@ -62,9 +62,9 @@ module wing(print)
         echo("P1", -MIDX + DX0, BOTTOM + DZ0);
         echo("P2", -MIDX + DX1, BOTTOM + DZ1);
         echo("Left");
-        echo("P0", -MIDX, BOTTOM);
-        echo("P1", -MIDX - DX0, BOTTOM + DZ0);
-        echo("P2", -MIDX - DX1, BOTTOM + DZ1);
+        echo("P0", MIDX, BOTTOM);
+        echo("P1", MIDX - DX0, BOTTOM + DZ0);
+        echo("P2", MIDX - DX1, BOTTOM + DZ1);
     }
 
     hull() {

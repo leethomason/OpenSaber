@@ -41,11 +41,11 @@ if right == 1:
     Y2 = -31.0125
 
 if right == 0:
-    X0 = -6
+    X0 = 6
     Y0 = -48.0125
-    X1 = -16
+    X1 = -4
     Y1 = -41.0125
-    X2 = -19
+    X2 = -7
     Y2 = -31.0125
 
 g = G(outfile='path.nc', aerotech_include=False, header=None, footer=None)
