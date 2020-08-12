@@ -131,9 +131,7 @@ bool GrinlizLSM303::begin()
     Wire.begin();
     delay(10);  // initial warmup
 
-    Log.p("write8").eol();
     write8(LSM303_ADDRESS_ACCEL, LSM303_REGISTER_ACCEL_CTRL_REG1_A, 0x57);
-    Log.p("read8").eol();
     uint8_t reg1_a = read8(LSM303_ADDRESS_ACCEL, LSM303_REGISTER_ACCEL_CTRL_REG1_A);
 
     Log.p("ctrlA=0x").p(reg1_a, HEX).p(" ").p(reg1_a == 0x57 ? "ok" : "error").eol();
