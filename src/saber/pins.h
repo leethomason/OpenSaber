@@ -51,6 +51,7 @@
 #define SABER_MODEL_LEIA  	   	   20   // Itsy v2b, Dotstar UI
 #define SABER_MODEL_SISTERS2  	   21   // Itsy v2b, OLED (128x32)
 #define SABER_MODEL_DUTCHESS   	   22   // Itsy v2b, Dotstar UI
+#define SABER_MODEL_PROTECTION 	   23   // Itsy v2b, Dotstar UI
 
 #define SABER_SUB_MODEL_NONE		0
 #define SABER_SUB_MODEL_LUNA		1
@@ -59,8 +60,8 @@
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_LEIA
+#define SERIAL_DEBUG 				1
+#define SABER_MODEL 				SABER_MODEL_PROTECTION
 #define SABER_SUB_MODEL				
 // ----------------------------------
 
@@ -774,6 +775,44 @@
 	#define FILTER_MAG_Z	10
 	#define SWING_SAMPLES	12
 	#define ID_STR "Dutchess Cree XPE2 RGB"
+
+	static const int32_t RED_VF   = 2200;
+	static const int32_t RED_I    = 400;
+	static const int32_t RED_R    = 4300;
+
+	static const int32_t GREEN_VF = 3200;
+	static const int32_t GREEN_I  = 400;
+	static const int32_t GREEN_R  = 1000;
+
+	static const int32_t BLUE_VF  = 3100;
+	static const int32_t BLUE_I   = 400;
+	static const int32_t BLUE_R   = 1800;
+
+	static const int VOLUME_1 = 32;
+	static const int VOLUME_2 = 64;
+	static const int VOLUME_3 = 128;
+	static const int VOLUME_4 = 255;
+#elif (SABER_MODEL == SABER_MODEL_PROTECTION)
+	#define PCB_VERSION 				PCB_ITSY_2E
+	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
+	#define SABER_VOLTMETER			
+	#define SABER_UI_LED				SABER_LED_DOTSTAR
+
+	#define SABER_NUM_LEDS 			    4
+	#define SABER_UI_START				0
+	#define SABER_UI_COUNT				4
+	#define SABER_UI_BRIGHTNESS	    	16
+	#define SABER_UI_IDLE_MEDITATION
+	#define VOLTMETER_TUNE				1016
+	//#define SABER_UI_COLOR_WHEEL
+
+	// Does not need to be power of 2.
+	// multiply by 10 to get ms width of filter
+	#define FILTER_MAG_X	10
+	#define FILTER_MAG_Y	10
+	#define FILTER_MAG_Z	10
+	#define SWING_SAMPLES	12
+	#define ID_STR "Protection Cree XPE2 RGB"
 
 	static const int32_t RED_VF   = 2200;
 	static const int32_t RED_I    = 400;
