@@ -1,5 +1,6 @@
 use <../shapes.scad>
 include <dim.scad>
+use <case.scad>
 
 $fn = 80;
 
@@ -12,12 +13,6 @@ if (M_DESIGN_MAX_COUPLER <= M_DESIGN_MAX_THREAD) echo("ERROR coupler impinging o
 
 BASE = 12.0 + BIT / 2;
 DZ_GEM = M_DESIGN_MAX - (M_DESIGN_MIN + BASE) - BIT/2;
-
-module dotstar() {
-    for(i=[0:3]) {
-        translate([0, 0, 7.0*i]) rotate([0, -90, 0]) cylinder(h=100, d=2.0);
-    }
-}
 
 module centerCut()
 {
@@ -78,18 +73,20 @@ module wing(print)
 module brassCenterCut()
 {
     H = 20;
-    DX = 6.0;
+    DX = 6;
     ZOFF = 1.0;
 
     M_TOP = M_BRASS + DZ_BRASS;
-    BOTTOM = (M_DESIGN_MIN + BASE) - M_TOP;
+    MARK = (M_DESIGN_MIN + BASE) - M_ALIGN;
 
-    echo("Brass center cut, from top of brass section. On tool centers.");
+    echo("Brass cut. From alignment hole. Tool center.");
     echo("Length of section", DZ_BRASS);
-    echo("P0", 0, BOTTOM + ZOFF);
-    echo("P1", DX, BOTTOM + DZ_GEM/2);
-    echo("P2", 0, BOTTOM + DZ_GEM - ZOFF);
-    echo("P3", -DX, BOTTOM + DZ_GEM/2);
+    echo("StartY w/bit", M_BRASS - M_ALIGN - BIT/2);
+    echo("EndY w/Bit", M_BRASS - M_ALIGN + DZ_BRASS + BIT/2);
+    echo("P0", 0, MARK + ZOFF);
+    echo("P1", DX, MARK + DZ_GEM/2);
+    echo("P2", 0, MARK + DZ_GEM - ZOFF);
+    echo("P3", -DX, MARK + DZ_GEM/2);
 
     translate([0, 0, M_DESIGN_MIN + BASE]) hull()
     {
@@ -109,15 +106,16 @@ module switchCut()
 }
 
 // Outer case
-difference() {
+*difference() {
     union() {
         color("Gainsboro") tube(h=M_BODY_END - M_0, do=D_OUTER, di=D_INNER);
         *color("LightGray") translate([0, 0, M_BODY_END]) tube(h=M_EXT_END - M_BODY_END, do=D_OUTER, di=D_INNER);
 
-        color("LightGray") translate([0, -D_OUTER/2 + 2, M_ALIGN])
+        *color("LightGray") translate([0, -D_OUTER/2 + 2, M_ALIGN])
             rotate([90, 0, 0])
                 cylinder(h=4, d=6);
     }
+    translate([0, 0, M_ALIGN]) rotate([90, 0, 0]) cylinder(h=100, d=4.2);
 
     translate([0, 0, M_DESIGN_MIN + BASE]) centerCut();
 
@@ -148,27 +146,28 @@ difference() {
     *color("plum") translate([0, 0, M_DESIGN_MAX]) tube(h=1.0, do=50, di=D_OUTER - OUTER_RING_DEPTH*2);
 
     translate([0, 0, M_FIRST_DOTSTAR]) dotstar();
+    hull() {
+        DDOT = 4.0;
+        translate([0, 0, M_FIRST_DOTSTAR]) rotate([0, -90, 0]) cylinder(h=20, d=DDOT);
+        translate([0, 0, M_FIRST_DOTSTAR + 21.0]) rotate([0, -90, 0]) cylinder(h=20, d=DDOT);
+    }
 }
 
 // Brass
-color("Gold") difference() {
-    union() {
-        translate([0, 0, M_BRASS])
-            tube(h=DZ_BRASS, do=DO_BRASS, di=DI_BRASS);
-    }
+difference() {
+    brassSleeve();
     brassCenterCut();
     rotate([0, 0, 180]) brassCenterCut();
-    echo("First dotstart, from top of BRASS", M_FIRST_DOTSTAR - (M_BRASS + DZ_BRASS));
     translate([0, 0, M_FIRST_DOTSTAR]) dotstar();
 }
 
 // Copper
-BAFFLE_Z = 9.6;
-BAFFLE_STEP = 5.5;
-N_BAFFLE = 5;
-
 module copperBaffles()
 {
+    BAFFLE_Z = 9.6;
+    BAFFLE_STEP = 5.5;
+    N_BAFFLE = 5;
+
     IW = 50.0;
     DY = 9.5;
     for(i=[0:N_BAFFLE - 1]) {
@@ -182,28 +181,34 @@ module copperBaffles()
     //translate([-50, 11.5, 0]) cube(size=[100, 100, 100]);
 }
 
-color("DarkGoldenrod") difference() {
-    union() {
-        translate([0, 0, TUBE_MIN])
-            tube(h=DZ_COPPER, do=DO_COPPER, di=DI_COPPER);
+module wireTube()
+{
+    OVER = 2.0;
+    D_TUBE = 5.6;
+    translate([(DI_COPPER - D_TUBE)/2, 0, M_COPPER - OVER])
+        cylinder(h=DZ_COPPER + OVER*2.0, d=D_TUBE);
+}
+
+color("DarkGoldenrod") 
+union() {
+    difference() {
+        copperChamber();
+        translate([0, 0, M_COPPER]) copperBaffles();
+        rotate([0, 0, 180]) translate([0, 0, M_COPPER]) copperBaffles();
+
+
     }
-    W = 8.0;
-    END_Z = 4.0;
-    translate([-W/2, -50, TUBE_MIN + END_Z])
-        cube(size=[W, 100, DZ_COPPER - END_Z*2]);
-    translate([0, 0, TUBE_MIN]) copperBaffles();
-    rotate([0, 0, 180]) translate([0, 0, TUBE_MIN]) copperBaffles();
-    switchCut();
+    //color("gold") rotate([0, 0, 45]) wireTube();
 }
 
 // Crystal
 color("crimson") {
     CRYSTAL = 10.0;
-    translate([0, 0, TUBE_MIN])
+    translate([0, 0, M_COPPER])
         rotate([0, 0, 45])
             translate([-CRYSTAL/2, -CRYSTAL/2, 0])
-                cube(size=[CRYSTAL, CRYSTAL, M_DESIGN_MAX - TUBE_MIN]);
+                cube(size=[CRYSTAL, CRYSTAL, M_DESIGN_MAX - M_COPPER]);
 }
 
 // Coupler:
-color("plum") translate([0, 0, M_PCB_COUPLER]) cylinder(d=D_INNER, h=10.0);
+*color("plum") translate([0, 0, M_PCB_COUPLER]) cylinder(d=D_INNER, h=10.0);
