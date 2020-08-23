@@ -33,7 +33,7 @@ CUTY0 = -25.9875
 CUTY1 = 62.5875
 
 mat = init_material(sys.argv[1])
-top = bool(sys.argv[2])
+top = int(sys.argv[2])
 
 g = G(outfile='path.nc', aerotech_include=False, header=None, footer=None)
 nomad_header(g, mat, CNC_TRAVEL_Z)
@@ -56,7 +56,7 @@ def path(g, total_plunge, plunge):
 steps = calc_steps(DEPTH, -mat['pass_depth'])
 run_3_stages_abs(path, g, steps)
 
-if top:
+if top == 1:
     g.move(z=2)
     g.move(y=0)
     g.move(z=0)
@@ -64,6 +64,9 @@ if top:
     g.move(z=0)
     rectangleTool(g, mat, DEPTH, 19.0 - mat['tool_size'], -CUTY0, 0, "top", "center")
 else:
+    g.move(z=2)
+    g.move(x=0, y=0)
+    g.move(z=0)
     hole(g, mat, DEPTH, d=4.2, offset="inside")
 
 
