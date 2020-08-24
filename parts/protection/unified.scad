@@ -4,8 +4,8 @@ use <../shapes.scad>
 use <case.scad>
 
 DRAW_AFT = false;
-DRAW_FORE = true;
-DRAW_COUPLER = false;
+DRAW_FORE = false;
+DRAW_COUPLER = true;
 
 T_JOINT = 3.5;
 DZ_JOINT = 8;
@@ -232,11 +232,11 @@ if (DRAW_COUPLER) {
 
         // Hold the PCB
         W_PCB = 9.16 + 0.4;
-        H_PCB = 14.24 + 0.4;
+        H_PCB = 16.78 + 0.4;
         translate([-W_PCB/2, -H_PCB/2, M_PCB_COUPLER]) cube(size=[W_PCB, H_PCB, 10]);
         // Punch out space under for wires & solder
         PCB_INSET = 2.0;
-        translate([-W_PCB/2, -(H_PCB - PCB_INSET)/2, M_PCB_COUPLER - 2.0]) 
+        translate([-W_PCB/2, -(H_PCB - PCB_INSET)/2, M_PCB_COUPLER - 2.8]) 
             cube(size=[W_PCB, H_PCB - PCB_INSET, 10]);
 
         // Very specific crystal holder.
@@ -246,7 +246,7 @@ if (DRAW_COUPLER) {
         DY_TIP = 1.5;
 
         translate([DX_TIP, DY_TIP, M_COUPLER - H_IN_COPPER - EPS])
-            cylinder(h=H_TIP, d=D_TIP);
+            cylinder(h=10, d=D_TIP);
     }
 }
 
