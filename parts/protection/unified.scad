@@ -4,8 +4,8 @@ use <../shapes.scad>
 use <case.scad>
 
 DRAW_AFT = false;
-DRAW_FORE = false;
-DRAW_COUPLER = true;
+DRAW_FORE = true;
+DRAW_COUPLER = false;
 
 T_JOINT = 3.5;
 DZ_JOINT = 8;
@@ -14,11 +14,12 @@ EPS = 0.01;
 
 NUT_W = 8.6;
 NUT_Y = 3.4;
-SMALL_NUT_W = 7.8;
+SMALL_NUT_W = 8.0;
 SMALL_NUT_Y = 2.8;
 
 D_ROD = 3.5;            
 NUT_FLOOR = -D_INNER/2 + 3.0;
+COPPER_OUTSET = 0.1;
 
 $fn = 40;
 
@@ -73,7 +74,17 @@ module dotstarCutout()
 module frontNotch()
 {
     // Do something about all that plastic in the front...
-    translate([-50, 6.0, M_SWITCH + 10.0]) cube(size=[100, 100, 100]);
+    //translate([-50, 6.0, M_SWITCH + 10.0]) cube(size=[100, 100, 100]);
+    D = 2.0 * (D_INNER/2 - 6.0);
+
+    hull() {
+        translate([50, 6.0 + D/2, M_SWITCH + 18.0])
+            rotate([0, -90, 0])
+                cylinder(h=100, d=D);
+        translate([50, 6.0 + D/2, M_SWITCH + 40])
+            rotate([0, -90, 0])
+                cylinder(h=100, d=D);
+    }
 }
 
 if (DRAW_FORE) 
@@ -131,7 +142,8 @@ if (DRAW_FORE)
                     translate([-50, -D_INNER/2, M_COPPER]) cube(size=[45, 12.0, H_HOLDER_1]);
                     mirror([-1, 0, 0]) translate([-50, -D_INNER/2, M_COPPER]) cube(size=[45, 12.0, H_HOLDER_1]);
                 }
-                translate([0, 0, M_COPPER]) tube(h=H_HOLDER_1, do=D_INNER, di=DO_COPPER);
+                translate([0, 0, M_COPPER]) 
+                    tube(h=H_HOLDER_1, do=D_INNER, di=DO_COPPER + COPPER_OUTSET);
             }
         }
         brassSleeve(addOuter = 1.0);
@@ -178,7 +190,7 @@ if (DRAW_FORE)
     difference() {
         union() {
             translate([0, 0, M_COPPER - H_HOLDER_0]) cylinder(d=D_INNER, h=H_HOLDER_0);
-            translate([0, 0, M_COPPER]) cylinder(d=DI_COPPER, h=H_HOLDER_1);
+            translate([0, 0, M_COPPER]) cylinder(d=DI_COPPER - COPPER_OUTSET, h=H_HOLDER_1);
         }
         brassSleeve(addOuter = 1.0);
         bolt();
