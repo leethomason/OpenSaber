@@ -50,11 +50,11 @@ module bolt()
 
 module dotstarCutout()
 {
-    dotstarZ = dotstarStripZLen(4);
+    dotstarZ = 30.0;
     dotstarX = 12.4;    // of the strip, not the LED
 
     SETBACK = 3.3;
-    translate([0, 0, M_FIRST_DOTSTAR - 2.5]) mirror([-1, 0, 0]) {            
+    translate([0, 0, M_ALIGN - dotstarZ/2]) mirror([-1, 0, 0]) {            
         translate([D_INNER/2 - SETBACK, 0, 0]) 
             polygonXY(h=dotstarZ, points = [
                 [0, -dotstarX/2],
@@ -64,7 +64,7 @@ module dotstarCutout()
             ]);
         
         // Wire access    
-        DY_WIRE = 7.0;
+        DY_WIRE = 9.0;
         DZ_WIRE = 4.0;
         translate([0, -DY_WIRE/2, -DZ_WIRE/2]) cube(size=[100, DY_WIRE, DZ_WIRE]);
         translate([0, -DY_WIRE/2, dotstarZ - DZ_WIRE/2]) cube(size=[100, DY_WIRE, DZ_WIRE]);
