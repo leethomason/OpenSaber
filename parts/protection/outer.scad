@@ -22,12 +22,13 @@ module centerCut()
     TOP = 7 * 25.4;
     BOTTOM = (M_DESIGN_MIN + BASE) - TOP;
 
+/*
     echo("CENTER Aluminum cut, from top of section. On tool centers.");
     echo("P0", 0, BOTTOM);
     echo("P1", DX, BOTTOM + DZ_GEM/2);
     echo("P2", 0, BOTTOM + DZ_GEM);
     echo("P3", -DX, BOTTOM + DZ_GEM/2);
-
+*/
     hull() {
         translate([0, 0, 0]) rotate([-90, 0, 0]) cylinder(h=H, d=BIT);
         translate([DX, 0, DZ_GEM/2]) rotate([-90, 0, 0]) cylinder(h=H, d=BIT);
@@ -51,6 +52,7 @@ module wing(print)
     BOTTOM = (M_DESIGN_MIN + BASE - WING_DZ) - TOP;
 
     if (print) {
+        /*
         echo("WING Aluminum cut, from top of saber body. On tool center.");
         echo("Right");
         echo("P0", -MIDX, BOTTOM);
@@ -60,6 +62,7 @@ module wing(print)
         echo("P0", MIDX, BOTTOM);
         echo("P1", MIDX - DX0, BOTTOM + DZ0);
         echo("P2", MIDX - DX1, BOTTOM + DZ1);
+        */
     }
 
     hull() {
@@ -79,6 +82,7 @@ module brassCenterCut()
     M_TOP = M_BRASS + DZ_BRASS;
     MARK = (M_DESIGN_MIN + BASE) - M_ALIGN;
 
+    /*
     echo("Brass cut. From alignment hole. Tool center.");
     echo("Length of section", DZ_BRASS);
     echo("StartY w/bit", M_BRASS - M_ALIGN - BIT/2);
@@ -87,7 +91,7 @@ module brassCenterCut()
     echo("P1", DX, MARK + DZ_GEM/2);
     echo("P2", 0, MARK + DZ_GEM - ZOFF);
     echo("P3", -DX, MARK + DZ_GEM/2);
-
+    */
     translate([0, 0, M_DESIGN_MIN + BASE]) hull()
     {
         translate([0, 0, ZOFF]) rotate([-90, 0, 0]) cylinder(h=H, d=BIT);
@@ -106,7 +110,7 @@ module switchCut()
 }
 
 // Outer case
-*difference() {
+difference() {
     union() {
         color("Gainsboro") tube(h=M_BODY_END - M_0, do=D_OUTER, di=D_INNER);
         *color("LightGray") translate([0, 0, M_BODY_END]) tube(h=M_EXT_END - M_BODY_END, do=D_OUTER, di=D_INNER);
@@ -164,6 +168,7 @@ difference() {
 // Copper
 module copperBaffles()
 {
+    /*
     BAFFLE_Z = 9.6;
     BAFFLE_STEP = 5.5;
     N_BAFFLE = 5;
@@ -179,6 +184,7 @@ module copperBaffles()
         }
     }
     //translate([-50, 11.5, 0]) cube(size=[100, 100, 100]);
+    */
 }
 
 module wireTube()
@@ -202,7 +208,7 @@ union() {
 }
 
 // Crystal
-color("crimson") {
+#color("crimson") {
     CRYSTAL = 10.0;
     translate([0, 0, M_COPPER])
         rotate([0, 0, 45])

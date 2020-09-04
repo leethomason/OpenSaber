@@ -15,7 +15,8 @@ DZ_BAFFLE = 3.7;
 M_JOINT = M_MC_BATTERY + (N_BATT_BAFFLES * 2 - 1)*DZ_BAFFLE;
 
 // M_FIRST_DOTSTAR = 137.0;    // front
-M_FIRST_DOTSTAR = 86.2;
+//M_FIRST_DOTSTAR = 86.2;
+M_FIRST_DOTSTAR = M_ALIGN - 7 * 2.5;    // back one dotstar
 
 M_PCB_COUPLER = M_EXT_END 
     - 28.9  // to base of thread

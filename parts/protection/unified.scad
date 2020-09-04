@@ -3,13 +3,13 @@ use <../commonUnified.scad>
 use <../shapes.scad>
 use <case.scad>
 
-DRAW_AFT = false;
-DRAW_FORE = true;
+DRAW_AFT = true;
+DRAW_FORE = false;
 DRAW_COUPLER = false;
 
 T_JOINT = 3.5;
 DZ_JOINT = 8;
-T = 6;
+T = 6.5;
 EPS = 0.01;
 
 NUT_W = 8.6;
@@ -52,9 +52,10 @@ module dotstarCutout()
 {
     dotstarZ = 30.0;
     dotstarX = 12.4;    // of the strip, not the LED
+    CENTER = M_ALIGN - 7.0;
 
     SETBACK = 3.3;
-    translate([0, 0, M_ALIGN - dotstarZ/2]) mirror([-1, 0, 0]) {            
+    translate([0, 0, CENTER - dotstarZ/2]) mirror([-1, 0, 0]) {            
         translate([D_INNER/2 - SETBACK, 0, 0]) 
             polygonXY(h=dotstarZ, points = [
                 [0, -dotstarX/2],
@@ -69,6 +70,11 @@ module dotstarCutout()
         translate([0, -DY_WIRE/2, -DZ_WIRE/2]) cube(size=[100, DY_WIRE, DZ_WIRE]);
         translate([0, -DY_WIRE/2, dotstarZ - DZ_WIRE/2]) cube(size=[100, DY_WIRE, DZ_WIRE]);
     }
+}
+
+module flatBottom()
+{
+    translate([-50, -D_INNER/2 - EPS, 0]) cube(size=[100, 2.0, 200]);
 }
 
 module frontNotch()
@@ -179,7 +185,7 @@ if (DRAW_FORE)
             ]);
         }
         // flatten bottom
-        translate([-50, -D_INNER/2 - EPS, 0]) cube(size=[100, 1.5, 200]);
+        flatBottom();
         // flatten top
         translate([-50, D_INNER/2 - 1.5, 0]) cube(size=[100, 10, 200]);
 
@@ -209,6 +215,7 @@ if (DRAW_FORE)
             cube(size=[WIRESIZE, 100, 8.0]);            
 
         frontNotch();
+        flatBottom();
     }
 }
 
