@@ -798,12 +798,14 @@
 	#define SABER_VOLTMETER			
 	#define SABER_UI_LED				SABER_LED_DOTSTAR
 
-	#define SABER_NUM_LEDS 			    4
+	#define SABER_NUM_LEDS 			    8
 	#define SABER_UI_START				0
 	#define SABER_UI_COUNT				4
 	#define SABER_UI_BRIGHTNESS	    	16
+	#define SABER_CRYSTAL_START	    	4
+	#define SABER_CRYSTAL_BRIGHTNESS 	32	// fixme
 	#define SABER_UI_IDLE_MEDITATION
-	#define VOLTMETER_TUNE				1016
+	#define VOLTMETER_TUNE				1000	// fixme
 	//#define SABER_UI_COLOR_WHEEL
 
 	// Does not need to be power of 2.
@@ -816,15 +818,15 @@
 
 	static const int32_t RED_VF   = 2200;
 	static const int32_t RED_I    = 400;
-	static const int32_t RED_R    = 4300;
+	static const int32_t RED_R    = 4300;	// fixme
 
 	static const int32_t GREEN_VF = 3200;
 	static const int32_t GREEN_I  = 400;
-	static const int32_t GREEN_R  = 1000;
+	static const int32_t GREEN_R  = 1000;	// fixme
 
 	static const int32_t BLUE_VF  = 3100;
 	static const int32_t BLUE_I   = 400;
-	static const int32_t BLUE_R   = 1800;
+	static const int32_t BLUE_R   = 1800;	// fixme
 
 	static const int VOLUME_1 = 32;
 	static const int VOLUME_2 = 64;
