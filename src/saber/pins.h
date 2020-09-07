@@ -739,7 +739,7 @@
 
 	static const int32_t RED_VF   = 2200;
 	static const int32_t RED_I    = 350;
-	static const int32_t RED_R    = 4300;
+	static const int32_t RED_R    = 4100;
 
 	static const int32_t GREEN_VF = 3200;
 	static const int32_t GREEN_I  = 350;
@@ -816,7 +816,7 @@
 
 	static const int32_t RED_VF   = 2200;
 	static const int32_t RED_I    = 400;
-	static const int32_t RED_R    = 4300;
+	static const int32_t RED_R    = 4100;
 
 	static const int32_t GREEN_VF = 3200;
 	static const int32_t GREEN_I  = 400;
@@ -824,7 +824,7 @@
 
 	static const int32_t BLUE_VF  = 3100;
 	static const int32_t BLUE_I   = 400;
-	static const int32_t BLUE_R   = 1800;
+	static const int32_t BLUE_R   = 1350;
 
 	static const int VOLUME_1 = 32;
 	static const int VOLUME_2 = 64;

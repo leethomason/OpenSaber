@@ -6,11 +6,8 @@ import sys
 from utility import *
 from material import init_material
 from rectangleTool import rectangleTool
+from hole import hole
 from mecode import G
-
-DEPTH = -4.5
-DDOT = 4.0
-DZ = 21.0 + DDOT
 
 mat = init_material(sys.argv[1])
 
@@ -23,10 +20,14 @@ g.move(z=2)
 g.feed(mat['feed_rate'])
 g.spindle('CW', mat['spindle_speed'])
 
-g.move(y = -7*2.5 - DDOT/2)
-g.move(z=0)
+for p in range(5):
+    depth = -(0.5 + p * 0.5)
 
-rectangleTool(g, mat, DEPTH, DDOT, DZ, DDOT/2, "bottom", "inner", fill=False, adjust_trim=True)
+    for i in range(4):
+        g.move(x = -7 * 1.5 + 7*i)
+        hole(g, mat, depth, d=1.6, offset="inside", z=0)
+        g.move(z=2)
+
 
 g.move(z=16)
 g.spindle()

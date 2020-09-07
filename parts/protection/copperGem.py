@@ -8,8 +8,8 @@ from mecode import G
 from hole import hole
 
 # positioned so that bit is centered at bottom of copper
-DEPTH = -3.0
-D = 11.0
+DEPTH = -3.2
+D = 10.0 #11.0
 SCALE = 2.2
 C = 23.47
 HALF_TOOL = 3.175/2
