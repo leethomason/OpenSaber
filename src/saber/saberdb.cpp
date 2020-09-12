@@ -162,6 +162,23 @@ void SaberDB::setPaletteFromDirHash(uint32_t h)
     }
     break;
 
+    // Protection
+    case 0xade1fec7:
+    {
+        Log.p("Graflex/Bold").eol();
+        static const int GLAFLEX = 0;
+        static const int BOLD = 1;
+        palette[0].set(0x00ff00, 0x00ffa0, GLAFLEX);       // green
+        palette[1].set(0x0088ff, 0x80A080, BOLD);          // blue
+        palette[2].set(0xCC00FF, 0x80A080, BOLD);          // purple
+        palette[3].set(0xff0000, 0xa08000, GLAFLEX);       // red
+        palette[4].set(0xff6000, 0x808000, GLAFLEX);       // orange
+        palette[5].set(0xffff00, 0x00FF88, GLAFLEX);       // yellow
+        palette[6].set(0x80A080, 0x30a0a0, BOLD);          // white
+        palette[7].set(0x00ff44, 0x00ffaa, BOLD);          // green-blue
+    }
+    break;
+
     case 0xd447a9d5:    // corelln (Corellian SS) test font.
     default:
     {
