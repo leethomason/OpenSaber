@@ -4,8 +4,8 @@ use <../shapes.scad>
 use <case.scad>
 
 DRAW_AFT = false;
-DRAW_FORE = true;
-DRAW_COUPLER = false;
+DRAW_FORE = false;
+DRAW_COUPLER = true;
 
 T_JOINT = 3.5;
 DZ_JOINT = 8;
@@ -16,7 +16,7 @@ NUT_W = 8.6;
 NUT_Y = 3.4;
 SMALL_NUT_W = 8.0;
 SMALL_NUT_Y = 2.8;
-SMALL_NUT_D = 9.0;
+SMALL_NUT_D = 10.0;
 
 D_ROD = 3.6;   // Travel free - secured by nuts
 D_ROD_HEAD = 6.6;
@@ -56,14 +56,20 @@ module bolt()
     translate([RAD, 0, M_HEAD]) cylinder(h=M_BOLT - M_HEAD, d=D_ROD_HEAD);
     // Bolt
     translate([RAD, 0, M_BOLT]) cylinder(h=M_NUT - M_BOLT, d=D_ROD);
-    // Nut & access
-    translate([RAD, 0, M_NUT]) cylinder(h=100, d=SMALL_NUT_D);
 }
 
 module bolts()
 {
     bolt();
     mirror([-1, 0, 0]) bolt();
+
+    // Nut & access
+    M_NUT = M_COPPER + DZ_COPPER;
+    RAD = DI_COPPER/2 - D_ROD/2 - 1.0 + 3.5;
+    hull() {
+        translate([RAD, 0, M_NUT]) cylinder(h=100, d=SMALL_NUT_D);
+        translate([-RAD, 0, M_NUT]) cylinder(h=100, d=SMALL_NUT_D);
+    }
 }
 
 
@@ -225,13 +231,11 @@ if (DRAW_FORE)
 }
 
 module wireAccess() {
-    //D = 4.0;
-    //hull() {
-    //    translate([(D_INNER - D)/2, 0, M_COPPER]) cylinder(h=100, d=D);
-    //    translate([50, 0, M_COPPER]) cylinder(h=100, d=D);
-    //}
-    translate([D_INNER/2 - 5, -50, M_COPPER + DZ_COPPER])
-        cube(size=[50, 100, 100]);
+    *translate([D_INNER/2 - 5, -50, M_COPPER + DZ_COPPER])
+        cube(size=[50, 52, 100]);
+    translate([D_INNER/2 - 4, -10, M_COPPER + DZ_COPPER])
+        cylinder(h=100, d=7);
+
 }
 
 if (DRAW_COUPLER) {
@@ -245,30 +249,28 @@ if (DRAW_COUPLER) {
         union() {
             // end of copper to pcb
             translate([0, 0, M_COUPLER]) 
-                cylinder(h=H_COUPLER, d = D_INNER, $fn=60);
+                cylinder(h=H_COUPLER + 0.5, d = D_INNER, $fn=60);
             // Inside copper
             translate([0, 0, M_COUPLER - H_IN_COPPER]) 
                 cylinder(h=H_COUPLER + H_IN_COPPER, d = DI_COPPER, $fn=60);
         }
         bolts();
-        //rotate([0, 0, 45]) wireTube();
         wireAccess();
-        rotate([0, 0, 180]) wireAccess();
+        mirror([-1, 0, 0]) wireAccess();
 
         // Hold the PCB
         W_PCB = 9.16 + 0.4;
         H_PCB = 16.78 + 0.4;
-        translate([-W_PCB/2, -H_PCB/2, M_PCB_COUPLER]) cube(size=[W_PCB, H_PCB, 10]);
+        translate([-W_PCB/2, -H_PCB/2, M_PCB_COUPLER + 1.0]) cube(size=[W_PCB, H_PCB, 10]);
         // Punch out space under for wires & solder
-        PCB_INSET = 2.0;
+        PCB_INSET = 2.5;
         translate([-W_PCB/2, -(H_PCB - PCB_INSET)/2, M_PCB_COUPLER - 2.8]) 
             cube(size=[W_PCB, H_PCB - PCB_INSET, 10]);
 
         // Very specific crystal holder.
-        H_TIP = 1.0;
-        D_TIP = 4.0;
-        DX_TIP = -2.0;
-        DY_TIP = 1.5;
+        D_TIP = 8.0;
+        DX_TIP = 0.0;
+        DY_TIP = 0.0;
 
         translate([DX_TIP, DY_TIP, M_COUPLER - H_IN_COPPER - EPS])
             cylinder(h=10, d=D_TIP);

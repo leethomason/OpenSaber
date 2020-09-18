@@ -804,7 +804,6 @@
 	#define SABER_UI_BRIGHTNESS	    	16
 	#define SABER_UI_IDLE_MEDITATION
 	#define VOLTMETER_TUNE				1016
-	//#define SABER_UI_COLOR_WHEEL
 
 	// Does not need to be power of 2.
 	// multiply by 10 to get ms width of filter
