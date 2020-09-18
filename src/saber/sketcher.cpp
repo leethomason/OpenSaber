@@ -344,6 +344,10 @@ void Digit4UI::Draw(UIMode mode, const UIRenderData *data)
         scratch[3] = 0;
         scratch[4] = 0;
         break;
+
+    case UIMode::NUM_MODES:
+    default:
+        break;
     }
 
     m_output = scratch;

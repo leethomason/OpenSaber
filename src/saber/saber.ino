@@ -78,6 +78,7 @@ SFX sfx(&i2sAudioDriver, manifest);
 
 ButtonCB    buttonA(PIN_SWITCH_A, Button::INTERNAL_PULLUP);
 LEDManager  ledA(PIN_LED_A, false);
+AnimateProp ledProp;
 
 BladeState  bladeState;
 UIModeUtil  uiMode;
@@ -641,7 +642,20 @@ void loop() {
     tester.process();
 
     buttonA.process();
+
+    #ifdef SABER_UI_IDLE_MEDITATION_LED_OFF
+    if (uiMode.mode() == UIMode::NORMAL && bladeState.state() == BLADE_OFF && uiMode.isIdle()) {
+        int pwm = 255;
+        ledProp.tick(delta, &pwm);
+        analogWrite(ledA.pin(), (uint8_t)pwm);
+    } 
+    else {
+        ledProp.start(1000, 255, 0);
+        ledA.process();
+    }
+    #else
     ledA.process();
+    #endif
 
     processAccel(msec, delta);
 

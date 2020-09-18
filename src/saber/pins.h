@@ -60,7 +60,7 @@
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
+#define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_PROTECTION
 #define SABER_SUB_MODEL				
 // ----------------------------------
@@ -798,18 +798,21 @@
 	#define SABER_VOLTMETER			
 	#define SABER_UI_LED				SABER_LED_DOTSTAR
 
-	#define SABER_NUM_LEDS 			    4
+	#define SABER_NUM_LEDS 			    8
 	#define SABER_UI_START				0
 	#define SABER_UI_COUNT				4
 	#define SABER_UI_BRIGHTNESS	    	16
+	#define SABER_CRYSTAL_START	    	4
+	#define SABER_CRYSTAL_BRIGHTNESS 	64
 	#define SABER_UI_IDLE_MEDITATION
-	#define VOLTMETER_TUNE				1016
+	#define SABER_UI_IDLE_MEDITATION_LED_OFF
+	#define VOLTMETER_TUNE				1043
 
 	// Does not need to be power of 2.
 	// multiply by 10 to get ms width of filter
-	#define FILTER_MAG_X	10
-	#define FILTER_MAG_Y	10
-	#define FILTER_MAG_Z	10
+	#define FILTER_MAG_X	20
+	#define FILTER_MAG_Y	20
+	#define FILTER_MAG_Z	20
 	#define SWING_SAMPLES	12
 	#define ID_STR "Protection Cree XPE2 RGB"
 
@@ -819,7 +822,7 @@
 
 	static const int32_t GREEN_VF = 3200;
 	static const int32_t GREEN_I  = 400;
-	static const int32_t GREEN_R  = 1000;
+	static const int32_t GREEN_R = 1000;
 
 	static const int32_t BLUE_VF  = 3100;
 	static const int32_t BLUE_I   = 400;
