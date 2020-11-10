@@ -468,7 +468,7 @@ module oneBaffleBottonRail(d, dz)
     }    
 }
 
-module bridgeAndRail(bridge, d, dz, bottomRail=true)
+module bridgeAndRail(bridge, d, dz, bottomRail=true, bridgeOnlyBottom=false)
 {
 
     if (bridge > 0) {
@@ -538,7 +538,7 @@ module oneBaffle(   d,
             else {
                 cylinder(h=dz, d=d + dExtra);
             }
-            bridgeAndRail(bridge, d, dz, bottomRail=bottomRail);
+            bridgeAndRail(bridge, d, dz, bottomRail=bottomRail, bridgeOnlyBottom=bridgeOnlyBottom);
         }
 
         if (battery) {
