@@ -660,6 +660,14 @@ module speakerHolder(outer, dz, dzToSpkrBack, type, extraZ=0)
 
 module powerPortRing(diameter, t, dz, dzToPort, portSupportToBack=false, counter=true, addY=0, dyPort=DY_PORT, topNut=true)
 {    
+    SECTION_PAD = 0.5;
+    if (dzToPort - D_NUT/2 - 0.5 < 0) {
+        echo("ERROR Port center z too low.");
+    }
+    if (dzToPort + D_NUT/2 + 0.5 > dz) {
+        echo("ERROR Port dz too short");
+    }
+
     D_NUT = 11.6;
     W_NUT = 10.15;
     H_NUT =  2.15;
@@ -778,6 +786,26 @@ module switchRing(diameter, t, dz, dzToSwitch, counter=true, switchDY=0)
         translate([0, switchDY, dzToSwitch]) {
             switch(diameter, true);
             if (counter) switchCounter();
+        }
+    }
+}
+
+module tactileRing(diameter, t, dz, dzToTactile)
+{
+    TACTILE_X = 4.2;    // FIXME
+    TACTILE_PAD = 1.0;   
+    DY = 2.0;
+
+    difference() {
+        union() {
+            //tube(h=dz, do=diameter, di=diameter-t);
+            translate([0, 0, dzToTactile]) {
+                simpleBridge(diameter, DY, 2.0, TACTILE_X, addWidth=TACTILE_X, flatFill=false);
+            }
+            translate([0, 0, dzToTactile - TACTILE_X/2]) {
+                translate([-TACTILE_X/2 - 4.0, DY, 0]) cube(size=[4.0, 3.0, TACTILE_X]);
+                mirror([-1, 0, 0]) translate([-TACTILE_X/2 - 4.0, DY, 0]) cube(size=[4.0, 3.0, TACTILE_X]);
+            }
         }
     }
 }
