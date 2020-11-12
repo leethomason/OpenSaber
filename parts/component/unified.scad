@@ -8,7 +8,7 @@ DRAW_PLATE = false;
 
 EPS = 0.01;
 
-$fn = 60;
+$fn = 80;
 
 module inner()
 {
@@ -55,7 +55,8 @@ if (DRAW_FORE) {
             translate([0, 0, M_JOINT]) {
                 powerPortRing(D_FORE_INNER, T, DZ_PORT_SECTION, 
                             M_PORT - M_JOINT,
-                            counter=false);
+                            counter=false,
+                            portSupportToBack=true);
             }
             translate([0, 0, M_BOLT_START]) {
                 boltRing(D_FORE_INNER, T, DZ_BOLT_SECTION, M_BOLT - M_BOLT_START);
@@ -89,11 +90,15 @@ if (DRAW_FORE) {
                 translate([0, 0, M_JOINT + 16 + i*8]) capsule(70, 110, 2, true);
         }
 
-        // Top vent
+        // Top vent (joint ring)
         hull() {
             translate([0, 0, M_JOINT + 12.0]) rotate([-90, 0, 0]) cylinder(h=100, d=10.0);
             translate([0, 0, M_FORE - 12.0]) rotate([-90, 0, 0]) cylinder(h=100, d=10.0);
         }
+
+        // Top vent (inner)
+        W = 12;
+        translate([-W/2, 0, M_FORE ]) cube(size=[W, 100, M_PORT - 8.0 - M_FORE]);
     }
 }
 
@@ -123,3 +128,6 @@ if (DRAW_PLATE) color("silver") {
 *translate([0, 0, M_MC + DZ_SPEAKER]) {
     color("red") battery(D_AFT_INNER);
 }
+
+echo("DZ_PORT, DZ_BOLT, DZ_SWITCH=", M_BOLT - M_PLATE, M_PORT - M_PLATE, M_SWITCH - M_PLATE);
+echo("H_PLATE=", D_OUTER/2 - (D_FORE_INNER/2 - DY_FLAT));
