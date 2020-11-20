@@ -838,6 +838,50 @@ module tactileRing(diameter, t, dz, dzToTactile)
     }
 }
 
+module emitterCouplerRing(diameter, t, dz)
+{
+    PCB_X = 10.0;
+    PCB_Y = 16.0;
+    HEADER_H = 8.4;
+    HEADER_W = 2.54;
+    HEADER_Y = 2.54 * 4;
+    PCB_Z = 1.8;
+    OVERLAP = 1.0;
+
+    PILLAR_W = 6.0;
+    COLUMN_Z = 3.0;
+    COLUMN_X = 4.0;
+
+    COLUMN_BACK = dz - HEADER_H - PCB_Z - COLUMN_Z;
+
+    //if (COLUMN_BACK > dz) echo("ERROR emitterCouplerRing dz too small");
+
+    difference() {
+        tube(h=dz, do=diameter, di=diameter - t);
+        translate([-50, 4, COLUMN_BACK + COLUMN_Z]) cube(size=[100, 50, 100]);
+        translate([-(PCB_X - OVERLAP*2)/2, diameter/2 - 4, -10]) cube(size=[PCB_X - OVERLAP*2, 50, 100]);
+    }
+
+    intersection() {
+        translate([0, 0, -10]) cylinder(h=dz + 10.0, d=diameter);
+
+        union() {
+            translate([-PCB_X/2 - COLUMN_X + OVERLAP, -diameter/2, COLUMN_BACK])
+                cube(size=[COLUMN_X, diameter, COLUMN_Z]);
+            mirror([-1, 0, 0]) translate([-PCB_X/2 - COLUMN_X + OVERLAP, -diameter/2, COLUMN_BACK])
+                cube(size=[COLUMN_X, diameter, COLUMN_Z]);
+
+            difference() {
+                translate([-PILLAR_W/2, -diameter/2, dz - HEADER_H])
+                    cube(size=[PILLAR_W, diameter/2 + HEADER_H/2, HEADER_H]);
+                translate([-HEADER_W/2, -HEADER_Y/2, dz - HEADER_H])
+                    cube(size=[HEADER_W, 100, 100]);
+            }
+        }
+    }
+
+}
+
 function nBafflesNeeded(dzButtress, type) = ceil(zBattery(type) / (dzButtress*2));
 
 function zLenOfBaffles(n, dzButtress) = n * dzButtress * 2 - dzButtress;

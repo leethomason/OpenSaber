@@ -25,10 +25,12 @@ T = 4.0;
 M_JOINT = zLenOfBaffles(N_BAFFLES, DZ_BAFFLE) + M_MC + DZ_SPEAKER;
 M_BOLT_START = M_PORT + 6.5;
 M_SWITCH_START = M_BOLT_START + 8.0;
+M_COUPLER_START = M_SWITCH + 7.0;
 
 DZ_PORT_SECTION = M_BOLT_START - M_JOINT;
 DZ_BOLT_SECTION = M_SWITCH_START - M_BOLT_START;
-DZ_SWITCH_SECTION = M_HEAD_SINK_THREAD - M_SWITCH_START;
+DZ_SWITCH_SECTION = M_COUPLER_START - M_SWITCH_START;
+DZ_COUPLER = M_HEAT_SINK - M_COUPLER_START;
 
 if (DRAW_AFT) {
     union() {
@@ -64,11 +66,13 @@ if (DRAW_FORE) {
             translate([0, 0, M_SWITCH_START]) {
                 tactileRing(D_FORE_INNER, T, DZ_SWITCH_SECTION, M_SWITCH - M_SWITCH_START);
             }
-            translate([0, 0, M_HEAD_SINK_THREAD]) tube(h=DZ_HEAT_SINK_THREAD, do=D_FORE_INNER, di=dynamicHeatSinkThread());
+            translate([0, 0, M_COUPLER_START]) {
+                emitterCouplerRing(D_FORE_INNER, T, DZ_COUPLER);
+            }
         }
         // Flat top
         translate([-50, D_FORE_INNER/2 - DY_FLAT, M_FORE]) {
-            cube(size=[100, 10, M_HEAD_SINK_THREAD - M_FORE]);
+            cube(size=[100, 10, M_HEAT_SINK - M_FORE]);
         }
 
         // flat bottom
