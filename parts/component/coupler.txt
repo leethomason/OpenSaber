@@ -1,0 +1,13 @@
+# a connection between the emitter and a pcb connector
+
+[             ]
+
+   o---o---o   
+       |
+   o---o---o
+       |
+   o---o---o
+       |
+   o---o---o
+
+[             ]

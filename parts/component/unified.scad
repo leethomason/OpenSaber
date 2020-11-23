@@ -6,6 +6,8 @@ DRAW_AFT = false;
 DRAW_FORE = true;
 DRAW_PLATE = false;
 
+PCB_SIZE = [19.32, 14.24];
+
 EPS = 0.01;
 
 $fn = 80;
@@ -67,7 +69,7 @@ if (DRAW_FORE) {
                 tactileRing(D_FORE_INNER, T, DZ_SWITCH_SECTION, M_SWITCH - M_SWITCH_START);
             }
             translate([0, 0, M_COUPLER_START]) {
-                emitterCouplerRing(D_FORE_INNER, T, DZ_COUPLER);
+                emitterCouplerRing(D_FORE_INNER, T, DZ_COUPLER, PCB_SIZE);
             }
         }
         // Flat top
@@ -132,6 +134,8 @@ if (DRAW_PLATE) color("silver") {
 *translate([0, 0, M_MC + DZ_SPEAKER]) {
     color("red") battery(D_AFT_INNER);
 }
+
+*color("red") translate([-PCB_SIZE[0]/2, -PCB_SIZE[1]/2, M_HEAT_SINK - 8.4 - 1.6]) cube(size=[PCB_SIZE[0], PCB_SIZE[1], 1.6]);
 
 echo("DZ_PORT, DZ_BOLT, DZ_SWITCH=", M_BOLT - M_PLATE, M_PORT - M_PLATE, M_SWITCH - M_PLATE);
 echo("H_PLATE=", D_OUTER/2 - (D_FORE_INNER/2 - DY_FLAT));

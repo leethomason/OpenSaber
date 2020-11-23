@@ -838,10 +838,8 @@ module tactileRing(diameter, t, dz, dzToTactile)
     }
 }
 
-module emitterCouplerRing(diameter, t, dz)
+module emitterCouplerRing(diameter, t, dz, pcbSize)
 {
-    PCB_X = 10.0;
-    PCB_Y = 16.0;
     HEADER_H = 8.4;
     HEADER_W = 2.54;
     HEADER_Y = 2.54 * 4;
@@ -859,23 +857,32 @@ module emitterCouplerRing(diameter, t, dz)
     difference() {
         tube(h=dz, do=diameter, di=diameter - t);
         translate([-50, 4, COLUMN_BACK + COLUMN_Z]) cube(size=[100, 50, 100]);
-        translate([-(PCB_X - OVERLAP*2)/2, diameter/2 - 4, -10]) cube(size=[PCB_X - OVERLAP*2, 50, 100]);
+        translate([-(pcbSize[0] - OVERLAP*2)/2, diameter/2 - 4, -10]) cube(size=[pcbSize[0] - OVERLAP*2, 50, 100]);
+        translate([-pcbSize[0]/2, -pcbSize[1]/2, COLUMN_BACK + COLUMN_Z])
+            cube(size=[pcbSize[0], pcbSize[1], PCB_Z]);
     }
 
     intersection() {
-        translate([0, 0, -10]) cylinder(h=dz + 10.0, d=diameter);
+        translate([0, 0, -10]) cylinder(h=100, d=diameter);
 
         union() {
-            translate([-PCB_X/2 - COLUMN_X + OVERLAP, -diameter/2, COLUMN_BACK])
+            // columns to hold pcb
+            translate([-pcbSize[0]/2 - COLUMN_X + OVERLAP, -diameter/2, COLUMN_BACK])
                 cube(size=[COLUMN_X, diameter, COLUMN_Z]);
-            mirror([-1, 0, 0]) translate([-PCB_X/2 - COLUMN_X + OVERLAP, -diameter/2, COLUMN_BACK])
+            mirror([-1, 0, 0]) translate([-pcbSize[0]/2 - COLUMN_X + OVERLAP, -diameter/2, COLUMN_BACK])
                 cube(size=[COLUMN_X, diameter, COLUMN_Z]);
 
+            // front holder
+            SLOPE = 1.5;
             difference() {
                 translate([-PILLAR_W/2, -diameter/2, dz - HEADER_H])
-                    cube(size=[PILLAR_W, diameter/2 + HEADER_H/2, HEADER_H]);
+                    cube(size=[PILLAR_W, diameter/2 + HEADER_H/2, HEADER_H + SLOPE]);
                 translate([-HEADER_W/2, -HEADER_Y/2, dz - HEADER_H])
                     cube(size=[HEADER_W, 100, 100]);
+                hull() {
+                    translate([-HEADER_W/2, -HEADER_Y/2, dz]) cube(size=[HEADER_W, 100, SLOPE]);
+                    translate([-PILLAR_W/2, -HEADER_Y/2 - 2.5, dz + SLOPE]) cube(size=[PILLAR_W, 100, 1.0]);
+                }
             }
         }
     }
