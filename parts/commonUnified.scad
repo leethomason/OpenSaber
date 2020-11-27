@@ -728,7 +728,7 @@ module boltRing(diameter, t, dz, dzToBolt)
     TRI = [[-50, 0], [0, 0], [-50, -50]];
 
     if (dz < DZ_BRIDGE) {
-        echo("Warning: boltRing dz too small. Should be:", DZ_BRIDGE);
+        echo("ERROR: boltRing dz too small. Should be:", DZ_BRIDGE);
     }
 
     intersection() {
@@ -838,39 +838,40 @@ module tactileRing(diameter, t, dz, dzToTactile)
     }
 }
 
-module emitterCouplerRing(diameter, t, dz, pcbSize)
+module emitterCouplerRing(diameter, t, dz)
 {
     HEADER_H = 8.4;
     HEADER_W = 2.54;
     HEADER_Y = 2.54 * 4;
     PCB_Z = 1.8;
     OVERLAP = 1.0;
+    PCB_D = 20.0;
 
-    PILLAR_W = 6.0;
-    COLUMN_Z = 3.0;
-    COLUMN_X = 4.0;
-
-    COLUMN_BACK = dz - HEADER_H - PCB_Z - COLUMN_Z;
+    PILLAR_W = 8.0;
+    RING_CUT = 8.0;
+    PCB_BACK = dz - HEADER_H - PCB_Z;
 
     //if (COLUMN_BACK > dz) echo("ERROR emitterCouplerRing dz too small");
 
     difference() {
-        tube(h=dz, do=diameter, di=diameter - t);
-        translate([-50, 4, COLUMN_BACK + COLUMN_Z]) cube(size=[100, 50, 100]);
-        translate([-(pcbSize[0] - OVERLAP*2)/2, diameter/2 - 4, -10]) cube(size=[pcbSize[0] - OVERLAP*2, 50, 100]);
-        translate([-pcbSize[0]/2, -pcbSize[1]/2, COLUMN_BACK + COLUMN_Z])
-            cube(size=[pcbSize[0], pcbSize[1], PCB_Z]);
+        tube(h=dz, do=diameter, di=19);
+        // top cutout
+        translate([-50, 4, PCB_BACK]) 
+            cube(size=[100, 50, 100]);
+        // ring cutout
+        translate([-RING_CUT/2, diameter/2 - 4, -10]) 
+            cube(size=[RING_CUT, 50, 100]);
+        // pcb slot
+        hull() {
+            translate([0, 0, PCB_BACK]) cylinder(h=PCB_Z, d=PCB_D);
+            translate([0, 20.0, PCB_BACK]) cylinder(h=PCB_Z * 0.5, d=PCB_D);
+        }
     }
 
     intersection() {
         translate([0, 0, -10]) cylinder(h=100, d=diameter);
 
         union() {
-            // columns to hold pcb
-            translate([-pcbSize[0]/2 - COLUMN_X + OVERLAP, -diameter/2, COLUMN_BACK])
-                cube(size=[COLUMN_X, diameter, COLUMN_Z]);
-            mirror([-1, 0, 0]) translate([-pcbSize[0]/2 - COLUMN_X + OVERLAP, -diameter/2, COLUMN_BACK])
-                cube(size=[COLUMN_X, diameter, COLUMN_Z]);
 
             // front holder
             SLOPE = 1.5;

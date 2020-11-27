@@ -3,8 +3,9 @@ use <../commonUnified.scad>
 use <../shapes.scad>
 
 DRAW_AFT = false;
-DRAW_FORE = true;
+DRAW_FORE = false;
 DRAW_PLATE = false;
+DRAW_PLATE_BASE = true;
 
 PCB_SIZE = [19.32, 14.24];
 
@@ -25,14 +26,17 @@ DZ_BAFFLE = 3.8;
 T = 4.0;
 
 M_JOINT = zLenOfBaffles(N_BAFFLES, DZ_BAFFLE) + M_MC + DZ_SPEAKER;
-M_BOLT_START = M_PORT + 6.5;
-M_SWITCH_START = M_BOLT_START + 8.0;
-M_COUPLER_START = M_SWITCH + 7.0;
+M_BOLT_START = M_BOLT - 4.0;
+M_SWITCH_START = M_BOLT + 4.0;
+M_COUPLER_START = M_SWITCH + 6.5;
 
 DZ_PORT_SECTION = M_BOLT_START - M_JOINT;
 DZ_BOLT_SECTION = M_SWITCH_START - M_BOLT_START;
 DZ_SWITCH_SECTION = M_COUPLER_START - M_SWITCH_START;
 DZ_COUPLER = M_HEAT_SINK - M_COUPLER_START;
+
+if (M_BOLT - M_PORT < (11.0/2.0 + 5.0 + 0.5))
+    echo("ERROR Bolt too close to Port");
 
 if (DRAW_AFT) {
     union() {
@@ -56,20 +60,20 @@ if (DRAW_FORE) {
             translate([0, 0, M_JOINT]) {
                 tube(h=M_FORE - M_JOINT, do=D_AFT_INNER, di=D_FORE_INNER - T);
             }
-            translate([0, 0, M_JOINT]) {
+            color("purple") translate([0, 0, M_JOINT]) {
                 powerPortRing(D_FORE_INNER, T, DZ_PORT_SECTION, 
                             M_PORT - M_JOINT,
                             counter=false,
                             portSupportToBack=true);
             }
-            translate([0, 0, M_BOLT_START]) {
+            color("orange") translate([0, 0, M_BOLT_START]) {
                 boltRing(D_FORE_INNER, T, DZ_BOLT_SECTION, M_BOLT - M_BOLT_START);
             }            
-            translate([0, 0, M_SWITCH_START]) {
+            color("olive") translate([0, 0, M_SWITCH_START]) {
                 tactileRing(D_FORE_INNER, T, DZ_SWITCH_SECTION, M_SWITCH - M_SWITCH_START);
             }
             translate([0, 0, M_COUPLER_START]) {
-                emitterCouplerRing(D_FORE_INNER, T, DZ_COUPLER, PCB_SIZE);
+                emitterCouplerRing(D_FORE_INNER, T, DZ_COUPLER);
             }
         }
         // Flat top
@@ -84,8 +88,10 @@ if (DRAW_FORE) {
 
         // Bottom access
         hull() {
-            translate([0, -D_FORE_INNER/2 + T, M_JOINT + 16.0]) rotate([90, 0, 0]) cylinder(h=20, d=10.0);
-            translate([0, -D_FORE_INNER/2 + T, M_SWITCH]) rotate([90, 0, 0]) cylinder(h=20, d=10.0);
+            translate([0, -D_FORE_INNER/2 + T, M_JOINT + 16.0]) 
+                rotate([90, 0, 0]) cylinder(h=20, d=12.0);
+            translate([0, -D_FORE_INNER/2 + T, M_SWITCH]) 
+                rotate([90, 0, 0]) cylinder(h=20, d=12.0);
         }
         translate([0, 0, M_JOINT]) keyJoint(KEYJOINT, D_AFT_INNER, D_AFT_INNER - KEYJOINT_T, true);
 
@@ -108,8 +114,8 @@ if (DRAW_FORE) {
     }
 }
 
-if (DRAW_PLATE) color("silver") {
-    $fn=80;
+if (DRAW_PLATE || DRAW_PLATE_BASE) color("silver") {
+    $fn=160;
     BOLT_D = 4.5;
     HEAD_D = 7.8;
 
@@ -125,9 +131,11 @@ if (DRAW_PLATE) color("silver") {
                 translate([-50, D_FORE_INNER/2 - DY_FLAT, M_PLATE]) cube(size=[100, 100, DZ_PLATE]);
             }
         }
-        translate([0, 0, M_PORT]) rotate([-90, 0, 0]) cylinder(h=100, d=11.0);
-        translate([0, 0, M_BOLT]) rotate([-90, 0, 0]) cylinder(h=100, d=BOLT_D);
-        translate([0, 0, M_SWITCH]) rotate([-90, 0, 0]) cylinder(h=100, d=8.0);
+        if (DRAW_PLATE) {
+            translate([0, 0, M_PORT]) rotate([-90, 0, 0]) cylinder(h=100, d=11.0);
+            translate([0, 0, M_BOLT]) rotate([-90, 0, 0]) cylinder(h=100, d=BOLT_D);
+            translate([0, 0, M_SWITCH]) rotate([-90, 0, 0]) cylinder(h=100, d=8.0);
+        }
     }
 }
 
@@ -137,5 +145,5 @@ if (DRAW_PLATE) color("silver") {
 
 *color("red") translate([-PCB_SIZE[0]/2, -PCB_SIZE[1]/2, M_HEAT_SINK - 8.4 - 1.6]) cube(size=[PCB_SIZE[0], PCB_SIZE[1], 1.6]);
 
-echo("DZ_PORT, DZ_BOLT, DZ_SWITCH=", M_BOLT - M_PLATE, M_PORT - M_PLATE, M_SWITCH - M_PLATE);
+echo("DZ_PORT, DZ_BOLT, DZ_SWITCH=", M_PORT - M_PLATE, M_BOLT - M_PLATE, M_SWITCH - M_PLATE);
 echo("H_PLATE=", D_OUTER/2 - (D_FORE_INNER/2 - DY_FLAT));

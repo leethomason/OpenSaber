@@ -108,8 +108,12 @@ void BladePWM::setThrottledRGB()
         ASSERT(pwm <= 255);
 
         m_pwm[i] = glClamp<int32_t>(pwm, 0, 255); // just in case...
+    }
+    noInterrupts();
+    for (int i = 0; i < NCHANNELS; ++i) {
         analogWrite(pinRGB[i], m_pwm[i]);
     }
+    interrupts();
 }
 
 void BladePWM::setVoltage(int milliVolts) 
