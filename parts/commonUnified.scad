@@ -833,7 +833,7 @@ module tactileRing(diameter, t, dz, dzToTactile)
         Z1 = dz - (dzToTactile + TACTILE_X/2);
         hull() {            
             translate([-50, -H + Z1/2, dz - Z1/2]) rotate([0, 90, 0]) cylinder(h=100, d=Z1);
-            translate([-50, H - Z1/2, dz - Z1/2]) rotate([0, 90, 0]) cylinder(h=100, d=Z1);
+            translate([-50, 0, dz - Z1/2]) rotate([0, 90, 0]) cylinder(h=100, d=Z1);
         }
     }
 }
@@ -856,11 +856,11 @@ module emitterCouplerRing(diameter, t, dz)
     difference() {
         tube(h=dz, do=diameter, di=19);
         // top cutout
-        translate([-50, 4, PCB_BACK]) 
+        translate([-50, 4, 0]) //PCB_BACK]) 
             cube(size=[100, 50, 100]);
         // ring cutout
-        translate([-RING_CUT/2, diameter/2 - 4, -10]) 
-            cube(size=[RING_CUT, 50, 100]);
+        //translate([-RING_CUT/2, diameter/2 - 4, -10]) 
+        //    cube(size=[RING_CUT, 50, 100]);
         // pcb slot
         hull() {
             translate([0, 0, PCB_BACK]) cylinder(h=PCB_Z, d=PCB_D);
@@ -878,11 +878,13 @@ module emitterCouplerRing(diameter, t, dz)
             difference() {
                 translate([-PILLAR_W/2, -diameter/2, dz - HEADER_H])
                     cube(size=[PILLAR_W, diameter/2 + HEADER_H/2, HEADER_H + SLOPE]);
-                translate([-HEADER_W/2, -HEADER_Y/2, dz - HEADER_H])
+                translate([-HEADER_W/2, -HEADER_Y/2 - 2, dz - HEADER_H])
                     cube(size=[HEADER_W, 100, 100]);
                 hull() {
-                    translate([-HEADER_W/2, -HEADER_Y/2, dz]) cube(size=[HEADER_W, 100, SLOPE]);
-                    translate([-PILLAR_W/2, -HEADER_Y/2 - 2.5, dz + SLOPE]) cube(size=[PILLAR_W, 100, 1.0]);
+                    translate([-HEADER_W/2, -diameter/2, dz]) 
+                        cube(size=[HEADER_W, 100, SLOPE]);
+                    translate([-PILLAR_W/2, -diameter/2, dz + SLOPE]) 
+                        cube(size=[PILLAR_W, 100, 1.0]);
                 }
             }
         }

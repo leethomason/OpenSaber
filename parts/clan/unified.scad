@@ -3,14 +3,11 @@ use <../commonUnified.scad>
 use <../shapes.scad>
 
 DRAW_AFT = false;
-DRAW_FORE = false;
+DRAW_FORE = true;
 DRAW_PLATE = false;
-DRAW_PLATE_BASE = true;
-
-PCB_SIZE = [19.32, 14.24];
+DRAW_PLATE_BASE = false;
 
 EPS = 0.01;
-
 $fn = 80;
 
 module inner()
@@ -98,8 +95,8 @@ if (DRAW_FORE) {
         // Side vents
         intersection() {
             translate([0, 0, M_JOINT]) tube(h=100, do=100, di=D_FORE_INNER - T - 0.1);
-            for(i=[0:2])
-                translate([0, 0, M_JOINT + 16 + i*8]) capsule(70, 110, 2, true);
+            for(i=[0:3])
+                translate([0, 0, M_JOINT + 15 + i*8]) capsule(70, 110, 2, true);
         }
 
         // Top vent (joint ring)
