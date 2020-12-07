@@ -11,7 +11,7 @@ mat = init_material(sys.argv[1])
 
 H = 3.5
 H_FLOOR = 1.5   # needs 2mm; to H_FLOOR + 2 <= H
-STOCK = 6.35      # HDPE
+STOCK = 6.35    # HDPE
 
 D = 20.0
 DEPTH_EPS = -1.0
