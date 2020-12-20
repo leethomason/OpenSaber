@@ -13,5 +13,5 @@ $fn = 80;
 
 difference() {
     translate([0, -Y, 0]) cube(size=[X, Y, Z]);
-    translate([0, -Y0/2, Z + D/2 - 7.0]) rotate([0, 90, 0]) cylinder(h=100, d=D);
+    translate([-1, -Y0/2, Z + D/2 - 7.0]) rotate([0, 90, 0]) cylinder(h=100, d=D);
 }
