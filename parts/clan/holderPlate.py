@@ -28,7 +28,7 @@ g.move(z=0)
 
 
 def absPath(g, total_plunge, plunge):
-    g.move(total_plunge)
+    g.move(z=total_plunge)
     g.feed(mat['plunge_rate'])
     g.move(z=total_plunge + plunge)
     g.feed(mat['feed_rate'])
