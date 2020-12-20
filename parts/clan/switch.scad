@@ -28,5 +28,5 @@ difference()
     H_CONE = (D_TACTILE - D_PIN)/2;
     translate([0, 0, H_TACTILE]) cylinder(h=H_CONE, d1=D_TACTILE, d2=D_PIN);
 
-    translate([-50, -50, -1]) cube(size=[100, 50, 50]);
+    //translate([-50, -50, -1]) cube(size=[100, 50, 50]);
 }
