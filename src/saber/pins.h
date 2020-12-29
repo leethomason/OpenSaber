@@ -48,11 +48,11 @@
 #define SABER_MODEL_AQUATIC_2	   17   // ItsyBitsy, Shield v1c, Dotstar
 #define SABER_MODEL_TYVOKKA		   18   // ItsyBitsy, Shield v1c, Dotstar
 //#define SABER_MODEL_SHOCK3  	   19   // Itsy v2b, OLED (128x32), Dotstar crystal
-#define SABER_MODEL_LEIA  	   	   20   // Itsy v2b, Dotstar UI
-#define SABER_MODEL_SISTERS2  	   21   // Itsy v2b, OLED (128x32)
-#define SABER_MODEL_DUTCHESS   	   22   // Itsy v2b, Dotstar UI
-#define SABER_MODEL_PROTECTION 	   23   // Itsy v2b, Dotstar UI
-#define SABER_MODEL_CLAN		   24
+#define SABER_MODEL_LEIA  	   	   20   // Itsy, Dotstar UI
+#define SABER_MODEL_SISTERS2  	   21   // Itsy, OLED (128x32)
+#define SABER_MODEL_DUTCHESS   	   22   // Itsy, Dotstar UI
+#define SABER_MODEL_PROTECTION 	   23   // Itsy, Dotstar UI
+#define SABER_MODEL_CLAN		   24	// Itsy, Blade UI
 
 #define SABER_SUB_MODEL_NONE		0
 #define SABER_SUB_MODEL_LUNA		1
@@ -97,6 +97,7 @@
 #define PCB_ITSY_2B				   19   // Gyro + Accelerometer on the I2C bus. Dotstar. SPI. I2S audio. Flash mem sound.
 #define PCB_ITSY_2C				   20   // Gyro + Accelerometer on the I2C bus. Dotstar. SPI. I2S audio. Flash mem sound.
 #define PCB_ITSY_2D				   21   // Gyro + Accelerometer on the I2C bus. Dotstar. SPI. I2S audio. Flash mem sound.
+#define PCB_ITSY_2E				   22   // Gyro + Accelerometer on the I2C bus. Dotstar. SPI. I2S audio. Flash mem sound.
 
 #define SABER_ACCELEROMETER_NONE 		0
 #define SABER_ACCELEROMETER_LIS3DH		1
@@ -850,7 +851,7 @@
 
 	static const int32_t RED_VF   = 2200;
 	static const int32_t RED_I    = 400;
-	static const int32_t RED_R    = 4100;	// fixme
+	static const int32_t RED_R    = 4100;
 
 	static const int32_t GREEN_VF = 3200;
 	static const int32_t GREEN_I  = 400;
@@ -858,7 +859,7 @@
 
 	static const int32_t BLUE_VF  = 3100;
 	static const int32_t BLUE_I   = 400;
-	static const int32_t BLUE_R   = 1350;	// fixme
+	static const int32_t BLUE_R   = 1350;
 
 	static const int VOLUME_1 = 32;
 	static const int VOLUME_2 = 64;
@@ -1117,10 +1118,10 @@
 #endif
 
 enum {
-  RED,
-  GREEN,
-  BLUE,
-  NCHANNELS
+  	RED,
+  	GREEN,
+  	BLUE,
+  	NCHANNELS
 };
 
 static const float DEFAULT_G_FORCE_MOTION = 1.3f;

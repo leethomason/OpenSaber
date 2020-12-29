@@ -1,8 +1,14 @@
 Issues:
 
+High
 - fix vol>255 not working
 - volume boost support for fonts
 - blade flash on retract. completely mystified
+
+NtH
+- better mode indicator
+- interpolate on color change
+- play hum in sound mode?
 
 Iceblock
 - switch to gyro.
@@ -37,7 +43,7 @@ x blade flash on retract. Neopixel not the issue. Add assert?
     x range checks in fixed
     x start / end checks on interp
 x high res mode for crystal / color.
-  x fixed point coputation
+  x fixed point computation
   x PWM for dotstar
 x can reduce sub-buffer size? effect on perf? encapselation?
 x drop vbat sample time, increase samples. move timing const into AveragePower class
