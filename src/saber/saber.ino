@@ -640,7 +640,6 @@ void loop() {
     lastLoopTime = msec;
 
     tester.process();
-
     buttonA.process();
 
     #ifdef SABER_UI_IDLE_MEDITATION_LED_OFF
@@ -666,7 +665,16 @@ void loop() {
         bladePWM.setRGB(bladeFlash.getColor());
     }
     else {
+        #if BLADE_ONLY_UI
+            if (bladeState.state() == BLADE_OFF)
+                bladeState.processUI(&bladePWM, bladeFlash, millis(), 
+                    uiMode.mode(),
+                    saberDB.volume4(), BladePWM::convertRawToPerceived(saberDB.bladeColor()));
+            else
+                bladeState.process(&bladePWM, bladeFlash, millis());
+        #else
         bladeState.process(&bladePWM, bladeFlash, millis());
+        #endif
     }
     
     sfx.process(bladeState.state(), delta, &swingVol);

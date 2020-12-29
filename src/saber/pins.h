@@ -52,6 +52,7 @@
 #define SABER_MODEL_SISTERS2  	   21   // Itsy v2b, OLED (128x32)
 #define SABER_MODEL_DUTCHESS   	   22   // Itsy v2b, Dotstar UI
 #define SABER_MODEL_PROTECTION 	   23   // Itsy v2b, Dotstar UI
+#define SABER_MODEL_CLAN		   24
 
 #define SABER_SUB_MODEL_NONE		0
 #define SABER_SUB_MODEL_LUNA		1
@@ -61,7 +62,7 @@
 
 // ----------------------------------
 #define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_PROTECTION
+#define SABER_MODEL 				SABER_MODEL_CLAN
 #define SABER_SUB_MODEL				
 // ----------------------------------
 
@@ -827,6 +828,37 @@
 	static const int32_t BLUE_VF  = 3100;
 	static const int32_t BLUE_I   = 400;
 	static const int32_t BLUE_R   = 1350;
+
+	static const int VOLUME_1 = 32;
+	static const int VOLUME_2 = 64;
+	static const int VOLUME_3 = 128;
+	static const int VOLUME_4 = 255;
+#elif (SABER_MODEL == SABER_MODEL_CLAN)
+	#define PCB_VERSION 				PCB_ITSY_2E
+	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
+	#define SABER_VOLTMETER			
+	#define VOLTMETER_TUNE				1048
+	#define BLADE_ONLY_UI	1
+
+	// Does not need to be power of 2.
+	// multiply by 10 to get ms width of filter
+	#define FILTER_MAG_X	20
+	#define FILTER_MAG_Y	20
+	#define FILTER_MAG_Z	20
+	#define SWING_SAMPLES	12
+	#define ID_STR "Clan Cree XPE2 RGB"
+
+	static const int32_t RED_VF   = 2200;
+	static const int32_t RED_I    = 400;
+	static const int32_t RED_R    = 4100;	// fixme
+
+	static const int32_t GREEN_VF = 3200;
+	static const int32_t GREEN_I  = 400;
+	static const int32_t GREEN_R = 1000;
+
+	static const int32_t BLUE_VF  = 3100;
+	static const int32_t BLUE_I   = 400;
+	static const int32_t BLUE_R   = 1350;	// fixme
 
 	static const int VOLUME_1 = 32;
 	static const int VOLUME_2 = 64;

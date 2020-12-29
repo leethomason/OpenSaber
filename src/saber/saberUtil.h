@@ -30,6 +30,7 @@
 */
 //#include "pins.h" 
 #include "modes.h"
+#include "rgb.h"
 
 class BladePWM;
 class BladeFlash;
@@ -58,6 +59,7 @@ public:
     }
 
     void process(BladePWM* bladePWM, const BladeFlash& bladeFlash, uint32_t time);
+    void processUI(BladePWM *blade, const BladeFlash &saber, uint32_t time, UIMode mode, int vol4, osbr::RGB color);
 
 private:
     uint8_t  m_currentState = BLADE_OFF;
