@@ -92,23 +92,30 @@ private:
         return v;
     }
 
-    static inline SHORT IntToFixed(int a) {
+    static inline SHORT IntToFixed(int32_t a) {
         SHORT v = (a << DECBITS);
         return v;
     }
 
 public:
-    static const int FIXED_1 = 1 << DECBITS;
+    static const int32_t FIXED_1 = 1 << DECBITS;
     SHORT x;
 
     FixedT() {}
     FixedT(const FixedT& f) : x(f.x) {}
     FixedT(int v) : x(v << DECBITS) {}
     FixedT(int32_t num, int32_t den) {
-        ASSERT(num <= Limit<SHORT>::pos());
-        ASSERT(num >= Limit<SHORT>::neg());
-        ASSERT(den != 0);
-        x = FIXED_1 * num / den;
+        while(num > Limit<SHORT>::pos() || num < Limit<SHORT>::neg()) {
+            num /= 2;
+            den /= 2;
+        }
+        if (den == 0) {
+            ASSERT(false);
+            x = 0;
+        }
+        else {
+            x = FIXED_1 * num / den;
+        }
     }
     FixedT(float v) : x(SHORT(FIXED_1 * v)) {}
     FixedT(double v) : x(SHORT(FIXED_1 * v)) {}

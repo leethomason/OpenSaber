@@ -7,10 +7,9 @@ from hole import hole
 
 mat = init_material(sys.argv[1])
 
-DZ_PLATE = 36.0
-W_PLATE = 19.0
-
-DEPTH = -10.0
+DZ_PLATE = 31.0
+W_PLATE = 15.0
+DEPTH = -14.0
 
 g = G(outfile='path.nc', aerotech_include=False, header=None, footer=None)
 nomad_header(g, mat, CNC_TRAVEL_Z)

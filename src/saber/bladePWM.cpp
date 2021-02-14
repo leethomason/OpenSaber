@@ -91,64 +91,54 @@ BladePWM::BladePWM()
 
 void BladePWM::setRGB(const RGB& rgb)
 {
-    if (rgb != m_color) {
-        m_color = rgb;
-        setThrottledRGB();
-    }
+    if (rgb == m_color)
+        return;
+
+    m_color = rgb;
+    setThrottledRGB();
 }
 
 void BladePWM::setThrottledRGB()
 {
     for (int i = 0; i < NCHANNELS; ++i) {
         int32_t pwm = m_throttle[i].scale(m_color[i]);
-
-        ASSERT(m_throttle[i] > 0);
-        ASSERT(m_throttle[i] <= 1);
-        ASSERT(pwm >= 0);
-        ASSERT(pwm <= 255);
-
         m_pwm[i] = glClamp<int32_t>(pwm, 0, 255); // just in case...
     }
-    noInterrupts();
     for (int i = 0; i < NCHANNELS; ++i) {
         analogWrite(pinRGB[i], m_pwm[i]);
     }
-    interrupts();
 }
 
 void BladePWM::setVoltage(int milliVolts) 
 {
+    static const int32_t DIV = 1000;
     static const int32_t vF[NCHANNELS]   = { RED_VF, GREEN_VF, BLUE_VF };
     static const int32_t amps[NCHANNELS] = { RED_I,  GREEN_I,  BLUE_I };
     static const int32_t res[NCHANNELS]  = { RED_R,  GREEN_R,  BLUE_R };
+    static const int32_t sNum[NCHANNELS] = {
+        amps[0] * res[0] / DIV,    // 400 * 4000 / 1000 = 1600
+        amps[1] * res[1] / DIV,    // 400 * 1000 / 1000 =  400
+        amps[2] * res[2] / DIV,    // 400 * 1350 / 1000 =  540
+    };
 
+    m_vbat = glClamp<int32_t>(m_vbat, 3000, 5400);
     if (m_vbat == milliVolts)
         return;
 
-    if (milliVolts < 3000 || milliVolts > 5400) {
-        Log.p("BladePWM::setVoltage() vBat=").p(m_vbat).p(" mV=").p(milliVolts).eol();
-        ASSERT(false);
-    }
-
     m_vbat = milliVolts;
     for (int i = 0; i < NCHANNELS; ++i) {
-        // Unlikely low power scenario.
-        if (m_vbat <= vF[i]) {
-            m_throttle[i] = 1;
-            continue;
-        }
-
         // throttle = I * R / (Vbat - Vf)
-        // Denominator x1000 corrects for units (mAmps, mOhms, mVolts)
-        m_throttle[i] = FixedNorm(amps[i] * res[i] / 1000, m_vbat - vF[i] );
-        if (m_throttle[i] <= 0) {
-            Log.p(i).p(": mAmps").p(amps[i]).p(" res: ").p(res[i]).p(" vbat: ").p(m_vbat).p(" vF: ").p(vF[i]).eol();
-            //ASSERT(false);
-            m_throttle[i] = 0;
-        }
-        // Want more power than we have as the battery goes down:
-        if (m_throttle[i] > 1)
+
+        const int32_t num = sNum[i];            // ~1000
+        const int32_t denom = m_vbat - vF[i];   // high: 4100 - 3000 = 1100
+                                                // low:  3400 - 3000 =  400
+
+        if (num >= denom || denom < 100) {
             m_throttle[i] = 1;
+        }
+        else {
+            m_throttle[i] = FixedNorm(num, denom);
+        }
     }
     setThrottledRGB();
 }

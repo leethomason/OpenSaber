@@ -1,4 +1,6 @@
-include <apprenticeV4.scad>
+//include <apprenticeV4.scad>
+include <ventedBlack.scad>
+
 use <../commonUnified.scad>
 use <../shapes.scad>
 
@@ -25,15 +27,12 @@ T = 4.0;
 M_JOINT = zLenOfBaffles(N_BAFFLES, DZ_BAFFLE) + M_MC + DZ_SPEAKER;
 M_BOLT_START = M_BOLT - 4.0;
 M_SWITCH_START = M_BOLT + 4.0;
-M_COUPLER_START = M_SWITCH + 6.5;
+M_COUPLER_START = HAS_COUPLER ? M_SWITCH + 6.5 : M_SWITCH + 8.0;    // the non-coupler case is a hack
 
 DZ_PORT_SECTION = M_BOLT_START - M_JOINT;
 DZ_BOLT_SECTION = M_SWITCH_START - M_BOLT_START;
 DZ_SWITCH_SECTION = M_COUPLER_START - M_SWITCH_START;
 DZ_COUPLER = M_HEAT_SINK - M_COUPLER_START;
-
-if (M_BOLT - M_PORT < (11.0/2.0 + 5.0 + 0.5))
-    echo("ERROR Bolt too close to Port");
 
 if (DRAW_AFT) {
     union() {
@@ -47,14 +46,30 @@ if (DRAW_AFT) {
                             bridgeStyle=2);
         }
     }
-    color("olive") translate([0, 0, M_JOINT]) 
-        keyJoint(KEYJOINT, D_AFT_INNER, D_AFT_INNER - KEYJOINT_T, false);
+    color("olive") translate([0, 0, M_JOINT]) {
+        D = HAS_FORE_AFT ? D_AFT_INNER : D_FORE_INNER;
+        keyJoint(KEYJOINT, D, D - KEYJOINT_T, false);
+
+        if (HAS_KEYJOINT_PILLAR) {
+            DZ = 2.0;
+            intersection() {
+                translate([0, 0, -DZ])
+                    cylinder(h=100, d=D_AFT_INNER);
+                union() {
+                    translate([D/2 - 3.0, -D_AFT_INNER/2, -DZ])
+                        cube(size=[4, D_AFT_INNER, DZ]);
+                    mirror([-1, 0, 0]) translate([D/2 - 3.0, -D_AFT_INNER/2, -DZ])
+                        cube(size=[4, D_AFT_INNER, DZ]);
+                }
+            }
+        }
+    }
 }
 
 if (DRAW_FORE) {
     difference() {
         union() {
-            translate([0, 0, M_JOINT]) {
+            if (HAS_FORE_AFT) translate([0, 0, M_JOINT]) {
                 tube(h=M_FORE - M_JOINT, do=D_AFT_INNER, di=D_FORE_INNER - T);
             }
             color("purple") translate([0, 0, M_JOINT]) {
@@ -67,10 +82,14 @@ if (DRAW_FORE) {
                 boltRing(D_FORE_INNER, T, DZ_BOLT_SECTION, M_BOLT - M_BOLT_START);
             }            
             color("olive") translate([0, 0, M_SWITCH_START]) {
-                tactileRing(D_FORE_INNER, T, DZ_SWITCH_SECTION, M_SWITCH - M_SWITCH_START);
+                tactileRing(D_FORE_INNER, T, 
+                    DZ_SWITCH_SECTION, 
+                    M_SWITCH - M_SWITCH_START, HAS_PIN_IGNITION);
             }
-            translate([0, 0, M_COUPLER_START]) {
-                emitterCouplerRing(D_FORE_INNER, T, DZ_COUPLER);
+            if (HAS_COUPLER) {
+                translate([0, 0, M_COUPLER_START]) {
+                    emitterCouplerRing(D_FORE_INNER, T, DZ_COUPLER);
+                }
             }
         }
         // Flat top
@@ -85,22 +104,25 @@ if (DRAW_FORE) {
 
         // Bottom access
         hull() {
-            translate([0, -D_FORE_INNER/2 + T, M_JOINT + 16.0]) 
+            translate([0, -D_FORE_INNER/2 + T, M_PORT]) 
                 rotate([90, 0, 0]) cylinder(h=20, d=12.0);
             translate([0, -D_FORE_INNER/2 + T, M_SWITCH]) 
                 rotate([90, 0, 0]) cylinder(h=20, d=12.0);
         }
-        translate([0, 0, M_JOINT]) keyJoint(KEYJOINT, D_AFT_INNER, D_AFT_INNER - KEYJOINT_T, true);
+        translate([0, 0, M_JOINT]) {
+            D = HAS_FORE_AFT ? D_AFT_INNER : D_FORE_INNER;
+            keyJoint(KEYJOINT, D, D - KEYJOINT_T, true);
+        }
 
         // Side vents
-        intersection() {
+        if (HAS_SIDE_VENTS) intersection() {
             translate([0, 0, M_JOINT]) tube(h=100, do=100, di=D_FORE_INNER - T - 0.1);
             for(i=[0:3])
                 translate([0, 0, M_JOINT + 15 + i*8]) capsule(70, 110, 2, true);
         }
 
         // Top vent (joint ring)
-        hull() {
+        if (HAS_FORE_AFT) hull() {
             translate([0, 0, M_JOINT + 12.0]) rotate([-90, 0, 0]) cylinder(h=100, d=10.0);
             translate([0, 0, M_FORE - 12.0]) rotate([-90, 0, 0]) cylinder(h=100, d=10.0);
         }
@@ -114,7 +136,6 @@ if (DRAW_FORE) {
 if (DRAW_PLATE || DRAW_PLATE_BASE) color("silver") {
     $fn=160;
     BOLT_D = 4.5;
-    HEAD_D = 7.8;
 
     difference() {
         intersection() 
@@ -131,7 +152,7 @@ if (DRAW_PLATE || DRAW_PLATE_BASE) color("silver") {
         if (DRAW_PLATE) {
             translate([0, 0, M_PORT]) rotate([-90, 0, 0]) cylinder(h=100, d=11.0);
             translate([0, 0, M_BOLT]) rotate([-90, 0, 0]) cylinder(h=100, d=BOLT_D);
-            translate([0, 0, M_SWITCH]) rotate([-90, 0, 0]) cylinder(h=100, d=8.0);
+            translate([0, 0, M_SWITCH]) rotate([-90, 0, 0]) cylinder(h=100, d=HAS_PIN_IGNITION ? 3.6 : 8.0);
         }
     }
 }
@@ -140,7 +161,7 @@ if (DRAW_PLATE || DRAW_PLATE_BASE) color("silver") {
     color("red") battery(D_AFT_INNER);
 }
 
-*color("red") translate([-PCB_SIZE[0]/2, -PCB_SIZE[1]/2, M_HEAT_SINK - 8.4 - 1.6]) cube(size=[PCB_SIZE[0], PCB_SIZE[1], 1.6]);
+*translate([0, 0, DZ_TOTAL]) color("red") cylinder(h=1.0, d=D_FORE_INNER);
 
 echo("DZ_PORT, DZ_BOLT, DZ_SWITCH=", M_PORT - M_PLATE, M_BOLT - M_PLATE, M_SWITCH - M_PLATE);
 echo("H_PLATE=", D_OUTER/2 - (D_FORE_INNER/2 - DY_FLAT));

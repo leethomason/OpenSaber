@@ -790,7 +790,7 @@ module switchRing(diameter, t, dz, dzToSwitch, counter=true, switchDY=0)
     }
 }
 
-module tactileRing(diameter, t, dz, dzToTactile)
+module tactileRing(diameter, t, dz, dzToTactile, hasPinIgnition)
 {
     TACTILE_X = 6.2;
     TACTILE_PAD = 1.0;   
@@ -802,38 +802,44 @@ module tactileRing(diameter, t, dz, dzToTactile)
         echo("ERROR too little space behind tactile switch (for switch)");
     if(dzToTactile + TACTILE_X/2 + TACTILE_PAD > dz)
         echo("ERROR too little space in front of tactile switch (for switch)");
-    if(dzToTactile - D_PIN_BASE/2 < 0)
-        echo("ERROR too little space behind tactile switch (for pin base)");
-    if(dzToTactile + D_PIN_BASE/2 > dz)
-        echo("ERROR too little space in front tactile switch (for pin base)");
-
+    if (!hasPinIgnition) {
+        if(dzToTactile - D_PIN_BASE/2 < 0)
+            echo("ERROR too little space behind tactile switch (for pin base)");
+        if(dzToTactile + D_PIN_BASE/2 > dz)
+            echo("ERROR too little space in front tactile switch (for pin base)");
+    }
     difference() {
-        union() {
-            difference() {
-                tube(h=dz, do=diameter, di=diameter - t);
-                translate([-W/2, 0, 0]) cube(size=[W, 100, 100]);
-            }
-            translate([0, 0, dzToTactile]) {
-                simpleBridge(diameter, DY, 2.0, TACTILE_X, addWidth=TACTILE_X, flatFill=false);
-            }
-            translate([0, 0, dzToTactile - TACTILE_X/2]) {
-                W = 16.0;
+        intersection() {
+            cylinder(h=100, d=diameter);
+            union() {
                 difference() {
-                    translate([-W/2, DY, 0]) cube(size=[W, 4.0, TACTILE_X]);
-                    translate([-TACTILE_X/2, DY, 0]) cube(size=[TACTILE_X, 20, TACTILE_X + EPS]);
+                    tube(h=dz, do=diameter, di=diameter - t);
+                    translate([-W/2, 0, 0]) cube(size=[W, 100, 100]);
+                }
+                translate([0, 0, dzToTactile]) {
+                    simpleBridge(diameter, DY, 2.0, TACTILE_X, addWidth=TACTILE_X, flatFill=false);
+                }
+                translate([0, 0, dzToTactile - TACTILE_X/2]) {
+                    W = 16.0;
+                    difference() {
+                        translate([-W/2, DY, 0]) cube(size=[W, 4.0, TACTILE_X]);
+                        translate([-TACTILE_X/2, DY, 0]) cube(size=[TACTILE_X, 20, TACTILE_X + EPS]);
+                    }
                 }
             }
         }
         H = 6;
         Z0 = dzToTactile - TACTILE_X/2;
-        hull() {            
-            translate([-50, -H + Z0/2, Z0/2]) rotate([0, 90, 0]) cylinder(h=100, d=Z0);
-            translate([-50, H - Z0/2, Z0/2]) rotate([0, 90, 0]) cylinder(h=100, d=Z0);
-        }
         Z1 = dz - (dzToTactile + TACTILE_X/2);
-        hull() {            
-            translate([-50, -H + Z1/2, dz - Z1/2]) rotate([0, 90, 0]) cylinder(h=100, d=Z1);
-            translate([-50, 0, dz - Z1/2]) rotate([0, 90, 0]) cylinder(h=100, d=Z1);
+        if (Z0 > 2.0 && Z1 > 1.0) {
+            hull() {            
+                translate([-50, -H + Z0/2, Z0/2]) rotate([0, 90, 0]) cylinder(h=100, d=Z0);
+                translate([-50, H - Z0/2, Z0/2]) rotate([0, 90, 0]) cylinder(h=100, d=Z0);
+            }
+            hull() {            
+                translate([-50, -H + Z1/2, dz - Z1/2]) rotate([0, 90, 0]) cylinder(h=100, d=ZD);
+                translate([-50, 0, dz - Z1/2]) rotate([0, 90, 0]) cylinder(h=100, d=ZD);
+            }
         }
     }
 }

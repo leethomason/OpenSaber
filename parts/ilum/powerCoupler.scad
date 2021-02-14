@@ -89,9 +89,10 @@ if (DRAW_1) {
     }
 }
 
-*color("gray") {
+color("gray") {
+    UNIT = 2.54;
+    H = 8;
     translate([-UNIT*2, -UNIT/2, 0]) cube(size=[UNIT*4, UNIT, H]);
-    translate([-UNIT, -1.5*UNIT, 0]) cube(size=[UNIT*2, UNIT*3, 5]);    // pcb wires
 }
 // color("gray") cylinder(h=TOOTH_HEIGHT, d=2);
 echo("Outer D", (R_COUPLER_MOUNT + 1.5) * 2);
