@@ -4,7 +4,7 @@ include <ventedBlack.scad>
 use <../commonUnified.scad>
 use <../shapes.scad>
 
-DRAW_AFT = false;
+DRAW_AFT = true;
 DRAW_FORE = true;
 DRAW_PLATE = false;
 DRAW_PLATE_BASE = false;

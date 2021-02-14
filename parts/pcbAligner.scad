@@ -17,6 +17,8 @@ STRUCTURE = 2.0;
 ZSTRUCT = 1.0;
 HANDLE = 10.0;
 
+OUTSIDE = true;
+
 module pillar() {
     translate([-PILLAR/2, -PILLAR/2, 0])
         cube(size=[PILLAR, PILLAR, PILLAR_Z]);
@@ -33,8 +35,8 @@ module support(x, y, sx, sy, height) {
         translate([x - sx/2 - TRIM, y - sy/2 - TRIM, TARGET - height])
             cube(size=[sx + TRIM*2, sy + TRIM*2, 10.0]);
     }
-    translate([x - STRUCTURE/2, 0, 0])
-        cube(size=[STRUCTURE, DY, ZSTRUCT]);
+    translate([x - STRUCTURE/2, -1, 0])
+        cube(size=[STRUCTURE, DY + 2, ZSTRUCT]);
 }
 
 difference() {
@@ -54,26 +56,40 @@ difference() {
     }
 }
 
-// Base
-difference() {
-    cube(size=[DX, DY, ZSTRUCT]);
-    translate([STRUCTURE, STRUCTURE, -EPS]) 
-        cube(size=[DX-STRUCTURE*2, DY-STRUCTURE*2, 100]);
-}
+if (OUTSIDE) {
+    OUT = 3.5;
+    OUT0 = 0.5;
 
-// Finger holds
-translate([DX/2 - HANDLE/2, DY, 0]) cube(size=[HANDLE, HANDLE, ZSTRUCT]);
-translate([DX/2 - HANDLE/2, -HANDLE, 0]) cube(size=[HANDLE, HANDLE, ZSTRUCT]);
+    // Base
+    difference() {
+        translate([-OUT, -OUT, 0])
+            cube(size=[DX + OUT*2, DY + OUT*2, ZSTRUCT]);
+        translate([-OUT0, -OUT0, -EPS]) 
+            cube(size=[DX+OUT0*2, DY+OUT0*2, 100]);
+    }
+
+    // Finger holds
+    translate([DX/2 - HANDLE/2, DY, 0]) cube(size=[HANDLE, HANDLE, ZSTRUCT]);
+    translate([DX/2 - HANDLE/2, -HANDLE, 0]) cube(size=[HANDLE, HANDLE, ZSTRUCT]);
+
+}
+else {
+    // Base
+    difference() {
+        cube(size=[DX, DY, ZSTRUCT]);
+        translate([STRUCTURE, STRUCTURE, -EPS]) 
+            cube(size=[DX-STRUCTURE*2, DY-STRUCTURE*2, 100]);
+    }
+
+    // Finger holds
+    translate([DX/2 - HANDLE/2, DY, 0]) cube(size=[HANDLE, HANDLE, ZSTRUCT]);
+    translate([DX/2 - HANDLE/2, -HANDLE, 0]) cube(size=[HANDLE, HANDLE, ZSTRUCT]);
+}
 
 // accel
 support(1.2904*C, 0.2708*C, 2.06 + 0.01, 2.06 + 0.1, 1.0);
-// amp
-support(0.1429*C, 0.3045*C, 3.10, 3.10, 0.8);
 
-/*
-// mosfet
-support(1.8256*C, 0.4913*C, 1.7, 2.0, 0.7);
-support(1.8288*C, 0.3369*C, 1.7, 2.0, 0.7);
-support(1.8288*C, 0.2244*C, 1.7, 2.0, 0.7);
-*/
-
+if (OUTSIDE == false) {
+    // amp
+    support(0.1429*C, 0.3045*C, 3.10, 3.10, 0.8);
+}
