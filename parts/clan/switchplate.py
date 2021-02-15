@@ -11,9 +11,12 @@ mat = init_material(sys.argv[1])
 
 DZ_PLATE = 31.0
 W_PLATE = 15.0
-DZ_PORT, DZ_BOLT, DZ_SWITCH = 8, 19, 29.3
-H_PLATE = 7.575
-D_SWITCH = 8.2
+DZ_PORT, DZ_BOLT, DZ_SWITCH = 7.1, 17.5, 25.7
+H_PLATE = 6.6
+
+# D_SWITCH = 8.2
+D_SWITCH = 4.4
+INSET_WITH_BOLT = True
 
 depth = -H_PLATE - 0.5
 
@@ -31,8 +34,14 @@ hole(g, mat, depth, d=11.0)
 travel(g, mat, y=DZ_BOLT)
 g.move(z=0)
 hole(g, mat, depth, d=4.4)
-g.move(z=0)
-hole(g, mat, -2.0, d=8.0)
+
+if INSET_WITH_BOLT:
+    travel(g, mat, y=DZ_BOLT - 4.0)
+    g.move(z=0)
+    rectangleTool(g, mat, -2.0, 8.0, DZ_SWITCH - DZ_BOLT + 8.0, 8.0/2, "bottom", "inner", fill=True, adjust_trim=True)
+else:
+    g.move(z=0)
+    hole(g, mat, -2.0, d=8.0)
 
 travel(g, mat, y=DZ_SWITCH)
 g.move(z=0)
