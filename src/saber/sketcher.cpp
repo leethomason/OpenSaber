@@ -67,13 +67,35 @@ void DotStarUI::Draw(osbr::RGB *led, int nLED, uint32_t time,
                      UIMode mode, bool ignited, const UIRenderData &data) const
 {
 
-    ASSERT(nLED == 4 || nLED == 6);
+    ASSERT(nLED == 1 || nLED == 4 || nLED == 6);
+    int powerLevel = UIRenderData::powerLevel(data.mVolts, nLED);
+
+    if (nLED ==1) {
+        switch(mode) {
+            case UIMode::PALETTE:
+                led[0] = data.color;
+                break;
+
+            case UIMode::VOLUME:
+                {
+                    int r = 255 * (4 - data.volume) / 4;
+                    int g = 255 * (4 - data.volume) / 4;
+                    int b = 255 * data.volume / 4;
+                    led[0].set(r, g, b);
+                }
+                break;
+
+            default:
+                led[0].setWhite(50 * powerLevel);
+                break;
+        }
+        return;
+    }
 
     if (ignited)
     {
         // Set the power level.
         int i = 0;
-        int powerLevel = UIRenderData::powerLevel(data.mVolts, nLED);
         for (; i < powerLevel && i < nLED; ++i)
         {
             led[i] = data.color;

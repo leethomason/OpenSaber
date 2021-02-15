@@ -9,8 +9,8 @@ from hole import hole
 
 mat = init_material(sys.argv[1])
 
-DZ_PLATE = 36.0
-W_PLATE = 19.0
+DZ_PLATE = 31.0
+W_PLATE = 15.0
 DZ_PORT, DZ_BOLT, DZ_SWITCH = 8, 19, 29.3
 H_PLATE = 7.575
 D_SWITCH = 8.2

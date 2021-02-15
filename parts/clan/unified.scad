@@ -5,7 +5,7 @@ use <../commonUnified.scad>
 use <../shapes.scad>
 
 DRAW_AFT = true;
-DRAW_FORE = true;
+DRAW_FORE = false;
 DRAW_PLATE = false;
 DRAW_PLATE_BASE = false;
 
@@ -27,7 +27,7 @@ T = 4.0;
 M_JOINT = zLenOfBaffles(N_BAFFLES, DZ_BAFFLE) + M_MC + DZ_SPEAKER;
 M_BOLT_START = M_BOLT - 4.0;
 M_SWITCH_START = M_BOLT + 4.0;
-M_COUPLER_START = HAS_COUPLER ? M_SWITCH + 6.5 : M_SWITCH + 8.0;    // the non-coupler case is a hack
+M_COUPLER_START = HAS_COUPLER ? M_SWITCH + 6.5 : M_SWITCH + 6.0;    // the non-coupler case is a hack
 
 DZ_PORT_SECTION = M_BOLT_START - M_JOINT;
 DZ_BOLT_SECTION = M_SWITCH_START - M_BOLT_START;
@@ -37,7 +37,19 @@ DZ_COUPLER = M_HEAT_SINK - M_COUPLER_START;
 if (DRAW_AFT) {
     union() {
         translate([0, 0, M_MC]) {
-            speakerHolder(D_AFT_INNER, DZ_SPEAKER, 2.0, "std28");
+            H_SPKR = 3.2;
+            OFFSET = 2.0;
+            if (D_AFT_INNER >= 29.5) {
+                speakerHolder(D_AFT_INNER, DZ_SPEAKER, OFFSET, "std28");
+            }
+            else {
+                difference() {
+                    translate([0, 0, OFFSET + H_SPKR])
+                        tube(h=DZ_SPEAKER - (OFFSET + H_SPKR), do=D_AFT_INNER, di=D_AFT_INNER - 5.0);
+                    translate([-50, -50, 0])
+                        cube(size=[100, 50 - 7.0, DZ_SPEAKER]);
+                }
+            }
         }
         translate([0, 0, M_MC + DZ_SPEAKER]) {
             baffleMCBattery(D_AFT_INNER, 
@@ -82,9 +94,14 @@ if (DRAW_FORE) {
                 boltRing(D_FORE_INNER, T, DZ_BOLT_SECTION, M_BOLT - M_BOLT_START);
             }            
             color("olive") translate([0, 0, M_SWITCH_START]) {
-                tactileRing(D_FORE_INNER, T, 
+                DY_TO_PLATE_BASE = D_FORE_INNER / 2 - DY_FLAT;
+
+                tactileRing(
+                    D_FORE_INNER, T, 
                     DZ_SWITCH_SECTION, 
-                    M_SWITCH - M_SWITCH_START, HAS_PIN_IGNITION);
+                    M_SWITCH - M_SWITCH_START, 
+                    HAS_PIN_IGNITION, 
+                    DY_TO_PLATE_BASE);
             }
             if (HAS_COUPLER) {
                 translate([0, 0, M_COUPLER_START]) {
@@ -104,9 +121,9 @@ if (DRAW_FORE) {
 
         // Bottom access
         hull() {
-            translate([0, -D_FORE_INNER/2 + T, M_PORT]) 
+            translate([0, -D_FORE_INNER/2 + T, M_PORT + 1.0]) 
                 rotate([90, 0, 0]) cylinder(h=20, d=12.0);
-            translate([0, -D_FORE_INNER/2 + T, M_SWITCH]) 
+            translate([0, -D_FORE_INNER/2 + T, M_SWITCH - 2.0]) 
                 rotate([90, 0, 0]) cylinder(h=20, d=12.0);
         }
         translate([0, 0, M_JOINT]) {

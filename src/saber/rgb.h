@@ -53,6 +53,10 @@ struct RGB {
 		r = _r; g = _g; b = _b;
 	}
 
+    void setWhite(uint8_t _w) {
+        r = g = b = _w;
+    }
+
 	void set(uint32_t c) {
 		r = (c & 0xff0000) >> 16;
 		g = (c & 0xff00) >> 8;

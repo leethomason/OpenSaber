@@ -61,7 +61,7 @@
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
+#define SERIAL_DEBUG 				1
 #define SABER_MODEL 				SABER_MODEL_CLAN
 #define SABER_SUB_MODEL				
 // ----------------------------------
@@ -840,7 +840,14 @@
 	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
 	#define SABER_VOLTMETER			
 	#define VOLTMETER_TUNE				1048
-	#define BLADE_ONLY_UI	1
+	
+	//#define BLADE_ONLY_UI	1
+	#define SABER_UI_LED				SABER_LED_DOTSTAR
+	#define SABER_UI_BRIGHTNESS			128	// max 256			
+	#define ITSY_DOTSTAR_UI				1
+	#define SABER_NUM_LEDS 			    1
+	#define SABER_UI_START				0
+	#define SABER_UI_COUNT				1
 
 	// Does not need to be power of 2.
 	// multiply by 10 to get ms width of filter

@@ -271,7 +271,11 @@ void setup()
         osbr::RGBA leds[SABER_NUM_LEDS] = {0x01020304};
         #if SABER_UI_LED == SABER_LED_DOTSTAR
         {
+#if ITSY_DOTSTAR_UI
+            dotstar.beginSW(40, 41);
+#else
             dotstar.beginSPI(PIN_DOTSTAR_EN);
+#endif            
             delay(2);
             dotstar.display(leds, SABER_NUM_LEDS);
             delay(2);

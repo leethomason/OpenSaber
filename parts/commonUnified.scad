@@ -12,7 +12,7 @@ DY_SWITCH            =  -2;
 D_PORT              =  7.9;
 D_PORT_SUPPORT      =  12;
 H_PORT              =  16;
-DY_PORT             =  6;
+//DY_PORT             =  6;
 
 INCHES_TO_MM        = 25.4;
 X_MC                =   0.7 * INCHES_TO_MM;
@@ -658,7 +658,7 @@ module speakerHolder(outer, dz, dzToSpkrBack, type, extraZ=0)
 }
 
 
-module powerPortRing(diameter, t, dz, dzToPort, portSupportToBack=false, counter=true, addY=0, dyPort=DY_PORT, topNut=true)
+module powerPortRing(diameter, t, dz, dzToPort, portSupportToBack=false, counter=true, addY=0, dyPort=6.0, topNut=true)
 {    
     SECTION_PAD = 0.5;
     if (dzToPort - D_NUT/2 - 0.5 < 0) {
@@ -724,6 +724,10 @@ module boltRing(diameter, t, dz, dzToBolt)
     NUT_Y = 3.4;
     DZ_BRIDGE = 8.0;
     DZ_SLOT = 2.0;
+    
+    H_THREAD = 5.5;
+    D_THREAD = 7.8;
+    DY_PORT = diameter/2 - (H_THREAD + (diameter/2 - yAtX(D_THREAD/2, diameter/2)));    // from portRing
 
     TRI = [[-50, 0], [0, 0], [-50, -50]];
 
@@ -790,12 +794,17 @@ module switchRing(diameter, t, dz, dzToSwitch, counter=true, switchDY=0)
     }
 }
 
-module tactileRing(diameter, t, dz, dzToTactile, hasPinIgnition)
+
+// Pin ignition keeps getting re-designed.
+// Current design: upside down 8-32 1/4" socket head screw.
+module tactileRing(diameter, t, dz, dzToTactile, hasPinIgnition, dyToPlateBase=0)
 {
     TACTILE_X = 6.2;
     TACTILE_PAD = 1.0;   
     D_PIN_BASE = 10.5 + 0.4;
-    DY = 2.0;
+    TACTILE_BASE_TO_PLATE = 8.0 + 0.5;  // assuming 8mm switch, which is nicely in the middle
+
+    DY = hasPinIgnition ? (dyToPlateBase - TACTILE_BASE_TO_PLATE) : 2.0;
     W = 11.0;
 
     if(dzToTactile - TACTILE_X/2 - TACTILE_PAD < 0)
@@ -808,6 +817,7 @@ module tactileRing(diameter, t, dz, dzToTactile, hasPinIgnition)
         if(dzToTactile + D_PIN_BASE/2 > dz)
             echo("ERROR too little space in front tactile switch (for pin base)");
     }
+
     difference() {
         intersection() {
             cylinder(h=100, d=diameter);
@@ -817,7 +827,7 @@ module tactileRing(diameter, t, dz, dzToTactile, hasPinIgnition)
                     translate([-W/2, 0, 0]) cube(size=[W, 100, 100]);
                 }
                 translate([0, 0, dzToTactile]) {
-                    simpleBridge(diameter, DY, 2.0, TACTILE_X, addWidth=TACTILE_X, flatFill=false);
+                    simpleBridge(diameter, DY, 1.0, TACTILE_X, addWidth=TACTILE_X, flatFill=false);
                 }
                 translate([0, 0, dzToTactile - TACTILE_X/2]) {
                     W = 16.0;
