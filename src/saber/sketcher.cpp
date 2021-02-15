@@ -68,7 +68,6 @@ void DotStarUI::Draw(osbr::RGB *led, int nLED, uint32_t time,
 {
 
     ASSERT(nLED == 1 || nLED == 4 || nLED == 6);
-    int powerLevel = UIRenderData::powerLevel(data.mVolts, nLED);
 
     if (nLED ==1) {
         switch(mode) {
@@ -86,7 +85,10 @@ void DotStarUI::Draw(osbr::RGB *led, int nLED, uint32_t time,
                 break;
 
             default:
-                led[0].setWhite(50 * powerLevel);
+                {
+                    //int powerLevel = UIRenderData::powerLevel(data.mVolts, 4);
+                    led[0].setWhite(80);
+                }
                 break;
         }
         return;
@@ -96,6 +98,7 @@ void DotStarUI::Draw(osbr::RGB *led, int nLED, uint32_t time,
     {
         // Set the power level.
         int i = 0;
+        int powerLevel = UIRenderData::powerLevel(data.mVolts, nLED);
         for (; i < powerLevel && i < nLED; ++i)
         {
             led[i] = data.color;
