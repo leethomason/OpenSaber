@@ -78,7 +78,7 @@ void DotStarUI::Draw(osbr::RGB *led, int nLED, uint32_t time,
             case UIMode::VOLUME:
                 {
                     int r = 255 * (4 - data.volume) / 4;
-                    int g = 255 * (4 - data.volume) / 4;
+                    int g = 0; // 255 * (4 - data.volume) / 4;
                     int b = 255 * data.volume / 4;
                     led[0].set(r, g, b);
                 }

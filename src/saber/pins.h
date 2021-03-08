@@ -61,7 +61,7 @@
 #define SABER_SUB_MODEL_STANDARD    4
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
+#define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_CLAN
 #define SABER_SUB_MODEL				
 // ----------------------------------
