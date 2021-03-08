@@ -63,11 +63,16 @@ void DotStarUI::DrawVolume(osbr::RGB *led, int n, uint32_t time, int vol04) cons
     }
 }
 
-void DotStarUI::Draw(osbr::RGB *led, int nLED, uint32_t time,
-                     UIMode mode, bool ignited, const UIRenderData &data) const
+void DotStarUI::Draw(osbr::RGB *led, int nLED, uint32_t time, uint32_t delta, 
+                     UIMode mode, bool ignited, const UIRenderData &data)
 {
 
     ASSERT(nLED == 1 || nLED == 4 || nLED == 6);
+    bool modeChanged = false;
+    if (mode != lastUIMode) {
+        modeChanged = true;
+        lastUIMode = mode;
+    }
 
     if (nLED ==1) {
         switch(mode) {
@@ -77,17 +82,27 @@ void DotStarUI::Draw(osbr::RGB *led, int nLED, uint32_t time,
 
             case UIMode::VOLUME:
                 {
-                    int r = 255 * (4 - data.volume) / 4;
-                    int g = 0; // 255 * (4 - data.volume) / 4;
-                    int b = 255 * data.volume / 4;
+                    uint8_t r, g, b;
+                    int angle = 360 - 120 * data.volume / 4;
+                    hsv2rgb(angle / 2, 255, 255, &r, &g, &b);
                     led[0].set(r, g, b);
                 }
                 break;
 
             default:
-                {
-                    //int powerLevel = UIRenderData::powerLevel(data.mVolts, 4);
-                    led[0].setWhite(80);
+                {   
+                    static const int WHITE = 150;
+                    static const uint32_t PERIOD = 700;
+
+                    if (modeChanged) {
+                        int powerLevel = UIRenderData::powerLevel(data.mVolts, 4);
+                        Log.p("start blink n=").p(powerLevel).eol();
+                        animate.startBlink(PERIOD * powerLevel, PERIOD, WHITE);
+                    }
+                    else {
+                        animate.tick(delta);
+                    }
+                    led[0].setWhite(animate.done() ? WHITE : animate.value());
                 }
                 break;
         }
@@ -178,7 +193,7 @@ bool DotStarUI::Test()
     {
         DotStarUI dotstar;
 
-        dotstar.Draw(&leds[1], 4, 0, UIMode::NORMAL, false, data);
+        dotstar.Draw(&leds[1], 4, 0, 0, UIMode::NORMAL, false, data);
         ASSERT(leds[0].get() == 0);        // check memory
         ASSERT(leds[1].get() == 0x0000ff); // sound on
         ASSERT(leds[2].get() == 0xFFD800); // sound low
@@ -186,7 +201,7 @@ bool DotStarUI::Test()
         ASSERT(leds[4].get() == 0xff0000); // blade color
         ASSERT(leds[5].get() == 0);        // memory check
 
-        dotstar.Draw(&leds[1], 4, 0, UIMode::NORMAL, true, data);
+        dotstar.Draw(&leds[1], 4, 0, 0, UIMode::NORMAL, true, data);
         ASSERT(leds[0].get() == 0); // check memory
         ASSERT(leds[1] == data.color);
         ASSERT(leds[2] == data.color);
@@ -194,7 +209,7 @@ bool DotStarUI::Test()
         ASSERT(leds[4].get() == 0);
         ASSERT(leds[5].get() == 0); // memory check
 
-        dotstar.Draw(&leds[1], 4, 0, UIMode::PALETTE, false, data);
+        dotstar.Draw(&leds[1], 4, 0, 0, UIMode::PALETTE, false, data);
         ASSERT(leds[0].get() == 0); // check memory
         ASSERT(leds[1].get() == 0);
         ASSERT(leds[2] == data.color);
@@ -202,7 +217,7 @@ bool DotStarUI::Test()
         ASSERT(leds[4].get() == 0);
         ASSERT(leds[5].get() == 0); // memory check
 
-        dotstar.Draw(&leds[1], 4, 0, UIMode::VOLUME, false, data);
+        dotstar.Draw(&leds[1], 4, 0, 0, UIMode::VOLUME, false, data);
         ASSERT(leds[0].get() == 0); // check memory
         ASSERT(leds[1].get() == 0x0000ff);
         ASSERT(leds[2].get() == 0xFFD800);

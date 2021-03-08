@@ -59,11 +59,13 @@
 #define SABER_SUB_MODEL_CELESTIA	2
 #define SABER_SUB_MODEL_SHOTO       3
 #define SABER_SUB_MODEL_STANDARD    4
+#define SABER_SUB_MODEL_APPRENTICE	5
+#define SABER_SUB_MODEL_BLACK		6
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
+#define SERIAL_DEBUG 				1
 #define SABER_MODEL 				SABER_MODEL_CLAN
-#define SABER_SUB_MODEL				
+#define SABER_SUB_MODEL				SABER_SUB_MODEL_BLACK				
 // ----------------------------------
 
 // Non-RGB has never been useful.
@@ -851,9 +853,16 @@
 
 	// Does not need to be power of 2.
 	// multiply by 10 to get ms width of filter
+#	if SABER_SUB_MODEL == SABER_SUB_MODEL_APPRENTICE
 	#define FILTER_MAG_X	20
 	#define FILTER_MAG_Y	20
 	#define FILTER_MAG_Z	20
+#	elif SABER_SUB_MODEL == SABER_SUB_MODEL_BLACK
+	// Very unstable. Case metal? Size?
+	#define FILTER_MAG_X	30
+	#define FILTER_MAG_Y	30
+	#define FILTER_MAG_Z	30
+#	endif
 	#define SWING_SAMPLES	12
 	#define ID_STR "Clan Cree XPE2 RGB"
 

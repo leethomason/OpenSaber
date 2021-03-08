@@ -298,6 +298,11 @@ inline int32_t iInvCos_S3(int32_t x) {
     return -iInvSin_S3(x) + ISINE_90;
 }
 
+// Best explained by test case:
+// TEST_IS_TRUE(iSin(0) == 0);
+// TEST_IS_TRUE(iSin(FixedNorm(1, 4)) == 1);
+// TEST_IS_TRUE(iSin(FixedNorm(2, 4)) == 0);
+// TEST_IS_TRUE(iSin(FixedNorm(3, 4)) == -1);
 inline FixedNorm iSin(FixedNorm f) {
     int32_t s12 = iSin_S3(f.scale(ISINE_360));
     return FixedNorm(s12, ISINE_ONE);

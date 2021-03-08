@@ -33,6 +33,8 @@ EPS2 = EPS * 2;
 
 function yAtX(x, r) = sqrt(r*r - x*x);
 
+function isSmall(d) = d < 29.5;
+
 // Utilities, shapes. ------------------------
 module capsule(theta0, theta1, r=2, _mirror=false)
 {
@@ -590,6 +592,23 @@ module oneBaffle(   d,
                     cube(size=[TROUGH_0, 30, dz + EPS2]);
             }
         }
+        
+        if (isSmall(d)) {
+            SMALL_X = 19.0;
+            // MC held in by case; requires insulation.
+            // Assumes everything is packed in tight. :(
+            // Clear out the bottom:
+            translate([-SMALL_X/2, -20, -EPS])
+                cube(size=[SMALL_X, 20, dz*2 + EPS2]);
+
+            // Trim the bottom.
+            // translate([-50, -d/2, 2]) cube(size=[100, 2, dz*2 + EPS2]);
+
+            // And extra opening on top:
+            W = 13.0;
+            translate([-W/2, 0, -EPS])
+                cube(size=[W, 20, dz*2 + EPS2]);
+        }
     }
 }
 
@@ -658,7 +677,7 @@ module speakerHolder(outer, dz, dzToSpkrBack, type, extraZ=0)
 }
 
 
-module powerPortRing(diameter, t, dz, dzToPort, portSupportToBack=false, counter=true, addY=0, dyPort=6.0, topNut=true)
+module powerPortRing(diameter, t, dz, dzToPort, portSupportToBack=false, counter=true, addY=0, dyPort=6.0, topNut=true, powerNutCanTurn=false)
 {    
     SECTION_PAD = 0.5;
     if (dzToPort - D_NUT/2 - 0.5 < 0) {
@@ -705,11 +724,17 @@ module powerPortRing(diameter, t, dz, dzToPort, portSupportToBack=false, counter
         }
         if (topNut) {
             translate([0, diameter/2 - H_NUT_PRACT, dzToPort]) {
-                intersection() {
+                if (powerNutCanTurn) {
                     rotate([-90, 0, 0])
                         cylinder(h=100, d=D_NUT);
-                    translate([-W_NUT/2, 0, -50])
-                        cube(size=[W_NUT, 100, 100]);
+                }
+                else {
+                    intersection() {
+                        rotate([-90, 0, 0])
+                            cylinder(h=100, d=D_NUT);
+                        translate([-W_NUT/2, 0, -50])
+                            cube(size=[W_NUT, 100, 100]);
+                    }
                 }
             }
         }

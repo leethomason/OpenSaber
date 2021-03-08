@@ -618,9 +618,18 @@ public:
 	void start(uint32_t period, int start, int end) {
 		m_time = 0;
 		m_period = period;
+		m_subPeriod = 0;
 		m_start = start;
 		m_end = end;
 		m_value = start;
+	}
+	void startBlink(uint32_t period, uint32_t subPeriod, int end) {
+		m_time = 0;
+		m_period = period;
+		m_subPeriod = subPeriod;
+		m_start = 0;
+		m_end = end;
+		m_value = 0;
 	}
 	int tick(uint32_t delta, int* target=0);
 	int value() const { return m_value; }
@@ -632,6 +641,7 @@ public:
 private:
 	uint32_t m_time = 0;
 	uint32_t m_period = 0;
+	uint32_t m_subPeriod = 0;
 	int m_value = 0;
 	int m_start = 0;
 	int m_end = 0;

@@ -8,7 +8,7 @@ D_TACTILE = 3.5;
 H_TACTILE = 3.0;
 
 D_RIM = 10.0;
-H_RIM = 1.5;
+H_RIM = 2.0;
 
 $fn = 80;
 

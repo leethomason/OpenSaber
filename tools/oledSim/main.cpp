@@ -204,6 +204,7 @@ int main(int, char**) {
 #endif
 
     Pixel_7_5_UI pixel75;
+    osbr::RGB dotstar1[1];
     osbr::RGB dotstar4[4];
     osbr::RGB dotstar6[6];
     DotStarUI dotstarUI;
@@ -230,11 +231,12 @@ int main(int, char**) {
     enum {
         RENDER_OLED,
         RENDER_MATRIX,
+        RENDER_DOTSTAR_1,
         RENDER_DOTSTAR_4,
         RENDER_DOTSTAR_6,
         NUM_RENDER_MODE
     };
-	int renderMode = RENDER_OLED;
+	int renderMode = RENDER_DOTSTAR_1;
     mode.set(UIMode::NORMAL);
 
 	const char* FONT_NAMES[8] = {
@@ -302,7 +304,8 @@ int main(int, char**) {
 
 		uint32_t t = SDL_GetTicks();
         bladeFlash.tick(t);
-		if (t - lastUpdate > 100) {
+		if (t - lastUpdate > 50) {
+            uint32_t delta = t - lastUpdate;
 			lastUpdate = t;
 			uint8_t value = int(127.8 * (sin(count * 0.2) + 1.0));
 			++count;
@@ -363,8 +366,9 @@ int main(int, char**) {
 #endif
 #endif
 			pixel75.Draw(t, mode.mode(), bladeOn, &data);
-            dotstarUI.Draw(dotstar4, 4, t, mode.mode(), bladeOn, data);
-            dotstarUI.Draw(dotstar6, 6, t, mode.mode(), bladeOn, data);
+            dotstarUI.Draw(dotstar1, 1, t, delta, mode.mode(), bladeOn, data);
+            dotstarUI.Draw(dotstar4, 4, t, delta, mode.mode(), bladeOn, data);
+            dotstarUI.Draw(dotstar6, 6, t, delta, mode.mode(), bladeOn, data);
 		}
 
 		const SDL_Rect src = { 0, 0, WIDTH, HEIGHT };
@@ -381,6 +385,9 @@ int main(int, char**) {
         }
         else if (renderMode == RENDER_MATRIX) {
             simDisplay.CommitFrom5x7(pixel75.Pixels());
+        }
+        else if (renderMode == RENDER_DOTSTAR_1) {
+            simDisplay.CommitFromDotstar(dotstar1, 1, &bladeFlash.getColor());
         }
         else if (renderMode == RENDER_DOTSTAR_4) {
             simDisplay.CommitFromDotstar(dotstar4, 4, &bladeFlash.getColor());

@@ -4,8 +4,8 @@ include <ventedBlack.scad>
 use <../commonUnified.scad>
 use <../shapes.scad>
 
-DRAW_AFT = false;
-DRAW_FORE = true;
+DRAW_AFT = true;
+DRAW_FORE = false;
 DRAW_PLATE = false;
 DRAW_PLATE_BASE = false;
 
@@ -35,45 +35,51 @@ DZ_SWITCH_SECTION = M_COUPLER_START - M_SWITCH_START;
 DZ_COUPLER = M_HEAT_SINK - M_COUPLER_START;
 
 if (DRAW_AFT) {
-    union() {
-        translate([0, 0, M_MC]) {
-            H_SPKR = 3.2;
-            OFFSET = 2.0;
-            if (D_AFT_INNER >= 29.5) {
-                speakerHolder(D_AFT_INNER, DZ_SPEAKER, OFFSET, "std28");
-            }
-            else {
-                difference() {
-                    translate([0, 0, OFFSET + H_SPKR])
-                        tube(h=DZ_SPEAKER - (OFFSET + H_SPKR), do=D_AFT_INNER, di=D_AFT_INNER - 5.0);
-                    translate([-50, -50, 0])
-                        cube(size=[100, 50 - 7.0, DZ_SPEAKER]);
+    difference() {
+        union() {
+            translate([0, 0, M_MC]) {
+                H_SPKR = 3.2;
+                OFFSET = 2.0;
+                if (!isSmall(D_AFT_INNER)) {
+                    speakerHolder(D_AFT_INNER, DZ_SPEAKER, OFFSET, "std28");
+                }
+                else {
+                    difference() {
+                        translate([0, 0, OFFSET + H_SPKR])
+                            tube(h=DZ_SPEAKER - (OFFSET + H_SPKR), do=D_AFT_INNER, di=D_AFT_INNER - 5.0);
+                        translate([-50, -50, 0])
+                            cube(size=[100, 50 - 7.0, DZ_SPEAKER]);
+                    }
                 }
             }
-        }
-        translate([0, 0, M_MC + DZ_SPEAKER]) {
-            baffleMCBattery(D_AFT_INNER, 
-                            N_BAFFLES,
-                            DZ_BAFFLE,
-                            bridgeStyle=2);
-        }
-    }
-    color("olive") translate([0, 0, M_JOINT]) {
-        D = HAS_FORE_AFT ? D_AFT_INNER : D_FORE_INNER;
-        keyJoint(KEYJOINT, D, D - KEYJOINT_T, false);
+            translate([0, 0, M_MC + DZ_SPEAKER]) {
+                baffleMCBattery(D_AFT_INNER, 
+                                N_BAFFLES,
+                                DZ_BAFFLE,
+                                bridgeStyle=2);
+            }
+            color("olive") translate([0, 0, M_JOINT]) {
+                D = HAS_FORE_AFT ? D_AFT_INNER : D_FORE_INNER;
+                keyJoint(KEYJOINT, D, D - KEYJOINT_T, false);
 
-        if (HAS_KEYJOINT_PILLAR) {
-            DZ = 2.0;
-            intersection() {
-                translate([0, 0, -DZ])
-                    cylinder(h=100, d=D_AFT_INNER);
-                union() {
-                    translate([D/2 - 3.0, -D_AFT_INNER/2, -DZ])
-                        cube(size=[4, D_AFT_INNER, DZ]);
-                    mirror([-1, 0, 0]) translate([D/2 - 3.0, -D_AFT_INNER/2, -DZ])
-                        cube(size=[4, D_AFT_INNER, DZ]);
+                if (HAS_KEYJOINT_PILLAR) {
+                    DZ = 2.0;
+                    intersection() {
+                        translate([0, 0, -DZ])
+                            cylinder(h=100, d=D_AFT_INNER);
+                        union() {
+                            translate([D/2 - 3.0, -D_AFT_INNER/2, -DZ])
+                                cube(size=[4, D_AFT_INNER, DZ]);
+                            mirror([-1, 0, 0]) translate([D/2 - 3.0, -D_AFT_INNER/2, -DZ])
+                                cube(size=[4, D_AFT_INNER, DZ]);
+                        }
+                    }
                 }
             }
+        }    
+        if (isSmall(D_AFT_INNER)) {
+            translate([-50, -50, 0])
+                cube(size=[100, 50 - 7.0, 200]);
         }
     }
 }
@@ -88,7 +94,8 @@ if (DRAW_FORE) {
                 powerPortRing(D_FORE_INNER, T, DZ_PORT_SECTION, 
                             M_PORT - M_JOINT,
                             counter=false,
-                            portSupportToBack=true);
+                            portSupportToBack=true,
+                            powerNutCanTurn=ALLOW_POWER_NUT_TO_TURN);
             }
             color("orange") translate([0, 0, M_BOLT_START]) {
                 boltRing(D_FORE_INNER, T, DZ_BOLT_SECTION, M_BOLT - M_BOLT_START);

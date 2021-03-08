@@ -65,6 +65,7 @@ static const uint32_t IMPACT_MIN_TIME         =  600;   // was 1000
 
 uint32_t lastImpactTime = 0;
 uint32_t lastLoopTime   = 0;
+uint32_t lastDisplayLoopTime = 0;
 bool colorWasProcessed = false;
 
 Adafruit_FlashTransport_SPI flashTransport(SS1, &SPI1);
@@ -106,7 +107,7 @@ Timer2 vbatTimer(Voltmeter::SAMPLE_INTERVAL);
 #if SABER_DISPLAY == SABER_DISPLAY_128_32
 static const int DISPLAY_TIMER = 23;
 #else
-static const int DISPLAY_TIMER = 113;
+static const int DISPLAY_TIMER = 67;
 #endif
 
 Timer2 displayTimer(DISPLAY_TIMER);       // distribute time to minimize "slow ticks"
@@ -291,6 +292,7 @@ void setup()
 
     buttonA.setHoldRepeats(true);  // everything repeats!!
     lastLoopTime = millis();    // so we don't get a big jump on the first loop()
+    lastDisplayLoopTime = millis();
 
     Log.p("Setup() done.").eol();
 }
@@ -710,14 +712,20 @@ void loop() {
     loopDisplays(msec, delta);
 }
 
-void loopDisplays(uint32_t msec, uint32_t delta)
+void loopDisplays(uint32_t msec, uint32_t mainDelta)
 {
-    int dTick = displayTimer.tick(delta);
+    int dTick = displayTimer.tick(mainDelta);
     if (dTick == 0)
         return;
 
     static ProfileData data("loopDisplays");
     ProfileBlock block(&data);
+
+    // This was an ugly bug that's been here...forever.
+    // The delta for the displays is different from 
+    // the "main" delta.
+    uint32_t delta = msec - lastDisplayLoopTime;
+    lastDisplayLoopTime = msec;
 
 #ifdef SABER_NUM_LEDS
     osbr::RGBA leds[SABER_NUM_LEDS] = {0};
@@ -742,7 +750,7 @@ void loopDisplays(uint32_t msec, uint32_t delta)
             break;
         case 1:
             vectorUI.Draw(&vRender, &renderer,
-                msec, uiMode.mode(), 
+                msec, delta, uiMode.mode(), 
                 !bladeState.bladeOff(), &uiRenderData);
             break;
         case 2:
@@ -773,15 +781,15 @@ void loopDisplays(uint32_t msec, uint32_t delta)
 #ifdef SABER_UI_IDLE_MEDITATION
         if (uiMode.mode() == UIMode::NORMAL && bladeState.state() == BLADE_OFF && uiMode.isIdle())
         {
-            dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, UIMode::MEDITATION, !bladeState.bladeOff(), uiRenderData);
+            dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, delta, UIMode::MEDITATION, !bladeState.bladeOff(), uiRenderData);
             rgb[SABER_UI_START + SABER_UI_COUNT - 1] = uiRenderData.color;
         }
         else
         {
-            dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
+            dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, delta, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
         }
 #else
-        dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
+        dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, delta, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
 #endif
 
         // Copy back from Draw(RGB) to Dotstar(RGBA)

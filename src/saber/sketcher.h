@@ -36,14 +36,17 @@ class DotStarUI
 {
 public:
     void Draw(osbr::RGB* uiLedStart,    // target LEDs
-              int nLED,                 // must be 4 or 6
-              uint32_t time, 
-              UIMode mode, bool bladeIgnited, const UIRenderData& data) const;
+              int nLED,                 // must be 1, 4, or 6
+              uint32_t time, uint32_t delta, 
+              UIMode mode, bool bladeIgnited, const UIRenderData& data);
 
 	static bool Test();
 
 private:
     void DrawVolume(osbr::RGB* led, int nLED, uint32_t time, int vol04) const;
+
+    AnimateProp animate;
+    UIMode lastUIMode = UIMode::NORMAL;
 };
 
 
