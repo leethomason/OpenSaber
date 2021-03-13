@@ -9,13 +9,23 @@ PILLAR = 4.0;
 PILLAR_Z = 5.0;
 BASE = 2.0;
 TARGET = 3.0;
-EDGE = 0.4;
-TRIM = 0.1;
+SUPPORT_HEIGHT = 1.0;
+EDGE = 0.6;             // Height of LSM303 is 1mm
+
+// FDM
+// TRIM = 0.10;
+// SCALE = 1.0;
+
+// MSLA
+TRIM = 0.13;    // expansion in curing?
+SCALE = 0.995;
 
 EPS = 0.001;
-STRUCTURE = 2.0;
-ZSTRUCT = 1.0;
+STRUCTURE = 3.0;
 HANDLE = 10.0;
+
+ZSTRUCT = 1.0;
+ZSTRUCT_OUTER = 1.6;
 
 OUTSIDE = true;
 
@@ -39,57 +49,55 @@ module support(x, y, sx, sy, height) {
         cube(size=[STRUCTURE, DY + 2, ZSTRUCT]);
 }
 
-difference() {
-    union() {
-        pillar();
-        translate([DX, 0, 0]) pillar();
-        translate([DX, DY, 0]) pillar();
-        translate([0, DY, 0]) pillar();
-    }
-    T = 0.15;
-    T1 = 0.35;
-    hull() {
-        translate([-T, -T, BASE])
-            cube(size=[DX + T*2, DY + T*2, 10]);
-        translate([-T1, -T1, PILLAR])
-            cube(size=[DX + T1*2, DY + T1*2, 10]);
-    }
-}
-
-if (OUTSIDE) {
-    OUT = 3.5;
-    OUT0 = 0.5;
-
-    // Base
+scale([SCALE, SCALE, SCALE]) {
     difference() {
-        translate([-OUT, -OUT, 0])
-            cube(size=[DX + OUT*2, DY + OUT*2, ZSTRUCT]);
-        translate([-OUT0, -OUT0, -EPS]) 
-            cube(size=[DX+OUT0*2, DY+OUT0*2, 100]);
+        union() {
+            pillar();
+            translate([DX, 0, 0]) pillar();
+            translate([DX, DY, 0]) pillar();
+            translate([0, DY, 0]) pillar();
+        }
+        T = 0.15;
+        T1 = 0.35;
+        hull() {
+            translate([-T, -T, BASE])
+                cube(size=[DX + T*2, DY + T*2, 10]);
+            translate([-T1, -T1, PILLAR])
+                cube(size=[DX + T1*2, DY + T1*2, 10]);
+        }
     }
 
-    // Finger holds
-    translate([DX/2 - HANDLE/2, DY, 0]) cube(size=[HANDLE, HANDLE, ZSTRUCT]);
-    translate([DX/2 - HANDLE/2, -HANDLE, 0]) cube(size=[HANDLE, HANDLE, ZSTRUCT]);
+    if (OUTSIDE) {
+        OUT = 3.5;
+        OUT0 = 0.5;
 
-}
-else {
-    // Base
-    difference() {
-        cube(size=[DX, DY, ZSTRUCT]);
-        translate([STRUCTURE, STRUCTURE, -EPS]) 
-            cube(size=[DX-STRUCTURE*2, DY-STRUCTURE*2, 100]);
+        // Base
+        difference() {
+            translate([-OUT, -OUT, 0])
+                cube(size=[DX + OUT*2, DY + OUT*2, ZSTRUCT_OUTER]);
+            translate([-OUT0, -OUT0, -EPS]) 
+                cube(size=[DX+OUT0*2, DY+OUT0*2, 100]);
+        }
+
+        // Finger holds
+        *translate([DX/2 - HANDLE/2, DY, 0]) cube(size=[HANDLE, HANDLE, ZSTRUCT]);
+        *translate([DX/2 - HANDLE/2, -HANDLE, 0]) cube(size=[HANDLE, HANDLE, ZSTRUCT]);
+
+    }
+    else {
+        // Base
+        difference() {
+            cube(size=[DX, DY, ZSTRUCT]);
+            translate([STRUCTURE, STRUCTURE, -EPS]) 
+                cube(size=[DX-STRUCTURE*2, DY-STRUCTURE*2, 100]);
+        }
+
+        // Finger holds
+        *translate([DX/2 - HANDLE/2, DY, 0]) cube(size=[HANDLE, HANDLE, ZSTRUCT]);
+        *translate([DX/2 - HANDLE/2, -HANDLE, 0]) cube(size=[HANDLE, HANDLE, ZSTRUCT]);
     }
 
-    // Finger holds
-    translate([DX/2 - HANDLE/2, DY, 0]) cube(size=[HANDLE, HANDLE, ZSTRUCT]);
-    translate([DX/2 - HANDLE/2, -HANDLE, 0]) cube(size=[HANDLE, HANDLE, ZSTRUCT]);
-}
-
-// accel
-support(1.2904*C, 0.2708*C, 2.06 + 0.01, 2.06 + 0.1, 1.0);
-
-if (OUTSIDE == false) {
-    // amp
+    // accel
+    support(1.2904*C, 0.2708*C, 2.06 + 0.01, 2.06 + 0.1, 1.0);
     support(0.1429*C, 0.3045*C, 3.10, 3.10, 0.8);
 }

@@ -4,7 +4,7 @@
 */
 
 HAS_FORE_AFT = false;
-HAS_COUPLER = false;
+HAS_COUPLER = 0;    // 0: none, 1: header, 2: thread
 HAS_PIN_IGNITION = true;
 HAS_KEYJOINT_PILLAR = true;
 HAS_SIDE_VENTS = false;
@@ -42,8 +42,7 @@ PLATE_PAD = 2.5;
 M_BOLT = M_SWITCH_CENTER + 2.0;     // w=8.0 mm
 M_PORT = M_BOLT - 4.0 - 6.3 - 0.1; // 12.6 mm
 M_SWITCH = M_BOLT + 4.0 + 4.1 + 0.1; // 8.2 mm
-
-M_HEAT_SINK = 300.0;
+M_COUPLER_START = M_SWITCH + 6.0;
 
 KEYJOINT = 8;
 KEYJOINT_T = 5.0;

@@ -1,12 +1,13 @@
-//include <apprenticeV4.scad>
-include <ventedBlack.scad>
+//include <dim_apprenticeV4.scad>
+//include <dim_ventedBlack.scad>
+include <dim_prophecy.scad>
 
 use <../commonUnified.scad>
 use <../shapes.scad>
 
-DRAW_AFT = true;
-DRAW_FORE = false;
-DRAW_PLATE = false;
+DRAW_AFT = false;
+DRAW_FORE = true;
+DRAW_PLATE = true;
 DRAW_PLATE_BASE = false;
 
 EPS = 0.01;
@@ -27,12 +28,11 @@ T = 4.0;
 M_JOINT = zLenOfBaffles(N_BAFFLES, DZ_BAFFLE) + M_MC + DZ_SPEAKER;
 M_BOLT_START = M_BOLT - 4.0;
 M_SWITCH_START = M_BOLT + 4.0;
-M_COUPLER_START = HAS_COUPLER ? M_SWITCH + 6.5 : M_SWITCH + 6.0;    // the non-coupler case is a hack
 
 DZ_PORT_SECTION = M_BOLT_START - M_JOINT;
 DZ_BOLT_SECTION = M_SWITCH_START - M_BOLT_START;
 DZ_SWITCH_SECTION = M_COUPLER_START - M_SWITCH_START;
-DZ_COUPLER = M_HEAT_SINK - M_COUPLER_START;
+DZ_COUPLER = 12.0;
 
 if (DRAW_AFT) {
     difference() {
@@ -110,15 +110,20 @@ if (DRAW_FORE) {
                     HAS_PIN_IGNITION, 
                     DY_TO_PLATE_BASE);
             }
-            if (HAS_COUPLER) {
+            if (HAS_COUPLER == 1) {
                 translate([0, 0, M_COUPLER_START]) {
                     emitterCouplerRing(D_FORE_INNER, T, DZ_COUPLER);
+                }
+            }
+            else if (HAS_COUPLER == 2) {
+                translate([0, 0, M_COUPLER_START]) {
+                    dynamicHeatSinkHolder(D_FORE_INNER);
                 }
             }
         }
         // Flat top
         translate([-50, D_FORE_INNER/2 - DY_FLAT, M_FORE]) {
-            cube(size=[100, 10, M_HEAT_SINK - M_FORE]);
+            cube(size=[100, 10, M_COUPLER_START - M_FORE]);
         }
 
         // flat bottom
@@ -177,6 +182,8 @@ if (DRAW_PLATE || DRAW_PLATE_BASE) color("silver") {
             translate([0, 0, M_PORT]) rotate([-90, 0, 0]) cylinder(h=100, d=11.0);
             translate([0, 0, M_BOLT]) rotate([-90, 0, 0]) cylinder(h=100, d=BOLT_D);
             translate([0, 0, M_SWITCH]) rotate([-90, 0, 0]) cylinder(h=100, d=HAS_PIN_IGNITION ? 3.6 : 8.0);
+
+            translate([0, D_FORE_INNER/2 + 4, M_BOLT]) rotate([-90, 0, 0]) cylinder(h=100, d=8.0);
         }
     }
 }

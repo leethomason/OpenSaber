@@ -97,16 +97,16 @@
 #define PCB_ITSY_1				   16
 #define PCB_ITSY_1C				   17	// 1B was a bad run, 1C adds dotstar support
 #define PCB_ITSY_2A				   18
-#define PCB_ITSY_2B				   19   // Gyro + Accelerometer on the I2C bus. Dotstar. SPI. I2S audio. Flash mem sound.
-#define PCB_ITSY_2C				   20   // Gyro + Accelerometer on the I2C bus. Dotstar. SPI. I2S audio. Flash mem sound.
-#define PCB_ITSY_2D				   21   // Gyro + Accelerometer on the I2C bus. Dotstar. SPI. I2S audio. Flash mem sound.
-#define PCB_ITSY_2E				   22   // Gyro + Accelerometer on the I2C bus. Dotstar. SPI. I2S audio. Flash mem sound.
+#define PCB_ITSY_2B				   19   // Magnetometer + Accelerometer on the I2C bus. Dotstar. SPI. I2S audio. Flash mem sound.
+#define PCB_ITSY_2C				   20   // Magnetometer + Accelerometer on the I2C bus. Dotstar. SPI. I2S audio. Flash mem sound.
+#define PCB_ITSY_2D				   21   // Magnetometer + Accelerometer on the I2C bus. Dotstar. SPI. I2S audio. Flash mem sound.
+#define PCB_ITSY_2E				   22   // Magnetometer + Accelerometer on the I2C bus. Dotstar. SPI. I2S audio. Flash mem sound.
 
 #define SABER_ACCELEROMETER_NONE 		0
 #define SABER_ACCELEROMETER_LIS3DH		1
 #define SABER_ACCELEROMETER_NXP			2
 #define SABER_ACCELEROMETER_LIS3DH_SPI 	3
-#define SABER_ACCELEROMETER_LSM303 		4	// SPI, accel, gyro
+#define SABER_ACCELEROMETER_LSM303 		4	// SPI, accel, magnetometer
 
 #if SABER_MODEL == SABER_MODEL_GECKO
 	#define PCB_VERSION 				PCB_VERSION_1
@@ -841,7 +841,6 @@
 	#define PCB_VERSION 				PCB_ITSY_2E
 	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
 	#define SABER_VOLTMETER			
-	#define VOLTMETER_TUNE				1048
 	
 	//#define BLADE_ONLY_UI	1
 	#define SABER_UI_LED				SABER_LED_DOTSTAR
@@ -857,11 +856,13 @@
 	#define FILTER_MAG_X	20
 	#define FILTER_MAG_Y	20
 	#define FILTER_MAG_Z	20
+	#define VOLTMETER_TUNE				1048
 #	elif SABER_SUB_MODEL == SABER_SUB_MODEL_BLACK
 	// Very unstable. Case metal? Size?
-	#define FILTER_MAG_X	30
-	#define FILTER_MAG_Y	30
-	#define FILTER_MAG_Z	30
+	#define FILTER_MAG_X	40		// really bouncy in the x.
+	#define FILTER_MAG_Y	20
+	#define FILTER_MAG_Z	16
+	#define VOLTMETER_TUNE				1038
 #	endif
 	#define SWING_SAMPLES	12
 	#define ID_STR "Clan Cree XPE2 RGB"

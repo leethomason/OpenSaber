@@ -872,8 +872,8 @@ module tactileRing(diameter, t, dz, dzToTactile, hasPinIgnition, dyToPlateBase=0
                 translate([-50, H - Z0/2, Z0/2]) rotate([0, 90, 0]) cylinder(h=100, d=Z0);
             }
             hull() {            
-                translate([-50, -H + Z1/2, dz - Z1/2]) rotate([0, 90, 0]) cylinder(h=100, d=ZD);
-                translate([-50, 0, dz - Z1/2]) rotate([0, 90, 0]) cylinder(h=100, d=ZD);
+                translate([-50, -H + Z1/2, dz - Z1/2]) rotate([0, 90, 0]) cylinder(h=100, d=Z1);
+                translate([-50, 0, dz - Z1/2]) rotate([0, 90, 0]) cylinder(h=100, d=Z1);
             }
         }
     }

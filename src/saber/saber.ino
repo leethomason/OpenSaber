@@ -524,27 +524,9 @@ void processAccel(uint32_t msec, uint32_t delta)
         float dot = swing.dotOrigin();
         float speed = swing.speed();
         //vectorUI.PushTestData(speed, 0.0f, SWING_MAX, msec, 4.0f);
-        
-#ifdef ACCEL_TO_SWING        
-        const float impact = saberDB.impact();
-        const float still = 1.1f;
-        float g2 = fastG2.average();
-
-        if (g2 > still * still) {
-            if (g2 > impact * impact) {
-                speed = (float)SWING_MAX;
-            }
-            else {
-                float g = sqrtf(g2);
-                float altSpeed = (float)SWING_MAX * (g - still) / (impact - still);
-                // Log.p("speed=").p(speed).p(" alt=").p(altSpeed).eol();
-                speed = glMax(altSpeed, speed);
-            }
-        }
-#endif
         sfx.sm_setSwing(speed, (int)((1.0f + dot)*128.0f));
 
-#if false
+#if false && (SERIAL_DEBUG == 1)
         static const int BURST = 5;
         static int32_t lastLog = 0;
         static int burstLog = 0;
@@ -555,17 +537,18 @@ void processAccel(uint32_t msec, uint32_t delta)
             Log.p(burstLog == BURST ? "--" : "  ")
                 .p("t=").p(millis()%1000)
                 .p(" swing=").p(swing.speed())
-                //.p(" swingVol=").p(swingVol)
+                .p(" swingVol=").p(swingVol)
                 //.p(" pos=").v3(swing.pos()).p(" origin=").v3(swing.origin())
                 //.p(" dot=").p(dot)
-                //.p(" val/min/max ").v3(magFilter.average()).v3(magMin).v3(magMax)
-                .p(" val/range ").v3(magFilter.average() - magMin).v3(range)
+                .p(" magfilter val/min/max ").v3(magFilter.average()).v3(magMin).v3(magMax)
+                //.p(" val/range ").v3(magFilter.average() - magMin).v3(range)
                 //.p(" accel=").p(fastG2.average())
                 .eol();
             lastLog = msec;
             burstLog--;
         }
 #endif        
+
     }
     for (int i = 0; i < n; ++i)
     {
