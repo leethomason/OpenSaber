@@ -27,14 +27,15 @@ for i in range(0, 4):
     g.feed(mat['feed_rate'])
     g.move(z=CNC_TRAVEL_Z)
     g.move(x=0, y=origin_y + stride * i)
-    g.move(z=1.0)
 
     d = depth + slope * i / 3.0
 
     if i == 2:
         if odd_depth < 0:
+            g.move(z=1.0)
             drill(g, mat, odd_depth - 1.0)
     else:
+        g.move(z=1.0)
         drill(g, mat, d - 1.0)
 
 g.move(z=10)
