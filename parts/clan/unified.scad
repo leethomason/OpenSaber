@@ -164,8 +164,8 @@ if (DRAW_FORE) {
 
         // Top vent (joint ring)
         if (HAS_FORE_AFT) hull() {
-            translate([0, -50, M_JOINT + 12.0]) rotate([-90, 0, 0]) cylinder(h=100, d=10.0);
-            translate([0, -50, M_FORE - 12.0]) rotate([-90, 0, 0]) cylinder(h=100, d=10.0);
+            translate([0, -50, M_JOINT + 8.0]) rotate([-90, 0, 0]) cylinder(h=100, d=10.0);
+            translate([0, -50, M_FORE - 8.0]) rotate([-90, 0, 0]) cylinder(h=100, d=10.0);
         }
 
         // Top vent (inner)
