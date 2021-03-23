@@ -281,6 +281,17 @@ module dynamicHeatSinkHolder(diameter)
     }
 }
 
+module shortDynamicHeatSinkHolder(diameter)
+{
+    DZ = 4.5;
+    D_HEAT_SINK_THREAD = dynamicHeatSinkThread();
+
+    difference() {
+        cylinder(h=DZ, d=diameter);
+        cylinder(h=DZ + EPS, d=D_HEAT_SINK_THREAD);
+    }
+}
+
 
 DOTSTAR_XZ = 5.6;
 DOTSTAR_PITCH = 7;
@@ -822,6 +833,7 @@ module switchRing(diameter, t, dz, dzToSwitch, counter=true, switchDY=0)
 
 // Pin ignition keeps getting re-designed.
 // Current design: upside down 8-32 1/4" socket head screw.
+// Pin
 module tactileRing(diameter, t, dz, dzToTactile, hasPinIgnition, dyToPlateBase=0)
 {
     TACTILE_X = 6.2;

@@ -1,13 +1,16 @@
 //include <dim_apprenticeV4.scad>
+//include <dim_apprenticeV4_LE.scad>
 //include <dim_ventedBlack.scad>
-include <dim_prophecy.scad>
+//include <dim_prophecy.scad>
+//include <dim_aeonv4.scad>
+include <dim_initiate.scad>
 
 use <../commonUnified.scad>
 use <../shapes.scad>
 
 DRAW_AFT = false;
 DRAW_FORE = true;
-DRAW_PLATE = true;
+DRAW_PLATE = false;
 DRAW_PLATE_BASE = false;
 
 EPS = 0.01;
@@ -94,7 +97,7 @@ if (DRAW_FORE) {
                 powerPortRing(D_FORE_INNER, T, DZ_PORT_SECTION, 
                             M_PORT - M_JOINT,
                             counter=false,
-                            portSupportToBack=true,
+                            portSupportToBack=false,    // FIXME - some designs?
                             powerNutCanTurn=ALLOW_POWER_NUT_TO_TURN);
             }
             color("orange") translate([0, 0, M_BOLT_START]) {
@@ -118,6 +121,15 @@ if (DRAW_FORE) {
             else if (HAS_COUPLER == 2) {
                 translate([0, 0, M_COUPLER_START]) {
                     dynamicHeatSinkHolder(D_FORE_INNER);
+                    echo("Front heatsink:", M_COUPLER_START + 10.0 + 26.0, 
+                         "past switch center:", M_COUPLER_START + 10.0 + 26.0 - M_SWITCH_CENTER);
+                }
+            }
+            else if (HAS_COUPLER == 3) {
+                translate([0, 0, M_COUPLER_START]) {
+                    shortDynamicHeatSinkHolder(D_FORE_INNER);
+                    echo("Front heatsink:", M_COUPLER_START + 4.5 + 26.0, 
+                         "past switch center:", M_COUPLER_START + 4.5 + 26.0 - M_SWITCH_CENTER);
                 }
             }
         }
@@ -133,7 +145,7 @@ if (DRAW_FORE) {
 
         // Bottom access
         hull() {
-            translate([0, -D_FORE_INNER/2 + T, M_PORT + 1.0]) 
+            translate([0, -D_FORE_INNER/2 + T, M_PORT - 1.0])   // FIXME: I keep toggling this value
                 rotate([90, 0, 0]) cylinder(h=20, d=12.0);
             translate([0, -D_FORE_INNER/2 + T, M_SWITCH - 2.0]) 
                 rotate([90, 0, 0]) cylinder(h=20, d=12.0);
@@ -146,14 +158,14 @@ if (DRAW_FORE) {
         // Side vents
         if (HAS_SIDE_VENTS) intersection() {
             translate([0, 0, M_JOINT]) tube(h=100, do=100, di=D_FORE_INNER - T - 0.1);
-            for(i=[0:3])
+            for(i=[0:NUM_VENTS-1])
                 translate([0, 0, M_JOINT + 15 + i*8]) capsule(70, 110, 2, true);
         }
 
         // Top vent (joint ring)
         if (HAS_FORE_AFT) hull() {
-            translate([0, 0, M_JOINT + 12.0]) rotate([-90, 0, 0]) cylinder(h=100, d=10.0);
-            translate([0, 0, M_FORE - 12.0]) rotate([-90, 0, 0]) cylinder(h=100, d=10.0);
+            translate([0, -50, M_JOINT + 12.0]) rotate([-90, 0, 0]) cylinder(h=100, d=10.0);
+            translate([0, -50, M_FORE - 12.0]) rotate([-90, 0, 0]) cylinder(h=100, d=10.0);
         }
 
         // Top vent (inner)

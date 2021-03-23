@@ -1,13 +1,5 @@
-/*
-    Classic ultrasabers poor design:
-    - aft with ~1.25 inch bore
-    - middle section with 0.9" bore
-    - forward with 1" bore, but not the correct length to secure the heatsink
-    - uses a header coupler for the heatsink
-*/
-
 HAS_FORE_AFT = true;
-HAS_COUPLER = 1;    // 0: none, 1: header, 2: thread
+HAS_COUPLER = 2;    // 0: none, 1: header, 2: thread
 HAS_PIN_IGNITION = false;
 HAS_KEYJOINT_PILLAR = false;
 HAS_SIDE_VENTS = true;
@@ -33,7 +25,7 @@ M_FORE = DZ_AFT;
 M_SWITCH_CENTER = 130.08 + 17.0 * 0.5; // center of ORIGINAL switch
 
 DZ_PLATE = 36.0;
-W_PLATE = 19.0;
+W_PLATE = 17.0;
 M_PLATE = M_SWITCH_CENTER - DZ_PLATE / 2;
 DY_FLAT = 1.5;
 NUM_VENTS = 3;
