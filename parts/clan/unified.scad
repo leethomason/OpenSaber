@@ -1,9 +1,9 @@
 //include <dim_apprenticeV4.scad>
 //include <dim_apprenticeV4_LE.scad>
 //include <dim_ventedBlack.scad>
-//include <dim_prophecy.scad>
+include <dim_prophecy.scad>
 //include <dim_aeonv4.scad>
-include <dim_initiate.scad>
+//include <dim_initiate.scad>
 
 use <../commonUnified.scad>
 use <../shapes.scad>
@@ -128,14 +128,14 @@ if (DRAW_FORE) {
             else if (HAS_COUPLER == 3) {
                 translate([0, 0, M_COUPLER_START]) {
                     shortDynamicHeatSinkHolder(D_FORE_INNER);
-                    echo("Front heatsink:", M_COUPLER_START + 4.5 + 26.0, 
-                         "past switch center:", M_COUPLER_START + 4.5 + 26.0 - M_SWITCH_CENTER);
+                    echo("Front heatsink:", M_COUPLER_START + 4.0 + 26.0, 
+                         "past switch center:", M_COUPLER_START + 4.0 + 26.0 - M_SWITCH_CENTER);
                 }
             }
         }
         // Flat top
         translate([-50, D_FORE_INNER/2 - DY_FLAT, M_FORE]) {
-            cube(size=[100, 10, M_COUPLER_START - M_FORE]);
+            cube(size=[100, 10, M_PLATE + DZ_PLATE - M_FORE]);
         }
 
         // flat bottom

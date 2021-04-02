@@ -48,6 +48,22 @@ module capsule(theta0, theta1, r=2, _mirror=false)
     }
 }
 
+module triCapsule(theta0, theta1, r=2, _mirror=false)
+{
+    hull() {
+        rotate([-90, -0, theta0]) 
+            polygonXY(20, [[-r, 0], [0, r], [r, 0]]);
+        rotate([-90, -0, theta1]) 
+            polygonXY(20, [[-r, 0], [0, -r], [r, 0]]);
+    }
+    if (_mirror == true) hull() {
+        mirror([1,0,0]) rotate([-90, -0, theta0]) 
+            polygonXY(20, [[-r, 0], [0, r], [r, 0]]);
+        mirror([1,0,0]) rotate([-90, -0, theta1]) 
+            polygonXY(20, [[-r, 0], [0, -r], [r, 0]]);
+    }
+}
+
 module columnY(dx, dyFrom0, dz, diameter, baseDX=0, baseDZ=0)
 {
     intersection() {
@@ -283,7 +299,7 @@ module dynamicHeatSinkHolder(diameter)
 
 module shortDynamicHeatSinkHolder(diameter)
 {
-    DZ = 4.5;
+    DZ = 4.0;
     D_HEAT_SINK_THREAD = dynamicHeatSinkThread();
 
     difference() {
@@ -856,7 +872,8 @@ module tactileRing(diameter, t, dz, dzToTactile, hasPinIgnition, dyToPlateBase=0
     }
 
     difference() {
-        intersection() {
+        intersection() 
+        {
             cylinder(h=100, d=diameter);
             union() {
                 difference() {
