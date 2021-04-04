@@ -6,7 +6,7 @@ HAS_SIDE_VENTS = true;          // side vents on front part
 ALLOW_POWER_NUT_TO_TURN = false;
 
 D_OUTER = 37.14;
-D_AFT_INNER = 32.5 + 0.2;
+D_AFT_INNER = 32.5;
 D_FORE_INNER = 25.4;
 DZ_AFT = 101.4;
 DZ_TOTAL = 101.0 + 100; // just defines inner()
