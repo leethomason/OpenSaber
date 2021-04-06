@@ -3,10 +3,13 @@ use <../commonUnified.scad>
 
 $fn = 60;
 
-DRAW_AFT = false;
-DRAW_FORE = true;
+DRAW_AFT = true;
+DRAW_FORE = false;
+
+//M_JOINT = M_MC + DZ_BUTTRESS
 
 if (DRAW_AFT) {
+    
     translate([0, 0, M_MC]) {
         difference() {
             union() {
@@ -36,24 +39,12 @@ if (DRAW_AFT) {
 
 if (DRAW_FORE)
 {
-    difference() {        
-        translate([0, 0, M_PORT-20])
-            powerPortRing(D_INNER, T, M_SWITCH + 5.0 - M_PORT + 20.0, 20.0);
-        translate([0, 0, M_SWITCH]) hull() {
-            rotate([-90, 0, 0]) cylinder(h=100, d=18);
-            translate([0, 0, 20]) rotate([-90, 0, 0]) cylinder(h=100, d=18);
-        }
-    }
-    TAC = 6.2;
-    TAC_H = 6.2;    // interesting...
-    intersection() {
-        cylinder(h=200, d=D_INNER);
-        translate([-TAC/2, -D_INNER/2, M_SWITCH - TAC/2]) cube(size=[TAC, D_INNER - TAC_H, TAC]);
-    }
+    translate([0, 0, M_PORT-20])
+        powerPortRing(D_INNER, T, M_SWITCH + 5.0 - M_PORT + 20.0, 20.0);
 }
 
-//color("red") translate([-MC_X/2, -MC_Y/2, M_MC]) cube(size=[MC_X, MC_Y, MC_Z]);
-//color("green") translate([0, 0, M_BATTERY]) cylinder(h=DZ_BATTERY, d=D_BATTERY);
+color("red") translate([-MC_X/2, -MC_Y/2, M_MC]) cube(size=[MC_X, MC_Y, MC_Z]);
+color("green") translate([0, 0, M_BATTERY]) cylinder(h=DZ_BATTERY, d=D_BATTERY);
 
 //color("red") translate([0, 0, M_BOLT]) rotate([-90, 0, 0]) cylinder(h=10, d=2);
 //color("red") translate([0, 0, M_SWITCH]) rotate([-90, 0, 0]) cylinder(h=10, d=12);
