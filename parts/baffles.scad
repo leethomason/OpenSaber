@@ -127,8 +127,6 @@ module bridge3(d, dz)
     }
 }
 
-$fn = 80;
-
 translate([0, 0, 0]) tube(h=4, do=32, di=26);
 translate([0, 0, 8]) tube(h=4, do=32, di=26);
 translate([0, 0, 16]) tube(h=4, do=32, di=26);

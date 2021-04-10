@@ -1,8 +1,6 @@
 use <shapes.scad>
 use <commonUnified.scad>
 
-$fn = 80;
-
 SWITCH_BRIDGE_DZ = 5.8;
 INNER_VIEW = false;
 

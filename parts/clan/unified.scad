@@ -14,7 +14,9 @@ DRAW_PLATE = false;
 DRAW_PLATE_BASE = false;
 
 EPS = 0.01;
-$fn = 80;
+$fn = 60;
+//$fa = 1;
+//$fs = 1.5;
 
 module inner()
 {
@@ -121,11 +123,15 @@ if (DRAW_FORE) {
             else if (HAS_COUPLER == 2) {
                 translate([0, 0, M_COUPLER_START]) {
                     dynamicHeatSinkHolder(D_FORE_INNER);
-                    echo("Front heatsink:", M_COUPLER_START + 10.0 + 26.0, 
-                         "past switch center:", M_COUPLER_START + 10.0 + 26.0 - M_SWITCH_CENTER);
                 }
             }
             else if (HAS_COUPLER == 3) {
+                if (M_COUPLER_START <= M_PLATE + DZ_PLATE) {
+                    echo("ERROR: the coupler ring overlaps the switch plate.");
+                    echo("M_COUPLER_START", M_COUPLER_START);
+                    echo("M_PLATE + DZ_PLATE", M_PLATE + DZ_PLATE);
+                }
+
                 translate([0, 0, M_COUPLER_START]) {
                     shortDynamicHeatSinkHolder(D_FORE_INNER);
                     echo("Front heatsink:", M_COUPLER_START + 4.0 + 26.0, 

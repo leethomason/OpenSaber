@@ -14,8 +14,8 @@ W_PLATE = 15.0
 DZ_PORT, DZ_BOLT, DZ_SWITCH = 7.1, 17.5, 25.7
 H_PLATE = 6.6
 
-# D_SWITCH = 8.2
-D_SWITCH = 4.4
+D_SWITCH = 8.2    # standard silver
+# D_SWITCH = 4.4    # pin
 INSET_WITH_BOLT = True
 
 depth = -H_PLATE - 0.5
