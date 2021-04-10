@@ -9,14 +9,12 @@ from hole import hole
 
 mat = init_material(sys.argv[1])
 
-DZ_PLATE = 31.0
-W_PLATE = 15.0
-DZ_PORT, DZ_BOLT, DZ_SWITCH = 7.1, 17.5, 25.7
+DZ_PLATE, W_PLATE, DZ_PORT, DZ_BOLT, DZ_SWITCH = 33, 17, 7, 17.5, 27.4
 H_PLATE = 6.6
 
 D_SWITCH = 8.2    # standard silver
 # D_SWITCH = 4.4    # pin
-INSET_WITH_BOLT = True
+INSET_WITH_BOLT = False
 
 depth = -H_PLATE - 0.5
 

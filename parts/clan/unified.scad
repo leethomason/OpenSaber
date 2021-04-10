@@ -9,9 +9,9 @@ use <../commonUnified.scad>
 use <../shapes.scad>
 
 DRAW_AFT = false;
-DRAW_FORE = true;
+DRAW_FORE = false;
 DRAW_PLATE = false;
-DRAW_PLATE_BASE = false;
+DRAW_PLATE_BASE = true;
 
 EPS = 0.01;
 $fn = 60;
@@ -212,5 +212,5 @@ if (DRAW_PLATE || DRAW_PLATE_BASE) color("silver") {
 
 *translate([0, 0, DZ_TOTAL]) color("red") cylinder(h=1.0, d=D_FORE_INNER);
 
-echo("DZ_PORT, DZ_BOLT, DZ_SWITCH=", M_PORT - M_PLATE, M_BOLT - M_PLATE, M_SWITCH - M_PLATE);
+echo("DZ_PLATE, W_PLATE, DZ_PORT, DZ_BOLT, DZ_SWITCH=", DZ_PLATE, W_PLATE, M_PORT - M_PLATE, M_BOLT - M_PLATE, M_SWITCH - M_PLATE);
 echo("H_PLATE=", D_OUTER/2 - (D_FORE_INNER/2 - DY_FLAT));
