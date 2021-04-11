@@ -50,17 +50,20 @@ module capsule(theta0, theta1, r=2, _mirror=false)
 
 module triCapsule(theta0, theta1, r=2, _mirror=false)
 {
+    theta0 = theta0 + 90;
+    theta1 = theta1 + 90;
+
     hull() {
-        rotate([-90, -0, theta0]) 
-            polygonXY(20, [[-r, 0], [0, r], [r, 0]]);
-        rotate([-90, -0, theta1]) 
-            polygonXY(20, [[-r, 0], [0, -r], [r, 0]]);
+        rotate([0, 0, theta0]) 
+            polygonYZ(20, [[0, -r], [-r, 0], [0, r]]);
+        rotate([0, 0, theta1]) 
+            polygonYZ(20, [[0, -r], [r, 0], [0, r]]);
     }
     if (_mirror == true) hull() {
-        mirror([1,0,0]) rotate([-90, -0, theta0]) 
-            polygonXY(20, [[-r, 0], [0, r], [r, 0]]);
-        mirror([1,0,0]) rotate([-90, -0, theta1]) 
-            polygonXY(20, [[-r, 0], [0, -r], [r, 0]]);
+        mirror([1,0,0]) rotate([0, -0, theta0]) 
+            polygonYZ(20, [[0, -r], [-r, 0], [0, r]]);
+        mirror([1,0,0]) rotate([0, -0, theta1]) 
+            polygonYZ(20, [[0, -r], [r, 0], [0, r]]);
     }
 }
 

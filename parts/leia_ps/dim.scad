@@ -10,10 +10,9 @@ M_MC = 8.0;
 M_BATTERY = M_MC + MC_Z;
 
 M_BOLT = 125.0;
-//M_SWITCH = 141.8;
-//M_PORT = 159.0;
-M_PORT = 141.8;
-M_SWITCH = 159.0;
+M_END = 160.0;  // very back of the heatsink. guesstimate
+M_SWITCH = 141.8;
+M_PORT = 159.0;
 
 DZ_BATTERY = 52.4;
 D_BATTERY = 18.4;

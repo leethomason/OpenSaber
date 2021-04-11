@@ -1,0 +1,19 @@
+# Holder for the 12mm tactile switch
+# 0.2" between leads,
+# 0.5" across switch
+# +M 2.2   Mounting
+# 
+
+[           ]
+ M  o   o  M
+    |   |
+    o   o
+    |   |
+    |   |
+    |   |
+    |   |
+    |   |
+    |   |
+    |   |
+ M  o   o  M
+[           ]
