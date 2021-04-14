@@ -772,17 +772,18 @@ module powerPortRing(diameter, t, dz, dzToPort, portSupportToBack=false, counter
 }
 
 
-module boltRing(diameter, t, dz, dzToBolt)
+module boltRing(diameter, t, dz, dzToBolt, bolt_d=0, nut_w=0, nut_y=0, dy_port=0)
 {
-    BOLT_D = 4.5;
-    NUT_W = 8.6;
-    NUT_Y = 3.4;
+    BOLT_D = bolt_d > 0 ? bolt_d : 4.5;
+    NUT_W  = nut_w > 0  ? nut_w  : 8.6;
+    NUT_Y  = nut_y > 0  ? nut_y  : 3.4;
     DZ_BRIDGE = 8.0;
     DZ_SLOT = 2.0;
     
     H_THREAD = 5.5;
     D_THREAD = 7.8;
-    DY_PORT = diameter/2 - (H_THREAD + (diameter/2 - yAtX(D_THREAD/2, diameter/2)));    // from portRing
+    DY_PORT = dy_port > 0 ? dy_port :
+        diameter/2 - (H_THREAD + (diameter/2 - yAtX(D_THREAD/2, diameter/2)));    // from portRing
 
     TRI = [[-50, 0], [0, 0], [-50, -50]];
 

@@ -4,8 +4,8 @@ use <../shapes.scad>
 
 $fn = 60;
 
-DRAW_AFT = true;
-DRAW_FORE = false;
+DRAW_AFT = false;
+DRAW_FORE = true;
 
 KEYJOINT = 8;
 KEYJOINT_T = 4.5;
@@ -52,7 +52,7 @@ if (DRAW_AFT) {
 if (DRAW_FORE)
 {
     PORT_DX = 9.00;
-    PORT_DY = 14.35;
+    PORT_DY = 14.35 + 0.5;
     PORT_DZ = 10.70;
     PORT_CENTER = 6.60;
     PORT_PAST = PORT_DZ - PORT_CENTER;
@@ -73,10 +73,19 @@ if (DRAW_FORE)
     PCB_HOLE_X = 6.35;
     PCB_HOLE_Z = 6.35;
 
+    DZ_BOLT = 13.0;
+    D_BOLT = 3.0;
+
     difference() {
         union() {
             translate([0, 0, M_FORE]) {
-                tube(h=DZ_SECTION, do=D_INNER, di=D_INNER - T);
+                boltRing(D_INNER, T, DZ_BOLT, M_BOLT - M_FORE, 
+                    bolt_d = D_BOLT + 0.2,
+                    nut_w = 5.50, 
+                    nut_y = 2.40,
+                    dy_port = 10.0);
+                translate([0, 0, DZ_BOLT]) 
+                    tube(h=DZ_SECTION - DZ_BOLT, do=D_INNER, di=D_INNER - T);
             }
 
             // Joint reinforce
@@ -93,8 +102,13 @@ if (DRAW_FORE)
             intersection() {
                 translate([0, 0, M_FORE]) cylinder(h=DZ_SECTION, d=D_INNER);
                 difference() {
-                    translate([-PORT_DX/2 - T_HOLDER, -D_INNER/2, M_PORT - PORT_CENTER])   
-                        cube(size=[PORT_DX + T_HOLDER*2, D_INNER/2 + 1, PORT_DZ]);
+                    union() {
+                        OFFSET = 4.0;
+                        translate([2, -D_INNER/2, M_PORT - PORT_CENTER - OFFSET])   
+                            cube(size=[PORT_DX/2 + T_HOLDER - 2, D_INNER/2 + 1, PORT_DZ + OFFSET]);
+                        mirror([-1, 0, 0]) translate([0, -D_INNER/2, M_PORT - PORT_CENTER])   
+                            cube(size=[PORT_DX/2 + T_HOLDER, D_INNER/2 + 1, PORT_DZ]);
+                    }
                     translate([-PORT_DX/2 + T_INNER, -D_INNER/2, M_PORT - PORT_CENTER])   
                         cube(size=[PORT_DX + -T_INNER*2, 20, PORT_DZ]);
                 }
@@ -118,12 +132,6 @@ if (DRAW_FORE)
         // side access
         //translate([0, 0, M_FORE + 32]) triCapsule(70, 110, 2, true);
         //translate([0, 0, M_FORE + 22]) triCapsule(70, 110, 2, true);
-
-        // top access
-        hull() {
-            translate([ 2, 0, M_FORE + 7]) rotate([-90, 0, 0]) cylinder(h=20, d=8);
-            translate([-2, 0, M_FORE + 7]) rotate([-90, 0, 0]) cylinder(h=20, d=8);
-        }
 
         // Flat bottom
         translate([-50, -D_INNER/2 -1, M_FORE]) cube(size=[100, 1.5, 100]);
