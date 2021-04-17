@@ -1,17 +1,17 @@
 //include <dim_apprenticeV4.scad>
 //include <dim_ventedBlack.scad>
-//include <dim_apprenticeV4_LE.scad>
+include <dim_apprenticeV4_LE.scad>
 //include <dim_prophecy.scad>
 //include <dim_aeonv4.scad>
-include <dim_initiate.scad>
+//include <dim_initiate.scad>
 
 use <../commonUnified.scad>
 use <../shapes.scad>
 
 DRAW_AFT = false;
 DRAW_FORE = false;
-DRAW_PLATE = true;
-DRAW_PLATE_BASE = false;
+DRAW_PLATE = false;
+DRAW_PLATE_BASE = true;
 
 EPS = 0.01;
 $fn = 60;

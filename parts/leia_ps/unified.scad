@@ -4,8 +4,8 @@ use <../shapes.scad>
 
 $fn = 60;
 
-DRAW_AFT = true;
-DRAW_FORE = false;
+DRAW_AFT = false;
+DRAW_FORE = true;
 
 KEYJOINT = 8;
 KEYJOINT_T = 4.5;
