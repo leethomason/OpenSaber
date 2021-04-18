@@ -2,18 +2,17 @@
 # 0.2" between leads,
 # 0.5" across switch
 # +M 2.2   Mounting
-# 
+# &h 1.41  Switch pins    
+# one axis 5.08 mounting
 
 [           ]
- M  o   o  M
-    |   |
-    o   o
+ M  h   h  M
     |   |
     |   |
+    |   +--o
+    |   
+    +------o
+       
     |   |
-    |   |
-    |   |
-    |   |
-    |   |
- M  o   o  M
+ M  h   h  M
 [           ]
