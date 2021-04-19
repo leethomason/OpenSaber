@@ -66,12 +66,11 @@ if (DRAW_FORE)
 
     PCB_DX = 16.8;
     PCB_DX_WIDE = 18;
-    PCB_DZ = 16.8;
-    PCB_OFFSET = 25.4 * 0.05;
+    PCB_DZ = 14.3;
     PCB_BUTTON = 6.7;
     PCB_BASE = yAtX(PCB_BUTTON/2, D_INNER/2) - 6.0 - 1.6 - 0.5;
     PCB_HOLE_X = 6.35;
-    PCB_HOLE_Z = 6.35;
+    PCB_HOLE_Z = 5.08;
 
     DZ_BOLT = 13.0;
     D_BOLT = 3.0;
@@ -119,15 +118,15 @@ if (DRAW_FORE)
             cube(size=[PORT_DX, 20, PORT_DZ]);
 
         // Cut PCB out
-        translate([-PCB_DX_WIDE/2, 0, M_SWITCH - PCB_DZ/2 - PCB_OFFSET])
+        translate([-PCB_DX_WIDE/2, 0, M_SWITCH - PCB_DZ/2])
             cube(size=[PCB_DX_WIDE, 20, PCB_DZ]);
         translate([0, 0, M_FORE - EPS])
             keyJoint(KEYJOINT + EPS, D_INNER, D_INNER - KEYJOINT_T, true);
 
         // Bottom access
         hull() {
-            translate([0, 0, M_FORE + 14]) rotate([90, 0, 0]) cylinder(h=20, d=16);
-            translate([0, 0, M_FORE + 25]) rotate([90, 0, 0]) cylinder(h=20, d=16);
+            translate([0, 4, M_FORE + 14]) rotate([90, 0, 0]) cylinder(h=100, d=16);
+            translate([0, 4, M_FORE + 24]) rotate([90, 0, 0]) cylinder(h=100, d=16);
         }
         // side access
         //translate([0, 0, M_FORE + 32]) triCapsule(70, 110, 2, true);
@@ -140,10 +139,10 @@ if (DRAW_FORE)
     intersection() {
         translate([0, 0, M_FORE]) cylinder(h=DZ_SECTION, d=D_INNER);
         union() {
-            translate([PCB_HOLE_X, PCB_BASE, M_SWITCH + PCB_HOLE_Z - PCB_OFFSET]) pcbButtress();
-            translate([PCB_HOLE_X, PCB_BASE, M_SWITCH - PCB_HOLE_Z - PCB_OFFSET]) pcbButtress();
-            mirror([-1, 0, 0]) translate([PCB_HOLE_X, PCB_BASE, M_SWITCH + PCB_HOLE_Z - PCB_OFFSET]) pcbButtress();
-            mirror([-1, 0, 0]) translate([PCB_HOLE_X, PCB_BASE, M_SWITCH - PCB_HOLE_Z - PCB_OFFSET]) pcbButtress();
+            translate([PCB_HOLE_X, PCB_BASE, M_SWITCH + PCB_HOLE_Z]) pcbButtress();
+            translate([PCB_HOLE_X, PCB_BASE, M_SWITCH - PCB_HOLE_Z]) pcbButtress();
+            mirror([-1, 0, 0]) translate([PCB_HOLE_X, PCB_BASE, M_SWITCH + PCB_HOLE_Z]) pcbButtress();
+            mirror([-1, 0, 0]) translate([PCB_HOLE_X, PCB_BASE, M_SWITCH - PCB_HOLE_Z]) pcbButtress();
         }
     }
 
