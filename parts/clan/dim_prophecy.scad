@@ -4,6 +4,7 @@ HAS_PIN_IGNITION = false;        // if true, small pin, else proper switch
 HAS_KEYJOINT_PILLAR = false;    // reinforces the key joint - small sabers
 HAS_SIDE_VENTS = true;          // side vents on front part
 ALLOW_POWER_NUT_TO_TURN = false;
+COVERTEC_CUTOUT = 1;
 
 D_OUTER = 37.14;
 D_AFT_INNER = 32.5 - 0.1;
@@ -15,7 +16,7 @@ DZ_SPEAKER = 12.0;
 D_PLATE_PORT = 11.0;
 
 M_0 = 0.0;
-M_MC = -12.0;   // can be -12
+M_MC = -11.0;
 M_FORE = DZ_AFT;
 M_SWITCH_CENTER = 139.2 + 16.0/2.0; // center of ORIGINAL switch
 

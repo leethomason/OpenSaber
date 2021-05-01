@@ -489,13 +489,15 @@ module oneBaffleBottonRail(d, dz)
 {
     yMC = -yAtX(X_MC/2, d/2) + 0.5;
 
+    Y = 12.0;
+
     intersection() {
         translate([0, 0, -EPS]) cylinder(h=dz*2 + EPS2, d=d);
         union() {
             translate([TROUGH_2 / 2, yMC - 10, -EPS])
-                cube(size=[20, 10, dz*2 + EPS]);
+                cube(size=[20, Y, dz*2 + EPS]);
             translate([X_MC / 2, yMC - 10, -EPS])
-                cube(size=[20, 11, dz*2 + EPS]);
+                cube(size=[20, Y, dz*2 + EPS]);
         }
     }    
 }
