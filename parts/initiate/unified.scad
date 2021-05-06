@@ -13,6 +13,15 @@ PORT_DY =  9.00;
 PORT_DZ = 10.70;
 D_BATTERY  = 18.50;
 
+PCB_DX = 17.5;
+PCB_DZ = 29.5;
+M_PCB = 15.7;
+
+module pcbHole()
+{
+    rotate([-90, 0, 0]) cylinder(h=20.0, d=2.2);
+}
+
 difference() {
     union() {
         translate([0, 0, M_AFT]) {
@@ -31,7 +40,30 @@ difference() {
             }
         }
     }
-    translate([-PORT_DX/2, D_INNER/2 - D_BATTERY - PORT_DY, 0]) cube(size=[PORT_DX, PORT_DY, PORT_DZ]);
+    // PCB
+    translate([-PCB_DX/2, -D_INNER/2, M_PCB])
+        cube(size=[PCB_DX, 5.0, PCB_DZ]);
+
+    HOLE_DX = (0.7 - 0.1) * 0.5 * 25.4;
+    HOLE_DZ0 = 0.1 * 25.4;
+    HOLE_DZ1 = 1.05 * 25.4;
+
+    translate([-HOLE_DX, -D_INNER/2, M_PCB + HOLE_DZ0]) pcbHole();
+    translate([HOLE_DX, -D_INNER/2, M_PCB + HOLE_DZ0]) pcbHole();
+    translate([-HOLE_DX, -D_INNER/2, M_PCB + HOLE_DZ1]) pcbHole();
+
+    // Back port
+    PORT_EXTRA = 10.0;
+    translate([-PORT_DX/2, D_INNER/2 - D_BATTERY - PORT_DY - PORT_EXTRA, 0]) 
+        cube(size=[PORT_DX, PORT_DY + PORT_EXTRA, PORT_DZ]);
+
+    // Wire Access
+    W = 10.0;
+    translate([-W/2, -100.0, 0]) cube(size=[W, 100, 200]);
+    W2 = 12.0;
+    translate([-W2/2, 0, 0]) cube(size=[W, 100, DZ_AFT - DZ_BUTTRESS*2]);
+
+    translate([0, 0, M_AFT]) battery(D_INNER, "18500");
 }
 
-color("green") translate([0, 0, M_AFT]) battery(D_INNER, "18500");
+*color("green") translate([0, 0, M_AFT]) battery(D_INNER, "18500");
