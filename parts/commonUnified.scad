@@ -2,7 +2,7 @@ use <shapes.scad>
 use <baffles.scad>
 
 Z_BATTERY_18650     = 65 + 4;
-Z_BATTERY_18500     = 50 + 4;
+Z_BATTERY_18500     = 50 + 5;
 D_BATTERY           = 18.50 + 0.5;    // An 1850. Huh. 
 
 D_SWITCH            =  12.5;     // actually 12, by thread.
