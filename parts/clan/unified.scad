@@ -1,17 +1,17 @@
 //include <dim_apprenticeV4.scad>
 //include <dim_ventedBlack.scad>
 //include <dim_apprenticeV4_LE.scad>
-//include <dim_prophecy.scad>
+include <dim_prophecy.scad>
 //include <dim_aeonv4.scad>
-include <dim_initiate.scad>
+//include <dim_initiate.scad>
 
 use <../commonUnified.scad>
 use <../shapes.scad>
 
-DRAW_AFT = false;
+DRAW_AFT = true;
 DRAW_FORE = false;
 DRAW_PLATE = false;
-DRAW_PLATE_BASE = true;
+DRAW_PLATE_BASE = false;
 
 EPS = 0.01;
 $fn = 60;
@@ -38,6 +38,16 @@ DZ_PORT_SECTION = M_BOLT_START - M_JOINT;
 DZ_BOLT_SECTION = M_SWITCH_START - M_BOLT_START;
 DZ_SWITCH_SECTION = M_COUPLER_START - M_SWITCH_START;
 DZ_COUPLER = 12.0;
+
+module covertecCutout()
+{
+    if(COVERTEC_CUTOUT != 0) {
+        START = 6.0;
+        LEN = (N_BAFFLES * 2 - 2) * DZ_BAFFLE;
+        mirror([COVERTEC_CUTOUT, 0, 0]) translate([D_AFT_INNER - 2.0, 0, START])
+            cylinder(h=LEN - START, d=D_AFT_INNER);
+    }
+}
 
 if (DRAW_AFT) {
     difference() {
@@ -86,6 +96,7 @@ if (DRAW_AFT) {
             translate([-50, -50, 0])
                 cube(size=[100, 50 - 7.0, 200]);
         }
+        covertecCutout();
     }
 }
 

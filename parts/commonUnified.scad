@@ -2,7 +2,7 @@ use <shapes.scad>
 use <baffles.scad>
 
 Z_BATTERY_18650     = 65 + 4;
-Z_BATTERY_18500     = 50 + 4;
+Z_BATTERY_18500     = 50 + 5;
 D_BATTERY           = 18.50 + 0.5;    // An 1850. Huh. 
 
 D_SWITCH            =  12.5;     // actually 12, by thread.
@@ -489,13 +489,15 @@ module oneBaffleBottonRail(d, dz)
 {
     yMC = -yAtX(X_MC/2, d/2) + 0.5;
 
+    Y = 12.0;
+    
     intersection() {
         translate([0, 0, -EPS]) cylinder(h=dz*2 + EPS2, d=d);
         union() {
             translate([TROUGH_2 / 2, yMC - 10, -EPS])
-                cube(size=[20, 10, dz*2 + EPS]);
+                cube(size=[20, Y, dz*2 + EPS]);
             translate([X_MC / 2, yMC - 10, -EPS])
-                cube(size=[20, 11, dz*2 + EPS]);
+                cube(size=[20, Y, dz*2 + EPS]);
         }
     }    
 }
