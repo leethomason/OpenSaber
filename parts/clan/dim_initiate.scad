@@ -4,6 +4,7 @@ HAS_PIN_IGNITION = false;        // if true, small pin, else proper switch
 HAS_KEYJOINT_PILLAR = false;    // reinforces the key joint - small sabers
 HAS_SIDE_VENTS = true;          // side vents on front part
 ALLOW_POWER_NUT_TO_TURN = false;
+COVERTEC_CUTOUT = 0;
 
 D_OUTER = 37.33;
 D_AFT_INNER = 32.5;
