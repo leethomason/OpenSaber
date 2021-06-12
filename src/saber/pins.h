@@ -61,9 +61,14 @@
 #define SABER_SUB_MODEL_STANDARD    4
 #define SABER_SUB_MODEL_APPRENTICE	5
 #define SABER_SUB_MODEL_BLACK		6
+#define SABER_SUB_MODEL_INITIATE    7
+#define SABER_SUB_MODEL_PROPHECY_1  8
+#define SABER_SUB_MODEL_PROPHECY_2  9
+#define SABER_SUB_MODEL_AEON        10
+#define SABER_SUB_MODEL_APPRENTICE	11
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
+#define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_CLAN
 #define SABER_SUB_MODEL				SABER_SUB_MODEL_BLACK				
 // ----------------------------------

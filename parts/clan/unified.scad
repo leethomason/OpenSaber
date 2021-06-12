@@ -179,12 +179,14 @@ if (DRAW_FORE) {
                 z = M_JOINT + 15 + i*8;
                 if (FORE_THERMAL_RELIEF && z > M_FORE) {
                     odd = (i % 2 == 0) ? true : false;
+                    
                     H = odd ? 6.0 : 2.0;
+                    L = odd ? 2.0 : -1.0;
 
                     if ( z < M_PORT - 6.0) {
                         translate([-50, -D_FORE_INNER/2, z])
                             polygonYZ(h=100, points=[
-                                [0, -2], [H, -2], [H+2, 0], [H, 2], [0, 2]
+                                [L, -2], [H, -2], [H+2, 0], [H, 2], [L, 2]
                             ]);
                     }
 
