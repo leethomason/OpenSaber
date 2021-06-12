@@ -37,7 +37,7 @@ public:
     // range max reading of vRef; 1023 or 4095
     // tune constant multiplied to answer 1000
     Voltmeter(uint32_t vRef, uint32_t rLower, uint32_t rHigher, uint32_t range, uint32_t tune)
-        : m_averagePower(NOMINAL_VOLTAGE), m_eased(NOMINAL_VOLTAGE)
+        : m_averagePower(HIGH_VOLTAGE), m_eased(HIGH_VOLTAGE)
     {       
         ASSERT(_instance == 0);
         _instance = this; 

@@ -15,12 +15,21 @@ D_BATTERY  = 18.50;
 DZ_BATTERY = 55.0;
 
 PCB_DX = 17.8 + 0.6;
-PCB_DZ = 29.5;
-M_PCB = 27.8;
+PCB_DZ = 29.5 + 0.5;
+M_PCB = 27.9;
+
+HOLE_DX = (0.6 - 0.1) * 0.5 * 25.4;
+HOLE_DZ0 = 0.1 * 25.4;
+HOLE_DZ1 = 1.05 * 25.4;
 
 module pcbHole()
 {
     rotate([-90, 0, 0]) cylinder(h=20.0, d=2.2);
+}
+
+module pcbPillar() 
+{
+    rotate([-90, 0, 0]) cylinder(h=15.0, d=5.0);
 }
 
 difference() {
@@ -40,18 +49,25 @@ difference() {
                 }
             }
         }
+        translate([-HOLE_DX, -D_INNER/2, M_PCB + HOLE_DZ0]) pcbPillar();
+        translate([HOLE_DX, -D_INNER/2, M_PCB + HOLE_DZ0]) pcbPillar();
+        translate([-HOLE_DX, -D_INNER/2, M_PCB + HOLE_DZ1]) pcbPillar();
+        translate([HOLE_DX, -D_INNER/2, M_PCB + HOLE_DZ1]) pcbPillar();
+
+        // Port
+        EXTRA_X = 3.0;
+        EXTRA_Z = 1.0;
+        translate([-(PORT_DX+EXTRA_X)/2, D_INNER/2 - D_BATTERY - PORT_DY, M_AFT]) 
+            cube(size=[PORT_DX+EXTRA_X, PORT_DY + PORT_EXTRA, PORT_DZ+EXTRA_Z]);
     }
     // PCB
     translate([-PCB_DX/2, -D_INNER/2, M_PCB])
         cube(size=[PCB_DX, 8.0, PCB_DZ]);
 
-    HOLE_DX = (0.7 - 0.1) * 0.5 * 25.4;
-    HOLE_DZ0 = 0.1 * 25.4;
-    HOLE_DZ1 = 1.05 * 25.4;
-
     translate([-HOLE_DX, -D_INNER/2, M_PCB + HOLE_DZ0]) pcbHole();
     translate([HOLE_DX, -D_INNER/2, M_PCB + HOLE_DZ0]) pcbHole();
     translate([-HOLE_DX, -D_INNER/2, M_PCB + HOLE_DZ1]) pcbHole();
+    translate([HOLE_DX, -D_INNER/2, M_PCB + HOLE_DZ1]) pcbHole();
 
     // Back port
     PORT_EXTRA = 10.0;
@@ -62,7 +78,7 @@ difference() {
     W = 8.0;
     translate([-W/2, -100.0, 0]) cube(size=[W, 100, 200]);
     W2 = 14.0;
-    translate([-W2/2, 0, 0]) cube(size=[W2, 100, DZ_AFT - DZ_BUTTRESS*1]);
+    translate([-W2/2, 0, M_AFT]) cube(size=[W2, 100, 55.0]);
 
     translate([0, 0, M_AFT]) battery(D_INNER, "18500");
 }

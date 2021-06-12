@@ -8,7 +8,7 @@ COVERTEC_CUTOUT = 1;
 
 D_OUTER = 37.14;
 D_AFT_INNER = 32.5 - 0.1;
-D_FORE_INNER = 25.4 - 0.2;
+D_FORE_INNER = 25.4 - 0.4;
 DZ_AFT = 101.4;
 DZ_TOTAL = 101.0 + 100; // just defines inner()
 

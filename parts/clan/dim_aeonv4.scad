@@ -1,9 +1,10 @@
 HAS_FORE_AFT = true;            // has 2 different bores
 HAS_COUPLER = 2;                // 0: none, 1: header, 2: thread
-HAS_PIN_IGNITION = false;        // if true, small pin, else proper switch
+HAS_PIN_IGNITION = false;       // if true, small pin, else proper switch
 HAS_KEYJOINT_PILLAR = false;    // reinforces the key joint - small sabers
-HAS_SIDE_VENTS = true;          // side vents on front part
 ALLOW_POWER_NUT_TO_TURN = false;
+COVERTEC_CUTOUT = 0;
+FORE_THERMAL_RELIEF = true;
 
 D_OUTER = 37.25;
 D_AFT_INNER = 32.5 + 0.2;
@@ -13,10 +14,10 @@ DZ_TOTAL = DZ_AFT + 100; // just defines inner()
 
 DZ_SPEAKER = 12.0;
 D_PLATE_PORT = 11.0;
-NUM_VENTS = 8;
+NUM_VENTS = 10;              // if 0, no side vents
 
 M_0 = 0.0;
-M_MC = 11.0;
+M_MC = 6.5;
 M_FORE = DZ_AFT;
 
 RIDGE = 120.34;

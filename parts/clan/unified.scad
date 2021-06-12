@@ -1,15 +1,15 @@
 //include <dim_apprenticeV4.scad>
 //include <dim_ventedBlack.scad>
 //include <dim_apprenticeV4_LE.scad>
-include <dim_prophecy.scad>
-//include <dim_aeonv4.scad>
+//include <dim_prophecy.scad>
+include <dim_aeonv4.scad>
 //include <dim_initiate.scad>
 
 use <../commonUnified.scad>
 use <../shapes.scad>
 
-DRAW_AFT = true;
-DRAW_FORE = false;
+DRAW_AFT = false;
+DRAW_FORE = true;
 DRAW_PLATE = false;
 DRAW_PLATE_BASE = false;
 
@@ -18,13 +18,8 @@ $fn = 60;
 //$fa = 1;
 //$fs = 1;
 
-module inner()
-{
-    cylinder(h=DZ_AFT, d=D_AFT_INNER);
-    translate([0, 0, DZ_AFT]) {
-        cylinder(h=DZ_TOTAL - DZ_AFT, d=D_FORE_INNER);
-    }
-}
+D_POMMEL = 31.4;
+DZ_POMMEL = 10.0 + 1.0;
 
 N_BAFFLES = 10.0;
 DZ_BAFFLE = 3.8;
@@ -71,7 +66,9 @@ if (DRAW_AFT) {
                 baffleMCBattery(D_AFT_INNER, 
                                 N_BAFFLES,
                                 DZ_BAFFLE,
-                                bridgeStyle=2);
+                                bridgeStyle=2,
+                                batteryOffset=(D_POMMEL < D_AFT_INNER) ? (D_AFT_INNER - D_POMMEL)/2 : 0,
+                                thermalRelief=4);
             }
             color("olive") translate([0, 0, M_JOINT]) {
                 D = HAS_FORE_AFT ? D_AFT_INNER : D_FORE_INNER;
@@ -97,6 +94,9 @@ if (DRAW_AFT) {
                 cube(size=[100, 50 - 7.0, 200]);
         }
         covertecCutout();
+        
+        // Make sure a TCSS pommel will fit
+        translate([0, 0, -100]) tube(h=100 + DZ_POMMEL, do=50, di=D_POMMEL);
     }
 }
 
@@ -173,10 +173,33 @@ if (DRAW_FORE) {
         }
 
         // Side vents
-        if (HAS_SIDE_VENTS) intersection() {
+        if (NUM_VENTS > 0) intersection() {
             translate([0, 0, M_JOINT]) tube(h=100, do=100, di=D_FORE_INNER - T - 0.1);
-            for(i=[0:NUM_VENTS-1])
-                translate([0, 0, M_JOINT + 15 + i*8]) capsule(70, 110, 2, true);
+            for(i=[0:NUM_VENTS-1]) {
+                z = M_JOINT + 15 + i*8;
+                if (FORE_THERMAL_RELIEF && z > M_FORE) {
+                    odd = (i % 2 == 0) ? true : false;
+                    H = odd ? 6.0 : 2.0;
+
+                    if ( z < M_PORT - 6.0) {
+                        translate([-50, -D_FORE_INNER/2, z])
+                            polygonYZ(h=100, points=[
+                                [0, -2], [H, -2], [H+2, 0], [H, 2], [0, 2]
+                            ]);
+                    }
+
+                    translate([0, 0, z])
+                        capsule(odd ? 55 : 75, odd ? 90 : 110, 2, true);
+
+                    if (!odd && z < M_PORT - 6.0)
+                        translate([0, 0, z])
+                            capsule(30, 40, 2, true);
+                }
+                else {
+                    translate([0, 0, z])
+                        capsule(70, 110, 2, true);
+                }
+            }
         }
 
         // Top vent (joint ring)
@@ -187,7 +210,14 @@ if (DRAW_FORE) {
 
         // Top vent (inner)
         W = 12;
-        translate([-W/2, 0, M_FORE ]) cube(size=[W, 100, M_PORT - 8.0 - M_FORE]);
+        translate([-W/2, 0, M_FORE ]) 
+            cube(size=[W, 100, M_PORT - 8.0 - M_FORE]);
+
+        // Make sure the plate fits! (Oops.)
+        hull() {
+            translate([0, D_FORE_INNER/2 - DY_FLAT, M_PLATE + W_PLATE/2]) rotate([-90, 0, 0]) cylinder(h=100, d=W_PLATE);
+            translate([0, D_FORE_INNER/2 - DY_FLAT, M_PLATE + DZ_PLATE - W_PLATE/2]) rotate([-90, 0, 0]) cylinder(h=100, d=W_PLATE);
+        }
     }
 }
 
@@ -217,7 +247,7 @@ if (DRAW_PLATE || DRAW_PLATE_BASE) color("silver") {
     }
 }
 
-*translate([0, 0, M_MC + DZ_SPEAKER]) {
+*translate([0, (D_POMMEL < D_AFT_INNER) ? -(D_AFT_INNER - D_POMMEL)/2 : 0, M_MC + DZ_SPEAKER]) {
     color("red") battery(D_AFT_INNER);
 }
 

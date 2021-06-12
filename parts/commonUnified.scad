@@ -553,7 +553,8 @@ module oneBaffle(   d,
                     bottomRail=true,    // bridge must be >0 for a bottom rail
                     conduit=false,
                     slopeFront=false,
-                    mcFullDrop=false
+                    mcFullDrop=false,
+                    batteryOffset=0
                     )     
 {
     yMC = -yAtX(X_MC/2, d/2) + 1.0;
@@ -576,7 +577,7 @@ module oneBaffle(   d,
         }
 
         if (battery) {
-            translate([0, 0, -EPS]) battery(d);
+            translate([0, -batteryOffset, -EPS]) battery(d);
         }
         translate([-TROUGH_1/2, -5, -EPS]) 
             cube(size=[TROUGH_1, 5, dz + EPS2]);
@@ -983,7 +984,9 @@ module baffleMCBattery( outer,          // outer diameter
                         bridgeStyle = 1,
                         mc=true,
                         mcFullDrop=false,
-                        bottomRail=true
+                        bottomRail=true,
+                        batteryOffset=0,
+                        thermalRelief=0
                     )
 {
     totalN = n + nPostBaffles;
@@ -1002,17 +1005,21 @@ module baffleMCBattery( outer,          // outer diameter
                             dExtra=dFirst - outer, 
                             bridge=bridgeStyle,
                             mcFullDrop=mcFullDrop,
-                            bottomRail=bottomRail
+                            bottomRail=bottomRail,
+                            batteryOffset=batteryOffset
                     );
                 }
             }
             else {
+                useBottomRail = bottomRail && (thermalRelief == 0 || (((i+2) % thermalRelief) > 0));
+
                 oneBaffle(outer, dzButtress, 
                     battery=hasBattery,
                     bridge=bridgeInFront || (i < totalN-1) ? bridgeStyle : 0, 
                     mc=mc,
                     mcFullDrop=mcFullDrop,
-                    bottomRail=bottomRail);
+                    bottomRail=useBottomRail,
+                    batteryOffset=batteryOffset);
             }
         }
     }
@@ -1022,7 +1029,8 @@ module baffleMCBattery( outer,          // outer diameter
                 bridge=0, 
                 mc=mc, 
                 mcFullDrop=mcFullDrop,
-                bottomRail=bottomRail);
+                bottomRail=bottomRail,
+                batteryOffset=batteryOffset);
         }
     }
 }

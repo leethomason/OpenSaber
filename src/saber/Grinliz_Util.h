@@ -31,6 +31,7 @@
 
 static const uint32_t NOMINAL_VOLTAGE = 3700;
 static const uint32_t VOLTAGE_RANGE	  =  300;
+static const uint32_t HIGH_VOLTAGE = 4100;
 
 inline int32_t lerp1024(int16_t a, int16_t b, int32_t t1024) {
     return (a * (1024 - t1024) + b * t1024) / 1024;
