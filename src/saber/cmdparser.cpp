@@ -259,6 +259,9 @@ bool CMDParser::processCMD()
     }
     else if (action == FONTS) {
 #ifdef SABER_SOUND_ON
+        uint32_t dirHash = manifest.dirHash();
+        Serial.print("dirHash=");
+        Serial.println(dirHash, HEX);
         for (int i = 0; i < MEM_IMAGE_NUM_DIR; ++i) {
             Serial.print(i);
             Serial.print(": ");

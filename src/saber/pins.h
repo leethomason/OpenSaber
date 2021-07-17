@@ -66,11 +66,14 @@
 #define SABER_SUB_MODEL_PROPHECY_2  9
 #define SABER_SUB_MODEL_AEON        10
 #define SABER_SUB_MODEL_APPRENTICE	11
+#define SABER_SUB_MODEL_APP_LE      12
+#define SABER_SUB_MODEL_AEON		13
+#define SABER_SUB_INITIATE			14
 
 // ----------------------------------
 #define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_CLAN
-#define SABER_SUB_MODEL				SABER_SUB_MODEL_BLACK				
+#define SABER_SUB_MODEL				SABER_SUB_INITIATE			
 // ----------------------------------
 
 // Non-RGB has never been useful.
@@ -868,6 +871,26 @@
 	#define FILTER_MAG_Y	20
 	#define FILTER_MAG_Z	16
 	#define VOLTMETER_TUNE				1038
+#	elif SABER_SUB_MODEL == SABER_SUB_MODEL_APP_LE
+	#define FILTER_MAG_X	20
+	#define FILTER_MAG_Y	20
+	#define FILTER_MAG_Z	20
+	#define VOLTMETER_TUNE				1050
+#	elif SABER_SUB_MODEL == SABER_SUB_MODEL_AEON
+	#define FILTER_MAG_X	20
+	#define FILTER_MAG_Y	20
+	#define FILTER_MAG_Z	20
+	#define VOLTMETER_TUNE				1050
+#	elif SABER_SUB_MODEL == SABER_SUB_INITIATE
+	#define FILTER_MAG_X	20
+	#define FILTER_MAG_Y	20
+	#define FILTER_MAG_Z	20
+	#define VOLTMETER_TUNE				1042
+#	else
+	#define FILTER_MAG_X	20
+	#define FILTER_MAG_Y	20
+	#define FILTER_MAG_Z	20
+	#define VOLTMETER_TUNE				1048
 #	endif
 	#define SWING_SAMPLES	12
 	#define ID_STR "Clan Cree XPE2 RGB"

@@ -24,7 +24,6 @@
 #include "Grinliz_Arduino_Util.h"
 #include "saberdb.h"
 #include "sfx.h" // bug fix; generally don't want a dependency on sfx
-//#include "vprom.h"    // would be nice to get this working.
 
 using namespace osbr;
 
@@ -124,6 +123,7 @@ void SaberDB::setPaletteFromDirHash(uint32_t h)
     }
     break;
 
+    // Duchess / dutchess
     case 0x1deb9709:
     {
         Log.p("Jaina - BoldOne").eol();
