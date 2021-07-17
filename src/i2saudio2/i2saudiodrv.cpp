@@ -39,6 +39,7 @@
 #define FILL_RIGHT
 
 //#define USE_16_BIT  // doesn't work - not sure if hardware or sw config
+#define DEBUG_DEEP 1
 
 #ifdef USE_16_BIT
 int16_t stereoBuffer0[AUDDRV_STEREO_SAMPLES];
@@ -56,7 +57,6 @@ SPIStream I2SAudioDriver::spiStream[AUDDRV_NUM_CHANNELS];
 wav12::ExpanderAD4 I2SAudioDriver::expander[AUDDRV_NUM_CHANNELS];
 int I2SAudioDriver::volume[AUDDRV_NUM_CHANNELS];
 uint32_t I2SAudioDriver::callbackMicros = 0;
-
 
 void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
 {
@@ -79,13 +79,17 @@ void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
 
     /* --- decode to fill --- */
 #if DECODE == DECODE_S4
-
     for(int i=0; i<AUDDRV_NUM_CHANNELS; ++i) {
         if (isQueued[i]) {
             isQueued[i] = false;
             spiStream[i].set(status[i].addr, status[i].size);
             expander[i].rewind();
-            //Serial.print("queue "); Serial.print(i); Serial.print(" "); Serial.print(status[i].addr); Serial.print(" "); Serial.println(status[i].size);
+            Serial.print("queue "); Serial.print(i);
+            Serial.print(" "); Serial.print(status[i].addr); 
+            Serial.print(" "); Serial.print(status[i].size);
+            Serial.print(" is8bit="); Serial.print(status[i].is8Bit);
+            Serial.print(" table="); Serial.print(status[i].table);
+            Serial.println("");
         }
     }
 
@@ -94,7 +98,7 @@ void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
         if (status[i].addr) {
             int bits = status[i].is8Bit ? 8 : 4;
             const int* table = S4ADPCM::getTable(bits, status[i].table);
-
+            /*
             n = expander[i].expand(fill, AUDDRV_BUFFER_SAMPLES, volume[i], i > 0, bits, table, false);
 
             if (status[i].loop && n < AUDDRV_BUFFER_SAMPLES) {
@@ -102,6 +106,7 @@ void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
                 expander[i].expand(fill + n*2, AUDDRV_BUFFER_SAMPLES - n, volume[i], i > 0, bits, table, false);
                 n = AUDDRV_BUFFER_SAMPLES;
             }
+            */
         }
         if (i == 0 && n < AUDDRV_BUFFER_SAMPLES) {
             for(int j=n; j<AUDDRV_BUFFER_SAMPLES; ++j) {

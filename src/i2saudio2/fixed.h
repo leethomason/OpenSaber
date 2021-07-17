@@ -92,23 +92,30 @@ private:
         return v;
     }
 
-    static inline SHORT IntToFixed(int a) {
+    static inline SHORT IntToFixed(int32_t a) {
         SHORT v = (a << DECBITS);
         return v;
     }
 
 public:
-    static const int FIXED_1 = 1 << DECBITS;
+    static const int32_t FIXED_1 = 1 << DECBITS;
     SHORT x;
 
     FixedT() {}
     FixedT(const FixedT& f) : x(f.x) {}
     FixedT(int v) : x(v << DECBITS) {}
     FixedT(int32_t num, int32_t den) {
-        ASSERT(num <= Limit<SHORT>::pos());
-        ASSERT(num >= Limit<SHORT>::neg());
-        ASSERT(den != 0);
-        x = FIXED_1 * num / den;
+        while(num > Limit<SHORT>::pos() || num < Limit<SHORT>::neg()) {
+            num /= 2;
+            den /= 2;
+        }
+        if (den == 0) {
+            ASSERT(false);
+            x = 0;
+        }
+        else {
+            x = FIXED_1 * num / den;
+        }
     }
     FixedT(float v) : x(SHORT(FIXED_1 * v)) {}
     FixedT(double v) : x(SHORT(FIXED_1 * v)) {}
@@ -291,6 +298,11 @@ inline int32_t iInvCos_S3(int32_t x) {
     return -iInvSin_S3(x) + ISINE_90;
 }
 
+// Best explained by test case:
+// TEST_IS_TRUE(iSin(0) == 0);
+// TEST_IS_TRUE(iSin(FixedNorm(1, 4)) == 1);
+// TEST_IS_TRUE(iSin(FixedNorm(2, 4)) == 0);
+// TEST_IS_TRUE(iSin(FixedNorm(3, 4)) == -1);
 inline FixedNorm iSin(FixedNorm f) {
     int32_t s12 = iSin_S3(f.scale(ISINE_360));
     return FixedNorm(s12, ISINE_ONE);

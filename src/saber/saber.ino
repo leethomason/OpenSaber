@@ -30,8 +30,8 @@
 #include <Adafruit_SPIFlash.h>
 #include <Wire.h>
 #include <SPI.h>
-#include <OLED_SSD1306.h>
 
+#include "OLED_SSD1306.h"
 #include "Button.h"
 #include "Grinliz_Arduino_Util.h"
 

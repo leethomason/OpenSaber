@@ -653,22 +653,33 @@ bool TestCQueue()
     return true;
 }
 
-int AnimateProp::tick(uint32_t delta, int* target) 
+int AnimateProp::tick(uint32_t delta, int* target)
 {
     m_time += delta;
 
     if (m_period == 0 || m_time >= m_period) {
+        // All done.
         m_period = 0;
         m_value = m_end;
         if (target) *target = m_value;
         return m_end;
     }
-    else {
-        m_time += delta;
-        m_value = m_start + (m_end - m_start) * int(m_time) / int(m_period);
-        if (target) *target = m_value;
-        return m_value;
+
+    if (m_subPeriod) {
+        // Breathy-blinking
+        FixedNorm t(m_time, m_subPeriod);
+        FixedNorm shift(1, 8);
+        FixedNorm s = iSin(t - shift);
+        if (s < 0) s = 0;
+
+        m_value = s.scale(m_end);
     }
+    else {
+        // Straight animation.
+        m_value = m_start + (m_end - m_start) * int(m_time) / int(m_period);
+    }
+    if (target) *target = m_value;
+    return m_value;
 }
 
 int Timer2::tick(uint32_t delta)

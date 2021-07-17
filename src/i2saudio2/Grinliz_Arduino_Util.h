@@ -51,6 +51,7 @@ public:
     }
 
     void process();
+    uint8_t pin() const { return m_pin; }
 
 private:
     uint8_t  m_pin = 0;
@@ -61,7 +62,7 @@ private:
     uint32_t m_startTime = 0;
     BlinkHandler m_handler = 0;
     uint8_t m_nCallbacks = 0;
-    bool m_analogMode = false;   // Teensy has a bug; once it goes analog, it STAYS analog
+    bool m_analogMode = true;   // Teensy has a bug; once it goes analog, it STAYS analog
 };
 
 // --- Interupts & Time --- //
