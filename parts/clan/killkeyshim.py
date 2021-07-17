@@ -8,7 +8,7 @@ from drill import drill
 
 STOCK = 12.75
 D = 10.5
-T = 6.2
+T = 6.2 + 0.5
 
 # killkey.py material height
 

@@ -1,8 +1,8 @@
 //include <dim_apprenticeV4.scad>
 //include <dim_ventedBlack.scad>
-//include <dim_apprenticeV4_LE.scad>
+include <dim_apprenticeV4_LE.scad>
 //include <dim_prophecy.scad>
-include <dim_aeonv4.scad>
+//include <dim_aeonv4.scad>
 //include <dim_initiate.scad>
 
 use <../commonUnified.scad>
