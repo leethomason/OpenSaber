@@ -5,6 +5,8 @@ HAS_KEYJOINT_PILLAR = false;    // reinforces the key joint - small sabers
 HAS_SIDE_VENTS = true;          // side vents on front part
 ALLOW_POWER_NUT_TO_TURN = false;
 COVERTEC_CUTOUT = 1;
+FORE_THERMAL_RELIEF = false;
+ROTATED_VIEW = true;
 
 D_OUTER = 37.14;
 D_AFT_INNER = 32.5 - 0.1;

@@ -1,4 +1,4 @@
-D_INNER = 25.5;
+D_INNER = 26.0;
 DZ_INNER = 180.9;
 
 MC_X                =   0.7 * 25.4;

@@ -63,21 +63,6 @@ public:
 
     static const Vec2 VECEND;
 
-    struct Vec2I8
-    {
-        int8_t x;
-        int8_t y;
-
-        const bool operator== (const Vec2I8& rhs) const {
-            return rhs.x == x && rhs.y == y;
-        }
-
-        const bool operator!= (const Vec2I8& rhs) const {
-            return rhs.x != x || rhs.y != y;
-        }
-    };
-
-
     struct Rect
     {
         Rect() {}

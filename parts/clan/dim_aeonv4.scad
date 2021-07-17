@@ -9,7 +9,7 @@ FORE_THERMAL_RELIEF = true;
 D_OUTER = 37.25;
 D_AFT_INNER = 32.5 + 0.2;
 D_FORE_INNER = 25.4;
-DZ_AFT = 114.22;
+DZ_AFT = 113.2;
 DZ_TOTAL = DZ_AFT + 100; // just defines inner()
 
 DZ_SPEAKER = 12.0;
@@ -17,7 +17,7 @@ D_PLATE_PORT = 11.0;
 NUM_VENTS = 10;              // if 0, no side vents
 
 M_0 = 0.0;
-M_MC = 6.5;
+M_MC = 10.0;
 M_FORE = DZ_AFT;
 
 RIDGE = 120.34;
