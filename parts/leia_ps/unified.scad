@@ -4,14 +4,39 @@ use <../shapes.scad>
 
 $fn = 60;
 
-DRAW_AFT = false;
-DRAW_FORE = true;
+DRAW_AFT = true;
+DRAW_FORE = false;
 
 KEYJOINT = 8;
 KEYJOINT_T = 4.5;
 EPS = 0.01;
 
+TACTILE_X = 14; // space for contacts
+TACTILE_Z = 12;
+TACTILE_DY = 7;
+
 M_FORE = M_MC + (N_BAFFLES * 2 + 1) * DZ_BUTTRESS;
+
+module bridge(dz)
+{
+    intersection()
+    {
+        cylinder(h=400, d=D_INNER);
+        union() {
+            polygonXY(dz, [
+                [-D_INNER/2, -D_INNER/2],
+                [-D_INNER/2, D_INNER/2],
+                [0, D_INNER/2]
+            ]);
+
+            polygonXY(dz, [
+                [D_INNER/2, -D_INNER/2],
+                [D_INNER/2, D_INNER/2],
+                [0, D_INNER/2]
+            ]);
+        }
+    }
+}
 
 if (DRAW_AFT) {    
     difference() {
@@ -19,15 +44,11 @@ if (DRAW_AFT) {
             translate([0, 0, M_MC]) {
                 for(i=[0:N_BAFFLES]) {
                     translate([0, 0, i*DZ_BUTTRESS*2])  {
-                        //oneBaffle(D_INNER, DZ_BUTTRESS, 
-                        //        battery=false,
-                        //        mc=false,
-                        //        bridge=2,
-                        //        bottomRail=true
-                        //);
                         cylinder(h=DZ_BUTTRESS, d=D_INNER);
-                        if (i < N_BAFFLES)
-                            bridgeAndRail(2, D_INNER, DZ_BUTTRESS, bottomRail=true);
+                        if (i < N_BAFFLES) {
+                            bottomRail = ((i+2)%4) != 0;
+                            bridgeAndRail(2, D_INNER, DZ_BUTTRESS, bottomRail=bottomRail);
+                        }
                     }
                 }
             }
@@ -35,18 +56,20 @@ if (DRAW_AFT) {
         translate([0, 0, M_MC]) {
             // Cut the top
             W = 10.0;
-            translate([-W/2, 0, DZ_BUTTRESS*3]) 
+            translate([-W/2, 0, 0]) //DZ_BUTTRESS*3]) 
                 cube(size=[W, 100, 200]);
 
             // Cut the bottom
             BW = 12.0;
-            translate([-BW/2, -100, 0]) cube(size=[BW, 100, 200]);
+            translate([-BW/2, -100, DZ_BUTTRESS*3]) cube(size=[BW, 100, 200]);
         }
-        translate([-MC_X/2, -MC_Y/2, M_MC]) 
+        translate([-MC_X/2, -2, M_MC]) 
             cube(size=[MC_X, MC_Y, MC_Z]);
         translate([0, 0, M_BATTERY]) 
             cylinder(h=DZ_BATTERY, d=D_BATTERY);
     }
+    translate([0, 0, M_FORE - EPS])
+        keyJoint(KEYJOINT + EPS, D_INNER, D_INNER - KEYJOINT_T, false);
 }
 
 if (DRAW_FORE)
@@ -100,33 +123,38 @@ if (DRAW_FORE)
             // Port holder.
             intersection() {
                 translate([0, 0, M_FORE]) cylinder(h=DZ_SECTION, d=D_INNER);
+                ACCESS = 5.0;
                 difference() {
-                    union() {
-                        OFFSET = 4.0;
-                        translate([2, -D_INNER/2, M_PORT - PORT_CENTER - OFFSET])   
-                            cube(size=[PORT_DX/2 + T_HOLDER - 2, D_INNER/2 + 1, PORT_DZ + OFFSET]);
-                        mirror([-1, 0, 0]) translate([0, -D_INNER/2, M_PORT - PORT_CENTER])   
-                            cube(size=[PORT_DX/2 + T_HOLDER, D_INNER/2 + 1, PORT_DZ]);
-                    }
-                    translate([-PORT_DX/2 + T_INNER, -D_INNER/2, M_PORT - PORT_CENTER])   
-                        cube(size=[PORT_DX + -T_INNER*2, 20, PORT_DZ]);
-                }
+                    translate([-PORT_DX/2 - T_INNER, -D_INNER/2, M_PORT - PORT_CENTER])   
+                        cube(size=[PORT_DX + T_INNER*2, 50, PORT_DZ]);
+                    // LED wire access
+                    translate([-ACCESS/2, -D_INNER/2, M_PORT - PORT_CENTER])   
+                        cube(size=[ACCESS, 50, PORT_DZ]);
+                }                
             }
+
+            // Tactile holder
+            translate([0, 0, M_SWITCH - TACTILE_Z/2]) bridge(2);
+            translate([0, 0, M_SWITCH + TACTILE_Z/2 - 2]) bridge(2);
         }
         // Cut port out.
         translate([-PORT_DX/2, PORT_Y, M_PORT - PORT_CENTER]) 
             cube(size=[PORT_DX, 20, PORT_DZ]);
 
         // Cut PCB out
-        translate([-PCB_DX_WIDE/2, 0, M_SWITCH - PCB_DZ/2])
-            cube(size=[PCB_DX_WIDE, 20, PCB_DZ]);
+        //translate([-PCB_DX_WIDE/2, 0, M_SWITCH - PCB_DZ/2])
+        //    cube(size=[PCB_DX_WIDE, 20, PCB_DZ]);
+        translate([-TACTILE_X/2, D_INNER/2-TACTILE_DY, M_SWITCH - TACTILE_Z/2])
+            cube(size=[TACTILE_X, 20, TACTILE_Z]);
+        
+        // Key joint
         translate([0, 0, M_FORE - EPS])
             keyJoint(KEYJOINT + EPS, D_INNER, D_INNER - KEYJOINT_T, true);
 
         // Bottom access
         hull() {
-            translate([0, 4, M_FORE + 14]) rotate([90, 0, 0]) cylinder(h=100, d=16);
-            translate([0, 4, M_FORE + 24]) rotate([90, 0, 0]) cylinder(h=100, d=16);
+            translate([0, -4, M_FORE + 14]) rotate([90, 0, 0]) cylinder(h=100, d=16);
+            translate([0, -4, M_FORE + 24]) rotate([90, 0, 0]) cylinder(h=100, d=16);
         }
         // side access
         //translate([0, 0, M_FORE + 32]) triCapsule(70, 110, 2, true);
@@ -136,7 +164,7 @@ if (DRAW_FORE)
         translate([-50, -D_INNER/2 -1, M_FORE]) cube(size=[100, 1.5, 100]);
     }
     // PCB holder
-    intersection() {
+    /*intersection() {
         translate([0, 0, M_FORE]) cylinder(h=DZ_SECTION, d=D_INNER);
         union() {
             translate([PCB_HOLE_X, PCB_BASE, M_SWITCH + PCB_HOLE_Z]) pcbButtress();
@@ -145,6 +173,7 @@ if (DRAW_FORE)
             mirror([-1, 0, 0]) translate([PCB_HOLE_X, PCB_BASE, M_SWITCH - PCB_HOLE_Z]) pcbButtress();
         }
     }
+    */
 
     *color("plum") translate([-PORT_DX/2, PORT_Y, M_PORT - PORT_CENTER]) 
         cube(size=[PORT_DX, PORT_DY, PORT_DZ]);
