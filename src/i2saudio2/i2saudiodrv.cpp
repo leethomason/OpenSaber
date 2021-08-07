@@ -98,7 +98,7 @@ void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
         if (status[i].addr) {
             int bits = status[i].is8Bit ? 8 : 4;
             const int* table = S4ADPCM::getTable(bits, status[i].table);
-            /*
+            
             n = expander[i].expand(fill, AUDDRV_BUFFER_SAMPLES, volume[i], i > 0, bits, table, false);
 
             if (status[i].loop && n < AUDDRV_BUFFER_SAMPLES) {
@@ -106,7 +106,6 @@ void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
                 expander[i].expand(fill + n*2, AUDDRV_BUFFER_SAMPLES - n, volume[i], i > 0, bits, table, false);
                 n = AUDDRV_BUFFER_SAMPLES;
             }
-            */
         }
         if (i == 0 && n < AUDDRV_BUFFER_SAMPLES) {
             for(int j=n; j<AUDDRV_BUFFER_SAMPLES; ++j) {

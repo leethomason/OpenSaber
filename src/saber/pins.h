@@ -68,7 +68,7 @@
 #define SABER_SUB_MODEL_APP_LE      11
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
+#define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_CLAN
 #define SABER_SUB_MODEL				SABER_SUB_MODEL_PROPHECY_1		
 // ----------------------------------
@@ -883,11 +883,11 @@
 	#define FILTER_MAG_Y	20
 	#define FILTER_MAG_Z	20
 	#define VOLTMETER_TUNE				1042
-#	elif SABER_SUB_MODEL == SABER_SUB_MODEL_PROPHECY_1
+#	elif SABER_SUB_MODEL == SABER_SUB_MODEL_PROPHECY_1 
 	#define FILTER_MAG_X	20
 	#define FILTER_MAG_Y	20
 	#define FILTER_MAG_Z	20
-	#define VOLTMETER_TUNE				1042
+	#define VOLTMETER_TUNE				1033
 #	elif SABER_SUB_MODEL == SABER_SUB_MODEL_PROPHECY_2
 	#define FILTER_MAG_X	20
 	#define FILTER_MAG_Y	20
