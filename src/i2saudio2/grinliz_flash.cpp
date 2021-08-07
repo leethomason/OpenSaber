@@ -1,7 +1,7 @@
 #include "grinliz_flash.h"
 
 #define DEEP_DEBUG 0
-#define PROFILE 1
+#define PROFILE 0
 
 enum
 {
@@ -177,9 +177,21 @@ bool GrinlizFlash::readMemory(uint32_t addr, uint8_t *data, uint32_t len)
     uint32_t startTime = micros();
 #endif
 
-    waitUntilReady();
+    //waitUntilReady();
     beginTransaction(_clock_rd);
 
+    _spi->transfer(SFLASH_CMD_READ);
+
+    // 24-bit address MSB first
+    _spi->transfer((addr >> 16) & 0xFF);
+    _spi->transfer((addr >> 8) & 0xFF);
+    _spi->transfer(addr & 0xFF);
+
+    while (len--) {
+        *data++ = _spi->transfer(0xff);
+    }
+
+    /*
     uint8_t cmd_with_addr[6] = {_cmd_read};
     fillAddress(cmd_with_addr + 1, addr);
 
@@ -189,7 +201,7 @@ bool GrinlizFlash::readMemory(uint32_t addr, uint8_t *data, uint32_t len)
     _spi->transfer(cmd_with_addr, cmd_len);
     _spi->transfer(data, len);
     //_spi->transfer(0, data, len, true);
-
+    */
     endTransaction();
 
 #if PROFILE

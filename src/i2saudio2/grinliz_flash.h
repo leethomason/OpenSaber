@@ -40,14 +40,14 @@ private:
 
     void beginTransaction(uint32_t clock_hz)
     {
-        _spi->beginTransaction(SPISettings(clock_hz, MSBFIRST, SPI_MODE0));
         digitalWrite(_ss, LOW);
+        _spi->beginTransaction(SPISettings(clock_hz, MSBFIRST, SPI_MODE0));
     }
 
     void endTransaction(void)
     {
-        digitalWrite(_ss, HIGH);
         _spi->endTransaction();
+        digitalWrite(_ss, HIGH);
     }
 
     void fillAddress(uint8_t *buf, uint32_t addr);
