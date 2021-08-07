@@ -177,6 +177,7 @@ bool GrinlizFlash::readMemory(uint32_t addr, uint8_t *data, uint32_t len)
     uint32_t startTime = micros();
 #endif
 
+    waitUntilReady();
     beginTransaction(_clock_rd);
 
     uint8_t cmd_with_addr[6] = {_cmd_read};
