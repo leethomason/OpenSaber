@@ -23,7 +23,7 @@
 #ifndef WAV_COMPRESSION
 #define WAV_COMPRESSION
 
-#include "wav12stream.h"
+#include "interface.h"
 #include "s4adpcm.h"
 
 #include <stdint.h>

@@ -21,8 +21,7 @@
 */
 
 #include "spistream.h"
-
-#include <Adafruit_SPIFlash.h>
+#include "interface.h"
 
 void SPIStream::set(uint32_t addr, uint32_t size)
 {
@@ -54,7 +53,7 @@ uint32_t SPIStream::fetch(uint8_t* target, uint32_t nBytes)
         nBytes = m_size - m_pos;
     if (nBytes == 0) return 0;
 
-    uint32_t r = m_flash->readBuffer(
+    uint32_t r = m_flash->readMemory(
         m_addr + m_pos, 
         target,
         nBytes);
