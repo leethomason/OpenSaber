@@ -23,8 +23,7 @@
 #pragma once
 
 #include "Grinliz_Util.h"
-
-class Adafruit_SPIFlash;
+#include "interface.h"
 
 struct MemUnit {
     static const int NAME_LEN = 8;
@@ -61,7 +60,7 @@ class Manifest
     public:
         Manifest();
         // Only scan interacts with the SPI. Afterwards, everything is cached locally.
-        void scan(Adafruit_SPIFlash* flash);
+        void scan(IMemory* flash);
         uint32_t dirHash() const;
         const MemUnit& getUnit(int id) const;
         

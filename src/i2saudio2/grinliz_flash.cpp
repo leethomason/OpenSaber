@@ -186,8 +186,8 @@ bool GrinlizFlash::readMemory(uint32_t addr, uint8_t *data, uint32_t len)
     uint8_t const cmd_len = 1 + ADDRESS_LEN + (SFLASH_CMD_FAST_READ == _cmd_read ? 1 : 0);
 
     _spi->transfer(cmd_with_addr, cmd_len);
-    //_spi->transfer(data, len);
-    _spi->transfer(0, data, len, true); // blocking DMA mode. performance 2x. interesting.
+    _spi->transfer(data, len);
+    //_spi->transfer(0, data, len, true);
 
     endTransaction();
 

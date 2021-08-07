@@ -23,10 +23,6 @@
 #ifndef GRINLIZ_ASSERT_INCLUDED
 #define GRINLIZ_ASSERT_INCLUDED
 
-#ifndef _WIN32
-#include <Arduino.h>
-#endif
-
 template<bool> struct CompileTimeAssert;
 template<> struct CompileTimeAssert <true> {};
 #define STATIC_ASSERT(e) (CompileTimeAssert <(e) != 0>())

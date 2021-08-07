@@ -21,16 +21,15 @@
 */
 
 #include "manifest.h"
-#include <Adafruit_SPIFlash.h>
 
 Manifest::Manifest()
 {
     memset(memUnit, 0, sizeof(MemUnit) * MEM_IMAGE_TOTAL);
 }
 
-void Manifest::scan(Adafruit_SPIFlash* flash)
+void Manifest::scan(IMemory* flash)
 {
-    flash->readBuffer(0, (uint8_t*) memUnit, sizeof(MemUnit) * MEM_IMAGE_TOTAL);
+    flash->readMemory(0, (uint8_t*) memUnit, sizeof(MemUnit) * MEM_IMAGE_TOTAL);
 }
 
 const MemUnit& Manifest::getUnit(int id) const

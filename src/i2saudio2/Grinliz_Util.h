@@ -701,6 +701,15 @@ static const int DEC = 1;	// fixme: use correct values
 static const int HEX = 2;
 #endif
 
+class Stream;
+
+#ifndef DEC
+#define DEC 10
+#endif
+#ifndef HEX
+#define HEX 16
+#endif
+
 class SPLog
 {
 public:

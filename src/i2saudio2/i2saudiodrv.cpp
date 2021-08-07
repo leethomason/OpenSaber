@@ -50,17 +50,16 @@ int32_t stereoBuffer1[AUDDRV_STEREO_SAMPLES] = {0};
 #endif
 DmacDescriptor* descriptor = 0;
 
-int I2SAudioDriver::callbackCycle = 0;
 I2SAudioDriver::Status I2SAudioDriver::status[AUDDRV_NUM_CHANNELS];
 bool I2SAudioDriver::isQueued[AUDDRV_NUM_CHANNELS];
 SPIStream I2SAudioDriver::spiStream[AUDDRV_NUM_CHANNELS];
 wav12::ExpanderAD4 I2SAudioDriver::expander[AUDDRV_NUM_CHANNELS];
 int I2SAudioDriver::volume[AUDDRV_NUM_CHANNELS];
-uint32_t I2SAudioDriver::callbackMicros = 0;
+
+static volatile uint32_t callbackCycle = 0;
 
 void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
 {
-    int32_t startMicros = micros();
     callbackCycle++;
     #ifdef USE_16_BIT
     int16_t* src = (callbackCycle & 1) ? stereoBuffer1 : stereoBuffer0;
@@ -131,8 +130,6 @@ void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
         ++t;
     }
 #endif    
-    uint32_t endMicros = micros();
-    callbackMicros += (endMicros - startMicros);
 }
 
 void I2SAudioDriver::begin()
@@ -159,7 +156,7 @@ void I2SAudioDriver::begin()
         (void *)(&I2S->DATA[0].reg),  // to here (M0+)
         AUDDRV_STEREO_SAMPLES,        // this many...
         #ifdef USE_16_BIT
-        DMA_BEAT_SIZE_HWORD,           // bytes/hword/words
+        DMA_BEAT_SIZE_HWORD,          // bytes/hword/words
         #else
         DMA_BEAT_SIZE_WORD,           // bytes/hword/words
         #endif

@@ -3,15 +3,14 @@
 #include "i2saudiodrv.h"
 #include "expander.h"
 #include "s4adpcm.h"
+#include "grinliz_flash.h"
 
-#include <Adafruit_SPIFlash.h>
 #include <Adafruit_ZeroI2S.h>
 #include <Adafruit_ZeroDMA.h>
 
 #define LOG_PERF
 
-Adafruit_FlashTransport_SPI flashTransport(SS1, &SPI1);
-Adafruit_SPIFlash spiFlash(&flashTransport);     // Use hardware SPI 
+GrinlizFlash spiFlash(SS1, &SPI1);
 Adafruit_ZeroDMA dma;
 Adafruit_ZeroI2S i2s(0, 1, 12, 2);
 Manifest manifest;
@@ -109,24 +108,14 @@ void processCmd(const CStr<32>& str)
 }
 
 
-void setupTest()
-{
-    wav12::ExpanderAD4::generateTestData(TEST_SOURCE_SAMPLES, gSourceSamples);
-    uint32_t nComp = 0;
-    int32_t err = 0;
-    const int* table = S4ADPCM::getTable(4, 0);
-    wav12::ExpanderAD4::compress4(gSourceSamples, TEST_SOURCE_SAMPLES, gCompressed, &nComp, table, &err);
-
-    Log.p("Setup test. nComp=").p(nComp).p(" err=").p(err).eol();
-}
-
+// This just takes time. It doesn't really test anything.
 int test()
 {
     int32_t total = 0;
 
     S4ADPCM::State state;
     const int* table = S4ADPCM::getTable(4, 0);
-    S4ADPCM::decode4(gCompressed, TEST_SOURCE_SAMPLES, 260, false, gTarget, &state, table);
+    S4ADPCM::decode4(gCompressed, TEST_SOURCE_SAMPLES, 256, false, gTarget, &state, table);
     for(int i=0; i<TEST_SOURCE_SAMPLES*2; i++) {
         total += gTarget[i];
     }
@@ -142,13 +131,11 @@ void setup()
 
     Log.p("Serial open.").eol();
 
-    flashTransport.begin();
     spiFlash.begin();
     manifest.scan(&spiFlash);
     i2sAudioDriver.begin();
 
     scan();
-    setupTest();
     uint32_t start = micros();
     int r = test();
     uint32_t end = micros();
@@ -181,11 +168,11 @@ void loop()
     static const int NSEC = 5;
     if (deltaMilli > NSEC * 1000) {
 
-        Log.p("Time(dir)%=").p(I2SAudioDriver::callbackMicros / (10 * deltaMilli))
-           .p(" Time(indirect)%=").p(100 - (100 * nTestCall / (nRunsPerSec * NSEC)))
-            .eol();
-        I2SAudioDriver::callbackMicros = 0;
+        Log.p("Time(indirect)%=").p(100 - (100 * nTestCall / (nRunsPerSec * NSEC)))
+           .p(" SPI calls=").p(spiFlash.nCalls())
+           .eol();
         nTestCall = 0;
+        spiFlash.resetTimer();
         lastLoopTime = millis();
     }
     #endif
