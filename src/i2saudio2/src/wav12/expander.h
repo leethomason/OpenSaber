@@ -49,7 +49,7 @@ namespace wav12 {
         static const int BUFFER_SIZE = 128;
 
         ExpanderAD4() {}
-        void init(IStream* stream);
+        void init(IStream* stream, int _codec, int _table);
 
         // Returns the number of samples it could expand. nSamples should be even,
         // unless it is the last sample (which can be odd if it uses up the
@@ -57,6 +57,8 @@ namespace wav12 {
         int expand(int32_t* target, uint32_t nSamples, int32_t volume, bool add, int codec, const int* table, bool overrideEasing);
         void rewind();
         bool done() const { return m_stream->done(); }
+        int codec() const { return m_codec; }
+        int table() const { return m_table; }
 
         // Codec 0 is uncompressed. (100%)
         // Codec 1 is 12 bit (loss) (75%)
@@ -109,10 +111,14 @@ namespace wav12 {
             return 0;
         }
 
+        static void fillBuffer(int32_t* buffer, int bufferSamples, ExpanderAD4* expanders, int nExpanders, const bool* loop, const int* volume, bool disableEasing);
+
     private:
         static uint8_t m_buffer[BUFFER_SIZE];
         IStream* m_stream = 0;
         S4ADPCM::State m_state;
+        int m_codec = S4ADPCM_4BIT;
+        int m_table = 0;
     };
 }
 #endif

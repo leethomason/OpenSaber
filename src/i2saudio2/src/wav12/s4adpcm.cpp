@@ -22,11 +22,6 @@
 
 #include "s4adpcm.h"
 
-#ifdef _WIN32
-#include <assert.h>
-#define ASSERT assert
-#endif
-
 const int S4ADPCM::DELTA_TABLE_4[N_TABLES][TABLE_SIZE] = {
     {-1, 0, 0, 0, 0, 1, 1, 2, 2},
     {-1, 0, 0, 1, 1, 1, 2, 3, 3},
@@ -61,17 +56,15 @@ void S4ADPCM::encode8(const int16_t* data, int32_t nSamples, uint8_t* target, St
         while (guess + (delta << state->shift) < SHRT_MIN)
             ++delta;
 
-        assert(delta >= -128 && delta <= 127);
+        W12ASSERT(delta >= -128 && delta <= 127);
 
         *target++ = int8_t(delta);
 
         int p = guess + (delta << state->shift);
-#ifdef _WIN32
-        assert(p >= SHRT_MIN && p <= SHRT_MAX);
-#endif
+        W12ASSERT(p >= SHRT_MIN && p <= SHRT_MAX);
         state->push(p);
 
-        int64_t err = (value - p);
+        int64_t err = int64_t(value) - int64_t(p);
         err12Squared += err * err;
 
         int dTable = (delta >= 0 ? delta : -delta) >> 4;
@@ -107,10 +100,10 @@ int S4ADPCM::encode4(const int16_t* data, int32_t nSamples, uint8_t* target, Sta
         while (guess + (delta << state->shift) < SHRT_MIN)
             ++delta;
 
-        assert(delta >= -8 && delta <= 7);
+        W12ASSERT(delta >= -8 && delta <= 7);
 
         uint8_t d = (delta >= 0) ? uint8_t(delta) : uint8_t(delta & 0x0f);
-        assert((d & 0xf0) == 0);
+        W12ASSERT((d & 0xf0) == 0);
 
         if (state->high)
             *target++ |= d << 4;
@@ -120,13 +113,11 @@ int S4ADPCM::encode4(const int16_t* data, int32_t nSamples, uint8_t* target, Sta
         state->high = !state->high;
 
         int p = guess + (delta << state->shift);
-#ifdef _MSC_VER
-        ASSERT(p >= SHRT_MIN && p <= SHRT_MAX);
-#endif
+        W12ASSERT(p >= SHRT_MIN && p <= SHRT_MAX);
 
         state->push(p);
 
-        int64_t err = (value - p);
+        int64_t err = int64_t(value) - int64_t(p);
         err12Squared += err * err;
 
         state->shift += table[delta >= 0 ? delta : -delta];
@@ -157,15 +148,9 @@ void S4ADPCM::decode4(const uint8_t* p, int32_t nSamples,
             d = *p & 0xf;
         }
         int8_t delta = int8_t(d << 4) >> 4;
+        int value = state->guess() + (delta << state->shift);
 
-        int guess = state->guess();
-        int value = guess + (delta << state->shift);
-
-#ifdef _WIN32
-        if (value < SHRT_MIN || value > SHRT_MAX) {
-            assert(false);
-        }
-#endif
+        W12ASSERT(value >= SHRT_MIN && value <= SHRT_MAX);
         state->push(value);
 
         if (state->volumeShifted < state->volumeTarget)
@@ -174,10 +159,7 @@ void S4ADPCM::decode4(const uint8_t* p, int32_t nSamples,
             state->volumeShifted -= VOLUME_EASING;
 
         int32_t s = scaleVol(value, state->volumeShifted);
-        if (add)
-            out[0] = out[1] = sat_add(s, out[0]);
-        else
-            out[0] = out[1] = s;
+        out[0] = out[1] = add ? sat_add(s, out[0]) : s;
         out += 2;
 
         state->shift += table[delta >= 0 ? delta : -delta];
@@ -194,15 +176,9 @@ void S4ADPCM::decode8(const uint8_t* p, int32_t nSamples,
 
     for (int32_t i = 0; i < nSamples; ++i) {
         int delta = int8_t(*p++);
+        int value = state->guess() + (delta << state->shift);
 
-        int guess = state->guess();
-        int value = guess + (delta << state->shift);
-
-#ifdef _WIN32
-        if (value < SHRT_MIN || value > SHRT_MAX) {
-            assert(false);
-        }
-#endif
+        W12ASSERT(value >= SHRT_MIN && value <= SHRT_MAX);
         state->push(value);
 
         if (state->volumeShifted < state->volumeTarget)
@@ -211,12 +187,7 @@ void S4ADPCM::decode8(const uint8_t* p, int32_t nSamples,
             state->volumeShifted -= VOLUME_EASING;
 
         int32_t s = scaleVol(value, state->volumeShifted);
-        if (add) {
-            out[0] = out[1] = sat_add(s, out[0]);
-        }
-        else {
-            out[0] = out[1] = s;
-        }
+        out[0] = out[1] = add ? sat_add(s, out[0]) : s;
         out += 2;
 
         int dTable = (delta >= 0 ? delta : -delta) >> 4;

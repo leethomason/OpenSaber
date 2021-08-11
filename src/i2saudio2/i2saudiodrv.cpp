@@ -83,6 +83,7 @@ void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
         if (isQueued[i]) {
             isQueued[i] = false;
             spiStream[i].set(status[i].addr, status[i].size);
+            expander[i].init(&spiStream[i], status[i].is8Bit ? 8 : 4, status[i].table);
             expander[i].rewind();
             //Serial.print("queue "); Serial.print(i); Serial.print(" "); Serial.print(status[i].addr); Serial.print(" "); Serial.println(status[i].size);
         }
@@ -137,7 +138,7 @@ void I2SAudioDriver::begin()
 
     for(int i=0; i<AUDDRV_NUM_CHANNELS; ++i) {
         spiStream[i].init(spiFlash);
-        expander[i].init(&spiStream[i]);   
+        expander[i].init(&spiStream[i], 4, 0);   
         volume[i] = 64;
     }
 
