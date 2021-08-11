@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "interface.h"
+#include "./src/util/interface.h"
 #include <stdint.h>
 
 class SPIStream : public IStream

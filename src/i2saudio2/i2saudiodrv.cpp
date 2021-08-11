@@ -21,7 +21,7 @@
 */
 
 #include "i2saudiodrv.h"
-#include "Grinliz_Util.h"
+#include "./src/util/Grinliz_Util.h"
 #include "manifest.h"
 
 #include <Arduino.h>

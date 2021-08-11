@@ -20,6 +20,7 @@
   SOFTWARE.
 */
 
+#include "../util/grinliz_assert.h"
 #include "expander.h"
 
 #include <stdlib.h>
@@ -61,6 +62,8 @@ void ExpanderAD4::compress8(const int16_t* data, int32_t nSamples,
 int ExpanderAD4::expand(int32_t *target, uint32_t nSamples, int32_t volume, bool add, 
     int codec, const int* table, bool overrideEasing)
 {
+    ASSERT(codec == 4 || codec == 8);
+
     if (!m_stream)
         return 0;
 
@@ -97,7 +100,7 @@ void ExpanderAD4::generateTestData(int nSamples, int16_t* data)
     static const int32_t WAVE0 = 440;   // A4
     //static const int32_t WAVE1 = 330;   // E3
 
-    static const int RANGE = 16000;
+    //static const int RANGE = 16000;
     static const int NAPPROX = 64;
     static const int SIN[32] = {
         0, 1568, 3121, 4644, 6122, 7542, 8889, 10150, 11313, 12368, 13303, 14110, 14782, 15311, 15692, 15922,

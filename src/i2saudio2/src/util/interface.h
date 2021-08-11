@@ -5,7 +5,7 @@
 // Abstract out something that acts like random access memory.
 class IMemory {
 public: 
-    virtual bool readMemory(uint32_t addr, uint8_t *data, uint32_t len) = 0;
+    virtual void readMemory(uint32_t addr, uint8_t *data, uint32_t len) = 0;
     virtual int32_t memorySize() = 0;
 };
 

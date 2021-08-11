@@ -1,16 +1,19 @@
-#include "Grinliz_Util.h"
 #include "manifest.h"
 #include "i2saudiodrv.h"
-#include "expander.h"
-#include "s4adpcm.h"
-#include "grinliz_flash.h"
+#include "./src/util/Grinliz_Util.h"
+#include "./src/wav12/expander.h"
+#include "./src/wav12/s4adpcm.h"
+#include "./src/nada_flashmem/Nada_FlashTransport_SPI.h"
+#include "./src/nada_flashmem/Nada_SPIFlash.h"
 
 #include <Adafruit_ZeroI2S.h>
 #include <Adafruit_ZeroDMA.h>
 
 #define LOG_PERF
 
-GrinlizFlash spiFlash(SS1, &SPI1);
+Nada_FlashTransport_SPI flashTransport(SS1, &SPI1);
+Nada_SPIFlash spiFlash(&flashTransport);
+
 Adafruit_ZeroDMA dma;
 Adafruit_ZeroI2S i2s(0, 1, 12, 2);
 Manifest manifest;
@@ -169,10 +172,8 @@ void loop()
     if (deltaMilli > NSEC * 1000) {
 
         Log.p("Time(indirect)%=").p(100 - (100 * nTestCall / (nRunsPerSec * NSEC)))
-           .p(" SPI calls=").p(spiFlash.nCalls())
            .eol();
         nTestCall = 0;
-        spiFlash.resetTimer();
         lastLoopTime = millis();
     }
     #endif

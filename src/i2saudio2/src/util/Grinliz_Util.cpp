@@ -110,7 +110,7 @@ void intToDigits(int value, int* digits, int nDigits)
     for (int i = 0; i < nDigits; ++i) {
         digits[i] = 0;
         uint32_t digit = value / range;
-        if (digit >= 0 && digit < 10) {
+        if (digit < 10) {
             digits[i] = digit;
             value -= range * digit;
             range = range / 10;
@@ -128,7 +128,7 @@ void intToString(int value, char* buf, int allocated, bool writeZero)
 	}
 	for (int i = 0; i < allocated - 1; ++i) {
 		uint32_t digit = value / range;
-		if (digit >= 0 && digit < 10) {
+		if (digit < 10) {
 			buf[i] = ' ';
 			if (digit || (i == allocated - 2) || writeZero) {
 				buf[i] = '0' + digit;

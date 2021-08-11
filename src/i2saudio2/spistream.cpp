@@ -21,7 +21,7 @@
 */
 
 #include "spistream.h"
-#include "interface.h"
+#include "./src/util/interface.h"
 
 void SPIStream::set(uint32_t addr, uint32_t size)
 {
@@ -53,11 +53,11 @@ uint32_t SPIStream::fetch(uint8_t* target, uint32_t nBytes)
         nBytes = m_size - m_pos;
     if (nBytes == 0) return 0;
 
-    uint32_t r = m_flash->readMemory(
+    m_flash->readMemory(
         m_addr + m_pos, 
         target,
         nBytes);
 
-    m_pos += r;
-    return r;
+    m_pos += nBytes;
+    return nBytes;
 }

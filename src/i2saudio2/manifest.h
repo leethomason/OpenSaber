@@ -22,8 +22,8 @@
 
 #pragma once
 
-#include "Grinliz_Util.h"
-#include "interface.h"
+#include "./src/util/Grinliz_Util.h"
+#include "./src/util/interface.h"
 
 struct MemUnit {
     static const int NAME_LEN = 8;
