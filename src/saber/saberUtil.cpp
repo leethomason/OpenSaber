@@ -21,7 +21,6 @@
 */
 
 #include "saberUtil.h"
-#include "Grinliz_Arduino_Util.h"
 #include "bladePWM.h"
 #include "sfx.h"
 #include "bladeflash.h"
@@ -41,7 +40,7 @@ bool BladeState::bladeOn() const
     return m_currentState >= BLADE_ON && m_currentState < BLADE_RETRACT;
 }
 
-void BladeState::processUI(BladePWM *blade, const BladeFlash &saber, uint32_t time, UIMode mode, int vol4, osbr::RGB color)
+void BladeState::processUI(BladePWM *blade, const BladeFlash& /*saber*/, uint32_t /*time*/, UIMode mode, int vol4, osbr::RGB color)
 {
     if (mode == UIMode::PALETTE) {
         blade->setRGB(color);
@@ -58,7 +57,7 @@ void BladeState::processUI(BladePWM *blade, const BladeFlash &saber, uint32_t ti
     }
 }
 
-void BladeState::process(BladePWM *blade, const BladeFlash &saber, uint32_t time)
+void BladeState::process(BladePWM *blade, const BladeFlash &saber, uint32_t /*time*/)
 {
     SFX *sfx = SFX::instance();
 

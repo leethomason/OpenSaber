@@ -22,7 +22,7 @@
 
 #include "vectorui.h"
 #include "vrender.h"
-#include "Grinliz_Util.h"
+#include "./src/util/Grinliz_Util.h"
 #include "rgb2hsv.h"
 #include "renderer.h"   // for drawing the bitmap directly to framebuffer
 #include "assets.h"     // source for bitmap

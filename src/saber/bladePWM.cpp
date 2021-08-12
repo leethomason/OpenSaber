@@ -47,7 +47,7 @@
 
 #include "pins.h"
 #include "bladePWM.h"
-#include "Grinliz_Util.h"
+#include "./src/util/Grinliz_Util.h"
 
 using namespace osbr;
 

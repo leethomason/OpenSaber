@@ -31,7 +31,7 @@
 #include "unittest.h"
 #include "saberdb.h"
 #include "Button.h"
-#include "Grinliz_Arduino_Util.h"
+#include "./src/util/Grinliz_Arduino_Util.h"
 #include "GrinlizLSM303.h"
 #include "bladeflash.h"
 
@@ -88,7 +88,7 @@ class IgniteRetractTest : public Test
         tester->holdButton();   // retract
     }
 
-    virtual int process(Tester* tester, uint32_t event)
+    virtual int process(Tester* tester, uint32_t /*event*/)
     {
         if (tester->checkOnOff())
             return TEST_SUCCESS;
@@ -115,7 +115,7 @@ public:
         tester->holdButton();   // retract
     }
 
-    virtual int process(Tester* tester, uint32_t event)
+    virtual int process(Tester* tester, uint32_t /*event*/)
     {
         if (tester->checkOnOff())
             return TEST_SUCCESS;
@@ -194,7 +194,7 @@ public:
         return "AccelerometerTest";
     }
 
-    virtual void start(Tester* tester)
+    virtual void start(Tester* /*tester*/)
     {
         nSamples = 0;
         GrinlizLSM303* accel = GrinlizLSM303::instance();
@@ -211,6 +211,7 @@ public:
         ASSERT(deltaTime > NDATA * 5 && deltaTime < NDATA * 20);
 
         bool variation = false;
+        (void)variation;
 
         for(int i=0; i<NDATA; ++i) {
             Log.p("Accel x=").p(data[i].x).p(" y=").p(data[i].y).p(" z=").p(data[i].z).eol();
@@ -231,7 +232,7 @@ public:
         ASSERT(variation);
     }
 
-    virtual int process(Tester* tester, uint32_t event)
+    virtual int process(Tester*, uint32_t /*event*/)
     {
         return TEST_SUCCESS;
     }
@@ -250,7 +251,7 @@ public:
         return "MagnemometerTest";
     }
 
-    virtual void start(Tester* tester)
+    virtual void start(Tester*)
     {
         GrinlizLSM303* accel = GrinlizLSM303::instance();
         ASSERT(accel);
@@ -277,7 +278,7 @@ public:
         }
     }
 
-    virtual int process(Tester* tester, uint32_t event)
+    virtual int process(Tester*, uint32_t /*event*/)
     {
         return TEST_SUCCESS;
     }
@@ -291,7 +292,7 @@ public:
     virtual const char* name() const {
         return "ButtonTest";
     }
-    virtual void start(Tester* tester)
+    virtual void start(Tester*)
     {
         Button button(255);
         button.enableTestMode(true);
@@ -323,7 +324,7 @@ public:
         TEST_EQUAL(button.isDown(), false);
     }
 
-    virtual int process(Tester* tester, uint32_t event)
+    virtual int process(Tester*, uint32_t /*event*/)
     {
         return TEST_SUCCESS;
     }

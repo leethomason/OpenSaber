@@ -21,9 +21,9 @@
 */
 
 #include "unittest.h"
-#include "Grinliz_Util.h"
+#include "./src/util/Grinliz_Util.h"
 #include "sketcher.h"
-#include "fixed.h"
+#include "./src/util/fixed.h"
 #include "swing.h"
 #include "bladeflash.h"
 

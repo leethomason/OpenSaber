@@ -20,6 +20,7 @@
   SOFTWARE.
 */
 
+#include "../util/grinliz_assert.h"
 #include "expander.h"
 
 #include <stdlib.h>
@@ -30,9 +31,12 @@ using namespace wav12;
 
 uint8_t ExpanderAD4::m_buffer[BUFFER_SIZE] = {0};
 
-void ExpanderAD4::init(IStream* stream)
+void ExpanderAD4::init(IStream* stream, int _codec, int _table)
 {
+    W12ASSERT(stream);
     m_stream = stream;
+    m_codec = _codec;
+    m_table = _table;
     rewind();
 }
 
@@ -45,6 +49,7 @@ void ExpanderAD4::rewind()
 void ExpanderAD4::compress4(const int16_t* data, int32_t nSamples,
     uint8_t* compressed, uint32_t* nCompressed, const int* table, int32_t* aveErrSquared)
 {
+    W12ASSERT((nSamples & 1) == 0); // encode an even # of samples to avoid edge cases.
     S4ADPCM::State state;
     *nCompressed = S4ADPCM::encode4(data, nSamples, compressed, &state, table, aveErrSquared);
 }
@@ -61,6 +66,8 @@ void ExpanderAD4::compress8(const int16_t* data, int32_t nSamples,
 int ExpanderAD4::expand(int32_t *target, uint32_t nSamples, int32_t volume, bool add, 
     int codec, const int* table, bool overrideEasing)
 {
+    W12ASSERT(codec == 4 || codec == 8);
+
     if (!m_stream)
         return 0;
 
@@ -97,7 +104,6 @@ void ExpanderAD4::generateTestData(int nSamples, int16_t* data)
     static const int32_t WAVE0 = 440;   // A4
     //static const int32_t WAVE1 = 330;   // E3
 
-    static const int RANGE = 16000;
     static const int NAPPROX = 64;
     static const int SIN[32] = {
         0, 1568, 3121, 4644, 6122, 7542, 8889, 10150, 11313, 12368, 13303, 14110, 14782, 15311, 15692, 15922,
@@ -112,3 +118,33 @@ void ExpanderAD4::generateTestData(int nSamples, int16_t* data)
             data[i] = -SIN[index - 32];
     }
 }
+
+
+void ExpanderAD4::fillBuffer(int32_t* buffer, int nBufferSamples, ExpanderAD4* expanders, int nExpanders, const bool* loop, const int *volume, bool disableEasing)
+{
+    if (!buffer) return;
+    if (nBufferSamples <= 0) return;
+
+    for (int i = 0; i < nExpanders; ++i) {
+        ExpanderAD4* expander = expanders + i;
+        const int* table = S4ADPCM::getTable(expander->codec(), expander->table());
+
+        int n = 0;
+        do {
+            // 32 bit stereo buffer
+            // annoying and inefficent, but that's what is working.
+            n += expander->expand(buffer + n * 2, nBufferSamples - n, volume[i], i > 0, expander->codec(), table, disableEasing);
+            if (loop[i] && expander->done())
+                expander->rewind();
+        } while (n < nBufferSamples && loop[i]);
+
+        if (i == 0) {
+            for (int j = n; j < nBufferSamples; ++j) {
+                buffer[j * 2 + 0] = 0;
+                buffer[j * 2 + 1] = 0;
+            }
+        }
+    }
+
+}
+

@@ -44,6 +44,7 @@ struct RGB {
         r = _r; g = _g; b = _b;
     }
     RGB(uint32_t c) { set(c); }
+    RGB& operator=(const RGB& rhs) = default;
 
     uint8_t r = 0;
     uint8_t g = 0;

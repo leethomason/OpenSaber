@@ -21,9 +21,9 @@
 */
 
 #include "bladeflash.h"
-#include "Grinliz_Util.h"
+#include "./src/util/Grinliz_Util.h"
 #include "rgb2hsv.h"
-#include "fixed.h"
+#include "./src/util/fixed.h"
 #include "rgb.h"
 
 void BladeFlash::tick(uint32_t msec)

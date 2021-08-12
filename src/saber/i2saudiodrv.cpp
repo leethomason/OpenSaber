@@ -21,7 +21,7 @@
 */
 
 #include "i2saudiodrv.h"
-#include "Grinliz_Util.h"
+#include "./src/util/Grinliz_Util.h"
 #include "manifest.h"
 
 #include <Arduino.h>
@@ -39,6 +39,7 @@
 #define FILL_RIGHT
 
 //#define USE_16_BIT  // doesn't work - not sure if hardware or sw config
+#define DEBUG_DEEP 1
 
 #ifdef USE_16_BIT
 int16_t stereoBuffer0[AUDDRV_STEREO_SAMPLES];
@@ -49,18 +50,16 @@ int32_t stereoBuffer1[AUDDRV_STEREO_SAMPLES] = {0};
 #endif
 DmacDescriptor* descriptor = 0;
 
-int I2SAudioDriver::callbackCycle = 0;
 I2SAudioDriver::Status I2SAudioDriver::status[AUDDRV_NUM_CHANNELS];
 bool I2SAudioDriver::isQueued[AUDDRV_NUM_CHANNELS];
 SPIStream I2SAudioDriver::spiStream[AUDDRV_NUM_CHANNELS];
 wav12::ExpanderAD4 I2SAudioDriver::expander[AUDDRV_NUM_CHANNELS];
 int I2SAudioDriver::volume[AUDDRV_NUM_CHANNELS];
-uint32_t I2SAudioDriver::callbackMicros = 0;
 
+static volatile uint32_t callbackCycle = 0;
 
 void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
 {
-    int32_t startMicros = micros();
     callbackCycle++;
     #ifdef USE_16_BIT
     int16_t* src = (callbackCycle & 1) ? stereoBuffer1 : stereoBuffer0;
@@ -84,6 +83,7 @@ void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
         if (isQueued[i]) {
             isQueued[i] = false;
             spiStream[i].set(status[i].addr, status[i].size);
+            expander[i].init(&spiStream[i], status[i].is8Bit ? 8 : 4, status[i].table);
             expander[i].rewind();
             //Serial.print("queue "); Serial.print(i); Serial.print(" "); Serial.print(status[i].addr); Serial.print(" "); Serial.println(status[i].size);
         }
@@ -94,7 +94,6 @@ void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
         if (status[i].addr) {
             int bits = status[i].is8Bit ? 8 : 4;
             const int* table = S4ADPCM::getTable(bits, status[i].table);
-
             n = expander[i].expand(fill, AUDDRV_BUFFER_SAMPLES, volume[i], i > 0, bits, table, false);
 
             if (status[i].loop && n < AUDDRV_BUFFER_SAMPLES) {
@@ -131,8 +130,6 @@ void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
         ++t;
     }
 #endif    
-    uint32_t endMicros = micros();
-    callbackMicros += (endMicros - startMicros);
 }
 
 void I2SAudioDriver::begin()
@@ -141,7 +138,7 @@ void I2SAudioDriver::begin()
 
     for(int i=0; i<AUDDRV_NUM_CHANNELS; ++i) {
         spiStream[i].init(spiFlash);
-        expander[i].init(&spiStream[i]);   
+        expander[i].init(&spiStream[i], 4, 0);   
         volume[i] = 64;
     }
 
@@ -159,7 +156,7 @@ void I2SAudioDriver::begin()
         (void *)(&I2S->DATA[0].reg),  // to here (M0+)
         AUDDRV_STEREO_SAMPLES,        // this many...
         #ifdef USE_16_BIT
-        DMA_BEAT_SIZE_HWORD,           // bytes/hword/words
+        DMA_BEAT_SIZE_HWORD,          // bytes/hword/words
         #else
         DMA_BEAT_SIZE_WORD,           // bytes/hword/words
         #endif

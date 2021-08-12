@@ -28,7 +28,7 @@
 
 using namespace osbr;
 
-void DotStarUI::DrawVolume(osbr::RGB *led, int n, uint32_t time, int vol04) const
+void DotStarUI::DrawVolume(osbr::RGB *led, int n, uint32_t /*time*/, int vol04) const
 {
     static const uint32_t COLOR_AUDIO_ON = 0x0000FF;
     static const uint32_t COLOR_AUDIO_OFF = 0xFFD800;
@@ -294,7 +294,7 @@ Pixel_7_5_UI::Pixel_7_5_UI()
           10000 0x10
           11111 0x1f
 */
-void Pixel_7_5_UI::Draw(uint32_t time, UIMode mode, bool bladeIgnited, const UIRenderData *data)
+void Pixel_7_5_UI::Draw(uint32_t /*time*/, UIMode mode, bool /*bladeIgnited*/, const UIRenderData *data)
 {
     for (int i = 0; i < ALLOCATED; ++i)
         m_col[i] = 0;

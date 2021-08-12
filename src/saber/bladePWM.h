@@ -25,7 +25,7 @@
 #define BLADE_INCLUDED
 
 #include <stdint.h>
-#include "fixed.h"
+#include "./src/util/fixed.h"
 #include "rgb.h"
 
 

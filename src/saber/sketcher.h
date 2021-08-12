@@ -25,7 +25,7 @@
 
 #include <stdint.h>
 #include "renderer.h"
-#include "Grinliz_Util.h"
+#include "./src/util/Grinliz_Util.h"
 #include "saberUtil.h"
 #include "rgb.h"
 #include "uirenderdata.h"

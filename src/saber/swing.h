@@ -23,7 +23,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "Grinliz_Util.h"
+#include "./src/util/Grinliz_Util.h"
 #include "pins.h"
 /*
 // The FILTER constants run an average over the accelerometer

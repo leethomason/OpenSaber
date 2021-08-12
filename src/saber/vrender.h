@@ -24,8 +24,8 @@
 
 #include <stdint.h>
 #include "rgb.h"
-#include "fixed.h"
-#include "Grinliz_Util.h"
+#include "./src/util/fixed.h"
+#include "./src/util/Grinliz_Util.h"
 
 struct BlockDrawChunk {
     int x0;
@@ -52,11 +52,11 @@ public:
         int x;
         int y;
 
-        const bool operator== (const Vec2& rhs) const {
+        bool operator== (const Vec2& rhs) const {
             return rhs.x == x && rhs.y == y;
         }
 
-        const bool operator!= (const Vec2& rhs) const {
+        bool operator!= (const Vec2& rhs) const {
             return rhs.x != x || rhs.y != y;
         }
     };

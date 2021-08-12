@@ -24,8 +24,8 @@
 #define SFX_HEADER
 
 #include <Arduino.h>
-#include "Grinliz_Arduino_Util.h"
-#include "Grinliz_Util.h"
+#include "./src/util/Grinliz_Arduino_Util.h"
+#include "./src/util/Grinliz_Util.h"
 
 class I2SAudioDriver;
 class Manifest;
@@ -69,8 +69,8 @@ public:
 	int getVolume() const { return m_volume; }
 	void setBoost(int boost, int channel);
 
-	const uint32_t getIgniteTime() const { return m_igniteTime; }
-	const uint32_t getRetractTime() const { return m_retractTime; }
+	uint32_t getIgniteTime() const { return m_igniteTime; }
+	uint32_t getRetractTime() const { return m_retractTime; }
 
 	int setFont(int font);
 	int setFont(const char *fontName);

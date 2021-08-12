@@ -24,7 +24,7 @@
 #define SABER_DB_INCLUDED
 
 #include <stdint.h>
-#include "Grinliz_Arduino_Util.h"
+#include "./src/util/Grinliz_Arduino_Util.h"
 #include "pins.h"
 #include "rgb.h"
 

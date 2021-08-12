@@ -44,7 +44,7 @@ public:
     BladeState() {}
 
     void change(uint8_t newState);
-    const int state() const {
+    int state() const {
         return m_currentState;
     }
 
@@ -54,7 +54,7 @@ public:
         return m_currentState == BLADE_OFF;
     }
 
-    const uint32_t startTime() const {
+    uint32_t startTime() const {
         return m_startTime;
     }
 
@@ -79,7 +79,7 @@ public:
     void setActive();
     bool isIdle();
     
-    const UIMode mode() const {
+    UIMode mode() const {
         return m_mode;
     }
 

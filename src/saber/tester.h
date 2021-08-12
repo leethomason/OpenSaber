@@ -24,7 +24,7 @@
 #define SABER_TESTER_INCLUDED
 
 #include <stdint.h>
-#include "Grinliz_Arduino_Util.h"
+#include "./src/util/Grinliz_Arduino_Util.h"
 
 class Button;
 struct ButtonCBHandlers;
@@ -47,8 +47,8 @@ public:
 	};
 
 	virtual const char* name() const = 0;
-	virtual void start(Tester* tester)	{}
-	virtual int process(Tester* tester, uint32_t event) = 0;
+	virtual void start(Tester*)	{}
+	virtual int process(Tester*, uint32_t /*event*/) = 0;
 
 protected:
 };

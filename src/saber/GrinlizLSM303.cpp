@@ -25,7 +25,7 @@
 #include <math.h>
 
 #include "GrinlizLSM303.h"
-#include "Grinliz_Arduino_Util.h"
+#include "./src/util/Grinliz_Arduino_Util.h"
 
 #define LSM303_ADDRESS_ACCEL (0x32 >> 1) // 0011001x
 #define LSM303_ADDRESS_MAG (0x3C >> 1)   // 0011110x

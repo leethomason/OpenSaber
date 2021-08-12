@@ -21,12 +21,10 @@
 */
 
 #include "vrender.h"
-#include "fixed.h"
-#include "Grinliz_Util.h"
 #include <stdio.h>
 
 #ifndef _WIN32
-#include "Grinliz_Arduino_Util.h" // profiling
+#include "./src/util/Grinliz_Arduino_Util.h" // profiling
 #endif
 
 const VRender::Vec2 VRender::VECEND(-111, -222);

@@ -26,6 +26,13 @@
 #include <limits.h>
 #include <assert.h>
 
+#if defined(_MSC_VER)
+#   include <assert.h>
+#	define W12ASSERT assert
+#else
+#   define W12ASSERT(x)
+#endif
+
 static const int S4ADPCM_4BIT = 4;
 static const int S4ADPCM_8BIT = 8;
 
@@ -115,7 +122,7 @@ private:
     {
         // Checking for overflow has an almost too-small perf impact.
         #if true
-        int64_t s64 = value * volumeShifted;
+        int64_t s64 = int64_t(value) * int64_t(volumeShifted);
         if (s64 > INT32_MAX)
             return INT32_MAX;
         else if (s64 < INT32_MIN)

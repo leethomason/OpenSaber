@@ -21,7 +21,7 @@
 */
 
 #include "renderer.h"
-#include "Grinliz_Util.h"
+#include "./src/util/Grinliz_Util.h"
 #include <stdint.h>
 
 #define MIN(x, y) ((x) < (y) ? (x) : (y))

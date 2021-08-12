@@ -23,7 +23,7 @@
 #pragma once
 #include <stdint.h>
 #include "rgb.h"
-#include "Grinliz_Util.h"
+#include "./src/util/Grinliz_Util.h"
 
 struct UIRenderData
 {

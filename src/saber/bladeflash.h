@@ -23,7 +23,7 @@
 #pragma once
 
 #include "rgb.h"
-#include "fixed.h"
+#include "./src/util/fixed.h"
 
 class BladeFlash
 {

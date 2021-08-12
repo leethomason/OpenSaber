@@ -27,13 +27,14 @@
 // Arduino Libraries
 #include <Adafruit_ZeroI2S.h>
 #include <Adafruit_ZeroDMA.h>
-#include <Adafruit_SPIFlash.h>
+#include "./src/nada_flashmem/Nada_SPIFLash.h"
+#include "./src/nada_flashmem/Nada_FlashTransport_SPI.h"
 #include <Wire.h>
 #include <SPI.h>
 
 #include "OLED_SSD1306.h"
 #include "Button.h"
-#include "Grinliz_Arduino_Util.h"
+#include "./src/util/Grinliz_Arduino_Util.h"
 
 // Includes
 // -- Must be first. Has configuration. -- //
@@ -68,8 +69,8 @@ uint32_t lastLoopTime   = 0;
 uint32_t lastDisplayLoopTime = 0;
 bool colorWasProcessed = false;
 
-Adafruit_FlashTransport_SPI flashTransport(SS1, &SPI1);
-Adafruit_SPIFlash spiFlash(&flashTransport);
+Nada_FlashTransport_SPI flashTransport(SS1, &SPI1);
+Nada_SPIFlash spiFlash(&flashTransport);
 Adafruit_ZeroDMA dma;
 
 Manifest manifest;
@@ -316,7 +317,7 @@ void syncToDB()
     bladeFlash.setImpactColor(palette->impactColor);
 }
 
-void buttonAReleaseHandler(const Button& b)
+void buttonAReleaseHandler(const Button&)
 {
     ledA.blink(0, 0);
     ledA.set(true); // power is on.
@@ -471,7 +472,7 @@ void processSerial()
     }
 }
 
-void processAccel(uint32_t msec, uint32_t delta)
+void processAccel(uint32_t msec, uint32_t /*delta*/)
 {
     static ProfileData profData("processAccel");
     ProfileBlock block(&profData);

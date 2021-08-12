@@ -23,7 +23,7 @@
 #ifndef SABER_VOLTMETER_INCLUDED
 #define SABER_VOLTMETER_INCLUDED
 
-#include "Grinliz_Util.h"
+#include "./src/util/Grinliz_Util.h"
 #include <stdint.h>
 
 class Voltmeter
