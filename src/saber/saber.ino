@@ -22,7 +22,6 @@
 
 
 // #define PROFILE
-// #define AUDIO_PROFILE
 
 // Arduino Libraries
 #include <Adafruit_ZeroI2S.h>
@@ -655,16 +654,7 @@ void loop() {
         bladePWM.setRGB(bladeFlash.getColor());
     }
     else {
-        #if BLADE_ONLY_UI
-            if (bladeState.state() == BLADE_OFF)
-                bladeState.processUI(&bladePWM, bladeFlash, millis(), 
-                    uiMode.mode(),
-                    saberDB.volume4(), BladePWM::convertRawToPerceived(saberDB.bladeColor()));
-            else
-                bladeState.process(&bladePWM, bladeFlash, millis());
-        #else
         bladeState.process(&bladePWM, bladeFlash, millis());
-        #endif
     }
     
     sfx.process(bladeState.state(), delta, &swingVol);
@@ -684,15 +674,6 @@ void loop() {
         DumpProfile();
     }
     #endif    
-    #ifdef AUDIO_PROFILE
-    if (audioPrintTimer.tick(delta)) {
-        Log.p("Cycle=").p(I2SAudioDriver::getCallbackCycle())
-            .p(" Time=").p(I2SAudioDriver::callbackMicros / (10 * audioPrintTimer.period())).p("%")
-            .eol();
-        I2SAudioDriver::callbackMicros = 0;
-    }
-    #endif
-
     loopDisplays(msec, delta);
 }
 

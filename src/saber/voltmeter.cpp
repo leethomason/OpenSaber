@@ -20,13 +20,8 @@
   SOFTWARE.
 */
 
-#ifndef _WIN32
 #include <Arduino.h>
-#include "./src/util/Grinliz_Arduino_Util.h"
-#else
 #include "pins.h"
-#endif
-
 #include "voltmeter.h"
 
 Voltmeter* Voltmeter::_instance = 0;
@@ -35,7 +30,7 @@ void Voltmeter::begin()
 {
     m_averagePower.fill(NOMINAL_VOLTAGE);
 
-#if defined(SABER_VOLTMETER) && !defined(_WIN32)
+#if SABER_VOLTMETER()
     analogRead(PIN_VMETER);     // warm up the ADC to avoid spurious initial value.
     Log.p("Voltmeter open.").eol();
     delay(10);
@@ -52,7 +47,7 @@ void Voltmeter::begin()
 
 uint32_t Voltmeter::readVBat()
 {
-#if defined(SABER_VOLTMETER) && !defined(_WIN32)
+#if SABER_VOLTMETER()
     uint32_t analog = analogRead(PIN_VMETER);
 
     // Voltage divider:

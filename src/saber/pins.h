@@ -53,6 +53,7 @@
 #define SABER_MODEL_DUTCHESS   	   22   // Itsy, Dotstar UI
 #define SABER_MODEL_PROTECTION 	   23   // Itsy, Dotstar UI
 #define SABER_MODEL_CLAN		   24	// Itsy, Blade UI
+#define SABER_MODEL_LEIA_PS		   25	// Itsy, Blade UI, essentially a CLAN saber
 
 #define SABER_SUB_MODEL_NONE		0
 #define SABER_SUB_MODEL_LUNA		1
@@ -68,9 +69,9 @@
 #define SABER_SUB_MODEL_APP_LE      11
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_CLAN
-#define SABER_SUB_MODEL				SABER_SUB_MODEL_PROPHECY_1		
+#define SERIAL_DEBUG 				1
+#define SABER_MODEL 				SABER_MODEL_LEIA_PS
+#define SABER_SUB_MODEL				0		
 // ----------------------------------
 
 // Non-RGB has never been useful.
@@ -847,7 +848,6 @@
 	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
 	#define SABER_VOLTMETER			
 	
-	//#define BLADE_ONLY_UI	1
 	#define SABER_UI_LED				SABER_LED_DOTSTAR
 	#define SABER_UI_BRIGHTNESS			128	// max 256			
 	#define ITSY_DOTSTAR_UI				1
@@ -901,6 +901,43 @@
 #	endif
 	#define SWING_SAMPLES	12
 	#define ID_STR "Clan Cree XPE2 RGB"
+
+	static const int32_t RED_VF   = 2200;
+	static const int32_t RED_I    = 400;
+	static const int32_t RED_R    = 4100;
+
+	static const int32_t GREEN_VF = 3200;
+	static const int32_t GREEN_I  = 400;
+	static const int32_t GREEN_R = 1000;
+
+	static const int32_t BLUE_VF  = 3100;
+	static const int32_t BLUE_I   = 400;
+	static const int32_t BLUE_R   = 1350;
+
+	static const int VOLUME_1 = 32;
+	static const int VOLUME_2 = 64;
+	static const int VOLUME_3 = 128;
+	static const int VOLUME_4 = 255;
+#elif (SABER_MODEL == SABER_MODEL_LEIA_PS)
+	#define PCB_VERSION 				PCB_ITSY_2E
+	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
+	#define SABER_VOLTMETER() 			1
+	
+	#define SABER_UI_LED				SABER_LED_DOTSTAR
+	#define SABER_UI_BRIGHTNESS			128	// max 256			
+	#define ITSY_DOTSTAR_UI				1
+	#define SABER_NUM_LEDS 			    1
+	#define SABER_UI_START				0
+	#define SABER_UI_COUNT				1
+
+	// Does not need to be power of 2.
+	// multiply by 10 to get ms width of filter
+	#define FILTER_MAG_X	20
+	#define FILTER_MAG_Y	20
+	#define FILTER_MAG_Z	20
+	#define VOLTMETER_TUNE				1048
+	#define SWING_SAMPLES	12
+	#define ID_STR "Leia PS Cree XPE2 RGB"
 
 	static const int32_t RED_VF   = 2200;
 	static const int32_t RED_I    = 400;
