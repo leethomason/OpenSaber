@@ -4,16 +4,16 @@ use <../shapes.scad>
 
 $fn = 60;
 
-DRAW_AFT = true;
-DRAW_FORE = false;
+DRAW_AFT = false;
+DRAW_FORE = true;
 
 KEYJOINT = 8;
 KEYJOINT_T = 4.5;
 EPS = 0.01;
 
-TACTILE_X = 14; // space for contacts
-TACTILE_Z = 12;
-TACTILE_DY = 7;
+TACTILE_X = 12 + 0.2; // space for contacts
+TACTILE_Z = 12 + 0.2;
+TACTILE_DY = 6.5;
 
 M_FORE = M_MC + (N_BAFFLES * 2 + 1) * DZ_BUTTRESS;
 
@@ -64,8 +64,8 @@ if (DRAW_AFT) {
             translate([-BW/2, -100, DZ_BUTTRESS*3]) cube(size=[BW, 100, 200]);
         }
         translate([-MC_X/2, -2, M_MC]) 
-            cube(size=[MC_X, MC_Y, MC_Z]);
-        translate([0, 0, M_BATTERY]) 
+            cube(size=[MC_X, MC_Y, MC_Z + 10]);
+        translate([0, -0.5 * (D_INNER - D_BATTERY) / 2.0, M_BATTERY]) 
             cylinder(h=DZ_BATTERY, d=D_BATTERY);
     }
     translate([0, 0, M_FORE - EPS])
@@ -77,8 +77,7 @@ if (DRAW_FORE)
     PORT_DX = 9.00;
     PORT_DY = 14.35 + 0.5;
     PORT_DZ = 10.70;
-    PORT_CENTER = 6.60;
-    PORT_PAST = PORT_DZ - PORT_CENTER;
+    PORT_CENTER = 6.5;  // from the back
 
     DZ_SECTION = M_END - M_FORE;
 
@@ -97,6 +96,7 @@ if (DRAW_FORE)
 
     DZ_BOLT = 13.0;
     D_BOLT = 3.0;
+    BRIDGE = 2.0;
 
     difference() {
         union() {
@@ -134,18 +134,24 @@ if (DRAW_FORE)
             }
 
             // Tactile holder
-            translate([0, 0, M_SWITCH - TACTILE_Z/2]) bridge(2);
-            translate([0, 0, M_SWITCH + TACTILE_Z/2 - 2]) bridge(2);
+            translate([0, 0, M_SWITCH - TACTILE_Z/2]) bridge(BRIDGE);
+            translate([0, 0, M_SWITCH + TACTILE_Z/2 - BRIDGE]) bridge(BRIDGE);
+
+            translate([0, 0, M_SWITCH - TACTILE_Z/2- BRIDGE]) bridge(BRIDGE);
+            translate([0, 0, M_SWITCH + TACTILE_Z/2]) bridge(BRIDGE);
         }
+
         // Cut port out.
         translate([-PORT_DX/2, PORT_Y, M_PORT - PORT_CENTER]) 
             cube(size=[PORT_DX, 20, PORT_DZ]);
 
-        // Cut PCB out
-        //translate([-PCB_DX_WIDE/2, 0, M_SWITCH - PCB_DZ/2])
-        //    cube(size=[PCB_DX_WIDE, 20, PCB_DZ]);
+        // Cut switch out
         translate([-TACTILE_X/2, D_INNER/2-TACTILE_DY, M_SWITCH - TACTILE_Z/2])
             cube(size=[TACTILE_X, 20, TACTILE_Z]);
+
+        TAC_BUF = 4.0;
+        translate([-TACTILE_X/2 - TAC_BUF/2, D_INNER/2-TACTILE_DY, M_SWITCH - TACTILE_Z/2 + BRIDGE])
+            cube(size=[TACTILE_X + TAC_BUF, 20, TACTILE_Z - BRIDGE*2]);
         
         // Key joint
         translate([0, 0, M_FORE - EPS])
@@ -163,17 +169,6 @@ if (DRAW_FORE)
         // Flat bottom
         translate([-50, -D_INNER/2 -1, M_FORE]) cube(size=[100, 1.5, 100]);
     }
-    // PCB holder
-    /*intersection() {
-        translate([0, 0, M_FORE]) cylinder(h=DZ_SECTION, d=D_INNER);
-        union() {
-            translate([PCB_HOLE_X, PCB_BASE, M_SWITCH + PCB_HOLE_Z]) pcbButtress();
-            translate([PCB_HOLE_X, PCB_BASE, M_SWITCH - PCB_HOLE_Z]) pcbButtress();
-            mirror([-1, 0, 0]) translate([PCB_HOLE_X, PCB_BASE, M_SWITCH + PCB_HOLE_Z]) pcbButtress();
-            mirror([-1, 0, 0]) translate([PCB_HOLE_X, PCB_BASE, M_SWITCH - PCB_HOLE_Z]) pcbButtress();
-        }
-    }
-    */
 
     *color("plum") translate([-PORT_DX/2, PORT_Y, M_PORT - PORT_CENTER]) 
         cube(size=[PORT_DX, PORT_DY, PORT_DZ]);

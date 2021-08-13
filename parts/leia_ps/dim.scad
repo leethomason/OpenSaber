@@ -9,10 +9,15 @@ M_0 = 0.0;
 M_MC = 7.0;
 M_BATTERY = M_MC + MC_Z;
 
-M_BOLT = 125.0;
+M_SW_0 = 134.2;             // back edge, not center. Hard to measure. The rest is standard.
+M_SW_1 = M_SW_0 + 30.1;     // front edge, not center
+D_SW_0 = 12.0;
+D_SW_1 = 10.0;
+
+M_BOLT = M_SW_0 - 8.0 - 3.0/2;
 M_END = 160.0;  // very back of the heatsink. guesstimate
-M_SWITCH = 141.8;
-M_PORT = 158.0;
+M_SWITCH = M_SW_0 + D_SW_0 / 2;
+M_PORT = M_SW_1 - D_SW_1 / 2;
 
 DZ_BATTERY = 52.4;
 D_BATTERY = 18.4;
