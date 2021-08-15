@@ -69,7 +69,7 @@
 #define SABER_SUB_MODEL_APP_LE      11
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
+#define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_LEIA_PS
 #define SABER_SUB_MODEL				0		
 // ----------------------------------
@@ -922,6 +922,7 @@
 	#define PCB_VERSION 				PCB_ITSY_2E
 	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
 	#define SABER_VOLTMETER() 			1
+	#define VOLTMETER_TUNE				1048
 	
 	#define SABER_UI_LED				SABER_LED_DOTSTAR
 	#define SABER_UI_BRIGHTNESS			128	// max 256			
@@ -935,7 +936,6 @@
 	#define FILTER_MAG_X	20
 	#define FILTER_MAG_Y	20
 	#define FILTER_MAG_Z	20
-	#define VOLTMETER_TUNE				1048
 	#define SWING_SAMPLES	12
 	#define ID_STR "Leia PS Cree XPE2 RGB"
 
