@@ -922,10 +922,10 @@
 	#define PCB_VERSION 				PCB_ITSY_2E
 	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
 	#define SABER_VOLTMETER() 			1
-	#define VOLTMETER_TUNE				1048
+	#define VOLTMETER_TUNE				1040
 	
 	#define SABER_UI_LED				SABER_LED_DOTSTAR
-	#define SABER_UI_BRIGHTNESS			128	// max 256			
+	#define SABER_UI_BRIGHTNESS			255	// max 255
 	#define ITSY_DOTSTAR_UI				1
 	#define SABER_NUM_LEDS 			    1
 	#define SABER_UI_START				0
