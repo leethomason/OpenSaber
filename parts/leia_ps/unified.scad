@@ -77,7 +77,7 @@ if (DRAW_FORE)
     PORT_DX = 9.00;
     PORT_DY = 14.35 + 0.5;
     PORT_DZ = 10.70;
-    PORT_CENTER = 6.5;  // from the back
+    PORT_CENTER = 8.5; //6.5;  // from the back
 
     DZ_SECTION = M_END - M_FORE;
 

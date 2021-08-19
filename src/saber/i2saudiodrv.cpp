@@ -134,7 +134,7 @@ void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
 
 void I2SAudioDriver::begin()
 {
-    Log.p("I2SAudioDriver::begin starting.").eol();
+    Log.p("I2SAudioDriver begin() starting.").eol();
 
     for(int i=0; i<AUDDRV_NUM_CHANNELS; ++i) {
         spiStream[i].init(spiFlash);

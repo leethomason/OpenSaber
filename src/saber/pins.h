@@ -70,7 +70,7 @@
 
 // ----------------------------------
 #define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_LEIA_PS
+#define SABER_MODEL 				SABER_MODEL_LEIA
 #define SABER_SUB_MODEL				0		
 // ----------------------------------
 
@@ -698,7 +698,6 @@
 #elif (SABER_MODEL == SABER_MODEL_LEIA)
 	#define PCB_VERSION 			PCB_ITSY_2B
 	#define SABER_SOUND_ON 			SABER_SOUND_FLASH
-	#define SABER_VOLTMETER			
 	#define SABER_UI_LED			SABER_LED_DOTSTAR
 
 	#define SABER_NUM_LEDS 			    4
@@ -706,7 +705,10 @@
 	#define SABER_UI_COUNT				4
 	#define SABER_UI_BRIGHTNESS	    	16		
 	#define SABER_UI_IDLE_MEDITATION
-	#define SABER_UI_COLOR_WHEEL
+	#define SABER_UI_COLOR_WHEEL()		0
+	#define SABER_UI_MEDITATION()		0
+
+	#define SABER_VOLTMETER()			1			
 	#define VOLTMETER_TUNE				1033
 
 	#define FILTER_MAG_X	20
