@@ -194,6 +194,18 @@ void SaberDB::setPaletteFromDirHash(uint32_t h)
     }
     break;
     }
+
+#if (SABER_MODEL == SABER_MODEL_LEIA_PS)
+    Log.p("Override palette: Leia-ps").eol();
+    palette[0].set(0x00ffff, 0x4488ff, 0);   // cyan
+    palette[1].set(0x00FF44, 0x00ffff, 0);   // "green"
+    palette[2].set(0xCC00FF, 0x80A080, 1);   // purple
+    palette[3].set(0xff6000, 0x808000, 0);   // orange
+    palette[4].set(0xffff00, 0x00FF88, 0);   // yellow
+    palette[5].set(0x508080, 0x30a0a0, 1);   // white
+    palette[6].set(0x0044ff, 0x00ccff, 1);   // blue-green
+    palette[7].set(0x00ff44, 0x00ffaa, 1);   // green-blue
+#endif
 }
 
 void SaberDB::nextPalette()
