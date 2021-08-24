@@ -532,9 +532,7 @@ private:
 
 
 /**
- * Power changes over time, and higher
- * draw changes the power. A small class
- * to average out power changes.
+ * An average of a range of samples.
  */
 template<typename TYPE, typename SUMTYPE, int N>
 class AverageSample

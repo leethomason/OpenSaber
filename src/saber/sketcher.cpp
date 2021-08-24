@@ -90,10 +90,6 @@ void DotStarUI::Draw(osbr::RGB *led, int nLED, uint32_t time, uint32_t delta,
 
             case UIMode::VOLUME:
                 {
-                    //uint8_t r, g, b;
-                    //int angle = 360 - 120 * data.volume / 4;
-                    //hsv2rgb(angle / 2, 255, 255, &r, &g, &b);
-                    //led[0].set(r, g, b);
                     led[0].set(ONE_VOLUME[data.volume]);
                 }
                 break;

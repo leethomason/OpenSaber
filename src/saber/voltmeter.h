@@ -29,7 +29,11 @@
 class Voltmeter
 {
 public:
-    enum {SAMPLE_INTERVAL = 25};
+    enum {
+        PERIOD = 1000,
+        N_SAMPLES = 64,
+        SAMPLE_INTERVAL = PERIOD / N_SAMPLES
+    };
 
     // vRef reference voltage in mVolts
     // rLower lower resistor (10000)
@@ -37,43 +41,43 @@ public:
     // range max reading of vRef; 1023 or 4095
     // tune constant multiplied to answer 1000
     Voltmeter(uint32_t vRef, uint32_t rLower, uint32_t rHigher, uint32_t range, uint32_t tune)
-        : m_averagePower(HIGH_VOLTAGE), m_eased(HIGH_VOLTAGE)
+        : m_vRef(vRef),
+          m_rLower(rLower),
+          m_rHigher(rHigher),
+          m_range(range),
+          m_tune(tune),
+          m_eased(HIGH_VOLTAGE),            // turn on with high power, so less power goes to LED
+          m_averagePower(HIGH_VOLTAGE)
     {       
         ASSERT(_instance == 0);
         _instance = this; 
-
-        m_vRef = vRef;
-        m_rLower = rLower;
-        m_rHigher = rHigher;
-        m_range = range;
-        m_tune = tune;
     }
     static Voltmeter* instance() { return _instance; }
 
     // set the analog reference before calling
-    void begin();
+    void begin(); 
 
     /// Instantaneous power. (Noisy).
     uint32_t readVBat();
     /// Average power.
     uint32_t averagePower() const { return m_averagePower.average(); }
-    /// For display
-    uint32_t easedPower() const { return m_eased.average(); }
+    /// For display (updated every half second)
+    uint32_t easedPower() const { return m_eased; }
 
     /// Add a sample to the average power.
-    uint32_t takeSample();
-
-    static int vbatToPowerLevel(int32_t vbat, int nLevels);
+    void takeSample();
 
 private:
     static Voltmeter* _instance;
+    uint32_t m_lastSampleMillis = 0;
+    uint32_t m_lastEasedMillis = 0;
     uint32_t m_vRef = 0;
     uint32_t m_rLower = 0;
     uint32_t m_rHigher = 0;
     uint32_t m_range = 0;
     uint32_t m_tune = 0;
-    AverageSample<uint16_t, uint32_t, 64> m_averagePower;
-    AverageSample<uint16_t, uint32_t, 4> m_eased;
+    uint32_t m_eased = 0;
+    AverageSample<uint16_t, uint32_t, N_SAMPLES> m_averagePower;
 };
 
 #endif // SABER_VOLTMETER_INCLUDED

@@ -103,7 +103,6 @@ DotStarUI dotstarUI;                // It is the DotStarUI regardless of physica
 #endif
 
 GrinlizLSM303 accelMag;
-Timer2 vbatTimer(Voltmeter::SAMPLE_INTERVAL);
 #if SABER_DISPLAY == SABER_DISPLAY_128_32
 static const int DISPLAY_TIMER = 23;
 #else
@@ -663,10 +662,10 @@ void loop() {
         swing.setOrigin();
     }
 
-    if (vbatTimer.tick(delta)) {
-        voltmeter.takeSample();
-        bladePWM.setVoltage(voltmeter.averagePower());
-    }
+    // Timing / skip is in the voltmeter class.
+    voltmeter.takeSample();
+    // setVoltage() will do nothing if the averagePower() is the same
+    bladePWM.setVoltage(voltmeter.averagePower());
     
     #ifdef PROFILE
     if (vbatPrintTimer.tick(delta)) {
