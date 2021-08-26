@@ -15,6 +15,8 @@ D_SW_0 = 12.0;
 D_SW_1 = 10.0;
 
 M_BOLT = M_SW_0 - 8.0 - 3.0/2;
+M_BOLT_1 = M_BOLT + 51.8 - 1.5;
+
 M_END = 160.0;  // very back of the heatsink. guesstimate
 M_SWITCH = M_SW_0 + D_SW_0 / 2;
 M_PORT = M_SW_1 - D_SW_1 / 2;
