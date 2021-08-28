@@ -13,9 +13,10 @@ M_SW_0 = 134.2;             // back edge, not center. Hard to measure. The rest 
 M_SW_1 = M_SW_0 + 30.1;     // front edge, not center
 D_SW_0 = 12.0;
 D_SW_1 = 10.0;
+DZ_BOLTS = (52.1 + 46.25) / 2;
 
 M_BOLT = M_SW_0 - 8.0 - 3.0/2;
-M_BOLT_1 = M_BOLT + 51.8 - 1.5;
+M_BOLT_1 = M_BOLT + DZ_BOLTS;
 
 M_END = 160.0;  // very back of the heatsink. guesstimate
 M_SWITCH = M_SW_0 + D_SW_0 / 2;
