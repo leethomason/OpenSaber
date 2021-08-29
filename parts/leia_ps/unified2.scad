@@ -18,10 +18,9 @@ PCB_W = 14;
 PCB_Y = D_INNER/2 - 8.5;
 PCB_Z = M_BOLT_1 + 4.0 - M_FORE;
 
-SLACK = 0.0;
-JOINT = 6.0 + SLACK;        // distance to the joint
-DX_JOINT = 3.0 - SLACK;
-DZ_JOINT = 5.0 - SLACK * 2;
+JOINT = 6.0;        // distance to the joint
+DX_JOINT = 3.0;
+DZ_JOINT = 5.0;
 SECTION = 11.0;     // length of the section
 
 TOP_W = 8.0;
@@ -52,9 +51,18 @@ module bridge(dz)
 
 module pcb()
 {
-    translate([-PCB_W/2, -20, 0]) cube(size=[PCB_W, 40, JOINT]);
-    translate([-PCB_W/2 + DX_JOINT, -20, JOINT]) cube(size=[PCB_W - DX_JOINT*2, 40, DZ_JOINT]);
-    translate([-PCB_W/2, -20, JOINT + DZ_JOINT]) cube(size=[PCB_W, 40, PCB_Z - (JOINT + DZ_JOINT)]);
+    XSCALE = 0.95;
+    ZSCALE = 0.95;
+
+    difference() {
+        translate([-PCB_W/2, -20, 0]) cube(size=[PCB_W, 40, PCB_Z]);
+        translate([PCB_W/2, 0, JOINT + DZ_JOINT/2]) 
+            scale([XSCALE, 1.0, ZSCALE])
+               cube(size=[DX_JOINT*2, 40, DZ_JOINT], center=true);
+        translate([-PCB_W/2, 0, JOINT + DZ_JOINT/2]) 
+            scale([XSCALE, 1.0, ZSCALE])
+                cube(size=[DX_JOINT*2, 40, DZ_JOINT], center=true);
+    }
 }
 
 difference() {
@@ -65,7 +73,7 @@ difference() {
                     cylinder(h=DZ_BUTTRESS, d=D_INNER);
                     if (i < N_BAFFLES) {
                         bottomRail = ((i+2)%4) != 0;
-                        bridgeAndRail(2, D_INNER, DZ_BUTTRESS, bottomRail=bottomRail);
+                        bridgeAndRail(4, D_INNER, DZ_BUTTRESS, bottomRail=bottomRail);
                     }
                 }
             }
@@ -80,7 +88,7 @@ difference() {
         BW = 12.0;
         translate([-BW/2, -100, DZ_BUTTRESS*3]) cube(size=[BW, 100, 200]);
     }
-    translate([-MC_X/2, -2, M_MC]) 
+    translate([-MC_X/2, -3.0, M_MC]) 
         cube(size=[MC_X, MC_Y, MC_Z + 10]);
     translate([0, -0.5 * (D_INNER - D_BATTERY) / 2.0, M_BATTERY]) 
         cylinder(h=DZ_BATTERY, d=D_BATTERY);

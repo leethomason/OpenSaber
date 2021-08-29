@@ -527,6 +527,8 @@ module bridgeAndRail(bridge, d, dz, bottomRail=true, bridgeOnlyBottom=false)
                     bridge2(d, dz);
                 else if (bridge == 3)
                     bridge3(d, dz);
+                else if (bridge == 4)
+                    bridge4(d, dz);
             }
         }
         if (bottomRail) {

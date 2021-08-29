@@ -77,6 +77,39 @@ module bridge2(d, dz)
     }
 }
 
+module bridge4UpperWall(d, dz)
+{
+    intersection() 
+    {
+        cylinder(h=dz, d=d - 1.0);
+        union() {
+            translate([-d/2 - 1.0, d*0.08, 0]) {
+                rotate([0, 0, -35]) {
+                    polygonYZ(2.0, [
+                        [0,0], 
+                        [dz*3.0, dz*2], 
+                        [dz*3.0, dz*1.5], 
+                        [dz*3.0, 0]
+                    ]);
+                }
+            }        
+        }
+    }
+}
+
+module bridge4(d, dz)
+{
+    intersection() 
+    {
+        tube(h=dz, do=d - D_OUTER, di=d - D_INNER);
+        translate([-d, -d*0.32, 0]) {
+            polygonYZ(d*2, [[0,0], [dz*2, dz*2], [dz*2, 0]]);
+        }        
+    }
+    bridge4UpperWall(d, dz);
+    mirror([-1, 0, 0]) bridge4UpperWall(d, dz);
+}
+
 module bridge3(d, dz)
 {
     difference() {
