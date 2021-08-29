@@ -18,10 +18,11 @@ PCB_W = 14;
 PCB_Y = D_INNER/2 - 8.5;
 PCB_Z = M_BOLT_1 + 4.0 - M_FORE;
 
-M_JOINT = M_FORE + 6.0;
-DX_JOINT = 3.0;
-DZ_JOINT = 5.0;
-SECTION = 9.0;
+SLACK = 0.0;
+JOINT = 6.0 + SLACK;        // distance to the joint
+DX_JOINT = 3.0 - SLACK;
+DZ_JOINT = 5.0 - SLACK * 2;
+SECTION = 11.0;     // length of the section
 
 TOP_W = 8.0;
 
@@ -47,6 +48,13 @@ module bridge(dz)
             ]);
         }
     }
+}
+
+module pcb()
+{
+    translate([-PCB_W/2, -20, 0]) cube(size=[PCB_W, 40, JOINT]);
+    translate([-PCB_W/2 + DX_JOINT, -20, JOINT]) cube(size=[PCB_W - DX_JOINT*2, 40, DZ_JOINT]);
+    translate([-PCB_W/2, -20, JOINT + DZ_JOINT]) cube(size=[PCB_W, 40, PCB_Z - (JOINT + DZ_JOINT)]);
 }
 
 difference() {
@@ -79,26 +87,11 @@ difference() {
 }
 
 difference() {
-    SLACK = 0.05;
-    translate([0, 0, M_FORE - EPS])
-        cylinder(h=M_JOINT + SECTION - M_FORE, d=D_INNER);        
-    translate([-TOP_W/2, -50, 0])
-        cube(size=[TOP_W, 100, 200]);
-        
-    translate([PCB_W/2 - DX_JOINT - EPS, -50, M_JOINT + SLACK])
-        cube(size=[DX_JOINT - SLACK, 100, DZ_JOINT - SLACK * 2]);
-    mirror([-1, 0, 0]) translate([PCB_W/2 - DX_JOINT - EPS, -50, M_JOINT + SLACK])
-        cube(size=[DX_JOINT - SLACK, 100, DZ_JOINT - SLACK * 2]);
-
-/*    translate([0, -50, M_FORE])
-        cube(size=[PCB_W/2, 100, M_JOINT - M_FORE]);
-    mirror([-1, 0, 0]) translate([0, -50, M_FORE])
-        cube(size=[PCB_W/2, 100, M_JOINT - M_FORE]);
-        */
+    SLACK = 0.1;
+    translate([0, 0, M_FORE])
+        cylinder(h=SECTION, d=D_INNER);        
+    translate([0, 0, M_FORE - EPS]) pcb();
 }
-
-//color("red") translate([-MC_X/2, -MC_Y/2, M_MC]) cube(size=[MC_X, MC_Y, MC_Z]);
-//color("green") translate([0, 0, M_BATTERY]) cylinder(h=DZ_BATTERY, d=D_BATTERY);
 
 *union() {
     color("red") translate([0, 0, M_BOLT]) rotate([-90, 0, 0]) cylinder(h=10, d=3);
@@ -109,11 +102,6 @@ difference() {
     difference() {
         color("green") translate([-PCB_W/2, PCB_Y, M_FORE])
             cube(size=[PCB_W, 1.6, PCB_Z]);
-        translate([TOP_W/2, PCB_Y-EPS, M_JOINT])
-            cube(size=[20, 20, DZ_JOINT]);
-        mirror([-1, 0, 0]) translate([TOP_W/2, PCB_Y-EPS, M_JOINT])
-            cube(size=[20, 20, DZ_JOINT]);
     }
 }
-// 4mm drop
-// 5.5mm barrel on power - 1.6 = 4.0 // if nut fits
+*color("plum") translate([0, 0, M_FORE]) pcb();
