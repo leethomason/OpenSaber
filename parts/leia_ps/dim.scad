@@ -1,4 +1,5 @@
 D_INNER = 26.0 - 0.1;
+D_OUTER = 32.5; // at switch
 DZ_INNER = 180.9;
 
 MC_X                =   0.7 * 25.4;

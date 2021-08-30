@@ -6,7 +6,7 @@ from rectangle import rectangle
 from mecode import G
 from hole import hole, drill
 
-M_BOLT_0, M_SWITCH, M_PORT, M_BOLT_1 = 124.7, 139.7, 157.8, 173.875
+M_BOLT_0, M_SWITCH, M_PORT, M_BOLT_1 = 124.7, 139.7, 157.2, 173.875
 M_PCB, DX_PCB, DZ_PCB = 119.147, 14, 58.7279
 
 JOINT = 6.0
