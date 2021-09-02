@@ -52,7 +52,7 @@ module bridge(dz)
 module pcb()
 {
     XSCALE = 0.95;
-    ZSCALE = 0.95;
+    ZSCALE = 0.90;
 
     difference() {
         translate([-PCB_W/2, -20, 0]) cube(size=[PCB_W, 40, PCB_Z]);
@@ -95,10 +95,11 @@ difference() {
 }
 
 difference() {
-    SLACK = 0.1;
     translate([0, 0, M_FORE])
         cylinder(h=SECTION, d=D_INNER);        
     translate([0, 0, M_FORE - EPS]) pcb();
+
+    translate([0, 0, M_FORE + 3.0]) capsule(-110, -70, 1.5, true);
 }
 
 *union() {
