@@ -63,6 +63,10 @@ module pcb()
             scale([XSCALE, 1.0, ZSCALE])
                 cube(size=[DX_JOINT*2, 40, DZ_JOINT], center=true);
     }
+    PAD = 1.0;
+    scale([1, 1, 1.04]) 
+        translate([-PCB_W/2 - PAD, -20, 0]) 
+            cube(size=[PCB_W + PAD*2, 40, JOINT]);
 }
 
 difference() {
