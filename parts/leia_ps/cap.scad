@@ -3,9 +3,9 @@ use <../shapes.scad>
 
 $fn = 60;
 
-Y_DOWN = 3.0;
-H_BUTTON = 5.0;
-H_PIN = 4.0;
+Y_DOWN = 1.8;
+H_BUTTON = 3.0;
+H_PIN = 2.0;
 D = 9.1;
 R = 0.3;
 
@@ -34,9 +34,10 @@ difference() {
     body();
     translate([0, D_INNER/2 - Y_DOWN, 0]) 
         rotate([-90, 0, 0]) {
-            cylinder(h=2.0, d=3.8);
-            translate([0, 0, 2.0])
-                cylinder(h=H_PIN-2.0, d1=4.0, d2=0.0);
+            cylinder(h=2.0, d=3.6);
+            //cylinder(h=2.0, d=3.8);
+            //translate([0, 0, 2.0])
+            //    cylinder(h=H_PIN-2.0, d1=4.0, d2=0.0);
         }
 }
 
