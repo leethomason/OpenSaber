@@ -6,7 +6,7 @@ use <../commonUnified.scad>
 //$fn = 40;
 $fn = 90;
 
-DRAW_AFT = false;
+DRAW_AFT = true;
 DRAW_MID = true;
 DRAW_BAFFLE = false;
 DRAW_CAP = false;
@@ -60,11 +60,10 @@ if (DRAW_AFT) {
         speakerHolder(D_AFT_MID, DZ_SPKR_HOLDER, 1.5, "cls28");
 
     translate([0, 0, M_AFT_BACK + DZ_SPKR_HOLDER])
-        baffleMCBattery(D_AFT_MID, N_BAFFLES, DZ_BUTTRESS);
+        baffleMCBattery(D_AFT_MID, N_BAFFLES, DZ_BUTTRESS, bridgeStyle=2);
 
     translate([0, 0, M_FRONT_BAFFLES])
-        keyJoint(JOINT, D_AFT_MID, D_AFT_MID - T, 
-                         0.2, KEY_ANGLE, true);
+        keyJoint(JOINT, D_AFT_MID, D_AFT_MID - T, false, KEY_ANGLE);
 }
 
 if (DRAW_MID) {
@@ -106,8 +105,7 @@ if (DRAW_MID) {
         }
         
         translate([0, 0, M_FRONT_BAFFLES])
-            keyJoint(JOINT, D_AFT_MID, D_AFT_MID - T, 
-                             0, KEY_ANGLE, true);
+            keyJoint(JOINT, D_AFT_MID, D_AFT_MID - T, true, KEY_ANGLE);
 
         // Side holes
         SIDE_TRIM = -0.8;

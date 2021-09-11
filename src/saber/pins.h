@@ -67,10 +67,12 @@
 #define SABER_SUB_MODEL_PROPHECY_2  9
 #define SABER_SUB_MODEL_AEON        10
 #define SABER_SUB_MODEL_APP_LE      11
+#define SABER_SUB_MODEL_A			12
+#define SABER_SUB_MODEL_B			13
 
 // ----------------------------------
 #define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_LEIA
+#define SABER_MODEL 				SABER_MODEL_LEIA_PS
 #define SABER_SUB_MODEL				0		
 // ----------------------------------
 
@@ -924,7 +926,15 @@
 	#define PCB_VERSION 				PCB_ITSY_2E
 	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
 	#define SABER_VOLTMETER() 			1
+#	if SABER_SUB_MODEL == SABER_SUB_MODEL_A
 	#define VOLTMETER_TUNE				1040
+	#define LEIA_PS_POWER				400
+	#define ID_STR "Leia PS Cree XPE2 RGB. Model B (LED in body)"
+#	else
+	#define VOLTMETER_TUNE				1051
+	#define LEIA_PS_POWER				350
+	#define ID_STR "Leia PS Cree XPE2 RGB. Model B (LED in blade)"
+#	endif
 	
 	#define SABER_UI_LED				SABER_LED_DOTSTAR
 	#define SABER_UI_BRIGHTNESS			255	// max 255
@@ -933,24 +943,26 @@
 	#define SABER_UI_START				0
 	#define SABER_UI_COUNT				1
 
+	#define SABER_UI_COLOR_WHEEL()		0
+	#define SABER_UI_MEDITATION()		0
+
 	// Does not need to be power of 2.
 	// multiply by 10 to get ms width of filter
 	#define FILTER_MAG_X	20
 	#define FILTER_MAG_Y	20
 	#define FILTER_MAG_Z	20
 	#define SWING_SAMPLES	12
-	#define ID_STR "Leia PS Cree XPE2 RGB"
 
 	static const int32_t RED_VF   = 2200;
-	static const int32_t RED_I    = 400;
+	static const int32_t RED_I    = LEIA_PS_POWER;
 	static const int32_t RED_R    = 4100;
 
 	static const int32_t GREEN_VF = 3200;
-	static const int32_t GREEN_I  = 400;
+	static const int32_t GREEN_I  = LEIA_PS_POWER;
 	static const int32_t GREEN_R = 1000;
 
 	static const int32_t BLUE_VF  = 3100;
-	static const int32_t BLUE_I   = 400;
+	static const int32_t BLUE_I   = LEIA_PS_POWER;
 	static const int32_t BLUE_R   = 1350;
 
 	static const int VOLUME_1 = 32;
