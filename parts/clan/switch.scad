@@ -20,6 +20,7 @@ D_PIN = 1.9;
 H_BASE = 2.4;
 
 D_RIM = 10.0;
+SQUARE = 3.5;
 
 $fn = 80;
 
@@ -27,7 +28,18 @@ difference()
 {
     union() {
         cylinder(h=H, d=D_PLATE);
-        cylinder(h=H_RIM, d=D_RIM);
+        if (SQUARE_OFF) {
+            hull() {
+                R = 0.5;
+                translate([D_RIM/2-R, SQUARE-R, 0]) cylinder(h=H_RIM,r=R);
+                translate([-D_RIM/2+R, SQUARE-R, 0]) cylinder(h=H_RIM,r=R);
+                translate([D_RIM/2-R, -D_RIM/2+R, 0]) cylinder(h=H_RIM,r=R);
+                translate([-D_RIM/2+R, -D_RIM/2+R, 0]) cylinder(h=H_RIM,r=R);
+            }
+        }
+        else {
+            cylinder(h=H_RIM, d=D_RIM);
+        }
     }
     // top part
     translate([0, 0, H - H_BASE]) 
@@ -43,6 +55,6 @@ difference()
         cylinder(h=H_CONE, d1=D_TACTILE, d2=D_PIN);
 
     if (SQUARE_OFF) {
-        translate([-10, 3.5, 0]) cube(size=[20, 20, 20]);
+        translate([-10, SQUARE, 0]) cube(size=[20, 20, 20]);
     }
 }

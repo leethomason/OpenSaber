@@ -52,8 +52,9 @@
 #define SABER_MODEL_SISTERS2  	   21   // Itsy, OLED (128x32)
 #define SABER_MODEL_DUTCHESS   	   22   // Itsy, Dotstar UI
 #define SABER_MODEL_PROTECTION 	   23   // Itsy, Dotstar UI
-#define SABER_MODEL_CLAN		   24	// Itsy, Blade UI
-#define SABER_MODEL_LEIA_PS		   25	// Itsy, Blade UI, essentially a CLAN saber
+#define SABER_MODEL_CLAN		   24	// Itsy, one LED UI
+#define SABER_MODEL_LEIA_PS		   25	// Itsy, one LED UI, essentially a clan saber
+#define SABER_MODEL_VIGILANCE_2	   26   // Itsy, LIS3DH SPI (accel + mag shortage)
 
 #define SABER_SUB_MODEL_NONE		0
 #define SABER_SUB_MODEL_LUNA		1
@@ -71,8 +72,8 @@
 #define SABER_SUB_MODEL_B			13
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_LEIA_PS
+#define SERIAL_DEBUG 				1
+#define SABER_MODEL 				SABER_MODEL_VIGILANCE_2
 #define SABER_SUB_MODEL				0		
 // ----------------------------------
 
@@ -104,16 +105,23 @@
 
 #define PCB_ITSY_1				   16
 #define PCB_ITSY_1C				   17	// 1B was a bad run, 1C adds dotstar support
-#define PCB_ITSY_2A				   18
+#define PCB_ITSY_2A				   18	
 #define PCB_ITSY_2B				   19   // Magnetometer + Accelerometer on the I2C bus. Dotstar. SPI. I2S audio. Flash mem sound.
 #define PCB_ITSY_2C				   20   // Magnetometer + Accelerometer on the I2C bus. Dotstar. SPI. I2S audio. Flash mem sound.
 #define PCB_ITSY_2D				   21   // Magnetometer + Accelerometer on the I2C bus. Dotstar. SPI. I2S audio. Flash mem sound.
-#define PCB_ITSY_2E				   22   // Magnetometer + Accelerometer on the I2C bus. Dotstar. SPI. I2S audio. Flash mem sound.
+// 2E is the LSM303 (magnetometer, accel) + MAX98357AETE+T (I2S audio). The basis for the clan-5/7 sabers.
+// Smooth swing, long running platform. 
+// However, as of 2021 there are no more LSM303 chips.
+#define PCB_ITSY_2E				   22   // Magnetometer + Accelerometer (LSM303) on the I2C bus. Dotstar. SPI. I2S audio. Flash mem sound.
+// The 3 series is the same as the 2 series, EXCEPT that it switches back to the LIS3DH.
+// Smooth swing not supported. But I have enough LISD3H chips to make it worth it, and allows me to replace/upgrade
+// sabers on the Teensy platform.
+#define PCB_ITSY_3A				   23
 
 #define SABER_ACCELEROMETER_NONE 		0
 #define SABER_ACCELEROMETER_LIS3DH		1
 #define SABER_ACCELEROMETER_NXP			2
-#define SABER_ACCELEROMETER_LIS3DH_SPI 	3
+#define SABER_ACCELEROMETER_LIS3DH_SPI 	3	// accel
 #define SABER_ACCELEROMETER_LSM303 		4	// SPI, accel, magnetometer
 
 #if SABER_MODEL == SABER_MODEL_GECKO
@@ -969,6 +977,46 @@
 	static const int VOLUME_2 = 64;
 	static const int VOLUME_3 = 128;
 	static const int VOLUME_4 = 255;
+#elif (SABER_MODEL == SABER_MODEL_VIGILANCE_2)
+	#define PCB_VERSION 				PCB_ITSY_3A
+	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
+	#define SABER_VOLTMETER() 			1
+	#define VOLTMETER_TUNE				1040
+	#define ID_STR "Vigilance 2Cree XPE2 RGB."
+	
+	#define SABER_UI_LED				SABER_LED_DOTSTAR
+	#define SABER_UI_BRIGHTNESS			16
+	#define ITSY_DOTSTAR_UI				1
+	#define SABER_NUM_LEDS 			    1
+	#define SABER_UI_START				0
+	#define SABER_UI_COUNT				1
+
+	#define SABER_UI_COLOR_WHEEL()		0
+	#define SABER_UI_MEDITATION()		0
+
+	// Does not need to be power of 2.
+	// multiply by 10 to get ms width of filter
+	#define FILTER_MAG_X	20
+	#define FILTER_MAG_Y	20
+	#define FILTER_MAG_Z	20
+	#define SWING_SAMPLES	12
+
+	static const int32_t RED_VF   = 2200;
+	static const int32_t RED_I    = 400;
+	static const int32_t RED_R    = 4100;
+
+	static const int32_t GREEN_VF = 3200;
+	static const int32_t GREEN_I  = 400;
+	static const int32_t GREEN_R = 1000;
+
+	static const int32_t BLUE_VF  = 3100;
+	static const int32_t BLUE_I   = 400;
+	static const int32_t BLUE_R   = 1350;
+
+	static const int VOLUME_1 = 32;
+	static const int VOLUME_2 = 64;
+	static const int VOLUME_3 = 128;
+	static const int VOLUME_4 = 255;
 #elif (SABER_MODEL == SABER_MODEL_TEST)
 	#define PCB_VERSION 				PCB_ITSY_2D
 	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
@@ -1217,6 +1265,32 @@
 	#define ACCEL_NORMAL_BUTTON   0
 	#define ACCEL_PERP_BUTTON     2
 
+#elif (PCB_VERSION == PCB_ITSY_3A)
+	#define SABER_ACCELEROMETER SABER_ACCELEROMETER_LIS3DH_SPI
+
+	#define PIN_I2S_LRCLK		0
+	#define PIN_I2S_BITCLK		1
+
+	#define PIN_VMETER        	A1
+	#define PIN_LED_A    	  	A2 
+	#define PIN_DOTSTAR_EN		A3
+	#define PIN_OLED_CS  		A4
+	#define PIN_OLED_DC		    A5
+	// CLOCK	 
+	// MOSI
+	// MISO 
+	#define PIN_ACCEL_EN      	2
+	// 7 available
+	#define PIN_EMITTER_RED   	9
+	#define PIN_EMITTER_GREEN 	10
+	#define PIN_EMITTER_BLUE   	11
+	#define PIN_I2S_DATA		12
+	#define PIN_SWITCH_A		13
+	
+	#define ACCEL_BLADE_DIRECTION 1
+	#define ACCEL_NORMAL_BUTTON   0
+	#define ACCEL_PERP_BUTTON     2
+
 #else
 	#error Pins not defined.
 #endif
@@ -1229,7 +1303,7 @@ enum {
 };
 
 static const float DEFAULT_G_FORCE_MOTION = 1.3f;
-static const float DEFAULT_G_FORCE_IMPACT = 3.0f;	// Was 2.3.
+static const float DEFAULT_G_FORCE_IMPACT = 3.0f;
 static const int SWING_MAX = 14;
 
 #endif // PINS_HEADER

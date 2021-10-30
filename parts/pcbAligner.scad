@@ -13,12 +13,8 @@ SUPPORT_HEIGHT = 1.0;
 EDGE = 0.6;             // Height of LSM303 is 1mm
 
 // FDM
-// TRIM = 0.10;
-// SCALE = 1.0;
-
-// MSLA
-TRIM = 0.13;    // expansion in curing?
-SCALE = 0.995;
+TRIM = 0.10;
+SCALE = 1.0;
 
 EPS = 0.001;
 STRUCTURE = 3.0;
@@ -97,7 +93,12 @@ scale([SCALE, SCALE, SCALE]) {
         *translate([DX/2 - HANDLE/2, -HANDLE, 0]) cube(size=[HANDLE, HANDLE, ZSTRUCT]);
     }
 
-    // accel
-    support(1.2904*C, 0.2708*C, 2.06 + 0.01, 2.06 + 0.1, 1.0);
+    // Itsy V2 accel / mag
+    // support(1.2904*C, 0.2708*C, 2.06 + 0.01, 2.06 + 0.1, 1.0);
+    
+    // Itsy V3 accel
+    support(1.2966*C, 0.2244*C, 3.10, 3.10, 1.0);
+    
+    // Itsy V2/V3 audio amp
     support(0.1429*C, 0.3045*C, 3.10, 3.10, 0.8);
 }
