@@ -1,22 +1,25 @@
 // Varies; size of bolt hole in top.
 // D_BASE = 3.9; // standard bolt
 //D_BASE = 1.8; // the little pins
-D_BASE = 4.2; // bad cub
+D_BASE = 4.2;
 
 // Varies; height of base ring.
-//H_RIM = 4.0; //4.5 too hig; // 3.5;
-H_RIM = 3.5;
+//H_RIM = 4.0; 
+//H_RIM = 3.5;
+// H_RIM = 3.3;
+H_RIM = 3.0;
 
 // Varies; height of entire thing
 //H = 6.5; // with raised header
 H = 8.0; // with flat top
 
 SQUARE_OFF = true;
+SQUARE = 3.0;
 
 D_PLATE = 7.8;
-D_TACTILE = 3.5;
+D_TACTILE = 3.8;
 H_TACTILE = 3.0;
-D_PIN = 1.9;  
+D_PIN = 3.8;  
 H_BASE = 2.4;
 
 D_RIM = 10.0;
@@ -29,12 +32,12 @@ difference()
     union() {
         cylinder(h=H, d=D_PLATE);
         if (SQUARE_OFF) {
+            R = 1.0;
             hull() {
-                R = 0.5;
-                translate([D_RIM/2-R, SQUARE-R, 0]) cylinder(h=H_RIM,r=R);
-                translate([-D_RIM/2+R, SQUARE-R, 0]) cylinder(h=H_RIM,r=R);
-                translate([D_RIM/2-R, -D_RIM/2+R, 0]) cylinder(h=H_RIM,r=R);
-                translate([-D_RIM/2+R, -D_RIM/2+R, 0]) cylinder(h=H_RIM,r=R);
+                translate([D_RIM/2-R, SQUARE-R, 0]) cylinder(h=H_RIM, r=R);
+                translate([D_RIM/2-R, -D_RIM/2+R, 0]) cylinder(h=H_RIM, r=R);
+                translate([-D_RIM/2+R, SQUARE-R, 0]) cylinder(h=H_RIM, r=R);
+                translate([-D_RIM/2+R, -D_RIM/2+R, 0]) cylinder(h=H_RIM, r=R);
             }
         }
         else {
@@ -46,7 +49,7 @@ difference()
         cylinder(h=H_BASE, d=D_BASE);
 
     // pin
-    cylinder(h=H, d=D_PIN);
+    //cylinder(h=H, d=D_PIN);
 
     // switch
     cylinder(h=H_TACTILE, d=D_TACTILE);
