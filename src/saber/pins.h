@@ -77,12 +77,6 @@
 #define SABER_SUB_MODEL				0		
 // ----------------------------------
 
-// Non-RGB has never been useful.
-//#define LED_TYPE_RGB				1   // red-green-blue
-//#define LED_TYPE_BBG				2   // blue-blue-green
-//#define LED_TYPE_WWG				3   // white-white-green
-//#define LED_TYPE_GGC				4	// green-green-cyan
-
 #define SABER_SOUND_SD 				1	// external memory card
 #define SABER_SOUND_FLASH 			2	// M0 memory
 
