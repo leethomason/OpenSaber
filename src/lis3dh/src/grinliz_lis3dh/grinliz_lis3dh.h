@@ -12,7 +12,7 @@ public:
     void begin(SPIClass* spi);
 
 private:
-    uint32_t read(uint32_t);
+    uint32_t read8(uint32_t);
 
     SPIClass* _spi;
     int _cs;

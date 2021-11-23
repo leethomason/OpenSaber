@@ -1,6 +1,6 @@
 #include "grinliz_lis3dh.h"
 
-const SPISettings spiSettings(1000000, MSBFIRST, SPI_MODE0);
+const SPISettings spiSettings(500000, MSBFIRST, SPI_MODE0);
 
 #define LIS3DH_REG_STATUS1 0x07
 #define LIS3DH_REG_OUTADC1_L 0x08
@@ -42,13 +42,13 @@ const SPISettings spiSettings(1000000, MSBFIRST, SPI_MODE0);
 void GrinlizLIS3DH::begin(SPIClass* spi)
 {
     pinMode(_cs, OUTPUT);
-    digitalWrite(_cs, LOW);
+    digitalWrite(_cs, HIGH);
 
     _spi = spi;
     _spi->begin();
-    delay(40);
+    delay(10);
 
-    uint32_t id = read(LIS3DH_REG_WHOAMI);
+    uint32_t id = read8(LIS3DH_REG_WHOAMI);
     if (id != 0b00110011) {
         Serial.println("LIS3DH WhoAmI failed.\n");
     }
@@ -56,12 +56,14 @@ void GrinlizLIS3DH::begin(SPIClass* spi)
     Serial.println(id);
 }
 
-uint32_t GrinlizLIS3DH::read(uint32_t reg)
+uint32_t GrinlizLIS3DH::read8(uint32_t reg)
 {
     _spi->beginTransaction(spiSettings);
     digitalWrite(_cs, LOW);
 
-    uint32_t r = _spi->transfer(reg | 0x80);
+    _spi->transfer(reg | 0x80);
+    uint32_t r = _spi->transfer(0);
+
     digitalWrite(_cs, HIGH);
     _spi->endTransaction();
     return r;
