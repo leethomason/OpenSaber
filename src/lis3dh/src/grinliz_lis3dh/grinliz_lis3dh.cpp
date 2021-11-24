@@ -39,20 +39,12 @@ const SPISettings spiSettings(500000, MSBFIRST, SPI_MODE0);
 #define LIS3DH_REG_TIMELATENCY 0x3C
 #define LIS3DH_REG_TIMEWINDOW 0x3D
 
-static const uint8_t LIS3DH_DATARATE_400_HZ = 0b0111; //  400Hz
-static const uint8_t LIS3DH_DATARATE_200_HZ = 0b0110; //  200Hz
-static const uint8_t LIS3DH_DATARATE_100_HZ = 0b0101; //  100Hz
-static const uint8_t LIS3DH_DATARATE_50_HZ = 0b0100;  //   50Hz
-static const uint8_t LIS3DH_DATARATE_25_HZ = 0b0011;  //   25Hz
-static const uint8_t LIS3DH_DATARATE_10_HZ = 0b0010;  // 10 Hz
-static const uint8_t LIS3DH_DATARATE_1_HZ = 0b0001;   // 1 Hz
-
 static const uint8_t SPI_INCREMENT = 0x40;
 static const uint8_t SPI_READ = 0x80;
 
 #define DEBUG_DEEP 1
 
-void GrinlizLIS3DH::begin(SPIClass* spi)
+void GrinlizLIS3DH::begin(SPIClass* spi, uint8_t dataRate)
 {
     pinMode(_cs, OUTPUT);
     digitalWrite(_cs, HIGH);
@@ -68,7 +60,7 @@ void GrinlizLIS3DH::begin(SPIClass* spi)
     Serial.print("WhoAmI: ");
     Serial.println(id, HEX);
 
-    static const uint8_t ctrl1Val = 0x07 | (LIS3DH_DATARATE_1_HZ << 4);   // all axis, 100hz, normal power
+    static const uint8_t ctrl1Val = 0x07 | (dataRate << 4);   // all axis, 100hz, normal power
     static const uint8_t ctrl2Val = 0;  // high pass filter off
     static const uint8_t ctrl3Val = 0;  // interupts off
     // block data: 0 (should be 1?)
@@ -77,14 +69,19 @@ void GrinlizLIS3DH::begin(SPIClass* spi)
     // high res 0
     // self test 00
     // interface mode 0
-    static const uint8_t ctrl4Val = 0b00110000;
+    static const uint8_t ctrl4Val = 0b10110000;
     static const uint8_t ctrl5Val = 0b01000000; // enable FIFO
+
+    //static const uint8_t FIFO   = 0b01000000;
+    static const uint8_t STREAM = 0b10000000;
+    static const uint8_t fifoVal  = STREAM | 0x1f;    // mode and 32 bits of buffer
 
     writeReg(LIS3DH_REG_CTRL1, ctrl1Val);
     writeReg(LIS3DH_REG_CTRL2, ctrl2Val);
     writeReg(LIS3DH_REG_CTRL3, ctrl3Val);
     writeReg(LIS3DH_REG_CTRL4, ctrl4Val);
     writeReg(LIS3DH_REG_CTRL5, ctrl5Val);
+    writeReg(LIS3DH_REG_FIFOCTRL, fifoVal);
 
     #if DEBUG_DEEP
     Serial.print("CTRL-1: "); Serial.print(readReg(LIS3DH_REG_CTRL1), HEX); Serial.print(" expected:"); Serial.println(ctrl1Val, HEX);
@@ -93,6 +90,36 @@ void GrinlizLIS3DH::begin(SPIClass* spi)
     Serial.print("CTRL-4: "); Serial.print(readReg(LIS3DH_REG_CTRL4), HEX); Serial.print(" expected:"); Serial.println(ctrl4Val, HEX);
     Serial.print("CTRL-5: "); Serial.print(readReg(LIS3DH_REG_CTRL5), HEX); Serial.print(" expected:"); Serial.println(ctrl5Val, HEX);
     #endif
+}
+
+bool GrinlizLIS3DH::sample(int16_t* x, int16_t* y, int16_t* z)
+{
+    uint8_t fifoSrc = readReg(LIS3DH_REG_FIFOSRC);
+    //if (fifoSrc) {
+    //    Serial.print("fifoSrc="); Serial.println(fifoSrc, HEX);
+    //}
+    if (fifoSrc) {
+        uint8_t data[6];
+        readData(LIS3DH_REG_OUT_X_L, data, 6);
+        *x = (data[1] << 8) | data[0];
+        *y = (data[3] << 8) | data[2];
+        *z = (data[5] << 8) | data[4];
+        return true;
+    }
+    *x = 0;
+    *y = 0;
+    *z = 0;
+    return false;
+}
+
+bool GrinlizLIS3DH::sample(Fixed115* fx, Fixed115* fy, Fixed115* fz)
+{
+    int16_t x, y, z;
+    bool result = sample(&x, &y, &z);
+    *fx = Fixed115(x, 1280);
+    *fy = Fixed115(y, 1280);
+    *fz = Fixed115(z, 1280);
+    return result;
 }
 
 uint8_t GrinlizLIS3DH::readReg(uint8_t reg)
