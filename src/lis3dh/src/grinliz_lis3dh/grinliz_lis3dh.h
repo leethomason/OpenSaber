@@ -12,7 +12,11 @@ public:
     void begin(SPIClass* spi);
 
 private:
-    uint32_t read8(uint32_t);
+    uint8_t readReg(uint8_t);
+    void writeReg(uint8_t reg, uint8_t val);
+
+    void readData(uint8_t addr, uint8_t* buf, int n);
+    void writeData(uint8_t addr, const uint8_t* buf, int n);
 
     SPIClass* _spi;
     int _cs;
