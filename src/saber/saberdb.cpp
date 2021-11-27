@@ -291,18 +291,6 @@ uint8_t SaberDB::volume4() const
     return 1;
 }
 
-void SaberDB::setMotion(float v)
-{
-    v = constrain(v, 1.1, 10.0);
-    m_motion = v;
-}
-
-void SaberDB::setImpact(float v)
-{
-    v = constrain(v, 1.1, 10.0);
-    m_impact = v;
-}
-
 void SaberDB::setBladeColor(const RGB &color)
 {
     palette[m_currentPalette].bladeColor = color;

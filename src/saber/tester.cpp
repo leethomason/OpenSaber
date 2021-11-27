@@ -33,11 +33,14 @@
 #include "Button.h"
 #include "./src/util/Grinliz_Arduino_Util.h"
 #include "GrinlizLSM303.h"
+#include "./src/grinliz_lis3dh/grinliz_lis3dh.h"
 #include "bladeflash.h"
 
 using namespace osbr;
 
 Tester* Tester::s_instance = 0;
+
+extern ACCELEROMETER accelMag;
 
 static const int HOLD_TIME = Button::DEFAULT_HOLD_TIME + 100;
 static const int PRESS_TIME = Button::DEFAULT_BOUNCE_DURATION * 2;
@@ -187,7 +190,7 @@ public:
 
 	static const int NDATA = 20;
 	int nSamples;
-    Vec3<float> data[NDATA];
+    Vec3<Fixed115> data[NDATA];
     uint32_t startTime;
 
     virtual const char* name() const {
@@ -197,14 +200,12 @@ public:
     virtual void start(Tester* /*tester*/)
     {
         nSamples = 0;
-        GrinlizLSM303* accel = GrinlizLSM303::instance();
-        ASSERT(accel);
-        accel->flush();
+        accelMag.flushAccel(0);
         startTime = millis();
 
         while(nSamples < NDATA) {
-            int n = accel->read(data + nSamples, NDATA - nSamples);
-            nSamples += n;
+            accelMag.sampleAccel(data + nSamples);
+            nSamples++;
         }
         uint32_t deltaTime = millis() - startTime;
         Serial.print("Time to read (ms):"); Serial.println(deltaTime);
@@ -216,7 +217,7 @@ public:
         for(int i=0; i<NDATA; ++i) {
             Log.p("Accel x=").p(data[i].x).p(" y=").p(data[i].y).p(" z=").p(data[i].z).eol();
             
-            float g2;
+            Fixed115 g2;
             calcGravity2(data[i].x, data[i].y, data[i].z, &g2, 0);
             TEST_RANGE(0.6f, 1.4f, g2);
 

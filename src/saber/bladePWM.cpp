@@ -51,7 +51,7 @@
 
 using namespace osbr;
 
-void calcGravity2(float ax, float ay, float az, float* g2, float* g2Normal)
+void calcGravity2(Fixed115 ax, Fixed115 ay, Fixed115 az, Fixed115* g2, Fixed115* g2Normal)
 {
     if (g2) {
         *g2 = ax*ax + ay*ay + az*az;

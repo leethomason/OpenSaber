@@ -29,7 +29,7 @@
 #include "rgb.h"
 
 
-void calcGravity2(float ax, float ay, float az, float* g2, float* g2Normal);
+void calcGravity2(Fixed115 ax, Fixed115 ay, Fixed115 az, Fixed115* g2, Fixed115* g2Normal);
 
 /*
     SaberDB: the database that holds the blade colors.

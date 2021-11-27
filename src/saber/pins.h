@@ -112,11 +112,8 @@
 // sabers on the Teensy platform.
 #define PCB_ITSY_3A				   23
 
-#define SABER_ACCELEROMETER_NONE 		0
-#define SABER_ACCELEROMETER_LIS3DH		1
-#define SABER_ACCELEROMETER_NXP			2
-#define SABER_ACCELEROMETER_LIS3DH_SPI 	3	// accel
-#define SABER_ACCELEROMETER_LSM303 		4	// SPI, accel, magnetometer
+#define SABER_ACCELEROMETER_LIS3DH		1	// SPI, accel
+#define SABER_ACCELEROMETER_LSM303 		2	// SPI, accel, magnetometer
 
 #if SABER_MODEL == SABER_MODEL_GECKO
 	#define PCB_VERSION 				PCB_VERSION_1
@@ -976,7 +973,7 @@
 	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
 	#define SABER_VOLTMETER() 			1
 	#define VOLTMETER_TUNE				1040
-	#define ID_STR "Vigilance 2Cree XPE2 RGB."
+	#define ID_STR "Vigilance 2 Cree XPE2 RGB."
 	
 	#define SABER_UI_LED				SABER_LED_DOTSTAR
 	#define SABER_UI_BRIGHTNESS			16
@@ -1260,7 +1257,8 @@
 	#define ACCEL_PERP_BUTTON     2
 
 #elif (PCB_VERSION == PCB_ITSY_3A)
-	#define SABER_ACCELEROMETER SABER_ACCELEROMETER_LIS3DH_SPI
+	#define SABER_ACCELEROMETER SABER_ACCELEROMETER_LIS3DH
+	#define ACCELEROMETER 		GrinlizLIS3DH
 
 	#define PIN_I2S_LRCLK		0
 	#define PIN_I2S_BITCLK		1

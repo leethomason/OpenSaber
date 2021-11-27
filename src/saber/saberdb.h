@@ -53,15 +53,6 @@ public:
     // Turns sonud on/off, and/or sets volume.
     void setVolume4(int vol);
 
-    float motion() const          {
-        return m_motion;
-    }
-    void setMotion(float motion);
-    float impact() const          {
-        return m_impact;
-    }
-    void setImpact(float impact);
-
     // Palette
     const osbr::RGB& bladeColor() const   {
         return palette[m_currentPalette].bladeColor;

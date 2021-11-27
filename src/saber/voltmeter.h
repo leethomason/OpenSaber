@@ -77,7 +77,7 @@ private:
     uint32_t m_range = 0;
     uint32_t m_tune = 0;
     uint32_t m_eased = 0;
-    AverageSample<uint16_t, uint32_t, N_SAMPLES> m_averagePower;
+    AverageSample<uint32_t, N_SAMPLES> m_averagePower;
 };
 
 #endif // SABER_VOLTMETER_INCLUDED

@@ -82,7 +82,7 @@ private:
 	Vec3<float> m_normal;
 	Vec3<float> m_origin;
 	Vec3<int32_t> m_prevSample;
-	AverageSample<int32_t, int32_t, SWING_SAMPLES> swingAve;
+	AverageSample<int32_t, SWING_SAMPLES> swingAve;
 };
 
 class MagFilter
@@ -99,7 +99,7 @@ public:
 
 private:
 	static const int32_t SCALE = 4;
-	AverageSample<int32_t, int32_t, FILTER_MAG_X> aveMagX;
-	AverageSample<int32_t, int32_t, FILTER_MAG_Y> aveMagY;
-	AverageSample<int32_t, int32_t, FILTER_MAG_Z> aveMagZ;
+	AverageSample<int32_t, FILTER_MAG_X> aveMagX;
+	AverageSample<int32_t, FILTER_MAG_Y> aveMagY;
+	AverageSample<int32_t, FILTER_MAG_Z> aveMagZ;
 };

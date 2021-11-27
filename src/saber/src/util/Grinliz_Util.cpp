@@ -185,7 +185,7 @@ uint32_t hash32(const char* v, uint32_t h)
 bool TestAverageSample()
 {
     {
-        AverageSample<Vec3<int>, Vec3<int>, 4> ave(Vec3<int>(2, 4, 8));
+        AverageSample<Vec3<int>, 4> ave(Vec3<int>(2, 4, 8));
         Vec3<int> r = ave.average();
         TEST_IS_TRUE(r.x == 2);
         TEST_IS_TRUE(r.y == 4);
@@ -205,7 +205,7 @@ bool TestAverageSample()
         TEST_IS_TRUE(ave.average().isZero());
     }
     {
-        AverageSample<uint16_t, uint32_t, 256> ave(4000);
+        AverageSample<uint32_t, 256> ave(4000);
         TEST_IS_TRUE(ave.average() == 4000);
         for (int i = 0; i < 128; i++) {
             ave.push(8000);
@@ -213,7 +213,7 @@ bool TestAverageSample()
         TEST_IS_TRUE(ave.average() == 6000);
     }
     {
-        AverageSample<float, float, 2> ave(0);
+        AverageSample<float, 2> ave(0);
         ave.push(1.0f);
         ave.push(1.0f);
         ave.push(0.0f);

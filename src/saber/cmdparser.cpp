@@ -29,10 +29,13 @@
 #include "Tester.h"
 #include "saberUtil.h"
 #include "GrinlizLSM303.h"
+#include "./src/grinliz_lis3dh/grinliz_lis3dh.h"
 #include "manifest.h"
 #include "voltmeter.h"
 
 using namespace osbr;
+
+extern ACCELEROMETER accelMag;
 
 CMDParser::CMDParser(SaberDB* _db, const Manifest& _manifest) : manifest(_manifest) {
     database = _db;
@@ -98,30 +101,6 @@ bool CMDParser::push(int c)
     return processed;
 }
 
-
-void CMDParser::printXYZ(const Vec3<int32_t>& v) const
-{
-    Serial.print("[");
-    Serial.print(v.x);
-    Serial.print(",");
-    Serial.print(v.y);
-    Serial.print(",");
-    Serial.print(v.z);
-    Serial.print("]");
-}
-
-
-void CMDParser::printXYZ(const Vec3<float>& v) const
-{
-    Serial.print("[");
-    Serial.print(v.x);
-    Serial.print(",");
-    Serial.print(v.y);
-    Serial.print(",");
-    Serial.print(v.z);
-    Serial.print("]");
-}
-
 bool CMDParser::processCMD() 
 {
     static const char BC[]      = "bc";
@@ -145,6 +124,7 @@ bool CMDParser::processCMD()
     static const int DELAY = 20;  // don't saturate the serial line. Too much for SoftwareSerial.
 
     RGB c(0);
+    SerialLog serialLog;    // guarantees log is attached to Serial
 
     tokenize();
     //Serial.print("CMD:"); Serial.print(action.c_str()); Serial.print(":"); Serial.println(value.c_str());
@@ -237,22 +217,6 @@ bool CMDParser::processCMD()
         }
         Serial.print('\n');
     }
-    else if (action == MOTION) {
-        if (isSet) {
-            float v = atof(value.c_str());
-            database->setMotion(v);
-        }
-        printLead(action.c_str());
-        Serial.println(database->motion());
-    }
-    else if (action == IMPACT) {
-        if (isSet) {
-            float v = atof(value.c_str());
-            database->setImpact(v);
-        }
-        printLead(action.c_str());
-        Serial.println(database->impact());
-    }
     else if (action == ID) {
         printLead(action.c_str());
         Serial.println(F(ID_STR));
@@ -272,55 +236,53 @@ bool CMDParser::processCMD()
 #endif
     }
     else if (action == ACCEL) {
-        GrinlizLSM303* accel = GrinlizLSM303::instance();
-        accel->flush();
+        accelMag.flushAccel(0);
 
         uint32_t start = millis();
         static const int N = 4;
         int n = 0;
-        Vec3<float> data[N];
+        Vec3<Fixed115> data[N];
         while(n < N) {
-            int read = accel->read(data + n, N - n);
-            n += read;
+            accelMag.sampleAccel(data + n);
+            n++;
         }
         float samplesPerSecond = N * 1000.0f / (millis() - start);
 
         for(int i=0; i<N; ++i) {
-            printXYZ(data[i]);
-
-            float g2, g2n;
+            Fixed115 g2, g2n;
             calcGravity2(data[i].x, data[i].y, data[i].z, &g2, &g2n);
 
-            Serial.print(" g="); Serial.print(sqrt(g2));
-            Serial.print(" gN="); Serial.println(sqrt(g2n));
+            Log.v3(data[i]).p(" g2=").p(g2).p(" g2N=").p(g2n);
         }
-        Serial.print("Samples per second: "); Serial.println(samplesPerSecond);
+        Log.p("Samples per second: ").p(samplesPerSecond).eol();
 
         delay(20);
-        Vec3<float> mag;
-        if (accel->readMag(0, &mag) == 0) {
-            Serial.println("no mag data.");
+        Vec3<int32_t> mag;
+        if (!accelMag.hasMag()) {
+            Log.p("No magnetometer.").eol();
         }
         else {
-            int count = 0;
-            uint32_t start = millis();
-            while(count < 10) {
-                if (accel->readMag(0, &mag))
-                    count++;
+            if (!accelMag.sampleMag(&mag)) {
+                Log.p("No magnetometer data.").eol();
             }
-            uint32_t end = millis();
+            else {
+                int count = 0;
+                uint32_t start = millis();
+                while(count < 10) {
+                    if (accelMag.sampleMag(&mag))
+                        count++;
+                }
+                uint32_t end = millis();
 
-            Serial.print("Mag:");
-            printXYZ(mag);
-            Serial.println("");
+                Log.p("Mag: ").v3(mag).eol();
 
-            Vec3<int32_t> vMin = accel->getMagMin();
-            Vec3<int32_t> vMax = accel->getMagMax();
-            Vec3<int32_t> vDelta = vMax - vMin;
-            Serial.print("Mag delta:");
-            printXYZ(vDelta);
-            Serial.println("");
-            Serial.print("Mag per second: "); Serial.println(10 * 1000.0f / (end - start));
+                Vec3<int32_t> vMin = accelMag.getMagMin();
+                Vec3<int32_t> vMax = accelMag.getMagMax();
+                Vec3<int32_t> vDelta = vMax - vMin;
+
+                Log.p("Mag delta: ").v3(vDelta).eol();
+                Log.p("Mag/s: ").p(10 * 1000.0f / (end - start)).eol();
+            }
         }
     }
     else if (action == PLAY) {
@@ -362,11 +324,11 @@ bool CMDParser::processCMD()
         
         delay(DELAY);
         printLead(MOTION);
-        Serial.println(database->motion());
+        Serial.println(DEFAULT_G_FORCE_MOTION);
         
         delay(DELAY);
         printLead(IMPACT);
-        Serial.println(database->impact());
+        Serial.println(DEFAULT_G_FORCE_IMPACT);
 
         delay(DELAY);
         printLead(VOLTS);

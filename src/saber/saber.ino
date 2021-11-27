@@ -41,6 +41,7 @@
 
 #include "DotStar.h"
 #include "GrinlizLSM303.h"
+#include "./src/grinliz_lis3dh/grinliz_lis3dh.h"
 #include "voltmeter.h"
 #include "sfx.h"
 #include "saberdb.h"
@@ -92,8 +93,6 @@ Tester      tester;
 Swing       swing;
 MagFilter   magFilter;
 int         swingVol = 0;
-AverageSample<Vec3<int32_t>, Vec3<int32_t>, 12> averageAccel(Vec3<int32_t>(0, 0, 0));
-AverageSample<float, float, 3> fastG2;
 
 #ifdef SABER_NUM_LEDS
 DotStar dotstar;                    // Hardware controller.
@@ -102,7 +101,8 @@ DotStar dotstar;                    // Hardware controller.
 DotStarUI dotstarUI;                // It is the DotStarUI regardless of physical pixel protocol
 #endif
 
-GrinlizLSM303 accelMag;
+ACCELEROMETER accelMag(PIN_ACCEL_EN);
+
 #if SABER_DISPLAY == SABER_DISPLAY_128_32
 static const int DISPLAY_TIMER = 23;
 #else
@@ -210,7 +210,7 @@ void setup()
 
     Log.p("Init accelerometer and magnemometer.").eol();
     delay(10);
-    accelMag.begin();
+    accelMag.begin(&SPI, LIS3DH_DATARATE_100_HZ);
     Log.p("Min/Max=").v3(accelMag.getMagMin()).p(" ").v3(accelMag.getMagMax()).eol();
     delay(10);
 
@@ -437,6 +437,7 @@ void buttonAHoldHandler(const Button& button)
 void processColorWheel(bool commitChange)
 {
     if (uiMode.mode() == UIMode::COLOR_WHEEL) {
+        /*
         Vec3<int32_t> ave = averageAccel.average();
         //FixedNorm x(ave[ACCEL_NORMAL_BUTTON], GrinlizLSM303::DIV);
         FixedNorm x(ave[ACCEL_PERP_BUTTON], GrinlizLSM303::DIV);
@@ -457,6 +458,8 @@ void processColorWheel(bool commitChange)
             saberDB.setImpactColor(rgbInv);
             syncToDB();
         }
+        */
+        ASSERT(false);
     }
 }
 
@@ -477,26 +480,12 @@ void processAccel(uint32_t msec, uint32_t /*delta*/)
 
     // Consistently process the accelerometer queue, even if we don't use the values.
     // Also look for stalls and hitches.
-    static const int N_ACCEL = 4;
-    Vec3<float> data[N_ACCEL];
-    Vec3<int32_t> intData[N_ACCEL];
-
-    int available = accelMag.available();
-    if (available > N_ACCEL) {
-        accelMag.flush(available - N_ACCEL);
-        Log.p("Accelerometer samples disposed=").p(available - N_ACCEL).eol();
-    }
-
-    int n = accelMag.readInner(intData, data, N_ACCEL);
-    ASSERT(n <= N_ACCEL);
+    accelMag.flushAccel(4);
 
     Vec3<int32_t> magData;
     // readMag() should only return >0 if there is new data from the hardware.
-    if (accelMag.readMag(&magData, 0) > 0) {
+    if (accelMag.hasMag() && accelMag.sampleMag(&magData)) {
         
-        static ProfileData magProfData("processMag");
-        ProfileBlock magProfBlock(&magProfData);
-
         static const uint32_t MAG_INTERVAL = 16;
         static uint32_t lastMagData = 0;
         int nMagData = 1;
@@ -549,21 +538,18 @@ void processAccel(uint32_t msec, uint32_t /*delta*/)
 #endif        
 
     }
-    for (int i = 0; i < n; ++i)
-    {
-        float g2Normal, g2;
-        float ax = data[i].x;
-        float ay = data[i].y;
-        float az = data[i].z;
-        calcGravity2(ax, ay, az, &g2, &g2Normal);
 
-        averageAccel.push(intData[i]);
-        fastG2.push(g2);
+    Vec3<Fixed115> accelData;
+    while(accelMag.sampleAccel(&accelData.x, &accelData.y, &accelData.z))
+    {
+        Fixed115 g2Normal, g2;
+        calcGravity2(accelData.x, accelData.y, accelData.z, &g2, &g2Normal);
 
         if (bladeState.state() == BLADE_ON)
         {
-            float motion = saberDB.motion();
-            float impact = saberDB.impact();
+            static const Fixed115 motion = DEFAULT_G_FORCE_MOTION;
+            //static const Fixed115 impact = DEFAULT_G_FORCE_IMPACT;
+            static const Fixed115 impact2 = DEFAULT_G_FORCE_IMPACT * DEFAULT_G_FORCE_IMPACT;
 
             // This workaround no longer makes sense with smoothswing,
             // and the much more compressed storage.
@@ -582,7 +568,7 @@ void processAccel(uint32_t msec, uint32_t /*delta*/)
             //            bool sfxOverDue = false;
             //#endif
 
-            if ((g2Normal >= impact * impact))
+            if ((g2Normal >= impact2))
             {
                 // Always flash the blade. Maybe play impact sounds.
                 // It doesn't sound good to have too many impacts chained together.
@@ -597,7 +583,7 @@ void processAccel(uint32_t msec, uint32_t /*delta*/)
 
                     if (sound)
                     {
-                        Log.p("Impact. g=").p(sqrt(g2)).eol();
+                        Log.p("Impact. g=").p(g2.sqrt()).eol();
                         lastImpactTime = msec;
                     }
                 }
@@ -606,7 +592,7 @@ void processAccel(uint32_t msec, uint32_t /*delta*/)
             {
                 bool sound = sfx.playSound(SFX_MOTION, SFX_GREATER);
                 if (sound) {
-                    Log.p("Motion. g=").p(sqrt(g2)).eol();
+                    Log.p("Motion. g=").p(g2.sqrt()).eol();
                 }
             }
         }
