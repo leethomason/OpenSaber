@@ -95,9 +95,6 @@ void GrinlizLIS3DH::begin(SPIClass* spi, uint8_t dataRate)
 bool GrinlizLIS3DH::sample(int16_t* x, int16_t* y, int16_t* z)
 {
     uint8_t fifoSrc = readReg(LIS3DH_REG_FIFOSRC);
-    //if (fifoSrc) {
-    //    Serial.print("fifoSrc="); Serial.println(fifoSrc, HEX);
-    //}
     if (fifoSrc) {
         uint8_t data[6];
         readData(LIS3DH_REG_OUT_X_L, data, 6);
@@ -110,6 +107,15 @@ bool GrinlizLIS3DH::sample(int16_t* x, int16_t* y, int16_t* z)
     *y = 0;
     *z = 0;
     return false;
+}
+
+void GrinlizLIS3DH::flushAccel(int reserve)
+{
+    int fifoSrc = readReg(LIS3DH_REG_FIFOSRC) - reserve;
+    for(int i=0; i<fifoSrc; i++) {
+        int16_t x=0, y=0, z=0;
+        sample(&x, &y, &z);
+    }
 }
 
 bool GrinlizLIS3DH::sampleAccel(Fixed115* fx, Fixed115* fy, Fixed115* fz)

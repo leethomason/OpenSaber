@@ -15,13 +15,13 @@ void setup() {
     //Log.p("Starting Accel/Gyro in I2C mode.").eol();
     //delay(10);
     accel.begin(&SPI, LIS3DH_DATARATE_1_HZ);
+    accel.flushAccel(0);
 }
 
 void loop()
 {
-    //int16_t x, y, z;
     Fixed115 x, y, z;
-    while (accel.sample(&x, &y, &z)) {
+    while (accel.sampleAccel(&x, &y, &z)) {
         Log.p("x=").p(x).p(" y=").p(y).p(" z=").p(z).eol();
     }
 }

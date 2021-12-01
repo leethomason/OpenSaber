@@ -211,6 +211,7 @@ void setup()
     Log.p("Init accelerometer and magnemometer.").eol();
     delay(10);
     accelMag.begin(&SPI, LIS3DH_DATARATE_100_HZ);
+    accelMag.flushAccel(0);
     Log.p("Min/Max=").v3(accelMag.getMagMin()).p(" ").v3(accelMag.getMagMax()).eol();
     delay(10);
 

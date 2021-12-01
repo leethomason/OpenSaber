@@ -534,7 +534,7 @@ private:
 /**
  * An average of a range of samples.
  */
-template<typename TYPE, typename SUMTYPE, int N>
+template<typename TYPE, int N>
 class AverageSample
 {
 public:
@@ -583,8 +583,8 @@ public:
 	bool origin() const { return m_pos == 0; }
 
 private:
-    SUMTYPE m_average;
-	SUMTYPE m_total = 0;
+    TYPE m_average;
+	TYPE m_total = 0;
     int m_pos = 0;
     TYPE m_sample[N];
 };
@@ -714,7 +714,6 @@ class SPLog
 {
 public:
 	void attachSerial(Stream* stream);
-	void attachLog(Stream* stream);
 
 	const SPLog& p(const char v[], int width=0) const;
 	const SPLog& p(char v) const;
@@ -738,6 +737,10 @@ public:
 	}
 	const SPLog& v3(const Vec3<int32_t>& v, const char* bracket=0) const {
 		return v3(v.x, v.y, v.z, bracket);
+	}
+	template<typename S, int D>
+	const SPLog& v3(const Vec3<FixedT<S, D>>& v, const char* bracket=0) const {
+		return v3(v.x.toFloat(), v.y.toFloat(), v.z.toFloat(), bracket);
 	}
 
 	// Templated print, generally of alternate string class.
@@ -763,12 +766,23 @@ public:
 
 	void eol() const;
 
+	Stream *getStream() const { return serialStream; }
+
 private:
 	Stream* serialStream = 0;
-	Stream* logStream = 0;
 };
 
 extern SPLog Log;
+
+class SerialLog
+{
+public:
+	SerialLog();
+	~SerialLog();
+
+private: 
+	Stream *_savedStream = 0;
+};
 
 #endif // GRINLIZ_UTIL_INCLUDED
 
