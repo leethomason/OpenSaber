@@ -165,6 +165,7 @@ void DotStarUI::Draw(osbr::RGB *led, int nLED, uint32_t time, uint32_t delta,
         }
         break;
 
+#if 0
         case UIMode::COLOR_WHEEL:
         {
             led[0].set(0xff0000);
@@ -175,7 +176,7 @@ void DotStarUI::Draw(osbr::RGB *led, int nLED, uint32_t time, uint32_t delta,
             }
         }
         break;
-
+#endif
         default:
             break;
         }
@@ -382,6 +383,7 @@ void Digit4UI::Draw(UIMode mode, const UIRenderData *data)
         scratch[4] = 0;
         break;
 
+#if 0
     case UIMode::COLOR_WHEEL:
         scratch[0] = 'C';
         scratch[1] = 'L';
@@ -389,6 +391,7 @@ void Digit4UI::Draw(UIMode mode, const UIRenderData *data)
         scratch[3] = 0;
         scratch[4] = 0;
         break;
+#endif
 
     case UIMode::NUM_MODES:
     default:

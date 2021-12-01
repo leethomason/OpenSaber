@@ -293,7 +293,7 @@ void VectorUI::Draw(
     }
     
     // Color dial
-    if (mode == UIMode::NORMAL || mode == UIMode::VOLUME || mode == UIMode::PALETTE || mode == UIMode::COLOR_WHEEL) {
+    if (mode == UIMode::NORMAL || mode == UIMode::VOLUME || mode == UIMode::PALETTE /*|| mode == UIMode::COLOR_WHEEL*/) {
         if (hProp != h) {
             hTime += deltaTime;
             

@@ -23,7 +23,7 @@
 #pragma once
 
 #include <stdint.h>
-#include "./src/util/Grinliz_Util.h"
+#include "../util/Grinliz_Util.h"
 
 class GrinlizLSM303
 {

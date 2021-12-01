@@ -149,9 +149,9 @@ void UIModeUtil::nextMode()
         Log.p("mode: VOLUME").eol();
         break;
 
-    case UIMode::COLOR_WHEEL:
-        Log.p("mode: COLOR_WHEEL").eol();
-        break;
+    //case UIMode::COLOR_WHEEL:
+    //    Log.p("mode: COLOR_WHEEL").eol();
+    //    break;
 
     case UIMode::MEDITATION:
         Log.p("mode: MEDITATION").eol();

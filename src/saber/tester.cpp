@@ -31,10 +31,11 @@
 #include "unittest.h"
 #include "saberdb.h"
 #include "Button.h"
-#include "./src/util/Grinliz_Arduino_Util.h"
-#include "GrinlizLSM303.h"
-#include "./src/grinliz_lis3dh/grinliz_lis3dh.h"
 #include "bladeflash.h"
+
+#include "./src/util/Grinliz_Arduino_Util.h"
+#include "./src/lsm303/grinliz_LSM303.h"
+#include "./src/lis3dh/grinliz_lis3dh.h"
 
 using namespace osbr;
 

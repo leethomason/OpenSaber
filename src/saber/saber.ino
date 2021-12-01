@@ -26,22 +26,24 @@
 // Arduino Libraries
 #include <Adafruit_ZeroI2S.h>
 #include <Adafruit_ZeroDMA.h>
+
 #include "./src/nada_flashmem/Nada_SPIFLash.h"
 #include "./src/nada_flashmem/Nada_FlashTransport_SPI.h"
+#include "./src/util/Grinliz_Arduino_Util.h"
+#include "./src/lsm303/grinliz_LSM303.h"
+#include "./src/lis3dh/grinliz_lis3dh.h"
+
 #include <Wire.h>
 #include <SPI.h>
 
 #include "OLED_SSD1306.h"
 #include "Button.h"
-#include "./src/util/Grinliz_Arduino_Util.h"
 
 // Includes
 // -- Must be first. Has configuration. -- //
 #include "pins.h"
 
 #include "DotStar.h"
-#include "GrinlizLSM303.h"
-#include "./src/grinliz_lis3dh/grinliz_lis3dh.h"
 #include "voltmeter.h"
 #include "sfx.h"
 #include "saberdb.h"
@@ -321,11 +323,11 @@ void buttonAReleaseHandler(const Button&)
     ledA.blink(0, 0);
     ledA.set(true); // power is on.
 
-    if (uiMode.mode() == UIMode::COLOR_WHEEL && colorWasProcessed) {
-        processColorWheel(true);
-        bladePWM.setRGB(osbr::RGB(0));
-        colorWasProcessed = false;
-    }
+    //if (uiMode.mode() == UIMode::COLOR_WHEEL && colorWasProcessed) {
+    //    processColorWheel(true);
+    //    bladePWM.setRGB(osbr::RGB(0));
+    //    colorWasProcessed = false;
+    //}
 }
 
 bool setVolumeFromHoldCount(int count)
@@ -435,10 +437,10 @@ void buttonAHoldHandler(const Button& button)
     }
 }
 
-void processColorWheel(bool commitChange)
+#if 0
+void processColorWheel(bool /*commitChange*/)
 {
     if (uiMode.mode() == UIMode::COLOR_WHEEL) {
-        /*
         Vec3<int32_t> ave = averageAccel.average();
         //FixedNorm x(ave[ACCEL_NORMAL_BUTTON], GrinlizLSM303::DIV);
         FixedNorm x(ave[ACCEL_PERP_BUTTON], GrinlizLSM303::DIV);
@@ -458,11 +460,10 @@ void processColorWheel(bool commitChange)
             saberDB.setBladeColor(rgb);
             saberDB.setImpactColor(rgbInv);
             syncToDB();
-        }
-        */
-        ASSERT(false);
+        }    
     }
 }
+#endif
 
 void processSerial() 
 {
@@ -634,14 +635,14 @@ void loop() {
     processAccel(msec, delta);
 
     bladeFlash.tick(msec);
-    if (uiMode.mode() == UIMode::COLOR_WHEEL && buttonA.held()) {
-        colorWasProcessed = true;
-        processColorWheel(false);           
-        bladePWM.setRGB(bladeFlash.getColor());
-    }
-    else {
-        bladeState.process(&bladePWM, bladeFlash, millis());
-    }
+    //if (uiMode.mode() == UIMode::COLOR_WHEEL && buttonA.held()) {
+    //    colorWasProcessed = true;
+    //    processColorWheel(false);           
+    //    bladePWM.setRGB(bladeFlash.getColor());
+    //}
+    //else {
+    bladeState.process(&bladePWM, bladeFlash, millis());
+    //}
     
     sfx.process(bladeState.state(), delta, &swingVol);
     if (swingVol == 0) {

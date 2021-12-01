@@ -22,14 +22,15 @@
 
 #include <Arduino.h>
 
+#include "./src/lsm303/grinliz_LSM303.h"
+#include "./src/lis3dh/grinliz_lis3dh.h"
+
 #include "cmdparser.h"
 #include "saberdb.h"
 #include "bladePWM.h"
 #include "SFX.h"
 #include "Tester.h"
 #include "saberUtil.h"
-#include "GrinlizLSM303.h"
-#include "./src/grinliz_lis3dh/grinliz_lis3dh.h"
 #include "manifest.h"
 #include "voltmeter.h"
 
@@ -239,12 +240,12 @@ bool CMDParser::processCMD()
         accelMag.flushAccel(0);
 
         uint32_t start = millis();
-        static const int N = 4;
+        static const int N = 10;
         int n = 0;
         Vec3<Fixed115> data[N];
         while(n < N) {
-            accelMag.sampleAccel(data + n);
-            n++;
+            if(accelMag.sampleAccel(data + n))
+                n++;
         }
         float samplesPerSecond = N * 1000.0f / (millis() - start);
 
@@ -252,7 +253,7 @@ bool CMDParser::processCMD()
             Fixed115 g2, g2n;
             calcGravity2(data[i].x, data[i].y, data[i].z, &g2, &g2n);
 
-            Log.v3(data[i]).p(" g2=").p(g2).p(" g2N=").p(g2n);
+            Log.v3(data[i]).p(" g2=").p(g2).p(" g2N=").p(g2n).p(" g=").p(g2.sqrt()).eol();
         }
         Log.p("Samples per second: ").p(samplesPerSecond).eol();
 
