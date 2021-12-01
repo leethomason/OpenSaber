@@ -42,7 +42,7 @@ const SPISettings spiSettings(500000, MSBFIRST, SPI_MODE0);
 static const uint8_t SPI_INCREMENT = 0x40;
 static const uint8_t SPI_READ = 0x80;
 
-#define DEBUG_DEEP 1
+#define DEBUG_DEEP 0
 
 void GrinlizLIS3DH::begin(SPIClass* spi, uint8_t dataRate)
 {
