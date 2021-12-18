@@ -205,8 +205,8 @@ public:
         startTime = millis();
 
         while(nSamples < NDATA) {
-            accelMag.sampleAccel(data + nSamples);
-            nSamples++;
+            if(accelMag.sampleAccel(data + nSamples))
+                nSamples++;
         }
         uint32_t deltaTime = millis() - startTime;
         Serial.print("Time to read (ms):"); Serial.println(deltaTime);
@@ -255,16 +255,18 @@ public:
 
     virtual void start(Tester*)
     {
-        GrinlizLSM303* accel = GrinlizLSM303::instance();
-        ASSERT(accel);
-        
-        if (accel->magDataValid()) {
+        if (!accelMag.hasMag()) {
+            Serial.println("No magnetometer.");
+            return;
+        }
+
+        if (accelMag.magDataValid()) {
             nSamples = 0;
             startTime = millis();
 
             while(nSamples < NDATA) {
                 Vec3<int32_t> data;
-                int n = accel->readMag(&data, 0);
+                int n = accelMag.sampleMag(&data);
                 nSamples += n;
             }
             uint32_t deltaTime = millis() - startTime;

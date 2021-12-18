@@ -28,7 +28,7 @@
 class GrinlizLSM303
 {
 public:
-    GrinlizLSM303() { s_instance = this; }
+    GrinlizLSM303() {}
 
     // divisor for raw data
     static const int DIV = 4096;    
@@ -48,7 +48,7 @@ public:
        The min/max is tracked by the library, and the x/y/z values are probably
        the ones to use.
     */
-    int readMag(Vec3<int32_t>* rawData, Vec3<float>* data);
+    int sampleMag(Vec3<int32_t>* rawData);
     bool recalibrateMag();
 
     const Vec3<int32_t>& getMagMin() const { return m_min; }
@@ -63,8 +63,6 @@ public:
     // Reduces power consumption at lower frequency
     void setMagDataRate(int hz);   // 10, 20, 50, 100
     int getMagDataRate() const;
-
-    static GrinlizLSM303* instance() { return s_instance; }
 
 private:
     static bool dataValid(int t, const Vec3<int32_t>& a, const Vec3<int32_t>& b) {
@@ -81,8 +79,6 @@ private:
 
     Vec3<int32_t> m_min, m_max;
     Vec3<int32_t> m_minQueued, m_maxQueued;
-
-    static GrinlizLSM303* s_instance;
 
     void write8(uint8_t address, uint8_t reg, uint8_t value) const;
     uint8_t read8(uint8_t address, uint8_t reg) const;

@@ -122,7 +122,6 @@ enum
     LSM303_MAGRATE_220 = 0x07  // 200 Hz
 };
 
-GrinlizLSM303* GrinlizLSM303::s_instance;
 
 bool GrinlizLSM303::begin()
 {
@@ -363,7 +362,7 @@ bool GrinlizLSM303::recalibrateMag()
     return false;
 }
 
-int GrinlizLSM303::readMag(Vec3<int32_t>* rawData, Vec3<float>* data)
+int GrinlizLSM303::sampleMag(Vec3<int32_t>* rawData)
 {
     uint8_t status = read8(LSM303_ADDRESS_MAG, STATUS_REG_M);
     if ((status & (1<<3)) == 0 && (status & (1<<7)) == 0) 
@@ -409,22 +408,9 @@ int GrinlizLSM303::readMag(Vec3<int32_t>* rawData, Vec3<float>* data)
     m_maxQueued.y = glMax(y, m_maxQueued.y);
     m_maxQueued.z = glMax(z, m_maxQueued.z);
 
-    if (rawData) {
-        rawData->x = x;
-        rawData->y = y;
-        rawData->z = z; 
-    }
-    if (data) {
-        float vx = -1.0f + 2.0f * (x - m_min.x) / (m_max.x - m_min.x);
-        float vy = -1.0f + 2.0f * (y - m_min.y) / (m_max.y - m_min.y);
-        float vz = -1.0f + 2.0f * (z - m_min.z) / (m_max.z - m_min.z);
-
-        float len2 = vx * vx + vy * vy + vz * vz;
-        float lenInv = 1.0f / sqrtf(len2);
-        data->x = vx * lenInv;
-        data->y = vy * lenInv;
-        data->z = vz * lenInv;
-    }
+    rawData->x = x;
+    rawData->y = y;
+    rawData->z = z; 
     return 1;
 }
 

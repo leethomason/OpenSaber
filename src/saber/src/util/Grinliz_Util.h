@@ -597,7 +597,7 @@ public:
 	StepProp() {}
 
 	void set(Fixed115 f) { step = f; }
-	void set(float f) { step = Fixed115(f); }
+	void set(float f) { step.set(f); }
 
 	int tick(uint32_t delta) {
 		value += step * delta;

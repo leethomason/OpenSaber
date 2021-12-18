@@ -47,7 +47,8 @@ public:
         Vec3<int32_t> v = {0, 0, 0};
         return v;
     }
-    void recalibrateMag() {}
+    bool magDataValid() const { return false; }
+        void recalibrateMag() {}
 
     private:
         uint8_t readReg(uint8_t);
