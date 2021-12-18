@@ -42,7 +42,7 @@ const SPISettings spiSettings(500000, MSBFIRST, SPI_MODE0);
 static const uint8_t SPI_INCREMENT = 0x40;
 static const uint8_t SPI_READ = 0x80;
 
-#define DEBUG_DEEP 1
+#define DEBUG_DEEP 0
 
 void GrinlizLIS3DH::begin(SPIClass* spi, uint8_t dataRate)
 {
@@ -90,6 +90,18 @@ void GrinlizLIS3DH::begin(SPIClass* spi, uint8_t dataRate)
     Serial.print("CTRL-4: "); Serial.print(readReg(LIS3DH_REG_CTRL4), HEX); Serial.print(" expected:"); Serial.println(ctrl4Val, HEX);
     Serial.print("CTRL-5: "); Serial.print(readReg(LIS3DH_REG_CTRL5), HEX); Serial.print(" expected:"); Serial.println(ctrl5Val, HEX);
     #endif
+
+    delay(10);  // just in case
+    flush();
+}
+
+
+void GrinlizLIS3DH::flush()
+{
+    while(readReg(LIS3DH_REG_FIFOSRC)) {
+        uint8_t data[6];
+        readData(LIS3DH_REG_OUT_X_L, data, 6);
+    }
 }
 
 bool GrinlizLIS3DH::sample(int16_t* x, int16_t* y, int16_t* z)

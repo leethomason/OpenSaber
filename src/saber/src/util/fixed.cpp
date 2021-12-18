@@ -91,6 +91,21 @@ bool TestFixed()
         FixedNorm ar = a.sqrt();
         TEST_IS_TRUE(ar.x == 817);
     }
+    {
+        Fixed115 a(2.1);
+        TEST_IS_TRUE(a >= 2.0f);
+        TEST_IS_TRUE(a <= 3.0f);
+        ASSERT(a > 2.0f && a < 3.0f);
+
+        if (a < 2.0f || a > 3.0f) {
+            ASSERT(false); 
+        }
+    }
+    {
+        Fixed115 b(-3.1f);
+        //b += 1.1f;
+        //ASSERT(b == 3.1f);
+    }
     return true;
 }
 

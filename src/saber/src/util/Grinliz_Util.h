@@ -600,7 +600,7 @@ public:
 	void set(float f) { step.set(f); }
 
 	int tick(uint32_t delta) {
-		value += step * delta;
+		value += step * int(delta);
 		int n = value.getInt();
 		value -= n;
 		return n;
