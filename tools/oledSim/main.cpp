@@ -18,7 +18,6 @@
 #include "../saber/vectorui.h"
 
 #define MONO_128_32 1
-//#define RGB_160_80 2
 
 #ifdef MONO_128_32
 static const int WIDTH = 128;
@@ -26,11 +25,6 @@ static const int HEIGHT = 32;
 static const int OLED_WIDTH_SHIFT = 7;
 
 #endif
-#ifdef RGB_160_80
-static const int WIDTH = 160;
-static const int HEIGHT = 80;
-#endif
-
 
 class QuickProfile
 {
@@ -159,50 +153,8 @@ int main(int, char**) {
     bRender.Attach(WIDTH, HEIGHT, displayBuffer);
     //vrender.SetCamera(WIDTH, HEIGHT, -1, -1);
 #endif
-#ifdef RGB_160_80
 
     // VRender can directly write to the display buffer
-    uint32_t* displayBuffer = new uint32_t[WIDTH*HEIGHT];
-    memset(displayBuffer, 0, 4 * WIDTH*HEIGHT);
-
-    VRender vrender;
-    blockDrawRGBABuffer = (osbr::RGBA*)displayBuffer;
-    vrender.Attach(BlockDrawRGB);
-    vrender.SetSize(WIDTH, HEIGHT);
-    vrender.ClearClip();
-    
-    vrender.DrawRect(10, 10, WIDTH-20, HEIGHT-20, osbr::RGBA(255, 255, 255, 64));
-    VRender::Vec2 points[4] = {
-        { WIDTH/2, 0 }, {WIDTH, HEIGHT/2}, {WIDTH/2, HEIGHT}, {0,HEIGHT/2}
-    };
-    vrender.DrawPoly(points, 4, osbr::RGBA(255, 255, 255, 64));
-
-    vrender.SetTransform(FixedNorm(4, 100), 0, 0);
-    vrender.DrawRect(0, 0, 40, 40, osbr::RGBA(0, 255, 255, 192));
-    vrender.DrawRect(40, 0, 40, 40, osbr::RGBA(255, 0, 255, 192));
-    vrender.DrawRect(30, 10, 20, 20, osbr::RGBA(255, 255, 255, 100));
-
-    vrender.ClearTransform();
-    for (int r = 0; r < 8; ++r) {
-        vrender.SetTransform(FixedNorm(r, 8), 3 * WIDTH / 4, HEIGHT / 2);
-        vrender.DrawRect(25, -5, 10, 10, osbr::RGBA(0, 255, 0, 200));
-    }
-    vrender.ClearTransform();
-    VRender::Vec2 p2[] = {
-        {10, 70}, {20, 60}, {30, 70}, {20, 80}
-    };
-    int T = 1;
-    VRender::Vec2 p2inner[] = {
-        {10+T, 70}, {20, 60+T}, {30-T, 70}, {20, 80-T}
-    };
-    vrender.PushLayer();
-    vrender.DrawPoly(p2, 4, osbr::RGBA(255, 255, 0));
-    vrender.DrawPoly(p2inner, 4, osbr::RGBA(255, 255, 0));
-    vrender.PopLayer();
-
-    vrender.Render();
-#endif
-
     Pixel_7_5_UI pixel75;
     osbr::RGB dotstar1[1];
     osbr::RGB dotstar4[4];
@@ -236,7 +188,7 @@ int main(int, char**) {
         RENDER_DOTSTAR_6,
         NUM_RENDER_MODE
     };
-	int renderMode = RENDER_DOTSTAR_1;
+	int renderMode = RENDER_OLED;
     mode.set(UIMode::NORMAL);
 
 	const char* FONT_NAMES[8] = {
@@ -312,7 +264,7 @@ int main(int, char**) {
 
 #ifdef MONO_128_32
 
-#if true    // Test the DrawTestData
+#if false    // Test the DrawTestData
             float s = sinf(t * 0.002f) + 1.0f;
             vectorUI.PushTestData(s, 0.2f, 1.8f, t, 1.0f);
             bladeOn = true;
@@ -322,48 +274,6 @@ int main(int, char**) {
             vrender.Clear();
             vectorUI.Draw(&vrender, &bRender, t, mode.mode(), bladeOn, &data);
             vrender.ClearTransform();
-#endif
-#ifdef RGB_160_80
-#if true
-            {
-                // 88ms
-                // Rasterize: 43%  -> SortActive 28
-                //                    RasterizeLine 46
-                // AddToColorStack 23
-                // BlockDrawRGB 14
-                // ------------------------
-                // Optimize: separate ActiveEdge from edge.
-                // 60ms (nice!)
-                // AddToColorStack 36
-                // Rasterize 31
-                // BlockDrawRGB 21
-                // -------------------------
-                // 50ms
-                // Optimize: better color stack
-                // Rasterize 36 -> RasterizeLine 72
-                // AddToColorStack 30
-                // BlockDrawRGB 23
-                // ---------------------
-                // Some lower level optimization
-                // AddToColorStack 30
-                // BlockDrawRGB 21
-                // RasterizeLine 18
-                // Rasterize 16
-
-                QuickProfile qp("multidraw", firstRender);
-        //        for (int j = 0; j < 500; ++j) 
-                {
-                    for (int i = 0; i < WIDTH*HEIGHT; ++i) displayBuffer[i] = 0xff0000ff;
-                    //vrender.SetClip(VRender::Rect(1, 1, WIDTH - 1, HEIGHT - 1));
-                    VectorUI::Draw(&vrender, t, mode.mode(), bladeOn, &data);
-                }
-            }
-            if (firstRender) {
-                firstRender = false;
-                printf("Sizeof VRender=%d\n", (int)sizeof(VRender));
-                printf("NumEdges=%d\n", vrender.NumEdges());
-            }
-#endif
 #endif
 			pixel75.Draw(t, mode.mode(), bladeOn, &data);
             dotstarUI.Draw(dotstar1, 1, t, delta, mode.mode(), bladeOn, data);
@@ -396,9 +306,6 @@ int main(int, char**) {
             simDisplay.CommitFromDotstar(dotstar6, 6, &bladeFlash.getColor());
         }
         SDL_UpdateTexture(texture, NULL, simDisplay.Pixels(), WIDTH * 4);
-#endif
-#ifdef RGB_160_80
-        SDL_UpdateTexture(texture, NULL, displayBuffer, WIDTH * 4);
 #endif
 		SDL_RenderCopy(ren, texture, &src, &dst);
 		SDL_RenderPresent(ren);

@@ -22,22 +22,13 @@
     <ClCompile Include="..\..\src\saber\sketcher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\saber\Grinliz_Util.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\saber\unittest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\WinUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\saber\voltmeter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\saber\rgb2hsv.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\saber\fixed.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\saber\vrender.cpp">
@@ -50,6 +41,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\saber\bladeflash.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\saber\src\util\fixed.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\saber\src\util\Grinliz_Util.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -66,16 +63,10 @@
     <ClInclude Include="..\..\src\saber\sketcher.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\saber\Grinliz_Util.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\saber\unittest.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\saber\rgb2hsv.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\saber\fixed.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\saber\vrender.h">
@@ -96,7 +87,10 @@
     <ClInclude Include="..\..\src\saber\bladeflash.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\saber\voltmeter.h">
+    <ClInclude Include="..\..\src\saber\src\util\fixed.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\saber\src\util\Grinliz_Util.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

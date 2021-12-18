@@ -97,6 +97,14 @@ private:
         return v;
     }
 
+    static inline SHORT FloatToFixed(float a) {
+        return SHORT(a * FIXED_1);
+    }
+
+    static inline SHORT FloatToFixed(double a) {
+        return SHORT(a * FIXED_1);
+    }
+
 public:
     static const int32_t FIXED_1 = 1 << DECBITS;
     SHORT x;
@@ -121,8 +129,8 @@ public:
     FixedT(double v) : x(SHORT(FIXED_1 * v)) {}
 
     void set(int v) { x = SHORT(v * FIXED_1); }
-    void set(float v) { x = SHORT(v * FIXED_1); }
-    void set(double v) { x = SHORT(v * FIXED_1); }
+    void set(float v) { x = FloatToFixed(v); }
+    void set(double v) { x = FloatToFixed(v); }
 
     int32_t convertRaw(int nBits) {
         if (nBits > DECBITS)
@@ -174,7 +182,7 @@ public:
 
     FixedT& operator = (const FixedT &v) { x = v.x; return *this; }
     FixedT& operator = (int v) { x = IntToFixed(v); return *this; }
-    FixedT& operator = (float v) { x = v * FIXED_1; return *this; }
+    FixedT& operator = (float v) { x = FloatToFixed(v); return *this; }
 
     FixedT& operator +=  (const FixedT& v) { x += v.x; return *this; }
     FixedT& operator +=  (const int v) { x += IntToFixed(v); return *this; }
@@ -202,18 +210,26 @@ public:
     inline friend FixedT operator +  (const FixedT a, const FixedT b) { FixedT t;  t.x = a.x + b.x;	return t; }
     inline friend FixedT operator +  (const FixedT a, const int b) { FixedT t;  t.x = a.x + IntToFixed(b);	return t; }
     inline friend FixedT operator +  (const int a, const FixedT b) { FixedT t;  t.x = IntToFixed(a) + b.x;	return t; }
+    inline friend FixedT operator +  (const float a, const FixedT b) { FixedT t; t.x = FloatToFixed(a) + b.x; return t; }
+    inline friend FixedT operator +  (const FixedT a, const float b) { FixedT t; t.x = a.x + FloatToFixed(b); return t; }
 
     inline friend FixedT operator -  (const FixedT a, const FixedT b) { FixedT t;	t.x = a.x - b.x;	return t; }
     inline friend FixedT operator -  (const FixedT a, const int b) { FixedT t;	t.x = a.x - IntToFixed(b);	return t; }
     inline friend FixedT operator -  (const int a, const FixedT b) { FixedT t;	t.x = IntToFixed(a) - b.x;	return t; }
+    inline friend FixedT operator -  (const float a, const FixedT b) { FixedT t; t.x = FloatToFixed(a) - b.x; return t; }
+    inline friend FixedT operator -  (const FixedT a, const float b) { FixedT t; t.x = a.x - FloatToFixed(b); return t; }
 
     inline friend FixedT operator *  (const FixedT a, const FixedT b) { FixedT t;	t.x = FixedMul(a.x, b.x);	return t; }
     inline friend FixedT operator *  (const FixedT a, const int b) { FixedT t;	t.x = a.x * b; return t; }
     inline friend FixedT operator *  (const int a, const FixedT b) { FixedT t;	t.x = a * b.x; return t; }
+    inline friend FixedT operator *  (const float a, const FixedT b) { FixedT t; t.x = FixedMul(FloatToFixed(a), b.x); return t; }
+    inline friend FixedT operator *  (const FixedT a, const float b) { FixedT t; t.x = FixedMul(a.x, FloatToFixed(b)); return t; }
 
     inline friend FixedT operator /  (const FixedT a, const FixedT b) { FixedT t;	t.x = FixedDiv(a.x, b.x); return t; }
     inline friend FixedT operator /  (const FixedT a, const int b) { FixedT t;	t.x = a.x / b; return t; }
     inline friend FixedT operator /  (const int a, const FixedT b) { FixedT t;	t.x = FixedDiv(IntToFixed(a), b.x); return t; }
+    inline friend FixedT operator /  (const float a, const FixedT b) { FixedT t; t.x = FixedDiv(FloatToFixed(a), b.x); return t; }
+    inline friend FixedT operator /  (const FixedT a, const float b) { FixedT t; t.x = FixedDiv(a.x, FloatToFixed(b)); return t; }
 
     inline friend FixedT operator << (const FixedT a, const int b) { FixedT t; t.x = a.x << b; return t; }
     inline friend FixedT operator >> (const FixedT a, const int b) { FixedT t; t.x = a.x >> b; return t; }
@@ -229,18 +245,36 @@ public:
     inline friend bool operator <  (const FixedT a, const FixedT b) { return a.x < b.x; }
     inline friend bool operator <  (const FixedT a, const int b) { return a.x < IntToFixed(b); }
     inline friend bool operator <  (const int a, const FixedT b) { return IntToFixed(a) < b.x; }
+    inline friend bool operator <  (const float a, const FixedT b) { return FloatToFixed(a) < b.x; }
+    inline friend bool operator <  (const FixedT a, const float b) { return a.x < FloatToFixed(b); }
 
     inline friend bool operator >  (const FixedT a, const FixedT b) { return a.x > b.x; }
     inline friend bool operator >  (const FixedT a, const int b) { return a.x > IntToFixed(b); }
     inline friend bool operator >  (const int a, const FixedT b) { return IntToFixed(a) > b.x; }
+    inline friend bool operator >  (const float a, const FixedT b) { return FloatToFixed(a) > b.x; }
+    inline friend bool operator >  (const FixedT a, const float b) { return a.x > FloatToFixed(b); }
 
     inline friend bool operator <=  (const FixedT a, const FixedT b) { return a.x <= b.x; }
     inline friend bool operator <=  (const FixedT a, const int b) { return a.x <= IntToFixed(b); }
     inline friend bool operator <=  (const int a, const FixedT b) { return IntToFixed(a) <= b.x; }
+    inline friend bool operator <= (const float a, const FixedT b) { return FloatToFixed(a) <= b.x; }
+    inline friend bool operator <= (const FixedT a, const float b) { return a.x <= FloatToFixed(b); }
 
     inline friend bool operator >=  (const FixedT a, const FixedT b) { return a.x >= b.x; }
     inline friend bool operator >=  (const FixedT a, const int b) { return a.x >= IntToFixed(b); }
     inline friend bool operator >=  (const int a, const FixedT b) { return IntToFixed(a) >= b.x; }
+    inline friend bool operator >=  (const float a, const FixedT b) { return FloatToFixed(a) >= b.x; }
+    inline friend bool operator >=  (const FixedT a, const float b) { return a.x >= FloatToFixed(b); }
+
+private:
+    // Discourage float
+    FixedT& operator +=  (const float v);
+    FixedT& operator -=  (const float v);
+    FixedT& operator *=  (const float v);
+    FixedT& operator /=  (const float v);
+    // These can't work
+    bool operator == (const float b);
+    bool operator != (const float b);
 };
 
 bool TestFixed();
