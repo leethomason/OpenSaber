@@ -73,7 +73,7 @@
 
 // ----------------------------------
 #define SERIAL_DEBUG 				1
-#define SABER_MODEL 				SABER_MODEL_VIGILANCE_2
+#define SABER_MODEL 				SABER_MODEL_DUTCHESS
 #define SABER_SUB_MODEL				0		
 // ----------------------------------
 
@@ -706,8 +706,6 @@
 	#define SABER_UI_COUNT				4
 	#define SABER_UI_BRIGHTNESS	    	16		
 	#define SABER_UI_IDLE_MEDITATION
-	#define SABER_UI_COLOR_WHEEL()		0
-	#define SABER_UI_MEDITATION()		0
 
 	#define SABER_VOLTMETER()			1			
 	#define VOLTMETER_TUNE				1033
@@ -771,7 +769,7 @@
 #elif (SABER_MODEL == SABER_MODEL_DUTCHESS)
 	#define PCB_VERSION 				PCB_ITSY_2C
 	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
-	#define SABER_VOLTMETER			
+	#define SABER_VOLTMETER()			1			
 	#define SABER_UI_LED				SABER_LED_DOTSTAR
 
 	#define SABER_NUM_LEDS 			    4
@@ -780,7 +778,6 @@
 	#define SABER_UI_BRIGHTNESS	    	16
 	#define SABER_UI_IDLE_MEDITATION
 	#define VOLTMETER_TUNE				1016
-	//#define SABER_UI_COLOR_WHEEL
 
 	// Does not need to be power of 2.
 	// multiply by 10 to get ms width of filter
@@ -942,9 +939,6 @@
 	#define SABER_UI_START				0
 	#define SABER_UI_COUNT				1
 
-	#define SABER_UI_COLOR_WHEEL()		0
-	#define SABER_UI_MEDITATION()		0
-
 	// Does not need to be power of 2.
 	// multiply by 10 to get ms width of filter
 	#define FILTER_MAG_X	20
@@ -981,9 +975,6 @@
 	#define SABER_NUM_LEDS 			    1
 	#define SABER_UI_START				0
 	#define SABER_UI_COUNT				1
-
-	#define SABER_UI_COLOR_WHEEL()		0
-	#define SABER_UI_MEDITATION()		0
 
 	// Does not need to be power of 2.
 	// multiply by 10 to get ms width of filter
@@ -1023,9 +1014,6 @@
 	#define SABER_UI_IDLE_MEDITATION
 	*/
 	#define VOLTMETER_TUNE				1016
-	//#define SABER_UI_COLOR_WHEEL
-	#define SABER_UI_MEDITATION
-
 	// Does not need to be power of 2.
 	// multiply by 10 to get ms width of filter
 	#define FILTER_MAG_X	10
@@ -1206,6 +1194,7 @@
 	   Dotstar support
 	*/
 	#define SABER_ACCELEROMETER SABER_ACCELEROMETER_LSM303
+	#define ACCELEROMETER 		GrinlizLSM303
 
 	#define PIN_I2S_LRCLK		0
 	#define PIN_I2S_BITCLK		1
@@ -1230,8 +1219,11 @@
 	#define ACCEL_NORMAL_BUTTON   0
 	#define ACCEL_PERP_BUTTON     2
 
+	#define PIN_ACCEL_EN	    255	// uses SDL/SDA for chatting with accel
+
 #elif (PCB_VERSION == PCB_ITSY_2D || PCB_VERSION == PCB_ITSY_2E)
 	#define SABER_ACCELEROMETER SABER_ACCELEROMETER_LSM303
+	#define ACCELEROMETER 		GrinlizLSM303
 
 	#define PIN_I2S_LRCLK		0
 	#define PIN_I2S_BITCLK		1

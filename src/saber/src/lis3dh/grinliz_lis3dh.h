@@ -23,7 +23,7 @@ public:
     GrinlizLIS3DH(int cs) : _spi(0), _cs(cs) {}
 
     void begin(SPIClass* spi, uint8_t dataRate);
-    bool sample(int16_t* x, int16_t* y, int16_t* z);
+    //bool sample(int16_t* x, int16_t* y, int16_t* z);
 
     // Interface:
     // FIFO queue
@@ -51,6 +51,7 @@ public:
         void recalibrateMag() {}
 
     private:
+        bool sample(int16_t *x, int16_t *y, int16_t *z);
         uint8_t readReg(uint8_t);
         void writeReg(uint8_t reg, uint8_t val);
 

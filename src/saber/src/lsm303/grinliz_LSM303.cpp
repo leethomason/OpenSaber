@@ -123,7 +123,7 @@ enum
 };
 
 
-bool GrinlizLSM303::begin()
+bool GrinlizLSM303::begin(const void*, uint8_t)
 {
     Log.p("---- LSM303 begin ----").eol();
 
@@ -272,9 +272,12 @@ int GrinlizLSM303::available()
     return avail + (overrun ? 1 : 0);
 }
 
-int GrinlizLSM303::flush(int n) 
+void GrinlizLSM303::flushAccel(int n) 
 {
-    return readInner(0, 0, n);
+    int avail = available();
+    int read = avail - n;
+    if (read > 0)
+        readInner(0, 0, read);
 }
 
 
@@ -324,7 +327,7 @@ int GrinlizLSM303::readInner(Vec3<int32_t>* rawData, Vec3<float>* data, int n)
     return n;
 }
 
-bool GrinlizLSM303::recalibrateMag()
+void GrinlizLSM303::recalibrateMag()
 {
     /*Log.p("recalibrateMag()").p(" queue=")
         .p(dataValid(WARM_T, m_min, m_max) ? 1 : 0)
@@ -357,16 +360,14 @@ bool GrinlizLSM303::recalibrateMag()
         // Either way, throw it away and start to recompute.
         m_minQueued.set(INT_MAX, INT_MAX, INT_MAX);
         m_maxQueued.set(INT_MIN, INT_MIN, INT_MIN);
-        return true;
     }
-    return false;
 }
 
-int GrinlizLSM303::sampleMag(Vec3<int32_t>* rawData)
+bool GrinlizLSM303::sampleMag(Vec3<int32_t>* rawData)
 {
     uint8_t status = read8(LSM303_ADDRESS_MAG, STATUS_REG_M);
     if ((status & (1<<3)) == 0 && (status & (1<<7)) == 0) 
-        return 0;
+        return false;
 
     Wire.beginTransmission(LSM303_ADDRESS_MAG);
     Wire.write(OUTX_LOW_REG_M);
@@ -398,7 +399,7 @@ int GrinlizLSM303::sampleMag(Vec3<int32_t>* rawData)
     m_max.z = glMax(z, m_max.z);
 
     if (!magDataValid())
-        return 0;
+        return false;
 
     m_minQueued.x = glMin(x, m_minQueued.x);
     m_minQueued.y = glMin(y, m_minQueued.y);
@@ -411,7 +412,7 @@ int GrinlizLSM303::sampleMag(Vec3<int32_t>* rawData)
     rawData->x = x;
     rawData->y = y;
     rawData->z = z; 
-    return 1;
+    return true;
 }
 
 void GrinlizLSM303::write8(uint8_t address, uint8_t reg, uint8_t value) const

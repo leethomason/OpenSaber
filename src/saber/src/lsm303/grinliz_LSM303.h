@@ -28,18 +28,19 @@
 class GrinlizLSM303
 {
 public:
-    GrinlizLSM303() {}
+    GrinlizLSM303(int /*_unusedPin*/ ) {}
 
     // divisor for raw data
     static const int DIV = 4096;    
 
-    bool begin();
+    bool begin(const void*, uint8_t);
 
-    int read(Vec3<float>* data, int nData) { return readInner(0, data, nData); }
-    int readRaw(Vec3<int32_t>* data, int nData) { return readInner(data, 0, nData); }
-    int readInner(Vec3<int32_t>* rawData, Vec3<float>* data, int n);
-    int available();
-    int flush(int n=32);
+    void flushAccel(int reserve);
+
+    bool sampleAccel(Fixed115* x, Fixed115* y, Fixed115* z);
+    bool sampleAccel(Vec3<Fixed115>* v) {
+        return sampleAccel(&v->x, &v->y, &v->z);
+    }
 
     /* In my test bed, the rawData isn't even close to being correctly pre-set.
        the ranges [-400, 200] and [-500, 90] have come up. Also totally 
@@ -48,15 +49,12 @@ public:
        The min/max is tracked by the library, and the x/y/z values are probably
        the ones to use.
     */
-    int sampleMag(Vec3<int32_t>* rawData);
-    bool recalibrateMag();
-
-    const Vec3<int32_t>& getMagMin() const { return m_min; }
-    const Vec3<int32_t>& getMagMax() const { return m_max; }
-
-    bool magDataValid() const { 
-        return dataValid(INIT_T, m_min, m_max);
-    }
+    bool hasMag() const { return true; }
+    bool sampleMag(Vec3<int32_t> *v);
+    Vec3<int32_t> getMagMax() const { return m_min; }
+    Vec3<int32_t> getMagMin() const { return m_max; }
+    bool magDataValid() const { return dataValid(INIT_T, m_min, m_max); }
+    void recalibrateMag();
 
     void logMagStatus();
 
@@ -70,6 +68,9 @@ private:
                 && (b.y - a.y > t) 
                 && (b.z - a.z > t);   
     }
+
+    int available();
+    int readInner(Vec3<int32_t> *rawData, Vec3<float> *data, int n);
 
     // how much delta do we need to operate? On the one hand, want to get the
     // swing on quickly. But after that, recalibrate should really have good 

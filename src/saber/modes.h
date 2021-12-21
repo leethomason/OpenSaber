@@ -27,20 +27,9 @@ enum class UIMode {
     NORMAL,
     PALETTE,
     VOLUME,
-#if SABER_UI_MEDITATION()
-    MEDITATION,
-#endif
-//#if SABER_UI_COLOR_WHEEL()
-//    COLOR_WHEEL,  // can't have WHEEL and TUNE
-//#endif
     NUM_MODES,
 
-#if !SABER_UI_MEDITATION()
     MEDITATION = 255,
-#endif
-//#if !SABER_UI_COLOR_WHEEL()
-//    COLOR_WHEEL = 256,  // can't have WHEEL and TUNE
-//#endif
 };
 
 enum {
