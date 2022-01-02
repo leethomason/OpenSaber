@@ -43,8 +43,8 @@ module capsule(theta0, theta1, r=2, _mirror=false)
         rotate([-90, -0, theta1]) cylinder(h=20, r=r);
     }
     if (_mirror == true) hull() {
-        mirror([1,0,0]) rotate([-90, -0, theta0]) cylinder(h=20, r=r);
-        mirror([1,0,0]) rotate([-90, -0, theta1]) cylinder(h=20, r=r);
+        rotate([-90, -0, 180 + theta0]) cylinder(h=20, r=r);
+        rotate([-90, -0, 180 + theta1]) cylinder(h=20, r=r);
     }
 }
 
