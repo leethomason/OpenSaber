@@ -51,8 +51,8 @@ public:
     */
     bool hasMag() const { return true; }
     bool sampleMag(Vec3<int32_t> *v);
-    Vec3<int32_t> getMagMax() const { return m_min; }
-    Vec3<int32_t> getMagMin() const { return m_max; }
+    Vec3<int32_t> getMagMin() const { return m_min; }
+    Vec3<int32_t> getMagMax() const { return m_max; }
     bool magDataValid() const { return dataValid(INIT_T, m_min, m_max); }
     void recalibrateMag();
 
@@ -70,7 +70,6 @@ private:
     }
 
     int available();
-    int readInner(Vec3<int32_t> *rawData, Vec3<float> *data, int n);
 
     // how much delta do we need to operate? On the one hand, want to get the
     // swing on quickly. But after that, recalibrate should really have good 
