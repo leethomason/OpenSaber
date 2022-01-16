@@ -266,8 +266,9 @@ public:
 
             while(nSamples < NDATA) {
                 Vec3<int32_t> data;
-                int n = accelMag.sampleMag(&data);
-                nSamples += n;
+                if(accelMag.sampleMag(&data)) {
+                    nSamples++;
+                }
             }
             uint32_t deltaTime = millis() - startTime;
             Serial.print("Time to read (ms):"); Serial.println(deltaTime);

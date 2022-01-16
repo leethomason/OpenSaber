@@ -270,8 +270,14 @@ bool CMDParser::processCMD()
                 int count = 0;
                 uint32_t start = millis();
                 while(count < 10) {
-                    if (accelMag.sampleMag(&mag))
+                    if (accelMag.sampleMag(&mag)) {
                         count++;
+
+                        Vec3<int32_t> magMin = accelMag.getMagMin();
+                        Vec3<int32_t> magMax = accelMag.getMagMax();
+                        Vec3<int32_t> range = magMax - magMin;
+                        Log.p("Mag=").v3(mag).p(" range=").v3(range).eol();
+                    }
                 }
                 uint32_t end = millis();
 
