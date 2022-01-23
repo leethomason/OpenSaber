@@ -41,6 +41,13 @@ module ring(dz)
     }
 }
 
+module chamberBolt(angle, d, h)
+{
+    rotate([0, 0, angle])
+        translate([0, D_VENT_INNER/2 - D_BOLT_CAP/2, 0])
+            cylinder(h=h, d=d);
+}
+
 module bottomDotstar()
 {
     H0 = 0.8;
@@ -82,15 +89,10 @@ module windows(start)
 {
     for(y=[start:3]) {
         translate([-50, -D_INNER/2 + y * 6 - 1, 0]) {
-            TH = 3.0;
-            TW = 2.0;
-            //polygonYZ(h=100, points=[
-            //    [0, 0], [0, TW], [TH, TW], [TH+TW/2, TW/2], [TH,0]
-            //]);
             if (y==0)
-                rotate([-45, 0, 0]) translate([0, 0, -6]) cube(size=[100, 4, 8]);
+                rotate([-45, 0, 0]) translate([0, 0, -6]) cube(size=[100, 6, 6]);
             else
-                rotate([-45, 0, 0]) cube(size=[100, 4, 2]);
+                rotate([-45, 0, 0]) cube(size=[100, 3, 3]);
         }
     }
 }
@@ -132,9 +134,9 @@ if (DRAW_FORE) {
                 cylinder(h=1000, d=D_INNER);
                 union() {
                     translate([6, -100, M_AFT_FRONT - HEAD_HOLDER_SETBACK])
-                        cube(size=[100, 100 + 4.0, HEAD_HOLDER_SETBACK]);
+                        cube(size=[100, 100 + 5.0, HEAD_HOLDER_SETBACK]);
                     mirror([-1, 0, 0]) translate([6, -100, M_AFT_FRONT - HEAD_HOLDER_SETBACK])
-                        cube(size=[100, 100 + 4.0, HEAD_HOLDER_SETBACK]);
+                        cube(size=[100, 100 + 5.0, HEAD_HOLDER_SETBACK]);
                 }
             }
             // toughen up the sides
@@ -182,18 +184,21 @@ if (DRAW_FORE) {
         translate([-W_ACCESS/2, -D_INNER/2, M_JOINT]) cube(size=[W_ACCESS, 2.5, 22]);
 
         // bolt holder
-        translate([10.0, -DY_HEAD_HOLDER/2, M_AFT_FRONT-HEAD_HOLDER_SETBACK-DZ_HEAD_HOLDER])
-            cube(size=[100, DY_HEAD_HOLDER, DZ_HEAD_HOLDER]);
-        mirror([-1, 0, 0]) translate([10.0, -DY_HEAD_HOLDER/2, M_AFT_FRONT-HEAD_HOLDER_SETBACK-DZ_HEAD_HOLDER])
-            cube(size=[100, DY_HEAD_HOLDER, DZ_HEAD_HOLDER]);
+        //translate([10.0, -DY_HEAD_HOLDER/2, M_AFT_FRONT-HEAD_HOLDER_SETBACK-DZ_HEAD_HOLDER])
+        //    cube(size=[100, DY_HEAD_HOLDER, DZ_HEAD_HOLDER]);
+        //mirror([-1, 0, 0]) translate([10.0, -DY_HEAD_HOLDER/2, M_AFT_FRONT-HEAD_HOLDER_SETBACK-DZ_HEAD_HOLDER])
+        //    cube(size=[100, DY_HEAD_HOLDER, DZ_HEAD_HOLDER]);
 
-        // bolts
-        rotate([0, 0, A_BOLT_0])
-            translate([0, D_VENT_INNER/2-D_BOLT_CAP/2, M_AFT_FRONT - HEAD_HOLDER_SETBACK - 1.0])
-                cylinder(h=30.0, d=D_ROD + 0.2);
-        rotate([0, 0, A_BOLT_1])
-            translate([0, D_VENT_INNER/2-D_BOLT_CAP/2, M_AFT_FRONT - HEAD_HOLDER_SETBACK - 1.0])
-                cylinder(h=30.0, d=D_ROD + 0.2);
+        // bolts, going forward
+        translate([0, 0, M_AFT_FRONT - HEAD_HOLDER_SETBACK - 1.0]) {
+            chamberBolt(A_BOLT_0, D_ROD, 100.0);
+            chamberBolt(A_BOLT_1, D_ROD, 100.0);
+        }
+        // bolts, access
+        //translate([0, 0, M_START]) {
+        //    chamberBolt(A_BOLT_0, D_BOLT_CAP, M_AFT_FRONT - HEAD_HOLDER_SETBACK - M_START);
+        //    chamberBolt(A_BOLT_1, D_BOLT_CAP, M_AFT_FRONT - HEAD_HOLDER_SETBACK - M_START);
+        //}
     }
 }
 

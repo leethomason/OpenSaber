@@ -48,12 +48,12 @@ DX_SWITCH_PLATE = 16.5;
 
 D_TUBE = 4.6;
 D_TUBE_INNER = 3.3;
-D_ROD = 3.6;
-D_BOLT_CAP = 7.0;
+D_ROD = 3.4;
+D_BOLT_CAP = 8.0; // space for a nut to thread...
 
-HEAD_HOLDER_SETBACK = 4.0;  // how deep threads go before nut
-DZ_HEAD_HOLDER = 4.2;
-DY_HEAD_HOLDER = 7.0;
+HEAD_HOLDER_SETBACK = 4.0;  // how deep threads go into pillars
+//DZ_HEAD_HOLDER = 4.2;
+//DY_HEAD_HOLDER = 7.0;
 
 A_BOLT_0 = 90;
 A_BOLT_1 = 270;
