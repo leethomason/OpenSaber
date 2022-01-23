@@ -276,55 +276,45 @@ void GrinlizLSM303::flushAccel(int n)
 {
     int avail = available();
     int read = avail - n;
-    if (read > 0)
-        readInner(0, 0, read);
+    for (int i = 0; i < read; ++i) {
+        Fixed115 x, y, z;
+        sampleAccel(&x, &y, &z);
+    }
 }
 
 
-int GrinlizLSM303::readInner(Vec3<int32_t>* rawData, Vec3<float>* data, int n)
+bool GrinlizLSM303::sampleAccel(Fixed115* fx, Fixed115* fy, Fixed115* fz)
 {
-    int i = 0;
-
     int avail = available();
-    n = n > avail ? avail : n;
-    if (n == 0) return 0;
+    if (!avail)
+        return false;
 
-    for(i=0; i<n; ++i) {
-        Wire.beginTransmission(LSM303_ADDRESS_ACCEL);
-        Wire.write(LSM303_REGISTER_ACCEL_OUT_X_L_A | 0x80);
-        Wire.endTransmission();
+    Wire.beginTransmission(LSM303_ADDRESS_ACCEL);
+    Wire.write(LSM303_REGISTER_ACCEL_OUT_X_L_A | 0x80);
+    Wire.endTransmission();
 
-        Wire.requestFrom((byte)LSM303_ADDRESS_ACCEL, (byte)6);
-        
-        while (Wire.available() < 2) {}
-        uint32_t xlo = Wire.read();
-        uint32_t xhi = Wire.read();
+    Wire.requestFrom((byte)LSM303_ADDRESS_ACCEL, (byte)6);
+    
+    while (Wire.available() < 2) {}
+    uint32_t xlo = Wire.read();
+    uint32_t xhi = Wire.read();
 
-        while (Wire.available() < 2) {}
-        uint32_t ylo = Wire.read();
-        uint32_t yhi = Wire.read();
-        
-        while (Wire.available() < 2) {}
-        uint32_t zlo = Wire.read();
-        uint32_t zhi = Wire.read();
+    while (Wire.available() < 2) {}
+    uint32_t ylo = Wire.read();
+    uint32_t yhi = Wire.read();
+    
+    while (Wire.available() < 2) {}
+    uint32_t zlo = Wire.read();
+    uint32_t zhi = Wire.read();
 
-        int16_t x = xlo | (xhi << 8);
-        int16_t y = ylo | (yhi << 8);
-        int16_t z = zlo | (zhi << 8);
+    int16_t x = xlo | (xhi << 8);
+    int16_t y = ylo | (yhi << 8);
+    int16_t z = zlo | (zhi << 8);
 
-        if (rawData) {
-            rawData[i].x = x;
-            rawData[i].y = y;
-            rawData[i].z = z;
-        }
-        if (data) {
-            static const float divInv = 1.0f / float(DIV);
-            data[i].x = x * divInv;
-            data[i].y = y * divInv;
-            data[i].z = z * divInv;
-        }
-    }
-    return n;
+    *fx = Fixed115(x, DIV);
+    *fy = Fixed115(y, DIV);
+    *fz = Fixed115(z, DIV);
+    return true;
 }
 
 void GrinlizLSM303::recalibrateMag()

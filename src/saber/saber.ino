@@ -520,6 +520,7 @@ void processAccel(uint32_t msec, uint32_t /*delta*/)
         static const int BURST = 5;
         static int32_t lastLog = 0;
         static int burstLog = 0;
+
         if (msec - lastLog > 500)
             burstLog = BURST;
         if (burstLog) {
@@ -528,9 +529,10 @@ void processAccel(uint32_t msec, uint32_t /*delta*/)
                 .p("t=").p(millis()%1000)
                 .p(" swing=").p(swing.speed())
                 .p(" swingVol=").p(swingVol)
+                .p(" range=").v3(range)
                 //.p(" pos=").v3(swing.pos()).p(" origin=").v3(swing.origin())
                 //.p(" dot=").p(dot)
-                .p(" magfilter val/min/max ").v3(magFilter.average()).v3(magMin).v3(magMax)
+                //.p(" magfilter val/min/max ").v3(magFilter.average()).v3(magMin).v3(magMax)
                 //.p(" val/range ").v3(magFilter.average() - magMin).v3(range)
                 //.p(" accel=").p(fastG2.average())
                 .eol();
