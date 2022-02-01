@@ -83,11 +83,14 @@ void DotStarUI::Draw(osbr::RGB *led, int nLED, uint32_t time, uint32_t delta,
     };
 
 #if SABER_LOCK()
+/*
     int32_t s = iSin_S3(time * 20); // -4096, +4096
     if (s < 0)
         s = -s;
     int32_t b = s * 255 / 4090;
     osbr::RGB lockLED = data.locked ? b << 16 : b << 8;
+*/
+    osbr::RGB lockLED = data.locked ? 0xff0000 : 0x00ff00;
 #endif
 
     if (nLED ==1) {

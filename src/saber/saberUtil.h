@@ -31,6 +31,7 @@
 //#include "pins.h" 
 #include "modes.h"
 #include "rgb.h"
+#include "./src/util/Grinliz_util.h"
 
 class BladePWM;
 class BladeFlash;
@@ -88,5 +89,26 @@ private:
     uint32_t lastActive = 0;
 };
 
+/*
+    Implements a countdown:
+    2 - 1 - click
+    flash to retract the lightsaber in "locked" mode 
+*/
+class LockTimer
+{
+public:
+    LockTimer();
+
+    bool enabled() const;
+    bool dark() const;
+
+    void start();
+    void tick(uint32_t delta);
+    bool click();   // return true if it should retract
+
+private:
+    Timer2      timer;
+    int         timerCount = 0;
+};
 
 #endif // SABER_UTIL_INCLUDED

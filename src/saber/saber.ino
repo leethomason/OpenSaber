@@ -94,9 +94,8 @@ BladePWM    bladePWM;
 Tester      tester;
 Swing       swing;
 MagFilter   magFilter;
-Timer2      lockTimer(250, 0);
-int         lockTimerCount = 0;
 bool        lockOn = false;
+LockTimer   lockTimer;
 int         swingVol = 0;
 
 #ifdef SABER_NUM_LEDS
@@ -170,8 +169,6 @@ void BlockDrawOLED(const BlockDrawChunk* chunks, int n)
 
 void setup() 
 {
-    lockTimer.setEnabled(false);
-
 #if defined(SHIFTED_OUTPUT)
         // I'm a little concerned about power draw on the display, in some states.
         // Do this first thing - set all the pins to ground so they don't short / draw.
@@ -398,13 +395,8 @@ void buttonAClickHandler(const Button&)
     }
     else if (bladeState.state() == BLADE_ON) {
         if (lockTimer.enabled()) {
-            if (lockTimerCount == 4 || lockTimerCount == 5) {
+            if (lockTimer.click())
                 retractBlade();
-            }
-            else {
-                lockTimerCount = 0;
-                lockTimer.setEnabled(false);
-            }
         }
         else {
             bladeFlash.doFlash(millis());
@@ -454,12 +446,8 @@ void buttonAHoldHandler(const Button& button)
     }
     else if (bladeState.state() != BLADE_RETRACT) {
         if (button.nHolds() == 1) {
-            if (lockOn) {
-                lockTimer.setPeriod(250);
-                lockTimer.setRepeating(true);
-                lockTimer.setEnabled(true);
-                lockTimerCount = 0;
-            }
+            if (lockOn)
+                lockTimer.start();
             else
                 retractBlade();
         }
@@ -621,12 +609,7 @@ void loop() {
 
     tester.process();
     buttonA.process();
-
-    lockTimerCount += lockTimer.tick(delta);
-    if (lockTimerCount >= 6) {
-        lockTimer.setEnabled(false);
-        lockTimerCount = 0;
-    }
+    lockTimer.tick(delta);
 
 #ifdef SABER_UI_IDLE_MEDITATION_LED_OFF
     if (uiMode.mode() == UIMode::NORMAL && bladeState.state() == BLADE_OFF && uiMode.isIdle()) {
@@ -694,7 +677,7 @@ void loopDisplays(uint32_t msec, uint32_t mainDelta)
     uiRenderData.fontName = manifest.getUnit(sfx.currentFont()).getName();
     uiRenderData.soundBank = sfx.currentFont();
     uiRenderData.locked = lockOn;
-    uiRenderData.lockFlash = lockTimer.enabled() && (lockTimerCount & 1);
+    uiRenderData.lockFlash = lockTimer.dark();
 
 #if SABER_DISPLAY == SABER_DISPLAY_128_32
     {
