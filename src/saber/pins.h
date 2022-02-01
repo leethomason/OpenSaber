@@ -72,9 +72,9 @@
 #define SABER_SUB_MODEL_B			13
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
-#define SABER_MODEL 				SABER_MODEL_DUTCHESS
-#define SABER_SUB_MODEL				0		
+#define SERIAL_DEBUG 				0
+#define SABER_MODEL 				SABER_MODEL_CLAN
+#define SABER_SUB_MODEL				SABER_SUB_MODEL_PROPHECY_1	
 // ----------------------------------
 
 #define SABER_SOUND_SD 				1	// external memory card
@@ -779,6 +779,8 @@
 	#define SABER_UI_IDLE_MEDITATION
 	#define VOLTMETER_TUNE				1016
 
+	#define SABER_LOCK()				0
+
 	// Does not need to be power of 2.
 	// multiply by 10 to get ms width of filter
 	#define FILTER_MAG_X	20
@@ -846,7 +848,7 @@
 #elif (SABER_MODEL == SABER_MODEL_CLAN)
 	#define PCB_VERSION 				PCB_ITSY_2E
 	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
-	#define SABER_VOLTMETER			
+	#define SABER_VOLTMETER()			1			
 	
 	#define SABER_UI_LED				SABER_LED_DOTSTAR
 	#define SABER_UI_BRIGHTNESS			128	// max 256			
@@ -888,11 +890,13 @@
 	#define FILTER_MAG_Y	20
 	#define FILTER_MAG_Z	20
 	#define VOLTMETER_TUNE				1033
+	#define SABER_LOCK()	1
 #	elif SABER_SUB_MODEL == SABER_SUB_MODEL_PROPHECY_2
 	#define FILTER_MAG_X	20
 	#define FILTER_MAG_Y	20
 	#define FILTER_MAG_Z	20
 	#define VOLTMETER_TUNE				1042
+	#define SABER_LOCK()	1
 #	else
 	#define FILTER_MAG_X	20
 	#define FILTER_MAG_Y	20
@@ -1243,7 +1247,8 @@
 	#define PIN_EMITTER_BLUE   	11
 	#define PIN_I2S_DATA		12
 	#define PIN_SWITCH_A		13
-	
+
+	#define PIN_ACCEL_EN	    255	// uses SDL/SDA for chatting with accel	
 	#define ACCEL_BLADE_DIRECTION 1
 	#define ACCEL_NORMAL_BUTTON   0
 	#define ACCEL_PERP_BUTTON     2
