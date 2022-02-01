@@ -124,6 +124,10 @@ void DotStarUI::Draw(osbr::RGB *led, int nLED, uint32_t time, uint32_t delta,
                         animate.tick(delta);
                     }
                     led[0].setWhite(animate.done() ? WHITE : animate.value());
+
+                    if (data.lockFlash) {
+                        led[0].set(0);
+                    }
                 }
                 break;
         }

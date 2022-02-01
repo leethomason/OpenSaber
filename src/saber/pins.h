@@ -72,7 +72,7 @@
 #define SABER_SUB_MODEL_B			13
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
+#define SERIAL_DEBUG 				1
 #define SABER_MODEL 				SABER_MODEL_CLAN
 #define SABER_SUB_MODEL				SABER_SUB_MODEL_PROPHECY_1	
 // ----------------------------------

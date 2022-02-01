@@ -94,8 +94,10 @@ BladePWM    bladePWM;
 Tester      tester;
 Swing       swing;
 MagFilter   magFilter;
-int         swingVol = 0;
+Timer2      lockTimer(250, 0);
+int         lockTimerCount = 0;
 bool        lockOn = false;
+int         swingVol = 0;
 
 #ifdef SABER_NUM_LEDS
 DotStar dotstar;                    // Hardware controller.
@@ -168,7 +170,9 @@ void BlockDrawOLED(const BlockDrawChunk* chunks, int n)
 
 void setup() 
 {
-    #if defined(SHIFTED_OUTPUT)
+    lockTimer.setEnabled(false);
+
+#if defined(SHIFTED_OUTPUT)
         // I'm a little concerned about power draw on the display, in some states.
         // Do this first thing - set all the pins to ground so they don't short / draw.
         pinMode(PIN_LATCH, OUTPUT);
@@ -365,7 +369,7 @@ void igniteBlade()
 
 void retractBlade()
 {
-    if (!lockOn && bladeState.state() != BLADE_OFF && bladeState.state() != BLADE_RETRACT) {
+    if (bladeState.state() != BLADE_OFF && bladeState.state() != BLADE_RETRACT) {
         bladeState.change(BLADE_RETRACT);
         if (sfx.smoothMode())
             sfx.sm_retract();
@@ -393,11 +397,22 @@ void buttonAClickHandler(const Button&)
         }
     }
     else if (bladeState.state() == BLADE_ON) {
-        bladeFlash.doFlash(millis());
-        if (sfx.smoothMode())
-            sfx.sm_playEvent(SFX_USER_TAP);
-        else
-            sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
+        if (lockTimer.enabled()) {
+            if (lockTimerCount == 4 || lockTimerCount == 5) {
+                retractBlade();
+            }
+            else {
+                lockTimerCount = 0;
+                lockTimer.setEnabled(false);
+            }
+        }
+        else {
+            bladeFlash.doFlash(millis());
+            if (sfx.smoothMode())
+                sfx.sm_playEvent(SFX_USER_TAP);
+            else
+                sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
+        }    
     }
 }
 
@@ -439,7 +454,14 @@ void buttonAHoldHandler(const Button& button)
     }
     else if (bladeState.state() != BLADE_RETRACT) {
         if (button.nHolds() == 1) {
-            retractBlade();
+            if (lockOn) {
+                lockTimer.setPeriod(250);
+                lockTimer.setRepeating(true);
+                lockTimer.setEnabled(true);
+                lockTimerCount = 0;
+            }
+            else
+                retractBlade();
         }
     }
 }
@@ -600,7 +622,13 @@ void loop() {
     tester.process();
     buttonA.process();
 
-    #ifdef SABER_UI_IDLE_MEDITATION_LED_OFF
+    lockTimerCount += lockTimer.tick(delta);
+    if (lockTimerCount >= 6) {
+        lockTimer.setEnabled(false);
+        lockTimerCount = 0;
+    }
+
+#ifdef SABER_UI_IDLE_MEDITATION_LED_OFF
     if (uiMode.mode() == UIMode::NORMAL && bladeState.state() == BLADE_OFF && uiMode.isIdle()) {
         int pwm = 255;
         ledProp.tick(delta, &pwm);
@@ -666,6 +694,7 @@ void loopDisplays(uint32_t msec, uint32_t mainDelta)
     uiRenderData.fontName = manifest.getUnit(sfx.currentFont()).getName();
     uiRenderData.soundBank = sfx.currentFont();
     uiRenderData.locked = lockOn;
+    uiRenderData.lockFlash = lockTimer.enabled() && (lockTimerCount & 1);
 
 #if SABER_DISPLAY == SABER_DISPLAY_128_32
     {

@@ -32,7 +32,8 @@ struct UIRenderData
     uint32_t mVolts = 0;    // actual voltage in milli-volts
     int soundBank = 0;
     bool locked = false;
-    
+    bool lockFlash = false;
+
     CStr<10> fontName;
 
     osbr::RGB color;	// NOT the RGB of the LED. An GGB LED would be
