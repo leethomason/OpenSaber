@@ -14,7 +14,7 @@ H_RIM = 3.0;
 H = 8.0; // with flat top
 
 SQUARE_OFF = true;
-SQUARE = 3.0;
+SHORTEN_FRONT = false;
 
 D_PLATE = 7.8;
 D_TACTILE = 3.8;
@@ -23,7 +23,7 @@ D_PIN = 3.8;
 H_BASE = 2.4;
 
 D_RIM = 10.0;
-SQUARE = 3.5;
+SQUARE = SHORTEN_FRONT ? 3.5 : D_RIM/2;
 
 $fn = 80;
 
@@ -57,7 +57,7 @@ difference()
     translate([0, 0, H_TACTILE]) 
         cylinder(h=H_CONE, d1=D_TACTILE, d2=D_PIN);
 
-    if (SQUARE_OFF) {
+    if (SHORTEN_FRONT) {
         translate([-10, SQUARE, 0]) cube(size=[20, 20, 20]);
     }
 }
