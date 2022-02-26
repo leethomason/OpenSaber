@@ -27,6 +27,9 @@ enum class UIMode {
     NORMAL,
     PALETTE,
     VOLUME,
+#if SABER_LOCK()
+    LOCK,
+#endif
     NUM_MODES,
 
     MEDITATION = 255,

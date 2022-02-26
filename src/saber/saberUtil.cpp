@@ -149,9 +149,11 @@ void UIModeUtil::nextMode()
         Log.p("mode: VOLUME").eol();
         break;
 
-    //case UIMode::COLOR_WHEEL:
-    //    Log.p("mode: COLOR_WHEEL").eol();
-    //    break;
+#if SABER_LOCK()
+    case UIMode::LOCK:
+        Log.p("mode: LOCK").eol();
+        break;
+#endif        
 
     case UIMode::MEDITATION:
         Log.p("mode: MEDITATION").eol();
@@ -162,4 +164,50 @@ void UIModeUtil::nextMode()
         m_mode = UIMode::NORMAL;
         break;
     }
+}
+
+
+LockTimer::LockTimer()
+{
+    timer.setEnabled(false);
+}
+
+bool LockTimer::enabled() const
+{
+    return timer.enabled();
+}
+
+bool LockTimer::click()
+{
+    //Log.p("click enabled=").p(timer.enabled()).p( " count=").p(timerCount).eol();
+    bool retract = false;
+    if (timerCount >= 4) {
+        retract = true;
+    }
+    timerCount = 0;
+    timer.setEnabled(false);
+    return retract;
+}
+
+void LockTimer::start()
+{
+    timer.reset();
+    timer.setPeriod(250);
+    timer.setRepeating(true);
+    timer.setEnabled(true);
+    timerCount = 0;
+}
+
+void LockTimer::tick(uint32_t delta)
+{
+    timerCount += timer.tick(delta);
+    if (timerCount >= 6) {
+        timer.setEnabled(false);
+        timerCount = 0;
+    }
+}
+
+bool LockTimer::dark() const
+{
+    return timer.enabled() && !(timerCount & 1);
 }

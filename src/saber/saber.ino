@@ -94,6 +94,8 @@ BladePWM    bladePWM;
 Tester      tester;
 Swing       swing;
 MagFilter   magFilter;
+bool        lockOn = false;
+LockTimer   lockTimer;
 int         swingVol = 0;
 
 #ifdef SABER_NUM_LEDS
@@ -167,7 +169,7 @@ void BlockDrawOLED(const BlockDrawChunk* chunks, int n)
 
 void setup() 
 {
-    #if defined(SHIFTED_OUTPUT)
+#if defined(SHIFTED_OUTPUT)
         // I'm a little concerned about power draw on the display, in some states.
         // Do this first thing - set all the pins to ground so they don't short / draw.
         pinMode(PIN_LATCH, OUTPUT);
@@ -322,12 +324,16 @@ void buttonAReleaseHandler(const Button&)
 {
     ledA.blink(0, 0);
     ledA.set(true); // power is on.
+}
 
-    //if (uiMode.mode() == UIMode::COLOR_WHEEL && colorWasProcessed) {
-    //    processColorWheel(true);
-    //    bladePWM.setRGB(osbr::RGB(0));
-    //    colorWasProcessed = false;
-    //}
+bool setPaletteFromHoldCount(int count)
+{
+    saberDB.setPalette(count - 1);
+    syncToDB();
+    #ifdef SABER_AUDIO_UI
+    SFX::instance()->playUISound(saberDB.paletteIndex());
+    #endif
+    return count <= SaberDB::NUM_PALETTES;
 }
 
 bool setVolumeFromHoldCount(int count)
@@ -339,6 +345,12 @@ bool setVolumeFromHoldCount(int count)
     SFX::instance()->playUISound(saberDB.volume4());
     #endif
     return count >= 0 && count <= 5;
+}
+
+bool setLockFromHoldCount(int count)
+{
+    lockOn = count > 1;
+    return count <= 2;
 }
 
 void igniteBlade()
@@ -363,16 +375,6 @@ void retractBlade()
     }
 }
 
-bool setPaletteFromHoldCount(int count)
-{
-    saberDB.setPalette(count - 1);
-    syncToDB();
-    #ifdef SABER_AUDIO_UI
-    SFX::instance()->playUISound(saberDB.paletteIndex());
-    #endif
-    return count <= SaberDB::NUM_PALETTES;
-}
-
 // One button case.
 void buttonAClickHandler(const Button&)
 {
@@ -392,11 +394,17 @@ void buttonAClickHandler(const Button&)
         }
     }
     else if (bladeState.state() == BLADE_ON) {
-        bladeFlash.doFlash(millis());
-        if (sfx.smoothMode())
-            sfx.sm_playEvent(SFX_USER_TAP);
-        else
-            sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
+        if (lockTimer.enabled()) {
+            if (lockTimer.click())
+                retractBlade();
+        }
+        else {
+            bladeFlash.doFlash(millis());
+            if (sfx.smoothMode())
+                sfx.sm_playEvent(SFX_USER_TAP);
+            else
+                sfx.playSound(SFX_USER_TAP, SFX_GREATER_OR_EQUAL);
+        }    
     }
 }
 
@@ -426,44 +434,26 @@ void buttonAHoldHandler(const Button& button)
                     if (!setVolumeFromHoldCount(cycle))
                         buttonLEDOn = false;
                 }
+#if SABER_LOCK()
+                else if (uiMode.mode() == UIMode::LOCK) {
+                    if (!setLockFromHoldCount(cycle))
+                        buttonLEDOn = false;
+                }
+#endif
             }
         }
         ledA.set(buttonLEDOn);
     }
     else if (bladeState.state() != BLADE_RETRACT) {
         if (button.nHolds() == 1) {
-            retractBlade();
+            if (lockOn)
+                lockTimer.start();
+            else
+                retractBlade();
         }
     }
 }
 
-#if 0
-void processColorWheel(bool /*commitChange*/)
-{
-    if (uiMode.mode() == UIMode::COLOR_WHEEL) {
-        Vec3<int32_t> ave = averageAccel.average();
-        //FixedNorm x(ave[ACCEL_NORMAL_BUTTON], GrinlizLSM303::DIV);
-        FixedNorm x(ave[ACCEL_PERP_BUTTON], GrinlizLSM303::DIV);
-
-        if (x < 0)
-            x = 0;
-
-        FixedNorm z(ave[ACCEL_BLADE_DIRECTION], GrinlizLSM303::DIV);
-        osbr::RGB rgb = AccelToColor(x, z);
-        osbr::RGB rgbInv = ColorRotated(rgb, 180);
-
-        // Log.p("accel to color. x=").p(x).p(" z=").p(z).p(" c=").ptc(rgb).eol();
-
-        bladeFlash.setBladeColor(rgb);
-        bladeFlash.setImpactColor(rgbInv);
-        if (commitChange) {
-            saberDB.setBladeColor(rgb);
-            saberDB.setImpactColor(rgbInv);
-            syncToDB();
-        }    
-    }
-}
-#endif
 
 void processSerial() 
 {
@@ -619,8 +609,9 @@ void loop() {
 
     tester.process();
     buttonA.process();
+    lockTimer.tick(delta);
 
-    #ifdef SABER_UI_IDLE_MEDITATION_LED_OFF
+#ifdef SABER_UI_IDLE_MEDITATION_LED_OFF
     if (uiMode.mode() == UIMode::NORMAL && bladeState.state() == BLADE_OFF && uiMode.isIdle()) {
         int pwm = 255;
         ledProp.tick(delta, &pwm);
@@ -637,14 +628,7 @@ void loop() {
     processAccel(msec, delta);
 
     bladeFlash.tick(msec);
-    //if (uiMode.mode() == UIMode::COLOR_WHEEL && buttonA.held()) {
-    //    colorWasProcessed = true;
-    //    processColorWheel(false);           
-    //    bladePWM.setRGB(bladeFlash.getColor());
-    //}
-    //else {
     bladeState.process(&bladePWM, bladeFlash, millis());
-    //}
     
     sfx.process(bladeState.state(), delta, &swingVol);
     if (swingVol == 0) {
@@ -692,6 +676,8 @@ void loopDisplays(uint32_t msec, uint32_t mainDelta)
     uiRenderData.mVolts = voltmeter.easedPower();
     uiRenderData.fontName = manifest.getUnit(sfx.currentFont()).getName();
     uiRenderData.soundBank = sfx.currentFont();
+    uiRenderData.locked = lockOn;
+    uiRenderData.lockFlash = lockTimer.dark();
 
 #if SABER_DISPLAY == SABER_DISPLAY_128_32
     {
