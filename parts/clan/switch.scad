@@ -1,7 +1,7 @@
 // Varies; size of bolt hole in top.
 // D_BASE = 3.9; // standard bolt
 //D_BASE = 1.8; // the little pins
-D_BASE = 4.2;
+D_BASE = 4.1;
 
 // Varies; height of base ring.
 //H_RIM = 4.0; 
@@ -16,7 +16,7 @@ H = 8.0; // with flat top
 SQUARE_OFF = true;
 SHORTEN_FRONT = false;
 
-D_PLATE = 7.8;
+D_PLATE = 7.3; //7.8;
 D_TACTILE = 3.8;
 H_TACTILE = 3.0;
 D_PIN = 3.8;  
@@ -55,7 +55,7 @@ difference()
     cylinder(h=H_TACTILE, d=D_TACTILE);
     H_CONE = (D_TACTILE - D_PIN)/2;
     translate([0, 0, H_TACTILE]) 
-        cylinder(h=H_CONE, d1=D_TACTILE, d2=D_PIN);
+        cylinder(h=H_CONE, d=D_TACTILE);
 
     if (SHORTEN_FRONT) {
         translate([-10, SQUARE, 0]) cube(size=[20, 20, 20]);
