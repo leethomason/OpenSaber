@@ -10,12 +10,9 @@ PILLAR_Z = 5.0;
 BASE = 2.0;
 TARGET = 3.0;
 SUPPORT_HEIGHT = 1.0;
-EDGE = 0.6;             // Height of LSM303 is 1mm
+EDGE = 0.6;
 
-// FDM
-TRIM = 0.10;
-SCALE = 1.0;
-
+TRIM = 0.4;
 EPS = 0.001;
 STRUCTURE = 3.0;
 HANDLE = 10.0;
@@ -38,14 +35,14 @@ module support(x, y, sx, sy, height) {
     difference() {
         translate([x - sx/2 - T, y - sy/2 - T, 0]) 
             cube(size=[sx + 2*T, sy + 2*T, TARGET - height + EDGE]);
-        translate([x - sx/2 - TRIM, y - sy/2 - TRIM, TARGET - height])
-            cube(size=[sx + TRIM*2, sy + TRIM*2, 10.0]);
+        translate([x - sx/2, y - sy/2, TARGET - height])
+            cube(size=[sx, sy, 10.0]);
     }
     translate([x - STRUCTURE/2, -1, 0])
         cube(size=[STRUCTURE, DY + 2, ZSTRUCT]);
 }
 
-scale([SCALE, SCALE, SCALE]) {
+{
     difference() {
         union() {
             pillar();
@@ -97,8 +94,11 @@ scale([SCALE, SCALE, SCALE]) {
     // support(1.2904*C, 0.2708*C, 2.06 + 0.01, 2.06 + 0.1, 1.0);
     
     // Itsy V3 accel
-    support(1.2966*C, 0.2244*C, 3.10, 3.10, 1.0);
-    
+    //support(1.2966*C, 0.2244*C, 3.10, 3.10, 1.0);
+
+    // Itsy V4 accel
+    support(1.3*C, 0.2*C, 3.00 + TRIM, 2.50 + TRIM, 0.86);
+
     // Itsy V2/V3 audio amp
-    support(0.1429*C, 0.3045*C, 3.10, 3.10, 0.8);
+    support(0.1429*C, 0.3045*C, 3.00 + TRIM, 3.00 + TRIM, 0.8);
 }

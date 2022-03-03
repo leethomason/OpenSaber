@@ -65,7 +65,7 @@
 #define SABER_SUB_MODEL_BLACK		6
 #define SABER_SUB_MODEL_INITIATE    7
 #define SABER_SUB_MODEL_PROPHECY_1  8	// There is no way to tell the prophecies apart...so...this will need to be reconciled & merged.
-#define SABER_SUB_MODEL_PROPHECY_2  9
+#define SABER_SUB_MODEL_PROPHECY_2  9	
 #define SABER_SUB_MODEL_AEON        10
 #define SABER_SUB_MODEL_APP_LE      11
 #define SABER_SUB_MODEL_A			12

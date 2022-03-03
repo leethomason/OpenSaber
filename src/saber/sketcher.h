@@ -44,6 +44,10 @@ public:
 
 private:
     void DrawVolume(osbr::RGB* led, int nLED, uint32_t time, int vol04) const;
+    void DrawOneLED(osbr::RGB* uiLedStart,
+                    uint32_t time, uint32_t delta, 
+                    UIMode mode, bool bladeIgnited, const UIRenderData& data,
+                    bool modeChanged);
 
     AnimateProp animate;
     UIMode lastUIMode = UIMode::NORMAL;

@@ -371,12 +371,10 @@ void Tester::runTests()
     runUnitTests();
 
     Log.p("Features:").eol();
-    #define STRINGIZE_(x) #x
-    #define STRINGIZE(x) STRINGIZE_(x)
     Log.p("Accel: ").p(STRINGIZE(ACCELEROMETER)).eol();
+    Log.p("Magnetometer: ").p(accelMag.hasMag()).eol();
     Log.p("Tune: ").p(VOLTMETER_TUNE).eol();
     Log.p("Lock: ").p(SABER_LOCK()).eol();
-    Log.p("---------").eol();
 
     running = true;
     if (button) 

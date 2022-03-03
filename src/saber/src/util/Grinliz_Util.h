@@ -695,12 +695,6 @@ private:
 	But a log class is useful to generalize, both for utility
 	and testing. Therefore put up with some #define nonsense here.
 */
-#ifdef _WIN32
-class Stream;
-static const int DEC = 1;	// fixme: use correct values
-static const int HEX = 2;
-#endif
-
 class Stream;
 
 #ifndef DEC
@@ -783,6 +777,9 @@ public:
 private: 
 	Stream *_savedStream = 0;
 };
+
+#define STRINGIZE_(x) #x
+#define STRINGIZE(x) STRINGIZE_(x)
 
 #endif // GRINLIZ_UTIL_INCLUDED
 

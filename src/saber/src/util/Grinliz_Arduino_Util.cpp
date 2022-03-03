@@ -279,19 +279,6 @@ void AssertOut2(const char *message, int x, int y, const char *file, int line)
     Log.p("   value0=").p(x).p(" value1=").p(y).eol();
 }
 
-SPITransaction::SPITransaction(uint8_t cs, const SPISettings &settings)
-{
-    SPI.beginTransaction(settings);
-    digitalWrite(cs, LOW);
-    this->cs = cs;
-}
-
-SPITransaction::~SPITransaction()
-{
-    digitalWrite(cs, HIGH);
-    SPI.endTransaction();
-}
-
 ProfileData *ProfileData::root = 0;
 
 void ProfileStart(ProfileData *data)

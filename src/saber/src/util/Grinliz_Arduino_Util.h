@@ -66,15 +66,6 @@ private:
 };
 
 // --- Interupts & Time --- //
-class SPITransaction
-{
-public:
-    SPITransaction(uint8_t cs, const SPISettings& settings);
-    ~SPITransaction();
-
-private:
-    uint8_t cs;
-};
 
 struct ProfileData
 {

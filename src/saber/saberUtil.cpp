@@ -155,10 +155,6 @@ void UIModeUtil::nextMode()
         break;
 #endif        
 
-    case UIMode::MEDITATION:
-        Log.p("mode: MEDITATION").eol();
-        break;
-
     default:
         ASSERT(false);
         m_mode = UIMode::NORMAL;

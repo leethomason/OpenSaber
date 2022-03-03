@@ -63,17 +63,9 @@ void DotStarUI::DrawVolume(osbr::RGB *led, int n, uint32_t /*time*/, int vol04) 
     }
 }
 
-void DotStarUI::Draw(osbr::RGB *led, int nLED, uint32_t time, uint32_t delta, 
-                     UIMode mode, bool ignited, const UIRenderData &data)
+
+void DotStarUI::DrawOneLED(osbr::RGB *led, uint32_t time, uint32_t delta, UIMode mode, bool ignited, const UIRenderData &data, bool modeChanged)
 {
-
-    ASSERT(nLED == 1 || nLED == 4 || nLED == 6);
-    bool modeChanged = false;
-    if (mode != lastUIMode) {
-        modeChanged = true;
-        lastUIMode = mode;
-    }
-
     static const uint32_t ONE_VOLUME[5] = {
         0xffff00,   // yellow
         0xff8800,   // orange
@@ -83,59 +75,72 @@ void DotStarUI::Draw(osbr::RGB *led, int nLED, uint32_t time, uint32_t delta,
     };
 
 #if SABER_LOCK()
-/*
-    int32_t s = iSin_S3(time * 20); // -4096, +4096
-    if (s < 0)
-        s = -s;
-    int32_t b = s * 255 / 4090;
-    osbr::RGB lockLED = data.locked ? b << 16 : b << 8;
-*/
     osbr::RGB lockLED = data.locked ? 0xff0000 : 0x00ff00;
 #endif
 
-    if (nLED ==1) {
-        switch(mode) {
-            case UIMode::PALETTE:
-                led[0] = data.color;
-                break;
+    switch(mode) {
+        case UIMode::PALETTE:
+        {
+            led[0] = data.color;
+        }
+        break;
 
-            case UIMode::VOLUME:
-            {
-                led[0].set(ONE_VOLUME[data.volume]);
-            }
-            break;
+        case UIMode::VOLUME:
+        {
+            led[0].set(ONE_VOLUME[data.volume]);
+        }
+        break;
 
 #if SABER_LOCK()
-            case UIMode::LOCK:
-            {
-                led[0] = lockLED;
-            }
-            break;
+        case UIMode::LOCK:
+        {
+            led[0] = lockLED;
+        }
+        break;
 #endif
 
-            default:
-                {   
-                    static const int WHITE = 150;
-                    static const uint32_t PERIOD = 700;
+        default:
+        {   
+            static const int WHITE = 150;
+            static const uint32_t PERIOD = 700;
 
-                    if (modeChanged) {
-                        int powerLevel = UIRenderData::powerLevel(data.mVolts, 4);
-                        Log.p("start blink n=").p(powerLevel).eol();
-                        animate.startBlink(PERIOD * powerLevel, PERIOD, WHITE);
-                    }
-                    else {
-                        animate.tick(delta);
-                    }
-                    led[0].setWhite(animate.done() ? WHITE : animate.value());
+            if (modeChanged) {
+                int powerLevel = UIRenderData::powerLevel(data.mVolts, 4);
+                Log.p("start blink n=").p(powerLevel).eol();
+                animate.startBlink(PERIOD * powerLevel, PERIOD, WHITE);
+            }
+            else {
+                animate.tick(delta);
+            }
+            led[0].setWhite(animate.done() ? WHITE : animate.value());
 
-                    if (data.lockFlash) {
-                        led[0].set(0);
-                    }
-                }
-                break;
+            if (data.lockFlash) {
+                led[0].set(0);
+            }
         }
+        break;
+    }
+}
+
+
+void DotStarUI::Draw(osbr::RGB *led, int nLED, uint32_t time, uint32_t delta, 
+                     UIMode mode, bool ignited, const UIRenderData &data)
+{
+    ASSERT(nLED == 1 || nLED == 4 || nLED == 6);
+    bool modeChanged = false;
+    if (mode != lastUIMode) {
+        modeChanged = true;
+        lastUIMode = mode;
+    }
+
+    if (nLED == 1) {
+        DrawOneLED(led, time, delta, mode, ignited, data, modeChanged);
         return;
     }
+
+#if SABER_LOCK()
+    osbr::RGB lockLED = data.locked ? 0xff0000 : 0x00ff00;
+#endif
 
     if (ignited)
     {

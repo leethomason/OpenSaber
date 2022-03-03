@@ -32,7 +32,8 @@ enum class UIMode {
 #endif
     NUM_MODES,
 
-    MEDITATION = 255,
+    // Modes that can be rendered, but not selected.
+    MEDITATION = 255,   
 };
 
 enum {
