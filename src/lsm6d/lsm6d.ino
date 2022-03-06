@@ -9,14 +9,20 @@ void setup() {
     Log.attachSerial(&Serial);
 
     Log.p("Serial connected.").eol();
-    accel.begin(&SPI);
+    accel.begin(&SPI, GrinlizLSM6D::Freq::HZ_12);
+
     Log.p("Accel begin() complete.").eol();
     uint8_t whoAmI = accel.whoAmI();
     Log.p("WhoAmI=").p(whoAmI, HEX).p(" (expected=").p(GrinlizLSM6D::WHOAMI, HEX).p(")").eol();
-    accel.flushFifo();
+
+    accel.test();
 }
 
 void loop()
 {
-    accel.flushFifo();
+    Vec3<Fixed115> a;
+    Vec3<int32_t> gyro;
+    if (accel.sampleAccelGyro(&a, &gyro)) {
+        Log.p("Accel: ").v3(a).p(" Gyro: ").v3(gyro).eol();
+    }
 }

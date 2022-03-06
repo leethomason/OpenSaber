@@ -1,6 +1,6 @@
 #include "grinliz_lsm6d.h"
 #include "../util/Grinliz_Arduino_Util.h"
-
+#include <limits.h>
 
 static const uint8_t SPI_READ = 0x80;
 
@@ -20,19 +20,20 @@ static constexpr uint8_t REG_FIFO_STATUS2 = 0x3b;
 static constexpr uint8_t REG_FIFO_DATA_OUT_TAG = 0x78;
 static constexpr uint8_t REG_FIFO_DATA_OUT_X_L = 0x79;
 
-static constexpr uint8_t FREQ_12  = 0b0001;
-static constexpr uint8_t FREQ_100 = 0b0100;
-
-static constexpr uint8_t FREQ = FREQ_12;
+static constexpr uint8_t TAG_GYRO  = 0x01;
+static constexpr uint8_t TAG_ACCEL = 0x02;
+static constexpr uint8_t TAG_TEMP  = 0x03;
+static constexpr uint8_t TAG_TIME  = 0x04;
 
 GrinlizLSM6D::GrinlizLSM6D(int cs)
 {
     _cs = cs;
 }
 
-void GrinlizLSM6D::begin(SPIClass *spi)
+void GrinlizLSM6D::begin(SPIClass *spi, GrinlizLSM6D::Freq f)
 {
     //Log.p("begin cs=").p(_cs).eol();
+    _freq = f;
     _spiDriver.begin(spi, _cs, 1000000);    // 8000000?
     delay(10);
     init();
@@ -47,13 +48,13 @@ uint8_t GrinlizLSM6D::whoAmI()
 void GrinlizLSM6D::init()
 {
     uint8_t data_ctrl1_xl =
-        (FREQ << 4) |
+        (uint8_t(_freq) << 4) |
         (0b11 << 2);    // 16g
 
 	_spiDriver.write8(REG_CTRL1_XL, data_ctrl1_xl);
 
     uint8_t data_ctrl2_g =
-        (FREQ << 4) |
+        (uint8_t(_freq) << 4) |
         (0b10 << 2);    // 1000 dps
 
 	_spiDriver.write8(REG_CTRL2_G, data_ctrl2_g);
@@ -71,15 +72,15 @@ void GrinlizLSM6D::init()
     _spiDriver.write8(REG_FIFO_CTRL2, 0);
 
     uint8_t data_fifo_3 =
-        (FREQ << 4) | // gyro
-        (FREQ);       // accel
+        (uint8_t(_freq) << 4) | // gyro
+        (uint8_t(_freq));       // accel
     _spiDriver.write8(REG_FIFO_CTRL3, data_fifo_3);
 
     uint8_t data_fifo_4 = 0b00000110;   // continuous FIFO mode
   //  uint8_t data_fifo_4 = 0b00000001;   // FIFO mode
     _spiDriver.write8(REG_FIFO_CTRL4, data_fifo_4);
 
-    readStatus();
+    //readStatus();
 }
 
 void GrinlizLSM6D::readStatus()
@@ -94,33 +95,93 @@ void GrinlizLSM6D::readStatus()
     Log.p("freqG=").p(freqG).p(" dps=").p(dps).p(" expect 4, 2").eol();
 }
 
-
-int GrinlizLSM6D::flushFifo()
+uint32_t GrinlizLSM6D::numWords()
 {
-    static const int N_TAG = 5;
-    const char *TAG[N_TAG] = {
-        "none",
-        "gyro",
-        "accel",
-        "temp",
-        "time"
-    };
-
     uint32_t nWords = _spiDriver.read8(SPI_READ | REG_FIFO_STATUS1);
     nWords |= (_spiDriver.read8(SPI_READ | REG_FIFO_STATUS2) & 0b11) << 8;
-    if (nWords == 0)
-        return 0;
-
-    Log.p("nFifo=").p(nWords).eol();
-    for (uint32_t w = 0; w < nWords; ++w) {
-        uint8_t tag = _spiDriver.read8(SPI_READ | REG_FIFO_DATA_OUT_TAG) >> 3;
-        for (int i = 0; i < 6; ++i) {
-            _spiDriver.read8(SPI_READ | (REG_FIFO_DATA_OUT_X_L + i));
-        }
-        const char *name = "--none--";
-        if (tag < N_TAG)
-            name = TAG[tag];
-        Log.p("  tag=").p(tag).p(" ").p(name).eol();
-    }
     return nWords;
 }
+
+uint8_t GrinlizLSM6D::readWord(Vec3<int16_t> *data)
+{
+    uint8_t tag = _spiDriver.read8(SPI_READ | REG_FIFO_DATA_OUT_TAG) >> 3;
+
+    for (int i = 0; i < 3; ++i)
+    {
+        (*data)[i]  = _spiDriver.read8(SPI_READ | (REG_FIFO_DATA_OUT_X_L + i*2));
+        (*data)[i] |= _spiDriver.read8(SPI_READ | (REG_FIFO_DATA_OUT_X_L + i*2 + 1)) << 8;
+    }
+    return tag;
+}
+
+bool GrinlizLSM6D::sampleAccelGyro(Vec3<Fixed115> *accel, Vec3<int32_t> *gyro)
+{
+    static const int32_t DIV = 2048;
+    
+    // Pulled from the Adafruit source.
+    // Having a very difficult time finding this in the data sheet.
+    // static const int32_t G_SCALE = 35;
+    // static const int32_t G_DIV = 1000;
+
+    // BUT, assuming max value 32767 is 1000 dps -> 32.8
+    static const int32_t G_SCALE = 328;
+    static const int32_t G_DIV = 10000;
+
+    uint32_t nWords = numWords();
+    if (nWords < 2)
+        return false;
+
+    accel->set(0, 0, 0);
+    gyro->set(INT32_MAX, INT32_MAX, INT32_MAX);
+
+    Vec3<int16_t> data;
+    for (int i = 0; i < 2; ++i) {
+        uint8_t tag = readWord(&data);
+        if (tag == TAG_ACCEL) {
+            accel->x = Fixed115(data.x, DIV);
+            accel->y = Fixed115(data.y, DIV);
+            accel->z = Fixed115(data.z, DIV);
+        }
+        else if (tag == TAG_GYRO) {
+            gyro->x = data.x * G_SCALE / G_DIV;
+            gyro->y = data.y * G_SCALE / G_DIV;
+            gyro->z = data.z * G_SCALE / G_DIV;
+        }
+    }
+    if (accel->x == 0 && accel->y == 0 && accel->z == 0)
+        Log.p("Error reading accel.").eol();
+    if (gyro->x == INT32_MAX)
+        Log.p("Error reading gyro.").eol();
+    return true;
+}
+
+void GrinlizLSM6D::test()
+{
+    uint32_t start = millis();
+    uint32_t end = 0;
+    int n = 0;
+    flush();
+    while(true) {
+        end = millis();
+        if (end - start > 1000)
+            break;
+        Vec3<Fixed115> a;
+        Vec3<int32_t> g;
+        if(sampleAccelGyro(&a, &g)) {
+            ++n;
+        }
+    }
+    Fixed115 sps(n * 1000, end - start);
+    Log.p(n).p(" samples read. ").p(sps).p(" Hz").eol();
+}
+
+void GrinlizLSM6D::flush()
+{
+    int32_t n = numWords();
+    while(n--) {
+        Vec3<Fixed115> a;
+        Vec3<int32_t> g;
+        sampleAccelGyro(&a, &g);
+    }
+}
+

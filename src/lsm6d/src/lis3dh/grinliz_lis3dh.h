@@ -7,7 +7,6 @@
 #include "../util/fixed.h"
 #include "../util/Grinliz_Util.h"
 
-
 static const uint8_t LIS3DH_DATARATE_400_HZ = 0b0111; // 400Hz
 static const uint8_t LIS3DH_DATARATE_200_HZ = 0b0110; // 200Hz
 static const uint8_t LIS3DH_DATARATE_100_HZ = 0b0101; // 100Hz
@@ -33,22 +32,6 @@ public:
     bool sampleAccel(Vec3<Fixed115>* v) {
         return sampleAccel(&v->x, &v->y, &v->z);
     }
-
-    bool hasMag() const { return false; }
-    bool sampleMag(Vec3<int32_t>* v) {
-        v->x = v->y = v->z = 0;
-        return false;
-    }
-    Vec3<int32_t> getMagMax() const {
-        Vec3<int32_t> v = {1, 1, 1};
-        return v;
-    }
-    Vec3<int32_t> getMagMin() const {
-        Vec3<int32_t> v = {0, 0, 0};
-        return v;
-    }
-    bool magDataValid() const { return false; }
-        void recalibrateMag() {}
 
 private:
     bool sample(int16_t *x, int16_t *y, int16_t *z);
