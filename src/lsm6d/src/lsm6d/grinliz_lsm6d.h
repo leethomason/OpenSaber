@@ -25,6 +25,7 @@ public:
 
     // Accel in g-force
     // Gyro in degrees per second. 
+    // Returns true if sample read. Can be used in a while() loop.
     bool sampleAccelGyro(Vec3<Fixed115> *accel, Vec3<int32_t> *gyro);
 
     enum
