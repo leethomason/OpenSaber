@@ -77,6 +77,10 @@ public:
 	int currentFont() const { return m_currentFont; }
 
 	bool smoothMode() const { return m_smoothMode; }
+
+	// radPerSec is straightforward how fast the blade is moving
+	// blend256 is the blending between sounds, from 0-256. Some interpretation of
+	//          a normal. For example: (int)((1.0f + dot)*128.0f)
 	void sm_setSwing(float radPerSec, int blend256) { m_speed = radPerSec; m_blend256 = blend256; }
 	void sm_ignite();
 	void sm_retract();

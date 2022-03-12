@@ -24,6 +24,7 @@
 
 #include "./src/lsm303/grinliz_LSM303.h"
 #include "./src/lis3dh/grinliz_lis3dh.h"
+#include "./src/lsm6d/grinliz_lsm6d.h"
 
 #include "cmdparser.h"
 #include "saberdb.h"
@@ -237,6 +238,8 @@ bool CMDParser::processCMD()
 #endif
     }
     else if (action == ACCEL) {
+        accelMag.log(8);
+        /*
         accelMag.flushAccel(0);
 
         uint32_t start = millis();
@@ -290,7 +293,7 @@ bool CMDParser::processCMD()
                 Log.p("Mag delta: ").v3(vDelta).eol();
                 Log.p("Mag/s: ").p(10 * 1000.0f / (end - start)).eol();
             }
-        }
+        }*/
     }
     else if (action == PLAY) {
         printLead(action.c_str());        

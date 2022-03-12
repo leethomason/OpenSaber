@@ -295,6 +295,8 @@ typedef FixedT<int16_t, 6> Fixed115;
 // About -8 to 8
 typedef FixedT<int16_t, 12> FixedNorm;
 
+typedef FixedT<int32_t, 16> Fixed16;
+
 static const FixedNorm fixedNormHalf(1, 2);
 static const FixedNorm fixedNormSqrt2Over2(0.7071067811);
 

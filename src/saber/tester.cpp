@@ -36,6 +36,7 @@
 #include "./src/util/Grinliz_Arduino_Util.h"
 #include "./src/lsm303/grinliz_LSM303.h"
 #include "./src/lis3dh/grinliz_lis3dh.h"
+#include "./src/lsm6d/grinliz_lsm6d.h"
 
 using namespace osbr;
 
@@ -200,6 +201,9 @@ public:
 
     virtual void start(Tester* /*tester*/)
     {
+        accelMag.test();
+        accelMag.log(5);
+        /*
         nSamples = 0;
         accelMag.flushAccel(0);
         startTime = millis();
@@ -232,6 +236,7 @@ public:
             }
         }
         ASSERT(variation);
+        */
     }
 
     virtual int process(Tester*, uint32_t /*event*/)
@@ -240,7 +245,7 @@ public:
     }
 };
 
-
+/*
 class MagnemometerTest : public Test
 {
 public:
@@ -283,11 +288,12 @@ public:
         }
     }
 
-    virtual int process(Tester*, uint32_t /*event*/)
+    virtual int process(Tester*, uint32_t)
     {
         return TEST_SUCCESS;
     }
 };
+*/
 
 class ButtonTest : public Test
 {
@@ -341,7 +347,7 @@ IgniteRetractTest igniteRetractTest;
 ChannelTest channelTest;
 BlasterTest blasterTest;
 AccelerometerTest accelerometerTest;
-MagnemometerTest magnemometerTest;
+//MagnemometerTest magnemometerTest;
 
 Test* gTests[] = {
     &buttonTest,
@@ -349,7 +355,7 @@ Test* gTests[] = {
     &channelTest,
     &blasterTest,
     &accelerometerTest,
-    &magnemometerTest,
+    //&magnemometerTest,
     0
 };
 
@@ -372,7 +378,7 @@ void Tester::runTests()
 
     Log.p("Features:").eol();
     Log.p("Accel: ").p(STRINGIZE(ACCELEROMETER)).eol();
-    Log.p("Magnetometer: ").p(accelMag.hasMag()).eol();
+    //Log.p("Magnetometer: ").p(accelMag.hasMag()).eol();
     Log.p("Tune: ").p(VOLTMETER_TUNE).eol();
     Log.p("Lock: ").p(SABER_LOCK()).eol();
 

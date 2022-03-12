@@ -25,13 +25,14 @@
 
 // Arduino Libraries
 #include <Adafruit_ZeroI2S.h>
-#include <Adafruit_ZeroDMA.h>
+//#include <Adafruit_ZeroDMA.h>
 
 #include "./src/nada_flashmem/Nada_SPIFLash.h"
 #include "./src/nada_flashmem/Nada_FlashTransport_SPI.h"
 #include "./src/util/Grinliz_Arduino_Util.h"
 #include "./src/lsm303/grinliz_LSM303.h"
 #include "./src/lis3dh/grinliz_lis3dh.h"
+#include "./src/lsm6d/grinliz_lsm6d.h"
 
 #include <Wire.h>
 #include <SPI.h>
@@ -92,11 +93,14 @@ BladeFlash  bladeFlash;
 CMDParser   cmdParser(&saberDB, manifest);
 BladePWM    bladePWM;
 Tester      tester;
-Swing       swing;
-MagFilter   magFilter;
 bool        lockOn = false;
 LockTimer   lockTimer;
 int         swingVol = 0;
+
+#if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LSM303
+Swing       swing;
+MagFilter   magFilter;
+#endif
 
 #ifdef SABER_NUM_LEDS
 DotStar dotstar;                    // Hardware controller.
@@ -214,9 +218,9 @@ void setup()
 
     Log.p("Init accelerometer and magnemometer.").eol();
     delay(10);
-    accelMag.begin(&SPI, LIS3DH_DATARATE_100_HZ);
+    accelMag.begin(&SPI);
     accelMag.flushAccel(0);
-    Log.p("Min/Max=").v3(accelMag.getMagMin()).p(" ").v3(accelMag.getMagMax()).eol();
+    //Log.p("Min/Max=").v3(accelMag.getMagMin()).p(" ").v3(accelMag.getMagMax()).eol();
     delay(10);
 
     Log.p("Init systems.").eol();
@@ -465,7 +469,7 @@ void processSerial()
     }
 }
 
-void processAccel(uint32_t msec, uint32_t /*delta*/)
+void processAccel(uint32_t msec, uint32_t)
 {
     static ProfileData profData("processAccel");
     ProfileBlock block(&profData);
@@ -474,6 +478,7 @@ void processAccel(uint32_t msec, uint32_t /*delta*/)
     // Also look for stalls and hitches.
     accelMag.flushAccel(4);
 
+#if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LSM303
     Vec3<int32_t> magData;
     // readMag() should only return >0 if there is new data from the hardware.
     if (accelMag.hasMag() && accelMag.sampleMag(&magData)) {
@@ -530,12 +535,57 @@ void processAccel(uint32_t msec, uint32_t /*delta*/)
             burstLog--;
         }
 #endif        
-
     }
+#endif
 
     Vec3<Fixed115> accelData;
-    while(accelMag.sampleAccel(&accelData.x, &accelData.y, &accelData.z))
+    Vec3<int32_t> gyroData;
+    while(accelMag.sampleAccel(&accelData, &gyroData))
     {
+#if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LSM6D
+        {
+            static Vec3<Fixed16> bladeRotation(0, 0, 0);    // 0-360
+            static Vec3<FixedNorm> bladeOrigin(1, 0, 0);    // normalized, -1 to 1
+            static int logDiv = 0;
+            const static int LOG_DIV = 20;
+
+            // Some notes: this math is only correct if you move
+            // one axis independentantly. But...that's okay.
+            // We mostly want rates.
+            // Ignore the "twist" axis.
+
+            // 100 hz. (Not delta as first attempted. Oops.)
+            // Blade rotation is in dps - can feed that directly to the sound system.
+            // BUT! We also need a normal origin position to blend the sounds.
+            Vec3<FixedNorm> bladeOrientation;
+            const Fixed16 dt(10, 1000);
+
+            for (int i = 0; i < 3; ++i) {
+                bladeRotation[i] += dt * (int)gyroData[i];
+                while(bladeRotation[i] < 0)
+                    bladeRotation[i] += 360;
+                while (bladeRotation[i] >= 360)
+                    bladeRotation[i] -= 360;
+
+                bladeOrientation[i] = iSin(FixedNorm(bladeRotation[i].scale(8), 360*8));
+            }
+
+            if (swingVol == 0) {
+                bladeOrigin = bladeOrientation;
+            }
+            int32_t dps2 = gyroData.x * gyroData.x + gyroData.y * gyroData.y + gyroData.z * gyroData.z;
+            int32_t dps = intSqrt(dps2);
+            FixedNorm dot = bladeOrigin.dot(bladeOrientation);
+            int32_t dotScaled = dot.scale(128); // -128 to 128
+
+            if(++logDiv == LOG_DIV) {
+                logDiv = 0;
+                Log.p("dps=").p(dps).p(" rot=").v3(bladeRotation).p(" orient=").v3(bladeOrientation).eol();
+            };
+            sfx.sm_setSwing(dps * 3.14f / 180.0f, dotScaled + 128);
+        }
+#endif
+
         Fixed115 g2Normal, g2;
         calcGravity2(accelData.x, accelData.y, accelData.z, &g2, &g2Normal);
 
@@ -632,8 +682,10 @@ void loop() {
     
     sfx.process(bladeState.state(), delta, &swingVol);
     if (swingVol == 0) {
+        #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LSM303
         accelMag.recalibrateMag();
         swing.setOrigin();
+        #endif
     }
 
     // Timing / skip is in the voltmeter class.

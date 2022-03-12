@@ -39,6 +39,19 @@ bool TestFixed()
     }
 
     {
+        Fixed16 a(5, 2);
+        TEST_IS_TRUE(a.getInt() == 2);
+        TEST_IS_TRUE(a.getDec() == 65536 / 2);
+
+        Fixed16 b;
+        b = 2;
+        Fixed16 c(1, 2);
+
+        Fixed16 d = a + b + c;
+        TEST_IS_TRUE(d == 5);
+    }
+
+    {
         Fixed115 a(5, 2);
         TEST_IS_TRUE(a.getInt() == 2);
         TEST_IS_TRUE(a.getDec() == 65536 / 2);

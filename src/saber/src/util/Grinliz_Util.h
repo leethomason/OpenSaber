@@ -81,6 +81,10 @@ struct Vec3
 		return a;
 	}
 
+	T dot(const Vec3<T>& rhs) const {
+		return rhs.x * x + rhs.y * y + rhs.z * z;
+	}
+
     Vec3<T>& operator += (const Vec3<T>& v) { x += v.x; y += v.y; z += v.z; return *this; }
     Vec3<T>& operator -= (const Vec3<T>& v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
 

@@ -50,7 +50,7 @@
 //#define SABER_MODEL_SHOCK3  	   19   // Itsy v2b, OLED (128x32), Dotstar crystal
 #define SABER_MODEL_LEIA  	   	   20   // Itsy, Dotstar UI
 #define SABER_MODEL_SISTERS2  	   21   // Itsy, OLED (128x32)
-#define SABER_MODEL_DUTCHESS   	   22   // Itsy, Dotstar UI
+#define SABER_MODEL_DUCHESS   	   22   // Itsy, Dotstar UI
 #define SABER_MODEL_PROTECTION 	   23   // Itsy, Dotstar UI
 #define SABER_MODEL_CLAN		   24	// Itsy, one LED UI
 #define SABER_MODEL_LEIA_PS		   25	// Itsy, one LED UI, essentially a clan saber
@@ -72,9 +72,9 @@
 #define SABER_SUB_MODEL_B			13
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_CLAN
-#define SABER_SUB_MODEL				SABER_SUB_MODEL_PROPHECY_1	
+#define SERIAL_DEBUG 				1
+#define SABER_MODEL 				SABER_MODEL_DUCHESS
+#define SABER_SUB_MODEL				0	
 // ----------------------------------
 
 #define SABER_SOUND_SD 				1	// external memory card
@@ -113,7 +113,8 @@
 #define PCB_ITSY_3A				   23
 
 #define SABER_ACCELEROMETER_LIS3DH		1	// SPI, accel
-#define SABER_ACCELEROMETER_LSM303 		2	// SPI, accel, magnetometer
+#define SABER_ACCELEROMETER_LSM303 		2	// I2C, accel, magnetometer
+#define SABER_ACCELEROMETER_LSM6D		3   // SPI, accel, gyro
 
 #if SABER_MODEL == SABER_MODEL_GECKO
 	#define PCB_VERSION 				PCB_VERSION_1
@@ -766,8 +767,8 @@
 	static const int VOLUME_3 = 128;
 	static const int VOLUME_4 = 255;
 
-#elif (SABER_MODEL == SABER_MODEL_DUTCHESS)
-	#define PCB_VERSION 				PCB_ITSY_2C
+#elif (SABER_MODEL == SABER_MODEL_DUCHESS)
+	#define PCB_VERSION 				PCB_ITSY_4A
 	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
 	#define SABER_VOLTMETER()			1			
 	#define SABER_UI_LED				SABER_LED_DOTSTAR
@@ -787,7 +788,7 @@
 	#define FILTER_MAG_Y	30
 	#define FILTER_MAG_Z	10
 	#define SWING_SAMPLES	12
-	#define ID_STR "Dutchess Cree XPE2 RGB"
+	#define ID_STR "Duchess Cree XPE2 RGB"
 
 	static const int32_t RED_VF   = 2200;
 	static const int32_t RED_I    = 400;
@@ -1277,6 +1278,33 @@
 	#define PIN_SWITCH_A		13
 	
 	#define ACCEL_BLADE_DIRECTION 0
+	#define ACCEL_NORMAL_BUTTON   1
+	#define ACCEL_PERP_BUTTON     2
+
+#elif (PCB_VERSION == PCB_ITSY_4A)
+	#define SABER_ACCELEROMETER SABER_ACCELEROMETER_LSM6D
+	#define ACCELEROMETER 		GrinlizLSM6D
+
+	#define PIN_I2S_LRCLK		0
+	#define PIN_I2S_BITCLK		1
+
+	#define PIN_VMETER        	A1
+	#define PIN_LED_A    	  	A2 
+	#define PIN_DOTSTAR_EN		A3
+	#define PIN_OLED_CS  		A4
+	#define PIN_OLED_DC		    2
+	// CLOCK	 
+	// MOSI
+	// MISO 
+	#define PIN_ACCEL_EN      	A5
+	// 7 available
+	#define PIN_EMITTER_RED   	9
+	#define PIN_EMITTER_GREEN 	10
+	#define PIN_EMITTER_BLUE   	11
+	#define PIN_I2S_DATA		12
+	#define PIN_SWITCH_A		13
+	
+	#define ACCEL_BLADE_DIRECTION 0 // fixme
 	#define ACCEL_NORMAL_BUTTON   1
 	#define ACCEL_PERP_BUTTON     2
 

@@ -29,11 +29,6 @@ void SPLog::attachSerial(Stream* stream)
 }
 
 
-void SPLog::attachLog(Stream* stream)
-{
-}
-
-
 const SPLog& SPLog::p(const char v[], int width) const
 {
     if (width)

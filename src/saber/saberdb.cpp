@@ -122,7 +122,7 @@ void SaberDB::setPaletteFromDirHash(uint32_t h)
     }
     break;
 
-    // Duchess / dutchess
+    // Duchess / duchess
     case 0x1deb9709:
     {
         Log.p("Jaina - BoldOne").eol();

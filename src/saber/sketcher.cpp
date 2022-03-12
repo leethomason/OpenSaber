@@ -64,7 +64,7 @@ void DotStarUI::DrawVolume(osbr::RGB *led, int n, uint32_t /*time*/, int vol04) 
 }
 
 
-void DotStarUI::DrawOneLED(osbr::RGB *led, uint32_t time, uint32_t delta, UIMode mode, bool ignited, const UIRenderData &data, bool modeChanged)
+void DotStarUI::DrawOneLED(osbr::RGB *led, uint32_t, uint32_t delta, UIMode mode, bool, const UIRenderData &data, bool modeChanged)
 {
     static const uint32_t ONE_VOLUME[5] = {
         0xffff00,   // yellow
