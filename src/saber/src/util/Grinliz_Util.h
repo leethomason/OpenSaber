@@ -85,6 +85,17 @@ struct Vec3
 		return rhs.x * x + rhs.y * y + rhs.z * z;
 	}
 
+	T length() const { return (x * x + y * y + z * z).sqrt(); }
+
+	void normalize() {
+		T len = length();
+		if (len == 0)
+			return;
+		x = x / len;
+		y = y / len;
+		z = z / len;
+	}
+
     Vec3<T>& operator += (const Vec3<T>& v) { x += v.x; y += v.y; z += v.z; return *this; }
     Vec3<T>& operator -= (const Vec3<T>& v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
 

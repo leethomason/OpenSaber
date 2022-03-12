@@ -1304,7 +1304,8 @@
 	#define PIN_I2S_DATA		12
 	#define PIN_SWITCH_A		13
 	
-	#define ACCEL_BLADE_DIRECTION 0 // fixme
+	// x is blade twist and blade direction.
+	#define ACCEL_BLADE_DIRECTION 0
 	#define ACCEL_NORMAL_BUTTON   1
 	#define ACCEL_PERP_BUTTON     2
 
