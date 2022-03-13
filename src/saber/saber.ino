@@ -539,12 +539,17 @@ void processAccel(uint32_t msec, uint32_t)
 
     Vec3<Fixed115> accelData;
     Vec3<int32_t> gyroData;
+
+#if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LSM6D
     while(accelMag.sampleAccel(&accelData, &gyroData))
+#else
+    while(accelMag.sampleAccel(&accelData))
+#endif
     {
 #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LSM6D
         {
-            static Vec3<Fixed16> bladeRotation(0, 0, 0);    // -180 to 180. Matches dps from gyro.
-            static Vec3<FixedNorm> bladeOrigin(1, 0, 0);    // normalized, -1 to 1
+            static Vec3<Fixed16> bladeRotation(0, 0, 0);  // -180 to 180. Matches dps from gyro.
+            static Vec3<Fixed16> bladeOrigin(0, 0, 0);    // normalized, -1 to 1
             static int logDiv = 0;
             const static int LOG_DIV = 20;
 
@@ -555,8 +560,6 @@ void processAccel(uint32_t msec, uint32_t)
 
             // 100 hz. (Not delta as first attempted. Oops.)
             // Blade rotation is in dps - can feed that directly to the sound system.
-            // BUT! We also need a normal origin position to blend the sounds.
-            Vec3<FixedNorm> bladeOrientation(0);
             const Fixed16 dt(10, 1000);
 
             for (int i = 0; i < 3; ++i) {
@@ -569,28 +572,32 @@ void processAccel(uint32_t msec, uint32_t)
                     bladeRotation[i] += 360;
                 while (bladeRotation[i] >= 180)
                     bladeRotation[i] -= 360;
-
-                bladeOrientation[i] = iSin(FixedNorm(bladeRotation[i].scale(8), 360*8));
             }
-            bladeOrientation.normalize();
-
             // A bit hacky that swingVol is global. But used as a key to update our origin location.
             if (swingVol == 0) {
-                bladeOrigin = bladeOrientation;
+                bladeOrigin = bladeRotation;
             }
             // How fast the blade is moving, in degrees per second.
             int32_t dps2 = gyroData.x * gyroData.x + gyroData.y * gyroData.y + gyroData.z * gyroData.z;
             int32_t dps = intSqrt(dps2);
-            // The relation of the blade (-1 to 1) to its origin.
-            FixedNorm dot = bladeOrigin.dot(bladeOrientation);
-            int32_t dotScaled = dot.scale(128); // -128 to 128
+            
+            // The relation of the blade to it's origin.
+            // Just needs to be a value to swing sounds mostly correct.
+            Fixed16 delta(0);
+
+            for (int i = 0; i < 3; ++i) {
+                delta = glMax(distBetweenAngle(bladeRotation[i], bladeOrigin[i], Fixed16(360)),
+                              delta);
+            }
+            if (delta > 180)
+                delta = 180;
 
             if(++logDiv == LOG_DIV) {
                 logDiv = 0;
-                Log.p("dps=").p(dps).p(" rot=").v3(bladeRotation).p(" orient=").v3(bladeOrientation).eol();
-                //Log.p("dps=").p(dps).p(" dot=").p(dot).p(" accel=").v3(accelData).eol();
+                Log.p("dps=").p(dps).p(" rot=").v3(bladeRotation).p(" delta=").p(delta).eol();
+                //Log.p("dps=").p(dps).p(" delta=").p(delta).p(" accel=").v3(accelData).eol();
             };
-            sfx.sm_setSwing(dps * 3.14f / 180.0f, dotScaled + 128);
+            sfx.sm_setSwing(dps * 3.14f / 180.0f, (delta * Fixed16(256, 180)).getInt());
         }
 #endif
 

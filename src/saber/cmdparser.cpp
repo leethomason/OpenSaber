@@ -239,61 +239,6 @@ bool CMDParser::processCMD()
     }
     else if (action == ACCEL) {
         accelMag.log(8);
-        /*
-        accelMag.flushAccel(0);
-
-        uint32_t start = millis();
-        static const int N = 10;
-        int n = 0;
-        Vec3<Fixed115> data[N];
-        while(n < N) {
-            if(accelMag.sampleAccel(data + n))
-                n++;
-        }
-        float samplesPerSecond = N * 1000.0f / (millis() - start);
-
-        for(int i=0; i<N; ++i) {
-            Fixed115 g2, g2n;
-            calcGravity2(data[i].x, data[i].y, data[i].z, &g2, &g2n);
-
-            Log.v3(data[i]).p(" g2=").p(g2).p(" g2N=").p(g2n).p(" g=").p(g2.sqrt()).eol();
-        }
-        Log.p("Samples per second: ").p(samplesPerSecond).eol();
-
-        delay(20);
-        Vec3<int32_t> mag;
-        if (!accelMag.hasMag()) {
-            Log.p("No magnetometer.").eol();
-        }
-        else {
-            if (!accelMag.sampleMag(&mag)) {
-                Log.p("No magnetometer data.").eol();
-            }
-            else {
-                int count = 0;
-                uint32_t start = millis();
-                while(count < 10) {
-                    if (accelMag.sampleMag(&mag)) {
-                        count++;
-
-                        Vec3<int32_t> magMin = accelMag.getMagMin();
-                        Vec3<int32_t> magMax = accelMag.getMagMax();
-                        Vec3<int32_t> range = magMax - magMin;
-                        Log.p("Mag=").v3(mag).p(" range=").v3(range).eol();
-                    }
-                }
-                uint32_t end = millis();
-
-                Log.p("Mag: ").v3(mag).eol();
-
-                Vec3<int32_t> vMin = accelMag.getMagMin();
-                Vec3<int32_t> vMax = accelMag.getMagMax();
-                Vec3<int32_t> vDelta = vMax - vMin;
-
-                Log.p("Mag delta: ").v3(vDelta).eol();
-                Log.p("Mag/s: ").p(10 * 1000.0f / (end - start)).eol();
-            }
-        }*/
     }
     else if (action == PLAY) {
         printLead(action.c_str());        

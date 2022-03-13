@@ -176,3 +176,35 @@ void GrinlizLIS3DH::writeData(uint8_t addr, const uint8_t *buf, int n)
     digitalWrite(_cs, HIGH);
     _spi->endTransaction();
 }
+
+void GrinlizLIS3DH::logTest(int nSamples, bool doAssert)
+{
+    flushAccel(0);
+
+    uint32_t start = millis();
+    static const int N = 20;
+    if (nSamples > N)
+        nSamples = N;
+    int n = 0;
+
+    Vec3<Fixed115> data[N];
+    while(n < nSamples) {
+        if(sampleAccel(data + n))
+            n++;
+    }
+    float samplesPerSecond = nSamples * 1000.0f / (millis() - start);
+
+    for(int i=0; i<nSamples; ++i) {
+        Fixed115 g2 = data[i].x * data[i].x + data[i].y * data[i].y + data[i].z * data[i].z;
+
+        if (!doAssert) {
+            Log.v3(data[i]).p(" g2=").p(g2).p(" g=").p(g2.sqrt()).eol();
+        }
+    }
+    Log.p("Samples per second: ").p(samplesPerSecond).eol();
+    if (doAssert) {
+        TEST_RANGE(50.0f, 150.0f, samplesPerSecond);
+    }
+}
+
+

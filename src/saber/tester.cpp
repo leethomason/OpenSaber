@@ -47,38 +47,6 @@ extern ACCELEROMETER accelMag;
 static const int HOLD_TIME = Button::DEFAULT_HOLD_TIME + 100;
 static const int PRESS_TIME = Button::DEFAULT_BOUNCE_DURATION * 2;
 
-#define TEST_EXISTS(expected) 						\
-	ASSERT(expected);								\
-	if (!(expected)) {								\
-		Log.p("Expected true:").p(#expected).eol();	\
-		while(true) {}								\
-	}
-
-#define TEST_EQUAL(expected, actual) 			\
-	ASSERT(expected == actual);					\
-	if (expected != actual) { 					\
-		Log.p("Expected:").p(expected).eol(); 	\
-		Log.p("Actual:").p(actual).eol();		\
-		while(true)	{}							\
-	 }
-
-#define TEST_STR_EQUAL(expected, actual) 		\
-	bool equal = strEqual(expected, actual);	\
-	ASSERT(equal);								\
-	if (!equal) { 								\
-		Log.p("Expected:").p(expected).eol(); 	\
-		Log.p("Actual:").p(actual).eol();		\
-		while(true)	{}							\
-	 }
-
-#define TEST_RANGE(low, high, actual) 			\
-	ASSERT(actual >= low && actual <= high);	\
-	if (actual < low || actual > high) {		\
-		Log.p("Low   :").p(low).eol(); 			\
-		Log.p("High  :").p(high).eol();			\
-		Log.p("Actual:").p(actual).eol();		\
-		while(true) {}							\
-	}
 
 class IgniteRetractTest : public Test
 {
@@ -203,40 +171,6 @@ public:
     {
         accelMag.test();
         accelMag.log(5);
-        /*
-        nSamples = 0;
-        accelMag.flushAccel(0);
-        startTime = millis();
-
-        while(nSamples < NDATA) {
-            if(accelMag.sampleAccel(data + nSamples))
-                nSamples++;
-        }
-        uint32_t deltaTime = millis() - startTime;
-        Serial.print("Time to read (ms):"); Serial.println(deltaTime);
-        ASSERT(deltaTime > NDATA * 5 && deltaTime < NDATA * 20);
-
-        bool variation = false;
-        (void)variation;
-
-        for(int i=0; i<NDATA; ++i) {
-            Log.p("Accel x=").p(data[i].x).p(" y=").p(data[i].y).p(" z=").p(data[i].z).eol();
-            
-            Fixed115 g2;
-            calcGravity2(data[i].x, data[i].y, data[i].z, &g2, 0);
-            TEST_RANGE(0.6f, 1.4f, g2);
-
-            if (i >= 1) {
-                if (data[i].x != data[i-1].x ||
-                    data[i].y != data[i-1].y ||
-                    data[i].z != data[i-1].z) 
-                {
-                    variation = true;
-                }
-            }
-        }
-        ASSERT(variation);
-        */
     }
 
     virtual int process(Tester*, uint32_t /*event*/)
@@ -244,56 +178,6 @@ public:
         return TEST_SUCCESS;
     }
 };
-
-/*
-class MagnemometerTest : public Test
-{
-public:
-
-	static const int NDATA = 10;
-	int nSamples;
-    uint32_t startTime;
-
-    virtual const char* name() const {
-        return "MagnemometerTest";
-    }
-
-    virtual void start(Tester*)
-    {
-        if (!accelMag.hasMag()) {
-            Serial.println("No magnetometer.");
-            return;
-        }
-
-        if (accelMag.magDataValid()) {
-            nSamples = 0;
-            startTime = millis();
-
-            while(nSamples < NDATA) {
-                Vec3<int32_t> data;
-                if(accelMag.sampleMag(&data)) {
-                    nSamples++;
-                }
-            }
-            uint32_t deltaTime = millis() - startTime;
-            Serial.print("Time to read (ms):"); Serial.println(deltaTime);
-            ASSERT(deltaTime > NDATA * 5 && deltaTime < NDATA * 20);
-
-            // We can't test what the data is because it almost 
-            // certainly has not been calibrated. We just test if
-            // there was data at the correct rate.
-        }
-        else {
-            Log.p("Mag data not valid; not enough positions have been recorded.").eol();
-        }
-    }
-
-    virtual int process(Tester*, uint32_t)
-    {
-        return TEST_SUCCESS;
-    }
-};
-*/
 
 class ButtonTest : public Test
 {
@@ -347,7 +231,6 @@ IgniteRetractTest igniteRetractTest;
 ChannelTest channelTest;
 BlasterTest blasterTest;
 AccelerometerTest accelerometerTest;
-//MagnemometerTest magnemometerTest;
 
 Test* gTests[] = {
     &buttonTest,
@@ -355,7 +238,6 @@ Test* gTests[] = {
     &channelTest,
     &blasterTest,
     &accelerometerTest,
-    //&magnemometerTest,
     0
 };
 

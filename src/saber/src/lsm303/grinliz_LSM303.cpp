@@ -123,7 +123,7 @@ enum
 };
 
 
-bool GrinlizLSM303::begin(const void*, uint8_t)
+bool GrinlizLSM303::begin(const void*)
 {
     Log.p("---- LSM303 begin ----").eol();
 
@@ -427,4 +427,69 @@ uint8_t GrinlizLSM303::read8(uint8_t address, uint8_t reg) const
 
     return value;
 }
+
+
+void GrinlizLSM303::logTest(int nSamples, bool doAssert)
+{
+    flushAccel(0);
+
+    uint32_t start = millis();
+    static const int N = 20;
+    if (nSamples > N)
+        nSamples = N;
+    int n = 0;
+
+    Vec3<Fixed115> data[N];
+    while(n < nSamples) {
+        if(sampleAccel(data + n))
+            n++;
+    }
+    float samplesPerSecond = nSamples * 1000.0f / (millis() - start);
+
+    for(int i=0; i<nSamples; ++i) {
+        Fixed115 g2 = data[i].x * data[i].x + data[i].y * data[i].y + data[i].z * data[i].z;
+
+        if (!doAssert) {
+            Log.v3(data[i]).p(" g2=").p(g2).p(" g=").p(g2.sqrt()).eol();
+        }
+    }
+    Log.p("Samples per second: ").p(samplesPerSecond).eol();
+    if (doAssert) {
+        TEST_RANGE(50.0f, 150.0f, samplesPerSecond);
+    }
+
+    delay(10);
+
+    Vec3<int32_t> mag;
+    if (!sampleMag(&mag)) {
+        Log.p("No magnetometer data.").eol();
+    }
+    else {
+        int count = 0;
+        uint32_t start = millis();
+        while(count < 10) {
+            if (sampleMag(&mag)) {
+                count++;
+
+                Vec3<int32_t> magMin = getMagMin();
+                Vec3<int32_t> magMax = getMagMax();
+                Vec3<int32_t> range = magMax - magMin;
+                if (!doAssert) {
+                    Log.p("Mag=").v3(mag).p(" range=").v3(range).eol();
+                }
+            }
+        }
+        uint32_t end = millis();
+
+        Log.p("Mag: ").v3(mag).eol();
+
+        Vec3<int32_t> vMin = getMagMin();
+        Vec3<int32_t> vMax = getMagMax();
+        Vec3<int32_t> vDelta = vMax - vMin;
+
+        Log.p("Mag delta: ").v3(vDelta).eol();
+        Log.p("Mag/s: ").p(10 * 1000.0f / (end - start)).eol();
+    }
+}
+
 

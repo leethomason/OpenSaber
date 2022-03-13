@@ -488,6 +488,31 @@ void glSwap(T &a, T &b) {
 template<class T>
 T glAbs(T x) { return x >= 0 ? x : -x; }
 
+template<class T>
+inline T anglePositive(T a, T RANGE) {
+	while(a < 0)
+		a += RANGE;
+	while (a >= RANGE)
+		a -= RANGE;
+	return a;
+}
+
+template<class T>
+inline T distBetweenAngle(T a, T b, T RANGE) 
+{
+	const T half = RANGE / 2;
+
+	a = anglePositive(a, RANGE);
+	b = anglePositive(b, RANGE);
+	T d = b - a;
+	if (d < 0)
+		d += RANGE;
+	if (d > half)
+		d = -(d - RANGE);
+	return d;
+}
+
+
 // --- Algorithm --- //
 
 template <class T>
@@ -795,6 +820,39 @@ private:
 
 #define STRINGIZE_(x) #x
 #define STRINGIZE(x) STRINGIZE_(x)
+
+#define TEST_EXISTS(expected) 						\
+	ASSERT(expected);								\
+	if (!(expected)) {								\
+		Log.p("Expected true:").p(#expected).eol();	\
+		while(true) {}								\
+	}
+
+#define TEST_EQUAL(expected, actual) 			\
+	ASSERT(expected == actual);					\
+	if (expected != actual) { 					\
+		Log.p("Expected:").p(expected).eol(); 	\
+		Log.p("Actual:").p(actual).eol();		\
+		while(true)	{}							\
+	 }
+
+#define TEST_STR_EQUAL(expected, actual) 		\
+	bool equal = strEqual(expected, actual);	\
+	ASSERT(equal);								\
+	if (!equal) { 								\
+		Log.p("Expected:").p(expected).eol(); 	\
+		Log.p("Actual:").p(actual).eol();		\
+		while(true)	{}							\
+	 }
+
+#define TEST_RANGE(low, high, actual) 			\
+	ASSERT(actual >= low && actual <= high);	\
+	if (actual < low || actual > high) {		\
+		Log.p("Low   :").p(low).eol(); 			\
+		Log.p("High  :").p(high).eol();			\
+		Log.p("Actual:").p(actual).eol();		\
+		while(true) {}							\
+	}
 
 #endif // GRINLIZ_UTIL_INCLUDED
 

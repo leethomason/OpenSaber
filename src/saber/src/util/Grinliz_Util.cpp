@@ -82,6 +82,19 @@ bool TestUtil()
             TEST_IS_TRUE(set[i] >= set[i - 1]);
     }
 
+    // Angle range
+    {
+        TEST_IS_TRUE(distBetweenAngle(350, 10, 360) == 20);
+        TEST_IS_TRUE(distBetweenAngle(10, 350, 360) == 20);
+        TEST_IS_TRUE(distBetweenAngle(-10, 10, 360) == 20);
+        TEST_IS_TRUE(distBetweenAngle(10, -10, 360) == 20);
+        TEST_IS_TRUE(distBetweenAngle(10, 40, 360) == 30);
+        TEST_IS_TRUE(distBetweenAngle(40, 10, 360) == 30);
+        TEST_IS_TRUE(distBetweenAngle(200, 210, 360) == 10);
+        TEST_IS_TRUE(distBetweenAngle(210, 200, 360) == 10);
+        TEST_IS_TRUE(distBetweenAngle(180, -180, 360) == 0);
+    }
+
     return true;
 }
 
