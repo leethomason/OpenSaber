@@ -42,6 +42,7 @@ DX_SWITCH_PLATE = 16.5;
 D_ROD = 3.4;
 D_ROD_NUT = 7.0; // space for a nut to thread...
 D_TUBE = 4.5;    // outer radius of tube that carries power to emitter
+D_TUBE_INNER = 3.2; // FIXME
 D_CRYSTAL_SPACE = 12.0;
 
 HEAD_HOLDER_SETBACK = 4.0;  // how deep threads go into pillars

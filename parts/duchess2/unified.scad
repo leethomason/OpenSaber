@@ -2,12 +2,11 @@ use <../commonUnified.scad>
 use <../shapes.scad>
 use <../inset.scad>
 include <dim.scad>
-include <dimCoupler.scad>
 
 $fn = 80;
 DRAW_AFT = false;
-DRAW_FORE = false;
-DRAW_RING = true;
+DRAW_FORE = true;
+DRAW_RING = false;
 
 EPS = 0.01;
 ESP2 = 2 * EPS;
@@ -175,9 +174,12 @@ if (DRAW_FORE) {
         translate([-W_ACCESS/2, -D_INNER/2, M_JOINT]) cube(size=[W_ACCESS, 2.5, 22]);
 
         // bolts, going forward
+        // Access to tubes for wiring
         translate([0, 0, M_AFT_FRONT - HEAD_HOLDER_SETBACK - 1.0]) {
             chamberBolt(A_BOLT_0, D_ROD, 100.0);
             chamberBolt(A_BOLT_1, D_ROD, 100.0);
+            chamberBolt(A_BOLT_0 + ANGLE_OFFSET, D_TUBE_INNER, 100);
+            chamberBolt(A_BOLT_1 + ANGLE_OFFSET, D_TUBE_INNER, 100);
         }
     }
 }
