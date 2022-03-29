@@ -27,13 +27,6 @@ DZ_POWER_RING = 18.0;
 DZ_BOLT = 8.0;          // switch to allen head for space?
 DZ_SWITCH = (M_AFT_FRONT - M_JOINT - DZ_POWER_RING - DZ_BOLT);
 
-//DZ_RING0 = 3.0; // thickness of the aft vent coupler
-//DZ_RING1 = 2.5; // fore vent coupler (non-standard)
-//DZ_FORE_SUPPORT = 1.5;
-
-//DZ_FORE_FULL = M_AFT_FRONT - M_JOINT;
-//DZ_FORE_TRIM = DZ_FORE_FULL - DZ_RING0;
-
 M_BOLT_START = M_JOINT + DZ_POWER_RING;
 M_SWITCH_START = M_BOLT_START + DZ_BOLT;
 
@@ -46,14 +39,14 @@ D_RING = 33.4;
 
 DX_SWITCH_PLATE = 16.5;
 
-D_TUBE = 4.6;
-D_TUBE_INNER = 3.3;
 D_ROD = 3.4;
-D_BOLT_CAP = 8.0; // space for a nut to thread...
+D_ROD_NUT = 7.0; // space for a nut to thread...
+D_TUBE = 4.5;    // outer radius of tube that carries power to emitter
+D_CRYSTAL_SPACE = 12.0;
 
 HEAD_HOLDER_SETBACK = 4.0;  // how deep threads go into pillars
-//DZ_HEAD_HOLDER = 4.2;
-//DY_HEAD_HOLDER = 7.0;
+A_BOLT_0 = 90;              // angle of bolt
+A_BOLT_1 = 270;             // angle of bolt
+ANGLE_OFFSET = 33;          // from rod to tube
 
-A_BOLT_0 = 90;
-A_BOLT_1 = 270;
+CHAMBER_RING_DZ = 1.6 * 2 + 3.0; // guess - thickness of brass, working space inside

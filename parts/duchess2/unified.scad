@@ -6,7 +6,8 @@ include <dimCoupler.scad>
 
 $fn = 80;
 DRAW_AFT = false;
-DRAW_FORE = true;
+DRAW_FORE = false;
+DRAW_RING = true;
 
 EPS = 0.01;
 ESP2 = 2 * EPS;
@@ -23,28 +24,18 @@ DOTSTAR_Z = 73.0 - 21.0;
 KEYJOINT_T = 5.0;
 COUPLER_ANGLE = -10.0;
 
-module ring(dz)
-{
-    difference() {
-        cylinder(h=dz, d=D_RING);
- 
-        translate([R_TUBE, 0, 0]) cylinder(h=dz, d=D_TUBE_INNER);
-        translate([R_TUBE, 0, dz/2]) cylinder(h=dz, d=D_TUBE_OUTER);
- 
-        translate([-R_TUBE, 0, 0]) cylinder(h=dz, d=D_TUBE_INNER);
-        translate([-R_TUBE, 0, dz/2]) cylinder(h=dz, d=D_TUBE_OUTER);
-
-        scale([1.4, 1, 1]) hull() {
-            translate([0, R_TUBE, 0])  cylinder(h=dz, d=6.0);
-            translate([0, -R_TUBE, 0]) cylinder(h=dz, d=6.0);
-        }
+module chamberRod() {
+    translate([0, D_VENT_INNER/2 - D_ROD_NUT/2]) cylinder(h=100, d=D_ROD);
+    rotate([0, 0, ANGLE_OFFSET]) hull() {
+        translate([0, D_VENT_INNER/2 - D_TUBE/2, 0]) cylinder(h=100, d=D_TUBE);
+        translate([0, 30, 0]) cylinder(h=100, d=D_TUBE);
     }
 }
 
 module chamberBolt(angle, d, h)
 {
     rotate([0, 0, angle])
-        translate([0, D_VENT_INNER/2 - D_BOLT_CAP/2, 0])
+        translate([0, D_VENT_INNER/2 - D_ROD_NUT/2, 0])
             cylinder(h=h, d=d);
 }
 
@@ -183,34 +174,27 @@ if (DRAW_FORE) {
         W_ACCESS = 12.0;
         translate([-W_ACCESS/2, -D_INNER/2, M_JOINT]) cube(size=[W_ACCESS, 2.5, 22]);
 
-        // bolt holder
-        //translate([10.0, -DY_HEAD_HOLDER/2, M_AFT_FRONT-HEAD_HOLDER_SETBACK-DZ_HEAD_HOLDER])
-        //    cube(size=[100, DY_HEAD_HOLDER, DZ_HEAD_HOLDER]);
-        //mirror([-1, 0, 0]) translate([10.0, -DY_HEAD_HOLDER/2, M_AFT_FRONT-HEAD_HOLDER_SETBACK-DZ_HEAD_HOLDER])
-        //    cube(size=[100, DY_HEAD_HOLDER, DZ_HEAD_HOLDER]);
-
         // bolts, going forward
         translate([0, 0, M_AFT_FRONT - HEAD_HOLDER_SETBACK - 1.0]) {
             chamberBolt(A_BOLT_0, D_ROD, 100.0);
             chamberBolt(A_BOLT_1, D_ROD, 100.0);
         }
-        // bolts, access
-        //translate([0, 0, M_START]) {
-        //    chamberBolt(A_BOLT_0, D_BOLT_CAP, M_AFT_FRONT - HEAD_HOLDER_SETBACK - M_START);
-        //    chamberBolt(A_BOLT_1, D_BOLT_CAP, M_AFT_FRONT - HEAD_HOLDER_SETBACK - M_START);
-        //}
+    }
+}
+
+if (DRAW_RING) {
+    translate([0, 0, M_AFT_FRONT + 10]) {
+        difference() {
+            cylinder(h=CHAMBER_RING_DZ, d=D_VENT_INNER);
+            translate([0, 0, -1]) {
+                cylinder(h=10, d=D_CRYSTAL_SPACE);
+                rotate([0, 0, A_BOLT_0]) chamberRod();
+                rotate([0, 0, A_BOLT_1]) chamberRod();                
+            }
+        }
     }
 }
 
 *color("blue") translate([0, 0, M_START-1]) cylinder(h=1, d=D_OUTER);
 *color("blue") translate([0, 0, M_AFT_FRONT]) cylinder(h=1, d=D_OUTER);
 *color("blue") translate([0, 0, M_AFT_FRONT]) cylinder(h=1, d=D_OUTER);
-
-*color("gold") {
-    rotate([0, 0, A_BOLT_0])
-        translate([0, D_VENT_INNER/2-D_BOLT_CAP/2, M_AFT_FRONT])
-            cylinder(h=30.0, d=D_ROD);
-    rotate([0, 0, A_BOLT_1])
-        translate([0, D_VENT_INNER/2-D_BOLT_CAP/2, M_AFT_FRONT])
-            cylinder(h=30.0, d=D_ROD);
-}

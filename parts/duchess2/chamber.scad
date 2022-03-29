@@ -1,5 +1,6 @@
 use <../commonUnified.scad>
 use <../shapes.scad>
+include <dim.scad>
 
 DZ_PART = 63.5;
 DZ_THREAD = 10.8;
@@ -10,18 +11,8 @@ DZ_OPENING = 5.0;
 D_INNER = 25.8;
 D_OUTER = 36.9;
 D_THREAD = 34.2;
-D_INNER_RING = 12.0;
 
 EPS = 0.01;
-
-D_TUBE = 4.5;
-D_ROD = 3.6;
-D_ROD_NUT = 7.0;
-
-ANGLE_OFFSET = 33;  // from rod to tube
-ANGLE_ROD_0 = 30;
-ANGLE_ROD_1 = ANGLE_ROD_0 + 180;
-
 $fn = 40;
 
 module case() {
@@ -50,21 +41,20 @@ module crystal() {
 }
 
 module ring() {
-    DZ = 1.6 * 2 + 3.0; // guess - thickness of brass, working space inside
-    color("gold") translate([0, 0, -DZ/2]) difference() {
-        cylinder(h=DZ, d=D_INNER);
-        cylinder(h=DZ, d=D_INNER_RING);
+    color("gold") translate([0, 0, -CHAMBER_RING_DZ/2]) difference() {
+        cylinder(h=CHAMBER_RING_DZ, d=D_INNER);
+        cylinder(h=CHAMBER_RING_DZ, d=D_CRYSTAL_SPACE);
     }
 }
 
-case();
-rotate([0, 0, ANGLE_ROD_0]) rods();
-rotate([0, 0, ANGLE_ROD_1]) rods();
+*case();
+rotate([0, 0, A_BOLT_0]) rods();
+rotate([0, 0, A_BOLT_1]) rods();
 translate([0, 0, DZ_THREAD]) crystal();
 //translate([0, 0, DZ_THREAD]) ring();
 translate([0, 0, DZ_PART/2]) ring();
 translate([0, 0, DZ_PART - DZ_THREAD]) ring();
 
 
-echo("angle: rod0", ANGLE_ROD_0, "tube0", ANGLE_ROD_0 + ANGLE_OFFSET);
+echo("angle: rod0", A_BOLT_0, "tube0", A_BOLT_0 + ANGLE_OFFSET);
 echo("r: rod0", D_INNER/2 - D_ROD_NUT/2, "tube0", D_INNER/2 - D_TUBE/2);
