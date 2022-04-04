@@ -4,8 +4,8 @@ use <../inset.scad>
 include <dim.scad>
 
 $fn = 80;
-DRAW_AFT = false;
-DRAW_FORE = true;
+DRAW_AFT = true;
+DRAW_FORE = false;
 DRAW_RING = false;
 
 EPS = 0.01;
@@ -38,6 +38,49 @@ module chamberBolt(angle, d, h)
             cylinder(h=h, d=d);
 }
 
+module ledPylon(dz)
+{
+    W = 20.0;
+    W2 = 20.0;
+    WB = 5.0;
+    WB2 = 10.0;
+    DOTSTAR = 5.0;
+    FILM = 12.2;
+    FILM_THICKNESS = 0.4;
+    CLEARANCE = 2.0;
+
+    intersection() {
+        translate([0, 0, -EPS]) cylinder(d=D_INNER, h=dz + 2 *EPS);
+        difference() {
+            translate([-W/2, -D_INNER/2, 0]) 
+                cube(size=[W, D_INNER/2 + DOTSTAR/2, dz]);
+            //polygonXY(h=dz, points=[
+            //    [-W2/2, -D_INNER/2],
+            //    [-W/2, DOTSTAR/2],
+            //    [W/2, DOTSTAR/2],
+            //    [W2/2, -D_INNER/2]
+            //]);
+
+            translate([0, 0, -EPS]) polygonXY(h=dz + EPS*2, points=[
+                [-WB2/2, -D_INNER/2],
+                [-WB/2, -DOTSTAR],
+                [WB/2, -DOTSTAR],
+                [WB2/2, -D_INNER/2]
+            ]);
+
+            // Knock out dotstar.
+            translate([-DOTSTAR/2, -DOTSTAR/2, dz/2])
+                cube(size=[DOTSTAR, 100, 10]);
+            // Knock out film
+            translate([-FILM/2, -DOTSTAR/2, dz/2 - FILM_THICKNESS])
+                cube(size=[FILM, 100, FILM_THICKNESS]);
+            // Space behind...
+            translate([-W/2, DOTSTAR/2 - CLEARANCE, -10])
+                cube(size=[W, DOTSTAR, 10 + dz/2]);
+        }
+    }
+}
+
 module bottomDotstar()
 {
     H0 = 0.8;
@@ -66,7 +109,7 @@ if (DRAW_AFT) {
     }
 
     difference() {
-        translate([0, 0, M_MC_BATTERY]) {
+        translate([0, 0, M_MC]) {
             baffleMCBattery(D_INNER, N_BATT_BAFFLES, DZ_BAFFLE, bridgeStyle=2);
         }
     }
@@ -122,11 +165,12 @@ if (DRAW_FORE) {
             }
             intersection() {
                 cylinder(h=1000, d=D_INNER);
+                PDY = 7.0;
                 union() {
                     translate([6, -100, M_AFT_FRONT - HEAD_HOLDER_SETBACK])
-                        cube(size=[100, 100 + 5.0, HEAD_HOLDER_SETBACK]);
+                        cube(size=[100, 100 + PDY, HEAD_HOLDER_SETBACK]);
                     mirror([-1, 0, 0]) translate([6, -100, M_AFT_FRONT - HEAD_HOLDER_SETBACK])
-                        cube(size=[100, 100 + 5.0, HEAD_HOLDER_SETBACK]);
+                        cube(size=[100, 100 + PDY, HEAD_HOLDER_SETBACK]);
                 }
             }
             // toughen up the sides
@@ -150,6 +194,8 @@ if (DRAW_FORE) {
                 translate([0, 0, M_JOINT]) cylinder(h=FORE_TRIM, d=D_INNER);
                 translate([-50, -D_INNER/2, M_JOINT]) cube(size=[100, DY, FORE_TRIM]);
             }
+            DLED = 4;
+            translate([0, 0, M_AFT_FRONT - DLED]) ledPylon(DLED);
         }
         bottomDotstar();
 
@@ -200,3 +246,4 @@ if (DRAW_RING) {
 *color("blue") translate([0, 0, M_START-1]) cylinder(h=1, d=D_OUTER);
 *color("blue") translate([0, 0, M_AFT_FRONT]) cylinder(h=1, d=D_OUTER);
 *color("blue") translate([0, 0, M_AFT_FRONT]) cylinder(h=1, d=D_OUTER);
+*color("blue") translate([0, 0, DZ_BODY]) cylinder(h=1, d=D_OUTER);
