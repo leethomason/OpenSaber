@@ -52,6 +52,7 @@ D_TUBE_INNER = 3.2; // FIXME
 D_CRYSTAL_SPACE = 12.0;
 
 HEAD_HOLDER_SETBACK = 4.0;  // how deep threads go into pillars
+TUBE_HOLDER_SETBACK = 2.0;  // how deep the tubes are seated
 A_BOLT_0 = 90 - 5;          // angle of bolt
 A_BOLT_1 = 270 - 5;         // angle of bolt
 ANGLE_OFFSET = 33;          // from rod to tube

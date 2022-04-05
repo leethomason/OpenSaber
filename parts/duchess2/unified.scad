@@ -4,8 +4,8 @@ use <../inset.scad>
 include <dim.scad>
 
 $fn = 80;
-DRAW_AFT = true;
-DRAW_FORE = false;
+DRAW_AFT = false;
+DRAW_FORE = true;
 DRAW_RING = false;
 
 EPS = 0.01;
@@ -163,13 +163,15 @@ if (DRAW_FORE) {
                     }
                 }
             }
+            // Front attachment points for tubes & rods.
             intersection() {
                 cylinder(h=1000, d=D_INNER);
-                PDY = 7.0;
+                PDY = 7.5;
+                X = 5.0;
                 union() {
-                    translate([6, -100, M_AFT_FRONT - HEAD_HOLDER_SETBACK])
+                    translate([X, -100, M_AFT_FRONT - HEAD_HOLDER_SETBACK])
                         cube(size=[100, 100 + PDY, HEAD_HOLDER_SETBACK]);
-                    mirror([-1, 0, 0]) translate([6, -100, M_AFT_FRONT - HEAD_HOLDER_SETBACK])
+                    mirror([-1, 0, 0]) translate([X, -100, M_AFT_FRONT - HEAD_HOLDER_SETBACK])
                         cube(size=[100, 100 + PDY, HEAD_HOLDER_SETBACK]);
                 }
             }
@@ -221,11 +223,15 @@ if (DRAW_FORE) {
 
         // bolts, going forward
         // Access to tubes for wiring
-        translate([0, 0, M_AFT_FRONT - HEAD_HOLDER_SETBACK - 1.0]) {
+        translate([0, 0, M_AFT_FRONT - HEAD_HOLDER_SETBACK - EPS]) {
             chamberBolt(A_BOLT_0, D_ROD, 100.0);
             chamberBolt(A_BOLT_1, D_ROD, 100.0);
             chamberBolt(A_BOLT_0 + ANGLE_OFFSET, D_TUBE_INNER, 100);
             chamberBolt(A_BOLT_1 + ANGLE_OFFSET, D_TUBE_INNER, 100);
+        }
+        translate([0, 0, M_AFT_FRONT - TUBE_HOLDER_SETBACK]) {
+            chamberBolt(A_BOLT_0 + ANGLE_OFFSET, D_TUBE, 100);
+            chamberBolt(A_BOLT_1 + ANGLE_OFFSET, D_TUBE, 100);
         }
     }
 }
