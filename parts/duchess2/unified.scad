@@ -5,8 +5,9 @@ include <dim.scad>
 
 $fn = 80;
 DRAW_AFT = true;
-DRAW_FORE = false;
+DRAW_FORE = true;
 DRAW_RING = false;
+DRAW_CHAMBER = true;
 
 EPS = 0.01;
 ESP2 = 2 * EPS;
@@ -41,42 +42,43 @@ module chamberBolt(angle, d, h)
 module ledPylon(dz)
 {
     W = 20.0;
-    W2 = 20.0;
+    W2 = 2.0;
     WB = 5.0;
-    WB2 = 10.0;
+    WB2 = 16.0;
+
     DOTSTAR = 5.0;
     FILM = 12.2;
-    FILM_THICKNESS = 0.4;
-    CLEARANCE = 2.0;
+    FILM_THICKNESS = 0.6;
+    CLEARANCE = 1.0;
+    BACK = 0.6 * dz;
 
     intersection() {
         translate([0, 0, -EPS]) cylinder(d=D_INNER, h=dz + 2 *EPS);
         difference() {
             translate([-W/2, -D_INNER/2, 0]) 
                 cube(size=[W, D_INNER/2 + DOTSTAR/2, dz]);
-            //polygonXY(h=dz, points=[
-            //    [-W2/2, -D_INNER/2],
-            //    [-W/2, DOTSTAR/2],
-            //    [W/2, DOTSTAR/2],
-            //    [W2/2, -D_INNER/2]
-            //]);
 
             translate([0, 0, -EPS]) polygonXY(h=dz + EPS*2, points=[
                 [-WB2/2, -D_INNER/2],
-                [-WB/2, -DOTSTAR],
-                [WB/2, -DOTSTAR],
+                [0, -DOTSTAR],
                 [WB2/2, -D_INNER/2]
             ]);
 
             // Knock out dotstar.
-            translate([-DOTSTAR/2, -DOTSTAR/2, dz/2])
+            translate([-DOTSTAR/2, -DOTSTAR/2, BACK])
                 cube(size=[DOTSTAR, 100, 10]);
             // Knock out film
-            translate([-FILM/2, -DOTSTAR/2, dz/2 - FILM_THICKNESS])
+            translate([-FILM/2, -DOTSTAR/2, BACK - FILM_THICKNESS])
                 cube(size=[FILM, 100, FILM_THICKNESS]);
+
             // Space behind...
             translate([-W/2, DOTSTAR/2 - CLEARANCE, -10])
-                cube(size=[W, DOTSTAR, 10 + dz/2]);
+                cube(size=[W, DOTSTAR, 10 + BACK]);
+
+            translate([DOTSTAR/2, -DOTSTAR/2, 0])
+                cube(size=[100, 100, BACK]);
+            mirror([-1, 0, 0]) translate([DOTSTAR/2, -DOTSTAR/2, 0])
+                cube(size=[100, 100, BACK]);
         }
     }
 }
@@ -194,7 +196,7 @@ if (DRAW_FORE) {
                 translate([0, 0, M_JOINT]) cylinder(h=FORE_TRIM, d=D_INNER);
                 translate([-50, -D_INNER/2, M_JOINT]) cube(size=[100, DY, FORE_TRIM]);
             }
-            DLED = 4;
+            DLED = 5;
             translate([0, 0, M_AFT_FRONT - DLED]) ledPylon(DLED);
         }
         bottomDotstar();
@@ -230,15 +232,53 @@ if (DRAW_FORE) {
     }
 }
 
+module chamberRing()
+{
+    difference() {
+        cylinder(h=CHAMBER_RING_DZ, d=D_VENT_INNER);
+        translate([0, 0, -1]) {
+            cylinder(h=10, d=D_CRYSTAL_SPACE);
+            rotate([0, 0, A_BOLT_0]) chamberRod();
+            rotate([0, 0, A_BOLT_1]) chamberRod();                
+        }
+    }
+}
+
 if (DRAW_RING) {
     translate([0, 0, M_AFT_FRONT + 10]) {
+        chamberRing();
+    }
+}
+
+if (DRAW_CHAMBER) {
+    translate([0, 0, M_RING0_CENTER - CHAMBER_RING_DZ/2]) chamberRing();
+    translate([0, 0, M_RING1_CENTER - CHAMBER_RING_DZ/2]) chamberRing();
+    translate([0, 0, M_RING2_CENTER - CHAMBER_RING_DZ/2]) chamberRing();
+
+    T_LOWER = 3.0;
+    T = 10.0;
+    W = 16;
+    
+    PCB_T = 1.6;
+    PCB_W = 12.0;
+    PCB_HOLE = 10.5;
+
+    intersection() {
+        cylinder(h=200, d=D_VENT_INNER);
         difference() {
-            cylinder(h=CHAMBER_RING_DZ, d=D_VENT_INNER);
-            translate([0, 0, -1]) {
-                cylinder(h=10, d=D_CRYSTAL_SPACE);
+            union() {
+                translate([0, 0, M_EMITTER_PLATE - T]) cylinder(h=T_LOWER, d=D_VENT_INNER);
+                translate([-W/2, 8, M_EMITTER_PLATE - T]) cube(size=[W, 20, T]);
+                mirror([0, -1, 0]) translate([-W/2, 8, M_EMITTER_PLATE - T]) cube(size=[W, 20, T]);
+            }
+            translate([0, 0, M_EMITTER_PLATE - T - 1]) {
+                cylinder(h=100, d=D_CRYSTAL_SPACE);
                 rotate([0, 0, A_BOLT_0]) chamberRod();
                 rotate([0, 0, A_BOLT_1]) chamberRod();                
             }
+            translate([-PCB_W/2, -50, M_EMITTER_PLATE - PCB_T]) cube(size=[PCB_W, 100, PCB_T]);
+            translate([0, PCB_HOLE, 0]) cylinder(h=1000, d=2.2);
+            translate([0, -PCB_HOLE, 0]) cylinder(h=1000, d=2.2);
         }
     }
 }
