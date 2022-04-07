@@ -46,15 +46,25 @@ D_RING = 33.4;
 DX_SWITCH_PLATE = 16.5;
 
 D_ROD = 3.4;
-D_ROD_NUT = 7.2; // space for a nut to thread...
-D_TUBE = 4.4;    // outer radius of tube that carries power to emitter
+D_ROD_LOOSE = 3.6;  // FIXME
+D_ROD_NUT = 7.2;    // space for a nut to thread...
+D_TUBE = 4.4;       // outer radius of tube that carries power to emitter
 D_TUBE_INNER = 3.2; // FIXME
 D_CRYSTAL_SPACE = 12.0;
 
 HEAD_HOLDER_SETBACK = 4.0;  // how deep threads go into pillars
 TUBE_HOLDER_SETBACK = 2.0;  // how deep the tubes are seated
-A_BOLT_0 = 90 - 5;          // angle of bolt
-A_BOLT_1 = 270 - 5;         // angle of bolt
+
+A_TILT = -5;
+A_BOLT_0 = 90 + A_TILT;     // angle of bolt
+A_BOLT_1 = 270 + A_TILT;    // angle of bolt
 ANGLE_OFFSET = 33;          // from rod to tube
 
+A_CHAMBER_CUT_0 = -15 + A_TILT;
+A_CHAMBER_CUT_1 = 15 + A_TILT;
+A_CHAMBER_CUT_2 = 45 + A_TILT;
+R_CHAMBER_CUT = 9.5;
+D_CHAMBER_CUT = 3.6;
+
 CHAMBER_RING_DZ = 1.5 * 2 + 3.0; // guess - thickness of brass, working space inside
+T_BRASS = 1.4;

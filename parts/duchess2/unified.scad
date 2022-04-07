@@ -5,9 +5,11 @@ include <dim.scad>
 
 $fn = 80;
 DRAW_AFT = false;
-DRAW_FORE = true;
+DRAW_FORE = false;
 DRAW_RING = false;
 DRAW_CHAMBER = false;
+DRAW_SPACER = false;
+DRAW_BRASS = true;
 
 EPS = 0.01;
 ESP2 = 2 * EPS;
@@ -24,8 +26,8 @@ DOTSTAR_Z = 73.0 - 21.0;
 KEYJOINT_T = 5.0;
 COUPLER_ANGLE = -10.0;
 
-module chamberRod() {
-    translate([0, D_VENT_INNER/2 - D_ROD_NUT/2]) cylinder(h=100, d=D_ROD);
+module chamberRod(dRod) {
+    translate([0, D_VENT_INNER/2 - D_ROD_NUT/2]) cylinder(h=100, d=dRod);
     rotate([0, 0, ANGLE_OFFSET]) hull() {
         translate([0, D_VENT_INNER/2 - D_TUBE/2, 0]) cylinder(h=100, d=D_TUBE);
         translate([0, 30, 0]) cylinder(h=100, d=D_TUBE);
@@ -244,11 +246,30 @@ module chamberRing()
         cylinder(h=CHAMBER_RING_DZ, d=D_VENT_INNER);
         translate([0, 0, -1]) {
             cylinder(h=10, d=D_CRYSTAL_SPACE);
-            rotate([0, 0, A_BOLT_0]) chamberRod();
-            rotate([0, 0, A_BOLT_1]) chamberRod();                
+            rotate([0, 0, A_BOLT_0]) chamberRod(D_ROD);
+            rotate([0, 0, A_BOLT_1]) chamberRod(D_ROD);                
         }
     }
 }
+
+module chamberPlate()
+{
+    difference() {
+        cylinder(h=T_BRASS, d=D_VENT_INNER);
+        translate([0, 0, -1]) {
+            cylinder(h=10, d=D_CRYSTAL_SPACE);
+            rotate([0, 0, A_BOLT_0]) chamberRod(D_ROD_LOOSE);
+            rotate([0, 0, A_BOLT_1]) chamberRod(D_ROD_LOOSE);                
+            rotate([0, 0, A_CHAMBER_CUT_0]) translate([0, R_CHAMBER_CUT, 0]) cylinder(h=100, d=D_CHAMBER_CUT);
+            rotate([0, 0, A_CHAMBER_CUT_1]) translate([0, R_CHAMBER_CUT, 0]) cylinder(h=100, d=D_CHAMBER_CUT);
+            rotate([0, 0, A_CHAMBER_CUT_2]) translate([0, R_CHAMBER_CUT, 0]) cylinder(h=100, d=D_CHAMBER_CUT);
+            rotate([0, 0, A_CHAMBER_CUT_0 + 180]) translate([0, R_CHAMBER_CUT, 0]) cylinder(h=100, d=D_CHAMBER_CUT);
+            rotate([0, 0, A_CHAMBER_CUT_1 + 180]) translate([0, R_CHAMBER_CUT, 0]) cylinder(h=100, d=D_CHAMBER_CUT);
+            rotate([0, 0, A_CHAMBER_CUT_2 + 180]) translate([0, R_CHAMBER_CUT, 0]) cylinder(h=100, d=D_CHAMBER_CUT);
+        }
+    }
+}
+
 
 if (DRAW_RING) {
     translate([0, 0, M_AFT_FRONT + 10]) {
@@ -279,14 +300,37 @@ if (DRAW_CHAMBER) {
             }
             translate([0, 0, M_EMITTER_PLATE - T - 1]) {
                 cylinder(h=100, d=D_CRYSTAL_SPACE);
-                rotate([0, 0, A_BOLT_0]) chamberRod();
-                rotate([0, 0, A_BOLT_1]) chamberRod();                
+                rotate([0, 0, A_BOLT_0]) chamberRod(D_ROD_LOOSE);
+                rotate([0, 0, A_BOLT_1]) chamberRod(D_ROD_LOOSE);                
             }
             translate([-PCB_W/2, -50, M_EMITTER_PLATE - PCB_T]) cube(size=[PCB_W, 100, PCB_T]);
             translate([0, PCB_HOLE, 0]) cylinder(h=1000, d=2.2);
             translate([0, -PCB_HOLE, 0]) cylinder(h=1000, d=2.2);
         }
     }
+}
+
+if (DRAW_SPACER) {
+    intersection() {
+        cylinder(h=1000, d=D_VENT_INNER);
+        translate([0, 0, M_RING0_CENTER - CHAMBER_RING_DZ/2]) {
+            difference() {
+                rotate([0, 0, -A_TILT + 4]) polygonXY(h=CHAMBER_RING_DZ, points=[
+                    [0, 0], [-30, 30], [30, 30]
+                ]);
+                //translate([0, 0, -CHAMBER_RING_DZ /2]) chamberPlate();
+                //cylinder(h=CHAMBER_RING_DZ, d=D_VENT_INNER);
+                translate([0, 0, CHAMBER_RING_DZ - T_BRASS + EPS]) chamberPlate();
+                translate([0, 0, 0]) chamberPlate();
+                cylinder(h=100, d=D_CRYSTAL_SPACE);
+            }
+        }
+    }
+}
+
+if (DRAW_BRASS) {
+    translate([0, 0, M_RING0_CENTER - CHAMBER_RING_DZ/2])
+        chamberPlate();
 }
 
 *color("blue") translate([0, 0, M_START-1]) cylinder(h=1, d=D_OUTER);
