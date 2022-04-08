@@ -5,11 +5,11 @@ include <dim.scad>
 
 $fn = 80;
 DRAW_AFT = false;
-DRAW_FORE = false;
+DRAW_FORE = true;
 DRAW_RING = false;
-DRAW_CHAMBER = false;
+DRAW_CHAMBER = true;
 DRAW_SPACER = false;
-DRAW_BRASS = true;
+DRAW_BRASS = false;
 
 EPS = 0.01;
 ESP2 = 2 * EPS;
