@@ -8,8 +8,8 @@ DRAW_AFT = false;
 DRAW_FORE = false;
 DRAW_RING = false;
 DRAW_CHAMBER = false;
-DRAW_SPACER = false;
-DRAW_BRASS = true;
+DRAW_SPACER = true;
+DRAW_BRASS = false;
 
 EPS = 0.01;
 ESP2 = 2 * EPS;
@@ -170,7 +170,7 @@ if (DRAW_FORE) {
             // Front attachment points for tubes & rods.
             intersection() {
                 cylinder(h=1000, d=D_INNER);
-                PDY = 7.5;
+                PDY = 100;
                 X = 5.0;
                 union() {
                     translate([X, -100, M_AFT_FRONT - HEAD_HOLDER_SETBACK])
@@ -315,7 +315,7 @@ if (DRAW_SPACER) {
         cylinder(h=1000, d=D_VENT_INNER);
         translate([0, 0, M_RING0_CENTER - CHAMBER_RING_DZ/2]) {
             difference() {
-                rotate([0, 0, -A_TILT + 4]) polygonXY(h=CHAMBER_RING_DZ, points=[
+                rotate([0, 0, A_CHAMBER_CUT_0 + 29]) polygonXY(h=CHAMBER_RING_DZ, points=[
                     [0, 0], [-30, 30], [30, 30]
                 ]);
                 //translate([0, 0, -CHAMBER_RING_DZ /2]) chamberPlate();
@@ -337,3 +337,9 @@ if (DRAW_BRASS) {
 *color("blue") translate([0, 0, M_AFT_FRONT]) cylinder(h=1, d=D_OUTER);
 *color("blue") translate([0, 0, M_AFT_FRONT]) cylinder(h=1, d=D_OUTER);
 *color("blue") translate([0, 0, DZ_BODY]) cylinder(h=1, d=D_OUTER);
+
+*color("blue")  rotate([0, 0, 45-5]) translate([-1, -20, M_AFT_FRONT])
+    cube(size=[2, 40, 1]);
+*color("blue")  rotate([0, 0, -45-5]) translate([-1, -20, M_AFT_FRONT])
+    cube(size=[2, 40, 1]);
+
