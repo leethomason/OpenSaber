@@ -7,7 +7,7 @@ $fn = 80;
 DRAW_AFT = false;
 DRAW_FORE = true;
 DRAW_RING = false;
-DRAW_CHAMBER = false;
+DRAW_CHAMBER = true;
 DRAW_SPACER = false;
 DRAW_BRASS = false;
 
@@ -139,6 +139,12 @@ module windows(start)
     }
 }
 
+module inner()
+{
+    translate([0, 0, M_START]) cylinder(h=DZ_AFT, d=D_INNER);
+    translate([0, 0, M_AFT_FRONT]) cylinder(h=200, d=D_VENT_INNER);
+}
+
 if (DRAW_FORE) {
     difference() {
         union() {
@@ -193,17 +199,15 @@ if (DRAW_FORE) {
                 translate([0, 0, M_JOINT]) cylinder(h=FORE_TRIM, d=D_INNER);
                 translate([-50, -D_INNER/2, M_JOINT]) cube(size=[100, DY, FORE_TRIM]);
             }
-            /*
-            DLED = 6;
-            intersection()
-            {
-                translate([0, 0, M_AFT_FRONT - DLED/2]) cylinder(h=DLED/2, d=D_INNER);
-                translate([0, 0, M_AFT_FRONT - DLED/2]) ledPylon(DLED);                
-            }
-            */
 
             // chamber base & holder
             translate([0, 0, M_AFT_FRONT]) cylinder(h=DZ_CHAMBER_BASE, d=D_VENT_INNER);
+
+            // attachment for vent base
+            intersection() {
+                inner();
+                mirror([-1, 0, 0]) translate([-2, -D_INNER/2, M_AFT_FRONT -3]) cube(size=[D_INNER/2, 10, 4]);
+            }
         }
         bottomDotstar();
 
@@ -256,7 +260,7 @@ module chamberRing()
 {
     difference() {
         cylinder(h=CHAMBER_RING_DZ, d=D_VENT_INNER);
-        translate([0, 0, -1]) {
+        translate([0, 0, -EPS]) {
             cylinder(h=10, d=D_CRYSTAL_SPACE);
             rotate([0, 0, A_BOLT_0]) chamberRod(D_ROD);
             rotate([0, 0, A_BOLT_1]) chamberRod(D_ROD);                
@@ -289,37 +293,72 @@ if (DRAW_RING) {
     }
 }
 
+module tubeCap(t)
+{
+    translate([0, D_VENT_INNER/2 - D_ROD_NUT/2, 0]) 
+        cylinder(h=100, d=D_ROD_LOOSE);
+    rotate([0, 0, ANGLE_OFFSET]) {
+        translate([0, D_VENT_INNER/2 - D_TUBE/2, 0]) {
+            cylinder(h=t, d=D_TUBE);
+            translate([0, 0, t])
+                cylinder(h=100, d=D_TUBE_INNER);
+        }
+    }
+}
+
 if (DRAW_CHAMBER) {
     translate([0, 0, M_RING0_CENTER - CHAMBER_RING_DZ/2]) chamberRing();
     translate([0, 0, M_RING1_CENTER - CHAMBER_RING_DZ/2]) chamberRing();
-    translate([0, 0, M_RING2_CENTER - CHAMBER_RING_DZ/2]) chamberRing();
 
-    T_LOWER = 3.0;
-    T = 10.0;
+    // 3rd ring caps it.
+    // translate([0, 0, M_RING2_CENTER - CHAMBER_RING_DZ/2]) chamberRing();
+
+    T_LOWER = 4.0;
+    T_HALF = 2.0;
+    START = M_RING2_CENTER - CHAMBER_RING_DZ/2 + T_BRASS;
     W = 16;
-    
     PCB_T = 1.6;
     PCB_W = 12.0;
     PCB_HOLE = 10.5;
+    ANGLE = 40;
 
-    intersection() {
-        cylinder(h=200, d=D_VENT_INNER);
-        difference() {
-            union() {
-                translate([0, 0, M_EMITTER_PLATE - T]) cylinder(h=T_LOWER, d=D_VENT_INNER);
-                translate([-W/2, 8, M_EMITTER_PLATE - T]) cube(size=[W, 20, T]);
-                mirror([0, -1, 0]) translate([-W/2, 8, M_EMITTER_PLATE - T]) cube(size=[W, 20, T]);
+    // Brass plate, then plastic:
+    *color("gold") translate([0, 0, M_RING2_CENTER - CHAMBER_RING_DZ/2]) {
+        cylinder(h=T_BRASS, d=D_VENT_INNER);
+    }
+
+    difference() {
+        intersection() {
+            inner();
+            translate([0, 0, START]) {
+                difference() {
+                    union() {
+                        cylinder(h=T_LOWER, d=D_VENT_INNER);
+                        rotate([0, 0, ANGLE]) {
+                            translate([7, -W/2, 0]) cube(size=[100, W, M_FOOTER - START]);
+                            mirror([-1, 0, 0]) translate([7, -W/2, 0]) cube(size=[100, W, M_FOOTER - START]);
+                        }
+                    }
+                    rotate([0, 0, A_BOLT_0]) tubeCap(T_HALF);
+                    rotate([0, 0, A_BOLT_1]) tubeCap(T_HALF);
+                    cylinder(h=100, d=D_CRYSTAL_SPACE);
+                }              
             }
-            translate([0, 0, M_EMITTER_PLATE - T - 1]) {
-                cylinder(h=100, d=D_CRYSTAL_SPACE);
-                rotate([0, 0, A_BOLT_0]) chamberRod(D_ROD_LOOSE);
-                rotate([0, 0, A_BOLT_1]) chamberRod(D_ROD_LOOSE);                
-            }
-            translate([-PCB_W/2, -50, M_EMITTER_PLATE - PCB_T]) cube(size=[PCB_W, 100, PCB_T]);
-            translate([0, PCB_HOLE, 0]) cylinder(h=1000, d=2.2);
-            translate([0, -PCB_HOLE, 0]) cylinder(h=1000, d=2.2);
+        }    
+        rotate([0, 0, ANGLE]) {
+            translate([-50, -PCB_W/2, M_FOOTER - PCB_T]) cube(size=[100, PCB_W, 100]);
+            translate([PCB_HOLE, 0, 0]) cylinder(h=1000, d=2.2);
+            translate([-PCB_HOLE, 0, 0]) cylinder(h=1000, d=2.2);
         }
     }
+    echo("DZ base-ring0", (M_RING0_CENTER - CHAMBER_RING_DZ/2) - (M_AFT_FRONT + DZ_CHAMBER_BASE));
+    echo("DZ ring0-ring1", (M_RING1_CENTER - CHAMBER_RING_DZ/2) - (M_RING0_CENTER + CHAMBER_RING_DZ/2));
+    echo("DZ ring1-coupler brass", (START - T_BRASS) - (M_RING1_CENTER + CHAMBER_RING_DZ/2));
+
+    TUBE_START = M_AFT_FRONT + DZ_CHAMBER_BASE - TUBE_HOLDER_SETBACK;
+    TUBE_END = START + T_HALF;    
+    echo("DZ tube", TUBE_END - TUBE_START);
+
 }
 
 if (DRAW_SPACER) {
@@ -348,7 +387,7 @@ if (DRAW_BRASS) {
 *color("blue") translate([0, 0, M_START-1]) cylinder(h=1, d=D_OUTER);
 *color("blue") translate([0, 0, M_AFT_FRONT]) cylinder(h=1, d=D_OUTER);
 *color("blue") translate([0, 0, M_AFT_FRONT]) cylinder(h=1, d=D_OUTER);
-*color("blue") translate([0, 0, DZ_BODY]) cylinder(h=1, d=D_OUTER);
+color("blue") translate([0, 0, M_FOOTER - 1.6]) cylinder(h=1.6, d=10);
 
 *color("blue")  rotate([0, 0, 45-5]) translate([-1, -20, M_AFT_FRONT])
     cube(size=[2, 40, 1]);
