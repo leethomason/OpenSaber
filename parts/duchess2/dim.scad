@@ -55,7 +55,7 @@ D_CRYSTAL_SPACE = 12.0;
 HEAD_HOLDER_SETBACK = 4.0;  // how deep threads go into pillars
 TUBE_HOLDER_SETBACK = 2.0;  // how deep the tubes are seated
 
-A_TILT = -5;
+A_TILT = -65;
 A_BOLT_0 = 90 + A_TILT;     // angle of bolt
 A_BOLT_1 = 270 + A_TILT;    // angle of bolt
 ANGLE_OFFSET = 33;          // from rod to tube
@@ -68,3 +68,4 @@ D_CHAMBER_CUT = 3.6;
 
 CHAMBER_RING_DZ = 1.5 * 2 + 3.0; // guess - thickness of brass, working space inside
 T_BRASS = 1.4;
+DZ_CHAMBER_BASE = 5;

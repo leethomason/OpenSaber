@@ -7,7 +7,7 @@ $fn = 80;
 DRAW_AFT = false;
 DRAW_FORE = true;
 DRAW_RING = false;
-DRAW_CHAMBER = true;
+DRAW_CHAMBER = false;
 DRAW_SPACER = false;
 DRAW_BRASS = false;
 
@@ -43,43 +43,48 @@ module chamberBolt(angle, d, h)
 
 module ledPylon(dz)
 {
-    W = 20.0;
-    W2 = 2.0;
+    W = 16.0;
+    W2 = 10.0;
     WB = 5.0;
     WB2 = 16.0;
 
-    DOTSTAR = 5.0;
     FILM = 12.2;
     FILM_THICKNESS = 0.6;
     CLEARANCE = 1.0;
-    BACK = 0.6 * dz;
+    BACK = 0.5 * dz;
 
     intersection() {
         translate([0, 0, -EPS]) cylinder(d=D_INNER, h=dz + 2 *EPS);
         difference() {
-            translate([-W/2, -D_INNER/2, 0]) 
-                cube(size=[W, D_INNER/2 + DOTSTAR/2, dz]);
+            translate([0, 0, 0]) 
+                //cube(size=[W, D_INNER/2 + DOTSTAR/2, dz]);
+                polygonXY(h=dz, points = [
+                    [-W/2, -D_INNER/2],
+                    [-W2/2, DOTSTAR_XZ/2],
+                    [W2/2, DOTSTAR_XZ/2],
+                    [W/2, -D_INNER/2]
+                ]);
 
             translate([0, 0, -EPS]) polygonXY(h=dz + EPS*2, points=[
                 [-WB2/2, -D_INNER/2],
-                [0, -DOTSTAR],
+                [0, -DOTSTAR_XZ],
                 [WB2/2, -D_INNER/2]
             ]);
 
             // Knock out dotstar.
-            translate([-DOTSTAR/2, -DOTSTAR/2, BACK])
-                cube(size=[DOTSTAR, 100, 10]);
+            translate([-DOTSTAR_XZ/2, -DOTSTAR_XZ/2, BACK])
+                cube(size=[DOTSTAR_XZ, 100, 10]);
             // Knock out film
-            translate([-FILM/2, -DOTSTAR/2, BACK - FILM_THICKNESS])
+            translate([-FILM/2, -DOTSTAR_XZ/2, BACK - FILM_THICKNESS])
                 cube(size=[FILM, 100, FILM_THICKNESS]);
 
             // Space behind...
-            translate([-W/2, DOTSTAR/2 - CLEARANCE, -10])
-                cube(size=[W, DOTSTAR, 10 + BACK]);
+            translate([-W/2, DOTSTAR_XZ/2 - CLEARANCE, -10])
+                cube(size=[W, DOTSTAR_XZ, 10 + BACK]);
 
-            translate([DOTSTAR/2, -DOTSTAR/2, 0])
+            translate([DOTSTAR_XZ/2, -DOTSTAR_XZ/2, 0])
                 cube(size=[100, 100, BACK]);
-            mirror([-1, 0, 0]) translate([DOTSTAR/2, -DOTSTAR/2, 0])
+            mirror([-1, 0, 0]) translate([DOTSTAR_XZ/2, -DOTSTAR_XZ/2, 0])
                 cube(size=[100, 100, BACK]);
         }
     }
@@ -167,18 +172,6 @@ if (DRAW_FORE) {
                     }
                 }
             }
-            // Front attachment points for tubes & rods.
-            intersection() {
-                cylinder(h=1000, d=D_INNER);
-                PDY = 7.5;
-                X = 5.0;
-                union() {
-                    translate([X, -100, M_AFT_FRONT - HEAD_HOLDER_SETBACK])
-                        cube(size=[100, 100 + PDY, HEAD_HOLDER_SETBACK]);
-                    mirror([-1, 0, 0]) translate([X, -100, M_AFT_FRONT - HEAD_HOLDER_SETBACK])
-                        cube(size=[100, 100 + PDY, HEAD_HOLDER_SETBACK]);
-                }
-            }
             // toughen up the sides
             FORE_TRIM = DZ_POWER_RING;
             difference() {
@@ -200,8 +193,17 @@ if (DRAW_FORE) {
                 translate([0, 0, M_JOINT]) cylinder(h=FORE_TRIM, d=D_INNER);
                 translate([-50, -D_INNER/2, M_JOINT]) cube(size=[100, DY, FORE_TRIM]);
             }
-            DLED = 5;
-            translate([0, 0, M_AFT_FRONT - DLED]) ledPylon(DLED);
+            /*
+            DLED = 6;
+            intersection()
+            {
+                translate([0, 0, M_AFT_FRONT - DLED/2]) cylinder(h=DLED/2, d=D_INNER);
+                translate([0, 0, M_AFT_FRONT - DLED/2]) ledPylon(DLED);                
+            }
+            */
+
+            // chamber base & holder
+            translate([0, 0, M_AFT_FRONT]) cylinder(h=DZ_CHAMBER_BASE, d=D_VENT_INNER);
         }
         bottomDotstar();
 
@@ -227,16 +229,26 @@ if (DRAW_FORE) {
 
         // bolts, going forward
         // Access to tubes for wiring
-        translate([0, 0, M_AFT_FRONT - HEAD_HOLDER_SETBACK - EPS]) {
-            chamberBolt(A_BOLT_0, D_ROD, 100.0);
-            chamberBolt(A_BOLT_1, D_ROD, 100.0);
+        translate([0, 0, M_AFT_FRONT - 5]) {
             chamberBolt(A_BOLT_0 + ANGLE_OFFSET, D_TUBE_INNER, 100);
             chamberBolt(A_BOLT_1 + ANGLE_OFFSET, D_TUBE_INNER, 100);
         }
-        translate([0, 0, M_AFT_FRONT - TUBE_HOLDER_SETBACK]) {
+        translate([0, 0, M_AFT_FRONT]) {
+            chamberBolt(A_BOLT_0, D_ROD, 100.0);
+            chamberBolt(A_BOLT_1, D_ROD, 100.0);
+        }
+        translate([0, 0, M_AFT_FRONT + DZ_CHAMBER_BASE - TUBE_HOLDER_SETBACK]) {
             chamberBolt(A_BOLT_0 + ANGLE_OFFSET, D_TUBE, 100);
             chamberBolt(A_BOLT_1 + ANGLE_OFFSET, D_TUBE, 100);
         }
+        translate([-DOTSTAR_XZ/2, -DOTSTAR_XZ/2, M_AFT_FRONT]) {
+            cube(size=[DOTSTAR_XZ, DOTSTAR_XZ, 10]);
+        }
+        // slide for led
+        translate([-DOTSTAR_XZ/2, -DOTSTAR_XZ/2, M_AFT_FRONT]) {
+            cube(size=[DOTSTAR_XZ, 100, 2.6]);
+        }
+
     }
 }
 
@@ -315,7 +327,7 @@ if (DRAW_SPACER) {
         cylinder(h=1000, d=D_VENT_INNER);
         translate([0, 0, M_RING0_CENTER - CHAMBER_RING_DZ/2]) {
             difference() {
-                rotate([0, 0, -A_TILT + 4]) polygonXY(h=CHAMBER_RING_DZ, points=[
+                rotate([0, 0, A_CHAMBER_CUT_0 + 29]) polygonXY(h=CHAMBER_RING_DZ, points=[
                     [0, 0], [-30, 30], [30, 30]
                 ]);
                 //translate([0, 0, -CHAMBER_RING_DZ /2]) chamberPlate();
@@ -337,3 +349,8 @@ if (DRAW_BRASS) {
 *color("blue") translate([0, 0, M_AFT_FRONT]) cylinder(h=1, d=D_OUTER);
 *color("blue") translate([0, 0, M_AFT_FRONT]) cylinder(h=1, d=D_OUTER);
 *color("blue") translate([0, 0, DZ_BODY]) cylinder(h=1, d=D_OUTER);
+
+*color("blue")  rotate([0, 0, 45-5]) translate([-1, -20, M_AFT_FRONT])
+    cube(size=[2, 40, 1]);
+*color("blue")  rotate([0, 0, -45-5]) translate([-1, -20, M_AFT_FRONT])
+    cube(size=[2, 40, 1]);
