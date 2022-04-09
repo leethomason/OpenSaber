@@ -5,7 +5,7 @@ include <dim.scad>
 
 $fn = 80;
 DRAW_AFT = false;
-DRAW_FORE = true;
+DRAW_FORE = false;
 DRAW_RING = false;
 DRAW_CHAMBER = true;
 DRAW_SPACER = false;
@@ -203,6 +203,9 @@ if (DRAW_FORE) {
             // chamber base & holder
             translate([0, 0, M_AFT_FRONT]) cylinder(h=DZ_CHAMBER_BASE, d=D_VENT_INNER);
 
+            // dotstar backing
+            translate([-2, -10, M_AFT_FRONT - 3]) cube(size=[4, 11, 2.5]);
+
             // attachment for vent base
             intersection() {
                 inner();
@@ -307,8 +310,8 @@ module tubeCap(t)
 }
 
 if (DRAW_CHAMBER) {
-    translate([0, 0, M_RING0_CENTER - CHAMBER_RING_DZ/2]) chamberRing();
-    translate([0, 0, M_RING1_CENTER - CHAMBER_RING_DZ/2]) chamberRing();
+    *translate([0, 0, M_RING0_CENTER - CHAMBER_RING_DZ/2]) chamberRing();
+    *translate([0, 0, M_RING1_CENTER - CHAMBER_RING_DZ/2]) chamberRing();
 
     // 3rd ring caps it.
     // translate([0, 0, M_RING2_CENTER - CHAMBER_RING_DZ/2]) chamberRing();
@@ -387,7 +390,7 @@ if (DRAW_BRASS) {
 *color("blue") translate([0, 0, M_START-1]) cylinder(h=1, d=D_OUTER);
 *color("blue") translate([0, 0, M_AFT_FRONT]) cylinder(h=1, d=D_OUTER);
 *color("blue") translate([0, 0, M_AFT_FRONT]) cylinder(h=1, d=D_OUTER);
-color("blue") translate([0, 0, M_FOOTER - 1.6]) cylinder(h=1.6, d=10);
+*color("blue") translate([0, 0, M_FOOTER - 1.6]) cylinder(h=1.6, d=10);
 
 *color("blue")  rotate([0, 0, 45-5]) translate([-1, -20, M_AFT_FRONT])
     cube(size=[2, 40, 1]);
