@@ -5,9 +5,9 @@ include <dim.scad>
 
 $fn = 80;
 DRAW_AFT = false;
-DRAW_FORE = false;
+DRAW_FORE = true;
 DRAW_RING = false;
-DRAW_CHAMBER = true;
+DRAW_CHAMBER = false;
 DRAW_SPACER = false;
 DRAW_BRASS = false;
 
@@ -41,52 +41,17 @@ module chamberBolt(angle, d, h)
             cylinder(h=h, d=d);
 }
 
-module ledPylon(dz)
+module ledPylon2()
 {
-    W = 16.0;
-    W2 = 10.0;
-    WB = 5.0;
-    WB2 = 16.0;
-
+    W = 17;
     FILM = 12.2;
-    FILM_THICKNESS = 0.6;
-    CLEARANCE = 1.0;
-    BACK = 0.5 * dz;
+    FILM_THICKNESS = 0.8;
 
-    intersection() {
-        translate([0, 0, -EPS]) cylinder(d=D_INNER, h=dz + 2 *EPS);
-        difference() {
-            translate([0, 0, 0]) 
-                //cube(size=[W, D_INNER/2 + DOTSTAR/2, dz]);
-                polygonXY(h=dz, points = [
-                    [-W/2, -D_INNER/2],
-                    [-W2/2, DOTSTAR_XZ/2],
-                    [W2/2, DOTSTAR_XZ/2],
-                    [W/2, -D_INNER/2]
-                ]);
-
-            translate([0, 0, -EPS]) polygonXY(h=dz + EPS*2, points=[
-                [-WB2/2, -D_INNER/2],
-                [0, -DOTSTAR_XZ],
-                [WB2/2, -D_INNER/2]
-            ]);
-
-            // Knock out dotstar.
-            translate([-DOTSTAR_XZ/2, -DOTSTAR_XZ/2, BACK])
-                cube(size=[DOTSTAR_XZ, 100, 10]);
-            // Knock out film
-            translate([-FILM/2, -DOTSTAR_XZ/2, BACK - FILM_THICKNESS])
-                cube(size=[FILM, 100, FILM_THICKNESS]);
-
-            // Space behind...
-            translate([-W/2, DOTSTAR_XZ/2 - CLEARANCE, -10])
-                cube(size=[W, DOTSTAR_XZ, 10 + BACK]);
-
-            translate([DOTSTAR_XZ/2, -DOTSTAR_XZ/2, 0])
-                cube(size=[100, 100, BACK]);
-            mirror([-1, 0, 0]) translate([DOTSTAR_XZ/2, -DOTSTAR_XZ/2, 0])
-                cube(size=[100, 100, BACK]);
-        }
+    difference() {
+        translate([-W/2, -D_INNER/2, M_AFT_FRONT - 5])
+            cube(size=[W, D_INNER/2 + 1, 5]);
+        translate([-FILM/2, -D_INNER/2, M_AFT_FRONT - FILM_THICKNESS])
+            cube(size=[FILM, 100, 100]);
     }
 }
 
@@ -162,7 +127,7 @@ if (DRAW_FORE) {
                     tube(h=M_AFT_FRONT - M_SWITCH_START, do=D_INNER, di=D_INNER - T);
                     translate([-W/2, 0, 0]) cube(size=[W, 100, 100]);
                 }
-                switchHolder(D_INNER, M_SWITCH - M_SWITCH_START, 0, 10.5);
+                switchHolder(D_INNER, M_SWITCH - M_SWITCH_START, 0, 10.5, true);
             }
             // Pillars to toughen front.
             PILLAR = HEAD_HOLDER_SETBACK;
@@ -203,13 +168,9 @@ if (DRAW_FORE) {
             // chamber base & holder
             translate([0, 0, M_AFT_FRONT]) cylinder(h=DZ_CHAMBER_BASE, d=D_VENT_INNER);
 
-            // dotstar backing
-            translate([-2, -10, M_AFT_FRONT - 3]) cube(size=[4, 11, 2.5]);
-
-            // attachment for vent base
             intersection() {
                 inner();
-                mirror([-1, 0, 0]) translate([-2, -D_INNER/2, M_AFT_FRONT -3]) cube(size=[D_INNER/2, 10, 4]);
+                ledPylon2();
             }
         }
         bottomDotstar();
@@ -234,9 +195,14 @@ if (DRAW_FORE) {
         W_ACCESS = 12.0;
         translate([-W_ACCESS/2, -D_INNER/2, M_JOINT]) cube(size=[W_ACCESS, 2.5, 22]);
 
+        // Access for dotstar
+        FILM_WIDTH = 14;
+        translate([-FILM_WIDTH/2, 5, M_AFT_FRONT - 1])
+            cube(size=[FILM_WIDTH, 100, 1]);
+
         // bolts, going forward
         // Access to tubes for wiring
-        translate([0, 0, M_AFT_FRONT - 5]) {
+        translate([0, 0, M_AFT_FRONT - 11]) {
             chamberBolt(A_BOLT_0 + ANGLE_OFFSET, D_TUBE_INNER, 100);
             chamberBolt(A_BOLT_1 + ANGLE_OFFSET, D_TUBE_INNER, 100);
         }

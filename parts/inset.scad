@@ -113,27 +113,38 @@ module headerHolder(diameter, dy)
     }
 }
 
-module switchHolder(diameter, dzSwitch, dyInset, dySwitch)
+module switchHolder(diameter, dzSwitch, dyInset, dySwitch, bridged)
 {
     echo(diameter, dzSwitch, dyInset, dySwitch);
 
     rInner = diameter / 2;
     X_SWITCH = 6.5;
     Y_SWITCH = 3.0;
+    Y_BASE = rInner - dySwitch - dyInset;
 
     intersection() {
         BRIDGE_T = 3;
         cylinder(h=300, d=diameter);
         translate([0, 0, dzSwitch - SWITCH_BRIDGE_DZ/2]) {
-            translate([-20, rInner - dySwitch - dyInset - BRIDGE_T]) {
-                cube(size=[40, BRIDGE_T, SWITCH_BRIDGE_DZ]);
+            if (bridged) {
+                difference() {
+                    translate([-20, Y_BASE - 20, 0]) cube(size=[40, 20, SWITCH_BRIDGE_DZ]);
+                    translate([0, Y_BASE - 1, -EPS]) polygonXY(h=SWITCH_BRIDGE_DZ + EPS*2, points=[
+                        [-20, -20], [0, 0], [20, -20]
+                    ]);
+                }
+            }
+            else {
+                translate([-20, Y_BASE - BRIDGE_T, 0]) {
+                    cube(size=[40, BRIDGE_T, SWITCH_BRIDGE_DZ]);
+                }
             }
 
-            translate([X_SWITCH/2, rInner - dySwitch - dyInset, 0]) {
+            translate([X_SWITCH/2, Y_BASE, 0]) {
                 cube(size=[50, Y_SWITCH, SWITCH_BRIDGE_DZ]);
             }
 
-            mirror([-1, 0, 0]) translate([X_SWITCH/2, rInner - dySwitch - dyInset, 0]) {
+            mirror([-1, 0, 0]) translate([X_SWITCH/2, Y_BASE, 0]) {
                 cube(size=[50, Y_SWITCH, SWITCH_BRIDGE_DZ]);
             }
         }
