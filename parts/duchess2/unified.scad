@@ -4,8 +4,8 @@ use <../inset.scad>
 include <dim.scad>
 
 $fn = 80;
-DRAW_AFT = false;
-DRAW_FORE = true;
+DRAW_AFT = true;
+DRAW_FORE = false;
 DRAW_RING = false;
 DRAW_CHAMBER = false;
 DRAW_SPACER = false;
@@ -84,7 +84,7 @@ if (DRAW_AFT) {
 
     difference() {
         translate([0, 0, M_MC]) {
-            baffleMCBattery(D_INNER, N_BATT_BAFFLES, DZ_BAFFLE, bridgeStyle=2);
+            baffleMCBattery(D_INNER, N_BATT_BAFFLES, DZ_BAFFLE, bridgeStyle=2, thermalRelief=3, thermalReliefOffset=2);
         }
     }
     translate([0, 0, M_JOINT]) rotate([0, 0, 0])

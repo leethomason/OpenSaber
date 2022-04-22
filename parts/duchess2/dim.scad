@@ -48,7 +48,7 @@ DX_SWITCH_PLATE = 16.5;
 
 D_ROD = 3.4;
 D_ROD_LOOSE = 3.6;  // FIXME
-D_ROD_NUT = 7.2;    // space for a nut to thread...
+D_ROD_NUT = 7.3;    // space for a nut to thread. New small ones!
 D_TUBE = 4.4;       // outer radius of tube that carries power to emitter
 D_TUBE_INNER = 3.2; // FIXME
 D_CRYSTAL_SPACE = 12.0;

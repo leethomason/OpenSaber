@@ -988,7 +988,8 @@ module baffleMCBattery( outer,          // outer diameter
                         mcFullDrop=false,
                         bottomRail=true,
                         batteryOffset=0,
-                        thermalRelief=0
+                        thermalRelief=0,
+                        thermalReliefOffset=0
                     )
 {
     totalN = n + nPostBaffles;
@@ -1013,7 +1014,7 @@ module baffleMCBattery( outer,          // outer diameter
                 }
             }
             else {
-                useBottomRail = bottomRail && (thermalRelief == 0 || (((i+2) % thermalRelief) > 0));
+                useBottomRail = bottomRail && (thermalRelief == 0 || (((i + 2 + thermalReliefOffset) % thermalRelief) > 0));
 
                 oneBaffle(outer, dzButtress, 
                     battery=hasBattery,
