@@ -4,8 +4,8 @@ use <../inset.scad>
 include <dim.scad>
 
 $fn = 80;
-DRAW_AFT = true;
-DRAW_FORE = false;
+DRAW_AFT = false;
+DRAW_FORE = true;
 DRAW_RING = false;
 DRAW_CHAMBER = false;
 DRAW_SPACER = false;
@@ -210,7 +210,8 @@ if (DRAW_FORE) {
             chamberBolt(A_BOLT_0, D_ROD, 100.0);
             chamberBolt(A_BOLT_1, D_ROD, 100.0);
         }
-        translate([0, 0, M_AFT_FRONT + DZ_CHAMBER_BASE - TUBE_HOLDER_SETBACK]) {
+        // Was: 5mm thick - 2mm setback = 3mm in front
+        translate([0, 0, M_AFT_FRONT + 3.0]) {
             chamberBolt(A_BOLT_0 + ANGLE_OFFSET, D_TUBE, 100);
             chamberBolt(A_BOLT_1 + ANGLE_OFFSET, D_TUBE, 100);
         }
@@ -338,8 +339,6 @@ if (DRAW_SPACER) {
                 rotate([0, 0, A_CHAMBER_CUT_0 + 29]) polygonXY(h=CHAMBER_RING_DZ, points=[
                     [0, 0], [-30, 30], [30, 30]
                 ]);
-                //translate([0, 0, -CHAMBER_RING_DZ /2]) chamberPlate();
-                //cylinder(h=CHAMBER_RING_DZ, d=D_VENT_INNER);
                 translate([0, 0, CHAMBER_RING_DZ - T_BRASS + EPS]) chamberPlate();
                 translate([0, 0, 0]) chamberPlate();
                 cylinder(h=100, d=D_CRYSTAL_SPACE);

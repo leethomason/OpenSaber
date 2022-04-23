@@ -69,4 +69,4 @@ D_CHAMBER_CUT = 3.6;
 
 CHAMBER_RING_DZ = 1.5 * 2 + 3.0; // guess - thickness of brass, working space inside
 T_BRASS = 1.4;
-DZ_CHAMBER_BASE = 5;
+DZ_CHAMBER_BASE = 8;
