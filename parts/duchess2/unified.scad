@@ -206,7 +206,7 @@ if (DRAW_FORE) {
 
         // bolts, going forward
         // Access to tubes for wiring
-        translate([0, 0, M_AFT_FRONT - EPS]) {
+        translate([0, 0, M_AFT_FRONT - 12]) {
             chamberBolt(A_BOLT_0, D_ROD, 100.0);
             chamberBolt(A_BOLT_1, D_ROD, 100.0);
         }
@@ -321,8 +321,8 @@ if (DRAW_CHAMBER) {
         }    
         rotate([0, 0, ANGLE]) {
             translate([-50, -PCB_W/2, M_FOOTER - PCB_T]) cube(size=[100, PCB_W, 100]);
-            translate([PCB_HOLE, 0, 0]) cylinder(h=1000, d=2.2);
-            translate([-PCB_HOLE, 0, 0]) cylinder(h=1000, d=2.2);
+            translate([PCB_HOLE, 0, 0]) cylinder(h=1000, d=2.0);
+            translate([-PCB_HOLE, 0, 0]) cylinder(h=1000, d=2.0);
         }
     }
     echo("DZ base-ring0", (M_RING0_CENTER - CHAMBER_RING_DZ/2) - (M_AFT_FRONT + DZ_CHAMBER_BASE));
