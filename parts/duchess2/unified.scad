@@ -26,6 +26,10 @@ DOTSTAR_Z = 73.0 - 21.0;
 KEYJOINT_T = 5.0;
 COUPLER_ANGLE = -10.0;
 
+module tubeAtY(d, h) {
+    translate([0, D_VENT_INNER/2 - D_TUBE/2, 0]) cylinder(h=h, d=d);
+}
+
 module chamberRod(dRod) {
     translate([0, D_VENT_INNER/2 - D_ROD_NUT/2]) cylinder(h=100, d=dRod);
     rotate([0, 0, ANGLE_OFFSET]) hull() {
@@ -202,18 +206,18 @@ if (DRAW_FORE) {
 
         // bolts, going forward
         // Access to tubes for wiring
-        translate([0, 0, M_AFT_FRONT - 11]) {
-            chamberBolt(A_BOLT_0 + ANGLE_OFFSET, D_TUBE_INNER, 100);
-            chamberBolt(A_BOLT_1 + ANGLE_OFFSET, D_TUBE_INNER, 100);
-        }
-        translate([0, 0, M_AFT_FRONT]) {
+        translate([0, 0, M_AFT_FRONT - EPS]) {
             chamberBolt(A_BOLT_0, D_ROD, 100.0);
             chamberBolt(A_BOLT_1, D_ROD, 100.0);
         }
+        translate([0, 0, M_AFT_FRONT - 4.0]) {
+            rotate([0, 0, A_BOLT_0 + ANGLE_OFFSET]) tubeAtY(D_TUBE_INNER, 100);
+            rotate([0, 0, A_BOLT_1 + ANGLE_OFFSET]) tubeAtY(D_TUBE_INNER, 100);
+        }
         // Was: 5mm thick - 2mm setback = 3mm in front
         translate([0, 0, M_AFT_FRONT + 3.0]) {
-            chamberBolt(A_BOLT_0 + ANGLE_OFFSET, D_TUBE, 100);
-            chamberBolt(A_BOLT_1 + ANGLE_OFFSET, D_TUBE, 100);
+            rotate([0, 0, A_BOLT_0 + ANGLE_OFFSET]) tubeAtY(D_TUBE, 100);
+            rotate([0, 0, A_BOLT_1 + ANGLE_OFFSET]) tubeAtY(D_TUBE, 100);
         }
         translate([-DOTSTAR_XZ/2, -DOTSTAR_XZ/2, M_AFT_FRONT]) {
             cube(size=[DOTSTAR_XZ, DOTSTAR_XZ, 10]);
