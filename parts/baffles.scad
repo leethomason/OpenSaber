@@ -56,18 +56,21 @@ module curveBridge(h, y, z, low, high)
 
 module bridge2(d, dz)
 {
+    SPACE_I = 6.0;
+    SPACE_O = 1.0;
+
     difference() {
         intersection() 
         {
-            tube(h=dz, do=d - D_OUTER, di=d - D_INNER);
+            tube(h=dz, do=d - SPACE_O, di=d - SPACE_I);
             union() {
-                translate([-d, d*0.10, 0]) {
+                translate([-d, d*0.15, 0]) {
                     polygonYZ(d*2, [
-                        [0,0], [dz*2, dz*2], [dz*4, dz*1.5], [dz*2, 0]
+                        [0,0], [dz*2, dz*2], [dz*3.5, dz*1.5], [dz*2.5, 0]
                     ]);
                 }        
                 translate([-d, -d*0.32, 0]) {
-                    polygonYZ(d*2, [[0,0], [dz*2, dz*2], [dz*2, 0]]);
+                    polygonYZ(d*2, [[0,0], [dz*2, dz*2], [dz*3, 0]]);
                 }        
             }
         }
