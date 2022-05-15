@@ -72,7 +72,7 @@
 #define SABER_SUB_MODEL_B			13
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
+#define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_DUCHESS
 #define SABER_SUB_MODEL				0	
 // ----------------------------------

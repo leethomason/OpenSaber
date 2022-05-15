@@ -594,7 +594,7 @@ void processAccel(uint32_t msec, uint32_t)
 
             if(++logDiv == LOG_DIV) {
                 logDiv = 0;
-                Log.p("dps=").p(dps).p(" rot=").v3(bladeRotation).p(" delta=").p(delta).eol();
+                //Log.p("dps=").p(dps).p(" rot=").v3(bladeRotation).p(" delta=").p(delta).eol();
                 //Log.p("dps=").p(dps).p(" delta=").p(delta).p(" accel=").v3(accelData).eol();
             };
             sfx.sm_setSwing(dps * 3.14f / 180.0f, (delta * Fixed16(256, 180)).getInt());
