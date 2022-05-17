@@ -773,11 +773,13 @@
 	#define SABER_VOLTMETER()			1			
 	#define SABER_UI_LED				SABER_LED_DOTSTAR
 
-	#define SABER_NUM_LEDS 			    4
+	#define SABER_NUM_LEDS 			    5
 	#define SABER_UI_START				0
 	#define SABER_UI_COUNT				4
 	#define SABER_UI_BRIGHTNESS	    	16
 	#define SABER_UI_IDLE_MEDITATION
+	#define SABER_CRYSTAL_START	    	4
+	#define SABER_CRYSTAL_BRIGHTNESS 	64
 	#define VOLTMETER_TUNE				1016
 
 	#define SABER_LOCK()				0
