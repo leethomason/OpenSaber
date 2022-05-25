@@ -779,17 +779,17 @@
 	#define SABER_UI_BRIGHTNESS	    	16
 	#define SABER_UI_IDLE_MEDITATION
 	#define SABER_CRYSTAL_START	    	4
-	#define SABER_CRYSTAL_BRIGHTNESS 	64
-	#define VOLTMETER_TUNE				1016
+	#define SABER_CRYSTAL_BRIGHTNESS 	128		// fixme was 64
+	#define VOLTMETER_TUNE				1016	// fixme
 
 	#define SABER_LOCK()				0
 
 	// Does not need to be power of 2.
 	// multiply by 10 to get ms width of filter
-	#define FILTER_MAG_X	20
-	#define FILTER_MAG_Y	30
-	#define FILTER_MAG_Z	10
-	#define SWING_SAMPLES	12
+	#define FILTER_MAG_X	20	// Not used
+	#define FILTER_MAG_Y	30	// Not used
+	#define FILTER_MAG_Z	10	// Not used
+	#define SWING_SAMPLES	12	// Not used
 	#define ID_STR "Duchess Cree XPE2 RGB"
 
 	static const int32_t RED_VF   = 2200;

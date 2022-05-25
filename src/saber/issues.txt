@@ -1,14 +1,14 @@
 Issues:
 
+Current
+- Turn off UI LED idle animation when there is a crystal
+
 High
 - fix vol>255 not working
 - volume boost support for fonts
 - blade flash on retract. completely mystified
 
-NtH
-- better mode indicator
-- interpolate on color change
-- play hum in sound mode?
+Med
 
 Iceblock
 - switch to gyro.
