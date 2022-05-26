@@ -2,6 +2,8 @@ Issues:
 
 Current
 - Turn off UI LED idle animation when there is a crystal
+- Remove axis rotation from gyro
+- Smooth out gyro sound?
 
 High
 - fix vol>255 not working
@@ -10,10 +12,10 @@ High
 
 Med
 
-Iceblock
-- switch to gyro.
+Icebox
 
 Fixed
+x switch to gyro.
 x a little less motion sensitivity
 x dropout during green spin
 x fix floating point average to not drift

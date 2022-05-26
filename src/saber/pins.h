@@ -72,7 +72,7 @@
 #define SABER_SUB_MODEL_B			13
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
+#define SERIAL_DEBUG 				1
 #define SABER_MODEL 				SABER_MODEL_DUCHESS
 #define SABER_SUB_MODEL				0	
 // ----------------------------------
@@ -111,6 +111,10 @@
 // Smooth swing not supported. But I have enough LISD3H chips to make it worth it, and allows me to replace/upgrade
 // sabers on the Teensy platform.
 #define PCB_ITSY_3A				   23
+// The 4 series builds on the 3 series design. The PCBs are very similar looking. However, the
+// magnetometer is removed, and a gyroscope is added (LSM6D). The gyroscrope is very nice, at first
+// attempt easy to solder, and gives very nice results.
+#define PCB_ITSY_4A				   24	// Gyro/Accelerometer on SPI bus. Dotstar. SPI. I2S audio. Flash mem sound.
 
 #define SABER_ACCELEROMETER_LIS3DH		1	// SPI, accel
 #define SABER_ACCELEROMETER_LSM303 		2	// I2C, accel, magnetometer
@@ -777,7 +781,7 @@
 	#define SABER_UI_START				0
 	#define SABER_UI_COUNT				4
 	#define SABER_UI_BRIGHTNESS	    	16
-	#define SABER_UI_IDLE_MEDITATION
+	#define SABER_UI_FADE_OUT
 	#define SABER_CRYSTAL_START	    	4
 	#define SABER_CRYSTAL_BRIGHTNESS 	128		// fixme was 64
 	#define VOLTMETER_TUNE				1016	// fixme

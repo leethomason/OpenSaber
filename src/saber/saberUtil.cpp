@@ -122,7 +122,14 @@ void UIModeUtil::setActive()
     lastActive = millis();
 }
 
-bool UIModeUtil::isIdle()
+uint32_t UIModeUtil::millisPastIdle() const {
+    if (isIdle()) {
+        return millis() - (lastActive + IDLE_TIME);
+    }
+    return 0;
+}
+
+bool UIModeUtil::isIdle() const
 {
     if (millis() - lastActive > IDLE_TIME)
         return true;

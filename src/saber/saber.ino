@@ -557,8 +557,6 @@ void processAccel(uint32_t msec, uint32_t)
             // one axis independentantly. But...that's okay.
             // We mostly want rates.
             // Ignore the "twist" axis.
-
-            // 100 hz. (Not delta as first attempted. Oops.)
             // Blade rotation is in dps - can feed that directly to the sound system.
             const Fixed16 dt(10, 1000);
 
@@ -785,7 +783,7 @@ void loopDisplays(uint32_t msec, uint32_t mainDelta)
     {
         osbr::RGB rgb[SABER_UI_COUNT];
 
-#ifdef SABER_UI_IDLE_MEDITATION
+#   ifdef SABER_UI_IDLE_MEDITATION
         if (uiMode.mode() == UIMode::NORMAL && bladeState.state() == BLADE_OFF && uiMode.isIdle())
         {
             dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, delta, UIMode::MEDITATION, !bladeState.bladeOff(), uiRenderData);
@@ -795,18 +793,35 @@ void loopDisplays(uint32_t msec, uint32_t mainDelta)
         {
             dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, delta, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
         }
-#else
+#   else
         dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, delta, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
-#endif
+#   endif
+
+#   ifdef SABER_UI_FADE_OUT
+        if (uiMode.isIdle()) {
+            static const uint32_t FADE_TIME = 800;
+            uint32_t over = uiMode.millisPastIdle();
+            Fixed115 fraction(0);
+
+            if (over < FADE_TIME) {
+                fraction = Fixed115(over, FADE_TIME);
+            }
+            for(int i=SABER_UI_START; i < SABER_UI_START + SABER_UI_COUNT; ++i) {
+                for(int j=0; j<3; ++j) {
+                    leds[i][j] = fraction.scale(leds[i][j]);
+                }                
+            }
+        }
+#   endif
 
         // Copy back from Draw(RGB) to Dotstar(RGBA)
         for (int i = 0; i < SABER_UI_COUNT; ++i)
         {
-#ifdef SABER_UI_REVERSE
+#   ifdef SABER_UI_REVERSE
             leds[SABER_UI_START + SABER_UI_COUNT - 1 - i].set(rgb[i], SABER_UI_BRIGHTNESS);
-#else
+#   else
             leds[SABER_UI_START + i].set(rgb[i], SABER_UI_BRIGHTNESS);
-#endif
+#   endif
         }
     }
 #endif  // SABER_UI_START

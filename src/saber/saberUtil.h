@@ -78,7 +78,8 @@ public:
     void nextMode();
 
     void setActive();
-    bool isIdle();
+    bool isIdle() const;
+    uint32_t millisPastIdle() const;
     
     UIMode mode() const {
         return m_mode;

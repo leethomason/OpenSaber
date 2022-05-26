@@ -712,7 +712,7 @@ module speakerHolder(outer, dz, dzToSpkrBack, type, extraZ=0)
 }
 
 
-module powerPortRing(diameter, t, dz, dzToPort, portSupportToBack=false, counter=true, addY=0, dyPort=6.0, topNut=true, powerNutCanTurn=false)
+module powerPortRing(diameter, t, dz, dzToPort, portSupportToBack=false, counter=true, yTop=0, dyPort=6.0, topNut=true, powerNutCanTurn=false)
 {    
     SECTION_PAD = 0.5;
     if (dzToPort - D_NUT/2 - 0.5 < 0) {
@@ -729,6 +729,7 @@ module powerPortRing(diameter, t, dz, dzToPort, portSupportToBack=false, counter
     H_THREAD = 5.5;
     D_THREAD = 7.8;
     H_THREAD_PRACT = H_THREAD + (diameter/2 - yAtX(D_THREAD/2, diameter/2));
+    yTop = (yTop == 0) ? diameter / 2 : yTop;
 
     difference() {
         union() {
@@ -736,8 +737,8 @@ module powerPortRing(diameter, t, dz, dzToPort, portSupportToBack=false, counter
             intersection() {
                 cylinder(h=dz, d=diameter);
 
-                portY = topNut ? (diameter/2 - H_THREAD_PRACT) 
-                               : diameter/2 - dyPort - addY;
+                portY = topNut ? (yTop - H_THREAD_PRACT) 
+                                : yTop - dyPort;
 
                 if (portSupportToBack) {
                     translate([-50, portY, 0])
@@ -758,7 +759,7 @@ module powerPortRing(diameter, t, dz, dzToPort, portSupportToBack=false, counter
                 portCounter();
         }
         if (topNut) {
-            translate([0, diameter/2 - H_NUT_PRACT, dzToPort]) {
+            translate([0, yTop - H_NUT_PRACT, dzToPort]) {
                 if (powerNutCanTurn) {
                     rotate([-90, 0, 0])
                         cylinder(h=100, d=D_NUT);

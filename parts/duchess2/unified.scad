@@ -5,10 +5,11 @@ include <dim.scad>
 
 $fn = 80;
 DRAW_AFT = false;
-DRAW_FORE = true;
+DRAW_FORE = false;
+DRAW_BRIDGE = false;
 DRAW_RING = false;
 DRAW_CHAMBER = false;
-DRAW_SPACER = false;
+DRAW_SPACER = true;
 DRAW_BRASS = false;
 
 EPS = 0.01;
@@ -98,7 +99,7 @@ if (DRAW_AFT) {
 
 module windows(start)
 {
-    for(y=[start:3]) {
+    for(y=[start:2]) {
         translate([-50, -D_INNER/2 + y * 6 - 1, 0]) {
             if (y==0)
                 rotate([-45, 0, 0]) translate([0, 0, -6]) cube(size=[100, 6, 6]);
@@ -118,7 +119,10 @@ if (DRAW_FORE) {
     difference() {
         union() {
             translate([0, 0, M_JOINT]) {
-                powerPortRing(D_INNER, T, DZ_POWER_RING, DZ_POWER_RING/2, addY=TOP_FLATTEN, dyPort=5.0);
+                powerPortRing(
+                    D_INNER, T, 
+                    DZ_POWER_RING, DZ_POWER_RING/2, 
+                    yTop=D_INNER /2 - TOP_FLATTEN, topNut=true);
             }
 
             translate([0, 0, M_BOLT_START]) {
@@ -131,7 +135,7 @@ if (DRAW_FORE) {
                     tube(h=M_AFT_FRONT - M_SWITCH_START, do=D_INNER, di=D_INNER - T);
                     translate([-W/2, 0, 0]) cube(size=[W, 100, 100]);
                 }
-                switchHolder(D_INNER, M_SWITCH - M_SWITCH_START, 0, 10.5, true);
+                //switchHolder(D_INNER, M_SWITCH - M_SWITCH_START, 0, 10.5, false);
             }
             // Pillars to toughen front.
             PILLAR = HEAD_HOLDER_SETBACK;
@@ -179,6 +183,10 @@ if (DRAW_FORE) {
         }
         bottomDotstar();
 
+        translate([0, 0, M_SWITCH_START]) scale([1.01, 1.01, 1.01]) {
+            switchHolder(D_INNER, M_SWITCH - M_SWITCH_START, 0, 10.5, false);
+        }
+
         translate([0, 0, M_PORT + 6.5]) windows(0);
         translate([0, 0, M_BOLT + 7.0]) windows(1);
 
@@ -206,11 +214,11 @@ if (DRAW_FORE) {
 
         // bolts, going forward
         // Access to tubes for wiring
-        translate([0, 0, M_AFT_FRONT - 12]) {
+        translate([0, 0, M_AFT_FRONT - 1]) {
             chamberBolt(A_BOLT_0, D_ROD, 100.0);
             chamberBolt(A_BOLT_1, D_ROD, 100.0);
         }
-        translate([0, 0, M_AFT_FRONT - 4.0]) {
+        translate([0, 0, M_AFT_FRONT - 3.0]) {
             rotate([0, 0, A_BOLT_0 + ANGLE_OFFSET]) tubeAtY(D_TUBE_INNER, 100);
             rotate([0, 0, A_BOLT_1 + ANGLE_OFFSET]) tubeAtY(D_TUBE_INNER, 100);
         }
@@ -227,6 +235,12 @@ if (DRAW_FORE) {
             cube(size=[DOTSTAR_XZ, 100, 2.6]);
         }
 
+    }
+}
+
+if (DRAW_BRIDGE) {
+    translate([0, 0, M_SWITCH_START]) {
+        switchHolder(D_INNER, M_SWITCH - M_SWITCH_START, 0, 10.5, false);
     }
 }
 
