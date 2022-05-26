@@ -1311,6 +1311,8 @@
 	#define ACCEL_NORMAL_BUTTON   1
 	#define ACCEL_PERP_BUTTON     2
 
+	#define GYRO_FILTER 0	// Filter x (=0) direction
+
 #else
 	#error Pins not defined.
 #endif

@@ -553,6 +553,10 @@ void processAccel(uint32_t msec, uint32_t)
             static int logDiv = 0;
             const static int LOG_DIV = 20;
 
+            if (GYRO_FILTER >= 0) {
+                gyroData[GYRO_FILTER] = 0;
+            }
+
             // Some notes: this math is only correct if you move
             // one axis independentantly. But...that's okay.
             // We mostly want rates.
@@ -584,8 +588,7 @@ void processAccel(uint32_t msec, uint32_t)
             Fixed16 delta(0);
 
             for (int i = 0; i < 3; ++i) {
-                delta = glMax(distBetweenAngle(bladeRotation[i], bladeOrigin[i], Fixed16(360)),
-                              delta);
+                delta = glMax(distBetweenAngle(bladeRotation[i], bladeOrigin[i], Fixed16(360)), delta);
             }
             if (delta > 180)
                 delta = 180;
@@ -594,6 +597,7 @@ void processAccel(uint32_t msec, uint32_t)
                 logDiv = 0;
                 //Log.p("dps=").p(dps).p(" rot=").v3(bladeRotation).p(" delta=").p(delta).eol();
                 //Log.p("dps=").p(dps).p(" delta=").p(delta).p(" accel=").v3(accelData).eol();
+                Log.p("gyro=").v3(gyroData).eol();
             };
             sfx.sm_setSwing(dps * 3.14f / 180.0f, (delta * Fixed16(256, 180)).getInt());
         }
@@ -804,12 +808,12 @@ void loopDisplays(uint32_t msec, uint32_t mainDelta)
             Fixed115 fraction(0);
 
             if (over < FADE_TIME) {
-                fraction = Fixed115(over, FADE_TIME);
+                fraction = Fixed115(FADE_TIME - over, FADE_TIME);
             }
-            for(int i=SABER_UI_START; i < SABER_UI_START + SABER_UI_COUNT; ++i) {
-                for(int j=0; j<3; ++j) {
-                    leds[i][j] = fraction.scale(leds[i][j]);
-                }                
+            for(int i=0; i < SABER_UI_COUNT; ++i) {
+                rgb[i].r = fraction.scale(rgb[i].r);
+                rgb[i].g = fraction.scale(rgb[i].g);
+                rgb[i].b = fraction.scale(rgb[i].b);
             }
         }
 #   endif
