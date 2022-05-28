@@ -276,16 +276,24 @@ bool SFX::sm_playEvent(int sfx)
 
 int SFX::sm_swingToVolume(float radPerSec)
 {
+    // 10 figure 8s in 13s is med-fast
+    // 6.1 * 2 * 10 rad / 13 s = 9.6 rad / sec
+    // Decent movement is 6.1 rad / sec
+
     // Keep experimenting with this. *sigh.*
+    //static const int16_t VOLUME[SWING_MAX+1] = {
+    //    0, 0, 0, 0, 8, 16, 32, 48, 64, 96, 128, 160, 192, 256,
+    //    256
+    //};
     static const int16_t VOLUME[SWING_MAX+1] = {
-        0, 0, 0, 0, 8, 16, 32, 48, 64, 96, 128, 160, 192, 256,
+        0, 0, 8, 16, 32, 48, 64, 96, 128, 160, 192, 256, 256, 256,
         256
     };
     if (radPerSec >= float(SWING_MAX)) 
         return 256;
 
     int low = (int)radPerSec;
-    int fraction = int(1024.0 * (radPerSec - low));
+    int fraction = int(1024.0f * (radPerSec - low));
 
     return lerp1024(VOLUME[low], VOLUME[low+1], fraction);
 }

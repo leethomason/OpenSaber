@@ -4,6 +4,7 @@ Current
 - Turn off UI LED idle animation when there is a crystal
 - Remove axis rotation from gyro
 - Smooth out gyro sound?
+- need run time tests
 
 High
 - fix vol>255 not working

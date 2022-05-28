@@ -72,7 +72,7 @@
 #define SABER_SUB_MODEL_B			13
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
+#define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_DUCHESS
 #define SABER_SUB_MODEL				0	
 // ----------------------------------
@@ -783,8 +783,8 @@
 	#define SABER_UI_BRIGHTNESS	    	16
 	#define SABER_UI_FADE_OUT
 	#define SABER_CRYSTAL_START	    	4
-	#define SABER_CRYSTAL_BRIGHTNESS 	128		// fixme was 64
-	#define VOLTMETER_TUNE				1016	// fixme
+	#define SABER_CRYSTAL_BRIGHTNESS 	128		// was 64
+	#define VOLTMETER_TUNE				1028
 
 	#define SABER_LOCK()				0
 

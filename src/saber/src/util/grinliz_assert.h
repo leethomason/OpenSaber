@@ -32,7 +32,7 @@ template<> struct CompileTimeAssert <true> {};
 #	define ASSERT assert
 #   define ASSERT2(x, y, z) assert( x )
 #else
-#   if false
+#   if true
         void AssertOut(const char* message, const char* file, int line);
 #       define ASSERT( x ) 	    if (!(x)) { AssertOut(#x, __FILE__, __LINE__); while(true) {} }
 #   else    

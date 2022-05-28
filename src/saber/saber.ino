@@ -202,6 +202,10 @@ void setup()
     }
     #endif
 
+    Log.p("Tests:").eol();
+    Log.p("  Fixed").eol();
+    TestFixed();
+
     Log.p("Setup:").eol(); 
     Log.p("Init flash memory.").eol();
 
@@ -548,8 +552,10 @@ void processAccel(uint32_t msec, uint32_t)
     {
 #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LSM6D
         {
-            static Vec3<Fixed16> bladeRotation(0, 0, 0);  // -180 to 180. Matches dps from gyro.
-            static Vec3<Fixed16> bladeOrigin(0, 0, 0);    // normalized, -1 to 1
+            // Try to avoid float in favor of fixed, but this block of code
+            // was challenging to debug with fixed.
+            static float bladeRotation = 0;  // -180 to 180. Matches dps from gyro.
+            static float bladeOrigin = 0;    // normalized, -1 to 1
             static int logDiv = 0;
             const static int LOG_DIV = 20;
 
@@ -562,44 +568,35 @@ void processAccel(uint32_t msec, uint32_t)
             // We mostly want rates.
             // Ignore the "twist" axis.
             // Blade rotation is in dps - can feed that directly to the sound system.
-            const Fixed16 dt(10, 1000);
+            const float dt = 0.01f; // 100 Hz
 
-            for (int i = 0; i < 3; ++i) {
-                // Ignore twist.
-                if (i == ACCEL_BLADE_DIRECTION)
-                    continue;
+            int32_t gyroSpeed2 = gyroData.x * gyroData.x + gyroData.y * gyroData.y + gyroData.z * gyroData.z;
+            float dps = sqrtf(gyroSpeed2);
+            float degrees = dps * dt;
 
-                bladeRotation[i] += dt * (int)gyroData[i];
-                while(bladeRotation[i] < -180)
-                    bladeRotation[i] += 360;
-                while (bladeRotation[i] >= 180)
-                    bladeRotation[i] -= 360;
-            }
+            bladeRotation += degrees;
+            while(bladeRotation > 180.0f) bladeRotation -= 360.0f;
+            while(bladeRotation < -180.0f) bladeRotation += 360.0f;
+
             // A bit hacky that swingVol is global. But used as a key to update our origin location.
             if (swingVol == 0) {
+                //if (bladeOrigin != bladeRotation)
+                //    Log.p("blade orientation reset").eol();
                 bladeOrigin = bladeRotation;
             }
-            // How fast the blade is moving, in degrees per second.
-            int32_t dps2 = gyroData.x * gyroData.x + gyroData.y * gyroData.y + gyroData.z * gyroData.z;
-            int32_t dps = intSqrt(dps2);
-            
-            // The relation of the blade to it's origin.
-            // Just needs to be a value to swing sounds mostly correct.
-            Fixed16 delta(0);
 
-            for (int i = 0; i < 3; ++i) {
-                delta = glMax(distBetweenAngle(bladeRotation[i], bladeOrigin[i], Fixed16(360)), delta);
+            float delta = distBetweenAngle(bladeRotation, bladeOrigin, 360.0f);
+
+            if (delta > 180.0f) {
+                delta = 180.0f;
             }
-            if (delta > 180)
-                delta = 180;
 
+            float radPerSec = dps * 3.14f / 180.0f;
             if(++logDiv == LOG_DIV) {
                 logDiv = 0;
-                //Log.p("dps=").p(dps).p(" rot=").v3(bladeRotation).p(" delta=").p(delta).eol();
-                //Log.p("dps=").p(dps).p(" delta=").p(delta).p(" accel=").v3(accelData).eol();
-                Log.p("gyro=").v3(gyroData).eol();
+                //Log.p("gyro=").v3(gyroData).p(" dps=").p(dps).p(" rps=").p(radPerSec).p(" rot=").p(bladeRotation).p(" degrees=").p(degrees).eol(); //p(" origin=").p(bladeOrigin).eol();
             };
-            sfx.sm_setSwing(dps * 3.14f / 180.0f, (delta * Fixed16(256, 180)).getInt());
+            sfx.sm_setSwing(radPerSec, int(delta * 256.0f / 180.0f));
         }
 #endif
 
@@ -802,7 +799,7 @@ void loopDisplays(uint32_t msec, uint32_t mainDelta)
 #   endif
 
 #   ifdef SABER_UI_FADE_OUT
-        if (uiMode.isIdle()) {
+        if (uiMode.mode() == UIMode::NORMAL && bladeState.state() == BLADE_OFF && uiMode.isIdle()) {
             static const uint32_t FADE_TIME = 800;
             uint32_t over = uiMode.millisPastIdle();
             Fixed115 fraction(0);

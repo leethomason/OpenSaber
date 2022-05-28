@@ -114,11 +114,6 @@ bool TestFixed()
             ASSERT(false); 
         }
     }
-    {
-        Fixed115 b(-3.1f);
-        //b += 1.1f;
-        //ASSERT(b == 3.1f);
-    }
     return true;
 }
 

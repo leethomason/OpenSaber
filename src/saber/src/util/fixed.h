@@ -76,6 +76,8 @@ struct Limit<int32_t> {
     static intptr_t neg() { return INT_MIN; }
 };
 
+static_assert(sizeof(int) == 4, "Not sure 2 bit ints will work in FixedT");
+
 template<typename SHORT, int DECBITS>
 class FixedT
 {
@@ -162,19 +164,9 @@ public:
     
     FixedT sqrt() const {
         if (x < 0) return 0;
-
-        uint32_t v = x << DECBITS;
-        uint32_t res = 0;
-        uint16_t add = 0x8000;
-        for (int i = 0; i < 16; i++) {
-            uint16_t temp = uint16_t(res) | add;
-            uint32_t g2 = temp * temp;
-            if (v >= g2)
-                res = temp;
-            add >>= 1;
-        }
+        static_assert(sizeof(FixedT) <= 2, "doesn't work for 32 bit types");
         FixedT val;
-        val.x = res;
+        val.x = intSqrt(x << DECBITS);
         return val;
     }
 
