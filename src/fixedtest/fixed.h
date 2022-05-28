@@ -20,32 +20,6 @@
   SOFTWARE.
 */
 
-/*
-    Testing fixed point in the itsy M0.
-    Very roughly a swing algorimth, simple math, square root.
-
-    float r=1619  time=41289     floating point.
-    fpm r=1619    time=35692     FPM 32 bit. Some results, but only slightly faster.
-    fpm8 r=1213    time=8121     FPM 16 bit.
-    fixed88 r=1202 time=6340     Fixed 16 bit. Fast, but close enough to fpm8.
-
-    All in all, OpenSaber isn't about maintaining a fixed point math library.
-    Been interesting, but time to move to an open source solution.
-
---- The REAL test - OLED ---
-  display              aveTime=1.24ms maxTime=1.25ms nCalls=454
-  draw                 aveTime=1.58ms maxTime=1.68ms nCalls=454
-  VRender::Rasterize   aveTime=1.47ms maxTime=1.54ms nCalls=454
-FPS=229 time/frame=4 size=1908 edges=64/120
-  display              aveTime=1.24ms maxTime=1.25ms nCalls=458
-  draw                 aveTime=1.59ms maxTime=1.70ms nCalls=458
-  VRender::Rasterize   aveTime=1.42ms maxTime=1.50ms nCalls=458
-FPS=225 time/frame=4 size=1908 edges=64/120
-  display              aveTime=1.24ms maxTime=1.25ms nCalls=451
-  draw                 aveTime=1.58ms maxTime=1.68ms nCalls=451
-  VRender::Rasterize   aveTime=1.50ms maxTime=1.54ms nCalls=451
-*/
-
 #ifndef FIXED_16_INCLUDED	
 #define FIXED_16_INCLUDED
 
@@ -58,8 +32,6 @@ FPS=225 time/frame=4 size=1908 edges=64/120
 
 #include <limits.h>
 #include <stdint.h>
-
-#include "grinliz_assert.h"
 
 inline int32_t intSqrt(int32_t x) 
 {
@@ -101,8 +73,6 @@ struct Limit<int32_t> {
     static intptr_t pos() { return INT_MAX; }
     static intptr_t neg() { return INT_MIN; }
 };
-
-static_assert(sizeof(int) == 4, "Not sure 2 bit ints will work in FixedT");
 
 template<typename SHORT, int DECBITS>
 class FixedT
@@ -146,7 +116,7 @@ public:
             den /= 2;
         }
         if (den == 0) {
-            ASSERT(false);
+            // ASSERT(false);
             x = 0;
         }
         else {
@@ -190,9 +160,32 @@ public:
     
     FixedT sqrt() const {
         if (x < 0) return 0;
-        static_assert(sizeof(FixedT) <= 2, "doesn't work for 32 bit types");
+        if (x < 4)
+            return 1;
+
+        uint64_t v = uint16_t(x) << DECBITS;
+        uint64_t low = 2;
+        uint64_t high = v / 2;
+        uint64_t ans = low;
+
+        while(low < high) {
+            uint64_t mid = (low + high) / 2;
+            uint64_t mid2 = mid * mid;
+            if (mid2 == v) {
+                ans = mid;
+                break;
+            }
+            if (mid2 > v) {
+                high = mid - 1;
+            }
+            else if (mid2 < v) {
+                ans = mid;
+                low = mid + 1;
+            } 
+        }
+
         FixedT val;
-        val.x = intSqrt(x << DECBITS);
+        val.x = ans;
         return val;
     }
 
@@ -296,6 +289,15 @@ private:
 };
 
 bool TestFixed();
+int SpeedTestFloat();
+int SpeedTestFixed16();
+int SpeedTestFixed88();
+int SpeedTestFPM();
+int SpeedTestFPM8();
+
+inline int32_t lerp1024(int16_t a, int16_t b, int32_t t1024) {
+    return (a * (1024 - t1024) + b * t1024) / 1024;
+}
 
 template<typename T, typename FIXED>
 T lerpFixed(T a, T b, FIXED t) {
