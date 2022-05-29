@@ -311,9 +311,9 @@ bool GrinlizLSM303::sampleAccel(Fixed115* fx, Fixed115* fy, Fixed115* fz)
     int16_t y = ylo | (yhi << 8);
     int16_t z = zlo | (zhi << 8);
 
-    *fx = Fixed115(x, DIV);
-    *fy = Fixed115(y, DIV);
-    *fz = Fixed115(z, DIV);
+    *fx = divToFixed<Fixed115>(x, DIV);
+    *fy = divToFixed<Fixed115>(y, DIV);
+    *fz = divToFixed<Fixed115>(z, DIV);
     return true;
 }
 
@@ -450,7 +450,7 @@ void GrinlizLSM303::logTest(int nSamples, bool doAssert)
         Fixed115 g2 = data[i].x * data[i].x + data[i].y * data[i].y + data[i].z * data[i].z;
 
         if (!doAssert) {
-            Log.v3(data[i]).p(" g2=").p(g2).p(" g=").p(g2.sqrt()).eol();
+            Log.v3(data[i]).p(" g2=").p(g2).p(" g=").p(sqrt(g2)).eol();
         }
     }
     Log.p("Samples per second: ").p(samplesPerSecond).eol();

@@ -1284,6 +1284,8 @@
 	#define ACCEL_NORMAL_BUTTON   1
 	#define ACCEL_PERP_BUTTON     2
 
+	static const float DEFAULT_G_FORCE_IMPACT = 3.0f;
+
 #elif (PCB_VERSION == PCB_ITSY_4A)
 	#define SABER_ACCELEROMETER SABER_ACCELEROMETER_LSM6D
 
@@ -1313,6 +1315,8 @@
 
 	#define GYRO_FILTER 0	// Filter x (=0) direction
 
+	static const float DEFAULT_G_FORCE_IMPACT = 3.5f;
+
 #else
 	#error Pins not defined.
 #endif
@@ -1325,7 +1329,6 @@ enum {
 };
 
 static const float DEFAULT_G_FORCE_MOTION = 1.3f;
-static const float DEFAULT_G_FORCE_IMPACT = 3.0f;
 static const int SWING_MAX = 14;
 
 #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH

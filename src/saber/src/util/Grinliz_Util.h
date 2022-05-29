@@ -45,7 +45,8 @@ inline int32_t lerp256(int16_t a, int16_t b, int32_t t256) {
     return (int32_t(a) * (256 - t256) + int32_t(b) * t256) / 256;
 }
 
-inline FixedNorm lerp(FixedNorm a, FixedNorm b, FixedNorm t) {
+template<typename T>
+T lerp(T a, T b, T t) {
     return (a * (1 - t) + b * t);
 }
 
@@ -833,6 +834,14 @@ private:
 	if (expected != actual) { 					\
 		Log.p("Expected:").p(expected).eol(); 	\
 		Log.p("Actual:").p(actual).eol();		\
+		while(true)	{}							\
+	 }
+
+#define TEST_EQUAL_RANGE(expected, actual, eps) 			\
+	if ((expected < actual - eps) || (expected > actual + eps)) { 	\
+		Log.p("Expected:").p(expected).eol(); 	\
+		Log.p("Actual:").p(actual).eol();		\
+		ASSERT(false);							\
 		while(true)	{}							\
 	 }
 

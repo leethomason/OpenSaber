@@ -78,4 +78,40 @@ bool isInt(fpm::fixed<A, B, C> fp) {
     return (mask & fp.raw_value()) == 0;
 }
 
+// Returns 0-1 on a sine curve, for an input from 0-1
+template<typename T>
+T sinLerp(T x) {
+    // The actual range:
+    // x    0  ->  1
+    // sine pi/2 -> 3pi/2
+    // correcting that the output is:
+    // 1 -> -1
+
+    if (x < T(0)) x = T(0);
+    if (x > T(1)) x = T(1);
+
+    T s = sin(T{ kPi_float * 0.5 } + x * T{ kPi_float });
+    s = T{ 0.5 } *(-s) + T{ 0.5 };
+
+    return s;
+}
+
+template<typename T>
+T cosLerp(T x) {
+    return T{ 1 } - sinLerp(x);
+}
+
+template<typename T>
+T divToFixed(int32_t num, int32_t den) {
+    static_assert(sizeof(T) == 2, "assumings an int16_t");
+
+    if (den == 0) return T{ 0 };
+
+    constexpr int32_t F1 = T{ 1 }.raw_value();
+    int64_t n = num * F1 / den;
+    return T::from_raw_value((int16_t)n);
+}
+
+bool TestFixed();
+
 #endif // FIXED_16_INCLUDED

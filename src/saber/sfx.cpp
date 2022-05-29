@@ -293,9 +293,9 @@ int SFX::sm_swingToVolume(float radPerSec)
         return 256;
 
     int low = (int)radPerSec;
-    int fraction = int(1024.0f * (radPerSec - low));
+    float fraction = radPerSec - low;
 
-    return lerp1024(VOLUME[low], VOLUME[low+1], fraction);
+    return (int) lerp((float)VOLUME[low], (float)VOLUME[low+1], fraction);
 }
 
 int SFX::scaleVolume(int v) const
@@ -326,10 +326,9 @@ void SFX::process(int bladeMode, uint32_t delta, int* swingVol)
             m_stillCount = 0;
         }
 
-        int swing0 = iCos(FixedNorm(m_blend256, 1024)).scale(swing);
-        int swing1 = iSin(FixedNorm(m_blend256, 1024)).scale(swing);
-        //int swing0 = lerp256(swing, 0, m_blend256);
-        //int swing1 = lerp256(0, swing, m_blend256);
+        FixedNorm blend = divToFixed<FixedNorm>(m_blend256, 256);
+        int swing0 = scale(cosLerp(blend), swing);
+        int swing1 = scale(sinLerp(blend), swing);
 
 #ifdef SMOOTH_LOG
         if (smoothTimer.tick(delta)) {

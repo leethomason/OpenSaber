@@ -60,8 +60,8 @@ public:
     osbr::RGB getRGB() const { return m_color; }
 
     // power utilization, from 0-100 for a channel
-    int32_t util(int i) const   { return m_throttle[i].scale(100); }
-    
+    int32_t util(int i) const { return static_cast<int>(m_throttle[i] * 100); }
+
     // The actual PWM setting, per channel.
     uint8_t pwmVal(int i) const {
         return m_pwm[i];
@@ -77,7 +77,7 @@ private:
 
     osbr::RGB m_color;
     int32_t m_vbat;
-    FixedNorm m_throttle[NCHANNELS];  // throttle = f(vbat).
+    float m_throttle[NCHANNELS];  // throttle = f(vbat).
     uint8_t m_pwm[NCHANNELS];         // pwm = f(color, throttle)
 };
 

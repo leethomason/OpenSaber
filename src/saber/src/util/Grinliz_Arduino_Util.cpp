@@ -90,8 +90,8 @@ void LEDManager::process()
         {
             if (m_style == BLINK_BREATH)
             {
-                FixedNorm dt(dMillis % m_cycle, m_cycle);
-                int32_t val = 128 + iSin(dt).scale(128);
+                FixedNorm dt = divToFixed<FixedNorm>(dMillis % m_cycle, m_cycle);
+                int32_t val = 128 + scale(sinLerp(dt), 128);
                 if (val < 0)
                     val = 0;
                 if (val > 255)

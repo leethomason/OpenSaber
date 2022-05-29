@@ -24,7 +24,6 @@
 
 // Arduino Libraries
 #include <Adafruit_ZeroI2S.h>
-//#include <Adafruit_ZeroDMA.h>
 
 #include "./src/nada_flashmem/Nada_SPIFLash.h"
 #include "./src/nada_flashmem/Nada_FlashTransport_SPI.h"
@@ -605,9 +604,8 @@ void processAccel(uint32_t msec, uint32_t)
 
         if (bladeState.state() == BLADE_ON)
         {
-            static const Fixed115 motion = DEFAULT_G_FORCE_MOTION;
-            //static const Fixed115 impact = DEFAULT_G_FORCE_IMPACT;
-            static const Fixed115 impact2 = DEFAULT_G_FORCE_IMPACT * DEFAULT_G_FORCE_IMPACT;
+            static constexpr Fixed115 motion{DEFAULT_G_FORCE_MOTION};
+            static constexpr Fixed115 impact2{DEFAULT_G_FORCE_IMPACT * DEFAULT_G_FORCE_IMPACT};
 
             // This workaround no longer makes sense with smoothswing,
             // and the much more compressed storage.
@@ -615,7 +613,7 @@ void processAccel(uint32_t msec, uint32_t)
             // The extra check here for the motion time is because some
             // motion loops are tacked on to the beginning of the idle
             // loop...which makes sense. (Sortof). But leads to super-long
-            // motion. So if time is above a threshold, allow replay.
+            // motion. So if time is above a thresh31old, allow replay.
             // Actual motion / impact sounds are usually less that 1 second.
             // TODO this needs a different workaround.
 
@@ -641,7 +639,7 @@ void processAccel(uint32_t msec, uint32_t)
 
                     if (sound)
                     {
-                        Log.p("Impact. g=").p(g2.sqrt()).eol();
+                        Log.p("Impact. g=").p(sqrt(g2)).eol();
                         lastImpactTime = msec;
                     }
                 }
@@ -650,7 +648,7 @@ void processAccel(uint32_t msec, uint32_t)
             {
                 bool sound = sfx.playSound(SFX_MOTION, SFX_GREATER);
                 if (sound) {
-                    Log.p("Motion. g=").p(g2.sqrt()).eol();
+                    Log.p("Motion. g=").p(sqrt(g2)).eol();
                 }
             }
         }
@@ -802,15 +800,15 @@ void loopDisplays(uint32_t msec, uint32_t mainDelta)
         if (uiMode.mode() == UIMode::NORMAL && bladeState.state() == BLADE_OFF && uiMode.isIdle()) {
             static const uint32_t FADE_TIME = 800;
             uint32_t over = uiMode.millisPastIdle();
-            Fixed115 fraction(0);
+            float fraction = 0;
 
             if (over < FADE_TIME) {
-                fraction = Fixed115(FADE_TIME - over, FADE_TIME);
+                fraction = (FADE_TIME - over) / float(FADE_TIME);
             }
             for(int i=0; i < SABER_UI_COUNT; ++i) {
-                rgb[i].r = fraction.scale(rgb[i].r);
-                rgb[i].g = fraction.scale(rgb[i].g);
-                rgb[i].b = fraction.scale(rgb[i].b);
+                rgb[i].r = uint8_t(fraction * rgb[i].r);
+                rgb[i].g = uint8_t(fraction * rgb[i].g);
+                rgb[i].b = uint8_t(fraction * rgb[i].b);
             }
         }
 #   endif

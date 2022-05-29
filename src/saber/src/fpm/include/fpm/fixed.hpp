@@ -8,6 +8,13 @@
 #include <limits>
 #include <type_traits>
 
+#ifdef round
+#undef round
+#endif
+#ifdef abs
+#undef abs
+#endif
+
 namespace fpm
 {
 

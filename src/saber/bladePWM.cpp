@@ -101,7 +101,7 @@ void BladePWM::setRGB(const RGB& rgb)
 void BladePWM::setThrottledRGB()
 {
     for (int i = 0; i < NCHANNELS; ++i) {
-        int32_t pwm = m_throttle[i].scale(m_color[i]);
+        int32_t pwm = static_cast<int>(m_throttle[i] * m_color[i]);
         m_pwm[i] = glClamp<int32_t>(pwm, 0, 255); // just in case...
     }
     for (int i = 0; i < NCHANNELS; ++i) {
@@ -137,7 +137,7 @@ void BladePWM::setVoltage(int milliVolts)
             m_throttle[i] = 1;
         }
         else {
-            m_throttle[i] = FixedNorm(num, denom);
+            m_throttle[i] = float(num) / denom;
         }
     }
     setThrottledRGB();

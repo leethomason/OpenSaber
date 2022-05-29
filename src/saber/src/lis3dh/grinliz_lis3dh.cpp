@@ -122,9 +122,9 @@ bool GrinlizLIS3DH::sampleAccel(Fixed115* fx, Fixed115* fy, Fixed115* fz)
 {
     int16_t x, y, z;
     bool result = sample(&x, &y, &z);
-    *fx = Fixed115(x, 1280);
-    *fy = Fixed115(y, 1280);
-    *fz = Fixed115(z, 1280);
+    *fx = divToFixed<Fixed115>(x, 1280);
+    *fy = divToFixed<Fixed115>(y, 1280);
+    *fz = divToFixed<Fixed115>(z, 1280);
     return result;
 }
 
@@ -198,7 +198,7 @@ void GrinlizLIS3DH::logTest(int nSamples, bool doAssert)
         Fixed115 g2 = data[i].x * data[i].x + data[i].y * data[i].y + data[i].z * data[i].z;
 
         if (!doAssert) {
-            Log.v3(data[i]).p(" g2=").p(g2).p(" g=").p(g2.sqrt()).eol();
+            Log.v3(data[i]).p(" g2=").p(g2).p(" g=").p(sqrt(g2)).eol();
         }
     }
     Log.p("Samples per second: ").p(samplesPerSecond).eol();
