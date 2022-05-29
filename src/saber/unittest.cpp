@@ -46,7 +46,6 @@ bool runUnitTests()
     RUN_TEST(TestCQueue);
     RUN_TEST(Random::Test);
     RUN_TEST(TestUtil);
-    RUN_TEST(TestFixed);
     RUN_TEST(TestBase64);
     RUN_TEST(TestAccelToColor);
     RUN_TEST(Swing::test)

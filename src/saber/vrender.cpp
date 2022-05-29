@@ -45,11 +45,11 @@ void VRender::Clear()
 
 void VRender::ClearTransform()
 {
-    m_rot = 0;
-    m_transX = 0;
-    m_transY = 0;
-    m_scaleX = 1;
-    m_scaleY = 1;
+    m_rot = FixedNorm{ 0 };
+    m_transX = Fixed115{ 0 };
+    m_transY = Fixed115{ 0 };
+    m_scaleX = Fixed115{ 1 };
+    m_scaleY = Fixed115{ 1 } ;
 }
 
 
@@ -91,14 +91,14 @@ void VRender::DrawPoly(const Vec2* points[], int n, int color)
 
 void VRender::Transform4(Fixed115* e, int x0, int y0, int x1, int y1)
 {
-    Fixed115 camTX = camTrans.x;
-    Fixed115 camTY = camTrans.y;
-    Fixed115 camSX = camScale.x;
-    Fixed115 camSY = camScale.y;
+    Fixed115 camTX = Fixed115{ camTrans.x };
+    Fixed115 camTY = Fixed115{ camTrans.y };
+    Fixed115 camSX = Fixed115{ camScale.x };
+    Fixed115 camSY = Fixed115{ camScale.y };
 
-    if (m_rot != 0) {
-        FixedNorm s = iSin(m_rot);
-        FixedNorm c = iCos(m_rot);
+    if (m_rot != FixedNorm{ 0 }) {
+        Fixed115 s = Fixed115{ sin(m_rot) };
+        Fixed115 c = Fixed115{ cos(m_rot) };
 
         Fixed115 xp0 = x0 * m_scaleX;
         Fixed115 yp0 = y0 * m_scaleY;
@@ -110,7 +110,7 @@ void VRender::Transform4(Fixed115* e, int x0, int y0, int x1, int y1)
         e[2] = (xp1 * c - yp1 * s + m_transX) * camSX + camTX;
         e[3] = (xp1 * s + yp1 * c + m_transY) * camSY + camTY;
     }
-    else if (m_scaleX != 1 || m_scaleY != 1) {
+    else if (m_scaleX != Fixed115{ 1 } || m_scaleY != Fixed115{ 1 }) {
         e[0] = (x0 * m_scaleX + m_transX) * camSX + camTX;
         e[1] = (y0 * m_scaleY + m_transY) * camSY + camTY;
         e[2] = (x1 * m_scaleX + m_transX) * camSX + camTX;
@@ -152,14 +152,14 @@ void VRender::InnerCreateActiveEdge(Fixed115 x0, Fixed115 y0, Fixed115 x1, Fixed
     // yAdd and yEnd are fiddly.
     // yAdd will be the scan line after...unless it is zero.
     int yAdd = 0;
-    if (y0 < 0) {
+    if (y0 < kZero_Fixed115) {
         yAdd = 0;
     }
-    else if (y0.getDec() == 0) {
-        yAdd = y0.getInt();
+    else if (isInt(y0)) {
+        yAdd = static_cast<int>(y0);
     }
     else {
-        yAdd = y0.getInt() + 1;
+        yAdd = static_cast<int>(y0) + 1;
     }
     if (yAdd >= Y_HASH) {
         //printf("Discard: yAdd=%d\n", yAdd);
@@ -167,19 +167,18 @@ void VRender::InnerCreateActiveEdge(Fixed115 x0, Fixed115 y0, Fixed115 x1, Fixed
     }
 
     ASSERT(yAdd >= 0 && yAdd < Y_HASH);
-    ASSERT(yAdd >= y0);
+    ASSERT(Fixed115{ yAdd } >= y0);
 
     m_nPool++;
 
     // yEnd is similarily exacting.
-    if (y1.getDec() == 0)
-        ae->yEnd = y1.getInt();
+    if (isInt(y1))
+        ae->yEnd = static_cast<int>(y1);
     else
-        ae->yEnd = y1.getInt() + 1;
+        ae->yEnd = static_cast<int>(y1) + 1;
 
-    ae->slope16 = ((x1.x - x0.x) << 16) / (y1.x - y0.x);
-    int32_t dy16 = (yAdd << 16) - y0.convertRaw(16);
-    ae->x16 = x0.convertRaw(16) + (ae->slope16 >> 8) * (dy16 >> 8);
+    ae->slope = Fixed1616{ x1 - x0 } / Fixed1616{ y1 - y0 };
+    ae->x = Fixed1616{ x0 } + ae->slope * (Fixed1616{ yAdd } - Fixed1616{ y0 });
 
     ASSERT(Y_HASH >= m_size.CY());
     ae->next = m_rootHash[yAdd];
@@ -202,7 +201,7 @@ void VRender::IncrementActiveEdges(int y)
         }
         else {
             *ae = m_activeEdges[i];
-            (*ae)->x16 += (*ae)->slope16;
+            (*ae)->x += (*ae)->slope;
             ++ae;
         }
     }
@@ -226,14 +225,14 @@ void VRender::SortActiveEdges()
 {
     for (int i = 0; i < m_nActive; ++i) {
         int j = i;
-        while (j > 0 && m_activeEdges[j - 1]->x16 > m_activeEdges[j]->x16) {
+        while (j > 0 && m_activeEdges[j - 1]->x > m_activeEdges[j]->x) {
             glSwap(m_activeEdges[j - 1], m_activeEdges[j]);
             j--;
         }
     }
 #ifdef _DEBUG
     for (int i = 1; i < m_nActive; ++i) {
-        ASSERT(m_activeEdges[i]->x16 >= m_activeEdges[i - 1]->x16);
+        ASSERT(m_activeEdges[i]->x >= m_activeEdges[i - 1]->x);
     }
 #endif
 }
@@ -262,8 +261,8 @@ void VRender::RasterizeLine(int y, const Rect& clip)
         ActiveEdge* left = m_activeEdges[i];
         ActiveEdge* right = m_activeEdges[i + 1];
 
-        int x0 = left->x16 >> 16;
-        int x1 = right->x16 >> 16;
+        int x0 = static_cast<int>(left->x);
+        int x1 = static_cast<int>(right->x);
 
         // Rasterize previous chunk.
         if (x1 > x0) {

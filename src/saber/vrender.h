@@ -137,8 +137,8 @@ private:
     {
         int16_t color;
         int16_t yEnd;
-        int32_t x16;        // x in 16.16
-        int32_t slope16;    // step in slope; 64k is one pixel
+        Fixed1616 x;
+        Fixed1616 slope;
         ActiveEdge* next;
     };
 

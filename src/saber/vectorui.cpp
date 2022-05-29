@@ -90,9 +90,9 @@ void VectorUI::DrawMultiBar(VRender* ren, int x, bool flip, int yCutoff)
     int bias = flip ? -1 : 1;
 
     for (int r = 0; r < 8; ++r) {
-        Fixed115 d = r - Fixed115(7, 2);
-        Fixed115 fx = Fixed115(8, 10) * d * d;
-        DrawBar(ren, x + fx.getInt() * bias , 29 - r * 4, BAR_W, 1, r < yCutoff ? 255 : 0);
+        Fixed115 d = r - Fixed115{ 7.0 / 2.0 };
+        Fixed115 fx = Fixed115{ 0.8 } * d * d;
+        DrawBar(ren, x + static_cast<int>(fx) * bias , 29 - r * 4, BAR_W, 1, r < yCutoff ? 255 : 0);
     }
 
 }
@@ -130,16 +130,16 @@ void VectorUI::DrawColorHSV(VRender* ren, int x, int h)
     static const int WHITE = 1;
 
     static const FixedNorm rotations[6] = {
-        FixedNorm(0, 6), FixedNorm(1, 6), FixedNorm(2, 6),
-        FixedNorm(3, 6), FixedNorm(4, 6), FixedNorm(5, 6)
+        FixedNorm{0}, FixedNorm{1.0 / 6.0}, FixedNorm{2.0 / 6.0},
+        FixedNorm{3.0 / 6.0}, FixedNorm{4.0 / 6.0}, FixedNorm{5.0 / 6.0}
     };
 
     for (int r = 0; r < 6; ++r) {
-        ren->SetTransform(rotations[r], x, H / 2);
+        ren->SetTransform(rotations[r] * k2Pi_FixedNorm, Fixed115{ x }, Fixed115{ H / 2 });
         ren->DrawRect(-1, 10, 2, 5, WHITE);
     }
 
-    ren->SetTransform(FixedNorm(h, 180), x, H / 2);
+    ren->SetTransform(FixedNorm{h * k2Pi_float / 180.0f}, Fixed115{ x }, Fixed115{ H / 2 });
     
     const VRender::Vec2 p0[] = { {-4,2}, {0, 0}, {4,2}, {1,12}, {-1, 12}, VRender::VECEND };
     const VRender::Vec2 p1[] = { {-2,3}, {2,3}, {0, 10}, VRender::VECEND };

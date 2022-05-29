@@ -272,16 +272,17 @@ void calcCrystalColorHSV(uint32_t msec, const osbr::RGB &base, osbr::RGB *out)
     // "breathing" - v
     static const int32_t VARIATION = 96;
     static const int32_t BASE = 256 - VARIATION * 2;
-    FixedNorm dt;
 
-    dt = FixedNorm(msec % BREATH_CYCLE, BREATH_CYCLE);
-    int32_t v32 = BASE + VARIATION + iSin(dt).scale(VARIATION);
+    float dt = (msec % BREATH_CYCLE) / float(BREATH_CYCLE);
+    float var = sinf(dt * k2Pi_float);
+    int32_t v32 = BASE + VARIATION + static_cast<int>(VARIATION * var);
     v = uint8_t(glClamp(v32, int32_t(0), int32_t(255)));
 
     // Hue
     static const int HUE_VAR = 20;
-    dt = FixedNorm(msec % HUE_CYCLE, HUE_CYCLE);
-    int32_t hPrime = h + iSin(dt).scale(HUE_VAR);
+    dt = (msec % HUE_CYCLE) / float(HUE_CYCLE);
+    var = sinf(dt * k2Pi_float);
+    int32_t hPrime = h + static_cast<int>(HUE_VAR * var);
     while (hPrime >= 180)
         hPrime -= 180;
     while (hPrime < 0)
@@ -290,8 +291,9 @@ void calcCrystalColorHSV(uint32_t msec, const osbr::RGB &base, osbr::RGB *out)
 
     // Saturation
     static const int32_t SAT_VAR = 32;
-    dt = FixedNorm((msec % SAT_CYCLE) >> 4, SAT_CYCLE >> 4);
-    int32_t sPrime = s - SAT_VAR / 2 + iSin(dt).scale(SAT_VAR);
+    dt = (msec % SAT_CYCLE) / float(SAT_CYCLE);
+    var = sinf(dt * k2Pi_float);
+    int32_t sPrime = s - SAT_VAR / 2 + static_cast<int>(var * SAT_VAR);
     if (sPrime < 0)
         sPrime = 0;
     if (sPrime > 255)

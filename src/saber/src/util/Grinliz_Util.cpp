@@ -45,35 +45,6 @@ bool TestUtil()
     TEST_IS_EQ(lerp1024(0, 16, 512), 8);
     TEST_IS_EQ(lerp1024(-16, 0, 512), -8);
 
-    // iSin, iSin255 madness
-    TEST_IS_TRUE(iSin(0) == 0);
-    TEST_IS_TRUE(iSin(FixedNorm(1, 4)) == 1);
-    TEST_IS_TRUE(iSin(FixedNorm(2, 4)) == 0);
-    TEST_IS_TRUE(iSin(FixedNorm(3, 4)) == -1);
-
-    TEST_IS_TRUE(iInvSin_S3(0) == 0);
-    TEST_IS_TRUE(iInvSin_S3(ISINE_ONE) == ISINE_90);
-    TEST_IS_TRUE(iInvSin_S3(-ISINE_ONE) == -ISINE_90);
-    TEST_IS_TRUE(iInvSin_S3(ISINE_HALF) == ISINE_30);
-
-    TEST_IS_TRUE(iInvCos_S3(0) == ISINE_90);
-    TEST_IS_TRUE(iInvCos_S3(ISINE_ONE) == 0);
-    TEST_IS_TRUE(iInvCos_S3(-ISINE_ONE) == ISINE_180);
-
-#ifdef _WIN32
-    for (float r = 0; r <= 1.0f; r += 0.01f) {
-        float f = sinf(r * 2.0f * 3.1415926535897932384626433832795f);
-        FixedNorm fn = iSin(FixedNorm(r));
-        int s3 = iSin_S3(int(r * 32768));
-
-        float fnFloat = fn.toFloat();
-        float s3Float = float(s3) / 4096.0f;
-
-        TEST_IS_TRUE(fabsf(f - fnFloat) < 0.04f);
-        TEST_IS_TRUE(fabsf(f - float(s3) / 4096.0f) < 0.04f);
-    }
-#endif
-
     // Combsort
     {
         int set[10] = { 0, 4, 4, 0, 1, 3, 3, 1, 2, 2};
@@ -680,12 +651,13 @@ int AnimateProp::tick(uint32_t delta, int* target)
 
     if (m_subPeriod) {
         // Breathy-blinking
-        FixedNorm t(m_time, m_subPeriod);
-        FixedNorm shift(1, 8);
-        FixedNorm s = iSin(t - shift);
-        if (s < 0) s = 0;
+        float t = float(m_time) / m_subPeriod;
+        constexpr float shift = 1.0f / 8.0f;
+        float s = sinf((t - shift) * k2Pi_float);
+        if (s < 0) 
+            s = 0;
 
-        m_value = s.scale(m_end);
+        m_value = static_cast<int>(s * m_end);
     }
     else {
         // Straight animation.

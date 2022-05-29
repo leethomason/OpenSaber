@@ -32,13 +32,8 @@ void BladeFlash::tick(uint32_t msec)
         color = bladeColor;
     }
     else {
-#if false
-        int t = int(msec - tStart) * 1024 / LEN;
-#else
-        FixedNorm fn(msec - tStart, LEN*4);
-        FixedNorm sn = iSin(fn);
-        int t = sn.scale(1024);
-#endif
+        uint32_t t = uint32_t(msec - tStart) * 1024 / LEN;
+
         color.r = lerp1024(impactColor.r, bladeColor.r, t);
         color.g = lerp1024(impactColor.g, bladeColor.g, t);
         color.b = lerp1024(impactColor.b, bladeColor.b, t);
@@ -60,25 +55,16 @@ osbr::RGB ColorRotated(const osbr::RGB& rgb, int angle360)
 
 osbr::RGB AccelToColor(FixedNorm x, FixedNorm z)
 {
-    // Blade direction.
-    // -1  -> 0 -> 1
-    FixedNorm angle0 = iInvSin(z);   // -90 -> 0 -> 90
+    // x and z are in acceleration (g)
+    // atan2 from -pi to pi
+    FixedNorm angle = atan2(x, z) / kPi_FixedNorm;
 
-                                     // Normal
-                                     // 0   -> 1 -> 0
-    FixedNorm angle1 = iInvCos(x);   // 90  -> 0 -> 90
+    if (angle < FixedNorm{ 0 })
+        angle = -angle;
 
-    if (angle0 < 0)
-        angle1 *= -1;
-
-    // Angle from -90 to 90 (normal)
-    FixedNorm angle = lerp(angle0, angle1, z.absolute());
-
-    // Shift to 0 to 180 (normal), which is 0.0 to 0.5
-    FixedNorm theta = FixedNorm(1, 4) - angle;
-
+    // range is now 0 to pi
     osbr::RGB rgb;
-    hsv2rgb(theta.scale(360), 255, 255, &rgb.r, &rgb.g, &rgb.b);
+    hsv2rgb(scale(angle, 180), 255, 255, &rgb.r, &rgb.g, &rgb.b);
     return rgb;
 }
 
@@ -101,19 +87,19 @@ bool TestAccelToColor()
     TEST_IS_TRUE(rgb == osbr::RGB(128, 0, 255));
 
     // z as blade: straight down (-1) to straight up (1)
-    rgb = AccelToColor(0, 1);  // 0 -> 0
+    rgb = AccelToColor(FixedNorm{ 0 }, FixedNorm{ 1 });  // 0 -> 0
     TEST_IS_TRUE(rgb == osbr::RGB(255, 0, 0));
 
-    rgb = AccelToColor(0, -1);  // 180 -> 360
+    rgb = AccelToColor(FixedNorm{ 0 }, FixedNorm{ -1 });  // 180 -> 360
     TEST_IS_TRUE(rgb == osbr::RGB(255, 0, 0));
 
-    rgb = AccelToColor(1, 0);   // 90 -> 180
+    rgb = AccelToColor(FixedNorm{ 1 }, FixedNorm{ 0 });   // 90 -> 180
     TEST_IS_TRUE(rgb == osbr::RGB(0, 255, 255));
 
-    rgb = AccelToColor(fixedNormSqrt2Over2, fixedNormSqrt2Over2); // 45 -> 90
+    rgb = AccelToColor(kSqrt2Over2_FixedNorm, kSqrt2Over2_FixedNorm); // 45 -> 90
     TEST_IS_TRUE(rgb == osbr::RGB(128, 255, 0));                
 
-    rgb = AccelToColor(fixedNormSqrt2Over2, -fixedNormSqrt2Over2); // 135 -> -90
+    rgb = AccelToColor(kSqrt2Over2_FixedNorm, -kSqrt2Over2_FixedNorm); // 135 -> -90
     TEST_IS_TRUE(rgb == osbr::RGB(128, 0, 255));
 
     return true;

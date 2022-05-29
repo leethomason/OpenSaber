@@ -637,18 +637,18 @@ public:
 	StepProp() {}
 
 	void set(Fixed115 f) { step = f; }
-	void set(float f) { step.set(f); }
+	void set(float f) { step = Fixed115{ f }; }
 
 	int tick(uint32_t delta) {
 		value += step * int(delta);
-		int n = value.getInt();
+		int n = static_cast<int>(value);
 		value -= n;
 		return n;
 	}
 
 public:
-	Fixed115 step = 0;
-	Fixed115 value = 0;
+	Fixed115 step{ 0 };
+	Fixed115 value{ 0 };
 };
 
 class AnimateProp
@@ -758,8 +758,8 @@ public:
 	const SPLog& p(unsigned long v, int p = DEC) const;
 	const SPLog& p(double v, int p = 2) const;
 
-	template<typename S, int D>
-	const SPLog& p(FixedT<S, D> v) const { return p(v.toFloat()); }
+	template<typename A, typename B, unsigned int C>
+	const SPLog& p(fpm::fixed<A, B, C> v) const { return p(static_cast<float>(v)); }
 
 	const SPLog& v3(int32_t x, int32_t y, int32_t z, const char* bracket=0) const;
 	const SPLog& v2(int32_t x, int32_t y, const char* bracket=0) const;
@@ -772,9 +772,9 @@ public:
 	const SPLog& v3(const Vec3<int32_t>& v, const char* bracket=0) const {
 		return v3(v.x, v.y, v.z, bracket);
 	}
-	template<typename S, int D>
-	const SPLog& v3(const Vec3<FixedT<S, D>>& v, const char* bracket=0) const {
-		return v3(v.x.toFloat(), v.y.toFloat(), v.z.toFloat(), bracket);
+	template<typename A, typename B, unsigned int C>
+	const SPLog& v3(const Vec3<fpm::fixed<A, B, C>>& v, const char* bracket=0) const {
+		return v3(static_cast<float>(v.x), static_cast<float>(v.y), static_cast<float>(v.z), bracket);
 	}
 
 	// Templated print, generally of alternate string class.
