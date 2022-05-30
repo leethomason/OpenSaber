@@ -112,6 +112,14 @@ T divToFixed(int32_t num, int32_t den) {
     return T::from_raw_value((int16_t)n);
 }
 
+inline float toDegree(float rad) {
+    return rad * 360.0f / k2Pi_float;
+}
+
+inline float toRad(float deg) {
+    return deg * k2Pi_float / 360.0f;
+}
+
 bool TestFixed();
 
 #endif // FIXED_16_INCLUDED

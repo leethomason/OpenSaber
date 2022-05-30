@@ -23,6 +23,8 @@
 #ifndef SFX_HEADER
 #define SFX_HEADER
 
+#include "sfxcalc.h"
+
 #include <Arduino.h>
 #include "./src/util/Grinliz_Arduino_Util.h"
 #include "./src/util/Grinliz_Util.h"
@@ -63,7 +65,8 @@ public:
 	bool playSound(const char *sfx);
 	void stopSound();
 
-	void process(int bladeMode, uint32_t delta, int* swingVol);
+	// Returns "true" for a stillReset - the blade is both still, and sounds need to be reset.
+	bool process(int bladeMode, uint32_t delta);
 
 	void setVolume(int v);
 	int getVolume() const { return m_volume; }
@@ -81,7 +84,7 @@ public:
 	// radPerSec is straightforward how fast the blade is moving
 	// blend256 is the blending between sounds, from 0-256. Some interpretation of
 	//          a normal. For example: (int)((1.0f + dot)*128.0f)
-	void sm_setSwing(float radPerSec, int blend256) { m_speed = radPerSec; m_blend256 = blend256; }
+	void sm_setSwing(float radPerSec, int blend256) { m_radPerSec = radPerSec; m_blend256 = blend256; }
 	void sm_ignite();
 	void sm_retract();
 	bool sm_playEvent(int sfx);
@@ -100,9 +103,7 @@ protected:
 	int calcSlot(const char* name);
 	int getTrack(int sound);
 	void playMotionTracks();
-
-	int sm_swingToVolume(float radPerSec);
-	int scaleVolume(int v) const;
+	int scaleVolume(int v) const { return v * m_volume / 256; }
 
 	I2SAudioDriver *m_driver;
 	const Manifest& m_manifest;
@@ -114,21 +115,19 @@ protected:
 	uint32_t m_retractTime;
 	int m_volume;				// typically 0-256, does support higher
 
-	float m_speed;
-	int m_blend256;
-	int m_swingTarget = 0;	
-	int m_hum = 0;				// also tracks with decay
-	int m_stillCount = 0;		// how many still frames (motion sound = 0)
-	int m_boost[N_CHANNEL] = {256, 256, 256, 256};
+	float m_radPerSec = 0;		// set by sm_setSwing()
+	int m_blend256 = 0;			// set by sm_setSwing()
 
+	int m_boost[N_CHANNEL] = {256, 256, 256, 256};
 	Random m_random;
-	AnimateProp volumeEnvelope;
+	SFXCalc sfxCalc;
 
 	struct SFXType {
 		int start;
 		int count;
 	};
 	SFXType m_sfxType[NUM_SFX_TYPES];
+
 
 	static SFX *m_instance;
 };

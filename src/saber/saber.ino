@@ -93,7 +93,7 @@ BladePWM    bladePWM;
 Tester      tester;
 bool        lockOn = false;
 LockTimer   lockTimer;
-int         swingVol = 0;
+bool        stillReset = false;
 
 #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LSM303
 Swing       swing;
@@ -200,10 +200,6 @@ void setup()
         Log.attachSerial(&Serial);
     }
     #endif
-
-    Log.p("Tests:").eol();
-    Log.p("  Fixed").eol();
-    TestFixed();
 
     Log.p("Setup:").eol(); 
     Log.p("Init flash memory.").eol();
@@ -554,7 +550,6 @@ void processAccel(uint32_t msec, uint32_t)
             // Try to avoid float in favor of fixed, but this block of code
             // was challenging to debug with fixed.
             static float bladeRotation = 0;  // -180 to 180. Matches dps from gyro.
-            static float bladeOrigin = 0;    // normalized, -1 to 1
             static int logDiv = 0;
             const static int LOG_DIV = 20;
 
@@ -577,20 +572,13 @@ void processAccel(uint32_t msec, uint32_t)
             while(bladeRotation > 180.0f) bladeRotation -= 360.0f;
             while(bladeRotation < -180.0f) bladeRotation += 360.0f;
 
-            // A bit hacky that swingVol is global. But used as a key to update our origin location.
-            if (swingVol == 0) {
-                //if (bladeOrigin != bladeRotation)
-                //    Log.p("blade orientation reset").eol();
-                bladeOrigin = bladeRotation;
-            }
-
-            float delta = distBetweenAngle(bladeRotation, bladeOrigin, 360.0f);
+            float delta = distBetweenAngle(bladeRotation, 0.f, 360.0f);
 
             if (delta > 180.0f) {
                 delta = 180.0f;
             }
 
-            float radPerSec = dps * 3.14f / 180.0f;
+            float radPerSec = toRad(dps);
             if(++logDiv == LOG_DIV) {
                 logDiv = 0;
                 //Log.p("gyro=").v3(gyroData).p(" dps=").p(dps).p(" rps=").p(radPerSec).p(" rot=").p(bladeRotation).p(" degrees=").p(degrees).eol(); //p(" origin=").p(bladeOrigin).eol();
@@ -692,8 +680,8 @@ void loop() {
     bladeFlash.tick(msec);
     bladeState.process(&bladePWM, bladeFlash, millis());
     
-    sfx.process(bladeState.state(), delta, &swingVol);
-    if (swingVol == 0) {
+    stillReset = sfx.process(bladeState.state(), delta);
+    if (stillReset) {
         #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LSM303
         accelMag.recalibrateMag();
         swing.setOrigin();

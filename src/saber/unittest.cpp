@@ -26,6 +26,7 @@
 #include "./src/util/fixed.h"
 #include "swing.h"
 #include "bladeflash.h"
+#include "sfxcalc.h"
 
 #define RUN_TEST(T)     \
     pass = T();         \
@@ -49,7 +50,8 @@ bool runUnitTests()
     RUN_TEST(TestUtil);
     RUN_TEST(TestBase64);
     RUN_TEST(TestAccelToColor);
-    RUN_TEST(Swing::test)
+    RUN_TEST(Swing::test);
+    RUN_TEST(SFXCalc::Test);
 
 	//RUN_TEST(FailTest);
 

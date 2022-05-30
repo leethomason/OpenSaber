@@ -61,7 +61,7 @@
 #define SABER_SUB_MODEL_CELESTIA	2
 #define SABER_SUB_MODEL_SHOTO       3
 #define SABER_SUB_MODEL_STANDARD    4
-#define SABER_SUB_MODEL_APPRENTICE	5
+#define SABER_SUB_MODEL_APPRENTICE	5	// Silver "test". Unmodified ultra-sabers case.
 #define SABER_SUB_MODEL_BLACK		6
 #define SABER_SUB_MODEL_INITIATE    7
 #define SABER_SUB_MODEL_PROPHECY_1  8	// There is no way to tell the prophecies apart...so...this will need to be reconciled & merged.
@@ -73,8 +73,8 @@
 
 // ----------------------------------
 #define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_DUCHESS
-#define SABER_SUB_MODEL				0	
+#define SABER_MODEL 				SABER_MODEL_CLAN
+#define SABER_SUB_MODEL				SABER_SUB_MODEL_APPRENTICE	
 // ----------------------------------
 
 #define SABER_SOUND_SD 				1	// external memory card
@@ -856,6 +856,7 @@
 	#define PCB_VERSION 				PCB_ITSY_2E
 	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
 	#define SABER_VOLTMETER()			1			
+	#define SABER_LOCK()				0
 	
 	#define SABER_UI_LED				SABER_LED_DOTSTAR
 	#define SABER_UI_BRIGHTNESS			128	// max 256			
@@ -1257,6 +1258,8 @@
 	#define ACCEL_BLADE_DIRECTION 1
 	#define ACCEL_NORMAL_BUTTON   0
 	#define ACCEL_PERP_BUTTON     2
+
+	static const float DEFAULT_G_FORCE_IMPACT = 3.0f;
 
 #elif (PCB_VERSION == PCB_ITSY_3A)
 	#define SABER_ACCELEROMETER SABER_ACCELEROMETER_LIS3DH

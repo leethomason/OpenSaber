@@ -28,7 +28,6 @@
 #include "i2saudiodrv.h"
 #include "modes.h"
 
-// #define SMOOTH_LOG
 Timer2 smoothTimer(253);
 
 SFX* SFX::m_instance = 0;
@@ -247,23 +246,24 @@ void SFX::sm_ignite()
     playMotionTracks();
     m_driver->play(getTrack(SFX_POWER_ON), false, CHANNEL_EVENT);
 
-    m_driver->setVolume(0, CHANNEL_IDLE);
-    m_driver->setVolume(0, CHANNEL_MOTION_0);
-    m_driver->setVolume(0, CHANNEL_MOTION_1);
-    m_driver->setVolume(m_volume /** m_boost[CHANNEL_EVENT] / 256*/, CHANNEL_EVENT);
-
-    volumeEnvelope.start(m_igniteTime, 0, 256);
+    //m_driver->setVolume(0, CHANNEL_IDLE);
+    //m_driver->setVolume(0, CHANNEL_MOTION_0);
+    //m_driver->setVolume(0, CHANNEL_MOTION_1);
+    m_driver->setVolume(m_volume, CHANNEL_EVENT);
+    //m_driver->setVolume(m_volume /** m_boost[CHANNEL_EVENT] / 256*/, CHANNEL_EVENT);
+    //volumeEnvelope.start(m_igniteTime, 0, 256);
+    sfxCalc.ignite(m_igniteTime);
 }
 
 void SFX::sm_retract()
 {
     Log.p("sm_retract").eol();
     m_driver->play(getTrack(SFX_POWER_OFF), false, CHANNEL_EVENT);
-    m_driver->setVolume(0, CHANNEL_MOTION_0);
-    m_driver->setVolume(0, CHANNEL_MOTION_1);
-    m_driver->setVolume(m_volume /** m_boost[CHANNEL_EVENT] / 256*/, CHANNEL_EVENT);
-
-    volumeEnvelope.start(m_retractTime, 256, 0);
+    //m_driver->setVolume(0, CHANNEL_MOTION_0);
+    //m_driver->setVolume(0, CHANNEL_MOTION_1);
+    m_driver->setVolume(m_volume, CHANNEL_EVENT);
+    //volumeEnvelope.start(m_retractTime, 256, 0);
+    sfxCalc.retract(m_retractTime);
 }
 
 bool SFX::sm_playEvent(int sfx)
@@ -273,84 +273,32 @@ bool SFX::sm_playEvent(int sfx)
     return true; // fixme
 }
 
-
-int SFX::sm_swingToVolume(float radPerSec)
+bool SFX::process(int bladeMode, uint32_t delta)
 {
-    // 10 figure 8s in 13s is med-fast
-    // 6.1 * 2 * 10 rad / 13 s = 9.6 rad / sec
-    // Decent movement is 6.1 rad / sec
-
-    // Keep experimenting with this. *sigh.*
-    //static const int16_t VOLUME[SWING_MAX+1] = {
-    //    0, 0, 0, 0, 8, 16, 32, 48, 64, 96, 128, 160, 192, 256,
-    //    256
-    //};
-    static const int16_t VOLUME[SWING_MAX+1] = {
-        0, 0, 0, 8, 16, 32, 48, 64, 96, 128, 160, 192, 256, 256,
-        256
-    };
-    if (radPerSec >= float(SWING_MAX)) 
-        return 256;
-
-    int low = (int)radPerSec;
-    float fraction = radPerSec - low;
-
-    return (int) lerp((float)VOLUME[low], (float)VOLUME[low+1], fraction);
-}
-
-int SFX::scaleVolume(int v) const
-{
-    v = (v * m_volume) >> 8;
-    return v;
-}
-
-
-void SFX::process(int bladeMode, uint32_t delta, int* swingVol)
-{
+    bool stillReset = false;
     if (m_smoothMode) {
-        // Animates from 0->256 on ignite, and back to 0 on retract.
-        // 256 or 0 at steady state.
-        volumeEnvelope.tick(delta);
-
-        int swing = sm_swingToVolume(m_speed);
-        int hum = 256 - swing * 192 / 256;
-        *swingVol = swing;
-
-        if (swing == 0) {
-            m_stillCount++;
-            if (m_stillCount == 30) {
-                playMotionTracks(); // new random tracks.
-            }
-        }
-        else {
-            m_stillCount = 0;
+        SFXCalc::TrackVolume tv = sfxCalc.sm_processTrackVolume(delta, m_radPerSec, m_blend256);
+        if (tv.stillReset) {
+            playMotionTracks(); // new random tracks.
         }
 
-        FixedNorm blend = divToFixed<FixedNorm>(m_blend256, 256);
-        int swing0 = scale(cosLerp(blend), swing);
-        int swing1 = scale(sinLerp(blend), swing);
-
-#ifdef SMOOTH_LOG
+#if false
         if (smoothTimer.tick(delta)) {
-            Log.p("speed=").p(m_speed).p(" swing=").p(swing).p(" hum=").p(hum)
-            .p(" blend=").p(m_blend256)
-            .p(" swing0=").p(swing0).p(" swing1=").p(swing1)
-            .eol();
+            Log.p("rps=").p(m_radPerSec).p(" blend=").p(m_blend256).eol();
         }
 #endif        
 
-        // volume is scaled by overall output volume (m_volume) and the
-        // current value of the volumeEnvelope. So this accounts for
-        // on/off/ignite/retract.
-        m_driver->setVolume(scaleVolume(hum * volumeEnvelope.value() / 256) /** m_boost[CHANNEL_IDLE] / 256*/,        CHANNEL_IDLE);
-        m_driver->setVolume(scaleVolume(swing0 * volumeEnvelope.value() / 256) /** m_boost[CHANNEL_MOTION_0] / 256*/, CHANNEL_MOTION_0);
-        m_driver->setVolume(scaleVolume(swing1 * volumeEnvelope.value() / 256) /** m_boost[CHANNEL_MOTION_1] / 256*/, CHANNEL_MOTION_1);
+        m_driver->setVolume(scaleVolume(tv.hum), CHANNEL_IDLE);
+        m_driver->setVolume(scaleVolume(tv.swing0), CHANNEL_MOTION_0);
+        m_driver->setVolume(scaleVolume(tv.swing1), CHANNEL_MOTION_1);
+        stillReset = tv.stillReset;
     }
     else {
         if ((bladeMode == BLADE_ON) && !m_driver->isPlaying(0)) {
             playSound(SFX_IDLE, SFX_GREATER);
         }
     }
+    return stillReset;
 }
 
 void SFX::readIgniteRetract()
