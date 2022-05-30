@@ -77,6 +77,7 @@
     <ClCompile Include="..\..\src\saber\bladeflash.cpp" />
     <ClCompile Include="..\..\src\saber\renderer.cpp" />
     <ClCompile Include="..\..\src\saber\rgb2hsv.cpp" />
+    <ClCompile Include="..\..\src\saber\sfxcalc.cpp" />
     <ClCompile Include="..\..\src\saber\sketcher.cpp" />
     <ClCompile Include="..\..\src\saber\src\util\fixed.cpp" />
     <ClCompile Include="..\..\src\saber\src\util\Grinliz_Util.cpp" />
@@ -94,6 +95,7 @@
     <ClInclude Include="..\..\src\saber\modes.h" />
     <ClInclude Include="..\..\src\saber\renderer.h" />
     <ClInclude Include="..\..\src\saber\rgb2hsv.h" />
+    <ClInclude Include="..\..\src\saber\sfxcalc.h" />
     <ClInclude Include="..\..\src\saber\sketcher.h" />
     <ClInclude Include="..\..\src\saber\src\util\fixed.h" />
     <ClInclude Include="..\..\src\saber\src\util\Grinliz_Util.h" />

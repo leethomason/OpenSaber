@@ -286,7 +286,7 @@ int SFX::sm_swingToVolume(float radPerSec)
     //    256
     //};
     static const int16_t VOLUME[SWING_MAX+1] = {
-        0, 0, 8, 16, 32, 48, 64, 96, 128, 160, 192, 256, 256, 256,
+        0, 0, 0, 8, 16, 32, 48, 64, 96, 128, 160, 192, 256, 256,
         256
     };
     if (radPerSec >= float(SWING_MAX)) 
