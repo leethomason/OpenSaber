@@ -139,7 +139,8 @@ int SFXCalc::sm_swingToVolume(float radPerSec)
     };
 
     // Less than "three zeros" makes the magnetometer unstable, I think?
-    // So hard to test.
+    // So hard to test. I think this one may be better. Need to test 
+    // on duchess.
     //static const int16_t VOLUME[SWING_MAX+1] = {
     //    0, 0, 0, 8, 16, 32, 48, 64, 96, 128, 160, 192, 256, 256,
     //    256
