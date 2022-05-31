@@ -273,7 +273,7 @@ bool SFX::sm_playEvent(int sfx)
     return true; // fixme
 }
 
-bool SFX::process(int bladeMode, uint32_t delta)
+bool SFX::process(BladeState bladeState, uint32_t delta)
 {
     bool stillReset = false;
     if (m_smoothMode) {
@@ -294,7 +294,7 @@ bool SFX::process(int bladeMode, uint32_t delta)
         stillReset = tv.stillReset;
     }
     else {
-        if ((bladeMode == BLADE_ON) && !m_driver->isPlaying(0)) {
+        if ((bladeState == BladeState::kOn) && !m_driver->isPlaying(0)) {
             playSound(SFX_IDLE, SFX_GREATER);
         }
     }

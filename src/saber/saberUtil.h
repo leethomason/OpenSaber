@@ -39,33 +39,6 @@ class BladeFlash;
 // Update everything from a DB change.
 void syncToDB();
 
-class BladeState
-{
-public:
-    BladeState() {}
-
-    void change(uint8_t newState);
-    int state() const {
-        return m_currentState;
-    }
-
-    // Any of the blade-on states, not just the BLADE_ON idles state.
-    bool bladeOn() const;
-    bool bladeOff() const {
-        return m_currentState == BLADE_OFF;
-    }
-
-    uint32_t startTime() const {
-        return m_startTime;
-    }
-
-    void process(BladePWM* bladePWM, const BladeFlash& bladeFlash, uint32_t time);
-
-private:
-    uint8_t  m_currentState = BLADE_OFF;
-    uint32_t m_startTime = 0;
-};
-
 class UIModeUtil
 {
 public:

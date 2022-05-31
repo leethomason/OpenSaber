@@ -59,6 +59,7 @@
 #include "vectorui.h"
 #include "bladeflash.h"
 #include "swing.h"
+#include "bladestate.h"
 
 using namespace osbr;
 
@@ -83,7 +84,7 @@ ButtonCB    buttonA(PIN_SWITCH_A, Button::INTERNAL_PULLUP);
 LEDManager  ledA(PIN_LED_A, false);
 AnimateProp ledProp;
 
-BladeState  bladeState;
+BladeStateManager  bladeStateManager;
 UIModeUtil  uiMode;
 SaberDB     saberDB;
 Voltmeter   voltmeter(1650, 10000, 47000, 4095, VOLTMETER_TUNE);
@@ -357,8 +358,8 @@ bool setLockFromHoldCount(int count)
 
 void igniteBlade()
 {
-    if (bladeState.state() == BLADE_OFF) {
-        bladeState.change(BLADE_IGNITE);
+    if (bladeStateManager.canIgnite()) {
+        bladeStateManager.ignite(sfx.getIgniteTime());
         if (sfx.smoothMode())
             sfx.sm_ignite();
         else
@@ -368,8 +369,8 @@ void igniteBlade()
 
 void retractBlade()
 {
-    if (bladeState.state() != BLADE_OFF && bladeState.state() != BLADE_RETRACT) {
-        bladeState.change(BLADE_RETRACT);
+    if (bladeStateManager.canRetract()) {
+        bladeStateManager.retract(sfx.getRetractTime());
         if (sfx.smoothMode())
             sfx.sm_retract();
         else
@@ -383,7 +384,7 @@ void buttonAClickHandler(const Button&)
     uiMode.setActive();
 
     Log.p("buttonAClickHandler").eol();
-    if (bladeState.bladeOff()) {
+    if (bladeStateManager.isOff()) {
         uiMode.nextMode();
         // Turn off blinking so we aren't in a weird state when we change modes.
         ledA.blink(0, 0, 0);
@@ -395,7 +396,7 @@ void buttonAClickHandler(const Button&)
             ledA.blink(power, INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
         }
     }
-    else if (bladeState.state() == BLADE_ON) {
+    else if (bladeStateManager.state() == BladeState::kOn) {
         if (lockTimer.enabled()) {
             if (lockTimer.click())
                 retractBlade();
@@ -415,7 +416,7 @@ void buttonAHoldHandler(const Button& button)
     uiMode.setActive();
     //Log.p("buttonAHoldHandler nHolds=").p(button.nHolds()).eol();
     
-    if (bladeState.state() == BLADE_OFF) {
+    if (bladeStateManager.isOff()) {
         bool buttonLEDOn = false;
         int cycle = button.cycle(&buttonLEDOn);
         //Log.p("button nHolds=").p(button.nHolds()).p(" cycle=").p(cycle).p(" on=").p(buttonOn).eol();
@@ -446,7 +447,7 @@ void buttonAHoldHandler(const Button& button)
         }
         ledA.set(buttonLEDOn);
     }
-    else if (bladeState.state() != BLADE_RETRACT) {
+    else if (bladeStateManager.canRetract()) {
         if (button.nHolds() == 1) {
             if (lockOn)
                 lockTimer.start();
@@ -590,7 +591,7 @@ void processAccel(uint32_t msec, uint32_t)
         Fixed115 g2Normal, g2;
         calcGravity2(accelData.x, accelData.y, accelData.z, &g2, &g2Normal);
 
-        if (bladeState.state() == BLADE_ON)
+        if (!bladeStateManager.isOff())
         {
             static constexpr Fixed115 motion{DEFAULT_G_FORCE_MOTION};
             static constexpr Fixed115 impact2{DEFAULT_G_FORCE_IMPACT * DEFAULT_G_FORCE_IMPACT};
@@ -662,7 +663,7 @@ void loop() {
     lockTimer.tick(delta);
 
 #ifdef SABER_UI_IDLE_MEDITATION_LED_OFF
-    if (uiMode.mode() == UIMode::NORMAL && bladeState.state() == BLADE_OFF && uiMode.isIdle()) {
+    if (uiMode.mode() == UIMode::NORMAL && bladeStateManager.state() == BLADE_OFF && uiMode.isIdle()) {
         int pwm = 255;
         ledProp.tick(delta, &pwm);
         analogWrite(ledA.pin(), (uint8_t)pwm);
@@ -677,10 +678,14 @@ void loop() {
 
     processAccel(msec, delta);
 
+    // Get the normal or flash color of blade (ignoring the ignite, retract, power)
+    // Modify the blade color for ignite / retract (ignoring power)
+    // Apply the power setting.
     bladeFlash.tick(msec);
-    bladeState.process(&bladePWM, bladeFlash, msec);
-    
-    stillReset = sfx.process(bladeState.state(), delta);
+    osbr::RGB bladeColor = bladeStateManager.process(bladeFlash.getColor(), msec);
+    bladePWM.setRGB(bladeColor);
+
+    stillReset = sfx.process(bladeStateManager.state(), delta);
     if (stillReset) {
         #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LSM303
         accelMag.recalibrateMag();
@@ -743,7 +748,7 @@ void loopDisplays(uint32_t msec, uint32_t mainDelta)
         case 1:
             vectorUI.Draw(&vRender, &renderer,
                 msec, delta, uiMode.mode(), 
-                !bladeState.bladeOff(), &uiRenderData);
+                !bladeStateManager.bladeOff(), &uiRenderData);
             break;
         case 2:
             display.display(oledBuffer);
@@ -757,7 +762,7 @@ void loopDisplays(uint32_t msec, uint32_t mainDelta)
 
 #if SABER_DISPLAY == SABER_DISPLAY_7_5
     {
-        display75.Draw(msec, uiMode.mode(), !bladeState.bladeOff(), &uiRenderData);
+        display75.Draw(msec, uiMode.mode(), !bladeStateManager.bladeOff(), &uiRenderData);
         dotMatrix.setFrom7_5(display75.Pixels());
     }
 #elif SABER_DISPLAY == SABER_DISPLAY_SEGMENT
@@ -771,21 +776,21 @@ void loopDisplays(uint32_t msec, uint32_t mainDelta)
         osbr::RGB rgb[SABER_UI_COUNT];
 
 #   ifdef SABER_UI_IDLE_MEDITATION
-        if (uiMode.mode() == UIMode::NORMAL && bladeState.state() == BLADE_OFF && uiMode.isIdle())
+        if (uiMode.mode() == UIMode::NORMAL && bladeStateManager.state() == BLADE_OFF && uiMode.isIdle())
         {
-            dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, delta, UIMode::MEDITATION, !bladeState.bladeOff(), uiRenderData);
+            dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, delta, UIMode::MEDITATION, !bladeStateManager.bladeOff(), uiRenderData);
             rgb[SABER_UI_START + SABER_UI_COUNT - 1] = uiRenderData.color;
         }
         else
         {
-            dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, delta, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
+            dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, delta, uiMode.mode(), !bladeStateManager.bladeOff(), uiRenderData);
         }
 #   else
-        dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, delta, uiMode.mode(), !bladeState.bladeOff(), uiRenderData);
+        dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, delta, uiMode.mode(), !bladeStateManager.isOff(), uiRenderData);
 #   endif
 
 #   ifdef SABER_UI_FADE_OUT
-        if (uiMode.mode() == UIMode::NORMAL && bladeState.state() == BLADE_OFF && uiMode.isIdle()) {
+        if (uiMode.mode() == UIMode::NORMAL && bladeStateManager.state() == BLADE_OFF && uiMode.isIdle()) {
             static const uint32_t FADE_TIME = 800;
             uint32_t over = uiMode.millisPastIdle();
             float fraction = 0;
@@ -866,7 +871,7 @@ void loopDisplays(uint32_t msec, uint32_t mainDelta)
 #if defined(SABER_CRYSTAL_START)
     {
         const RGB bladeColor = saberDB.bladeColor();
-        if (bladeState.state() == BLADE_OFF && (uiMode.mode() == UIMode::NORMAL))
+        if (bladeStateManager.state() == BLADE_OFF && (uiMode.mode() == UIMode::NORMAL))
         {
             osbr::RGB rgb;
             calcCrystalColorHSV(msec, bladeColor, &rgb);
@@ -883,7 +888,7 @@ void loopDisplays(uint32_t msec, uint32_t mainDelta)
     {
         // Flashes a secondary LED with the flash on clash color.
         RGB flashColor = saberDB.impactColor();
-        leds[SABER_FLASH_LED] = ((bladeState.state() == BLADE_FLASH) ? flashColor : RGBA::BLACK, 255);
+        leds[SABER_FLASH_LED] = ((bladeStateManager.state() == BLADE_FLASH) ? flashColor : RGBA::BLACK, 255);
     }
 #endif
 

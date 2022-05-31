@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include "rgb.h"
 
-enum class BladeState2
+enum class BladeState
 {
     kOff,
     kIgnite,
@@ -17,8 +17,11 @@ public:
     void ignite(uint32_t igniteTime);
     void retract(uint32_t retractTime);
 
-    BladeState2 bladeState() const { return m_state; }
-    bool isOff() const { return m_state == BladeState2::kOff; }
+    BladeState state() const { return m_state; }
+
+    bool isOff() const { return m_state == BladeState::kOff; }
+    bool canIgnite() const { return m_state == BladeState::kOff; }
+    bool canRetract() const { return m_state == BladeState::kOn; }
 
     // In: fullColor: the color of the blade if full on. Can be
     //                impact or normal color. 
@@ -29,7 +32,7 @@ public:
     static bool Test();
 
 private:
-    BladeState2 m_state = BladeState2::kOff;
+    BladeState m_state = BladeState::kOff;
     uint32_t m_startTime = 0;
     uint32_t m_eventTime = 0;
     uint32_t m_currentTime = 0;

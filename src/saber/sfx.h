@@ -24,6 +24,7 @@
 #define SFX_HEADER
 
 #include "sfxcalc.h"
+#include "bladestate.h"
 
 #include <Arduino.h>
 #include "./src/util/Grinliz_Arduino_Util.h"
@@ -66,7 +67,7 @@ public:
 	void stopSound();
 
 	// Returns "true" for a stillReset - the blade is both still, and sounds need to be reset.
-	bool process(int bladeMode, uint32_t delta);
+	bool process(BladeState state, uint32_t delta);
 
 	void setVolume(int v);
 	int getVolume() const { return m_volume; }
