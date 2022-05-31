@@ -40,23 +40,6 @@ bool BladeState::bladeOn() const
     return m_currentState >= BLADE_ON && m_currentState < BLADE_RETRACT;
 }
 
-void BladeState::processUI(BladePWM *blade, const BladeFlash& /*saber*/, uint32_t /*time*/, UIMode mode, int vol4, osbr::RGB color)
-{
-    if (mode == UIMode::PALETTE) {
-        blade->setRGB(color);
-    }
-    else if (mode == UIMode::VOLUME) {
-        osbr::RGB c;
-        c.r = 128 * vol4 * vol4 / 16;
-        c.g = 128 * vol4 * vol4 / 16;
-        c.b = 128 * (4 - vol4) / 4;
-        blade->setRGB(c);
-    }
-    else {
-        blade->setRGB(osbr::RGB::BLACK);
-    }
-}
-
 void BladeState::process(BladePWM *blade, const BladeFlash &saber, uint32_t /*time*/)
 {
     SFX *sfx = SFX::instance();

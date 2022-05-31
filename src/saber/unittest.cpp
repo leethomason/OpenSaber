@@ -27,6 +27,7 @@
 #include "swing.h"
 #include "bladeflash.h"
 #include "sfxcalc.h"
+#include "bladestate.h"
 
 #define RUN_TEST(T)     \
     pass = T();         \
@@ -52,6 +53,7 @@ bool runUnitTests()
     RUN_TEST(TestAccelToColor);
     RUN_TEST(Swing::test);
     RUN_TEST(SFXCalc::Test);
+    RUN_TEST(BladeStateManager::Test);
 
 	//RUN_TEST(FailTest);
 

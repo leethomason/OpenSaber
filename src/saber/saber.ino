@@ -678,7 +678,7 @@ void loop() {
     processAccel(msec, delta);
 
     bladeFlash.tick(msec);
-    bladeState.process(&bladePWM, bladeFlash, millis());
+    bladeState.process(&bladePWM, bladeFlash, msec);
     
     stillReset = sfx.process(bladeState.state(), delta);
     if (stillReset) {

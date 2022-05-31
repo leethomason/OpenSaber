@@ -133,7 +133,7 @@ void BladePWM::setVoltage(int milliVolts)
         const int32_t denom = m_vbat - vF[i];   // high: 4100 - 3000 = 1100
                                                 // low:  3400 - 3000 =  400
 
-        if (num >= denom || denom < 100) {
+        if (num >= denom) {
             m_throttle[i] = 1;
         }
         else {

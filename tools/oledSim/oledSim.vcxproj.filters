@@ -52,6 +52,9 @@
     <ClCompile Include="..\..\src\saber\sfxcalc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\saber\bladestate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="oledsim.h">
@@ -97,6 +100,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\saber\sfxcalc.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\saber\bladestate.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
