@@ -315,7 +315,7 @@ void syncToDB()
     const SaberDB::Palette *palette = saberDB.getPalette();
 
     sfx.setFont(saberDB.soundFont());
-    sfx.setVolume(saberDB.volume());
+    sfx.setVolume(VOLUME_1);
     for(int i=0; i<SaberDB::Palette::NAUDIO; ++i) {
         sfx.setBoost(palette->channelBoost[i], i);
     }
@@ -333,20 +333,12 @@ bool setPaletteFromHoldCount(int count)
 {
     saberDB.setPalette(count - 1);
     syncToDB();
-    #ifdef SABER_AUDIO_UI
-    SFX::instance()->playUISound(saberDB.paletteIndex());
-    #endif
     return count <= SaberDB::NUM_PALETTES;
 }
 
 bool setVolumeFromHoldCount(int count)
 {
-    //Log.p("cycle=").p(count).eol();
-    saberDB.setVolume4(count - 1);
-    syncToDB();
-    #ifdef SABER_AUDIO_UI
-    SFX::instance()->playUISound(saberDB.volume4());
-    #endif
+    sfx.setVolume(SaberDB::toVolume256(count - 1));
     return count >= 0 && count <= 5;
 }
 
@@ -727,7 +719,7 @@ void loopDisplays(uint32_t msec, uint32_t mainDelta)
 #endif
 
     UIRenderData uiRenderData;
-    uiRenderData.volume = saberDB.volume4();
+    uiRenderData.volume = SaberDB::toVolume4(sfx.getVolume());
     uiRenderData.color = BladePWM::convertRawToPerceived(saberDB.bladeColor());
     uiRenderData.palette = saberDB.paletteIndex();
     uiRenderData.mVolts = voltmeter.easedPower();

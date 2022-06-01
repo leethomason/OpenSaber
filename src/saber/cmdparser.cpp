@@ -192,12 +192,13 @@ bool CMDParser::processCMD()
         Serial.println(name.c_str());
     }
     else if (action == VOL) {
+        SFX* sfx = SFX::instance();
+
         if (isSet) {
-            int volume = constrain(atoi(value.c_str()), 0, 204);
-            database->setVolume(volume);
+            sfx->setVolume(atoi(value.c_str()));
         }
         printLead(action.c_str());
-        Serial.println(database->volume());
+        Serial.println(sfx->getVolume());
     }
     else if (action == VOLTS) {
         printLead(action.c_str());
@@ -271,9 +272,8 @@ bool CMDParser::processCMD()
         
         delay(DELAY);
         printLead(VOL);
-        Serial.print(database->volume());
-        Serial.print(" audioOn=");
-        Serial.println(database->soundOn());
+        SFX* sfx = SFX::instance();
+        Serial.println(sfx->getVolume());
         
         delay(DELAY);
         printLead(MOTION);

@@ -69,7 +69,7 @@ public:
 	// Returns "true" for a stillReset - the blade is both still, and sounds need to be reset.
 	bool process(BladeState state, uint32_t delta);
 
-	void setVolume(int v);
+	void setVolume(int v256);
 	int getVolume() const { return m_volume; }
 	void setBoost(int boost, int channel);
 

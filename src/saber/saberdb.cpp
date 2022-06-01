@@ -245,50 +245,33 @@ const SaberDB::Palette* SaberDB::getPalette(int i) const
     return &palette[i];
 }
 
-void SaberDB::setVolume(int v) 
+int SaberDB::toVolume256(int volume4)
 {
-    m_volume = glClamp(v, 0, 512);  // can go over 256; but cap at something not crazy.
-    Log.p("setVolume=").p(v).eol();
+    if (volume4 >= 4) return VOLUME_4;
+    if (volume4 <= 0) return 0;
+
+    if (volume4 == 3)
+        return VOLUME_3;
+    else if (volume4 == 2)
+        return VOLUME_2;
+    return VOLUME_1;
 }
 
-void SaberDB::setVolume4(int v)
+int SaberDB::toVolume4(int volume256)
 {
-    switch (v)
-    {
-    case 0:
-        setVolume(0);
-        break;
-    case 1:
-        setVolume(VOLUME_1);
-        break;
-    case 2:
-        setVolume(VOLUME_2);
-        break;
-    case 3:
-        setVolume(VOLUME_3);
-        break;
-    case 4:
-        setVolume(VOLUME_4);
-        break;
-    }
-}
-
-uint8_t SaberDB::volume4() const
-{
-    if (!soundOn() || m_volume == 0)
-    {
-        return 0;
-    }
-    if (m_volume >= VOLUME_4) {
+    if (volume256 >= VOLUME_4) {
         return 4;
     }
-    if (m_volume >= VOLUME_3) {
+    if (volume256 >= VOLUME_3) {
         return 3;
     }
-    if (m_volume >= VOLUME_2) {
+    if (volume256 >= VOLUME_2) {
         return 2;
     }
-    return 1;
+    if (volume256 >= VOLUME_1) {
+        return 1;
+    }
+    return 0;
 }
 
 void SaberDB::setBladeColor(const RGB &color)

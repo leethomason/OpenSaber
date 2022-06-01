@@ -40,18 +40,8 @@ public:
     void setPalette(int n);
     void setPaletteFromDirHash(uint32_t h);
 
-    bool soundOn() const          {
-        return m_volume > 0;
-    }
-
-    uint8_t volume()              {
-        return m_volume;
-    }
-    void setVolume(int v);
-
-    uint8_t volume4() const; // an approximation
-    // Turns sonud on/off, and/or sets volume.
-    void setVolume4(int vol);
+    static int toVolume256(int volume4);
+    static int toVolume4(int volume256);
 
     // Palette
     const osbr::RGB& bladeColor() const   {
@@ -97,7 +87,6 @@ public:
 
 private:
     int m_currentPalette = 0;
-    int m_volume = 40;
     float   m_motion = DEFAULT_G_FORCE_MOTION;
     float   m_impact = DEFAULT_G_FORCE_IMPACT;
     Palette palette[NUM_PALETTES];
