@@ -24,8 +24,11 @@
 #define SABER_CMD_PARSER
 
 #include <stdint.h>
+
 #include "./src/util/Grinliz_Arduino_Util.h"
+
 #include "DotStar.h"
+#include "bladecolor.h"
 
 class SaberDB;
 class Manifest;
@@ -33,7 +36,7 @@ class Manifest;
 class CMDParser
 {
 public:
-    CMDParser(SaberDB* database, const Manifest& manifest);
+    CMDParser(SaberDB& database, BladeColor& bladeColor, const Manifest& manifest);
 
     bool push(int c);
    
@@ -55,7 +58,8 @@ private:
     void printXYZ(const Vec3<int32_t>& v) const;
     void printXYZ(const Vec3<float>& v) const;
 
-    SaberDB* database = 0;
+    SaberDB& database;
+    BladeColor& bladeColor;
     const Manifest& manifest;
 
     static const int ALLOCATE = 30;

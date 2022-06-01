@@ -39,9 +39,7 @@ using namespace osbr;
 
 extern ACCELEROMETER accelMag;
 
-CMDParser::CMDParser(SaberDB* _db, const Manifest& _manifest) : manifest(_manifest) {
-    database = _db;
-}
+CMDParser::CMDParser(SaberDB& _db, BladeColor& _bladeColor, const Manifest& _manifest) : database(_db), bladeColor(_bladeColor), manifest(_manifest) {}
 
 void CMDParser::tokenize()
 {
@@ -135,32 +133,31 @@ bool CMDParser::processCMD()
     if (action == BC) {
         if (isSet) {
             parseHexColor(value.c_str() + 1, &c);
-            database->setBladeColor(c);
+            bladeColor.setBladeColor(c);
         }
         printLead(action.c_str());
-        RGB c = database->bladeColor();
-        printHexColor(c);
+        printHexColor(bladeColor.getBladeColor());
         Serial.print(" ");
-        printMAmps(c);
+        printMAmps(bladeColor.getBladeColor());
         Serial.print('\n');
     }
     else if (action == IC) {
         if (isSet) {
             parseHexColor(value.c_str() + 1, &c);
-            database->setImpactColor(c);
+            bladeColor.setImpactColor(c);
         }
         printLead(action.c_str());
-        printHexColor(database->impactColor());
+        printHexColor(bladeColor.getImpactColor());
         Serial.print(" ");
-        printMAmps(database->impactColor());
+        printMAmps(bladeColor.getImpactColor());
         Serial.print('\n');
     }
     else if (action == LSPAL) {
         for(int i=0; i<SaberDB::NUM_PALETTES; ++i) {
-            const SaberDB::Palette* pal = database->getPalette(i);
+            const SaberDB::Palette* pal = database.getPalette(i);
 
             CStr<10> name;
-            const MemUnit& memUnit = manifest.getUnit(database->soundFont());
+            const MemUnit& memUnit = manifest.getUnit(database.soundFont());
             memUnit.name.toStr(&name);
 
             Log.p(i).p(": ")
@@ -175,19 +172,19 @@ bool CMDParser::processCMD()
     else if (action == PAL) {
         if (isSet) {
             int pal = atoi(value.c_str());
-            database->setPalette(pal);
+           changePalette(pal);
         }
         printLead(action.c_str());
-        Serial.println(database->paletteIndex());
+        Serial.println(database.paletteIndex());
     }
     else if (action == FONT) {
         if (isSet) {
             int f = atoi(value.c_str());
-            database->setSoundFont(f);
+            database.setSoundFont(f);
         }
         printLead(action.c_str());
         CStr<10> name;
-        const MemUnit& memUnit = manifest.getUnit(database->soundFont());
+        const MemUnit& memUnit = manifest.getUnit(database.soundFont());
         memUnit.name.toStr(&name);
         Serial.println(name.c_str());
     }
@@ -264,11 +261,11 @@ bool CMDParser::processCMD()
         
         delay(DELAY);
         printLead(PAL);
-        Serial.println(database->paletteIndex());
+        Serial.println(database.paletteIndex());
         
         delay(DELAY);
         printLead(FONT);
-        Serial.println(database->soundFont());
+        Serial.println(database.soundFont());
         
         delay(DELAY);
         printLead(VOL);
@@ -287,22 +284,6 @@ bool CMDParser::processCMD()
         printLead(VOLTS);
         Serial.println(Voltmeter::instance()->averagePower());
 
-        #if 0
-        ComRF24* com = ComRF24::instance();
-        if (com) {
-            delay(DELAY);
-            printLead("RF24");
-            Serial.print("inUse="); 
-            Serial.print(com->inUse());
-            Serial.print(" isConnected=");
-            Serial.print(com->isConnected());
-            Serial.print(" role=");
-            Serial.println(com->role());
-        }
-        
-        delay(DELAY);
-        #endif 
-        
         printLead(UTIL);
         
         delay(DELAY);
@@ -323,16 +304,16 @@ bool CMDParser::processCMD()
         delay(DELAY);
         // font
         printLead(BC);
-        printHexColor(database->bladeColor());
+        printHexColor(bladeColor.getBladeColor());
         Serial.print(" ");
-        printMAmps(database->bladeColor());
+        printMAmps(bladeColor.getBladeColor());
         Serial.print('\n');
 
         delay(DELAY);
         printLead(IC);
-        printHexColor(database->impactColor());
+        printHexColor(bladeColor.getImpactColor());
         Serial.print(" ");
-        printMAmps(database->impactColor());
+        printMAmps(bladeColor.getImpactColor());
         Serial.print('\n');
         Serial.println(space);
     }

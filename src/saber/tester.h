@@ -59,7 +59,7 @@ class Tester
 public:
 	Tester();
 	void attach(Button* buttonA);
-	void attachDB(SaberDB* _saberDB, BladePWM* _blade, BladeColor* _bladeFlash) { saberDB = _saberDB; bladePWM = _blade; bladeFlash = _bladeFlash;}
+	void attachDB(SaberDB* _saberDB, BladePWM* _blade, BladeColor* _bladeFlash) { saberDB = _saberDB; bladePWM = _blade; bladeColor = _bladeFlash;}
 
 	void runTests();
 	void process();
@@ -73,7 +73,7 @@ public:
 	
 	SaberDB* getSaberDB() { return saberDB; }
 	BladePWM* getBladePWM() { return bladePWM; }
-	BladeColor* getBladeColor() { return bladeFlash;}
+	BladeColor* getBladeColor() { return bladeColor;}
 
 	// check the common test termination - returns true
 	// if the blade has turned on and then back off again.
@@ -110,7 +110,7 @@ private:
 
 	SaberDB* saberDB = 0;
 	BladePWM* bladePWM = 0;
-	BladeColor* bladeFlash = 0;
+	BladeColor* bladeColor = 0;
 	Button* button;
 
 	static Tester* s_instance;

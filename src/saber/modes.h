@@ -35,12 +35,3 @@ enum class UIMode {
     // Modes that can be rendered, but not selected.
     MEDITATION = 255,   
 };
-
-enum {
-    BLADE_OFF,
-    BLADE_IGNITE,
-    BLADE_ON,
-    BLADE_RETRACT
-};
-
-

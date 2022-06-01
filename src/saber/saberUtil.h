@@ -37,7 +37,7 @@ class BladePWM;
 class BladeColor;
 
 // Update everything from a DB change.
-void syncToDB();
+void changePalette(int index);
 
 class UIModeUtil
 {

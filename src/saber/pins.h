@@ -305,7 +305,6 @@
 	#define SABER_SOUND_ON 				SABER_SOUND_SD
 	#define SABER_VOLTMETER
 	#define SABER_INTEGRATED_SD
-	#define SABER_COMRF24
 	#define SABER_AUDIO_UI
 
 	#define SABER_ADDR_0 "1Sist"

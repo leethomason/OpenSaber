@@ -88,8 +88,8 @@ BladeStateManager  bladeStateManager;
 UIModeUtil  uiMode;
 SaberDB     saberDB;
 Voltmeter   voltmeter(1650, 10000, 47000, 4095, VOLTMETER_TUNE);
-BladeColor  bladeFlash;
-CMDParser   cmdParser(&saberDB, manifest);
+BladeColor  bladeColor;
+CMDParser   cmdParser(saberDB, bladeColor, manifest);
 BladePWM    bladePWM;
 Tester      tester;
 bool        lockOn = false;
@@ -210,7 +210,7 @@ void setup()
     manifest.scan(&spiFlash);
 
     uint32_t dirHash = manifest.dirHash();
-    saberDB.setPaletteFromDirHash(dirHash);
+    saberDB.initializeFromDirHash(dirHash);
 
     Log.p("Init audio system.").eol();
     i2sAudioDriver.begin();
@@ -234,7 +234,7 @@ void setup()
     buttonA.setReleaseHandler(buttonAReleaseHandler);
 
     tester.attach(&buttonA);
-    tester.attachDB(&saberDB, &bladePWM, &bladeFlash);
+    tester.attachDB(&saberDB, &bladePWM, &bladeColor);
 
     Log.p("Average power: ").p(voltmeter.averagePower()).eol();
     bladePWM.setVoltage(voltmeter.averagePower());
@@ -294,7 +294,8 @@ void setup()
     }
     #endif
 
-    syncToDB();
+    sfx.setVolume(VOLUME_1);
+    changePalette(0);
     ledA.set(true); // "power on" light
 
     buttonA.setHoldRepeats(true);  // everything repeats!!
@@ -304,23 +305,24 @@ void setup()
     Log.p("Setup() done.").eol();
 }
 
-/*
-   The saberDB is the source of truth. (The Model.)
-   Bring other things in sync when it changes.
-   This made...more sense when the EEPROM was supported.
-   All the modern sabers just reset on power on.
-*/
-void syncToDB()
+void changePalette(int index)
 {
+#ifdef SABER_SOUND_ON
+    // The SD card memory streaming and the use of the SD
+    // file system lead to crashes. (Grr.) Stop the sound
+    // here to see if it cleans up the problem.
+    sfx.stopSound();
+#endif
+
+    saberDB.setPalette(index);
     const SaberDB::Palette *palette = saberDB.getPalette();
 
     sfx.setFont(saberDB.soundFont());
-    sfx.setVolume(VOLUME_1);
     for(int i=0; i<SaberDB::Palette::NAUDIO; ++i) {
         sfx.setBoost(palette->channelBoost[i], i);
     }
-    bladeFlash.setBladeColor(palette->bladeColor);
-    bladeFlash.setImpactColor(palette->impactColor);
+    bladeColor.setBladeColor(palette->bladeColor);
+    bladeColor.setImpactColor(palette->impactColor);
 }
 
 void buttonAReleaseHandler(const Button&)
@@ -331,8 +333,7 @@ void buttonAReleaseHandler(const Button&)
 
 bool setPaletteFromHoldCount(int count)
 {
-    saberDB.setPalette(count - 1);
-    syncToDB();
+    changePalette(count - 1);
     return count <= SaberDB::NUM_PALETTES;
 }
 
@@ -394,7 +395,7 @@ void buttonAClickHandler(const Button&)
                 retractBlade();
         }
         else {
-            bladeFlash.doFlash(millis());
+            bladeColor.doFlash(millis());
             if (sfx.smoothMode())
                 sfx.sm_playEvent(SFX_USER_TAP);
             else
@@ -454,9 +455,7 @@ void processSerial()
 {
     while (Serial.available()) {
         int c = Serial.read();
-        if (cmdParser.push(c)) {
-            syncToDB();
-        }
+        cmdParser.push(c);
     }
 }
 
@@ -609,7 +608,7 @@ void processAccel(uint32_t msec, uint32_t)
             {
                 // Always flash the blade. Maybe play impact sounds.
                 // It doesn't sound good to have too many impacts chained together.
-                bladeFlash.doFlash(millis());
+                bladeColor.doFlash(millis());
                 if ((msec - lastImpactTime) > IMPACT_MIN_TIME)
                 {
                     bool sound = false;
@@ -670,12 +669,14 @@ void loop() {
 
     processAccel(msec, delta);
 
-    // Get the normal or flash color of blade (ignoring the ignite, retract, power)
-    // Modify the blade color for ignite / retract (ignoring power)
-    // Apply the power setting.
-    bladeFlash.tick(msec);
-    osbr::RGB bladeColor = bladeStateManager.process(bladeFlash.getColor(), msec);
-    bladePWM.setRGB(bladeColor);
+    {
+        // Get the normal or flash color of blade (ignoring the ignite, retract, power)
+        // Modify the blade color for ignite / retract (ignoring power)
+        // Apply the power setting.
+        bladeColor.tick(msec);
+        osbr::RGB color = bladeStateManager.process(bladeColor.getColor(), msec);
+        bladePWM.setRGB(color);
+    }
 
     stillReset = sfx.process(bladeStateManager.state(), delta);
     if (stillReset) {
@@ -720,7 +721,7 @@ void loopDisplays(uint32_t msec, uint32_t mainDelta)
 
     UIRenderData uiRenderData;
     uiRenderData.volume = SaberDB::toVolume4(sfx.getVolume());
-    uiRenderData.color = BladePWM::convertRawToPerceived(saberDB.bladeColor());
+    uiRenderData.color = BladePWM::convertRawToPerceived(bladeColor.getBladeColor());
     uiRenderData.palette = saberDB.paletteIndex();
     uiRenderData.mVolts = voltmeter.easedPower();
     uiRenderData.fontName = manifest.getUnit(sfx.currentFont()).getName();

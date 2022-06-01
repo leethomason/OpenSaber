@@ -38,6 +38,8 @@ public:
     void doFlash(uint32_t msec) { tStart = msec; }
 
     osbr::RGB getColor() const { return color;  }
+    osbr::RGB getBladeColor() const { return bladeColor; }
+    osbr::RGB getImpactColor() const { return impactColor; }
 
 private:
     static const uint32_t LEN = 500;

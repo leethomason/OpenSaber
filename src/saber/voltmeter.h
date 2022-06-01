@@ -46,8 +46,8 @@ public:
           m_rHigher(rHigher),
           m_range(range),
           m_tune(tune),
-          m_eased(HIGH_VOLTAGE),            // turn on with high power, so less power goes to LED
-          m_averagePower(HIGH_VOLTAGE)
+          m_eased(NOMINAL_VOLTAGE + VOLTAGE_RANGE),            // turn on with high power, so less power goes to LED
+          m_averagePower(NOMINAL_VOLTAGE + VOLTAGE_RANGE)
     {       
         ASSERT(_instance == 0);
         _instance = this; 

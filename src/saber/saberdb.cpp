@@ -28,10 +28,10 @@ using namespace osbr;
 
 SaberDB::SaberDB()
 {
-    setPaletteFromDirHash(0);
+    initializeFromDirHash(0);
 }
 
-void SaberDB::setPaletteFromDirHash(uint32_t h)
+void SaberDB::initializeFromDirHash(uint32_t h)
 {
     switch (h)
     {
@@ -222,20 +222,8 @@ void SaberDB::setPaletteFromDirHash(uint32_t h)
 #endif
 }
 
-void SaberDB::nextPalette()
-{
-    setPalette(m_currentPalette + 1);
-}
-
 void SaberDB::setPalette(int n)
 {
-#ifdef SABER_SOUND_ON
-    // The SD card memory streaming and the use of the SD
-    // file system lead to crashes. (Grr.) Stop the sound
-    // here to see if it cleans up the problem.
-    SFX::instance()->stopSound();
-#endif
-
     m_currentPalette = abs(n) % NUM_PALETTES;
 }
 
@@ -272,16 +260,6 @@ int SaberDB::toVolume4(int volume256)
         return 1;
     }
     return 0;
-}
-
-void SaberDB::setBladeColor(const RGB &color)
-{
-    palette[m_currentPalette].bladeColor = color;
-}
-
-void SaberDB::setImpactColor(const RGB &color)
-{
-    palette[m_currentPalette].impactColor = color;
 }
 
 void SaberDB::setSoundFont(int f)

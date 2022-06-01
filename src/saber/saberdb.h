@@ -33,27 +33,14 @@ class SaberDB
 public:
     SaberDB();
 
-    void nextPalette();
-    int paletteIndex() const      {
-        return m_currentPalette;
-    }
+    int paletteIndex() const { return m_currentPalette; }
     void setPalette(int n);
-    void setPaletteFromDirHash(uint32_t h);
+    void initializeFromDirHash(uint32_t h);
 
     static int toVolume256(int volume4);
     static int toVolume4(int volume256);
 
     // Palette
-    const osbr::RGB& bladeColor() const   {
-        return palette[m_currentPalette].bladeColor;
-    }
-    void setBladeColor(const osbr::RGB& color);
-
-    const osbr::RGB& impactColor() const  {
-        return palette[m_currentPalette].impactColor;
-    }
-    void setImpactColor(const osbr::RGB& color);
-
     int soundFont() const {
         return palette[m_currentPalette].soundFont;
     }
@@ -87,8 +74,8 @@ public:
 
 private:
     int m_currentPalette = 0;
-    float   m_motion = DEFAULT_G_FORCE_MOTION;
-    float   m_impact = DEFAULT_G_FORCE_IMPACT;
+    float m_motion = DEFAULT_G_FORCE_MOTION;
+    float m_impact = DEFAULT_G_FORCE_IMPACT;
     Palette palette[NUM_PALETTES];
 };
 

@@ -99,7 +99,7 @@ public:
 
 class ChannelTest : public Test
 {
-    RGB bladeColor;
+    RGB savedColor;
 
     virtual const char* name() const {
         return "ChannelTest";
@@ -124,26 +124,25 @@ class ChannelTest : public Test
     {
         BladePWM* blade = tester->getBladePWM();
         ASSERT(blade);
-        BladeColor* bladeFlash = tester->getBladeColor();
-        ASSERT(bladeFlash);
+        BladeColor* bladeColor = tester->getBladeColor();
+        ASSERT(bladeColor);
 
         switch(event) {
             case 0: 
-                bladeColor = blade->getRGB();
-                bladeFlash->setBladeColor(RGB(0x400000));
-                blade->setRGB(RGB(0x400000));
+                savedColor = bladeColor->getBladeColor();
+                bladeColor->setBladeColor(RGB(0x400000));
                 break;
             case 1: 
-                bladeFlash->setBladeColor(RGB(0x004000));
-                blade->setRGB(RGB(0x400000));
+                TEST(bladeColor->getColor() == RGB(0x400000));
+                bladeColor->setBladeColor(RGB(0x004000));
                 break;
             case 2: 
-                bladeFlash->setBladeColor(RGB(0x000040));
-                blade->setRGB(RGB(0x400000));
+                TEST(bladeColor->getColor() == RGB(0x004000));
+                bladeColor->setBladeColor(RGB(0x000040));
                 break;
             case 3:
-                bladeFlash->setBladeColor(bladeColor);
-                blade->setRGB(bladeColor);
+                TEST(bladeColor->getColor() == RGB(0x000040));
+                bladeColor->setBladeColor(savedColor);
                 break;
             default:
                 break;

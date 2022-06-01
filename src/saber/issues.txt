@@ -1,8 +1,6 @@
 Issues:
 
 Current
-- Turn off UI LED idle animation when there is a crystal
-- Remove axis rotation from gyro
 - Smooth out gyro sound?
 - need run time tests
 
@@ -16,6 +14,8 @@ Med
 Icebox
 
 Fixed
+x Turn off UI LED idle animation when there is a crystal
+x Remove axis rotation from gyro
 x switch to gyro.
 x a little less motion sensitivity
 x dropout during green spin
