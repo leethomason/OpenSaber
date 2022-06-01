@@ -74,7 +74,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\saber\assets.cpp" />
-    <ClCompile Include="..\..\src\saber\bladeflash.cpp" />
+    <ClCompile Include="..\..\src\saber\bladecolor.cpp" />
     <ClCompile Include="..\..\src\saber\bladestate.cpp" />
     <ClCompile Include="..\..\src\saber\renderer.cpp" />
     <ClCompile Include="..\..\src\saber\rgb2hsv.cpp" />
@@ -92,7 +92,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\saber\assets.h" />
-    <ClInclude Include="..\..\src\saber\bladeflash.h" />
+    <ClInclude Include="..\..\src\saber\bladecolor.h" />
     <ClInclude Include="..\..\src\saber\bladestate.h" />
     <ClInclude Include="..\..\src\saber\modes.h" />
     <ClInclude Include="..\..\src\saber\renderer.h" />

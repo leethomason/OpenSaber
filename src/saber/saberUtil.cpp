@@ -23,7 +23,7 @@
 #include "saberUtil.h"
 #include "bladePWM.h"
 #include "sfx.h"
-#include "bladeflash.h"
+#include "bladecolor.h"
 
 using namespace osbr;
 

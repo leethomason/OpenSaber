@@ -31,7 +31,7 @@
 #include "unittest.h"
 #include "saberdb.h"
 #include "Button.h"
-#include "bladeflash.h"
+#include "bladecolor.h"
 
 #include "./src/util/Grinliz_Arduino_Util.h"
 #include "./src/lsm303/grinliz_LSM303.h"
@@ -124,7 +124,7 @@ class ChannelTest : public Test
     {
         BladePWM* blade = tester->getBladePWM();
         ASSERT(blade);
-        BladeFlash* bladeFlash = tester->getBladeFlash();
+        BladeColor* bladeFlash = tester->getBladeColor();
         ASSERT(bladeFlash);
 
         switch(event) {

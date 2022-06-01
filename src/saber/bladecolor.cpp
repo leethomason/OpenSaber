@@ -20,13 +20,13 @@
   SOFTWARE.
 */
 
-#include "bladeflash.h"
+#include "bladecolor.h"
 #include "./src/util/Grinliz_Util.h"
 #include "rgb2hsv.h"
 #include "./src/util/fixed.h"
 #include "rgb.h"
 
-void BladeFlash::tick(uint32_t msec)
+void BladeColor::tick(uint32_t msec)
 {
     if (msec - tStart >= LEN) {
         color = bladeColor;

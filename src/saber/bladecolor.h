@@ -25,10 +25,10 @@
 #include "rgb.h"
 #include "./src/util/fixed.h"
 
-class BladeFlash
+class BladeColor
 {
 public:
-    BladeFlash() {}
+    BladeColor() {}
 
     void setBladeColor(const osbr::RGB& rgb) { bladeColor = rgb;  }
     void setImpactColor(const osbr::RGB& rgb) { impactColor = rgb; }

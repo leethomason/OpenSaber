@@ -25,7 +25,7 @@
 #include "sketcher.h"
 #include "./src/util/fixed.h"
 #include "swing.h"
-#include "bladeflash.h"
+#include "bladecolor.h"
 #include "sfxcalc.h"
 #include "bladestate.h"
 

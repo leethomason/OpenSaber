@@ -57,7 +57,7 @@
 #include "manifest.h"
 #include "vrender.h"
 #include "vectorui.h"
-#include "bladeflash.h"
+#include "bladecolor.h"
 #include "swing.h"
 #include "bladestate.h"
 
@@ -88,7 +88,7 @@ BladeStateManager  bladeStateManager;
 UIModeUtil  uiMode;
 SaberDB     saberDB;
 Voltmeter   voltmeter(1650, 10000, 47000, 4095, VOLTMETER_TUNE);
-BladeFlash  bladeFlash;
+BladeColor  bladeFlash;
 CMDParser   cmdParser(&saberDB, manifest);
 BladePWM    bladePWM;
 Tester      tester;

@@ -34,7 +34,7 @@
 #include "./src/util/Grinliz_util.h"
 
 class BladePWM;
-class BladeFlash;
+class BladeColor;
 
 // Update everything from a DB change.
 void syncToDB();

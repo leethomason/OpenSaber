@@ -11,7 +11,7 @@
 #include "oledsim.h"
 #include "assets.h"
 #include "sketcher.h"
-#include "bladeflash.h"
+#include "bladecolor.h"
 #include "../saber/unittest.h"
 #include "../saber/rgb.h"
 #include "../saber/vrender.h"
@@ -178,7 +178,7 @@ int main(int, char**) {
 	int count = 0;
 	uint32_t lastUpdate = SDL_GetTicks();
     bool firstRender = true;
-    BladeFlash bladeFlash;
+    BladeColor bladeColor;
 
     enum {
         RENDER_OLED,
@@ -205,8 +205,8 @@ int main(int, char**) {
         osbr::RGB(255, 255, 0)
     };
     data.color = colors[0];
-    bladeFlash.setBladeColor(data.color);
-    bladeFlash.setImpactColor(ColorRotated(data.color, 180));
+    bladeColor.setBladeColor(data.color);
+    bladeColor.setImpactColor(ColorRotated(data.color, 180));
 
 	int palette = 0;
 
@@ -244,18 +244,18 @@ int main(int, char**) {
 				palette = (palette + 1) % 8;
                 data.palette = palette;
                 data.color = colors[palette];
-                bladeFlash.setBladeColor(data.color);
-                bladeFlash.setImpactColor(ColorRotated(data.color, 180));
+                bladeColor.setBladeColor(data.color);
+                bladeColor.setImpactColor(ColorRotated(data.color, 180));
                 data.fontName = FONT_NAMES[palette];
                 data.soundBank = palette % 4;
 			}
             else if (e.key.keysym.sym == SDLK_f) {
-                bladeFlash.doFlash(SDL_GetTicks());
+                bladeColor.doFlash(SDL_GetTicks());
             }
 		}
 
 		uint32_t t = SDL_GetTicks();
-        bladeFlash.tick(t);
+        bladeColor.tick(t);
 		if (t - lastUpdate > 50) {
             uint32_t delta = t - lastUpdate;
 			lastUpdate = t;
@@ -297,13 +297,13 @@ int main(int, char**) {
             simDisplay.CommitFrom5x7(pixel75.Pixels());
         }
         else if (renderMode == RENDER_DOTSTAR_1) {
-            simDisplay.CommitFromDotstar(dotstar1, 1, &bladeFlash.getColor());
+            simDisplay.CommitFromDotstar(dotstar1, 1, &bladeColor.getColor());
         }
         else if (renderMode == RENDER_DOTSTAR_4) {
-            simDisplay.CommitFromDotstar(dotstar4, 4, &bladeFlash.getColor());
+            simDisplay.CommitFromDotstar(dotstar4, 4, &bladeColor.getColor());
         }
         else if (renderMode == RENDER_DOTSTAR_6) {
-            simDisplay.CommitFromDotstar(dotstar6, 6, &bladeFlash.getColor());
+            simDisplay.CommitFromDotstar(dotstar6, 6, &bladeColor.getColor());
         }
         SDL_UpdateTexture(texture, NULL, simDisplay.Pixels(), WIDTH * 4);
 #endif
