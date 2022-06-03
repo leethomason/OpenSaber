@@ -270,9 +270,9 @@ int main(int, char**) {
             vrender.ClearTransform();
 #endif
 			pixel75.Process(mode.mode(), data);
-            dotstarUI.Process(dotstar1, UILEDConfig::kOne, t, t, mode.mode(), bladeOn, data);
-            dotstarUI.Process(dotstar4, UILEDConfig::kFour, t, t, mode.mode(), bladeOn, data);
-            dotstarUI.Process(dotstar6, UILEDConfig::kSix, t, t, mode.mode(), bladeOn, data);
+            dotstarUI.Process(dotstar1, 1, t, t, mode.mode(), bladeOn, data);
+            dotstarUI.Process(dotstar4, 4, t, t, mode.mode(), bladeOn, data);
+            dotstarUI.Process(dotstar6, 6, t, t, mode.mode(), bladeOn, data);
 		}
 
 		const SDL_Rect src = { 0, 0, WIDTH, HEIGHT };

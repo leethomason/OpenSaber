@@ -9,19 +9,19 @@ static const uint32_t COLOR_AUDIO_OFF   = 0xffd800;
 
 bool DotStarUI::Process(
     osbr::RGBA* uiLEDs,       // INPUT/OUTPUT: target LEDs
-    UILEDConfig ledConfig,
-    uint32_t brightness,
+    int ledConfig,
+    uint8_t brightness,
     uint32_t currentTime,
     UIMode mode, 
     bool bladeIgnited, 
     const UIRenderData& data)
 {
     bool change = false;
-    if (ledConfig == UILEDConfig::kOne) {
+    if (ledConfig == 1) {
         change = DrawOneLED(uiLEDs, brightness, currentTime, mode, bladeIgnited, data);
     }
     else {
-        change = DrawMultiLED(uiLEDs, (int)ledConfig, brightness, currentTime, mode, bladeIgnited, data);
+        change = DrawMultiLED(uiLEDs, ledConfig, brightness, currentTime, mode, bladeIgnited, data);
     }
     lastTime = currentTime;
     lastMode = mode;
@@ -29,7 +29,7 @@ bool DotStarUI::Process(
 }
 
 
-bool DotStarUI::Commit(const osbr::RGB* in, int nLEDs, osbr::RGBA* out, uint32_t brightness)
+bool DotStarUI::Commit(const osbr::RGB* in, int nLEDs, osbr::RGBA* out, uint8_t brightness)
 {
     uint8_t b = glClamp<int32_t>(brightness, 0, 255);
     bool change = false;
@@ -98,7 +98,7 @@ void DotStarUI::PowerLockIndicator(osbr::RGB* led, uint32_t time, UIMode mode, c
 
 
 
-bool DotStarUI::DrawOneLED(osbr::RGBA* out, uint32_t brightness, uint32_t time, UIMode mode, bool bladeIgnited, const UIRenderData& data)
+bool DotStarUI::DrawOneLED(osbr::RGBA* out, uint8_t brightness, uint32_t time, UIMode mode, bool bladeIgnited, const UIRenderData& data)
 {
     static const uint32_t ONE_VOLUME[5] = {
         0xffff00,   // yellow
@@ -139,7 +139,7 @@ bool DotStarUI::DrawOneLED(osbr::RGBA* out, uint32_t brightness, uint32_t time, 
 }
 
 
-bool DotStarUI::DrawMultiLED(osbr::RGBA* out, int nLEDs, uint32_t brightness, uint32_t time, UIMode mode, bool bladeIgnited, const UIRenderData& data)
+bool DotStarUI::DrawMultiLED(osbr::RGBA* out, int nLEDs, uint8_t brightness, uint32_t time, UIMode mode, bool bladeIgnited, const UIRenderData& data)
 {
     osbr::RGB lockLED = data.locked ? LOCK_COLOR : UNLOCK_COLOR;
     osbr::RGB led[MAX_LED] = {0};
@@ -218,7 +218,7 @@ bool DotStarUI::Test()
     // Test in range
     {
         DotStarUI dotstar(true);
-        bool change = dotstar.Process(&leds[1], UILEDConfig::kFour,  255, 0, UIMode::NORMAL, false, data);
+        bool change = dotstar.Process(&leds[1], 4,  255, 0, UIMode::NORMAL, false, data);
         TEST(change);
         TEST(leds[0].get() == 0);
         TEST(leds[1].get() != 0);
