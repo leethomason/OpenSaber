@@ -23,60 +23,17 @@
 #ifndef SKETCHER_INCLUDED
 #define SKETCHER_INCLUDED
 
+#include "rgb.h"
+
+void calcCrystalColorHSV(uint32_t msec, const osbr::RGB& base, osbr::RGB* out);
+
+#if false
+
 #include <stdint.h>
 #include "renderer.h"
 #include "./src/util/Grinliz_Util.h"
 #include "saberUtil.h"
-#include "rgb.h"
 #include "uirenderdata.h"
-
-
-/* Renders the UI to RGB LEDs */
-class DotStarUI
-{
-public:
-    void Draw(osbr::RGB* uiLedStart,    // target LEDs
-              int nLED,                 // must be 1, 4, or 6
-              uint32_t time, uint32_t delta, 
-              UIMode mode, bool bladeIgnited, const UIRenderData& data);
-
-	static bool Test();
-
-private:
-    void DrawVolume(osbr::RGB* led, int nLED, uint32_t time, int vol04) const;
-    void DrawOneLED(osbr::RGB* uiLedStart,
-                    uint32_t time, uint32_t delta, 
-                    UIMode mode, bool bladeIgnited, const UIRenderData& data,
-                    bool modeChanged);
-
-    AnimateProp animate;
-    UIMode lastUIMode = UIMode::NORMAL;
-};
-
-
-/* Renders the UI to a 7x5 dot matrix (90 turn; usually they are 7 high, 
-   this uses them as 7 wide.)
- */
-class Pixel_7_5_UI
-{
-public:
-    Pixel_7_5_UI();
-    void Draw(uint32_t time, UIMode mode, bool bladeIgnited, const UIRenderData* data);
-
-    // Returns columns.
-    // So this will a pointer to 7 bytes.
-	const uint8_t* Pixels() { return m_col; }
-
-private:
-	void DrawBar(int x, int y);
-	void DrawDot(int x, int y);
-
-	static const int NROWS = 5;
-	static const int NCOLS = 7;
-    static const int ALLOCATED = NCOLS + 1;
-    uint8_t m_col[ALLOCATED] = { 0 };		// enough memory for writing the glyphs 4+4 bytes
-};
-
 
 /* Renders the UI to a 4 7-segment displays. */
 class Digit4UI
@@ -91,6 +48,6 @@ private:
 	CStr<9> m_output;
 };
 
-void calcCrystalColorHSV(uint32_t msec, const osbr::RGB& base, osbr::RGB* out);
+#endif
 
 #endif // SKETCHER_INCLUDED

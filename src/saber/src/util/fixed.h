@@ -48,9 +48,9 @@
 
 using Fixed88 = fpm::fixed<int16_t, int32_t, 8>;
 using Fixed115 = fpm::fixed<int16_t, int32_t, 5>;
-using FixedNorm = fpm::fixed<int16_t, int32_t, 12>;
-using Fixed1616 = fpm::fixed<int32_t, int64_t, 16>; // Note this isn't really faster than float.
-                                                    // Use carefully.
+using FixedNorm = fpm::fixed<int16_t, int32_t, 12>;     // For things that are generally fractional
+using Fixed610 = fpm::fixed<int16_t, int32_t, 10>;      // "wider" FixedNorm
+using Fixed1616 = fpm::fixed<int32_t, int64_t, 16>;     // Note this isn't really faster than float. Use carefully.
 
 constexpr float kPi_float = 3.1415926535897932384626433832795f;
 constexpr float k2Pi_float = kPi_float * 2.0f;

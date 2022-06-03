@@ -12,6 +12,11 @@
 #include "assets.h"
 #include "sketcher.h"
 #include "bladecolor.h"
+#include "saberUtil.h"
+
+#include "uiDotStar.h"
+#include "uiPixel75.h"
+
 #include "../saber/unittest.h"
 #include "../saber/rgb.h"
 #include "../saber/vrender.h"
@@ -91,17 +96,6 @@ void BlockDrawOLED(const BlockDrawChunk* chunks, int n)
 }
 
 
-UIModeUtil::UIModeUtil()
-{
-    lastActive = 0;
-}
-
-void UIModeUtil::nextMode()
-{
-	m_mode = (UIMode)((int(m_mode) + 1) % int(UIMode::NUM_MODES));
-}
-
-
 int main(int, char**) {
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
 		printf("SDL_Init Error: %s\n", SDL_GetError());
@@ -155,11 +149,11 @@ int main(int, char**) {
 #endif
 
     // VRender can directly write to the display buffer
-    Pixel_7_5_UI pixel75;
-    osbr::RGB dotstar1[1];
-    osbr::RGB dotstar4[4];
-    osbr::RGB dotstar6[6];
-    DotStarUI dotstarUI;
+    Pixel75UI pixel75;
+    osbr::RGBA dotstar1[1];
+    osbr::RGBA dotstar4[4];
+    osbr::RGBA dotstar6[6];
+    DotStarUI dotstarUI(false);
 
 	SDL_SetRenderDrawColor(ren, 128, 128, 128, 255);
 
@@ -173,7 +167,7 @@ int main(int, char**) {
     
 	SDL_Event e;
 	int scale = 4;
-	UIModeUtil mode;
+	UIModeUtil mode(false);
 	bool bladeOn = false;
 	int count = 0;
 	uint32_t lastUpdate = SDL_GetTicks();
@@ -275,10 +269,10 @@ int main(int, char**) {
             vectorUI.Draw(&vrender, &bRender, t, mode.mode(), bladeOn, &data);
             vrender.ClearTransform();
 #endif
-			pixel75.Draw(t, mode.mode(), bladeOn, &data);
-            dotstarUI.Draw(dotstar1, 1, t, delta, mode.mode(), bladeOn, data);
-            dotstarUI.Draw(dotstar4, 4, t, delta, mode.mode(), bladeOn, data);
-            dotstarUI.Draw(dotstar6, 6, t, delta, mode.mode(), bladeOn, data);
+			pixel75.Process(mode.mode(), data);
+            dotstarUI.Process(dotstar1, UILEDConfig::kOne, t, t, mode.mode(), bladeOn, data);
+            dotstarUI.Process(dotstar4, UILEDConfig::kFour, t, t, mode.mode(), bladeOn, data);
+            dotstarUI.Process(dotstar6, UILEDConfig::kSix, t, t, mode.mode(), bladeOn, data);
 		}
 
 		const SDL_Rect src = { 0, 0, WIDTH, HEIGHT };

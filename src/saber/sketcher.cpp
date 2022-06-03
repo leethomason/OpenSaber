@@ -21,244 +21,11 @@
 */
 
 #include "sketcher.h"
-#include "renderer.h"
-#include "assets.h"
-#include "voltmeter.h"
 #include "rgb2hsv.h"
+#include "./src/util/fixed.h"
+#include "./src/util/Grinliz_Util.h"
 
 using namespace osbr;
-
-void DotStarUI::DrawVolume(osbr::RGB *led, int n, uint32_t /*time*/, int vol04) const
-{
-    static const uint32_t COLOR_AUDIO_ON = 0x0000FF;
-    static const uint32_t COLOR_AUDIO_OFF = 0xFFD800;
-
-    if (n >= 4)
-    {
-        int i = 0;
-        for (; i < vol04 && i < 4; ++i)
-        {
-            led[i].set(COLOR_AUDIO_ON);
-        }
-        for (; i < 4; ++i)
-        {
-            led[i].set(COLOR_AUDIO_OFF);
-        }
-        for (; i < n; ++i)
-        {
-            led[i].set(0);
-        }
-    }
-    else
-    {
-        for (int i = 0; i < n; ++i)
-        {
-            if (i < vol04 * n / 4)
-                led[i].set(COLOR_AUDIO_ON);
-            else
-                led[i].set(COLOR_AUDIO_OFF);
-        }
-        if (vol04 > 0)
-            led[0].set(COLOR_AUDIO_ON);
-    }
-}
-
-
-void DotStarUI::DrawOneLED(osbr::RGB *led, uint32_t, uint32_t delta, UIMode mode, bool, const UIRenderData &data, bool modeChanged)
-{
-    static const uint32_t ONE_VOLUME[5] = {
-        0xffff00,   // yellow
-        0xff8800,   // orange
-        0xff0088, 
-        0x8800ff,
-        0x0000ff
-    };
-
-#if SABER_LOCK()
-    osbr::RGB lockLED = data.locked ? 0xff0000 : 0x00ff00;
-#endif
-
-    switch(mode) {
-        case UIMode::PALETTE:
-        {
-            led[0] = data.color;
-        }
-        break;
-
-        case UIMode::VOLUME:
-        {
-            led[0].set(ONE_VOLUME[data.volume]);
-        }
-        break;
-
-#if SABER_LOCK()
-        case UIMode::LOCK:
-        {
-            led[0] = lockLED;
-        }
-        break;
-#endif
-
-        default:
-        {   
-            static const int WHITE = 150;
-            static const uint32_t PERIOD = 700;
-
-            if (modeChanged) {
-                int powerLevel = UIRenderData::powerLevel(data.mVolts, 4);
-                Log.p("start blink n=").p(powerLevel).eol();
-                animate.startBlink(PERIOD * powerLevel, PERIOD, WHITE);
-            }
-            else {
-                animate.tick(delta);
-            }
-            led[0].setWhite(animate.done() ? WHITE : animate.value());
-
-            if (data.lockFlash) {
-                led[0].set(0);
-            }
-        }
-        break;
-    }
-}
-
-
-void DotStarUI::Draw(osbr::RGB *led, int nLED, uint32_t time, uint32_t delta, 
-                     UIMode mode, bool ignited, const UIRenderData &data)
-{
-    ASSERT(nLED == 1 || nLED == 4 || nLED == 6);
-    bool modeChanged = false;
-    if (mode != lastUIMode) {
-        modeChanged = true;
-        lastUIMode = mode;
-    }
-
-    if (nLED == 1) {
-        DrawOneLED(led, time, delta, mode, ignited, data, modeChanged);
-        return;
-    }
-
-#if SABER_LOCK()
-    osbr::RGB lockLED = data.locked ? 0xff0000 : 0x00ff00;
-#endif
-
-    if (ignited)
-    {
-        // Set the power level.
-        int i = 0;
-        int powerLevel = UIRenderData::powerLevel(data.mVolts, nLED);
-        for (; i < powerLevel && i < nLED; ++i)
-        {
-            led[i] = data.color;
-        }
-        for (; i < nLED; ++i)
-        {
-            led[i].set(0);
-        }
-    }
-    else
-    {
-        switch (mode)
-        {
-        case UIMode::NORMAL:
-        {
-            DrawVolume(led, nLED - 2, time, data.volume);
-            led[nLED - 2].set(0);
-            led[nLED - 1] = data.color;
-        }
-        break;
-
-        case UIMode::PALETTE:
-        {
-            led[0] = led[nLED - 1] = osbr::RGB::BLACK;
-            for (int i = 1; i < nLED - 1; ++i)
-            {
-                led[i] = data.color;
-            }
-        }
-        break;
-
-        case UIMode::VOLUME:
-        {
-            DrawVolume(led, nLED, time, data.volume);
-        }
-        break;
-
-#if SABER_LOCK()
-        case UIMode::LOCK: 
-        { 
-            for (int i = 0; i < nLED; ++i) {
-                led[i] = lockLED;
-            }
-        }
-        break;
-#endif        
-
-        case UIMode::MEDITATION:
-        {
-            static const uint32_t TIME_STEP = 800;
-            for (int i = 0; i < nLED; ++i) {
-                calcCrystalColorHSV(time + TIME_STEP * i, data.color, &led[i]);
-            }
-        }
-        break;
-
-        default:
-            break;
-        }
-    }
-}
-
-bool DotStarUI::Test()
-{
-    osbr::RGB leds[6];
-
-    UIRenderData data;
-    data.mVolts = 3700;
-    data.volume = 1;
-    data.palette = 7;
-    data.fontName = "FontName";
-    data.soundBank = 0;
-    data.color.set(0xff, 0, 0);
-
-    ASSERT(data.color.get() == 0xff0000);
-    {
-        DotStarUI dotstar;
-
-        dotstar.Draw(&leds[1], 4, 0, 0, UIMode::NORMAL, false, data);
-        ASSERT(leds[0].get() == 0);        // check memory
-        ASSERT(leds[1].get() == 0x0000ff); // sound on
-        ASSERT(leds[2].get() == 0xFFD800); // sound low
-        ASSERT(leds[3].get() == 0);        // off
-        ASSERT(leds[4].get() == 0xff0000); // blade color
-        ASSERT(leds[5].get() == 0);        // memory check
-
-        dotstar.Draw(&leds[1], 4, 0, 0, UIMode::NORMAL, true, data);
-        ASSERT(leds[0].get() == 0); // check memory
-        ASSERT(leds[1] == data.color);
-        ASSERT(leds[2] == data.color);
-        ASSERT(leds[3].get() == 0);
-        ASSERT(leds[4].get() == 0);
-        ASSERT(leds[5].get() == 0); // memory check
-
-        dotstar.Draw(&leds[1], 4, 0, 0, UIMode::PALETTE, false, data);
-        ASSERT(leds[0].get() == 0); // check memory
-        ASSERT(leds[1].get() == 0);
-        ASSERT(leds[2] == data.color);
-        ASSERT(leds[3] == data.color);
-        ASSERT(leds[4].get() == 0);
-        ASSERT(leds[5].get() == 0); // memory check
-
-        dotstar.Draw(&leds[1], 4, 0, 0, UIMode::VOLUME, false, data);
-        ASSERT(leds[0].get() == 0); // check memory
-        ASSERT(leds[1].get() == 0x0000ff);
-        ASSERT(leds[2].get() == 0xFFD800);
-        ASSERT(leds[3].get() == 0xFFD800);
-        ASSERT(leds[4].get() == 0xFFD800);
-        ASSERT(leds[5].get() == 0); // memory check
-    }
-    return true;
-}
 
 void calcCrystalColorHSV(uint32_t msec, const osbr::RGB &base, osbr::RGB *out)
 {
@@ -270,39 +37,45 @@ void calcCrystalColorHSV(uint32_t msec, const osbr::RGB &base, osbr::RGB *out)
     static const uint32_t SAT_CYCLE    = 47 * 1000;     // milliseconds to cycle
 
     // "breathing" - v
-    static const int32_t VARIATION = 96;
-    static const int32_t BASE = 256 - VARIATION * 2;
+    {
+        static const int32_t VARIATION = 96;
+        static const int32_t BASE = 256 - VARIATION * 2;
 
-    float dt = (msec % BREATH_CYCLE) / float(BREATH_CYCLE);
-    float var = sinf(dt * k2Pi_float);
-    int32_t v32 = BASE + VARIATION + static_cast<int>(VARIATION * var);
-    v = uint8_t(glClamp(v32, int32_t(0), int32_t(255)));
-
+        Fixed610 dt = divToFixed<Fixed610>(msec % BREATH_CYCLE, BREATH_CYCLE);
+        Fixed610 var = sin(dt * Fixed610{k2Pi_float});
+        int32_t v32 = BASE + VARIATION + scale(var, VARIATION);
+        v = uint8_t(glClamp(v32, int32_t(0), int32_t(255)));
+    }
     // Hue
-    static const int HUE_VAR = 20;
-    dt = (msec % HUE_CYCLE) / float(HUE_CYCLE);
-    var = sinf(dt * k2Pi_float);
-    int32_t hPrime = h + static_cast<int>(HUE_VAR * var);
-    while (hPrime >= 180)
-        hPrime -= 180;
-    while (hPrime < 0)
-        hPrime += 180;
-    h = uint8_t(hPrime);
+    {
+        static const int HUE_VAR = 20;
+
+        Fixed610 dt = divToFixed<Fixed610>(msec % HUE_CYCLE, HUE_CYCLE);
+        Fixed610 var = sin(dt * Fixed610{k2Pi_float});
+        int32_t hPrime = h + scale(var, HUE_VAR);
+        while (hPrime >= 180)
+            hPrime -= 180;
+        while (hPrime < 0)
+            hPrime += 180;
+        h = uint8_t(hPrime);
+    }
 
     // Saturation
-    static const int32_t SAT_VAR = 32;
-    dt = (msec % SAT_CYCLE) / float(SAT_CYCLE);
-    var = sinf(dt * k2Pi_float);
-    int32_t sPrime = s - SAT_VAR / 2 + static_cast<int>(var * SAT_VAR);
-    if (sPrime < 0)
-        sPrime = 0;
-    if (sPrime > 255)
-        sPrime = 255;
-    s = sPrime;
-
+    {
+        static const int32_t SAT_VAR = 32;
+        Fixed610 dt = divToFixed<Fixed610>(msec % SAT_CYCLE, SAT_CYCLE);
+        Fixed610 var = sin(dt * Fixed610{k2Pi_float});
+        int32_t sPrime = s - SAT_VAR / 2 + scale(var, SAT_VAR);
+        if (sPrime < 0)
+            sPrime = 0;
+        if (sPrime > 255)
+            sPrime = 255;
+        s = sPrime;
+    }
     hsv2rgb(h, s, v, &out->r, &out->g, &out->b);
 }
 
+#if false
 Pixel_7_5_UI::Pixel_7_5_UI()
 {
 }
@@ -428,3 +201,4 @@ void Digit4UI::Draw(UIMode mode, const UIRenderData *data)
 
     m_output = scratch;
 }
+#endif

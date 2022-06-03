@@ -28,6 +28,7 @@
 #include "bladecolor.h"
 #include "sfxcalc.h"
 #include "bladestate.h"
+#include "uiDotStar.h"
 
 #define RUN_TEST(T)     \
     pass = T();         \

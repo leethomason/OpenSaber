@@ -21,15 +21,12 @@
 */
 
 #pragma once
-#include "pins.h"
 
 enum class UIMode {
     NORMAL,
     PALETTE,
     VOLUME,
-#if SABER_LOCK()
-    LOCK,
-#endif
+    LOCK,           // Not always supported.
     NUM_MODES,
 
     // Modes that can be rendered, but not selected.

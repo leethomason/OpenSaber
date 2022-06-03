@@ -114,6 +114,7 @@ struct RGBA {
 
     RGBA() {}
     RGBA(const RGBA& other) { r = other.r; g = other.g; b = other.b; a = other.a; }
+    RGBA(const RGB& other, uint8_t alpha) { r = other.r; g = other.g; b = other.b; a = alpha; }
     RGBA(uint32_t c) { set(c); }
     RGBA(int r, int g, int b, int a = 255) {
         this->r = r;

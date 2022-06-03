@@ -24,11 +24,6 @@
 #define SABER_UTIL_INCLUDED
 
 #include <stdint.h>
-/* Don't include pins.h, etc. Keep this header (but not cpp)
-   cross platform so that it can be included with test / debug
-   code.
-*/
-//#include "pins.h" 
 #include "modes.h"
 #include "rgb.h"
 #include "./src/util/Grinliz_util.h"
@@ -44,22 +39,22 @@ class UIModeUtil
 public:
     static const uint32_t IDLE_TIME = 10 * 1000;
 
-	UIModeUtil();
+	UIModeUtil(bool hasLockMode) : m_hasLockMode(hasLockMode) {}
 
 	void set(UIMode mode) { m_mode = mode; }
     void nextMode();
 
-    void setActive();
-    bool isIdle() const;
-    uint32_t millisPastIdle() const;
+    void setActive(uint32_t time) { m_lastActive = time; }
+    bool isIdle(uint32_t time) const;
+    uint32_t millisPastIdle(uint32_t time) const;
     
-    UIMode mode() const {
-        return m_mode;
-    }
+    UIMode mode() const { return m_mode; }
 
 private:
+    const bool m_hasLockMode;
+
     UIMode m_mode = UIMode::NORMAL;
-    uint32_t lastActive = 0;
+    uint32_t m_lastActive = 0;
 };
 
 /*

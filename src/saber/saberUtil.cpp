@@ -21,32 +21,19 @@
 */
 
 #include "saberUtil.h"
-#include "bladePWM.h"
-#include "sfx.h"
-#include "bladecolor.h"
 
 using namespace osbr;
 
-UIModeUtil::UIModeUtil()
-{
-    lastActive = millis();
-}
-
-void UIModeUtil::setActive()
-{
-    lastActive = millis();
-}
-
-uint32_t UIModeUtil::millisPastIdle() const {
-    if (isIdle()) {
-        return millis() - (lastActive + IDLE_TIME);
+uint32_t UIModeUtil::millisPastIdle(uint32_t time) const {
+    if (isIdle(time)) {
+        return time - (m_lastActive + IDLE_TIME);
     }
     return 0;
 }
 
-bool UIModeUtil::isIdle() const
+bool UIModeUtil::isIdle(uint32_t time) const
 {
-    if (millis() - lastActive > IDLE_TIME)
+    if (time - m_lastActive > IDLE_TIME)
         return true;
     return false;
 }
@@ -54,34 +41,22 @@ bool UIModeUtil::isIdle() const
 void UIModeUtil::nextMode()
 {
     m_mode = (UIMode)((int)m_mode + 1);
+
+    if (m_mode == UIMode::LOCK && !m_hasLockMode) {
+        m_mode = (UIMode)((int)m_mode + 1);
+    }
+
     if(m_mode == UIMode::NUM_MODES)
         m_mode = UIMode::NORMAL;
 
-    switch (m_mode)
-    {
-    case UIMode::NORMAL:
-        Log.p("mode: NORMAL").eol();
-        break;
+    const char* NAMES[UIMode::NUM_MODES] = {
+        "NORMAL",
+        "PALETTE",
+        "VOLUME",
+        "LOCK"
+    };
 
-    case UIMode::PALETTE:
-        Log.p("mode: PALETTE").eol();
-        break;
-
-    case UIMode::VOLUME:
-        Log.p("mode: VOLUME").eol();
-        break;
-
-#if SABER_LOCK()
-    case UIMode::LOCK:
-        Log.p("mode: LOCK").eol();
-        break;
-#endif        
-
-    default:
-        ASSERT(false);
-        m_mode = UIMode::NORMAL;
-        break;
-    }
+    Log.p("Mode: ").p(NAMES[(int)m_mode]).eol();
 }
 
 

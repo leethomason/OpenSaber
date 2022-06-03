@@ -69,7 +69,7 @@ void SimDisplay::CommitFrom5x7(const void* _col)
 }
 
 
-void SimDisplay::CommitFromDotstar(const osbr::RGB* dotstar, int n, const osbr::RGB* rgb)
+void SimDisplay::CommitFromDotstar(const osbr::RGBA* dotstar, int n, const osbr::RGB* blade)
 {
     //memset(pixels, 0, width * height * sizeof(uint32_t));
     const int s = width * height;
@@ -80,10 +80,14 @@ void SimDisplay::CommitFromDotstar(const osbr::RGB* dotstar, int n, const osbr::
     int size = height / 4;
 
     for (int i = 0; i < n; ++i) {
-        DrawRect(i, 0, size, 0xff | (dotstar[i].get() << 8));
+        osbr::RGB c;
+        c.r = dotstar[i].r * dotstar[i].a / 255;
+        c.g = dotstar[i].g * dotstar[i].a / 255;
+        c.b = dotstar[i].b * dotstar[i].a / 255;
+        DrawRect(i, 0, size, 0xff | (c.get() << 8));
     }
-    if (rgb) {
-        DrawRect(0, 2, size, 0xff | (rgb->get() << 8));
+    if (blade) {
+        DrawRect(0, 2, size, 0xff | (blade->get() << 8));
     }
 }
 
