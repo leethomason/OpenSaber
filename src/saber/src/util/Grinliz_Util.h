@@ -23,11 +23,11 @@
 #ifndef GRINLIZ_UTIL_INCLUDED
 #define GRINLIZ_UTIL_INCLUDED
 
-#include <string.h>
-#include <stdint.h>
-
 #include "grinliz_assert.h"
 #include "fixed.h"
+
+#include <stdint.h>
+#include <memory.h> // strcmp, memset, memcpy
 
 static const uint32_t NOMINAL_VOLTAGE = 3700;
 static const uint32_t VOLTAGE_RANGE	  =  300;
@@ -105,6 +105,14 @@ struct Vec3
 };
 
 /**
+* Returns 'true' if 'str' strarts with 'prefix'
+*/
+bool strStarts(const char* str, const char* prefix);
+bool istrStarts(const char* str, const char* prefix);
+void intToString(int value, char* str, int allocated, bool writeZero);
+void intToDigits(int value, int* digits, int nDigits);
+
+/**
 * Returns 'true' if 2 strings are equal.
 * If one or both are null, they are never equal.
 * (But two empty strings are equal.)
@@ -112,18 +120,6 @@ struct Vec3
 inline bool strEqual(const char* a, const char* b) {
 	return a && b && strcmp(a, b) == 0;
 }
-
-inline bool strEqual(const char* a, const char* b, int n) {
-    return a && b && strncmp(a, b, n);
-}
-
-/**
-* Returns 'true' if 'str' strarts with 'prefix'
-*/
-bool strStarts(const char* str, const char* prefix);
-bool istrStarts(const char* str, const char* prefix);
-void intToString(int value, char* str, int allocated, bool writeZero);
-void intToDigits(int value, int* digits, int nDigits);
 
 void encodeBase64(const uint8_t* bytes, int nBytes, char* target, bool writeNull);
 void decodeBase64(const char* src, int nBytes, uint8_t* dst);
@@ -142,6 +138,8 @@ template< int ALLOCATE >
 class CStr
 {
 public:
+	static_assert(ALLOCATE < 255, "CStr is for small strings");
+
 	CStr() {
 		clear();
 	}
@@ -266,7 +264,7 @@ public:
 	void setFromNum(uint32_t value, bool writeZero) {
 		clear();
 		intToString(value, buf, ALLOCATE, writeZero);
-		len = (int) strlen(buf);
+		len = (uint8_t) strlen(buf);
 	}
 	
 	uint32_t hash32() const {
@@ -293,7 +291,7 @@ private:
 		return p;
 	}
 
-	int len;
+	uint8_t len;
 	char buf[ALLOCATE];
 };
 

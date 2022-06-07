@@ -49,6 +49,8 @@
 #include "cmdparser.h"
 #include "bladePWM.h"
 #include "sketcher.h"
+#include "uiDotStar.h"
+#include "uiPixel75.h"
 #include "renderer.h"
 #include "saberUtil.h"
 #include "tester.h"
@@ -68,7 +70,6 @@ static const uint32_t IMPACT_MIN_TIME         =  600;   // was 1000
 
 uint32_t lastImpactTime = 0;
 uint32_t lastLoopTime   = 0;
-uint32_t lastDisplayLoopTime = 0;
 bool colorWasProcessed = false;
 
 Nada_FlashTransport_SPI flashTransport(SS1, &SPI1);
@@ -84,8 +85,9 @@ ButtonCB    buttonA(PIN_SWITCH_A, Button::INTERNAL_PULLUP);
 LEDManager  ledA(PIN_LED_A, false);
 AnimateProp ledProp;
 
+constexpr bool lockSupported = SABER_LOCK() ? true : false;
 BladeStateManager  bladeStateManager;
-UIModeUtil  uiMode;
+UIModeUtil  uiMode(lockSupported);
 SaberDB     saberDB;
 Voltmeter   voltmeter(1650, 10000, 47000, 4095, VOLTMETER_TUNE);
 BladeColor  bladeColor;
@@ -105,7 +107,7 @@ MagFilter   magFilter;
 DotStar dotstar;                    // Hardware controller.
 #endif
 #ifdef SABER_UI_START
-DotStarUI dotstarUI;                // It is the DotStarUI regardless of physical pixel protocol
+DotStarUI dotstarUI(lockSupported);                // It is the DotStarUI regardless of physical pixel protocol
 #endif
 
 ACCELEROMETER accelMag(PIN_ACCEL_EN);
@@ -116,7 +118,6 @@ static const int DISPLAY_TIMER = 23;
 static const int DISPLAY_TIMER = 67;
 #endif
 
-Timer2 displayTimer(DISPLAY_TIMER);       // distribute time to minimize "slow ticks"
 Timer2 vbatPrintTimer(1217);
 Timer2 audioPrintTimer(2000);
 
@@ -300,7 +301,6 @@ void setup()
 
     buttonA.setHoldRepeats(true);  // everything repeats!!
     lastLoopTime = millis();    // so we don't get a big jump on the first loop()
-    lastDisplayLoopTime = millis();
 
     Log.p("Setup() done.").eol();
 }
@@ -374,7 +374,7 @@ void retractBlade()
 // One button case.
 void buttonAClickHandler(const Button&)
 {
-    uiMode.setActive();
+    uiMode.setActive(millis());
 
     Log.p("buttonAClickHandler").eol();
     if (bladeStateManager.isOff()) {
@@ -406,7 +406,7 @@ void buttonAClickHandler(const Button&)
 
 void buttonAHoldHandler(const Button& button)
 {
-    uiMode.setActive();
+    uiMode.setActive(millis());
     //Log.p("buttonAHoldHandler nHolds=").p(button.nHolds()).eol();
     
     if (bladeStateManager.isOff()) {
@@ -654,7 +654,7 @@ void loop() {
     lockTimer.tick(delta);
 
 #ifdef SABER_UI_IDLE_MEDITATION_LED_OFF
-    if (uiMode.mode() == UIMode::NORMAL && bladeStateManager.state() == BLADE_OFF && uiMode.isIdle()) {
+    if (uiMode.mode() == UIMode::NORMAL && bladeStateManager.isOff() && uiMode.isIdle(msec)) {
         int pwm = 255;
         ledProp.tick(delta, &pwm);
         analogWrite(ledA.pin(), (uint8_t)pwm);
@@ -697,27 +697,13 @@ void loop() {
         DumpProfile();
     }
     #endif    
-    loopDisplays(msec, delta);
+    loopDisplays(msec);
 }
 
-void loopDisplays(uint32_t msec, uint32_t mainDelta)
+void loopDisplays(uint32_t msec)
 {
-    int dTick = displayTimer.tick(mainDelta);
-    if (dTick == 0)
-        return;
-
     static ProfileData data("loopDisplays");
     ProfileBlock block(&data);
-
-    // This was an ugly bug that's been here...forever.
-    // The delta for the displays is different from 
-    // the "main" delta.
-    uint32_t delta = msec - lastDisplayLoopTime;
-    lastDisplayLoopTime = msec;
-
-#ifdef SABER_NUM_LEDS
-    osbr::RGBA leds[SABER_NUM_LEDS] = {0};
-#endif
 
     UIRenderData uiRenderData;
     uiRenderData.volume = SaberDB::toVolume4(sfx.getVolume());
@@ -728,6 +714,86 @@ void loopDisplays(uint32_t msec, uint32_t mainDelta)
     uiRenderData.soundBank = sfx.currentFont();
     uiRenderData.locked = lockOn;
     uiRenderData.lockFlash = lockTimer.dark();
+
+    bool normalModeAndOff = uiMode.mode() == UIMode::NORMAL && bladeStateManager.isOff();
+    (void)normalModeAndOff;
+
+    // ------------ LEDs ---------- //
+#ifdef SABER_NUM_LEDS
+    osbr::RGBA rgba[SABER_NUM_LEDS] = {0};
+
+#   ifdef SABER_UI_START
+    {
+#       ifdef SABER_UI_IDLE_MEDITATION
+        if (normalModeAndOff && uiMode.isIdle(msec)) {
+            dotstarUI.Process(rgba + SABER_UI_START, SABER_UI_COUNT, SABER_UI_BRIGHTNESS, 
+                msec, UIMode::MEDITATION, false, uiRenderData);
+            rgba[SABER_UI_START + SABER_UI_COUNT - 1] = osbr::RGBA(uiRenderData.color, SABER_UI_BRIGHTNESS);
+        }
+        else
+#       endif // SABER_UI_IDLE_MEDITATION
+        {
+            dotstarUI.Process(rgba + SABER_UI_START, SABER_UI_COUNT, SABER_UI_BRIGHTNESS, 
+                msec, uiMode.mode(), !bladeStateManager.isOff(), uiRenderData);
+        }
+
+#       ifdef SABER_UI_FADE_OUT
+        if (normalModeAndOff && uiMode.isIdle(msec)) {
+            static const uint32_t FADE_TIME = 800;
+            uint32_t over = uiMode.millisPastIdle();
+            float fraction = 0;
+
+            if (over < FADE_TIME) {
+                fraction = (FADE_TIME - over) / float(FADE_TIME);
+            }
+            for(int i=SABER_UI_START; i < SABER_UI_START + SABER_UI_COUNT; ++i) {
+                rgba[i].r = uint8_t(fraction * rgba[i].r);
+                rgba[i].g = uint8_t(fraction * rgba[i].g);
+                rgba[i].b = uint8_t(fraction * rgba[i].b);
+            }
+        }
+#       endif  // SABER_UI_FADE_OUT
+#       ifdef SABER_UI_REVERSE
+            for(int i=0; i < SABER_UI_COUNT/2; ++i) {
+                glSwap(rgba[i + SABER_UI_START], SABER_UI_START + SABER_UI_COUNT - 1 - i);
+            }
+#       endif // SABER_UT_REVERSE
+    }
+#   endif // SABER_UI_START
+#   ifdef SABER_CRYSTAL_START
+    {
+        const RGB bladeColor = saberDB.bladeColor();
+        if (normalModeAndOff)) {
+            osbr::RGB rgb;
+            calcCrystalColorHSV(msec, bladeColor, &rgb);
+            rgba[SABER_CRYSTAL_START].set(rgb, SABER_CRYSTAL_BRIGHTNESS);
+        }
+        else {
+            rgba[SABER_CRYSTAL_START].set(bladeColor, SABER_CRYSTAL_BRIGHTNESS);
+        }
+    }
+#   endif // SABER_CRYSTAL_START
+#   ifdef SABER_FLASH_LED
+    {
+        // Flashes a secondary LED with the flash on clash color.
+        RGB flashColor = saberDB.impactColor();
+        rgba[SABER_FLASH_LED] = ((bladeStateManager.state() == BLADE_FLASH) ? flashColor : RGBA::BLACK, 255);
+    }
+#   endif // SABER_FLASH_LED
+
+    static osbr::RGBA leds[SABER_NUM_LEDS] = {0};
+    bool send = false;
+
+    for (int i = 0; i < SABER_NUM_LEDS; ++i) {
+        if (leds[i] != rgba[i]) {
+            leds[i] = rgba[i];
+            send = true;
+        }
+    }
+    if (send) {
+        dotstar.display(leds, SABER_NUM_LEDS);
+    }
+#endif // SABER_NUM_LEDS
 
 #if SABER_DISPLAY == SABER_DISPLAY_128_32
     {
@@ -764,52 +830,6 @@ void loopDisplays(uint32_t msec, uint32_t mainDelta)
         shifted7.set(digit4UI.Output().c_str());
     }
 #endif
-#ifdef SABER_UI_START
-    {
-        osbr::RGB rgb[SABER_UI_COUNT];
-
-#   ifdef SABER_UI_IDLE_MEDITATION
-        if (uiMode.mode() == UIMode::NORMAL && bladeStateManager.state() == BLADE_OFF && uiMode.isIdle())
-        {
-            dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, delta, UIMode::MEDITATION, !bladeStateManager.bladeOff(), uiRenderData);
-            rgb[SABER_UI_START + SABER_UI_COUNT - 1] = uiRenderData.color;
-        }
-        else
-        {
-            dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, delta, uiMode.mode(), !bladeStateManager.bladeOff(), uiRenderData);
-        }
-#   else
-        dotstarUI.Draw(rgb, SABER_UI_COUNT, msec, delta, uiMode.mode(), !bladeStateManager.isOff(), uiRenderData);
-#   endif
-
-#   ifdef SABER_UI_FADE_OUT
-        if (uiMode.mode() == UIMode::NORMAL && bladeStateManager.state() == BLADE_OFF && uiMode.isIdle()) {
-            static const uint32_t FADE_TIME = 800;
-            uint32_t over = uiMode.millisPastIdle();
-            float fraction = 0;
-
-            if (over < FADE_TIME) {
-                fraction = (FADE_TIME - over) / float(FADE_TIME);
-            }
-            for(int i=0; i < SABER_UI_COUNT; ++i) {
-                rgb[i].r = uint8_t(fraction * rgb[i].r);
-                rgb[i].g = uint8_t(fraction * rgb[i].g);
-                rgb[i].b = uint8_t(fraction * rgb[i].b);
-            }
-        }
-#   endif
-
-        // Copy back from Draw(RGB) to Dotstar(RGBA)
-        for (int i = 0; i < SABER_UI_COUNT; ++i)
-        {
-#   ifdef SABER_UI_REVERSE
-            leds[SABER_UI_START + SABER_UI_COUNT - 1 - i].set(rgb[i], SABER_UI_BRIGHTNESS);
-#   else
-            leds[SABER_UI_START + i].set(rgb[i], SABER_UI_BRIGHTNESS);
-#   endif
-        }
-    }
-#endif  // SABER_UI_START
 
 // Now loop() the specific display.
 #if SABER_DISPLAY == SABER_DISPLAY_7_5
@@ -861,42 +881,4 @@ void loopDisplays(uint32_t msec, uint32_t mainDelta)
     }
 #endif
 
-#if defined(SABER_CRYSTAL_START)
-    {
-        const RGB bladeColor = saberDB.bladeColor();
-        if (bladeStateManager.state() == BLADE_OFF && (uiMode.mode() == UIMode::NORMAL))
-        {
-            osbr::RGB rgb;
-            calcCrystalColorHSV(msec, bladeColor, &rgb);
-            leds[SABER_CRYSTAL_START].set(rgb, SABER_CRYSTAL_BRIGHTNESS);
-        }
-        else
-        {
-            leds[SABER_CRYSTAL_START].set(bladeColor, SABER_CRYSTAL_BRIGHTNESS);
-        }
-    }
-#endif
-
-#if defined(SABER_FLASH_LED)
-    {
-        // Flashes a secondary LED with the flash on clash color.
-        RGB flashColor = saberDB.impactColor();
-        leds[SABER_FLASH_LED] = ((bladeStateManager.state() == BLADE_FLASH) ? flashColor : RGBA::BLACK, 255);
-    }
-#endif
-
-#if defined(SABER_BLACK_START)
-    {
-        for (int i = SABER_BLACK_START; i < SABER_BLACK_START + SABER_BLACK_COUNT; ++i)
-        {
-            leds[i].set(0);
-        }
-    }
-#endif
-
-#ifdef SABER_NUM_LEDS
-    {
-        dotstar.display(leds, SABER_NUM_LEDS);
-    }
-#endif
 }

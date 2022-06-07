@@ -1,6 +1,7 @@
 #include "oledsim.h"
-#include <string.h>
 #include "../saber/rgb.h"
+
+#include <string.h>
 
 SimDisplay::SimDisplay(int w, int h, int bytes)
 {

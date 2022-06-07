@@ -49,7 +49,7 @@ void UIModeUtil::nextMode()
     if(m_mode == UIMode::NUM_MODES)
         m_mode = UIMode::NORMAL;
 
-    const char* NAMES[UIMode::NUM_MODES] = {
+    const char* NAMES[(int)UIMode::NUM_MODES] = {
         "NORMAL",
         "PALETTE",
         "VOLUME",

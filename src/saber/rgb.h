@@ -122,6 +122,7 @@ struct RGBA {
         this->b = b;
         this->a = a;
     }
+    RGBA& operator=(const RGBA& rhs) = default; 
 
     uint8_t r = 0;
     uint8_t g = 0;

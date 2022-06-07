@@ -210,6 +210,20 @@ bool TestAverageSample()
 
 bool TestCStr()
 {
+    //Log.p("sizeof(CStr<3>=").p(sizeof(CStr<3>)).eol();  // 8
+    //Log.p("sizeof(CStr<4>=").p(sizeof(CStr<4>)).eol();  // 8
+    //Log.p("sizeof(CStr<7>=").p(sizeof(CStr<7>)).eol();  // 12
+    //Log.p("sizeof(CStr<10>=").p(sizeof(CStr<10>)).eol();// 16
+
+    TEST_EQUAL(4, sizeof(CStr<3>));
+    TEST_EQUAL(5, sizeof(CStr<4>));
+    TEST_EQUAL(8, sizeof(CStr<7>));
+    TEST_EQUAL(11, sizeof(CStr<10>));
+
+    CStr<2> a = "a";
+    CStr<2> b = "b";
+    TEST(a < b);
+
     TEST_IS_TRUE(strStarts("FooBar", "Foo"));
     TEST_IS_FALSE(strStarts("FooBar", "Bar"));
     TEST_IS_FALSE(strStarts("Foo", "FooBar"));

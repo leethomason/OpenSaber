@@ -1,12 +1,3 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <SDL.h>
-#include <assert.h>
-#include <string.h>
-#include <stdint.h>
-#include <math.h>
-#include <chrono>
-
 #include "renderer.h"
 #include "oledsim.h"
 #include "assets.h"
@@ -21,6 +12,15 @@
 #include "../saber/rgb.h"
 #include "../saber/vrender.h"
 #include "../saber/vectorui.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <SDL.h>
+#include <assert.h>
+#include <string.h>
+#include <stdint.h>
+#include <math.h>
+#include <chrono>
 
 #define MONO_128_32 1
 
@@ -270,9 +270,9 @@ int main(int, char**) {
             vrender.ClearTransform();
 #endif
 			pixel75.Process(mode.mode(), data);
-            dotstarUI.Process(dotstar1, 1, t, t, mode.mode(), bladeOn, data);
-            dotstarUI.Process(dotstar4, 4, t, t, mode.mode(), bladeOn, data);
-            dotstarUI.Process(dotstar6, 6, t, t, mode.mode(), bladeOn, data);
+            dotstarUI.Process(dotstar1, 1, 255, t, mode.mode(), bladeOn, data);
+            dotstarUI.Process(dotstar4, 4, 255, t, mode.mode(), bladeOn, data);
+            dotstarUI.Process(dotstar6, 6, 255, t, mode.mode(), bladeOn, data);
 		}
 
 		const SDL_Rect src = { 0, 0, WIDTH, HEIGHT };
