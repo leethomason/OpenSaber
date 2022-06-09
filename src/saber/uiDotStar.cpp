@@ -7,7 +7,7 @@ static const uint32_t COLOR_AUDIO_ON    = 0x0000ff;
 static const uint32_t COLOR_AUDIO_OFF   = 0xffd800;
 
 
-bool DotStarUI::Process(
+void DotStarUI::Process(
     osbr::RGBA* uiLEDs,       // INPUT/OUTPUT: target LEDs
     int ledConfig,
     uint8_t brightness,
@@ -16,31 +16,26 @@ bool DotStarUI::Process(
     bool bladeIgnited, 
     const UIRenderData& data)
 {
-    bool change = false;
     if (ledConfig == 1) {
-        change = DrawOneLED(uiLEDs, brightness, currentTime, mode, bladeIgnited, data);
+        DrawOneLED(uiLEDs, brightness, currentTime, mode, bladeIgnited, data);
     }
     else {
-        change = DrawMultiLED(uiLEDs, ledConfig, brightness, currentTime, mode, bladeIgnited, data);
+        DrawMultiLED(uiLEDs, ledConfig, brightness, currentTime, mode, bladeIgnited, data);
     }
     lastTime = currentTime;
     lastMode = mode;
-    return change;
 }
 
 
-bool DotStarUI::Commit(const osbr::RGB* in, int nLEDs, osbr::RGBA* out, uint8_t brightness)
+void DotStarUI::Commit(const osbr::RGB* in, int nLEDs, osbr::RGBA* out, uint8_t brightness)
 {
     uint8_t b = glClamp<int32_t>(brightness, 0, 255);
-    bool change = false;
     for(int i=0; i<nLEDs; ++i) {
         osbr::RGBA rgba(in[i], b);
         if (rgba != out[i]) {
-            change = true;
             out[i] = rgba;
         }
     }
-    return change;
 }
 
 
@@ -98,7 +93,7 @@ void DotStarUI::PowerLockIndicator(osbr::RGB* led, uint32_t time, UIMode mode, c
 
 
 
-bool DotStarUI::DrawOneLED(osbr::RGBA* out, uint8_t brightness, uint32_t time, UIMode mode, bool bladeIgnited, const UIRenderData& data)
+void DotStarUI::DrawOneLED(osbr::RGBA* out, uint8_t brightness, uint32_t time, UIMode mode, bool, const UIRenderData& data)
 {
     static const uint32_t ONE_VOLUME[5] = {
         0xffff00,   // yellow
@@ -139,7 +134,7 @@ bool DotStarUI::DrawOneLED(osbr::RGBA* out, uint8_t brightness, uint32_t time, U
 }
 
 
-bool DotStarUI::DrawMultiLED(osbr::RGBA* out, int nLEDs, uint8_t brightness, uint32_t time, UIMode mode, bool bladeIgnited, const UIRenderData& data)
+void DotStarUI::DrawMultiLED(osbr::RGBA* out, int nLEDs, uint8_t brightness, uint32_t time, UIMode mode, bool bladeIgnited, const UIRenderData& data)
 {
     osbr::RGB lockLED = data.locked ? LOCK_COLOR : UNLOCK_COLOR;
     osbr::RGB led[MAX_LED] = {0};
@@ -218,8 +213,7 @@ bool DotStarUI::Test()
     // Test in range
     {
         DotStarUI dotstar(true);
-        bool change = dotstar.Process(&leds[1], 4,  255, 0, UIMode::NORMAL, false, data);
-        TEST(change);
+        dotstar.Process(&leds[1], 4,  255, 0, UIMode::NORMAL, false, data);
         TEST(leds[0].get() == 0);
         TEST(leds[1].get() != 0);
         TEST(leds[4].get() != 0);
