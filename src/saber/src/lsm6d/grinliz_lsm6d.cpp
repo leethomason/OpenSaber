@@ -148,10 +148,12 @@ bool GrinlizLSM6D::sampleAccel(Vec3<Fixed115> *accel, Vec3<int32_t> *gyro)
             gyro->z = data.z * G_SCALE / G_DIV;
         }
     }
+    /*
     if (accel->x == kZero_Fixed115 && accel->y == kZero_Fixed115 && accel->z == kZero_Fixed115)
         Log.p("Error reading accel.").eol();
     if (gyro->x == INT32_MAX)
         Log.p("Error reading gyro.").eol();
+    */
     return true;
 }
 

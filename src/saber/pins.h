@@ -72,9 +72,9 @@
 #define SABER_SUB_MODEL_B			13
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_CLAN
-#define SABER_SUB_MODEL				SABER_SUB_MODEL_APPRENTICE	
+#define SERIAL_DEBUG 				1
+#define SABER_MODEL 				SABER_MODEL_DUCHESS
+#define SABER_SUB_MODEL				0	
 // ----------------------------------
 
 #define SABER_SOUND_SD 				1	// external memory card

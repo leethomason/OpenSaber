@@ -740,7 +740,7 @@ void loopDisplays(uint32_t msec)
 #       ifdef SABER_UI_FADE_OUT
         if (normalModeAndOff && uiMode.isIdle(msec)) {
             static const uint32_t FADE_TIME = 800;
-            uint32_t over = uiMode.millisPastIdle();
+            uint32_t over = uiMode.millisPastIdle(msec);
             float fraction = 0;
 
             if (over < FADE_TIME) {
@@ -762,14 +762,13 @@ void loopDisplays(uint32_t msec)
 #   endif // SABER_UI_START
 #   ifdef SABER_CRYSTAL_START
     {
-        const RGB bladeColor = saberDB.bladeColor();
-        if (normalModeAndOff)) {
+        if (normalModeAndOff) {
             osbr::RGB rgb;
-            calcCrystalColorHSV(msec, bladeColor, &rgb);
+            calcCrystalColorHSV(msec, bladeColor.getBladeColor(), &rgb);
             rgba[SABER_CRYSTAL_START].set(rgb, SABER_CRYSTAL_BRIGHTNESS);
         }
         else {
-            rgba[SABER_CRYSTAL_START].set(bladeColor, SABER_CRYSTAL_BRIGHTNESS);
+            rgba[SABER_CRYSTAL_START].set(bladeColor.getBladeColor(), SABER_CRYSTAL_BRIGHTNESS);
         }
     }
 #   endif // SABER_CRYSTAL_START
