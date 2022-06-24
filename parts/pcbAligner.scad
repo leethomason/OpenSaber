@@ -1,9 +1,10 @@
-C = 25.4;
-PIN = C / 10.0;
+INCH_TO_MM = 25.4;
 
-DX = 2.2 * C;
-DY = 0.7 * C;
-PINY = 0.6 * C;
+// Offset from the origin (0,0) to the lower left of the board. Typically 1/2 of 1/10 of an inch
+ORIGIN = 0.05 * INCH_TO_MM;
+// Size of the board
+DX = (2.15 + 0.05) * INCH_TO_MM;
+DY = (0.65 + 0.05) * INCH_TO_MM;
 
 PILLAR = 4.0;
 PILLAR_Z = 5.0;
@@ -12,7 +13,7 @@ TARGET = 3.0;
 SUPPORT_HEIGHT = 1.0;
 EDGE = 0.6;
 
-TRIM = 0.4;
+TRIM = 0.2;
 EPS = 0.001;
 STRUCTURE = 3.0;
 HANDLE = 10.0;
@@ -20,16 +21,16 @@ HANDLE = 10.0;
 ZSTRUCT = 1.0;
 ZSTRUCT_OUTER = 1.6;
 
-OUTSIDE = true;
-
 module pillar() {
     translate([-PILLAR/2, -PILLAR/2, 0])
         cube(size=[PILLAR, PILLAR, PILLAR_Z]);
 }
 
 module support(x, y, sx, sy, height) {
-    x = x + 0.05*C;
-    y = 0.05*C + PINY - y;
+    x = x + ORIGIN;
+    y = DY - (y + ORIGIN);
+
+    echo("support at:", x, y, "size:", sx, sy);
 
     T = 1.0;
     difference() {
@@ -60,45 +61,24 @@ module support(x, y, sx, sy, height) {
         }
     }
 
-    if (OUTSIDE) {
-        OUT = 3.5;
-        OUT0 = 0.5;
+    OUT = 3.5;
+    OUT0 = 0.5;
 
-        // Base
-        difference() {
-            translate([-OUT, -OUT, 0])
-                cube(size=[DX + OUT*2, DY + OUT*2, ZSTRUCT_OUTER]);
-            translate([-OUT0, -OUT0, -EPS]) 
-                cube(size=[DX+OUT0*2, DY+OUT0*2, 100]);
-        }
-
-        // Finger holds
-        *translate([DX/2 - HANDLE/2, DY, 0]) cube(size=[HANDLE, HANDLE, ZSTRUCT]);
-        *translate([DX/2 - HANDLE/2, -HANDLE, 0]) cube(size=[HANDLE, HANDLE, ZSTRUCT]);
-
-    }
-    else {
-        // Base
-        difference() {
-            cube(size=[DX, DY, ZSTRUCT]);
-            translate([STRUCTURE, STRUCTURE, -EPS]) 
-                cube(size=[DX-STRUCTURE*2, DY-STRUCTURE*2, 100]);
-        }
-
-        // Finger holds
-        *translate([DX/2 - HANDLE/2, DY, 0]) cube(size=[HANDLE, HANDLE, ZSTRUCT]);
-        *translate([DX/2 - HANDLE/2, -HANDLE, 0]) cube(size=[HANDLE, HANDLE, ZSTRUCT]);
+    // Base
+    difference() {
+        translate([-OUT, -OUT, 0])
+            cube(size=[DX + OUT*2, DY + OUT*2, ZSTRUCT_OUTER]);
+        translate([-OUT0, -OUT0, -EPS]) 
+            cube(size=[DX+OUT0*2, DY+OUT0*2, 100]);
     }
 
-    // Itsy V2 accel / mag
-    // support(1.2904*C, 0.2708*C, 2.06 + 0.01, 2.06 + 0.1, 1.0);
-    
-    // Itsy V3 accel
-    //support(1.2966*C, 0.2244*C, 3.10, 3.10, 1.0);
+    // Finger holds
+    translate([DX/2 - HANDLE/2, DY, 0]) cube(size=[HANDLE, HANDLE, ZSTRUCT]);
+    translate([DX/2 - HANDLE/2, -HANDLE, 0]) cube(size=[HANDLE, HANDLE, ZSTRUCT]);
 
     // Itsy V4 accel
-    support(1.3*C, 0.2*C, 3.00 + TRIM, 2.50 + TRIM, 0.86);
+    support(1.3*INCH_TO_MM, 0.2*INCH_TO_MM, 3.00 + TRIM, 2.50 + TRIM, 0.86);
 
-    // Itsy V2/V3 audio amp
-    support(0.1429*C, 0.3045*C, 3.00 + TRIM, 3.00 + TRIM, 0.8);
+    // Itsy V2/V3/V4 audio amp
+    support(0.1429*INCH_TO_MM, 0.3045*INCH_TO_MM, 3.00 + TRIM, 3.00 + TRIM, 0.8);
 }
