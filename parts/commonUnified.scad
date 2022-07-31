@@ -778,6 +778,52 @@ module powerPortRing(diameter, t, dz, dzToPort, portSupportToBack=false, counter
 }
 
 
+module boltRingNoShell(dy_port, bolt_d=0, nut_w=0, nut_y=0)
+{
+    BOLT_D = bolt_d > 0 ? bolt_d : 4.5;
+    NUT_W  = nut_w > 0  ? nut_w  : 8.6;
+    NUT_Y  = nut_y > 0  ? nut_y  : 3.4;
+    DZ_BRIDGE = 8.0;
+    DZ_SLOT = 2.0;
+    
+    H_THREAD = 5.5;
+    D_THREAD = 7.8;
+
+    TRI = [[-50, 0], [0, 0], [-50, -50]];
+
+    difference() {
+        union() {
+            // Top of the holder aligns witht the port, so the nut can be slid in.
+            translate([-50, dy_port, -DZ_BRIDGE/2]) cube(size=[100, 100, DZ_BRIDGE]);                    
+        }
+
+        rotate([-90, 0, 0]) cylinder(h=100, d=BOLT_D);
+        translate([-NUT_W/2, 0, DZ_SLOT/2]) cube(size=[NUT_W, 100, DZ_SLOT]);
+    }
+    // Side blocks
+    {
+        translate([-50, dy_port - NUT_Y, -DZ_BRIDGE/2]) 
+            cube(size=[50 - NUT_W/2, NUT_Y, DZ_BRIDGE]);
+        translate([-NUT_W/2, dy_port - NUT_Y, -DZ_BRIDGE/2]) 
+            polygonXY(h=DZ_BRIDGE, points=TRI);
+    }
+    mirror([-1, 0, 0]) {
+        translate([-50, dy_port - NUT_Y,  -DZ_BRIDGE/2]) 
+            cube(size=[50 - NUT_W/2, NUT_Y, DZ_BRIDGE]);
+        translate([-NUT_W/2, dy_port - NUT_Y, -DZ_BRIDGE/2]) 
+            polygonXY(h=DZ_BRIDGE, points=TRI);
+    }
+    
+    // Triangle holders
+    translate([-BOLT_D/2, dy_port - NUT_Y, -DZ_SLOT/2]) {
+        polygonXY(h=DZ_SLOT, points=TRI);
+    }
+    mirror([-1, 0, 0]) translate([-BOLT_D/2, dy_port - NUT_Y, -DZ_SLOT/2]) {
+        polygonXY(h=DZ_SLOT, points=TRI);
+    }
+}
+
+
 module boltRing(diameter, t, dz, dzToBolt, bolt_d=0, nut_w=0, nut_y=0, dy_port=0)
 {
     BOLT_D = bolt_d > 0 ? bolt_d : 4.5;
