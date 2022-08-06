@@ -90,8 +90,8 @@ void LEDManager::process()
         {
             if (m_style == BLINK_BREATH)
             {
-                FixedNorm dt(dMillis % m_cycle, m_cycle);
-                int32_t val = 128 + iSin(dt).scale(128);
+                FixedNorm dt = divToFixed<FixedNorm>(dMillis % m_cycle, m_cycle);
+                int32_t val = 128 + scale(sinLerp(dt), 128);
                 if (val < 0)
                     val = 0;
                 if (val > 255)
@@ -134,25 +134,15 @@ void SPLog::attachSerial(Stream *stream)
     serialStream = stream;
 }
 
-void SPLog::attachLog(Stream *stream)
-{
-    logStream = stream;
-}
-
 const SPLog &SPLog::p(const char v[], int width) const
 {
     if (serialStream)
         serialStream->print(v);
-    if (logStream)
-        logStream->print(v);
-
     if (width) {
         int len = strlen(v);
         for(; len < width; ++len) {
             if (serialStream)
                 serialStream->print(" ");
-            if (logStream)
-                logStream->print(" ");
         }
     }
 
@@ -163,8 +153,6 @@ const SPLog &SPLog::p(char v) const
 {
     if (serialStream)
         serialStream->print(v);
-    if (logStream)
-        logStream->print(v);
     return *this;
 }
 
@@ -172,8 +160,6 @@ const SPLog &SPLog::p(unsigned char v, int p) const
 {
     if (serialStream)
         serialStream->print(v, p);
-    if (logStream)
-        logStream->print(v, p);
     return *this;
 }
 
@@ -181,8 +167,6 @@ const SPLog &SPLog::p(int v, int p) const
 {
     if (serialStream)
         serialStream->print(v, p);
-    if (logStream)
-        logStream->print(v, p);
     return *this;
 }
 
@@ -190,8 +174,6 @@ const SPLog &SPLog::p(unsigned int v, int p) const
 {
     if (serialStream)
         serialStream->print(v, p);
-    if (logStream)
-        logStream->print(v, p);
     return *this;
 }
 
@@ -199,8 +181,6 @@ const SPLog &SPLog::p(long v, int p) const
 {
     if (serialStream)
         serialStream->print(v, p);
-    if (logStream)
-        logStream->print(v, p);
     return *this;
 }
 
@@ -208,8 +188,6 @@ const SPLog &SPLog::p(unsigned long v, int p) const
 {
     if (serialStream)
         serialStream->print(v, p);
-    if (logStream)
-        logStream->print(v, p);
     return *this;
 }
 
@@ -217,8 +195,6 @@ const SPLog &SPLog::p(double v, int p) const
 {
     if (serialStream)
         serialStream->print(v, p);
-    if (logStream)
-        logStream->print(v, p);
     return *this;
 }
 
@@ -290,35 +266,11 @@ void SPLog::eol() const
 {
     if (serialStream)
         serialStream->println("");
-    if (logStream)
-    {
-        logStream->println("");
-        logStream->flush();
-    }
 }
 
 void AssertOut(const char *message, const char *file, int line)
 {
     Log.p("ASSERT: ").p(message).p(" ").p(file).p(" ").p(line).eol();
-}
-
-void AssertOut2(const char *message, int x, int y, const char *file, int line)
-{
-    Log.p("ASSERT: ").p(message).p(" ").p(file).p(" ").p(line).eol();
-    Log.p("   value0=").p(x).p(" value1=").p(y).eol();
-}
-
-SPITransaction::SPITransaction(uint8_t cs, const SPISettings &settings)
-{
-    SPI.beginTransaction(settings);
-    digitalWrite(cs, LOW);
-    this->cs = cs;
-}
-
-SPITransaction::~SPITransaction()
-{
-    digitalWrite(cs, HIGH);
-    SPI.endTransaction();
 }
 
 ProfileData *ProfileData::root = 0;
@@ -350,4 +302,14 @@ void DumpProfile()
         data->totalTime = 0;
         data->maxTime = 0;
     }
+}
+
+
+SerialLog::SerialLog() {
+    _savedStream = Log.getStream();
+    Log.attachSerial(&Serial);
+}
+
+SerialLog::~SerialLog() {
+    Log.attachSerial(_savedStream);
 }

@@ -22,7 +22,7 @@ void loop()
 {
     Vec3<Fixed115> a;
     Vec3<int32_t> gyro;
-    if (accel.sampleAccelGyro(&a, &gyro)) {
+    if (accel.sampleAccel(&a, &gyro)) {
         Log.p("Accel: ").v3(a).p(" Gyro: ").v3(gyro).eol();
     }
 }

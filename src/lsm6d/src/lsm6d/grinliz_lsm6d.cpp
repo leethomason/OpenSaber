@@ -114,7 +114,7 @@ uint8_t GrinlizLSM6D::readWord(Vec3<int16_t> *data)
     return tag;
 }
 
-bool GrinlizLSM6D::sampleAccelGyro(Vec3<Fixed115> *accel, Vec3<int32_t> *gyro)
+bool GrinlizLSM6D::sampleAccel(Vec3<Fixed115> *accel, Vec3<int32_t> *gyro)
 {
     static const int32_t DIV = 2048;
     
@@ -131,16 +131,16 @@ bool GrinlizLSM6D::sampleAccelGyro(Vec3<Fixed115> *accel, Vec3<int32_t> *gyro)
     if (nWords < 2)
         return false;
 
-    accel->set(0, 0, 0);
+    accel->set(Fixed115{0}, Fixed115{0}, Fixed115{0});
     gyro->set(INT32_MAX, INT32_MAX, INT32_MAX);
 
     Vec3<int16_t> data;
     for (int i = 0; i < 2; ++i) {
         uint8_t tag = readWord(&data);
         if (tag == TAG_ACCEL) {
-            accel->x = Fixed115(data.x, DIV);
-            accel->y = Fixed115(data.y, DIV);
-            accel->z = Fixed115(data.z, DIV);
+            accel->x = divToFixed<Fixed115>(data.x, DIV);
+            accel->y = divToFixed<Fixed115>(data.y, DIV);
+            accel->z = divToFixed<Fixed115>(data.z, DIV);
         }
         else if (tag == TAG_GYRO) {
             gyro->x = data.x * G_SCALE / G_DIV;
@@ -148,10 +148,12 @@ bool GrinlizLSM6D::sampleAccelGyro(Vec3<Fixed115> *accel, Vec3<int32_t> *gyro)
             gyro->z = data.z * G_SCALE / G_DIV;
         }
     }
-    if (accel->x == 0 && accel->y == 0 && accel->z == 0)
+    /*
+    if (accel->x == kZero_Fixed115 && accel->y == kZero_Fixed115 && accel->z == kZero_Fixed115)
         Log.p("Error reading accel.").eol();
     if (gyro->x == INT32_MAX)
         Log.p("Error reading gyro.").eol();
+    */
     return true;
 }
 
@@ -167,21 +169,35 @@ void GrinlizLSM6D::test()
             break;
         Vec3<Fixed115> a;
         Vec3<int32_t> g;
-        if(sampleAccelGyro(&a, &g)) {
+        if(sampleAccel(&a, &g)) {
             ++n;
         }
     }
-    Fixed115 sps(n * 1000, end - start);
+    Fixed115 sps = divToFixed<Fixed115>(n * 1000, end - start);
     Log.p(n).p(" samples read. ").p(sps).p(" Hz").eol();
 }
 
-void GrinlizLSM6D::flush()
+void GrinlizLSM6D::log(int n)
 {
-    int32_t n = numWords();
-    while(n--) {
+    flush();
+    while(n > 0) {
         Vec3<Fixed115> a;
         Vec3<int32_t> g;
-        sampleAccelGyro(&a, &g);
+        if (sampleAccel(&a, &g)) {
+            n--;
+            Log.p("Accel: ").v3(a).p(" Gyro: ").v3(g).eol();
+        }
+    }
+}
+
+void GrinlizLSM6D::flushAccel(int reserve)
+{
+    int32_t n = numWords() - reserve;
+    while(n > 0) {
+        Vec3<Fixed115> a;
+        Vec3<int32_t> g;
+        sampleAccel(&a, &g);
+        n--;
     }
 }
 

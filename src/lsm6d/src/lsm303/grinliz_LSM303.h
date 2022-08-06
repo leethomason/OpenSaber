@@ -36,7 +36,7 @@ public:
     // divisor for raw data
     static const int DIV = 4096;    
 
-    bool begin(const void*, uint8_t);
+    bool begin(const void*);
 
     void flushAccel(int reserve);
 
@@ -65,6 +65,9 @@ public:
     void setMagDataRate(int hz);   // 10, 20, 50, 100
     int getMagDataRate() const;
 
+    void log(int nSamples) { logTest(nSamples, false); }
+    void test() { logTest(20, true); }
+
 private:
     static bool dataValid(int t, const Vec3<int32_t>& a, const Vec3<int32_t>& b) {
         return     (b.x - a.x > t) 
@@ -73,6 +76,8 @@ private:
     }
 
     int available();
+
+    void logTest(int nSamples, bool doAsserts);
 
     // how much delta do we need to operate? On the one hand, want to get the
     // swing on quickly. But after that, recalibrate should really have good 

@@ -90,8 +90,8 @@ void LEDManager::process()
         {
             if (m_style == BLINK_BREATH)
             {
-                FixedNorm dt(dMillis % m_cycle, m_cycle);
-                int32_t val = 128 + iSin(dt).scale(128);
+                FixedNorm dt = divToFixed<FixedNorm>(dMillis % m_cycle, m_cycle);
+                int32_t val = 128 + scale(sinLerp(dt), 128);
                 if (val < 0)
                     val = 0;
                 if (val > 255)
@@ -271,12 +271,6 @@ void SPLog::eol() const
 void AssertOut(const char *message, const char *file, int line)
 {
     Log.p("ASSERT: ").p(message).p(" ").p(file).p(" ").p(line).eol();
-}
-
-void AssertOut2(const char *message, int x, int y, const char *file, int line)
-{
-    Log.p("ASSERT: ").p(message).p(" ").p(file).p(" ").p(line).eol();
-    Log.p("   value0=").p(x).p(" value1=").p(y).eol();
 }
 
 ProfileData *ProfileData::root = 0;

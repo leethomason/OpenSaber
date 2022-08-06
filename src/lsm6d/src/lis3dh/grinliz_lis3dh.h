@@ -22,7 +22,7 @@ class GrinlizLIS3DH
 public:
     GrinlizLIS3DH(int cs) : _spi(0), _cs(cs) {}
 
-    void begin(SPIClass* spi, uint8_t dataRate);
+    void begin(SPIClass* spi, uint8_t dataRate = LIS3DH_DATARATE_100_HZ);
 
     // Interface:
     // FIFO queue
@@ -33,7 +33,12 @@ public:
         return sampleAccel(&v->x, &v->y, &v->z);
     }
 
+    void log(int nSamples) { logTest(nSamples, false); }
+    void test() { logTest(20, true); }
+
 private:
+    void logTest(int nSamples, bool doAsserts);
+
     bool sample(int16_t *x, int16_t *y, int16_t *z);
     uint8_t readReg(uint8_t);
     void writeReg(uint8_t reg, uint8_t val);

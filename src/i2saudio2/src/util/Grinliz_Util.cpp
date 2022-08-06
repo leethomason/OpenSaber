@@ -45,41 +45,25 @@ bool TestUtil()
     TEST_IS_EQ(lerp1024(0, 16, 512), 8);
     TEST_IS_EQ(lerp1024(-16, 0, 512), -8);
 
-    // iSin, iSin255 madness
-    TEST_IS_TRUE(iSin(0) == 0);
-    TEST_IS_TRUE(iSin(FixedNorm(1, 4)) == 1);
-    TEST_IS_TRUE(iSin(FixedNorm(2, 4)) == 0);
-    TEST_IS_TRUE(iSin(FixedNorm(3, 4)) == -1);
-
-    TEST_IS_TRUE(iInvSin_S3(0) == 0);
-    TEST_IS_TRUE(iInvSin_S3(ISINE_ONE) == ISINE_90);
-    TEST_IS_TRUE(iInvSin_S3(-ISINE_ONE) == -ISINE_90);
-    TEST_IS_TRUE(iInvSin_S3(ISINE_HALF) == ISINE_30);
-
-    TEST_IS_TRUE(iInvCos_S3(0) == ISINE_90);
-    TEST_IS_TRUE(iInvCos_S3(ISINE_ONE) == 0);
-    TEST_IS_TRUE(iInvCos_S3(-ISINE_ONE) == ISINE_180);
-
-#ifdef _WIN32
-    for (float r = 0; r <= 1.0f; r += 0.01f) {
-        float f = sinf(r * 2.0f * 3.1415926535897932384626433832795f);
-        FixedNorm fn = iSin(FixedNorm(r));
-        int s3 = iSin_S3(int(r * 32768));
-
-        float fnFloat = fn.toFloat();
-        float s3Float = float(s3) / 4096.0f;
-
-        TEST_IS_TRUE(fabsf(f - fnFloat) < 0.04f);
-        TEST_IS_TRUE(fabsf(f - float(s3) / 4096.0f) < 0.04f);
-    }
-#endif
-
     // Combsort
     {
         int set[10] = { 0, 4, 4, 0, 1, 3, 3, 1, 2, 2};
         combSort(set, 10);
         for(int i=1; i<10; ++i)
             TEST_IS_TRUE(set[i] >= set[i - 1]);
+    }
+
+    // Angle range
+    {
+        TEST_IS_TRUE(distBetweenAngle(350, 10, 360) == 20);
+        TEST_IS_TRUE(distBetweenAngle(10, 350, 360) == 20);
+        TEST_IS_TRUE(distBetweenAngle(-10, 10, 360) == 20);
+        TEST_IS_TRUE(distBetweenAngle(10, -10, 360) == 20);
+        TEST_IS_TRUE(distBetweenAngle(10, 40, 360) == 30);
+        TEST_IS_TRUE(distBetweenAngle(40, 10, 360) == 30);
+        TEST_IS_TRUE(distBetweenAngle(200, 210, 360) == 10);
+        TEST_IS_TRUE(distBetweenAngle(210, 200, 360) == 10);
+        TEST_IS_TRUE(distBetweenAngle(180, -180, 360) == 0);
     }
 
     return true;
@@ -185,7 +169,7 @@ uint32_t hash32(const char* v, uint32_t h)
 bool TestAverageSample()
 {
     {
-        AverageSample<Vec3<int>, Vec3<int>, 4> ave(Vec3<int>(2, 4, 8));
+        AverageSample<Vec3<int>, 4> ave(Vec3<int>(2, 4, 8));
         Vec3<int> r = ave.average();
         TEST_IS_TRUE(r.x == 2);
         TEST_IS_TRUE(r.y == 4);
@@ -205,7 +189,7 @@ bool TestAverageSample()
         TEST_IS_TRUE(ave.average().isZero());
     }
     {
-        AverageSample<uint16_t, uint32_t, 256> ave(4000);
+        AverageSample<uint32_t, 256> ave(4000);
         TEST_IS_TRUE(ave.average() == 4000);
         for (int i = 0; i < 128; i++) {
             ave.push(8000);
@@ -213,7 +197,7 @@ bool TestAverageSample()
         TEST_IS_TRUE(ave.average() == 6000);
     }
     {
-        AverageSample<float, float, 2> ave(0);
+        AverageSample<float, 2> ave(0);
         ave.push(1.0f);
         ave.push(1.0f);
         ave.push(0.0f);
@@ -226,6 +210,20 @@ bool TestAverageSample()
 
 bool TestCStr()
 {
+    //Log.p("sizeof(CStr<3>=").p(sizeof(CStr<3>)).eol();  // 8
+    //Log.p("sizeof(CStr<4>=").p(sizeof(CStr<4>)).eol();  // 8
+    //Log.p("sizeof(CStr<7>=").p(sizeof(CStr<7>)).eol();  // 12
+    //Log.p("sizeof(CStr<10>=").p(sizeof(CStr<10>)).eol();// 16
+
+    TEST_EQUAL(4, sizeof(CStr<3>));
+    TEST_EQUAL(5, sizeof(CStr<4>));
+    TEST_EQUAL(8, sizeof(CStr<7>));
+    TEST_EQUAL(11, sizeof(CStr<10>));
+
+    CStr<2> a = "a";
+    CStr<2> b = "b";
+    TEST(a < b);
+
     TEST_IS_TRUE(strStarts("FooBar", "Foo"));
     TEST_IS_FALSE(strStarts("FooBar", "Bar"));
     TEST_IS_FALSE(strStarts("Foo", "FooBar"));
@@ -667,12 +665,13 @@ int AnimateProp::tick(uint32_t delta, int* target)
 
     if (m_subPeriod) {
         // Breathy-blinking
-        FixedNorm t(m_time, m_subPeriod);
-        FixedNorm shift(1, 8);
-        FixedNorm s = iSin(t - shift);
-        if (s < 0) s = 0;
+        float t = float(m_time) / m_subPeriod;
+        constexpr float shift = 1.0f / 8.0f;
+        float s = sinf((t - shift) * k2Pi_float);
+        if (s < 0) 
+            s = 0;
 
-        m_value = s.scale(m_end);
+        m_value = static_cast<int>(s * m_end);
     }
     else {
         // Straight animation.

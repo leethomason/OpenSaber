@@ -9,7 +9,7 @@
 #include <Adafruit_ZeroI2S.h>
 #include <Adafruit_ZeroDMA.h>
 
-#define LOG_PERF
+//#define LOG_PERF
 
 Nada_FlashTransport_SPI flashTransport(SS1, &SPI1);
 Nada_SPIFlash spiFlash(&flashTransport);

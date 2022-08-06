@@ -19,14 +19,16 @@ public:
 
     GrinlizLSM6D(int cs);
 
-    void begin(SPIClass *spi, Freq freq);
+    void begin(SPIClass *spi, Freq freq = Freq::HZ_100);
 
-    void flush();
+    void flush() { flushAccel(0); }
+    // flushes the gyro too, the name is convention
+    void flushAccel(int reserve);
 
     // Accel in g-force
     // Gyro in degrees per second. 
     // Returns true if sample read. Can be used in a while() loop.
-    bool sampleAccelGyro(Vec3<Fixed115> *accel, Vec3<int32_t> *gyro);
+    bool sampleAccel(Vec3<Fixed115> *accel, Vec3<int32_t> *gyro);
 
     enum
     {
@@ -35,6 +37,9 @@ public:
     uint8_t whoAmI();
 
     void test();
+    void log(int nSamples);
+
+    void recalibrateMag() {}
 
 private:
     uint8_t _cs;
