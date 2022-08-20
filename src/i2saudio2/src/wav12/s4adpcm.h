@@ -25,16 +25,15 @@
 #include <stdint.h>
 #include <limits.h>
 #include <assert.h>
+#include <stdlib.h>
+#include <algorithm>
 
 #if defined(_MSC_VER)
 #   include <assert.h>
 #	define W12ASSERT assert
 #else
-#   define W12ASSERT(x)
+#   define W12ASSERT
 #endif
-
-static const int S4ADPCM_4BIT = 4;
-static const int S4ADPCM_8BIT = 8;
 
 /* 
     A 4-bit ADPCM encoder/decoder. It is not any of the "official" ADPCM codecs.
@@ -58,82 +57,81 @@ static const int S4ADPCM_8BIT = 8;
     bits (State.shift). A large delta will increase the scaling for the
     next sample, a small delta will decrease it, so that the codec is always
     "chasing" the correct scale for the current samples.
+
+    8/2022 changes:
+    - Processing of looping sounds will now look for a good zero point. This fixes
+      the "pop on loop".
+    - 8bit was removed: popping fixed, quality improved in 4bit
+    - More tables.
+    - Encoding/decoding will exceed 16bit limits, but the value passed on is clamped.
+      this is a big code simplification
+    - The value encoded in the stream isn't a multiplier, but an index to STEP.
+      This was the big gain to encoding and the algorithm
+    - Error is about 0.5 to 0.8 of previous values, across the board.
+    Nice improvements. I'm very happy with the insights, and fiati.wav
+    is audibly improved.
 */
 class S4ADPCM
 {
 public:
-    struct State {
-        int prev2 = 0;
-        int prev1 = 0;
-        int shift = 0;
-        bool high = false;
-        int volumeShifted = 0;
-        int volumeTarget = 0;
+    static const int ZERO_INDEX = 8;
+    static const int TABLE_SIZE = 9;
 
-        int guess() const {
-            int g = 2 * prev1 - prev2;
-            if (g > SHRT_MAX) g = SHRT_MAX;
-            if (g < SHRT_MIN) g = SHRT_MIN;
-            return g;
+    struct State {
+        bool high = false;
+        int32_t prev2 = 0;
+        int32_t prev1 = 0;
+        int32_t shift = 0;
+        int32_t volumeShifted = 0;
+        int32_t volumeTarget = 0;
+
+        int32_t guess() const {
+            // TotalError = 895  SimpleError = 52945
+            //return 2 * prev1 - prev2;
+            
+            // In between: good numbers across the board,
+            // but favors hum & swing
+            // TotalError = 588  SimpleError = 33127
+            return prev1 + (prev1 - prev2) / 2;
+            
+            // TotalError = 586  SimpleError = 28855
+            //return prev1;
         }
-        void push(int value) {
+        void push(int32_t value) {
             prev2 = prev1;
             prev1 = value;
         }
+
+        void doShift(const int* table, int index) {
+            W12ASSERT(index >= 0 && index < 16);
+
+            int delta = abs(index - ZERO_INDEX); // 0 - 8
+            shift += table[delta];
+            if (shift < 0) shift = 0;
+            if (shift > SHIFT_LIMIT_4) shift = SHIFT_LIMIT_4;
+        }
     };
 
-    static int encode4(const int16_t* data, int32_t nSamples, uint8_t* compressed, State* state, const int* table, int32_t* aveErrSquared);
+    static int encode4(const int16_t* data, int32_t nSamples, uint8_t* compressed, State* state, const int* table);
     static void decode4(const uint8_t *compressed,
                         int32_t nSamples,
-                        int volume, // 256 is neutral; normally 0-256. Above 256 can boost & clip.
+                        int32_t volume, // 256 is neutral; normally 0-256. Above 256 can boost & clip.
                         bool add,   // if true, add to the 'data' buffer, else write to it
                         int32_t *samples, State *state, const int *table);
 
-    static void encode8(const int16_t* data, int32_t nSamples, uint8_t* compressed, State* state, const int* table, int32_t* aveErrSquared);
-    static void decode8(const uint8_t *compressed,
-                        int32_t nSamples,
-                        int volume, // 256 is neutral; normally 0-256. Above 256 can boost & clip.
-                        bool add,   // if true, add to the 'data' buffer, else write to it
-                        int32_t *samples, State *state, const int *table);
-
-    static const int TABLE_SIZE = 9;
-    static const int* getTable(int bits, int i) {
+    static const int* getTable(int i) {
         assert(i >= 0 && i < N_TABLES);
-        assert(bits == 8 || bits == 4);
-        if (bits == 8) return DELTA_TABLE_8[i];
         return DELTA_TABLE_4[i];
     }
 
 private:
-    static const int SHIFT_LIMIT_4 = 12;
-    static const int SHIFT_LIMIT_8 = 8;
+    static const int SHIFT_LIMIT_4 = 14;
     static const int VOLUME_EASING = 32;    // 8, 16, 32, 64? initial test on powerOn sound seemed 32 was good.
 
-    static int64_t calcError(int value, int p) 
+    inline static int32_t sat_mult(int32_t a, int32_t b)
     {
-        // Want this is 12 bit space, so divide by 16
-        value /= 16;
-        p /= 16;
-        int64_t d = int64_t(value) - p;
-        return d * d;
-    }
-
-    inline static int32_t scaleVol(int32_t value, int32_t volumeShifted)
-    {
-        // Checking for overflow has an almost too-small perf impact.
-        #if true
-        int64_t s64 = int64_t(value) * int64_t(volumeShifted);
-        if (s64 > INT32_MAX)
-            return INT32_MAX;
-        else if (s64 < INT32_MIN)
-            return INT32_MIN;
-        return (int32_t)s64;
-        #else
-        // max: SHRT_MAX * 256 * 256
-        //      32767 * 256 * 256 = 2147418112
-        //              INT32_MAX = 2147483647
-        return value * volumeShifted;
-        #endif
+        int64_t s64 = int64_t(a) * int64_t(b);
+        return (int32_t)std::min(std::max(s64, int64_t(INT32_MIN)), int64_t(INT32_MAX));
     }
 
     inline static int32_t sat_add(int32_t x, int32_t y)
@@ -152,7 +150,7 @@ private:
     }
 
 public:
-    static const int N_TABLES = 4;
+    static const int N_TABLES = 6;
     static const int DELTA_TABLE_4[N_TABLES][TABLE_SIZE];
-    static const int DELTA_TABLE_8[N_TABLES][TABLE_SIZE];
+    static const int STEP[16];
 };

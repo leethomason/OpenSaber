@@ -1,6 +1,8 @@
+INNER_TRIM = 0.2;
+
 INNER_DX = 21.5;
-INNER_DY = 20.7;
-INNER_ARCY = 32.0;
+INNER_DY = 20.5;    // 20.7
+INNER_ARCY = 31.8; // 32.0 - inner trim was a challenge
 
 POWER_DX = 9.3;
 POWER_DY = 14.3;

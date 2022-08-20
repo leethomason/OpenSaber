@@ -3,8 +3,8 @@ use <../shapes.scad>
 use <../inset.scad>
 include <dim.scad>
 
-DRAW_AFT = true;
-DRAW_FORE = false;
+DRAW_AFT = false;
+DRAW_FORE = true;
 
 ARC_INNER_DX = INNER_DX / 2;
 ARC_INNER_DY = (INNER_ARCY - INNER_DY) / 2;
@@ -24,6 +24,16 @@ WINDOW_ADD = 6.0;
 WINDOW_CUT = 1.0;
 
 $fn = 80;
+
+module railJoint()
+{
+    W = 5.0;
+    C = 10.0;
+    L = 8.0;
+
+    translate([-W/2, -100, 0]) cube(size=[W, 100, L]);
+    translate([0, 0, L]) rotate([90, 0, 0]) cylinder(h=100, d=C);
+}
 
 module arcCylinder(h, dx, dy)
 {
@@ -99,8 +109,8 @@ module carriage()
         inner();
         scale([INNER_SCALE, INNER_SCALE, 1]) inner(1);
 
-        for(i=[1:7]) {
-            translate([0, 0, M_CARRIAGE + 2 + i*20]) hull() {
+        for(i=[1:5]) {
+            translate([0, 0, M_CARRIAGE + 0 + i*20]) hull() {
                 S = 10;
                 translate([-50, 2, 0]) rotate([0, 90, 0]) cylinder(h=100, d=S);
                 translate([-50, 50, -S/2]) cube(size=[100, 1, S]);
@@ -164,6 +174,8 @@ if (DRAW_FORE) {
         translate([0, 0, M_WINDOW_1]) windowCut();
         translate([0, 0, M_WINDOW_0]) windowCut();
 
+        translate([0, 0, M_SWITCH_SECTION_START-EPS]) railJoint();
+
     }
 
     intersection() {
@@ -179,7 +191,10 @@ if (DRAW_AFT) {
     difference() {
         carriage();
 
-        translate([-50, -50, M_SWITCH_SECTION_START]) cube(size=[100, 100, 1000]);
+        difference() {
+            translate([-50, -50, M_SWITCH_SECTION_START]) cube(size=[100, 100, 1000]);
+            translate([0, 0, M_SWITCH_SECTION_START]) railJoint();
+        }
 
         // hint of flattening
         //translate([-50, -INNER_ARCY/2, 0]) cube(size=[200, 0.5, 200]);

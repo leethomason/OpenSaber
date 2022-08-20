@@ -1,4 +1,5 @@
-#pragma once
+#ifndef IMEMORY_AND_ISTREAM
+#define IMEMORY_AND_ISTREAM
 
 #include <stdint.h>
 
@@ -24,3 +25,5 @@ public:
     // stream, not necessarily the downstream output.
     virtual bool done() const = 0;
 };
+
+#endif // IMEMORY_AND_ISTREAM
