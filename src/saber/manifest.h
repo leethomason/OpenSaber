@@ -22,36 +22,41 @@
 
 #pragma once
 
-#include "./src/util/Grinliz_Util.h"
-#include "./src/util/interface.h"
+#include "../util/interface.h"
 
 struct MemUnit {
     static const int NAME_LEN = 8;
 
-    CStrBuf<NAME_LEN> name;   // NOT null terminated, but 0-filled.
+    char name[NAME_LEN];   // NOT null terminated, but 0-filled.
     uint32_t offset;
-    uint32_t size : 24;
-    uint32_t is8Bit : 1;
-    uint32_t table : 2;
-    uint32_t reserve : 5;
+    uint32_t size : 24;     // if needed, an extra sample is added so that size==nSamples
+    uint32_t table : 4;     // 0-15 to select table
 
-    uint32_t numSamples() const { return is8Bit ? size : size * 2; }
-    uint32_t timeInMSec() const {
-        return numSamples() * 1000 / 22050;
-    }
-    CStr<10> getName() const {
-        CStr<10> n;
-        name.toStr(&n);
-        return n;
-    }
+    uint32_t numSamples() const { return size * 2; }
+    bool nameMatch(const char* n) const;
+    uint32_t nameHash(uint32_t h) const;
 };
 
 static_assert(sizeof(MemUnit) == 16, "16 byte MemUnit");
 
-enum {
-    MEM_IMAGE_NUM_DIR   = 4,
-    MEM_IMAGE_NUM_FILES = 60,
-    MEM_IMAGE_TOTAL = MEM_IMAGE_NUM_DIR + MEM_IMAGE_NUM_FILES
+struct ConfigUnit {
+    static const int NUM_CONFIG = 8;
+    char name[MemUnit::NAME_LEN];
+    uint8_t soundFont, bc_r, bc_b, bc_g;
+    uint8_t ic_r, ic_b, ic_g, reserve;
+};
+
+static_assert(sizeof(ConfigUnit) == 16, "16 byte ConfigUnit");
+static_assert(sizeof(ConfigUnit) == sizeof(MemUnit), "MemUnit and ConfigUnit should be the same size");
+
+
+struct MemImage {
+    static const int NUM_DIR = 4;
+    static const int NUM_FILES = 60;
+    static const int NUM = NUM_DIR + NUM_FILES;
+    static const size_t SIZE = NUM * sizeof(MemUnit);
+
+    MemUnit unit[NUM];
 };
 
 
@@ -59,18 +64,25 @@ class Manifest
 {
     public:
         Manifest();
-        // Only scan interacts with the SPI. Afterwards, everything is cached locally.
-        void scan(IMemory* flash);
+        // Used by the SPI readed to initialize the block of memory.
+        MemImage* getBasePtr() { return &image; }
+
         uint32_t dirHash() const;
         const MemUnit& getUnit(int id) const;
+        const ConfigUnit& getConfig(int id) const;
         
         int getDir(const char* dir) const;
-        void dirRange(int dir, int* start, int* count) const;
         int getFile(int dir, const char* fname) const;
+        int getFile(const char* dir, const char* fname) const {
+            return getFile(getDir(dir), fname);
+        }
+
+        static bool Test();
 
     private:        
+        void dirRange(int dir, int* start, int* count) const;
         int find(const char* name, int start, int n) const;
 
-        MemUnit memUnit[MEM_IMAGE_TOTAL];
+        MemImage image;
 };
 

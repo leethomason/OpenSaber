@@ -21,66 +21,122 @@
 */
 
 #include "manifest.h"
+#include <memory.h>
+#include <assert.h>
+
+#define TEST(x) { if (!(x)) { assert(false); return false; }}
+
+uint32_t MemUnit::nameHash(uint32_t h) const
+{
+    for (int i = 0; i < NAME_LEN; ++i) {
+        // Simple form of the hash:
+        // h = h * 33 ^ (*v);
+        // But M0+ doesn't have 64 intermediate multiply. So use shifts:
+        h = ((h << 5) + h) ^ name[i];
+    }
+    return h;
+}
+
+bool MemUnit::nameMatch(const char* n) const
+{
+    if (n == 0 || *n == 0 || *name == 0)
+        return false;
+
+    const char* q = name;
+    const char* p = n;
+    for (; *p && *q && q < (name + NAME_LEN); ++p, ++q) {
+        if (*p != *q)
+            return false;
+    }
+    if (q < name + NAME_LEN)
+        return *q == 0 && *p == 0;  // both null terminated
+    return *p == 0; // if all characters read, just n needs to be null terminated
+}
+
 
 Manifest::Manifest()
 {
-    memset(memUnit, 0, sizeof(MemUnit) * MEM_IMAGE_TOTAL);
-}
-
-void Manifest::scan(IMemory* flash)
-{
-    flash->readMemory(0, (uint8_t*) memUnit, sizeof(MemUnit) * MEM_IMAGE_TOTAL);
+    memset(image.unit, 0, MemImage::SIZE);
 }
 
 const MemUnit& Manifest::getUnit(int id) const
 {
-    id = glClamp(id, 0, MEM_IMAGE_TOTAL-1);
-    return memUnit[id];
+    if (id < 0) id = 0;
+    if (id >= MemImage::NUM) id = MemImage::NUM - 1;
+    return image.unit[id];
 }
+
+const ConfigUnit& Manifest::getConfig(int id) const
+{
+    if (id < 0) id = 0;
+    if (id >= MemImage::NUM) id = MemImage::NUM - 1;
+    return *((const ConfigUnit*)(& image.unit[id]));
+}
+
 
 uint32_t Manifest::dirHash() const
 {
     uint32_t h = 0;
-    for(int i=0; i<MEM_IMAGE_NUM_DIR; ++i) {
-        const char *start = (const char *)&memUnit[i];
-        const char* end = start + MemUnit::NAME_LEN;
-        h = hash32(start, end, h);
+    for(int i=0; i< MemImage::NUM_DIR; ++i) {
+        h = image.unit[i].nameHash(h);
     }
     return h;
 }
 
 int Manifest::find(const char* name, int start, int n) const
 {
-    CStrBuf<MemUnit::NAME_LEN> strBuf = name;
     for(int i=0; i<n; ++i) {
-        if (strBuf == memUnit[i+start].name) {
+        if (image.unit[i + start].nameMatch(name)) {
             return i + start;
         }
     }
     return -1;
 }
 
-
 int Manifest::getDir(const char* name) const
 {
-    int dir = find(name, 0, MEM_IMAGE_NUM_DIR);
+    int dir = find(name, 0, MemImage::NUM_DIR);
     return dir;
 }
 
 void Manifest::dirRange(int dir, int* start, int* count) const
 {
-    dir = glClamp(dir, 0, MEM_IMAGE_NUM_DIR-1);
-    *start = memUnit[dir].offset;   // gah. ugly. need to fix in the generator.
-    *count = memUnit[dir].size;
+    if (dir < 0) dir = 0;
+    if (dir >= MemImage::NUM_DIR) dir = MemImage::NUM_DIR - 1;
+
+    *start = image.unit[dir].offset;   // gah. ugly. need to fix in the generator.
+    *count = image.unit[dir].size;
 }
 
 int Manifest::getFile(int dir, const char* fname) const
 {
+    if (dir < 0 || dir >= MemImage::NUM_DIR)
+        return -1;
+
     int start = 0;
     int count = 0;
     dirRange(dir, &start, &count);
 
-    int file = find(fname, start, count);
-    return file;
+    return find(fname, start, count);
 }
 
+
+bool Manifest::Test()
+{
+    {
+        MemUnit mu;
+        memset(&mu, 0, sizeof(mu));
+
+        memcpy(mu.name, "foo", 3);
+        TEST(mu.nameMatch("foo"));
+        TEST(!mu.nameMatch("fo"));
+        TEST(!mu.nameMatch("fooo"));
+
+        memcpy(mu.name, "12345678", 8);
+        TEST(mu.nameMatch("12345678"));
+        TEST(!mu.nameMatch("12345678a"));
+        TEST(!mu.nameMatch("1234567"));
+    }
+
+    return true;
+}
