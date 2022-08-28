@@ -12,7 +12,7 @@ actions = [
         # wav12ly utility files
         "src" : "../../wav12ly",
         "dst" : ["./i2saudio2", "./saber"],
-        "files" : ["manifest.h", "manifest.cpp"]
+        "files" : ["manifest.h", "manifest.cpp", "i2saudiodrv.cpp", "i2saudiodrv.h", "spistream.cpp", "spistream.h"]
     }
 ]
 

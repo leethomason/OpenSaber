@@ -61,12 +61,10 @@ private:
         uint32_t addr = 0;
         uint32_t size = 0;
         int table = 0;
-        bool is8Bit = false;
         bool loop = false;
 
         void clear() {
             addr = size = table = 0;
-            is8Bit = false;
             loop = false;
         }
     };

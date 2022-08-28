@@ -48,8 +48,10 @@ void scan()
 
 void dumpMemUnit(int id, const MemUnit& memUnit)
 {
-    Log.p("[").p(id).p("] ").pt(memUnit.name).p(" addr=").p(memUnit.offset).p(" size=").p(memUnit.size)
-       .p(" bits=").p(memUnit.is8Bit ? 8 : 4)
+    char name[9] = {0};
+    memcpy(name, memUnit.name, 8);
+
+    Log.p("[").p(id).p("] ").p(name).p(" addr=").p(memUnit.offset).p(" size=").p(memUnit.size)
        .p(" table=").p(memUnit.table)
        .p(" samples=").p(memUnit.numSamples())
       .eol();
@@ -117,7 +119,7 @@ int test()
     int32_t total = 0;
 
     S4ADPCM::State state;
-    const int* table = S4ADPCM::getTable(4, 0);
+    const int* table = S4ADPCM::getTable(0);
     S4ADPCM::decode4(gCompressed, TEST_SOURCE_SAMPLES, 256, false, gTarget, &state, table);
     for(int i=0; i<TEST_SOURCE_SAMPLES*2; i++) {
         total += gTarget[i];
@@ -135,7 +137,8 @@ void setup()
     Log.p("Serial open.").eol();
 
     spiFlash.begin();
-    manifest.scan(&spiFlash);
+    spiFlash.readMemory(0, (uint8_t*) manifest.getBasePtr(), Manifest::IMAGE_SIZE);
+
     i2sAudioDriver.begin();
 
     scan();

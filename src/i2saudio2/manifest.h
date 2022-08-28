@@ -24,7 +24,11 @@
 
 #include <stdint.h>
 #include <cstddef>
+#ifdef ARDUINO
 #include "./src/util/interface.h"
+#else
+#include "interface.h"
+#endif
 
 struct MemUnit {
     static const int NAME_LEN = 8;
@@ -65,6 +69,8 @@ struct MemImage {
 class Manifest
 {
     public:
+        static const size_t IMAGE_SIZE = MemImage::SIZE;
+
         Manifest();
         // Used by the SPI readed to initialize the block of memory.
         MemImage* getBasePtr() { return &image; }
@@ -79,10 +85,10 @@ class Manifest
             return getFile(getDir(dir), fname);
         }
 
+        void dirRange(int dir, int* start, int* count) const;
         static bool Test();
 
     private:        
-        void dirRange(int dir, int* start, int* count) const;
         int find(const char* name, int start, int n) const;
 
         MemImage image;

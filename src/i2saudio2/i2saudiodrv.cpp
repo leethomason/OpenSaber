@@ -83,7 +83,7 @@ void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
         if (isQueued[i]) {
             isQueued[i] = false;
             spiStream[i].set(status[i].addr, status[i].size);
-            expander[i].init(&spiStream[i], status[i].is8Bit ? 8 : 4, status[i].table);
+            expander[i].init(&spiStream[i], status[i].table);
             expander[i].rewind();
             //Serial.print("queue "); Serial.print(i); Serial.print(" "); Serial.print(status[i].addr); Serial.print(" "); Serial.println(status[i].size);
         }
@@ -92,13 +92,12 @@ void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
     for(int i=0; i<AUDDRV_NUM_CHANNELS; ++i) {
         int n = 0;
         if (status[i].addr) {
-            int bits = status[i].is8Bit ? 8 : 4;
-            const int* table = S4ADPCM::getTable(bits, status[i].table);
-            n = expander[i].expand(fill, AUDDRV_BUFFER_SAMPLES, volume[i], i > 0, bits, table, false);
+            const int* table = S4ADPCM::getTable(status[i].table);
+            n = expander[i].expand(fill, AUDDRV_BUFFER_SAMPLES, volume[i], i > 0, table, false);
 
             if (status[i].loop && n < AUDDRV_BUFFER_SAMPLES) {
                 expander[i].rewind();
-                expander[i].expand(fill + n*2, AUDDRV_BUFFER_SAMPLES - n, volume[i], i > 0, bits, table, false);
+                expander[i].expand(fill + n*2, AUDDRV_BUFFER_SAMPLES - n, volume[i], i > 0, table, false);
                 n = AUDDRV_BUFFER_SAMPLES;
             }
         }
@@ -138,7 +137,7 @@ void I2SAudioDriver::begin()
 
     for(int i=0; i<AUDDRV_NUM_CHANNELS; ++i) {
         spiStream[i].init(spiFlash);
-        expander[i].init(&spiStream[i], 4, 0);   
+        expander[i].init(&spiStream[i], 0);   
         volume[i] = 64;
     }
 
@@ -190,7 +189,6 @@ void I2SAudioDriver::play(int index, bool loop, int channel)
     noInterrupts();
     status[channel].addr = memUnit.offset;
     status[channel].size = memUnit.size;
-    status[channel].is8Bit = memUnit.is8Bit == true;
     status[channel].table = memUnit.table;
     status[channel].loop = loop;
     isQueued[channel] = true;

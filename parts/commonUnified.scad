@@ -12,7 +12,6 @@ DY_SWITCH            =  -2;
 D_PORT              =  7.9;
 D_PORT_SUPPORT      =  12;
 H_PORT              =  16;
-//DY_PORT             =  6;
 
 INCHES_TO_MM        = 25.4;
 X_MC                =   0.7 * INCHES_TO_MM;

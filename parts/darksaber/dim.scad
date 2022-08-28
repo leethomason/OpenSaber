@@ -21,6 +21,10 @@ D_CHARGER_PLUG = 11.0;
 D_BOLT = 3.1;
 D_SWITCH = 14.1;
 
+PCB_BOLT_DX = INNER_DX - 4.0;
+PCB_BOLT_DY = 1.0;
+PCB_BOLT_D_DIAMOND = 2.2;
+
 // Back plate
 // Speaker
 // Header

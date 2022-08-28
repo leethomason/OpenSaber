@@ -3,8 +3,8 @@ use <../shapes.scad>
 use <../inset.scad>
 include <dim.scad>
 
-DRAW_AFT = false;
-DRAW_FORE = true;
+DRAW_AFT = true;
+DRAW_FORE = false;
 
 ARC_INNER_DX = INNER_DX / 2;
 ARC_INNER_DY = (INNER_ARCY - INNER_DY) / 2;
@@ -22,6 +22,10 @@ M_WINDOW_1 = M_BOLT_2 - 7.0;
 M_WINDOW_0 = M_BOLT_1 + 10.0;
 WINDOW_ADD = 6.0;
 WINDOW_CUT = 1.0;
+
+D_BATTERY           = 18.50 + 0.5;
+Z_BATTERY_18500     = 70.0;
+M_BATTERY = M_SWITCH_SECTION_START - Z_BATTERY_18500;
 
 $fn = 80;
 
@@ -112,11 +116,34 @@ module carriage()
         for(i=[1:5]) {
             translate([0, 0, M_CARRIAGE + 0 + i*20]) hull() {
                 S = 10;
-                translate([-50, 2, 0]) rotate([0, 90, 0]) cylinder(h=100, d=S);
+                translate([-50, 5, 0]) rotate([0, 90, 0]) cylinder(h=100, d=S);
                 translate([-50, 50, -S/2]) cube(size=[100, 1, S]);
             }
         }
     }
+}
+
+module diamondBolt(d, dz)
+{
+    r = d/2;
+    polygonXY(h=dz, points=[
+        [0, -r], [r, 0], [0, r], [-r, 0]
+    ]);
+}
+
+module bat(extend)
+{
+    color("red") 
+        translate([0, INNER_ARCY/2 - D_BATTERY / 2, 0])
+            cylinder(h=Z_BATTERY_18500 + extend, d=D_BATTERY);
+}
+
+module buttress()
+{
+    DX = 5.0;
+    Y = 5.0;
+    translate([INNER_DX/2 - DX, -INNER_ARCY/2, 0]) cube(size=[12, INNER_ARCY/2 + Y, 3.0]);
+    mirror([-1, 0, 0]) translate([INNER_DX/2 - DX, -INNER_ARCY/2, 0]) cube(size=[12, INNER_ARCY/2 + Y, 3.0]);
 }
 
 if (DRAW_FORE) {
@@ -188,17 +215,35 @@ if (DRAW_FORE) {
 }
 
 if (DRAW_AFT) {
+    Y_MC = 9.0;
+    MC_DY = INNER_ARCY / 2 - D_BATTERY - Y_MC;
+
     difference() {
-        carriage();
+        union() {
+            carriage();
+            intersection() {
+                scale([0.95, 0.95, 1]) inner(1);
+                for(i=[0:23])
+                    translate([0, 0, M_CARRIAGE + EPS + i * 5.1]) buttress();
+            }
+        }
 
         difference() {
             translate([-50, -50, M_SWITCH_SECTION_START]) cube(size=[100, 100, 1000]);
             translate([0, 0, M_SWITCH_SECTION_START]) railJoint();
         }
 
-        // hint of flattening
-        //translate([-50, -INNER_ARCY/2, 0]) cube(size=[200, 0.5, 200]);
+        translate([PCB_BOLT_DX/2, PCB_BOLT_DY, M_CARRIAGE - EPS]) diamondBolt(dz=6.0, d=PCB_BOLT_D_DIAMOND);
+        translate([-PCB_BOLT_DX/2, PCB_BOLT_DY, M_CARRIAGE - EPS]) diamondBolt(dz=6.0, d=PCB_BOLT_D_DIAMOND);
+
+        translate([0, MC_DY, M_CARRIAGE]) mc();
+        translate([0, 0, M_BATTERY]) bat(10);
+
+        CUT_X = 18.0;
+        translate([-CUT_X/2, 2.0, M_BATTERY]) cube(size=[CUT_X, 100, 100]);
     }
+    *translate([0, MC_DY, M_CARRIAGE]) mc();
+    *translate([0, 0, M_BATTERY]) bat(0);
 }
 
 *color("red") {
