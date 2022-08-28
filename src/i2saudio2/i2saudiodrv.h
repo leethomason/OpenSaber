@@ -25,7 +25,7 @@
 #include <stdint.h>
 #include "spistream.h"
 #include "./src/wav12/expander.h"
-#include "./src/util/interface.h"
+#include "./src/wav12/interface.h"
 
 class Adafruit_ZeroDMA;
 class Adafruit_ZeroI2S;

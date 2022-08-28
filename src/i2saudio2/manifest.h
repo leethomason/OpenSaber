@@ -24,11 +24,6 @@
 
 #include <stdint.h>
 #include <cstddef>
-#ifdef ARDUINO
-#include "./src/util/interface.h"
-#else
-#include "interface.h"
-#endif
 
 struct MemUnit {
     static const int NAME_LEN = 8;

@@ -21,7 +21,6 @@
 */
 
 #include "spistream.h"
-#include "./src/util/interface.h"
 
 void SPIStream::set(uint32_t addr, uint32_t size)
 {

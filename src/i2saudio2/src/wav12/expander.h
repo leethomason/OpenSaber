@@ -24,12 +24,7 @@
 #define WAV_COMPRESSION
 
 #include "s4adpcm.h"
-
-#ifdef ARDUINO
-#include "../util/interface.h"
-#else
 #include "interface.h"
-#endif
 
 #include <stdint.h>
 #include <string.h>

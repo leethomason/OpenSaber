@@ -4,15 +4,17 @@ import shutil
 
 actions = [
     {
-        # wav12ly library files
         "src" : "../../wav12ly/wav12", 
         "dst" : ["./i2saudio2/src/wav12", "./saber/src/wav12"], 
         "files" : ["*.cpp", "*.h"]
     },{
-        # wav12ly utility files
         "src" : "../../wav12ly",
         "dst" : ["./i2saudio2", "./saber"],
         "files" : ["manifest.h", "manifest.cpp", "i2saudiodrv.cpp", "i2saudiodrv.h", "spistream.cpp", "spistream.h"]
+    },{
+        "src" : "./fpm/include/fpm",
+        "dst" : ["./i2saudio2/src/fpm/include/fpm", "./saber/src/fpm/include/fpm"],
+        "files" : ["*.hpp"]
     }
 ]
 
