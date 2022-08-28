@@ -1,6 +1,7 @@
 from pathlib import Path
 import sys
 import shutil
+import os
 
 actions = [
     {
@@ -15,6 +16,14 @@ actions = [
         "src" : "./fpm/include/fpm",
         "dst" : ["./i2saudio2/src/fpm/include/fpm", "./saber/src/fpm/include/fpm"],
         "files" : ["*.hpp"]
+    },{
+        "src" : "./nada_flashmem",
+        "dst" : ["./i2saudio2/src/nada_flashmem"],
+        "files" : ["*.h", "*.cpp"]
+    },{
+        "src" : "./util",
+        "dst" : ["./i2saudio2/src/util"],
+        "files" : ["*.h", "*.cpp"]
     }
 ]
 
@@ -31,5 +40,6 @@ for action in actions:
                 #check(s, dst)
                 print(s, "->", dst)
                 if copy:
+                    os.makedirs(d, exist_ok=True)
                     shutil.copyfile(s, dst)
     
