@@ -2,8 +2,10 @@
 # Mounting and cutout in python calling file.
 #
 
+[       ]
   o   o
   |   |
   o o o
-  |   |
-  o   o
+
+  
+[       ]
