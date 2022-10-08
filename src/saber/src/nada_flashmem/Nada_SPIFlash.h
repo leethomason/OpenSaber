@@ -1,39 +1,13 @@
-/**
- * @file Adafruit_QSPI_Flash.h
- *
- * The MIT License (MIT)
- *
- * Copyright (c) 2019 Ha Thach and Dean Miller for Adafruit Industries LLC
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
-
-#ifndef ADAFRUIT_SPIFLASHBASE_H_
-#define ADAFRUIT_SPIFLASHBASE_H_
+#pragma once
 
 // for debugging
 #define SPIFLASH_DEBUG 0
 
 #include <stdint.h>
-#include "../util/interface.h"
+
 #include "Nada_FlashTransport.h"
 #include "nada_flash_devices.h"
+#include "../wav12/interface.h"
 
 /// Constant that is (mostly) true to all external flash devices
 enum
@@ -44,9 +18,6 @@ enum
 };
 
 // An easy to use interface for working with Flash memory.
-//
-// If you are managing allocation of the Flash space yourself, this is the
-// class to use as it take very little RAM.
 class Nada_SPIFlash : public IMemory
 {
 public:
@@ -86,5 +57,3 @@ private:
     Nada_FlashTransport *_trans;
     SPIFlash_Device_t const *_flash_dev;
 };
-
-#endif /* ADAFRUIT_SPIFLASHBASE_H_ */
