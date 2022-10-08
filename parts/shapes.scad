@@ -78,6 +78,17 @@ module polygonYZ(h, points)
     }  	
 }
 
+module polygonZY(h, points)
+{
+    multmatrix(m = [ [0, 0, 1, 0],
+    				 [0, 1, 0, 0],
+    				 [1, 0, 0, 0],
+    				 [0, 0, 0, 1]
+       			   ])
+    linear_extrude(height = h) {
+        polygon(points=points);
+    }  	
+}
 module polygonXZ(h, points)
 {
     multmatrix(m = [ [1, 0, 0, 0],

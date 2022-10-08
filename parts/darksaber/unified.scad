@@ -27,6 +27,8 @@ D_BATTERY           = 18.50 + 0.5;
 Z_BATTERY_18500     = 70.0;
 M_BATTERY = M_SWITCH_SECTION_START - Z_BATTERY_18500;
 
+MC_DROP = 12.0;
+
 $fn = 80;
 
 module railJoint()
@@ -120,6 +122,15 @@ module carriage()
                 translate([-50, 50, -S/2]) cube(size=[100, 1, S]);
             }
         }
+        W = 4; 
+        H = 10;
+        for(i=[1:5]) {
+            DY = (i==1) ? -2.4 : 0;
+            translate([-50, -10 + DY, M_CARRIAGE + 10 + i*20])
+                polygonZY(h=100, points=[
+                    [-W/2, 0], [W/2, 0], [W/2, H-W], [0, H], [-W/2, H-W]
+                ]);
+        }
     }
 }
 
@@ -138,12 +149,23 @@ module bat(extend)
             cylinder(h=Z_BATTERY_18500 + extend, d=D_BATTERY);
 }
 
-module buttress()
+module buttress(extraY)
 {
     DX = 5.0;
     Y = 5.0;
     translate([INNER_DX/2 - DX, -INNER_ARCY/2, 0]) cube(size=[12, INNER_ARCY/2 + Y, 3.0]);
     mirror([-1, 0, 0]) translate([INNER_DX/2 - DX, -INNER_ARCY/2, 0]) cube(size=[12, INNER_ARCY/2 + Y, 3.0]);
+
+    if (extraY) {
+        polygonXY(h=3.0, points=[
+            [-INNER_DX/2 + DX, Y], [1, 14],
+            [-INNER_DX, 14], [-INNER_DX, Y]
+        ]);
+        mirror([-1, 0, 0]) polygonXY(h=3.0, points=[
+            [-INNER_DX/2 + DX, Y], [1, 14],
+            [-INNER_DX, 14], [-INNER_DX, Y]
+        ]);
+    }
 }
 
 if (DRAW_FORE) {
@@ -223,8 +245,11 @@ if (DRAW_AFT) {
             carriage();
             intersection() {
                 scale([0.95, 0.95, 1]) inner(1);
-                for(i=[0:23])
-                    translate([0, 0, M_CARRIAGE + EPS + i * 5.1]) buttress();
+                for(i=[0:23]) {
+                    EXTRA = (i==0) ? 100 : 0;
+                    translate([0, 0, M_CARRIAGE + EPS + i * 5.1]) 
+                        buttress(extraY=(i < 3) || (i==5) || (i==6) || (i==9) || (i==10));
+                }
             }
         }
 
@@ -236,11 +261,29 @@ if (DRAW_AFT) {
         translate([PCB_BOLT_DX/2, PCB_BOLT_DY, M_CARRIAGE - EPS]) diamondBolt(dz=6.0, d=PCB_BOLT_D_DIAMOND);
         translate([-PCB_BOLT_DX/2, PCB_BOLT_DY, M_CARRIAGE - EPS]) diamondBolt(dz=6.0, d=PCB_BOLT_D_DIAMOND);
 
-        translate([0, MC_DY, M_CARRIAGE]) mc();
+        translate([0, MC_DY, M_CARRIAGE - EPS]) mc();
+        {
+            X_MC = 0.7 * 25.4;
+            Y_MC = 9.0;
+            Z_MC = 2.2 * 25.4 + 0.1;
+            MC_T = 0.5;
+        }
+        translate([-X_MC/2, MC_DY - 20, M_CARRIAGE - EPS]) cube(size=[X_MC, 20 + EPS, MC_DROP]);
+        translate([-X_MC/2, MC_DY - 20, M_CARRIAGE - EPS]) cube(size=[MC_T, 20 + EPS, Z_MC]);
+        mirror([-1, 0, 0]) translate([-X_MC/2, MC_DY - 20, M_CARRIAGE - EPS]) cube(size=[MC_T, 20 + EPS, Z_MC]);
+
         translate([0, 0, M_BATTERY]) bat(10);
 
         CUT_X = 18.0;
         translate([-CUT_X/2, 2.0, M_BATTERY]) cube(size=[CUT_X, 100, 100]);
+
+        // arms above the battery just fall off.
+        translate([-50, 6, M_BATTERY + 5]) cube(size=[100, 100, 40]);
+
+        translate([-50, 0, M_CARRIAGE-EPS]) polygonZY(h=100, points=[
+            [10, -13], [0, -3], [0, -13]
+        ]);
+
     }
     *translate([0, MC_DY, M_CARRIAGE]) mc();
     *translate([0, 0, M_BATTERY]) bat(0);

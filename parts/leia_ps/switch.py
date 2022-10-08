@@ -6,7 +6,7 @@ from rectangle import rectangle
 from mecode import G
 from hole import hole, drill
 
-M_BOLT_0, M_SWITCH, M_PORT, M_BOLT_1 = 124.7, 139.7, 157.2, 173.875
+M_BOLT_0, M_PORT, M_SWITCH, M_BOLT_1 = 124.7, 139.7, 157.2, 173.875
 M_PCB, DX_PCB, DZ_PCB = 119.147, 14, 58.7279
 
 JOINT = 6.0
@@ -70,6 +70,15 @@ rectangle(g, mat, CUT_DEPTH, DZ_JOINT - tool_size, DX_JOINT + tool_size, 0, "bot
 travel(g, mat, x=JOINT + DZ_JOINT/2, y=-DX_PCB/2 - half_tool)
 g.move(z=0)
 rectangle(g, mat, CUT_DEPTH, DZ_JOINT - tool_size, DX_JOINT + tool_size, 0, "bottom")
+
+# trim from joint
+travel(g, mat, x=0, y=DX_PCB/2 - half_tool)
+g.move(z=0)
+rectangle(g, mat, CUT_DEPTH, JOINT, 0, 0, "left")
+
+travel(g, mat, x=0, y=-DX_PCB/2 + half_tool)
+g.move(z=0)
+rectangle(g, mat, CUT_DEPTH, JOINT, 0, 0, "left")
 
 # outside
 travel(g, mat, x=0, y=0)

@@ -16,7 +16,7 @@ H_PORT              =  16;
 INCHES_TO_MM        = 25.4;
 X_MC                =   0.7 * INCHES_TO_MM;
 Y_MC                =   9.0;
-Z_MC                =   2.2 * INCHES_TO_MM;
+Z_MC                =   2.2 * INCHES_TO_MM + 0.1;
 DY_MC               = -12.5;
 
 X_CRYSTAL           =  11;
