@@ -21,8 +21,8 @@
 */
 
 #include "i2saudiodrv.h"
-#include "./src/util/Grinliz_Util.h"
-#include "manifest.h"
+#include "../util/Grinliz_Util.h"
+#include "../wav12util/manifest.h"
 
 #include <Arduino.h>
 #include <Adafruit_ZeroI2S.h>
