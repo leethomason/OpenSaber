@@ -23,7 +23,6 @@
 #include <Arduino.h>
 
 #include "./src/lsm303/grinliz_LSM303.h"
-#include "./src/lis3dh/grinliz_lis3dh.h"
 #include "./src/lsm6d/grinliz_lsm6d.h"
 
 #include "cmdparser.h"
@@ -32,8 +31,9 @@
 #include "SFX.h"
 #include "Tester.h"
 #include "saberUtil.h"
-#include "manifest.h"
 #include "voltmeter.h"
+
+#include "src/wav12util/manifest.h"
 
 using namespace osbr;
 
@@ -156,9 +156,8 @@ bool CMDParser::processCMD()
         for(int i=0; i<SaberDB::NUM_PALETTES; ++i) {
             const SaberDB::Palette* pal = database.getPalette(i);
 
-            CStr<10> name;
             const MemUnit& memUnit = manifest.getUnit(database.soundFont());
-            memUnit.name.toStr(&name);
+            CStr<MemUnit::NAME_ALLOC> name = memUnit.name;
 
             Log.p(i).p(": ")
                .p(name.c_str())
@@ -183,9 +182,8 @@ bool CMDParser::processCMD()
             database.setSoundFont(f);
         }
         printLead(action.c_str());
-        CStr<10> name;
         const MemUnit& memUnit = manifest.getUnit(database.soundFont());
-        memUnit.name.toStr(&name);
+        CStr<MemUnit::NAME_ALLOC> name = memUnit.name;
         Serial.println(name.c_str());
     }
     else if (action == VOL) {
@@ -223,14 +221,14 @@ bool CMDParser::processCMD()
     }
     else if (action == FONTS) {
 #ifdef SABER_SOUND_ON
-        uint32_t dirHash = manifest.dirHash();
-        Serial.print("dirHash=");
-        Serial.println(dirHash, HEX);
-        for (int i = 0; i < MEM_IMAGE_NUM_DIR; ++i) {
+        //uint32_t dirHash = manifest.dirHash();
+        //Serial.print("dirHash=");
+        //Serial.println(dirHash, HEX);
+        for (int i = 0; i < MemImage::NUM_DIR; ++i) {
             Serial.print(i);
             Serial.print(": ");
 
-            CStr<10> name = manifest.getUnit(i).getName();
+            CStr<MemUnit::NAME_ALLOC> name = manifest.getUnit(i).name;
             Serial.println(name.c_str());
         }
 #endif

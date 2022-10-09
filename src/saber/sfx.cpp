@@ -22,11 +22,13 @@
 
 #include "pins.h"
 
-#include "manifest.h"
 #include "sfx.h"
 #include "tester.h"
-#include "i2saudiodrv.h"
 #include "modes.h"
+
+#include "./src/i2saudio2/i2saudiodrv.h"
+
+#include "src/wav12util/manifest.h"
 
 Timer2 smoothTimer(253);
 
@@ -50,11 +52,10 @@ SFX::SFX(I2SAudioDriver *driver, const Manifest& manifest) :
 
 void SFX::scanFiles()
 {
-    ASSERT(m_currentFont >= 0 && m_currentFont < MEM_IMAGE_NUM_DIR);
+    ASSERT(m_currentFont >= 0 && m_currentFont < MemImage::NUM_DIR);
     const MemUnit& dirUnit = m_manifest.getUnit(m_currentFont);
     int start = dirUnit.offset;
     int count = dirUnit.size;
-    //Log.p("scanning: ").p(dirUnit.getName().c_str()).p(" start=").p(start).p(" count=").p(count).eol();
 
     // Group the files; assume they are already
     // in swing / clash / etc. groups.
@@ -66,8 +67,7 @@ void SFX::scanFiles()
     m_smoothMode = false;
     for(int i=start; i < start + count; ++i) {
         const MemUnit& memUnit = m_manifest.getUnit(i);
-        CStr<9> name;
-        memUnit.name.toStr(&name);
+        CStr<MemUnit::NAME_ALLOC> name = memUnit.name;
         int slot = calcSlot(name.c_str());
         if (slot == SFX_MOTION_HIGH)
             m_smoothMode = true;
@@ -141,10 +141,10 @@ int SFX::getTrack(int sound)
 
     int track = m_sfxType[sound].start + m_random.rand(m_sfxType[sound].count);
 
-    if (track < MEM_IMAGE_NUM_DIR || track >= MEM_IMAGE_TOTAL) {
+    if (track < MemImage::NUM_DIR || track >= MemImage::NUM) {
         Log.p("track=").p(track).p(" sound=").p(sound).eol();
-        ASSERT(track >= MEM_IMAGE_NUM_DIR);
-        ASSERT(track < MEM_IMAGE_TOTAL);
+        ASSERT(track >= MemImage::NUM_DIR);
+        ASSERT(track < MemImage::NUM);
     }
     return track;
 }
@@ -183,9 +183,8 @@ bool SFX::playSound(int sound, int mode, int channel)
     {
         int track = getTrack(sound);
 
-        CStr<9> filename;
         const MemUnit& memUnit = m_manifest.getUnit(track);
-        memUnit.name.toStr(&filename);
+        CStr<MemUnit::NAME_ALLOC> filename = memUnit.name;
 
         Log.p("SFX play=").p(filename.c_str()).p(" track=").p(track)
             .p(" [")
@@ -245,24 +244,15 @@ void SFX::sm_ignite()
     m_driver->play(getTrack(SFX_IDLE), true, CHANNEL_IDLE);
     playMotionTracks();
     m_driver->play(getTrack(SFX_POWER_ON), false, CHANNEL_EVENT);
-
-    //m_driver->setVolume(0, CHANNEL_IDLE);
-    //m_driver->setVolume(0, CHANNEL_MOTION_0);
-    //m_driver->setVolume(0, CHANNEL_MOTION_1);
     m_driver->setVolume(m_volume, CHANNEL_EVENT);
-    //m_driver->setVolume(m_volume /** m_boost[CHANNEL_EVENT] / 256*/, CHANNEL_EVENT);
-    //volumeEnvelope.start(m_igniteTime, 0, 256);
     sfxCalc.ignite(m_igniteTime);
 }
 
 void SFX::sm_retract()
 {
-    Log.p("sm_retract").eol();
+    Log.p("sm_retract time=").p(m_retractTime).eol();
     m_driver->play(getTrack(SFX_POWER_OFF), false, CHANNEL_EVENT);
-    //m_driver->setVolume(0, CHANNEL_MOTION_0);
-    //m_driver->setVolume(0, CHANNEL_MOTION_1);
     m_driver->setVolume(m_volume, CHANNEL_EVENT);
-    //volumeEnvelope.start(m_retractTime, 256, 0);
     sfxCalc.retract(m_retractTime);
 }
 
@@ -313,12 +303,20 @@ void SFX::readIgniteRetract()
         const MemUnit& memUnit = m_manifest.getUnit(m_sfxType[SFX_POWER_OFF].start);
         m_retractTime = memUnit.timeInMSec();
     }
+
+    static const uint32_t TIME_LIMIT = 1200;
+    if (m_igniteTime > TIME_LIMIT)
+        m_igniteTime = TIME_LIMIT;
+    if (m_retractTime > TIME_LIMIT)
+        m_retractTime = TIME_LIMIT;
+
+    Log.p("Ignite time=").p(m_igniteTime).p(" retract time=").p(m_retractTime).eol();
 }
 
 
 int SFX::setFont(int font)
 {
-    font = glClamp(font, 0, MEM_IMAGE_NUM_DIR-1);
+    font = glClamp(font, 0, MemImage::NUM_DIR-1);
     const MemUnit& unit = m_manifest.getUnit(font);
     if (unit.size == 0) 
         font = 0;

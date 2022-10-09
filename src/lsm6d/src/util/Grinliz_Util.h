@@ -759,10 +759,6 @@ public:
 	const SPLog& p(fpm::fixed<A, B, C> v) const { return p(static_cast<float>(v)); }
 
 	const SPLog& v3(int32_t x, int32_t y, int32_t z, const char* bracket=0) const;
-	const SPLog& v3(uint8_t x, uint8_t y, uint8_t z, const char* bracket=0) const {
-		return v3(int32_t(x), int32_t(y), int32_t(z), bracket);
-	}
-
 	const SPLog& v2(int32_t x, int32_t y, const char* bracket=0) const;
 	const SPLog& v3(float x, float y, float z, const char* bracket=0) const;
 	const SPLog& v2(float x, float y, const char* bracket=0) const;

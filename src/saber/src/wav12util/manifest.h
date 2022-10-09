@@ -26,7 +26,8 @@
 #include <cstddef>
 
 struct MemUnit {
-    static const int NAME_LEN = 8;
+    static constexpr int NAME_LEN = 8;
+    static constexpr int NAME_ALLOC = NAME_LEN + 1; // not used here, but amount to allocate if you need to null-terminate
 
     char name[NAME_LEN];   // NOT null terminated, but 0-filled.
     uint32_t offset;
@@ -34,6 +35,9 @@ struct MemUnit {
     uint32_t table : 4;     // 0-15 to select table
 
     uint32_t numSamples() const { return size * 2; }
+    uint32_t timeInMSec() const {
+        return numSamples() * 100 / 2205;
+    }
     bool nameMatch(const char* n) const;
     uint32_t nameHash(uint32_t h) const;
 };

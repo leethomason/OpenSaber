@@ -1,10 +1,10 @@
-#include "manifest.h"
-#include "i2saudiodrv.h"
-#include "./src/util/Grinliz_Util.h"
-#include "./src/wav12/expander.h"
-#include "./src/wav12/s4adpcm.h"
-#include "./src/nada_flashmem/Nada_FlashTransport_SPI.h"
-#include "./src/nada_flashmem/Nada_SPIFlash.h"
+#include "src/wav12/expander.h"
+#include "src/wav12/s4adpcm.h"
+#include "src/wav12util/manifest.h"
+#include "src/i2saudio2/i2saudiodrv.h"
+#include "src/util/Grinliz_Util.h"
+#include "src/nada_flashmem/Nada_FlashTransport_SPI.h"
+#include "src/nada_flashmem/Nada_SPIFlash.h"
 
 #include <Adafruit_ZeroI2S.h>
 #include <Adafruit_ZeroDMA.h>
