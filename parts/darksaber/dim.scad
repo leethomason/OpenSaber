@@ -32,11 +32,12 @@ PCB_BOLT_D_DIAMOND = 2.2;
 // back of plastic / start of carriage
 
 DZ_SPKR_PLATE = 7.7;
-DZ_SPKR_AND_HEADER = 25.0;
+DZ_SPKR_AND_HEADER = 28.0;
 
 M_0 = 0.0;
 //M_SPKR = 29.5;      // guess
 M_CARRIAGE = DZ_SPKR_PLATE + DZ_SPKR_AND_HEADER;
+M_RESET = M_CARRIAGE + 35.5;
 M_BOLT_0 = 63.6 + D_BOLT / 2;
 M_BOLT_1 = M_BOLT_0 + 91.2 + D_BOLT;
 M_SWITCH = M_BOLT_1 + D_BOLT/2 + 16.1 + D_SWITCH/2;

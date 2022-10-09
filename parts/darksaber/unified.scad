@@ -125,7 +125,8 @@ module carriage()
         W = 4; 
         H = 10;
         for(i=[1:5]) {
-            DY = (i==1) ? -2.4 : 0;
+            //DY = (i <= 2) ? -2.4 : 0;
+            DY = 0;
             translate([-50, -10 + DY, M_CARRIAGE + 10 + i*20])
                 polygonZY(h=100, points=[
                     [-W/2, 0], [W/2, 0], [W/2, H-W], [0, H], [-W/2, H-W]
@@ -278,11 +279,19 @@ if (DRAW_AFT) {
         translate([-CUT_X/2, 2.0, M_BATTERY]) cube(size=[CUT_X, 100, 100]);
 
         // arms above the battery just fall off.
-        translate([-50, 6, M_BATTERY + 5]) cube(size=[100, 100, 40]);
+        translate([-50, 6, M_BATTERY + 5]) cube(size=[100, 100, 45]);
 
         translate([-50, 0, M_CARRIAGE-EPS]) polygonZY(h=100, points=[
             [10, -13], [0, -3], [0, -13]
         ]);
+
+        // Lots and lots and lots of thermal problems with this part.
+        translate([-50, -12.5, M_CARRIAGE-EPS])
+            cube(size=[100, 3, 51]);
+
+        // Oops - the "tongue" clicks the reset button.
+        translate([0, 0, M_RESET]) rotate([90, 0, 0])
+            cylinder(h=50, d=5);
 
     }
     *translate([0, MC_DY, M_CARRIAGE]) mc();
