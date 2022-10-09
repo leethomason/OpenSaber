@@ -74,7 +74,7 @@
 #define SABER_SUB_MODEL_B			13
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
+#define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_DARKSABER
 #define SABER_SUB_MODEL				0	
 // ----------------------------------
@@ -1076,16 +1076,16 @@
 	#define SWING_SAMPLES	12	// Not used
 	#define ID_STR "Darksaber"
 
-	static const int32_t RED_VF   = 2200;	// FIXME
-	static const int32_t RED_I    = 400;
+	static const int32_t RED_VF   = 2520;
+	static const int32_t RED_I    = 350;
 	static const int32_t RED_R    = 4300;
 
-	static const int32_t GREEN_VF = 3200;	// FIXME
-	static const int32_t GREEN_I  = 400;
+	static const int32_t GREEN_VF = 2280;		
+	static const int32_t GREEN_I  = 350;
 	static const int32_t GREEN_R  = 1000;
 
-	static const int32_t BLUE_VF  = 3100;	// FIXME
-	static const int32_t BLUE_I   = 400;
+	static const int32_t BLUE_VF  = 2580;
+	static const int32_t BLUE_I   = 350;
 	static const int32_t BLUE_R   = 1800;
 
 	static const int VOLUME_1 = 32;
