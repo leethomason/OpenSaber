@@ -118,7 +118,7 @@
 // attempt easy to solder, and gives very nice results.
 #define PCB_ITSY_4A				   24	// Gyro/Accelerometer on SPI bus. Dotstar. SPI. I2S audio. Flash mem sound.
 
-#define SABER_ACCELEROMETER_LIS3DH		1	// SPI, accel
+//#define SABER_ACCELEROMETER_LIS3DH		1	// SPI, accel
 #define SABER_ACCELEROMETER_LSM303 		2	// I2C, accel, magnetometer
 #define SABER_ACCELEROMETER_LSM6D		3   // SPI, accel, gyro
 
@@ -1376,9 +1376,7 @@ enum {
 static const float DEFAULT_G_FORCE_MOTION = 1.3f;
 static const int SWING_MAX = 14;
 
-#if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LIS3DH
-	#define ACCELEROMETER GrinlizLIS3DH
-#elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_LSM303
+#if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LSM303
 	#define ACCELEROMETER GrinlizLSM303
 #elif SABER_ACCELEROMETER == SABER_ACCELEROMETER_LSM6D
 	#define ACCELEROMETER GrinlizLSM6D
