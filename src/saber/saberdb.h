@@ -28,6 +28,8 @@
 #include "pins.h"
 #include "rgb.h"
 
+class Manifest;
+
 class SaberDB
 {
 public:
@@ -35,7 +37,7 @@ public:
 
     int paletteIndex() const { return m_currentPalette; }
     void setPalette(int n);
-    void initializeFromDirHash(uint32_t h);
+    void initFromManifest(const Manifest &);
 
     static int toVolume256(int volume4);
     static int toVolume4(int volume256);

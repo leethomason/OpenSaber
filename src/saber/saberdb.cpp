@@ -23,203 +23,41 @@
 #include <Arduino.h>
 #include "saberdb.h"
 #include "sfx.h" // bug fix; generally don't want a dependency on sfx
+#include "src/wav12util/manifest.h"
 
 using namespace osbr;
 
 SaberDB::SaberDB()
 {
-    initializeFromDirHash(0);
+    //initializeFromDirHash(0);
 }
 
-void SaberDB::initializeFromDirHash(uint32_t h)
+void SaberDB::initFromManifest(const Manifest& manifest)
 {
-    switch (h)
-    {
-    case 0xfe1a3638:
-    {
-        Log.p("Bespin2/Jaina/Vader").eol();
-        static const int BESPIN2 = 0;
-        static const int JAINA = 1;
-        static const int VADER = 2;
-
-        palette[0].set(0x00ff00, 0x00ffa0, BESPIN2); // green
-        palette[1].set(0x0000ff, 0x00c8ff, BESPIN2); // blue
-        palette[2].set(0x00ffff, 0x00a0ff, BESPIN2); // cyan
-        palette[3].set(0xff0000, 0xa08000, VADER);   // red
-        palette[4].set(0xff6000, 0x808000, JAINA);   // orange
-        palette[5].set(0x0044ff, 0x00ccff, JAINA);   // blue-green
-        palette[6].set(0x508080, 0x30a0a0, JAINA);   // white
-        palette[7].set(0x00ff44, 0x00ffaa, JAINA);   // green-blue
+    int dir = -1;
+    for (int i = 0; i < 4; ++i) {
+        if (strEqual(manifest.getUnit(i).name, "config")) {
+            dir = i;
+            break;
+        }
     }
-    break;
-
-    case 0x3f14313c:
-    {
-        Log.p("Bespin2/Jaina/SmoothJedi").eol();
-        static const int BESPIN2 = 0;
-        static const int JAINA = 1;
-        static const int SMOOTH = 2;
-
-        palette[0].set(0x00ff00, 0x00ffa0, BESPIN2); // green
-        palette[1].set(0x0000ff, 0x00c8ff, SMOOTH);  // blue
-        palette[2].set(0x00ffff, 0x00a0ff, BESPIN2); // cyan
-        palette[3].set(0xff0000, 0xa08000, SMOOTH);   // red
-        palette[4].set(0xff6000, 0x808000, JAINA);   // orange
-        palette[5].set(0x0044ff, 0x00ccff, JAINA);   // blue-green
-        palette[6].set(0x508080, 0x30a0a0, JAINA);   // white
-        palette[7].set(0x00ff44, 0x00ffaa, JAINA);   // green-blue
+    if (dir < 0) {
+        Log.p("Error finding palette configuration.").eol();
+        return;
     }
-    break;
-
-    case 0xd9a8993d:
-    {
-        Log.p("Hero - Jaina").eol();
-        static const int HERO = 0;
-        static const int JAINA = 1;
-
-        palette[0].set(0x00ff00, 0x00ffa0, HERO); // green
-        palette[1].set(0x0000ff, 0x00c8ff, HERO); // blue
-        palette[2].set(0x00ffff, 0x00a0ff, HERO); // cyan
-        palette[3].set(0xff0000, 0xa08000, JAINA);   // red
-        palette[4].set(0xff6000, 0x808000, JAINA);   // orange
-        palette[5].set(0x0044ff, 0x00ccff, JAINA);   // blue-green
-        palette[6].set(0x508080, 0x30a0a0, JAINA);   // white
-        palette[7].set(0x00ff44, 0x00ffaa, JAINA);   // green-blue
+    int start = manifest.getUnit(dir).offset;
+    Log.p("Palette start=").p(start).eol();
+    for (int i = 0; i < NUM_PALETTES; ++i) {
+        const ConfigUnit &config = manifest.getConfig(start + i);
+        osbr::RGB blade = {config.bc_r, config.bc_g, config.bc_b};
+        osbr::RGB impact = {config.ic_r, config.ic_g, config.ic_b};
+        Log.p("Palette: ")
+            .p(i).p(" font=").p(config.soundFont)
+            .p(" bc=").v3(blade.r, blade.g, blade.b)
+            .p(" ic=").v3(impact.r, impact.g, impact.b)
+            .eol();
+        palette[i].set(blade, impact, config.soundFont);
     }
-    break;
-
-    case 0xe13817f5:
-    {
-        Log.p("Fulcrum - TFA Graflex: NOT TUNED").eol();
-        static const int FULCRUM = 0;
-        static const int GRAFLEX = 1;
-
-        palette[0].set(0x00ff00, 0x00ffa0, FULCRUM); // green
-        palette[1].set(0x0000ff, 0x00c8ff, FULCRUM); // blue
-        palette[2].set(0x00ffff, 0x00a0ff, FULCRUM); // cyan
-        palette[3].set(0xff0000, 0xa08000, GRAFLEX);   // red
-        palette[4].set(0xff6000, 0x808000, GRAFLEX);   // orange
-        palette[5].set(0x0044ff, 0x00ccff, GRAFLEX);   // blue-green
-        palette[6].set(0x508080, 0x30a0a0, GRAFLEX);   // white
-        palette[7].set(0x00ff44, 0x00ffaa, GRAFLEX);   // green-blue
-    }
-    break;
-
-    case 0xdf451848:
-    {
-        Log.p("Temple - Jaina").eol();
-        static const int JAINA = 0;
-        static const int TEMPLE = 1;
-
-        palette[0].set(0x0044ff, 0x00ccff, JAINA);     // blue
-        palette[1].set(0x00ff00, 0x00ffa0, TEMPLE);    // green
-        palette[2].set(0x00ffff, 0x00a0ff, TEMPLE);    // cyan
-        palette[3].set(0xff0000, 0xa08000, TEMPLE);    // red
-        palette[4].set(0xff6000, 0x808000, JAINA);     // orange
-        palette[5].set(0xffcc00, 0x808080, TEMPLE);    // yellow
-        palette[6].set(0x808080, 0x30a0a0, JAINA);     // white
-        palette[7].set(0x00ff44, 0x00ffaa, JAINA);     // green-blue
-    }
-    break;
-
-    // Duchess / duchess
-    case 0x1deb9709:
-    {
-        Log.p("Jaina - BoldOne").eol();
-        static const int JAINA = 0;
-        static const int BOLD = 1;
-
-        // FIXME: boost values are not tested!
-        // And currently turned off.
-        palette[0].set(0x0088ff, 0x44ccff, BOLD, 290, 290);     // blue
-        palette[1].set(0x00ff00, 0x00ffa0, BOLD, 290, 290);     // green
-        palette[2].set(0xC000FF, 0x80A080, JAINA);              // purple
-        palette[3].set(0xff0000, 0xa08000, JAINA);              // red
-        palette[4].set(0xff6000, 0x808000, JAINA);              // orange
-        palette[5].set(0xffff00, 0x00FF88, BOLD, 290, 290);     // yellow
-        palette[6].set(0x80A080, 0x30a0a0, JAINA);              // white
-        palette[7].set(0x00ff44, 0x00ffaa, BOLD, 290, 290);     // green-blue
-    }
-    break;
-
-    // Sisters.
-    case 0x74288e03:
-    case 0x66b046f6:
-    {
-        Log.p("Fulcrum/Graflex - Nightsister").eol();
-        static const int FULCRUM = 0;   // Luna
-        // static const int GRAFLEX = 0;   // Celestia
-        static const int NIGHTSISTER = 1;
-        palette[0].set(0x00ff00, 0x00ffa0, FULCRUM);              // green
-        palette[1].set(0x0088ff, 0x80A080, FULCRUM);              // blue
-        palette[2].set(0xCC00FF, 0x80A080, NIGHTSISTER);          // purple
-        palette[3].set(0xff0000, 0xa08000, NIGHTSISTER);          // red
-        palette[4].set(0xff6000, 0x808000, NIGHTSISTER);          // orange
-        palette[5].set(0xffff00, 0x00FF88, FULCRUM);              // yellow
-        palette[6].set(0x80A080, 0x30a0a0, FULCRUM);              // white
-        palette[7].set(0x00ff44, 0x00ffaa, NIGHTSISTER);          // green-blue
-    }
-    break;
-
-    // Protection
-    case 0xade1fec7:
-    {
-        Log.p("Graflex/Bold").eol();
-        static const int GRAFLEX = 0;
-        static const int BOLD = 1;
-        palette[0].set(0x00ff00, 0x00ffa0, GRAFLEX);       // green
-        palette[1].set(0x0088ff, 0x80A080, BOLD);          // blue
-        palette[2].set(0x00ffff, 0x00a0ff, GRAFLEX);       // cyan
-        palette[3].set(0xff0000, 0xa08000, GRAFLEX);       // red
-        palette[4].set(0xff7700, 0x808000, GRAFLEX);       // orange
-        palette[5].set(0xCC00FF, 0x80A080, BOLD);          // purple
-        palette[6].set(0x80A080, 0x30a0a0, BOLD);          // white
-        palette[7].set(0x00ff44, 0x00ffaa, BOLD);          // green-blue
-    }
-    break;
-
-    case 0xd447a9d5:    // corelln (Corellian SS) test font.
-    default:
-    {
-        Log.p("corelln (Corellian SS) test font").eol();
-
-        palette[0].set(0x00ff00, 0x00ffa0, 0);   // green
-        palette[1].set(0x0000ff, 0x00c8ff, 0);   // blue
-        palette[2].set(0x00ffff, 0x00a0ff, 0);   // cyan
-        palette[3].set(0xff0000, 0xa08000, 0);   // red
-        palette[4].set(0xff6000, 0x808000, 0);   // orange
-        palette[5].set(0x0044ff, 0x00ccff, 0);   // blue-green
-        palette[6].set(0x508080, 0x30a0a0, 0);   // white
-        palette[7].set(0x00ff44, 0x00ffaa, 0);   // green-blue
-    }
-    break;
-    }
-
-#if (SABER_MODEL == SABER_MODEL_LEIA_PS)
-#   if (SABER_SUB_MODEL == SABER_SUB_MODEL_A)
-        // The A variant is too dim and needs 2 LEDs always on.
-        Log.p("Override palette: Leia-ps (model A)").eol();
-        palette[0].set(0x00ffff, 0x4488ff, 0);   // cyan
-        palette[1].set(0x00FF44, 0x00ffff, 0);   // "green"
-        palette[2].set(0xCC00FF, 0x80A080, 1);   // purple
-        palette[3].set(0xff6000, 0x808000, 0);   // orange
-        palette[4].set(0xffff00, 0x00FF88, 0);   // yellow
-        palette[5].set(0x508080, 0x30a0a0, 1);   // white
-        palette[6].set(0x0044ff, 0x00ccff, 1);   // blue-green
-        palette[7].set(0x00ff44, 0x00ffaa, 1);   // green-blue
-#   else
-        // The B variant is more standard.
-        Log.p("Override palette: Leia-ps (model B)").eol();
-        palette[0].set(0x0088ff, 0x44ccff, 0);   // blue
-        palette[1].set(0x00ff00, 0x00ffa0, 0);   // green
-        palette[2].set(0xCC00FF, 0x80A080, 1);   // purple
-        palette[3].set(0xff0000, 0xa08000, 1);              // red
-        palette[4].set(0xff6000, 0x808000, 1);   // orange
-        palette[5].set(0xffff00, 0x00FF88, 0);   // yellow
-        palette[6].set(0x508080, 0x30a0a0, 0);   // white
-        palette[7].set(0x00FF44, 0x00ffff, 1);   // "green"
-#   endif
-#endif
 }
 
 void SaberDB::setPalette(int n)

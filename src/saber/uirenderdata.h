@@ -34,7 +34,7 @@ struct UIRenderData
     bool locked = false;
     bool lockFlash = false;
 
-    CStr<10> fontName;
+    CStr<9> fontName; // FIXME: requires 8 byte limit in MemUnit, which it is, but also fragile
 
     osbr::RGB color;	// NOT the RGB of the LED. An GGB LED would be
                       // green if set to (1, 0, 0), so the bladeColor

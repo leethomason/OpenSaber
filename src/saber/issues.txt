@@ -2,7 +2,7 @@ Issues:
 
 Current
 - Smooth out gyro sound?
-- need run time tests
+- Retract is WAY too slow
 
 High
 - fix vol>255 not working

@@ -55,13 +55,14 @@
 #include "saberUtil.h"
 #include "tester.h"
 #include "ShiftedSevenSeg.h"
-#include "i2saudiodrv.h"
-#include "manifest.h"
 #include "vrender.h"
 #include "vectorui.h"
 #include "bladecolor.h"
 #include "swing.h"
 #include "bladestate.h"
+
+#include "./src/i2saudio2/i2saudiodrv.h"
+#include "./src/wav12util/manifest.h"
 
 using namespace osbr;
 
@@ -208,10 +209,12 @@ void setup()
 
     flashTransport.begin();
     spiFlash.begin();
-    manifest.scan(&spiFlash);
+    //manifest.scan(&spiFlash);
+    spiFlash.readMemory(0, (uint8_t*) manifest.getBasePtr(), Manifest::IMAGE_SIZE);
 
-    uint32_t dirHash = manifest.dirHash();
-    saberDB.initializeFromDirHash(dirHash);
+    //uint32_t dirHash = manifest.dirHash();
+    //saberDB.initializeFromDirHash(dirHash);
+    saberDB.initFromManifest(manifest);
 
     Log.p("Init audio system.").eol();
     i2sAudioDriver.begin();
@@ -710,7 +713,7 @@ void loopDisplays(uint32_t msec)
     uiRenderData.color = BladePWM::convertRawToPerceived(bladeColor.getBladeColor());
     uiRenderData.palette = saberDB.paletteIndex();
     uiRenderData.mVolts = voltmeter.easedPower();
-    uiRenderData.fontName = manifest.getUnit(sfx.currentFont()).getName();
+    uiRenderData.fontName = manifest.getUnit(sfx.currentFont()).name;
     uiRenderData.soundBank = sfx.currentFont();
     uiRenderData.locked = lockOn;
     uiRenderData.lockFlash = lockTimer.dark();
