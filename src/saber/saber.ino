@@ -640,6 +640,7 @@ void processAccel(uint32_t msec, uint32_t)
 void loop() {
     static ProfileData data("loop");
     ProfileBlock block(&data);
+    //static uint32_t lastPrintTime = 0;
 
     // processSerial() doesn't seem to get called on M0 / ItsyBitsy. 
     // Not sure why.
@@ -648,9 +649,16 @@ void loop() {
     processSerial();
 
     const uint32_t msec = millis();
+    const uint32_t msecStable = I2SAudioDriver::stableSlowTime();
     uint32_t delta = msec - lastLoopTime;
     lastLoopTime = msec;
 
+/*
+    if (msec - lastPrintTime >= 500) {
+        Log.p("msec=").p(msec).eol();
+        lastPrintTime = msec;
+    }
+*/
     tester.process();
     buttonA.process();
     lockTimer.tick(delta);
@@ -672,12 +680,18 @@ void loop() {
     processAccel(msec, delta);
 
     {
-        // Get the normal or flash color of blade (ignoring the ignite, retract, power)
-        // Modify the blade color for ignite / retract (ignoring power)
-        // Apply the power setting.
-        bladeColor.tick(msec);
-        osbr::RGB color = bladeStateManager.process(bladeColor.getColor(), msec);
-        bladePWM.setRGB(color);
+        static uint32_t lastMsecStable = 0;
+        if (lastMsecStable != msecStable) {
+            lastMsecStable = msecStable;
+
+            // Get the normal or flash color of blade (ignoring the ignite, retract, power)
+            // Modify the blade color for ignite / retract (ignoring power)
+            // Apply the power setting.
+            bladeColor.tick(msecStable);
+            osbr::RGB color = bladeStateManager.process(bladeColor.getColor(), msecStable);
+            bladePWM.setRGB(color);
+            //Log.p("pwm=").p(bladePWM.pwmVal(0)).p(" ").p(bladePWM.pwmVal(1)).p(" ").p(bladePWM.pwmVal(2)).eol();
+        }
     }
 
     stillReset = sfx.process(bladeStateManager.state(), delta);
@@ -699,10 +713,10 @@ void loop() {
         DumpProfile();
     }
     #endif    
-    loopDisplays(msec);
+    loopDisplays(msecStable);
 }
 
-void loopDisplays(uint32_t msec)
+void loopDisplays(uint32_t msecStable)
 {
     static ProfileData data("loopDisplays");
     ProfileBlock block(&data);
@@ -736,7 +750,7 @@ void loopDisplays(uint32_t msec)
 #       endif // SABER_UI_IDLE_MEDITATION
         {
             dotstarUI.Process(rgba + SABER_UI_START, SABER_UI_COUNT, SABER_UI_BRIGHTNESS, 
-                msec, uiMode.mode(), !bladeStateManager.isOff(), uiRenderData);
+                msecStable, uiMode.mode(), !bladeStateManager.isOff(), uiRenderData);
         }
 
 #       ifdef SABER_UI_FADE_OUT

@@ -54,7 +54,7 @@
 #define SABER_MODEL_PROTECTION 	   23   // Itsy, Dotstar UI
 #define SABER_MODEL_CLAN		   24	// Itsy, one LED UI
 #define SABER_MODEL_LEIA_PS		   25	// Itsy, one LED UI, essentially a clan saber
-#define SABER_MODEL_VIGILANCE_2	   26   // Itsy, LIS3DH SPI (accel + mag shortage)
+// #define SABER_MODEL_VIGILANCE_2	   26   // Itsy, LIS3DH SPI (accel + mag shortage)	Never built; odd it's on this list.
 #define SABER_MODEL_DUCHESS   	   27   // Itsy 4a, Dotstar UI, LSM6D Gyro
 #define SABER_MODEL_DARKSABER	   28   // Itsy 4a, Dotstar UI, LSM6D Gyro
 
@@ -1076,6 +1076,19 @@
 	#define SWING_SAMPLES	12	// Not used
 	#define ID_STR "Darksaber"
 
+	static const int32_t RED_VF   = 2200;
+	static const int32_t RED_I    = 400;
+	static const int32_t RED_R    = 4100;
+
+	static const int32_t GREEN_VF = 3200;
+	static const int32_t GREEN_I  = 400;
+	static const int32_t GREEN_R  = 1000;
+
+	static const int32_t BLUE_VF  = 3100;
+	static const int32_t BLUE_I   = 400;
+	static const int32_t BLUE_R   = 1350;
+
+	/* Possible values for pach LED?
 	static const int32_t RED_VF   = 2520;
 	static const int32_t RED_I    = 350;
 	static const int32_t RED_R    = 4300;
@@ -1087,6 +1100,7 @@
 	static const int32_t BLUE_VF  = 2580;
 	static const int32_t BLUE_I   = 350;
 	static const int32_t BLUE_R   = 1800;
+	*/
 
 	static const int VOLUME_1 = 32;
 	static const int VOLUME_2 = 64;

@@ -121,8 +121,8 @@ class ChannelTest : public Test
 
     virtual int process(Tester* tester, uint32_t event)
     {
-        BladePWM* blade = tester->getBladePWM();
-        ASSERT(blade);
+        //BladePWM* blade = tester->getBladePWM();
+        //ASSERT(blade);
         BladeColor* bladeColor = tester->getBladeColor();
         ASSERT(bladeColor);
 

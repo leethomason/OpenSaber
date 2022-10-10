@@ -100,12 +100,24 @@ void BladePWM::setRGB(const RGB& rgb)
 
 void BladePWM::setThrottledRGB()
 {
+    bool changed = false;
     for (int i = 0; i < NCHANNELS; ++i) {
         int32_t pwm = static_cast<int>(m_throttle[i] * m_color[i]);
-        m_pwm[i] = glClamp<int32_t>(pwm, 0, 255); // just in case...
+        int32_t v = glClamp<int32_t>(pwm, 0, 255);
+        if (v != m_pwm[i])
+            changed = true;
+        m_pwm[i] = v;
     }
-    for (int i = 0; i < NCHANNELS; ++i) {
-        analogWrite(pinRGB[i], m_pwm[i]);
+    if (changed) {
+        for (int i = 0; i < NCHANNELS; ++i) {
+            analogWrite(pinRGB[i], m_pwm[i]);
+        }
+        /*
+        Log.p("pwm=").p(m_pwm[0]).p(" ").p(m_pwm[1]).p(" ").p(m_pwm[2])
+            .p(" throttle=").p(m_throttle[0]).p(" ").p(m_throttle[1]).p(" ").p(m_throttle[2])
+            .p(" vbat=").p(m_vbat)
+            .eol();
+        */
     }
 }
 

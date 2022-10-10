@@ -11,6 +11,8 @@ enum class BladeState
     kRetract
 };
 
+// The input is the color: main color, impact color, interpolation between.
+// Then this as adjusted for ignite / retract.
 class BladeStateManager
 {
 public:
