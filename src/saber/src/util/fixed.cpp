@@ -17,5 +17,5 @@ bool TestFixed()
 	TEST_EQUAL(Fixed88(1), divToFixed<Fixed88>(1000, 1000));
 	TEST_EQUAL(Fixed88(2), divToFixed<Fixed88>(2000, 1000));
 	TEST_EQUAL(Fixed88(0.5), divToFixed<Fixed88>(500, 1000));
-	return true;
+    return true;
 }

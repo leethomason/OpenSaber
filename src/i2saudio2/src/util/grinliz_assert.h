@@ -23,36 +23,34 @@
 #ifndef GRINLIZ_ASSERT_INCLUDED
 #define GRINLIZ_ASSERT_INCLUDED
 
-template<bool> struct CompileTimeAssert;
-template<> struct CompileTimeAssert <true> {};
-#define STATIC_ASSERT(e) (CompileTimeAssert <(e) != 0>())
-
 #if defined(_MSC_VER)
 #   include <assert.h>
 #	define ASSERT assert
 #   define ASSERT2(x, y, z) assert( x )
+#   define RELASSERT assert
 #else
-        void AssertOut(const char* message, const char* file, int line);
-#   define ASSERT( x ) 	    if (!(x)) { AssertOut(#x, __FILE__, __LINE__); }
+    void AssertOut(const char* message, const char* file, int line);
+#   define RELASSERT( x ) 	    if (!(x)) { AssertOut(#x, __FILE__, __LINE__); }
+#   define ASSERT(x)
 #endif
 
 #define TEST_IS_TRUE(x) {         \
     if((x)) {                     \
     }                             \
     else {                        \
-        ASSERT(false);            \
+        RELASSERT(false);            \
         return false;             \
     }                             \
 }
 
 #define TEST(x)                   \
-    ASSERT(x);
+    RELASSERT(x);
 
 #define TEST_IS_FALSE(x) {        \
     if(!(x)) {                    \
     }                             \
     else {                        \
-        ASSERT(false);            \
+        RELASSERT(false);            \
         return false;             \
     }                             \
 }
@@ -61,7 +59,7 @@ template<> struct CompileTimeAssert <true> {};
     if((x) == (y)) {              \
     }                             \
     else {                        \
-        ASSERT(false);            \
+        RELASSERT(false);            \
         return false;             \
     }                             \
 }

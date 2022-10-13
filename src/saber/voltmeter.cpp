@@ -65,19 +65,18 @@ uint32_t Voltmeter::readVBat()
 #endif
 }
 
-void Voltmeter::takeSample()
+void Voltmeter::takeSample(uint32_t msec)
 {
-    uint32_t m = millis();
-    if (m - m_lastSampleMillis < SAMPLE_INTERVAL)
+    if (msec - m_lastSampleMillis < SAMPLE_INTERVAL)
         return;
 
-    m_lastSampleMillis = m;
+    m_lastSampleMillis = msec;
 
     uint32_t sample = readVBat();
     m_averagePower.push(sample);
 
-    if (m - m_lastEasedMillis >= 500) {
-        m_lastEasedMillis = m;
+    if (msec - m_lastEasedMillis >= 500) {
+        m_lastEasedMillis = msec;
         m_eased = m_averagePower.average();
     }
 }

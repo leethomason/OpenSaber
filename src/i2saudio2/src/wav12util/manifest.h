@@ -53,7 +53,7 @@ static_assert(sizeof(ConfigUnit) == sizeof(MemUnit), "MemUnit and ConfigUnit sho
 
 struct MemImage {
     static const int NUM_DIR = 4;
-    static const int NUM_FILES = 60;
+    static const int NUM_FILES = 96 - NUM_DIR;
     static const int NUM = NUM_DIR + NUM_FILES;
     static const size_t SIZE = NUM * sizeof(MemUnit);
 

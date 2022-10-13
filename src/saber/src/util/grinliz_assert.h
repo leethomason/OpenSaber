@@ -27,6 +27,7 @@
 #   include <assert.h>
 #	define ASSERT assert
 #   define ASSERT2(x, y, z) assert( x )
+#   define RELASSERT assert
 #else
     void AssertOut(const char* message, const char* file, int line);
 #   define RELASSERT( x ) 	    if (!(x)) { AssertOut(#x, __FILE__, __LINE__); }

@@ -25,8 +25,7 @@
 #include "rgb.h"
 #include "./src/util/fixed.h"
 
-// The blade color independent of time.
-// Basically: main color, impact color, and interpolation between them.
+// Blade color as a function of the flash (so normal and impact color)
 class BladeColor
 {
 public:

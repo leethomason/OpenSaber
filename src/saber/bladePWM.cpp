@@ -47,6 +47,9 @@
 
 #include "pins.h"
 #include "bladePWM.h"
+#include "linear.h"
+#include "SAMD21turboPWM.h"
+
 #include "./src/util/Grinliz_Util.h"
 
 using namespace osbr;
@@ -69,6 +72,7 @@ void calcGravity2(Fixed115 ax, Fixed115 ay, Fixed115 az, Fixed115* g2, Fixed115*
 
 const int8_t BladePWM::pinRGB[NCHANNELS] = { PIN_EMITTER_RED, PIN_EMITTER_GREEN, PIN_EMITTER_BLUE };
 BladePWM* BladePWM::instance = 0;
+TurboPWM turboPWM;
 
 BladePWM::BladePWM() 
 {
@@ -86,13 +90,19 @@ BladePWM::BladePWM()
         m_color[i] = 0;
     }
     instance = this;
+
+    turboPWM.setClockDivider(1, false);    
+    turboPWM.timer(0, 1, 1000, true);
+    turboPWM.timer(1, 1, 1000, true);
+    turboPWM.timer(2, 1, 1000, true);
 }
 
 
 void BladePWM::setRGB(const RGB& rgb)
 {
-    if (rgb == m_color)
-        return;
+    // Can't early out. The voltage may have changed.
+    // if (rgb == m_color)
+    //    return;
 
     m_color = rgb;
     setThrottledRGB();
@@ -102,22 +112,29 @@ void BladePWM::setThrottledRGB()
 {
     bool changed = false;
     for (int i = 0; i < NCHANNELS; ++i) {
-        int32_t pwm = static_cast<int>(m_throttle[i] * m_color[i]);
-        int32_t v = glClamp<int32_t>(pwm, 0, 255);
-        if (v != m_pwm[i])
+        int32_t pwm = int32_t(m_throttle[i] * m_color[i] * 1000.0f / 255.0f);
+        pwm = glClamp<int32_t>(pwm, 0, 1000);
+        if (pwm != m_pwm[i])
             changed = true;
-        m_pwm[i] = v;
+        m_pwm[i] = pwm;
     }
     if (changed) {
-        for (int i = 0; i < NCHANNELS; ++i) {
-            analogWrite(pinRGB[i], m_pwm[i]);
-        }
-        /*
+        // noInterrupts(); Doesn't seem to help with the flash.
+        //for (int i = 0; i < NCHANNELS; ++i) {
+        //    analogWrite(pinRGB[i], m_pwm[i]);
+        //}
+
+        turboPWM.analogWrite(9,  m_pwm[0]);
+        turboPWM.analogWrite(10, m_pwm[1]);
+        turboPWM.analogWrite(11, m_pwm[2]);        
+#if 0        
+        // Useful for debugging.
+        // Doesn't show the flash.
         Log.p("pwm=").p(m_pwm[0]).p(" ").p(m_pwm[1]).p(" ").p(m_pwm[2])
             .p(" throttle=").p(m_throttle[0]).p(" ").p(m_throttle[1]).p(" ").p(m_throttle[2])
             .p(" vbat=").p(m_vbat)
             .eol();
-        */
+#endif        
     }
 }
 
@@ -133,11 +150,11 @@ void BladePWM::setVoltage(int milliVolts)
         amps[2] * res[2] / DIV,    // 400 * 1350 / 1000 =  540
     };
 
-    m_vbat = glClamp<int32_t>(m_vbat, 3000, 5400);
+    milliVolts = glClamp<int32_t>(milliVolts, 3000, 5400);
     if (m_vbat == milliVolts)
         return;
-
     m_vbat = milliVolts;
+
     for (int i = 0; i < NCHANNELS; ++i) {
         // throttle = I * R / (Vbat - Vf)
 
@@ -152,7 +169,7 @@ void BladePWM::setVoltage(int milliVolts)
             m_throttle[i] = float(num) / denom;
         }
     }
-    setThrottledRGB();
+    // The setRGB loop will update for the voltage change.
 }
 
 

@@ -703,8 +703,7 @@ void loop() {
     }
 
     // Timing / skip is in the voltmeter class.
-    voltmeter.takeSample();
-    // setVoltage() will do nothing if the averagePower() is the same
+    voltmeter.takeSample(msecStable);
     bladePWM.setVoltage(voltmeter.averagePower());
     
     #ifdef PROFILE

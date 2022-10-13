@@ -65,7 +65,7 @@ public:
     uint32_t easedPower() const { return m_eased; }
 
     /// Add a sample to the average power.
-    void takeSample();
+    void takeSample(uint32_t msec);
 
 private:
     static Voltmeter* _instance;

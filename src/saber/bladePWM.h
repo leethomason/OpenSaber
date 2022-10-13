@@ -75,10 +75,10 @@ private:
     static const int8_t pinRGB[NCHANNELS];
     static BladePWM* instance;
 
-    osbr::RGB m_color;
+    osbr::RGB m_color;              // color (not power)
     int32_t m_vbat;
-    float m_throttle[NCHANNELS];  // throttle = f(vbat).
-    uint8_t m_pwm[NCHANNELS];         // pwm = f(color, throttle)
+    float m_throttle[NCHANNELS];    // throttle = f(vbat).
+    int32_t m_pwm[NCHANNELS];       // pwm = f(color, throttle) scale of 0-1000 (used by turboPWM)
 };
 
 #endif // BLADE_INCLUDED

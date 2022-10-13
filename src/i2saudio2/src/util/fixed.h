@@ -70,13 +70,13 @@ template<typename A, typename B, unsigned int C>
 int32_t scale(fpm::fixed<A, B, C> fp, int32_t s) {
     static constexpr int32_t FIXED_1 = 1 << C;
     return s * fp.raw_value() / FIXED_1;
-    }
+}
 
 template<typename A, typename B, unsigned int C>
 bool isInt(fpm::fixed<A, B, C> fp) {
     const A mask = (1 << C) - 1;
     return (mask & fp.raw_value()) == 0;
-    }
+}
 
 // Returns 0-1 on a sine curve, for an input from 0-1
 template<typename T>

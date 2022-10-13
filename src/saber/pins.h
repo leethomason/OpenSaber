@@ -74,7 +74,7 @@
 #define SABER_SUB_MODEL_B			13
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
+#define SERIAL_DEBUG 				1
 #define SABER_MODEL 				SABER_MODEL_DARKSABER
 #define SABER_SUB_MODEL				0	
 // ----------------------------------
@@ -1064,7 +1064,7 @@
 	#define SABER_UI_START				0
 	#define SABER_UI_COUNT				1
 
-	#define VOLTMETER_TUNE				1028	// FIXME
+	#define VOLTMETER_TUNE				1059
 
 	#define SABER_LOCK()				0
 
