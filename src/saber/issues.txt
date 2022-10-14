@@ -1,6 +1,8 @@
 Issues:
 
 Current
+- implement general analogWrite (grumble)
+- fix LED manager to be not weird, and not call arduino library funcs
 - correct colors for darksaber
 - sync wav12 to i2saudio2, test
 - sync i2saudio2 to saber, test

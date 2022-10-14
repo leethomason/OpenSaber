@@ -64,7 +64,7 @@ constexpr FixedNorm k2Pi_FixedNorm = FixedNorm{ k2Pi_float };
 constexpr FixedNorm kSqrt2Over2_FixedNorm{ 0.70710678118654752440084436210485 };
 
 constexpr Fixed115 kZero_Fixed115{ 0 };
-constexpr Fixed115 kOne_Fixed115{ 0 };
+constexpr Fixed115 kOne_Fixed115{ 1 };
 
 template<typename A, typename B, unsigned int C>
 int32_t scale(fpm::fixed<A, B, C> fp, int32_t s) {
@@ -94,11 +94,6 @@ T sinLerp(T x) {
     s = T{ 0.5 } *(-s) + T{ 0.5 };
 
     return s;
-}
-
-template<typename T>
-T cosLerp(T x) {
-    return T{ 1 } - sinLerp(x);
 }
 
 template<typename T>

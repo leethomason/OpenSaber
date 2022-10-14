@@ -112,11 +112,16 @@ void BladePWM::setThrottledRGB()
 {
     bool changed = false;
     for (int i = 0; i < NCHANNELS; ++i) {
-        int32_t pwm = int32_t(m_throttle[i] * m_color[i] * 1000.0f / 255.0f);
-        pwm = glClamp<int32_t>(pwm, 0, 1000);
-        if (pwm != m_pwm[i])
-            changed = true;
-        m_pwm[i] = pwm;
+        // Not totally convinced this is the correct approach.
+        // How does the throttling affect color? Can / should
+        // that be accounted for?
+
+        int32_t pwm = LinearToPWM1000(m_color[i]);
+        int32_t throttledPWM = int32_t(pwm * m_throttle[i] + 0.5f);
+        throttledPWM = glClamp<int32_t>(throttledPWM, 0, 1000);
+
+        changed |= (throttledPWM != m_pwm[i]);
+        m_pwm[i] = throttledPWM;
     }
     if (changed) {
         // noInterrupts(); Doesn't seem to help with the flash.
@@ -161,7 +166,6 @@ void BladePWM::setVoltage(int milliVolts)
         const int32_t num = sNum[i];            // ~1000
         const int32_t denom = m_vbat - vF[i];   // high: 4100 - 3000 = 1100
                                                 // low:  3400 - 3000 =  400
-
         if (num >= denom) {
             m_throttle[i] = 1;
         }

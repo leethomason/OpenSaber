@@ -39,6 +39,12 @@ public:
 		BLINK_LEADING,
         BLINK_BREATH
 	};
+
+    struct State {
+        bool analog;    // if false, digital
+        uint8_t value;  // analog: [0, 255], digital: 0 or !0
+    }
+
     LEDManager(uint8_t pin, bool on=true);
 
     void set(bool on);
