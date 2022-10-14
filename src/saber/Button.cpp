@@ -79,9 +79,8 @@ void Button::init(uint8_t buttonPin, uint8_t buttonMode, uint16_t _debounceDurat
     }
 }
 
-void Button::process(void)
+void Button::process(uint32_t currentMillis)
 {
-    uint32_t currentMillis = millis();
     uint32_t interval = currentMillis - m_debounceStartTime;
 
     if(interval < uint32_t(m_debounceDuration)) {
@@ -178,11 +177,11 @@ bool Button::held() const
 }
 
 
-uint32_t Button::holdTime() const
+uint32_t Button::holdTime(uint32_t currentMillis) const
 {
     if (!isDown())
         return 0;
-    return millis() - m_pressedStartTime;
+    return currentMillis - m_pressedStartTime;
 }
 
 

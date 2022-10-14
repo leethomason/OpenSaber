@@ -34,6 +34,7 @@
 #include "voltmeter.h"
 
 #include "src/wav12util/manifest.h"
+#include "src/util/linear.h"
 
 using namespace osbr;
 
@@ -63,9 +64,9 @@ void CMDParser::printHexColor(const RGB& color) {
 
 void CMDParser::printMAmps(const RGB& c) {
     Serial.print("(");
-    uint32_t amps =   uint32_t(c[0]) * RED_I / uint32_t(255) 
-                    + uint32_t(c[1]) * GREEN_I / uint32_t(255) 
-                    + uint32_t(c[2]) * BLUE_I / uint32_t(255);
+    uint32_t amps =   LinearToPWM1024(c[0]) * RED_I / uint32_t(1023) 
+                    + LinearToPWM1024(c[1]) * GREEN_I / uint32_t(1023) 
+                    + LinearToPWM1024(c[2]) * BLUE_I / uint32_t(1023);
     Serial.print(amps);
     Serial.print(" mAmps)");
 }

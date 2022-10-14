@@ -24,7 +24,7 @@ void BladeStateManager::retract(uint32_t eventTime)
 osbr::RGB BladeStateManager::process(osbr::RGB fullColor, uint32_t currentTime)
 {
     osbr::RGB color(0), start(0), end(0);
-    bool lerp = false;
+    bool needLerp = false;
     uint32_t deltaTime = 0;
 
     m_currentTime = currentTime;
@@ -52,29 +52,25 @@ osbr::RGB BladeStateManager::process(osbr::RGB fullColor, uint32_t currentTime)
             break;
 
         case BladeState::kIgnite:
-            lerp = true;
+            needLerp = true;
             start.set(0);
             end = fullColor;
             break;
         
         case BladeState::kRetract:
-            lerp = true;
+            needLerp = true;
             start = fullColor;
             end.set(0);
             break;
     }
 
-    if (lerp) {
-        //ASSERT(deltaTime < m_eventTime);
-        //FixedNorm fraction = divToFixed<FixedNorm>(deltaTime, m_eventTime);
-        float fraction = (float)deltaTime / m_eventTime;
+    if (needLerp) {
+        FixedNorm fraction = divToFixed<FixedNorm>(deltaTime, m_eventTime);
+        if (fraction < kZero_FixedNorm) fraction = kZero_FixedNorm;
+        if (fraction > kOne_FixedNorm) fraction = kOne_FixedNorm;
 
         for (int i = 0; i < 3; ++i) {
-            // A little defensive programming range checking. The blade flash
-            // bug is still undiagnosed. Be very careful with int8 range.
-            //int32_t c = start[i] + scale(fraction, end[i] - start[i]);
-
-            int32_t c = int32_t((float)start[i] + fraction * (end[i] - start[i]));
+            int32_t c = start[i] + scale(fraction, end[i] - start[i]);
             color[i] = (uint8_t)glClamp<int32_t>(c, 0, 255);
         }
     }

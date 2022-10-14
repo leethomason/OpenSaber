@@ -25,7 +25,7 @@ void PWMWrite(int pin, uint8_t pwm)
         turboPWM.analogWrite(pin, uint32_t(pwm) * 1000 / 255);
     }
     else {
-        AnalogWrite(pin, pwm);
+        analogWrite(pin, pwm);
     }
 }
 
@@ -38,7 +38,7 @@ void PWMWriteColor(int pin, uint8_t color)
     }
     else {
         uint16_t pwm = LinearToPWM1024(color);
-        AnalogWrite(pin, pwm >> 2);
+        analogWrite(pin, pwm >> 2);
     }
 }
 
@@ -47,7 +47,7 @@ void PWMWrite1000(int pin, uint32_t pwm)
     if (TurboPin(pin))
         turboPWM.analogWrite(pin, pwm);
     else
-        AnalogWrite(pin, pwm * 255 / 1000);
+        analogWrite(pin, pwm * 255 / 1000);
 }
 
 void PWMWrite1024(int pin, uint32_t pwm)
@@ -55,5 +55,5 @@ void PWMWrite1024(int pin, uint32_t pwm)
     if (TurboPin(pin))
         turboPWM.analogWrite(pin, pwm * 1000 / 1023);
     else
-        AnalogWrite(pin, pwm >> 2);
+        analogWrite(pin, pwm >> 2);
 }

@@ -24,33 +24,38 @@
     Blade flash bug:
     x is it voltmeter?
         NO. with volt setting turned off, still see flicker, specially at high-t during retract
-    - is it fixed point?        
+    x is it fixed point?        
         Unlikely; bug existed before fixed.
-    - is it LERP?
+    x is it LERP?
         Unlikely; test okay. Error would be in middle of lerp.
-    - is it interupting calls?
+    x is it interupting calls?
         Unlikely; this has been addressed.
         Weirdness in Blade code (setVolts / setRGB coupling) has been addressed. LERP
             is outside.
-    - PWM hardware?
+    x PWM hardware?
         Maybe? but setting different values doesn't seem to matter.
         Is the set atomic?
-    - Error in the state?
+    x Error in the state?
         Again, don't see anything. The BLADE_FLASH seems to be set correctly.
     x interrupts don't matter
 
-    Does have to have something to do with the interpolation / color change. Don't see in-use
-    flashes. Only during ignite / retract. 
+    October 2022: Turns out the bug is in the analogWrite code in the Arduino library.
+    I haven't traced down the bug. But once I (finally) found the correct source file,
+    it's a mess of logic and hundreds of LOC that is obviously suspect. Replacing that
+    with the TurboPWM library (even in non-turbo mode) fixes the bug.
+
+    Why is the flash always in the retract state? Not sure. But it's definitely in the
+    analogWrite. Also, this is why you work so hard to not write ridiculous spaghetti
+    code. Incredibly difficult to inspect for bugs.
 */
 
 #include <Arduino.h>
 
 #include "pins.h"
 #include "bladePWM.h"
-#include "linear.h"
-#include "SAMD21turboPWM.h"
-
-#include "./src/util/Grinliz_Util.h"
+#include "src/util/Grinliz_Util.h"
+#include "src/util/pwmwrite.h"
+#include "src/util/linear.h"
 
 using namespace osbr;
 
@@ -72,7 +77,6 @@ void calcGravity2(Fixed115 ax, Fixed115 ay, Fixed115 az, Fixed115* g2, Fixed115*
 
 const int8_t BladePWM::pinRGB[NCHANNELS] = { PIN_EMITTER_RED, PIN_EMITTER_GREEN, PIN_EMITTER_BLUE };
 BladePWM* BladePWM::instance = 0;
-TurboPWM turboPWM;
 
 BladePWM::BladePWM() 
 {
@@ -90,11 +94,6 @@ BladePWM::BladePWM()
         m_color[i] = 0;
     }
     instance = this;
-
-    turboPWM.setClockDivider(1, false);    
-    turboPWM.timer(0, 1, 1000, true);
-    turboPWM.timer(1, 1, 1000, true);
-    turboPWM.timer(2, 1, 1000, true);
 }
 
 
@@ -125,14 +124,28 @@ void BladePWM::setThrottledRGB()
     }
     if (changed) {
         // noInterrupts(); Doesn't seem to help with the flash.
+        // Using the TurboPWM library to work around the buggy code.
         //for (int i = 0; i < NCHANNELS; ++i) {
         //    analogWrite(pinRGB[i], m_pwm[i]);
         //}
 
-        turboPWM.analogWrite(9,  m_pwm[0]);
-        turboPWM.analogWrite(10, m_pwm[1]);
-        turboPWM.analogWrite(11, m_pwm[2]);        
-#if 0        
+        // The red channel is bright (relative to GB) in the low
+        // end. Cut the power a bit, by pure heuristics.
+        int32_t redPWM = m_pwm[0];  // 0 - 1000
+        if (redPWM < 500) {
+            // correction = a + b * red (0-1)
+            static const FixedNorm a{0.70};
+            static const FixedNorm b{1.0};
+            FixedNorm c = a + b * divToFixed<FixedNorm>(redPWM, 1000);
+            if (c < a) c = a;
+            if (c > kOne_FixedNorm) c = kOne_FixedNorm;
+            redPWM = scale(c, redPWM);
+        }   
+
+        PWMWrite1000(9,  redPWM);
+        PWMWrite1000(10, m_pwm[1]);
+        PWMWrite1000(11, m_pwm[2]);        
+#if 0   
         // Useful for debugging.
         // Doesn't show the flash.
         Log.p("pwm=").p(m_pwm[0]).p(" ").p(m_pwm[1]).p(" ").p(m_pwm[2])

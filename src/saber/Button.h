@@ -71,7 +71,7 @@ public:
     /** Process the button state change. Should be called from loop().
      *  Will call the callbacks, if needed.
      */
-    void process();
+    void process(uint32_t currentTime);
 
     /// true if pressed on this loop
     bool press() const;
@@ -80,7 +80,7 @@ public:
     /// true if the button is held to the trigger time
     bool held() const;
     /// return the time the button has been held down
-    uint32_t holdTime() const;
+    uint32_t holdTime(uint32_t currentTime) const;
     /// return the last time the button was pressed down
     uint32_t pressedTime() const {
         return m_pressedStartTime;

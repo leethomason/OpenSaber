@@ -8,6 +8,9 @@ bool TestFixed()
 	Fixed88 l = sinLerp(Fixed88{ 0.5 });
 	TEST_EQUAL_RANGE(Fixed88{ 0.5 }, l, Fixed88{ 0.01 });
 
+	TEST_EQUAL(Fixed88{ 1 }, cosLerp(Fixed88{ 0 }));
+	TEST_EQUAL(Fixed88{ 0 }, cosLerp(Fixed88{ 1 }));
+
 	TEST_EQUAL(FixedNorm{ 0 }, sinLerp(FixedNorm{ 0 }));
 	TEST_EQUAL(FixedNorm{ 1 }, sinLerp(FixedNorm{ 1 }));
 	TEST_EQUAL_RANGE(FixedNorm{ 0.5 }, sinLerp(FixedNorm{ 0.5 }), FixedNorm{ 0.01 });

@@ -20,6 +20,19 @@ Med
 
 Icebox
 
+
+Notes
+50  708080 (cool white)
+40  596666
+30  434C4C -> 414cc4
+20  2D3333 -> 253333
+10  161919 -> 101919
+
+30 -> 65/67 -> 0.97
+20 -> 37/45 -> 0.82
+10 -> 16/22 -> 0.73
+
+
 Fixed
 x Turn off UI LED idle animation when there is a crystal
 x Remove axis rotation from gyro

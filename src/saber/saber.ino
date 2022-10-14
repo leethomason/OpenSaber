@@ -25,11 +25,13 @@
 // Arduino Libraries
 #include <Adafruit_ZeroI2S.h>
 
-#include "./src/nada_flashmem/Nada_SPIFLash.h"
-#include "./src/nada_flashmem/Nada_FlashTransport_SPI.h"
-#include "./src/util/Grinliz_Arduino_Util.h"
-#include "./src/lsm303/grinliz_LSM303.h"
-#include "./src/lsm6d/grinliz_lsm6d.h"
+#include "src/nada_flashmem/Nada_SPIFLash.h"
+#include "src/nada_flashmem/Nada_FlashTransport_SPI.h"
+
+#include "src/util/Grinliz_Arduino_Util.h"
+#include "src/util/pwmwrite.h"
+#include "src/lsm303/grinliz_LSM303.h"
+#include "src/lsm6d/grinliz_lsm6d.h"
 
 #include <Wire.h>
 #include <SPI.h>
@@ -60,8 +62,8 @@
 #include "swing.h"
 #include "bladestate.h"
 
-#include "./src/i2saudio2/i2saudiodrv.h"
-#include "./src/wav12util/manifest.h"
+#include "src/i2saudio2/i2saudiodrv.h"
+#include "src/wav12util/manifest.h"
 
 using namespace osbr;
 
@@ -190,6 +192,7 @@ void setup()
         digitalWrite(PIN_LATCH, HIGH);
     #endif
 
+    InitPWM();
     Serial.begin(19200);  // Still need to turn it on in case USB is connected later to configure or debug.
     #if SERIAL_DEBUG == 1
     {
@@ -329,7 +332,7 @@ void changePalette(int index)
 
 void buttonAReleaseHandler(const Button&)
 {
-    ledA.blink(0, 0);
+    ledA.blink(I2SAudioDriver::stableSlowTime(), 0, 0);
     ledA.set(true); // power is on.
 }
 
@@ -382,13 +385,13 @@ void buttonAClickHandler(const Button&)
     if (bladeStateManager.isOff()) {
         uiMode.nextMode();
         // Turn off blinking so we aren't in a weird state when we change modes.
-        ledA.blink(0, 0, 0);
+        ledA.blink(I2SAudioDriver::stableSlowTime(), 0, 0, 0);
         // Not the best indication: show power if
         // the modes are cycled. But haven't yet
         // figured out a better option.
         if (uiMode.mode() == UIMode::NORMAL) {
             int power = UIRenderData::powerLevel(voltmeter.averagePower(), 4);
-            ledA.blink(power, INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
+            ledA.blink(I2SAudioDriver::stableSlowTime(), power, INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
         }
     }
     else if (bladeStateManager.state() == BladeState::kOn) {
@@ -660,21 +663,21 @@ void loop() {
     }
 */
     tester.process();
-    buttonA.process();
+    buttonA.process(msec);
     lockTimer.tick(delta);
 
 #ifdef SABER_UI_IDLE_MEDITATION_LED_OFF
     if (uiMode.mode() == UIMode::NORMAL && bladeStateManager.isOff() && uiMode.isIdle(msec)) {
         int pwm = 255;
         ledProp.tick(delta, &pwm);
-        analogWrite(ledA.pin(), (uint8_t)pwm);
+        PWMWrite(ledA.pin(), (uint8_t)pwm);
     } 
     else {
         ledProp.start(1000, 255, 0);
         ledA.process();
     }
 #else
-    ledA.process();
+    ledA.process(I2SAudioDriver::stableSlowTime());
 #endif
 
     processAccel(msec, delta);

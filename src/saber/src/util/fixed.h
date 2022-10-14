@@ -65,6 +65,8 @@ constexpr FixedNorm kSqrt2Over2_FixedNorm{ 0.70710678118654752440084436210485 };
 
 constexpr Fixed115 kZero_Fixed115{ 0 };
 constexpr Fixed115 kOne_Fixed115{ 1 };
+constexpr FixedNorm kZero_FixedNorm{ 0 };
+constexpr FixedNorm kOne_FixedNorm{ 1 };
 
 template<typename A, typename B, unsigned int C>
 int32_t scale(fpm::fixed<A, B, C> fp, int32_t s) {
@@ -93,6 +95,22 @@ T sinLerp(T x) {
     T s = sin(T{ kPi_float * 0.5 } + x * T{ kPi_float });
     s = T{ 0.5 } *(-s) + T{ 0.5 };
 
+    return s;
+}
+
+template<typename T>
+T cosLerp(T x) {
+    // The actual range:
+    // x    0  ->  1
+    // sine pi/2 -> 3pi/2
+    // correcting that the output is:
+    // 1 -> -1
+
+    if (x < T(0)) x = T(0);
+    if (x > T(1)) x = T(1);
+
+    T s = cos(x * T{ kPi_float });
+    s = T{ 0.5 } * s + T{ 0.5 };
     return s;
 }
 

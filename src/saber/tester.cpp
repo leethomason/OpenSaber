@@ -192,27 +192,27 @@ public:
 
         // Press with bounce.
         button.testPress();
-        button.process();
+        button.process(millis());
         TEST_EQUAL(button.press(), true);
         delay(5);
-        button.process();
+        button.process(millis());
         button.testRelease();
-        button.process();
+        button.process(millis());
 
         // should still be down: release filtered by de-bounce.
         TEST_EQUAL(button.isDown(), true);
         delay(5);
         button.testPress();
-        button.process();
+        button.process(millis());
         TEST_EQUAL(button.isDown(), true);
 
         button.testRelease();
-        button.process();
+        button.process(millis());
         // still too soon to register.
         TEST_EQUAL(button.isDown(), true);
 
         delay(25);
-        button.process();
+        button.process(millis());
         // Not it has time to catch up, after bounce filter.
         TEST_EQUAL(button.isDown(), false);
     }
