@@ -56,6 +56,8 @@ public:
     void setVolume(int v, int channel);
     int getVolume(int channel);
 
+    static uint32_t stableSlowTime();
+
 private:
     struct Status {
         uint32_t addr = 0;

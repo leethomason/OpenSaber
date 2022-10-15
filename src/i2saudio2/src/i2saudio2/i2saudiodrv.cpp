@@ -58,6 +58,21 @@ int I2SAudioDriver::volume[AUDDRV_NUM_CHANNELS];
 
 static volatile uint32_t callbackCycle = 0;
 
+uint32_t I2SAudioDriver::stableSlowTime()
+{
+    uint32_t t0 = 0;
+    uint32_t t1 = 1;
+    while(t0 != t1) {
+        t0 = callbackCycle;
+        t1 = callbackCycle;
+    }
+    //static const uint32_t M = 1000 * AUDDRV_BUFFER_SAMPLES / AUDDRV_FREQ;    // 11.61 in theory.
+    static const uint64_t M = 1161;
+
+    uint64_t m = uint64_t(t0) * M / 100;
+    return uint32_t(m);
+}
+
 void I2SAudioDriver::DMACallback(Adafruit_ZeroDMA* dma)
 {
     callbackCycle++;

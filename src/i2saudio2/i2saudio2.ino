@@ -45,7 +45,6 @@ void scan()
 
 }
 
-
 void dumpMemUnit(int id, const MemUnit& memUnit)
 {
     char name[9] = {0};
@@ -55,6 +54,31 @@ void dumpMemUnit(int id, const MemUnit& memUnit)
        .p(" table=").p(memUnit.table)
        .p(" samples=").p(memUnit.numSamples())
       .eol();
+}
+
+void dumpConfig()
+{
+    int dir = -1;
+    for (int i = 0; i < MemImage::NUM_DIR; ++i) {
+        if (strEqual(manifest.getUnit(i).name, "config")) {
+            dir = i;
+            break;
+        }
+    }
+    if (dir < 0) {
+        Log.p("Error finding palette configuration.").eol();
+        return;
+    }
+    int start = manifest.getUnit(dir).offset;
+    Log.p("Palette start=").p(start).eol();
+    for (int i = 0; i < 8; ++i) {
+        const ConfigUnit &config = manifest.getConfig(start + i);
+        Log.p("Palette: ")
+            .p(i).p(" font=").p(config.soundFont)
+            .p(" bc=").v3(config.bc_r, config.bc_g, config.bc_b)
+            .p(" ic=").v3(config.ic_r, config.ic_g, config.ic_b)
+            .eol();
+    }
 }
 
 void processCmd(const CStr<32>& str) 
@@ -138,6 +162,8 @@ void setup()
 
     spiFlash.begin();
     spiFlash.readMemory(0, (uint8_t*) manifest.getBasePtr(), Manifest::IMAGE_SIZE);
+
+    dumpConfig();
 
     i2sAudioDriver.begin();
 

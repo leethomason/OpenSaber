@@ -39,18 +39,19 @@ public:
 		BLINK_LEADING,
         BLINK_BREATH
 	};
+
     LEDManager(uint8_t pin, bool on=true);
 
     void set(bool on);
     bool isOn() const;
 
-    void blink(uint8_t n, uint32_t cycle, BlinkHandler handler = 0, uint8_t style = BLINK_LEADING);
-    int  numBlinks() const;
+    void blink(uint32_t currentTime, uint8_t n, uint32_t cycle, BlinkHandler handler = 0, uint8_t style = BLINK_LEADING);
+    int  numBlinks(uint32_t currentTime) const;
     bool blinking() const {
         return m_nBlink > 0;
     }
 
-    void process();
+    void process(uint32_t currentTime);
     uint8_t pin() const { return m_pin; }
 
 private:

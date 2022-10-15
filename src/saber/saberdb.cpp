@@ -35,7 +35,7 @@ SaberDB::SaberDB()
 void SaberDB::initFromManifest(const Manifest& manifest)
 {
     int dir = -1;
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < MemImage::NUM_DIR; ++i) {
         if (strEqual(manifest.getUnit(i).name, "config")) {
             dir = i;
             break;
