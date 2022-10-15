@@ -400,7 +400,8 @@ void buttonAClickHandler(const Button&)
                 retractBlade();
         }
         else {
-            bladeColor.doFlash(millis());
+            uint32_t stable = I2SAudioDriver::stableSlowTime();
+            bladeColor.doFlash(stable);
             if (sfx.smoothMode())
                 sfx.sm_playEvent(SFX_USER_TAP);
             else
@@ -613,7 +614,8 @@ void processAccel(uint32_t msec, uint32_t)
             {
                 // Always flash the blade. Maybe play impact sounds.
                 // It doesn't sound good to have too many impacts chained together.
-                bladeColor.doFlash(millis());
+                uint32_t stable = I2SAudioDriver::stableSlowTime();
+                bladeColor.doFlash(stable);
                 if ((msec - lastImpactTime) > IMPACT_MIN_TIME)
                 {
                     bool sound = false;

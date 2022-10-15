@@ -62,6 +62,29 @@ void CMDParser::printHexColor(const RGB& color) {
     }
 }
 
+void CMDParser::printAllColor(const osbr::RGB& color)
+{
+    Serial.print('#');
+    for (int i = 0; i < NCHANNELS; ++i) {
+        Serial.print(color[i] / 16, HEX);
+        Serial.print(color[i] & 0xf, HEX);
+    }
+    Serial.print(" %(");
+    for (int i = 0; i < NCHANNELS; ++i) {
+        Serial.print(color[i] * 100 / 255);
+        if (i < NCHANNELS - 1)
+            Serial.print(' ');
+    }
+    Serial.print(") [");
+    for (int i = 0; i < NCHANNELS; ++i) {
+        Serial.print(color[i]);
+        if (i < NCHANNELS - 1)
+            Serial.print(' ');
+    }
+    Serial.print("]");
+}
+
+
 void CMDParser::printMAmps(const RGB& c) {
     Serial.print("(");
     uint32_t amps =   LinearToPWM1024(c[0]) * RED_I / uint32_t(1023) 
@@ -69,17 +92,6 @@ void CMDParser::printMAmps(const RGB& c) {
                     + LinearToPWM1024(c[2]) * BLUE_I / uint32_t(1023);
     Serial.print(amps);
     Serial.print(" mAmps)");
-}
-
-void CMDParser::parseHexColor(const char* str, RGB* c) {
-    if (str[3] == 0) {
-        CStr<4> cstr = str;
-        parseHex(cstr, &c->r);
-    }
-    else {
-        CStr<7> cstr = str;
-        parseHex(cstr, &c->r);
-    }
 }
 
 void CMDParser::printLead(const char* str) {
@@ -133,22 +145,23 @@ bool CMDParser::processCMD()
 
     if (action == BC) {
         if (isSet) {
-            parseHexColor(value.c_str() + 1, &c);
+            Serial.print("'"); Serial.print(value.c_str()); Serial.println("'");
+            parseAllColor(value.c_str(), &c.r);
             bladeColor.setBladeColor(c);
         }
         printLead(action.c_str());
-        printHexColor(bladeColor.getBladeColor());
+        printAllColor(bladeColor.getBladeColor());
         Serial.print(" ");
         printMAmps(bladeColor.getBladeColor());
         Serial.print('\n');
     }
     else if (action == IC) {
         if (isSet) {
-            parseHexColor(value.c_str() + 1, &c);
+            parseAllColor(value.c_str(), &c.r);
             bladeColor.setImpactColor(c);
         }
         printLead(action.c_str());
-        printHexColor(bladeColor.getImpactColor());
+        printAllColor(bladeColor.getImpactColor());
         Serial.print(" ");
         printMAmps(bladeColor.getImpactColor());
         Serial.print('\n');

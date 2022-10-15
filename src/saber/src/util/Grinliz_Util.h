@@ -394,11 +394,15 @@ char decToHex(int v);
 
 bool TestHexDec();
 
-/**
-* Convert a string in the form: aabbcc to decimal.
-*/
-void parseHex(const CStr<7>& str, uint8_t* color3);
-void parseHex(const CStr<4>& str, uint8_t* color3);
+// Convert a string in the form: aabbcc to decimal.
+void parse3Hex(const char* str, uint8_t* val);
+// Parse a string in form: aa bb cc to decimal.
+void parse3Dec(const char* str, uint8_t* val);
+// Parse a color string, accepting format:
+//  #aabbcc in hex
+//  %100 50 0 in percentages
+//  255 129 0 in decimal
+void parseAllColor(const char* str, uint8_t* val);
 
 /**
 *  Convert a numbers to a CStr.

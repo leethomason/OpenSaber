@@ -74,8 +74,10 @@ osbr::RGB BladeStateManager::process(osbr::RGB fullColor, uint32_t currentTime)
             color[i] = (uint8_t)glClamp<int32_t>(c, 0, 255);
         }
     }
-    //if (color != osbr::RGB(0))
-    //   Log.p("BladeStateManager time=").p(currentTime).p(" color=").ptc(color).p(" full=").ptc(fullColor).eol();
+#if 0    
+    if (color != osbr::RGB(0))
+       Log.p("BladeStateManager time=").p(currentTime).p(" color=").ptc(color).p(" full=").ptc(fullColor).eol();
+#endif
     return color;
 }
 

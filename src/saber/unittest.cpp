@@ -43,6 +43,7 @@ bool runUnitTests()
     bool allPass = true;
 
     RUN_TEST(TestFixed);
+    RUN_TEST(TestHex);
     RUN_TEST(TestHexDec);
 	RUN_TEST(DotStarUI::Test);
 	RUN_TEST(TestCStr);

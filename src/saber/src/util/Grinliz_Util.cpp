@@ -478,18 +478,41 @@ bool TestHexDec()
 }
 
 
-void parseHex(const CStr<7>& str, uint8_t* c)
+void parse3Hex(const char* str, uint8_t* c)
 {
     for (int i = 0; i < 3; ++i) {
         c[i] = hexToDec(str[i*2+0]) * 16 + hexToDec(str[i*2+1]);
     }
 }
 
-void parseHex(const CStr<4>& str, uint8_t* c)
+void parse3Dec(const char* str, uint8_t* c)
 {
-    for (int i = 0; i < 3; ++i) {
-        int h = hexToDec(str[i]);
-        c[i] = h * 16 + h;
+    c[0] = c[1] = c[2] = 0;
+    for(int i=0; i<3; ++i) {
+        while(*str >= '0' && *str <= '9') {
+            c[i] *= 10;
+            c[i] += *str - '0';
+            str++;
+        }
+        str++;
+    }
+}
+
+void parseAllColor(const char* str, uint8_t* c)
+{
+    if (*str == '#') {
+        parse3Hex(str + 1, c);
+    }
+    else if (*str == '%') {
+        parse3Dec(str + 1, c);
+        for (int i = 0; i < 3; ++i) {
+            if (c[i] > 100)
+                c[i] = 100;
+            c[i] = c[i] * 255 / 100;
+        }
+    }
+    else {
+        parse3Dec(str, c);
     }
 }
 
@@ -504,26 +527,40 @@ void writeHex(const uint8_t* c, CStr<7>* str)
 
 bool TestHex()
 {
-	CStr<7> inLong("a1b2c3");
-	CStr<4> inShort("abc");
+	const char* inLong("a1b2c3");
 	CStr<7> out;
 
 	uint8_t rgb[3];
 
-	parseHex(inLong, rgb);
+	parse3Hex(inLong, rgb);
 	TEST_IS_TRUE(rgb[0] == 0xa1);
 	TEST_IS_TRUE(rgb[1] == 0xb2);
 	TEST_IS_TRUE(rgb[2] == 0xc3);
 
-	parseHex(inShort, rgb);
-	TEST_IS_TRUE(rgb[0] == 0xaa);
-	TEST_IS_TRUE(rgb[1] == 0xbb);
-	TEST_IS_TRUE(rgb[2] == 0xcc);
-
 	writeHex(rgb, &out);
-	TEST_IS_TRUE(out == "aabbcc");
+	TEST_IS_TRUE(out == "a1b2c3");
 
-	return true;
+    parse3Dec("10 212 3", rgb);
+    TEST_EQUAL(rgb[0], 10);
+    TEST_EQUAL(rgb[1], 212);
+    TEST_EQUAL(rgb[2], 3);
+
+    parseAllColor("#123456", rgb);
+    TEST_EQUAL(rgb[0], 16 + 2);
+    TEST_EQUAL(rgb[1], 16 * 3 + 4);
+    TEST_EQUAL(rgb[2], 16*5 + 6);
+
+    parseAllColor("%100 50 25", rgb);
+    TEST_EQUAL(rgb[0], 255);
+    TEST_EQUAL(rgb[1], 127);
+    TEST_EQUAL(rgb[2], 63);
+
+    parseAllColor("10 20 200", rgb);
+    TEST_EQUAL(rgb[0], 10);
+    TEST_EQUAL(rgb[1], 20);
+    TEST_EQUAL(rgb[2], 200);
+
+    return true;
 }
 
 

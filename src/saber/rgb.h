@@ -81,11 +81,11 @@ struct RGB {
         b = (uint16_t(b) * s) >> 8;
     }
 
-	uint8_t operator[](const int index) const {
+	uint8_t operator[](int index) const {
 		return *(&r + index);
 	}
 
-    uint8_t& operator[](const int index) {
+    uint8_t& operator[](int index) {
         return *(&r + index);
     }
 

@@ -52,7 +52,7 @@ private:
     bool processCMD();
     void tokenize();
     void printHexColor(const osbr::RGB& color);
-    void parseHexColor(const char* str, osbr::RGB* c);
+    void printAllColor(const osbr::RGB& color);
     void printLead(const char* str);
     void printMAmps(const osbr::RGB& color);
     void printXYZ(const Vec3<int32_t>& v) const;
