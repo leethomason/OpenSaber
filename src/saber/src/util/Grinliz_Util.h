@@ -813,6 +813,9 @@ private:
 
 extern SPLog Log;
 
+// Guarentees - for the scope of the class - attachment
+// of the Log to serial output. Restores previous state
+// when done.
 class SerialLog
 {
 public:

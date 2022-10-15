@@ -66,7 +66,6 @@ private:
     CStr<ALLOCATE> token;
     CStr<ALLOCATE> action;
     CStr<ALLOCATE> value;
-    CStr<ALLOCATE> value2;
 };
 
 

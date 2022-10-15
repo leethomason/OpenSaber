@@ -46,12 +46,20 @@ void CMDParser::tokenize()
 {
     action.clear();
     value.clear();
-    value2.clear();
 
     if (token.empty()) return;
 
-    CStr<ALLOCATE>* inputs[3] = { &action, &value, &value2 };
-    token.tokenize(' ', inputs, 3);
+    const char *p = token.c_str();
+    while(*p && *p != ' ') {
+        action.append(*p);
+        ++p;
+    }
+    while(*p && *p == ' ') {
+        ++p;
+    }
+    while(*p) {
+        value.append(*p);
+    }
 }
 
 void CMDParser::printHexColor(const RGB& color) {
@@ -105,7 +113,6 @@ bool CMDParser::push(int c)
 {
     bool processed = false;
     if (c == '\n') {
-        //Serial.println("process");
         processed = processCMD();
     }
     else {
@@ -118,10 +125,8 @@ bool CMDParser::processCMD()
 {
     static const char BC[]      = "bc";
     static const char IC[]      = "ic";
-    static const char LSPAL[]   = "lspal";
     static const char PAL[]     = "pal";
     static const char FONT[]    = "font";
-    static const char FONTS[]   = "fonts";
     static const char VOL[]     = "vol";
     static const char VOLTS[]   = "vbat";
     static const char UTIL[]    = "util";
@@ -140,12 +145,10 @@ bool CMDParser::processCMD()
     SerialLog serialLog;    // guarantees log is attached to Serial
 
     tokenize();
-    //Serial.print("CMD:"); Serial.print(action.c_str()); Serial.print(":"); Serial.println(value.c_str());
     bool isSet = !value.empty();
 
     if (action == BC) {
         if (isSet) {
-            Serial.print("'"); Serial.print(value.c_str()); Serial.println("'");
             parseAllColor(value.c_str(), &c.r);
             bladeColor.setBladeColor(c);
         }
@@ -165,22 +168,6 @@ bool CMDParser::processCMD()
         Serial.print(" ");
         printMAmps(bladeColor.getImpactColor());
         Serial.print('\n');
-    }
-    else if (action == LSPAL) {
-        for(int i=0; i<SaberDB::NUM_PALETTES; ++i) {
-            const SaberDB::Palette* pal = database.getPalette(i);
-
-            const MemUnit& memUnit = manifest.getUnit(database.soundFont());
-            CStr<MemUnit::NAME_ALLOC> name = memUnit.name;
-
-            Log.p(i).p(": ")
-               .p(name.c_str())
-               .p(" ")
-               .ptc(pal->bladeColor)
-               .p(" ")
-               .ptc(pal->impactColor)
-               .eol();
-        }
     }
     else if (action == PAL) {
         if (isSet) {
@@ -232,20 +219,6 @@ bool CMDParser::processCMD()
     else if (action == ID) {
         printLead(action.c_str());
         Serial.println(F(ID_STR));
-    }
-    else if (action == FONTS) {
-#ifdef SABER_SOUND_ON
-        //uint32_t dirHash = manifest.dirHash();
-        //Serial.print("dirHash=");
-        //Serial.println(dirHash, HEX);
-        for (int i = 0; i < MemImage::NUM_DIR; ++i) {
-            Serial.print(i);
-            Serial.print(": ");
-
-            CStr<MemUnit::NAME_ALLOC> name = manifest.getUnit(i).name;
-            Serial.println(name.c_str());
-        }
-#endif
     }
     else if (action == ACCEL) {
         accelMag.log(8);

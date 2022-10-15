@@ -211,11 +211,7 @@ void setup()
 
     flashTransport.begin();
     spiFlash.begin();
-    //manifest.scan(&spiFlash);
     spiFlash.readMemory(0, (uint8_t*) manifest.getBasePtr(), Manifest::IMAGE_SIZE);
-
-    //uint32_t dirHash = manifest.dirHash();
-    //saberDB.initializeFromDirHash(dirHash);
     saberDB.initFromManifest(manifest);
 
     Log.p("Init audio system.").eol();
