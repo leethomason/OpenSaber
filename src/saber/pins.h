@@ -74,7 +74,7 @@
 #define SABER_SUB_MODEL_B			13
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
+#define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_DARKSABER
 #define SABER_SUB_MODEL				0	
 // ----------------------------------
@@ -1052,11 +1052,11 @@
 	static const int VOLUME_3 = 128;
 	static const int VOLUME_4 = 255;
 #elif (SABER_MODEL == SABER_MODEL_DARKSABER)
+	#define ID_STR "Darksaber"
+
 	#define PCB_VERSION 				PCB_ITSY_4A
 	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
 	#define SABER_VOLTMETER()			1			
-	#define SABER_UI_LED				SABER_LED_DOTSTAR
-
 	#define SABER_UI_LED				SABER_LED_DOTSTAR
 	#define SABER_UI_BRIGHTNESS			128	// max 256			
 	#define ITSY_DOTSTAR_UI				1
@@ -1065,7 +1065,6 @@
 	#define SABER_UI_COUNT				1
 
 	#define VOLTMETER_TUNE				1059
-
 	#define SABER_LOCK()				0
 
 	// Does not need to be power of 2.
@@ -1074,7 +1073,6 @@
 	#define FILTER_MAG_Y	30	// Not used
 	#define FILTER_MAG_Z	10	// Not used
 	#define SWING_SAMPLES	12	// Not used
-	#define ID_STR "Darksaber"
 
 	static const int32_t RED_VF   = 2200;
 	static const int32_t RED_I    = 400;

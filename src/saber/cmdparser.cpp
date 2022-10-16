@@ -59,6 +59,7 @@ void CMDParser::tokenize()
     }
     while(*p) {
         value.append(*p);
+        ++p;
     }
 }
 
