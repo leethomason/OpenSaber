@@ -173,6 +173,27 @@ void BlockDrawOLED(const BlockDrawChunk* chunks, int n)
 }
 #endif
 
+void setupManifestData()
+{
+    MemPalette memPalette[SaberDB::NUM_PALETTES];
+
+    spiFlash.readMemory(0, (uint8_t*) manifest.getBasePtr(), MemImage::SIZE_MEMUNITS);
+    spiFlash.readMemory(Manifest::PaletteAddr(0), (uint8_t*) memPalette, MemImage::SIZE_PALETTE);
+    spiFlash.readMemory(Manifest::DescAddr(), (uint8_t*) cmdParser.desc.c_str(), MemImage::SIZE_DESC);
+    
+    for(int i=0; i<SaberDB::NUM_PALETTES; ++i) {
+        SaberDB::Palette pal;
+        pal.soundFont = memPalette[i].soundFont;
+        pal.bladeColor.r = memPalette[i].bladeColor.r;
+        pal.bladeColor.g = memPalette[i].bladeColor.g;
+        pal.bladeColor.b = memPalette[i].bladeColor.b;
+        pal.impactColor.r = memPalette[i].impactColor.r;
+        pal.impactColor.g = memPalette[i].impactColor.g;
+        pal.impactColor.b = memPalette[i].impactColor.b;
+        saberDB.setPalette(i, pal);
+    }
+}
+
 void setup() 
 {
 #if defined(SHIFTED_OUTPUT)
@@ -211,8 +232,7 @@ void setup()
 
     flashTransport.begin();
     spiFlash.begin();
-    spiFlash.readMemory(0, (uint8_t*) manifest.getBasePtr(), Manifest::IMAGE_SIZE);
-    saberDB.initFromManifest(manifest);
+    setupManifestData();
 
     Log.p("Init audio system.").eol();
     i2sAudioDriver.begin();
@@ -319,9 +339,9 @@ void changePalette(int index)
     const SaberDB::Palette *palette = saberDB.getPalette();
 
     sfx.setFont(saberDB.soundFont());
-    for(int i=0; i<SaberDB::Palette::NAUDIO; ++i) {
-        sfx.setBoost(palette->channelBoost[i], i);
-    }
+    //for(int i=0; i<SaberDB::Palette::NAUDIO; ++i) {
+    //    sfx.setBoost(palette->channelBoost[i], i);
+    //}
     bladeColor.setBladeColor(palette->bladeColor);
     bladeColor.setImpactColor(palette->impactColor);
 }

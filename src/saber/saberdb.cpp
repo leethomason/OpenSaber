@@ -29,35 +29,12 @@ using namespace osbr;
 
 SaberDB::SaberDB()
 {
-    //initializeFromDirHash(0);
 }
 
-void SaberDB::initFromManifest(const Manifest& manifest)
+void SaberDB::setPalette(int i, const Palette& pal)
 {
-    int dir = -1;
-    for (int i = 0; i < MemImage::NUM_DIR; ++i) {
-        if (strEqual(manifest.getUnit(i).name, "config")) {
-            dir = i;
-            break;
-        }
-    }
-    if (dir < 0) {
-        Log.p("Error finding palette configuration.").eol();
-        return;
-    }
-    int start = manifest.getUnit(dir).offset;
-    Log.p("Palette start=").p(start).eol();
-    for (int i = 0; i < NUM_PALETTES; ++i) {
-        const ConfigUnit &config = manifest.getConfig(start + i);
-        osbr::RGB blade = {config.bc_r, config.bc_g, config.bc_b};
-        osbr::RGB impact = {config.ic_r, config.ic_g, config.ic_b};
-        Log.p("Palette: ")
-            .p(i).p(" font=").p(config.soundFont)
-            .p(" bc=").v3(blade.r, blade.g, blade.b)
-            .p(" ic=").v3(impact.r, impact.g, impact.b)
-            .eol();
-        palette[i].set(blade, impact, config.soundFont);
-    }
+    i = glClamp(i, 0, NUM_PALETTES - 1);
+    palette[i] = pal;
 }
 
 void SaberDB::setPalette(int n)

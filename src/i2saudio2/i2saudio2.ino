@@ -18,6 +18,8 @@ Adafruit_ZeroDMA dma;
 Adafruit_ZeroI2S i2s(0, 1, 12, 2);
 Manifest manifest;
 I2SAudioDriver i2sAudioDriver(&dma, &i2s, &spiFlash, manifest);
+MemPalette memPalette[MemPalette::NUM_PALETTES];
+CStr<64> descString;
 
 static const int TEST_SOURCE_SAMPLES = 1024;
 static const int TEST_COMPRESSED_BYTES = 512;
@@ -58,25 +60,12 @@ void dumpMemUnit(int id, const MemUnit& memUnit)
 
 void dumpConfig()
 {
-    int dir = -1;
-    for (int i = 0; i < MemImage::NUM_DIR; ++i) {
-        if (strEqual(manifest.getUnit(i).name, "config")) {
-            dir = i;
-            break;
-        }
-    }
-    if (dir < 0) {
-        Log.p("Error finding palette configuration.").eol();
-        return;
-    }
-    int start = manifest.getUnit(dir).offset;
-    Log.p("Palette start=").p(start).eol();
-    for (int i = 0; i < 8; ++i) {
-        const ConfigUnit &config = manifest.getConfig(start + i);
+    Log.p("Desc=").p(descString.c_str()).eol();
+    for(int i=0; i<MemPalette::NUM_PALETTES; ++i) {
         Log.p("Palette: ")
-            .p(i).p(" font=").p(config.soundFont)
-            .p(" bc=").v3(config.bc_r, config.bc_g, config.bc_b)
-            .p(" ic=").v3(config.ic_r, config.ic_g, config.ic_b)
+            .p(i).p(" font=").p(memPalette[i].soundFont)
+            .p(" bc=").v3(memPalette[i].bladeColor.r, memPalette[i].bladeColor.g, memPalette[i].bladeColor.b)
+            .p(" ic=").v3(memPalette[i].impactColor.r, memPalette[i].impactColor.g, memPalette[i].impactColor.b)
             .eol();
     }
 }
@@ -161,7 +150,9 @@ void setup()
     Log.p("Serial open.").eol();
 
     spiFlash.begin();
-    spiFlash.readMemory(0, (uint8_t*) manifest.getBasePtr(), Manifest::IMAGE_SIZE);
+    spiFlash.readMemory(0, (uint8_t*) manifest.getBasePtr(), MemImage::SIZE_MEMUNITS);
+    spiFlash.readMemory(Manifest::PaletteAddr(0), (uint8_t*) memPalette, MemImage::SIZE_PALETTE);
+    spiFlash.readMemory(Manifest::DescAddr(), (uint8_t*) descString.c_str(), MemImage::SIZE_DESC);
 
     dumpConfig();
 

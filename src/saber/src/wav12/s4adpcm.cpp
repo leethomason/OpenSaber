@@ -39,6 +39,7 @@ const int S4ADPCM::DELTA_TABLE_4[N_TABLES][TABLE_SIZE] = {
     {-1,  0, 0, 0, 0, 0, 1, 1, 1},  // in01, out01
     {-1,  0, 0, 0, 0, 0, 1, 2, 2},  // fiati, swingh01, swingl01, in02
     {-1, -1, 0, 0, 0, 1, 2, 3, 4}   // hum01
+
 };
 
 // -8 + 7
