@@ -54,7 +54,6 @@
 #define SABER_MODEL_PROTECTION 	   23   // Itsy, Dotstar UI
 #define SABER_MODEL_CLAN		   24	// Itsy, one LED UI
 #define SABER_MODEL_LEIA_PS		   25	// Itsy, one LED UI, essentially a clan saber
-// #define SABER_MODEL_VIGILANCE_2	   26   // Itsy, LIS3DH SPI (accel + mag shortage)	Never built; odd it's on this list.
 #define SABER_MODEL_DUCHESS   	   27   // Itsy 4a, Dotstar UI, LSM6D Gyro
 #define SABER_MODEL_DARKSABER	   28   // Itsy 4a, Dotstar UI, LSM6D Gyro
 
@@ -969,43 +968,6 @@
 
 	static const int32_t BLUE_VF  = 3100;
 	static const int32_t BLUE_I   = LEIA_PS_POWER;
-	static const int32_t BLUE_R   = 1350;
-
-	static const int VOLUME_1 = 32;
-	static const int VOLUME_2 = 64;
-	static const int VOLUME_3 = 128;
-	static const int VOLUME_4 = 255;
-#elif (SABER_MODEL == SABER_MODEL_VIGILANCE_2)
-	#define PCB_VERSION 				PCB_ITSY_3A
-	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
-	#define SABER_VOLTMETER() 			1
-	#define VOLTMETER_TUNE				1040
-	#define ID_STR "Vigilance 2 Cree XPE2 RGB."
-	
-	#define SABER_UI_LED				SABER_LED_DOTSTAR
-	#define SABER_UI_BRIGHTNESS			16
-	#define ITSY_DOTSTAR_UI				1
-	#define SABER_NUM_LEDS 			    1
-	#define SABER_UI_START				0
-	#define SABER_UI_COUNT				1
-
-	// Does not need to be power of 2.
-	// multiply by 10 to get ms width of filter
-	#define FILTER_MAG_X	20
-	#define FILTER_MAG_Y	20
-	#define FILTER_MAG_Z	20
-	#define SWING_SAMPLES	12
-
-	static const int32_t RED_VF   = 2200;
-	static const int32_t RED_I    = 400;
-	static const int32_t RED_R    = 4100;
-
-	static const int32_t GREEN_VF = 3200;
-	static const int32_t GREEN_I  = 400;
-	static const int32_t GREEN_R = 1000;
-
-	static const int32_t BLUE_VF  = 3100;
-	static const int32_t BLUE_I   = 400;
 	static const int32_t BLUE_R   = 1350;
 
 	static const int VOLUME_1 = 32;
