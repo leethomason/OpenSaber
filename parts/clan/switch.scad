@@ -1,17 +1,17 @@
 // Varies; size of bolt hole in top.
 // D_BASE = 3.9; // standard bolt
-//D_BASE = 1.8; // the little pins
-D_BASE = 4.1;
+D_BASE = 1.8; // the little pins
+//D_BASE = 4.1;
 
 // Varies; height of base ring.
 //H_RIM = 4.0; 
 //H_RIM = 3.5;
 // H_RIM = 3.3;
-H_RIM = 3.0;
+H_RIM = 4.0;
 
 // Varies; height of entire thing
 //H = 6.5; // with raised header
-H = 8.0; // with flat top
+H = 6.8; // with flat top
 
 SQUARE_OFF = true;
 SHORTEN_FRONT = false;
