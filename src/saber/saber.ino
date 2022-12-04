@@ -395,7 +395,7 @@ void retractBlade()
 // One button case.
 void buttonAClickHandler(const Button&)
 {
-    uiMode.setActive(millis());
+    uiMode.setActive(I2SAudioDriver::stableSlowTime());
 
     Log.p("buttonAClickHandler").eol();
     if (bladeStateManager.isOff()) {
@@ -428,7 +428,7 @@ void buttonAClickHandler(const Button&)
 
 void buttonAHoldHandler(const Button& button)
 {
-    uiMode.setActive(millis());
+    uiMode.setActive(I2SAudioDriver::stableSlowTime());
     //Log.p("buttonAHoldHandler nHolds=").p(button.nHolds()).eol();
     
     if (bladeStateManager.isOff()) {
@@ -774,9 +774,9 @@ void loopDisplays(uint32_t msecStable)
         }
 
 #       ifdef SABER_UI_FADE_OUT
-        if (normalModeAndOff && uiMode.isIdle(msec)) {
+        if (normalModeAndOff && uiMode.isIdle(msecStable)) {
             static const uint32_t FADE_TIME = 800;
-            uint32_t over = uiMode.millisPastIdle(msec);
+            uint32_t over = uiMode.millisPastIdle(msecStable);
             float fraction = 0;
 
             if (over < FADE_TIME) {
@@ -800,7 +800,7 @@ void loopDisplays(uint32_t msecStable)
     {
         if (normalModeAndOff) {
             osbr::RGB rgb;
-            calcCrystalColorHSV(msec, bladeColor.getBladeColor(), &rgb);
+            calcCrystalColorHSV(msecStable, bladeColor.getBladeColor(), &rgb);
             rgba[SABER_CRYSTAL_START].set(rgb, SABER_CRYSTAL_BRIGHTNESS);
         }
         else {

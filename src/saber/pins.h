@@ -25,6 +25,14 @@
 
 #include <stdint.h>
 
+/*
+	Duchess		4a		Testing
+	Clan-Test	2e		No
+	Clan-Tano	2e		No
+	Leia-PS		2e		No
+	Sisters		2e		No
+*/
+
 // --- Configuration ---
 // Note: Serial connection should be set to 19200 baud with a newline after commands.
 
@@ -74,7 +82,7 @@
 
 // ----------------------------------
 #define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_DARKSABER
+#define SABER_MODEL 				SABER_MODEL_DUCHESS
 #define SABER_SUB_MODEL				0	
 // ----------------------------------
 
@@ -111,7 +119,8 @@
 // The 3 series is the same as the 2 series, EXCEPT that it switches back to the LIS3DH.
 // Smooth swing not supported. But I have enough LISD3H chips to make it worth it, and allows me to replace/upgrade
 // sabers on the Teensy platform.
-#define PCB_ITSY_3A				   23
+// NEVER USED
+// #define PCB_ITSY_3A				   23
 // The 4 series builds on the 3 series design. The PCBs are very similar looking. However, the
 // magnetometer is removed, and a gyroscope is added (LSM6D). The gyroscrope is very nice, at first
 // attempt easy to solder, and gives very nice results.
