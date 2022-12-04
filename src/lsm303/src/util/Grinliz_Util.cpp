@@ -45,41 +45,25 @@ bool TestUtil()
     TEST_IS_EQ(lerp1024(0, 16, 512), 8);
     TEST_IS_EQ(lerp1024(-16, 0, 512), -8);
 
-    // iSin, iSin255 madness
-    TEST_IS_TRUE(iSin(0) == 0);
-    TEST_IS_TRUE(iSin(FixedNorm(1, 4)) == 1);
-    TEST_IS_TRUE(iSin(FixedNorm(2, 4)) == 0);
-    TEST_IS_TRUE(iSin(FixedNorm(3, 4)) == -1);
-
-    TEST_IS_TRUE(iInvSin_S3(0) == 0);
-    TEST_IS_TRUE(iInvSin_S3(ISINE_ONE) == ISINE_90);
-    TEST_IS_TRUE(iInvSin_S3(-ISINE_ONE) == -ISINE_90);
-    TEST_IS_TRUE(iInvSin_S3(ISINE_HALF) == ISINE_30);
-
-    TEST_IS_TRUE(iInvCos_S3(0) == ISINE_90);
-    TEST_IS_TRUE(iInvCos_S3(ISINE_ONE) == 0);
-    TEST_IS_TRUE(iInvCos_S3(-ISINE_ONE) == ISINE_180);
-
-#ifdef _WIN32
-    for (float r = 0; r <= 1.0f; r += 0.01f) {
-        float f = sinf(r * 2.0f * 3.1415926535897932384626433832795f);
-        FixedNorm fn = iSin(FixedNorm(r));
-        int s3 = iSin_S3(int(r * 32768));
-
-        float fnFloat = fn.toFloat();
-        float s3Float = float(s3) / 4096.0f;
-
-        TEST_IS_TRUE(fabsf(f - fnFloat) < 0.04f);
-        TEST_IS_TRUE(fabsf(f - float(s3) / 4096.0f) < 0.04f);
-    }
-#endif
-
     // Combsort
     {
         int set[10] = { 0, 4, 4, 0, 1, 3, 3, 1, 2, 2};
         combSort(set, 10);
         for(int i=1; i<10; ++i)
             TEST_IS_TRUE(set[i] >= set[i - 1]);
+    }
+
+    // Angle range
+    {
+        TEST_IS_TRUE(distBetweenAngle(350, 10, 360) == 20);
+        TEST_IS_TRUE(distBetweenAngle(10, 350, 360) == 20);
+        TEST_IS_TRUE(distBetweenAngle(-10, 10, 360) == 20);
+        TEST_IS_TRUE(distBetweenAngle(10, -10, 360) == 20);
+        TEST_IS_TRUE(distBetweenAngle(10, 40, 360) == 30);
+        TEST_IS_TRUE(distBetweenAngle(40, 10, 360) == 30);
+        TEST_IS_TRUE(distBetweenAngle(200, 210, 360) == 10);
+        TEST_IS_TRUE(distBetweenAngle(210, 200, 360) == 10);
+        TEST_IS_TRUE(distBetweenAngle(180, -180, 360) == 0);
     }
 
     return true;
@@ -110,7 +94,7 @@ void intToDigits(int value, int* digits, int nDigits)
     for (int i = 0; i < nDigits; ++i) {
         digits[i] = 0;
         uint32_t digit = value / range;
-        if (digit >= 0 && digit < 10) {
+        if (digit < 10) {
             digits[i] = digit;
             value -= range * digit;
             range = range / 10;
@@ -128,7 +112,7 @@ void intToString(int value, char* buf, int allocated, bool writeZero)
 	}
 	for (int i = 0; i < allocated - 1; ++i) {
 		uint32_t digit = value / range;
-		if (digit >= 0 && digit < 10) {
+		if (digit < 10) {
 			buf[i] = ' ';
 			if (digit || (i == allocated - 2) || writeZero) {
 				buf[i] = '0' + digit;
@@ -185,7 +169,7 @@ uint32_t hash32(const char* v, uint32_t h)
 bool TestAverageSample()
 {
     {
-        AverageSample<Vec3<int>, Vec3<int>, 4> ave(Vec3<int>(2, 4, 8));
+        AverageSample<Vec3<int>, 4> ave(Vec3<int>(2, 4, 8));
         Vec3<int> r = ave.average();
         TEST_IS_TRUE(r.x == 2);
         TEST_IS_TRUE(r.y == 4);
@@ -205,7 +189,7 @@ bool TestAverageSample()
         TEST_IS_TRUE(ave.average().isZero());
     }
     {
-        AverageSample<uint16_t, uint32_t, 256> ave(4000);
+        AverageSample<uint32_t, 256> ave(4000);
         TEST_IS_TRUE(ave.average() == 4000);
         for (int i = 0; i < 128; i++) {
             ave.push(8000);
@@ -213,7 +197,7 @@ bool TestAverageSample()
         TEST_IS_TRUE(ave.average() == 6000);
     }
     {
-        AverageSample<float, float, 2> ave(0);
+        AverageSample<float, 2> ave(0);
         ave.push(1.0f);
         ave.push(1.0f);
         ave.push(0.0f);
@@ -226,6 +210,20 @@ bool TestAverageSample()
 
 bool TestCStr()
 {
+    //Log.p("sizeof(CStr<3>=").p(sizeof(CStr<3>)).eol();  // 8
+    //Log.p("sizeof(CStr<4>=").p(sizeof(CStr<4>)).eol();  // 8
+    //Log.p("sizeof(CStr<7>=").p(sizeof(CStr<7>)).eol();  // 12
+    //Log.p("sizeof(CStr<10>=").p(sizeof(CStr<10>)).eol();// 16
+
+    TEST_EQUAL(4, sizeof(CStr<3>));
+    TEST_EQUAL(5, sizeof(CStr<4>));
+    TEST_EQUAL(8, sizeof(CStr<7>));
+    TEST_EQUAL(11, sizeof(CStr<10>));
+
+    CStr<2> a = "a";
+    CStr<2> b = "b";
+    TEST(a < b);
+
     TEST_IS_TRUE(strStarts("FooBar", "Foo"));
     TEST_IS_FALSE(strStarts("FooBar", "Bar"));
     TEST_IS_FALSE(strStarts("Foo", "FooBar"));
@@ -480,18 +478,41 @@ bool TestHexDec()
 }
 
 
-void parseHex(const CStr<7>& str, uint8_t* c)
+void parse3Hex(const char* str, uint8_t* c)
 {
     for (int i = 0; i < 3; ++i) {
         c[i] = hexToDec(str[i*2+0]) * 16 + hexToDec(str[i*2+1]);
     }
 }
 
-void parseHex(const CStr<4>& str, uint8_t* c)
+void parse3Dec(const char* str, uint8_t* c)
 {
-    for (int i = 0; i < 3; ++i) {
-        int h = hexToDec(str[i]);
-        c[i] = h * 16 + h;
+    c[0] = c[1] = c[2] = 0;
+    for(int i=0; i<3; ++i) {
+        while(*str >= '0' && *str <= '9') {
+            c[i] *= 10;
+            c[i] += *str - '0';
+            str++;
+        }
+        str++;
+    }
+}
+
+void parseAllColor(const char* str, uint8_t* c)
+{
+    if (*str == '#') {
+        parse3Hex(str + 1, c);
+    }
+    else if (*str == '%') {
+        parse3Dec(str + 1, c);
+        for (int i = 0; i < 3; ++i) {
+            if (c[i] > 100)
+                c[i] = 100;
+            c[i] = c[i] * 255 / 100;
+        }
+    }
+    else {
+        parse3Dec(str, c);
     }
 }
 
@@ -506,26 +527,40 @@ void writeHex(const uint8_t* c, CStr<7>* str)
 
 bool TestHex()
 {
-	CStr<7> inLong("a1b2c3");
-	CStr<4> inShort("abc");
+	const char* inLong("a1b2c3");
 	CStr<7> out;
 
 	uint8_t rgb[3];
 
-	parseHex(inLong, rgb);
+	parse3Hex(inLong, rgb);
 	TEST_IS_TRUE(rgb[0] == 0xa1);
 	TEST_IS_TRUE(rgb[1] == 0xb2);
 	TEST_IS_TRUE(rgb[2] == 0xc3);
 
-	parseHex(inShort, rgb);
-	TEST_IS_TRUE(rgb[0] == 0xaa);
-	TEST_IS_TRUE(rgb[1] == 0xbb);
-	TEST_IS_TRUE(rgb[2] == 0xcc);
-
 	writeHex(rgb, &out);
-	TEST_IS_TRUE(out == "aabbcc");
+	TEST_IS_TRUE(out == "a1b2c3");
 
-	return true;
+    parse3Dec("10 212 3", rgb);
+    TEST_EQUAL(rgb[0], 10);
+    TEST_EQUAL(rgb[1], 212);
+    TEST_EQUAL(rgb[2], 3);
+
+    parseAllColor("#123456", rgb);
+    TEST_EQUAL(rgb[0], 16 + 2);
+    TEST_EQUAL(rgb[1], 16 * 3 + 4);
+    TEST_EQUAL(rgb[2], 16*5 + 6);
+
+    parseAllColor("%100 50 25", rgb);
+    TEST_EQUAL(rgb[0], 255);
+    TEST_EQUAL(rgb[1], 127);
+    TEST_EQUAL(rgb[2], 63);
+
+    parseAllColor("10 20 200", rgb);
+    TEST_EQUAL(rgb[0], 10);
+    TEST_EQUAL(rgb[1], 20);
+    TEST_EQUAL(rgb[2], 200);
+
+    return true;
 }
 
 
@@ -653,22 +688,34 @@ bool TestCQueue()
     return true;
 }
 
-int AnimateProp::tick(uint32_t delta, int* target) 
+int AnimateProp::tick(uint32_t delta, int* target)
 {
     m_time += delta;
 
     if (m_period == 0 || m_time >= m_period) {
+        // All done.
         m_period = 0;
         m_value = m_end;
         if (target) *target = m_value;
         return m_end;
     }
-    else {
-        m_time += delta;
-        m_value = m_start + (m_end - m_start) * int(m_time) / int(m_period);
-        if (target) *target = m_value;
-        return m_value;
+
+    if (m_subPeriod) {
+        // Breathy-blinking
+        float t = float(m_time) / m_subPeriod;
+        constexpr float shift = 1.0f / 8.0f;
+        float s = sinf((t - shift) * k2Pi_float);
+        if (s < 0) 
+            s = 0;
+
+        m_value = static_cast<int>(s * m_end);
     }
+    else {
+        // Straight animation.
+        m_value = m_start + (m_end - m_start) * int(m_time) / int(m_period);
+    }
+    if (target) *target = m_value;
+    return m_value;
 }
 
 int Timer2::tick(uint32_t delta)

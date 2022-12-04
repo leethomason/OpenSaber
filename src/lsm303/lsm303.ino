@@ -1,15 +1,8 @@
-#include <SPI.h>
-#include <math.h>
-
-#include "GrinlizLSM303.h"
-#include "Grinliz_Util.h"
-#include "fixed.h"
+#include "src/lsm303/grinliz_LSM303.h"
+#include "src/util/Grinliz_Arduino_Util.h"
 #include "swing.h"
 
-uint32_t lastMillis = 0;
-int nRead = 0;
-int nMagRead = 0;
-GrinlizLSM303 accel;
+GrinlizLSM303 accel(0);
 Swing swing;
 
 void setup() {
@@ -21,32 +14,46 @@ void setup() {
     Log.p("Starting Accel/Gyro in I2C mode.").eol();
     delay(10);
 
-    if (!accel.begin()) {
+    if (!accel.begin(0)) {
         Log.p("Accel error.").eol();
         while(true) {}
     }
     Log.p("Accel/Gyro success").eol();
-    accel.logMagStatus();
-
-    TestFixed();
     Swing::test();
+
+    accel.recalibrateMag();
+    accel.logMagStatus();
+    accel.flushAccel(0);
 }
 
 void loop()
 {
-    static bool printTime = false;
+    static uint32_t lastAccelTime = 0;
+    static uint32_t lastMagTime = 0;
+    static uint32_t lastSwingTime = 0;
 
-    Vec3<float> data[8];
-    Vec3<int32_t> rawData[8];
-    int n = accel.readInner(rawData, data, 8);
-    nRead += n;
+    Vec3<Fixed115> data;
+    bool hasAccelData = accel.sampleAccel(&data);
 
-    Vec3<float> fMagData;
     Vec3<int32_t> magData;
-    int nMag = accel.readMag(&magData, &fMagData);
-    if(nMag) {
+    bool hasMagData = accel.sampleMag(&magData);
+
+    uint32_t ms = millis();
+    if (hasAccelData && (ms - lastAccelTime > 200)) {
+        lastAccelTime = ms;
+        //Log.p("Accel=").v3(data).eol();
+    }
+    if (hasMagData && (ms - lastMagTime > 200)) {
+        lastMagTime = ms;
+        //Log.p("Mag  =").v3(magData).eol();
+    }
+
+    if(hasMagData) {
         swing.push(magData, accel.getMagMin(), accel.getMagMax());
-        ++nMagRead;
+        if (ms - lastSwingTime > 200) {
+            lastSwingTime = ms;
+            Log.p("Swing=").p(swing.speed()).p(" val=").v3(magData).p(" min=").v3(accel.getMagMin()).p(" max=").v3(accel.getMagMax()).eol();
+        }
     }
 
     #if false
@@ -68,10 +75,7 @@ void loop()
     }
     #endif 
 
-    if (printTime && nMag) {
-        printTime = false;
-
-#if true
+#if false
     {
         float heading = atan2(fMagData.y, fMagData.x) * 180.0f / 3.14159f;
         if (heading < 0) heading += 360;
@@ -96,17 +100,4 @@ void loop()
         Serial.print(ay); Serial.print(" ");
         Serial.println(az);
 #endif
-    }
-
-    uint32_t t = millis();
-    if (t - lastMillis >= 1000) {
-        //Serial.print("Samples = ");
-        //Serial.println(nRead);
-        Serial.print("MagSamples=");
-        Serial.println(nMagRead);
-        lastMillis = t;
-        nRead = 0;
-        nMagRead = 0;
-        printTime = true;
-    }
 }

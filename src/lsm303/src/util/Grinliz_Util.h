@@ -23,15 +23,14 @@
 #ifndef GRINLIZ_UTIL_INCLUDED
 #define GRINLIZ_UTIL_INCLUDED
 
-#include <string.h>
-#include <stdint.h>
-
 #include "grinliz_assert.h"
 #include "fixed.h"
 
+#include <stdint.h>
+#include <memory.h> // strcmp, memset, memcpy
+
 static const uint32_t NOMINAL_VOLTAGE = 3700;
 static const uint32_t VOLTAGE_RANGE	  =  300;
-static const uint32_t HIGH_VOLTAGE = 4100;
 
 inline int32_t lerp1024(int16_t a, int16_t b, int32_t t1024) {
     return (a * (1024 - t1024) + b * t1024) / 1024;
@@ -45,7 +44,8 @@ inline int32_t lerp256(int16_t a, int16_t b, int32_t t256) {
     return (int32_t(a) * (256 - t256) + int32_t(b) * t256) / 256;
 }
 
-inline FixedNorm lerp(FixedNorm a, FixedNorm b, FixedNorm t) {
+template<typename T>
+T lerp(T a, T b, T t) {
     return (a * (1 - t) + b * t);
 }
 
@@ -81,6 +81,21 @@ struct Vec3
 		return a;
 	}
 
+	T dot(const Vec3<T>& rhs) const {
+		return rhs.x * x + rhs.y * y + rhs.z * z;
+	}
+
+	T length() const { return (x * x + y * y + z * z).sqrt(); }
+
+	void normalize() {
+		T len = length();
+		if (len == 0)
+			return;
+		x = x / len;
+		y = y / len;
+		z = z / len;
+	}
+
     Vec3<T>& operator += (const Vec3<T>& v) { x += v.x; y += v.y; z += v.z; return *this; }
     Vec3<T>& operator -= (const Vec3<T>& v) { x -= v.x; y -= v.y; z -= v.z; return *this; }
 
@@ -90,6 +105,14 @@ struct Vec3
 };
 
 /**
+* Returns 'true' if 'str' strarts with 'prefix'
+*/
+bool strStarts(const char* str, const char* prefix);
+bool istrStarts(const char* str, const char* prefix);
+void intToString(int value, char* str, int allocated, bool writeZero);
+void intToDigits(int value, int* digits, int nDigits);
+
+/**
 * Returns 'true' if 2 strings are equal.
 * If one or both are null, they are never equal.
 * (But two empty strings are equal.)
@@ -97,18 +120,6 @@ struct Vec3
 inline bool strEqual(const char* a, const char* b) {
 	return a && b && strcmp(a, b) == 0;
 }
-
-inline bool strEqual(const char* a, const char* b, int n) {
-    return a && b && strncmp(a, b, n);
-}
-
-/**
-* Returns 'true' if 'str' strarts with 'prefix'
-*/
-bool strStarts(const char* str, const char* prefix);
-bool istrStarts(const char* str, const char* prefix);
-void intToString(int value, char* str, int allocated, bool writeZero);
-void intToDigits(int value, int* digits, int nDigits);
 
 void encodeBase64(const uint8_t* bytes, int nBytes, char* target, bool writeNull);
 void decodeBase64(const char* src, int nBytes, uint8_t* dst);
@@ -127,6 +138,8 @@ template< int ALLOCATE >
 class CStr
 {
 public:
+	static_assert(ALLOCATE < 255, "CStr is for small strings");
+
 	CStr() {
 		clear();
 	}
@@ -251,7 +264,7 @@ public:
 	void setFromNum(uint32_t value, bool writeZero) {
 		clear();
 		intToString(value, buf, ALLOCATE, writeZero);
-		len = (int) strlen(buf);
+		len = (uint8_t) strlen(buf);
 	}
 	
 	uint32_t hash32() const {
@@ -278,7 +291,7 @@ private:
 		return p;
 	}
 
-	int len;
+	uint8_t len;
 	char buf[ALLOCATE];
 };
 
@@ -349,7 +362,6 @@ public:
     }
 
     template< class T > bool operator !=(const T& str) const {
-        // Somewhat forced syntax because I don't want to re-implement the operator==
         return !(*this == str);
     }
 
@@ -382,11 +394,15 @@ char decToHex(int v);
 
 bool TestHexDec();
 
-/**
-* Convert a string in the form: aabbcc to decimal.
-*/
-void parseHex(const CStr<7>& str, uint8_t* color3);
-void parseHex(const CStr<4>& str, uint8_t* color3);
+// Convert a string in the form: aabbcc to decimal.
+void parse3Hex(const char* str, uint8_t* val);
+// Parse a string in form: aa bb cc to decimal.
+void parse3Dec(const char* str, uint8_t* val);
+// Parse a color string, accepting format:
+//  #aabbcc in hex
+//  %100 50 0 in percentages
+//  255 129 0 in decimal
+void parseAllColor(const char* str, uint8_t* val);
 
 /**
 *  Convert a numbers to a CStr.
@@ -472,6 +488,31 @@ void glSwap(T &a, T &b) {
 
 template<class T>
 T glAbs(T x) { return x >= 0 ? x : -x; }
+
+template<class T>
+inline T anglePositive(T a, T RANGE) {
+	while(a < 0)
+		a += RANGE;
+	while (a >= RANGE)
+		a -= RANGE;
+	return a;
+}
+
+template<class T>
+inline T distBetweenAngle(T a, T b, T RANGE) 
+{
+	const T half = RANGE / 2;
+
+	a = anglePositive(a, RANGE);
+	b = anglePositive(b, RANGE);
+	T d = b - a;
+	if (d < 0)
+		d += RANGE;
+	if (d > half)
+		d = -(d - RANGE);
+	return d;
+}
+
 
 // --- Algorithm --- //
 
@@ -597,18 +638,18 @@ public:
 	StepProp() {}
 
 	void set(Fixed115 f) { step = f; }
-	void set(float f) { step = Fixed115(f); }
+	void set(float f) { step = Fixed115{ f }; }
 
 	int tick(uint32_t delta) {
-		value += step * delta;
-		int n = value.getInt();
+		value += step * int(delta);
+		int n = static_cast<int>(value);
 		value -= n;
 		return n;
 	}
 
 public:
-	Fixed115 step = 0;
-	Fixed115 value = 0;
+	Fixed115 step{ 0 };
+	Fixed115 value{ 0 };
 };
 
 class AnimateProp
@@ -695,12 +736,6 @@ private:
 	But a log class is useful to generalize, both for utility
 	and testing. Therefore put up with some #define nonsense here.
 */
-#ifdef _WIN32
-class Stream;
-static const int DEC = 1;	// fixme: use correct values
-static const int HEX = 2;
-#endif
-
 class Stream;
 
 #ifndef DEC
@@ -724,10 +759,14 @@ public:
 	const SPLog& p(unsigned long v, int p = DEC) const;
 	const SPLog& p(double v, int p = 2) const;
 
-	template<typename S, int D>
-	const SPLog& p(FixedT<S, D> v) const { return p(v.toFloat()); }
+	template<typename A, typename B, unsigned int C>
+	const SPLog& p(fpm::fixed<A, B, C> v) const { return p(static_cast<float>(v)); }
 
 	const SPLog& v3(int32_t x, int32_t y, int32_t z, const char* bracket=0) const;
+	const SPLog& v3(uint8_t x, uint8_t y, uint8_t z, const char* bracket=0) const {
+		return v3(int32_t(x), int32_t(y), int32_t(z), bracket);
+	}
+
 	const SPLog& v2(int32_t x, int32_t y, const char* bracket=0) const;
 	const SPLog& v3(float x, float y, float z, const char* bracket=0) const;
 	const SPLog& v2(float x, float y, const char* bracket=0) const;
@@ -738,9 +777,9 @@ public:
 	const SPLog& v3(const Vec3<int32_t>& v, const char* bracket=0) const {
 		return v3(v.x, v.y, v.z, bracket);
 	}
-	template<typename S, int D>
-	const SPLog& v3(const Vec3<FixedT<S, D>>& v, const char* bracket=0) const {
-		return v3(v.x.toFloat(), v.y.toFloat(), v.z.toFloat(), bracket);
+	template<typename A, typename B, unsigned int C>
+	const SPLog& v3(const Vec3<fpm::fixed<A, B, C>>& v, const char* bracket=0) const {
+		return v3(static_cast<float>(v.x), static_cast<float>(v.y), static_cast<float>(v.z), bracket);
 	}
 
 	// Templated print, generally of alternate string class.
@@ -774,6 +813,9 @@ private:
 
 extern SPLog Log;
 
+// Guarentees - for the scope of the class - attachment
+// of the Log to serial output. Restores previous state
+// when done.
 class SerialLog
 {
 public:
@@ -783,6 +825,50 @@ public:
 private: 
 	Stream *_savedStream = 0;
 };
+
+#define STRINGIZE_(x) #x
+#define STRINGIZE(x) STRINGIZE_(x)
+
+#define TEST_EXISTS(expected) 						\
+	ASSERT(expected);								\
+	if (!(expected)) {								\
+		Log.p("Expected true:").p(#expected).eol();	\
+		while(true) {}								\
+	}
+
+#define TEST_EQUAL(expected, actual) 			\
+	ASSERT(expected == actual);					\
+	if (expected != actual) { 					\
+		Log.p("Expected:").p(expected).eol(); 	\
+		Log.p("Actual:").p(actual).eol();		\
+		while(true)	{}							\
+	 }
+
+#define TEST_EQUAL_RANGE(expected, actual, eps) 			\
+	if ((expected < actual - eps) || (expected > actual + eps)) { 	\
+		Log.p("Expected:").p(expected).eol(); 	\
+		Log.p("Actual:").p(actual).eol();		\
+		ASSERT(false);							\
+		while(true)	{}							\
+	 }
+
+#define TEST_STR_EQUAL(expected, actual) 		\
+	bool equal = strEqual(expected, actual);	\
+	ASSERT(equal);								\
+	if (!equal) { 								\
+		Log.p("Expected:").p(expected).eol(); 	\
+		Log.p("Actual:").p(actual).eol();		\
+		while(true)	{}							\
+	 }
+
+#define TEST_RANGE(low, high, actual) 			\
+	ASSERT(actual >= low && actual <= high);	\
+	if (actual < low || actual > high) {		\
+		Log.p("Low   :").p(low).eol(); 			\
+		Log.p("High  :").p(high).eol();			\
+		Log.p("Actual:").p(actual).eol();		\
+		while(true) {}							\
+	}
 
 #endif // GRINLIZ_UTIL_INCLUDED
 

@@ -81,9 +81,9 @@
 #define SABER_SUB_MODEL_B			13
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_DUCHESS
-#define SABER_SUB_MODEL				0	
+#define SERIAL_DEBUG 				1
+#define SABER_MODEL 				SABER_MODEL_CLAN
+#define SABER_SUB_MODEL				SABER_SUB_MODEL_APPRENTICE
 // ----------------------------------
 
 #define SABER_SOUND_SD 				1	// external memory card
@@ -116,11 +116,13 @@
 // Smooth swing, long running platform. 
 // However, as of 2021 there are no more LSM303 chips.
 #define PCB_ITSY_2E				   22   // Magnetometer + Accelerometer (LSM303) on the I2C bus. Dotstar. SPI. I2S audio. Flash mem sound.
+
 // The 3 series is the same as the 2 series, EXCEPT that it switches back to the LIS3DH.
 // Smooth swing not supported. But I have enough LISD3H chips to make it worth it, and allows me to replace/upgrade
 // sabers on the Teensy platform.
 // NEVER USED
 // #define PCB_ITSY_3A				   23
+
 // The 4 series builds on the 3 series design. The PCBs are very similar looking. However, the
 // magnetometer is removed, and a gyroscope is added (LSM6D). The gyroscrope is very nice, at first
 // attempt easy to solder, and gives very nice results.
