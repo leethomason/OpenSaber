@@ -69,43 +69,14 @@ public:
 
 	// Where the swing "starts", probably any starting location is fine.
 	// Maybe even idle times?
-	void setOrigin();
-	// Gets the dot product of current and origin, which is essentially the
-	// mix betwen swing sounds. Returns -1 to 1
-	float dotOrigin() const { return m_dotOrigin; }
-
-	const Vec3<float>& pos() const { return m_normal; }
-	const Vec3<float>& origin() const { return m_origin; }
-
+	void setOrigin() { m_init = false; }
 	static bool test();
 
 private:
-	Vec3<float> normalize(const Vec3<int32_t> x, const Vec3<int32_t>& x0, const Vec3<int32_t>& x1);
+	//Vec3<float> normalize(const Vec3<int32_t> x, const Vec3<int32_t>& x0, const Vec3<int32_t>& x1);
 
-	bool m_init;
-	float m_speed;
-	float m_dotOrigin;
-	Vec3<float> m_normal;
-	Vec3<float> m_origin;
-	Vec3<int32_t> m_prevSample;
+	bool m_init = false;
+	float m_speed = 0;
 	AverageSample<int32_t, SWING_SAMPLES> swingAve;
-};
-
-class MagFilter
-{
-public:
-	MagFilter() {}
-
-	void push(const Vec3<int32_t>& mag);
-	Vec3<int32_t> average() const {
-		Vec3<int32_t> v(aveMagX.average(), aveMagY.average(), aveMagZ.average());
-		v.div(SCALE);
-		return v;
-	}
-
-private:
-	static const int32_t SCALE = 4;
-	AverageSample<int32_t, FILTER_MAG_X> aveMagX;
-	AverageSample<int32_t, FILTER_MAG_Y> aveMagY;
-	AverageSample<int32_t, FILTER_MAG_Z> aveMagZ;
+	AverageSample<Vec3<int32_t>, 4> inputAve;
 };

@@ -53,6 +53,7 @@ void loop()
         if (ms - lastSwingTime > 200) {
             lastSwingTime = ms;
             Log.p("Swing=").p(swing.speed()).p(" val=").v3(magData).p(" min=").v3(accel.getMagMin()).p(" max=").v3(accel.getMagMax()).eol();
+            //Log.p("Swing=").p(swing.speed()).eol();
         }
     }
 
