@@ -24,12 +24,7 @@
 
 #include <stdint.h>
 #include "./src/util/Grinliz_Util.h"
-
-#define SWING_SAMPLES	12
-#define FILTER_MAG_X	10
-#define FILTER_MAG_Y	10
-#define FILTER_MAG_Z	10
-static const int SWING_MAX = 14;
+#include "pins.h"	// for SWING_SAMPLES and FILTER_MAG_X/Y/Z
 
 /*
 // The FILTER constants run an average over the accelerometer
@@ -66,17 +61,23 @@ public:
 	void push(const Vec3<int32_t>& x, const Vec3<int32_t>& xMin, const Vec3<int32_t>& xMax);
 	// speed in radians / second
 	float speed() const { return m_speed; }
+	// from -1 to 1
+	float dotOrigin() const { return m_dot;}
 
-	// Where the swing "starts", probably any starting location is fine.
-	// Maybe even idle times?
-	void setOrigin() { m_init = false; }
+	void setOrigin() { m_setOrigin = true;}
+
 	static bool test();
 
 private:
-	//Vec3<float> normalize(const Vec3<int32_t> x, const Vec3<int32_t>& x0, const Vec3<int32_t>& x1);
+	Vec3<float> calcVec(const Vec3<int32_t>& vec, const Vec3<int32_t>& mMin, const Vec3<int32_t>& mMax) const;
 
 	bool m_init = false;
-	float m_speed = 0;
+	bool m_setOrigin = false;
+	float m_speed = 0;	
+	float m_dot = 0;
+	Vec3<float> m_dotOrigin;
 	AverageSample<int32_t, SWING_SAMPLES> swingAve;
-	AverageSample<Vec3<int32_t>, 4> inputAve;
+	AverageSample<int32_t, FILTER_MAG_X> xInputAve;
+	AverageSample<int32_t, FILTER_MAG_Y> yInputAve;
+	AverageSample<int32_t, FILTER_MAG_Z> zInputAve;
 };

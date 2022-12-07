@@ -102,7 +102,6 @@ bool        stillReset = false;
 
 #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LSM303
 Swing       swing;
-MagFilter   magFilter;
 #endif
 
 #ifdef SABER_NUM_LEDS
@@ -493,16 +492,7 @@ void processAccel(uint32_t msec, uint32_t)
 #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LSM303
     Vec3<int32_t> magData;
     // readMag() should only return >0 if there is new data from the hardware.
-    if (accelMag.hasMag() && accelMag.sampleMag(&magData)) {
-        
-        static const uint32_t MAG_INTERVAL = 16;
-        static uint32_t lastMagData = 0;
-        int nMagData = 1;
-        if (lastMagData && (msec - lastMagData) >= MAG_INTERVAL * 2) {
-            // use a little less than 10ms for error correction
-            nMagData = (msec - lastMagData) / MAG_INTERVAL;
-        }
-        lastMagData = msec;
+    while (accelMag.hasMag() && accelMag.sampleMag(&magData)) {
 
         // The accelerometer and magnemometer are both clocked at 100Hz.
         // The swing is set up for constant data; assume n is the same for both.
@@ -511,19 +501,18 @@ void processAccel(uint32_t msec, uint32_t)
         // Keep waffling on this...assuming when blade is lit this will pretty
         // consistently get hit every 10ms.
 
-        for (int i = 0; i < nMagData; ++i)
-            magFilter.push(magData);
+        //for (int i = 0; i < nMagData; ++i)
+        //    magFilter.push(magData);
 
         Vec3<int32_t> magMin = accelMag.getMagMin();
         Vec3<int32_t> magMax = accelMag.getMagMax();
-        swing.push(magFilter.average(), magMin, magMax);
+        swing.push(magData, magMin, magMax);
 
         float dot = swing.dotOrigin();
-        float speed = swing.speed();
-        //vectorUI.PushTestData(speed, 0.0f, SWING_MAX, msec, 4.0f);
+        float speed = swing.speed() * 2.0f; // This factor of 2 is plaguing me. But at leasts it's in the LSM303 path.
         sfx.sm_setSwing(speed, (int)((1.0f + dot)*128.0f));
 
-#if false && (SERIAL_DEBUG == 1)
+#if true && (SERIAL_DEBUG == 1)
         static const int BURST = 5;
         static int32_t lastLog = 0;
         static int burstLog = 0;
@@ -535,10 +524,10 @@ void processAccel(uint32_t msec, uint32_t)
             Log.p(burstLog == BURST ? "--" : "  ")
                 .p("t=").p(millis()%1000)
                 .p(" swing=").p(swing.speed())
-                .p(" swingVol=").p(swingVol)
+                //.p(" swingVol=").p(swingVol)
                 .p(" range=").v3(range)
                 //.p(" pos=").v3(swing.pos()).p(" origin=").v3(swing.origin())
-                //.p(" dot=").p(dot)
+                .p(" dot=").p(dot)
                 //.p(" magfilter val/min/max ").v3(magFilter.average()).v3(magMin).v3(magMax)
                 //.p(" val/range ").v3(magFilter.average() - magMin).v3(range)
                 //.p(" accel=").p(fastG2.average())

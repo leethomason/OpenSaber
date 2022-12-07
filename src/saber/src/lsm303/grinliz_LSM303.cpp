@@ -455,7 +455,7 @@ void GrinlizLSM303::logTest(int nSamples, bool doAssert)
     }
     Log.p("Samples per second: ").p(samplesPerSecond).eol();
     if (doAssert) {
-        TEST_RANGE(50.0f, 150.0f, samplesPerSecond);
+        TEST_RANGE(50.0f, 180.0f, samplesPerSecond);
     }
 
     delay(10);

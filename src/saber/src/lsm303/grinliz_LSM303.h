@@ -31,12 +31,12 @@
 class GrinlizLSM303
 {
 public:
-    GrinlizLSM303(int /*_unusedPin*/ ) {}
+    GrinlizLSM303(int /*unused*/) {}
 
     // divisor for raw data
     static const int DIV = 4096;    
 
-    bool begin(const void*);
+    bool begin(const void* /*unused*/);
 
     void flushAccel(int reserve);
 
