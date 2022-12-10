@@ -879,11 +879,11 @@
 	// Does not need to be power of 2.
 	// multiply by 10 to get ms width of filter
 #	if SABER_SUB_MODEL == SABER_SUB_MODEL_APPRENTICE
-	#define FILTER_MAG_X	4
-	#define FILTER_MAG_Y	4
-	#define FILTER_MAG_Z	4
+	#define FILTER_MAG_X	20
+	#define FILTER_MAG_Y	20
+	#define FILTER_MAG_Z	20
 	#define SWING_SAMPLES	12
-	#define VOLTMETER_TUNE				1048
+	#define VOLTMETER_TUNE	1048
 #	elif SABER_SUB_MODEL == SABER_SUB_MODEL_BLACK
 	// Very unstable. Case metal? Size?
 	#define FILTER_MAG_X	40		// really bouncy in the x.

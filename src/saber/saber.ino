@@ -102,6 +102,7 @@ bool        stillReset = false;
 
 #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LSM303
 Swing       swing;
+MagFilter   magFilter;
 #endif
 
 #ifdef SABER_NUM_LEDS
@@ -501,15 +502,14 @@ void processAccel(uint32_t msec, uint32_t)
         // Keep waffling on this...assuming when blade is lit this will pretty
         // consistently get hit every 10ms.
 
-        //for (int i = 0; i < nMagData; ++i)
-        //    magFilter.push(magData);
+        magFilter.push(magData);
 
         Vec3<int32_t> magMin = accelMag.getMagMin();
         Vec3<int32_t> magMax = accelMag.getMagMax();
-        swing.push(magData, magMin, magMax);
+        swing.push(magFilter.average(), magMin, magMax);
 
         float dot = swing.dotOrigin();
-        float speed = swing.speed();    // * 2.0f; // This factor of 2 is plaguing me. But at leasts it's in the LSM303 path.
+        float speed = swing.speed();
         sfx.sm_setSwing(speed, (int)((1.0f + dot)*128.0f));
 
 #if true && (SERIAL_DEBUG == 1)
