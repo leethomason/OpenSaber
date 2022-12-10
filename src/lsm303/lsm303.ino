@@ -63,4 +63,8 @@ void loop()
             //Log.p("Swing=").p(swing.speed()).eol();
         }
     }
+
+    if (swing.speed() < 0.4f) {
+        accel.recalibrateMag();
+    }  
 }

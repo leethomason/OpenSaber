@@ -32,13 +32,17 @@ Swing::Swing()
 Vec3<float> Swing::calcVec(const Vec3<int32_t>& x, const Vec3<int32_t>& mMin, const Vec3<int32_t>& mMax) const
 {
     Vec3<float> r(0, 0, 0);
+    //Vec3<int32_t> center = (mMax + mMin) / 2;
+    //Vec3<int32_t> half = (mMax - mMin) / 2;
+    Vec3<int32_t> dir = x - mMin;
+    Vec3<int32_t> range = mMax - mMin;
 
     for(int i=0; i<3; ++i) {
-        float norm = float(x[i] - mMin[i]) / float(mMax[i] - mMin[i]);  // 0 - 1
-        norm = norm * 2.0f - 1.0f;
-        r[i] = norm;
+        r[i] = (float)dir[i] / range[i];
     }
     float len = sqrtf(r.x * r.x + r.y * r.y + r.z * r.z);
+    if (len < 0.00001f)
+        return m_dot;
     r.scale(1.0f / len);
     return r;
 }
@@ -106,7 +110,7 @@ bool Swing::test()
     static const int NTEST = 3;
     static const float speedRad[NTEST] = { 1.57f, 3.14f, 6.28f };
 
-    for (int n = 0; n < 1; ++n) {
+    for (int n = 0; n < NTEST; ++n) {
         Swing swing;
         float minDotOrigin = 2.0f;
         float maxDotOrigin = -2.0f;
@@ -117,7 +121,9 @@ bool Swing::test()
             float y = sinf(speedRad[n] * i / 100.0f);
 
             Vec3<int32_t> v;
-            /* This seems correct. But in testing, results are about double what they should be. */
+            /* This seems correct. But in testing, results are about double what they should be. 
+            *  Speaks to not really understanding the magnetometer.
+            */
             #if 0
             v.x = int32_t(center.x + half.x * x);
             v.y = int32_t(center.y + half.y * y);
@@ -129,7 +135,7 @@ bool Swing::test()
             #endif
 
             swing.push(v, mMin, mMax);
-            Log.p("i=").p(i).p(" dot=").p(swing.dotOrigin()).eol();
+            //Log.p("i=").p(i).p(" dot=").p(swing.dotOrigin()).p(" x=").p(x).p(" y=").p(y).eol();
             minDotOrigin = glMin(minDotOrigin, swing.dotOrigin());
             maxDotOrigin = glMax(maxDotOrigin, swing.dotOrigin());
         }

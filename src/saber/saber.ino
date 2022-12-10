@@ -509,7 +509,7 @@ void processAccel(uint32_t msec, uint32_t)
         swing.push(magData, magMin, magMax);
 
         float dot = swing.dotOrigin();
-        float speed = swing.speed() * 2.0f; // This factor of 2 is plaguing me. But at leasts it's in the LSM303 path.
+        float speed = swing.speed();    // * 2.0f; // This factor of 2 is plaguing me. But at leasts it's in the LSM303 path.
         sfx.sm_setSwing(speed, (int)((1.0f + dot)*128.0f));
 
 #if true && (SERIAL_DEBUG == 1)

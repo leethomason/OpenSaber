@@ -24,7 +24,15 @@
 
 #include <stdint.h>
 #include "./src/util/Grinliz_Util.h"
+
+#ifdef _MSC_VER
+#define FILTER_MAG_X	4
+#define FILTER_MAG_Y	4
+#define FILTER_MAG_Z	4
+#define SWING_SAMPLES	8
+#else
 #include "pins.h"	// for SWING_SAMPLES and FILTER_MAG_X/Y/Z
+#endif
 
 /*
 // The FILTER constants run an average over the accelerometer
