@@ -167,8 +167,8 @@ public:
 
     virtual void start(Tester* /*tester*/)
     {
-        accelMag.test();
-        accelMag.log(5);
+        //accelMag.test();
+        accelMag.log(10);
     }
 
     virtual int process(Tester*, uint32_t /*event*/)

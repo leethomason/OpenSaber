@@ -32,8 +32,6 @@ Swing::Swing()
 Vec3<float> Swing::calcVec(const Vec3<int32_t>& x, const Vec3<int32_t>& mMin, const Vec3<int32_t>& mMax) const
 {
     Vec3<float> r(0, 0, 0);
-    //Vec3<int32_t> center = (mMax + mMin) / 2;
-    //Vec3<int32_t> half = (mMax - mMin) / 2;
     Vec3<int32_t> dir = x - mMin;
     Vec3<int32_t> range = mMax - mMin;
 
@@ -45,6 +43,24 @@ Vec3<float> Swing::calcVec(const Vec3<int32_t>& x, const Vec3<int32_t>& mMin, co
         return m_dot;
     r.scale(1.0f / len);
     return r;
+}
+
+float Swing::calcDot(const Vec3<int32_t>& x, const Vec3<int32_t>& mMin, const Vec3<int32_t>& mMax) const
+{
+    Vec3<int32_t> dir = x - mMin;
+    Vec3<int32_t> range = mMax - mMin;
+    
+    Vec3<float> r(0, 0, 0);
+    Vec3<float> d(0, 0, 0);
+    for(int i=0; i<3; ++i) {
+        r[i] = (float)dir[i];
+        d[i] = (float)range[i];
+    }
+    float rLen = sqrtf(r.x * r.x + r.y * r.y + r.z * r.z);
+    float dLen = sqrtf(d.x * d.x + d.y * d.y + d.z * d.z);
+
+    float f = rLen / dLen;
+    return f * 2.0f - 1.0f;
 }
 
 void Swing::push(const Vec3<int32_t>& _x, const Vec3<int32_t>& mMin, const Vec3<int32_t>& mMax)
@@ -96,7 +112,8 @@ void Swing::push(const Vec3<int32_t>& _x, const Vec3<int32_t>& mMin, const Vec3<
 
     // Not even sure what the physical meaning is. 
     // Assuming we are moving in 2 axis of a cube.
-    m_dot = m_dotOrigin.dot(calcVec(x, mMin, mMax));
+    //m_dot = m_dotOrigin.dot(calcVec(x, mMin, mMax));
+    m_dot = calcDot(x, mMin, mMax);
 }
 
 bool Swing::test()

@@ -78,6 +78,7 @@ public:
 
 private:
 	Vec3<float> calcVec(const Vec3<int32_t>& vec, const Vec3<int32_t>& mMin, const Vec3<int32_t>& mMax) const;
+  float calcDot(const Vec3<int32_t>& x, const Vec3<int32_t>& mMin, const Vec3<int32_t>& mMax) const;
 
 	bool m_init = false;
 	bool m_setOrigin = false;

@@ -81,7 +81,7 @@
 #define SABER_SUB_MODEL_B			13
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
+#define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_CLAN
 #define SABER_SUB_MODEL				SABER_SUB_MODEL_APPRENTICE
 // ----------------------------------
@@ -882,7 +882,7 @@
 	#define FILTER_MAG_X	4
 	#define FILTER_MAG_Y	4
 	#define FILTER_MAG_Z	4
-	#define SWING_SAMPLES	8
+	#define SWING_SAMPLES	12
 	#define VOLTMETER_TUNE				1048
 #	elif SABER_SUB_MODEL == SABER_SUB_MODEL_BLACK
 	// Very unstable. Case metal? Size?
