@@ -173,6 +173,27 @@ void BlockDrawOLED(const BlockDrawChunk* chunks, int n)
 }
 #endif
 
+void setupManifestData()
+{
+    MemPalette memPalette[SaberDB::NUM_PALETTES];
+
+    spiFlash.readMemory(0, (uint8_t*) manifest.getBasePtr(), MemImage::SIZE_MEMUNITS);
+    spiFlash.readMemory(Manifest::PaletteAddr(0), (uint8_t*) memPalette, MemImage::SIZE_PALETTE);
+    spiFlash.readMemory(Manifest::DescAddr(), (uint8_t*) cmdParser.desc.c_str(), MemImage::SIZE_DESC);
+    
+    for(int i=0; i<SaberDB::NUM_PALETTES; ++i) {
+        SaberDB::Palette pal;
+        pal.soundFont = memPalette[i].soundFont;
+        pal.bladeColor.r = memPalette[i].bladeColor.r;
+        pal.bladeColor.g = memPalette[i].bladeColor.g;
+        pal.bladeColor.b = memPalette[i].bladeColor.b;
+        pal.impactColor.r = memPalette[i].impactColor.r;
+        pal.impactColor.g = memPalette[i].impactColor.g;
+        pal.impactColor.b = memPalette[i].impactColor.b;
+        saberDB.setPalette(i, pal);
+    }
+}
+
 void setup() 
 {
 #if defined(SHIFTED_OUTPUT)
@@ -211,8 +232,7 @@ void setup()
 
     flashTransport.begin();
     spiFlash.begin();
-    spiFlash.readMemory(0, (uint8_t*) manifest.getBasePtr(), Manifest::IMAGE_SIZE);
-    saberDB.initFromManifest(manifest);
+    setupManifestData();
 
     Log.p("Init audio system.").eol();
     i2sAudioDriver.begin();
@@ -319,9 +339,9 @@ void changePalette(int index)
     const SaberDB::Palette *palette = saberDB.getPalette();
 
     sfx.setFont(saberDB.soundFont());
-    for(int i=0; i<SaberDB::Palette::NAUDIO; ++i) {
-        sfx.setBoost(palette->channelBoost[i], i);
-    }
+    //for(int i=0; i<SaberDB::Palette::NAUDIO; ++i) {
+    //    sfx.setBoost(palette->channelBoost[i], i);
+    //}
     bladeColor.setBladeColor(palette->bladeColor);
     bladeColor.setImpactColor(palette->impactColor);
 }
@@ -375,7 +395,7 @@ void retractBlade()
 // One button case.
 void buttonAClickHandler(const Button&)
 {
-    uiMode.setActive(millis());
+    uiMode.setActive(I2SAudioDriver::stableSlowTime());
 
     Log.p("buttonAClickHandler").eol();
     if (bladeStateManager.isOff()) {
@@ -408,7 +428,7 @@ void buttonAClickHandler(const Button&)
 
 void buttonAHoldHandler(const Button& button)
 {
-    uiMode.setActive(millis());
+    uiMode.setActive(I2SAudioDriver::stableSlowTime());
     //Log.p("buttonAHoldHandler nHolds=").p(button.nHolds()).eol();
     
     if (bladeStateManager.isOff()) {
@@ -473,16 +493,7 @@ void processAccel(uint32_t msec, uint32_t)
 #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LSM303
     Vec3<int32_t> magData;
     // readMag() should only return >0 if there is new data from the hardware.
-    if (accelMag.hasMag() && accelMag.sampleMag(&magData)) {
-        
-        static const uint32_t MAG_INTERVAL = 16;
-        static uint32_t lastMagData = 0;
-        int nMagData = 1;
-        if (lastMagData && (msec - lastMagData) >= MAG_INTERVAL * 2) {
-            // use a little less than 10ms for error correction
-            nMagData = (msec - lastMagData) / MAG_INTERVAL;
-        }
-        lastMagData = msec;
+    while (accelMag.hasMag() && accelMag.sampleMag(&magData)) {
 
         // The accelerometer and magnemometer are both clocked at 100Hz.
         // The swing is set up for constant data; assume n is the same for both.
@@ -491,8 +502,7 @@ void processAccel(uint32_t msec, uint32_t)
         // Keep waffling on this...assuming when blade is lit this will pretty
         // consistently get hit every 10ms.
 
-        for (int i = 0; i < nMagData; ++i)
-            magFilter.push(magData);
+        magFilter.push(magData);
 
         Vec3<int32_t> magMin = accelMag.getMagMin();
         Vec3<int32_t> magMax = accelMag.getMagMax();
@@ -500,10 +510,9 @@ void processAccel(uint32_t msec, uint32_t)
 
         float dot = swing.dotOrigin();
         float speed = swing.speed();
-        //vectorUI.PushTestData(speed, 0.0f, SWING_MAX, msec, 4.0f);
         sfx.sm_setSwing(speed, (int)((1.0f + dot)*128.0f));
 
-#if false && (SERIAL_DEBUG == 1)
+#if true && (SERIAL_DEBUG == 1)
         static const int BURST = 5;
         static int32_t lastLog = 0;
         static int burstLog = 0;
@@ -515,10 +524,10 @@ void processAccel(uint32_t msec, uint32_t)
             Log.p(burstLog == BURST ? "--" : "  ")
                 .p("t=").p(millis()%1000)
                 .p(" swing=").p(swing.speed())
-                .p(" swingVol=").p(swingVol)
+                //.p(" swingVol=").p(swingVol)
                 .p(" range=").v3(range)
                 //.p(" pos=").v3(swing.pos()).p(" origin=").v3(swing.origin())
-                //.p(" dot=").p(dot)
+                .p(" dot=").p(dot)
                 //.p(" magfilter val/min/max ").v3(magFilter.average()).v3(magMin).v3(magMax)
                 //.p(" val/range ").v3(magFilter.average() - magMin).v3(range)
                 //.p(" accel=").p(fastG2.average())
@@ -754,9 +763,9 @@ void loopDisplays(uint32_t msecStable)
         }
 
 #       ifdef SABER_UI_FADE_OUT
-        if (normalModeAndOff && uiMode.isIdle(msec)) {
+        if (normalModeAndOff && uiMode.isIdle(msecStable)) {
             static const uint32_t FADE_TIME = 800;
-            uint32_t over = uiMode.millisPastIdle(msec);
+            uint32_t over = uiMode.millisPastIdle(msecStable);
             float fraction = 0;
 
             if (over < FADE_TIME) {
@@ -780,7 +789,7 @@ void loopDisplays(uint32_t msecStable)
     {
         if (normalModeAndOff) {
             osbr::RGB rgb;
-            calcCrystalColorHSV(msec, bladeColor.getBladeColor(), &rgb);
+            calcCrystalColorHSV(msecStable, bladeColor.getBladeColor(), &rgb);
             rgba[SABER_CRYSTAL_START].set(rgb, SABER_CRYSTAL_BRIGHTNESS);
         }
         else {

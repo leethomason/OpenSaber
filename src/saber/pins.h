@@ -25,6 +25,14 @@
 
 #include <stdint.h>
 
+/*
+	Duchess		4a		Testing
+	Clan-Test	2e		No
+	Clan-Tano	2e		No
+	Leia-PS		2e		No
+	Sisters		2e		No
+*/
+
 // --- Configuration ---
 // Note: Serial connection should be set to 19200 baud with a newline after commands.
 
@@ -54,7 +62,6 @@
 #define SABER_MODEL_PROTECTION 	   23   // Itsy, Dotstar UI
 #define SABER_MODEL_CLAN		   24	// Itsy, one LED UI
 #define SABER_MODEL_LEIA_PS		   25	// Itsy, one LED UI, essentially a clan saber
-// #define SABER_MODEL_VIGILANCE_2	   26   // Itsy, LIS3DH SPI (accel + mag shortage)	Never built; odd it's on this list.
 #define SABER_MODEL_DUCHESS   	   27   // Itsy 4a, Dotstar UI, LSM6D Gyro
 #define SABER_MODEL_DARKSABER	   28   // Itsy 4a, Dotstar UI, LSM6D Gyro
 
@@ -75,8 +82,8 @@
 
 // ----------------------------------
 #define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_DARKSABER
-#define SABER_SUB_MODEL				0	
+#define SABER_MODEL 				SABER_MODEL_CLAN
+#define SABER_SUB_MODEL				SABER_SUB_MODEL_APPRENTICE
 // ----------------------------------
 
 #define SABER_SOUND_SD 				1	// external memory card
@@ -109,10 +116,13 @@
 // Smooth swing, long running platform. 
 // However, as of 2021 there are no more LSM303 chips.
 #define PCB_ITSY_2E				   22   // Magnetometer + Accelerometer (LSM303) on the I2C bus. Dotstar. SPI. I2S audio. Flash mem sound.
+
 // The 3 series is the same as the 2 series, EXCEPT that it switches back to the LIS3DH.
 // Smooth swing not supported. But I have enough LISD3H chips to make it worth it, and allows me to replace/upgrade
 // sabers on the Teensy platform.
-#define PCB_ITSY_3A				   23
+// NEVER USED
+// #define PCB_ITSY_3A				   23
+
 // The 4 series builds on the 3 series design. The PCBs are very similar looking. However, the
 // magnetometer is removed, and a gyroscope is added (LSM6D). The gyroscrope is very nice, at first
 // attempt easy to solder, and gives very nice results.
@@ -872,7 +882,8 @@
 	#define FILTER_MAG_X	20
 	#define FILTER_MAG_Y	20
 	#define FILTER_MAG_Z	20
-	#define VOLTMETER_TUNE				1048
+	#define SWING_SAMPLES	12
+	#define VOLTMETER_TUNE	1048
 #	elif SABER_SUB_MODEL == SABER_SUB_MODEL_BLACK
 	// Very unstable. Case metal? Size?
 	#define FILTER_MAG_X	40		// really bouncy in the x.
@@ -912,7 +923,6 @@
 	#define FILTER_MAG_Z	20
 	#define VOLTMETER_TUNE				1048
 #	endif
-	#define SWING_SAMPLES	12
 	#define ID_STR "Clan Cree XPE2 RGB"
 
 	static const int32_t RED_VF   = 2200;
@@ -969,43 +979,6 @@
 
 	static const int32_t BLUE_VF  = 3100;
 	static const int32_t BLUE_I   = LEIA_PS_POWER;
-	static const int32_t BLUE_R   = 1350;
-
-	static const int VOLUME_1 = 32;
-	static const int VOLUME_2 = 64;
-	static const int VOLUME_3 = 128;
-	static const int VOLUME_4 = 255;
-#elif (SABER_MODEL == SABER_MODEL_VIGILANCE_2)
-	#define PCB_VERSION 				PCB_ITSY_3A
-	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
-	#define SABER_VOLTMETER() 			1
-	#define VOLTMETER_TUNE				1040
-	#define ID_STR "Vigilance 2 Cree XPE2 RGB."
-	
-	#define SABER_UI_LED				SABER_LED_DOTSTAR
-	#define SABER_UI_BRIGHTNESS			16
-	#define ITSY_DOTSTAR_UI				1
-	#define SABER_NUM_LEDS 			    1
-	#define SABER_UI_START				0
-	#define SABER_UI_COUNT				1
-
-	// Does not need to be power of 2.
-	// multiply by 10 to get ms width of filter
-	#define FILTER_MAG_X	20
-	#define FILTER_MAG_Y	20
-	#define FILTER_MAG_Z	20
-	#define SWING_SAMPLES	12
-
-	static const int32_t RED_VF   = 2200;
-	static const int32_t RED_I    = 400;
-	static const int32_t RED_R    = 4100;
-
-	static const int32_t GREEN_VF = 3200;
-	static const int32_t GREEN_I  = 400;
-	static const int32_t GREEN_R = 1000;
-
-	static const int32_t BLUE_VF  = 3100;
-	static const int32_t BLUE_I   = 400;
 	static const int32_t BLUE_R   = 1350;
 
 	static const int VOLUME_1 = 32;

@@ -23,23 +23,27 @@
 #pragma once
 
 #include <stdint.h>
-#include "Grinliz_Util.h"
+#include "../util/Grinliz_Util.h"
 
+// Accelerometer and magnetometer.
+// Really like this chip and works well. As of 2022 can't buy more.
+// I2C interface
 class GrinlizLSM303
 {
 public:
-    GrinlizLSM303() { s_instance = this; }
+    GrinlizLSM303(int /*unused*/) {}
 
     // divisor for raw data
     static const int DIV = 4096;    
 
-    bool begin();
+    bool begin(const void* /*unused*/);
 
-    int read(Vec3<float>* data, int nData) { return readInner(0, data, nData); }
-    int readRaw(Vec3<int32_t>* data, int nData) { return readInner(data, 0, nData); }
-    int readInner(Vec3<int32_t>* rawData, Vec3<float>* data, int n);
-    int available();
-    int flush(int n=32);
+    void flushAccel(int reserve);
+
+    bool sampleAccel(Fixed115* x, Fixed115* y, Fixed115* z);
+    bool sampleAccel(Vec3<Fixed115>* v) {
+        return sampleAccel(&v->x, &v->y, &v->z);
+    }
 
     /* In my test bed, the rawData isn't even close to being correctly pre-set.
        the ranges [-400, 200] and [-500, 90] have come up. Also totally 
@@ -48,15 +52,12 @@ public:
        The min/max is tracked by the library, and the x/y/z values are probably
        the ones to use.
     */
-    int readMag(Vec3<int32_t>* rawData, Vec3<float>* data);
-    bool recalibrateMag();
-
-    const Vec3<int32_t>& getMagMin() const { return m_min; }
-    const Vec3<int32_t>& getMagMax() const { return m_max; }
-
-    bool magDataValid() const { 
-        return dataValid(INIT_T, m_min, m_max);
-    }
+    bool hasMag() const { return true; }
+    bool sampleMag(Vec3<int32_t> *v);
+    Vec3<int32_t> getMagMin() const { return m_min; }
+    Vec3<int32_t> getMagMax() const { return m_max; }
+    bool magDataValid() const { return dataValid(INIT_T, m_min, m_max); }
+    void recalibrateMag();
 
     void logMagStatus();
 
@@ -64,7 +65,7 @@ public:
     void setMagDataRate(int hz);   // 10, 20, 50, 100
     int getMagDataRate() const;
 
-    static GrinlizLSM303* instance() { return s_instance; }
+    void log(int nSamples);
 
 private:
     static bool dataValid(int t, const Vec3<int32_t>& a, const Vec3<int32_t>& b) {
@@ -72,6 +73,8 @@ private:
                 && (b.y - a.y > t) 
                 && (b.z - a.z > t);   
     }
+
+    int available();
 
     // how much delta do we need to operate? On the one hand, want to get the
     // swing on quickly. But after that, recalibrate should really have good 
@@ -81,8 +84,6 @@ private:
 
     Vec3<int32_t> m_min, m_max;
     Vec3<int32_t> m_minQueued, m_maxQueued;
-
-    static GrinlizLSM303* s_instance;
 
     void write8(uint8_t address, uint8_t reg, uint8_t value) const;
     uint8_t read8(uint8_t address, uint8_t reg) const;

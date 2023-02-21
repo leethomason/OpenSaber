@@ -37,7 +37,6 @@ public:
 
     int paletteIndex() const { return m_currentPalette; }
     void setPalette(int n);
-    void initFromManifest(const Manifest &);
 
     static int toVolume256(int volume4);
     static int toVolume4(int volume256);
@@ -51,26 +50,19 @@ public:
     static const int NUM_PALETTES = 8;
 
     struct Palette {
+        int soundFont;
         osbr::RGB bladeColor;
         osbr::RGB impactColor;
-        int soundFont;
 
-        static const int NAUDIO = 4;
-        int channelBoost[NAUDIO];
-
-        void set(const osbr::RGB& blade, const osbr::RGB& impact, int font, 
-                 int humBoost=256, int swingBoost=256, int eventBoost=256 ) 
+        void set(int font, const osbr::RGB& blade, const osbr::RGB& impact) 
         {
+            soundFont = font;
             bladeColor = blade;
             impactColor = impact;
-            soundFont = font;
-            channelBoost[0] = humBoost;
-            channelBoost[1] = swingBoost;
-            channelBoost[2] = swingBoost;
-            channelBoost[3] = eventBoost;
         }
     };
 
+    void setPalette(int i, const Palette& palette);
     const SaberDB::Palette* getPalette(int i) const;
     const SaberDB::Palette* getPalette() const { return &palette[m_currentPalette]; }
 

@@ -24,8 +24,8 @@
 #include <Wire.h>
 #include <math.h>
 
-#include "GrinlizLSM303.h"
-#include "Grinliz_Arduino_Util.h"
+#include "grinliz_LSM303.h"
+#include "../util/Grinliz_Arduino_Util.h"
 
 #define LSM303_ADDRESS_ACCEL (0x32 >> 1) // 0011001x
 #define LSM303_ADDRESS_MAG (0x3C >> 1)   // 0011110x
@@ -122,9 +122,8 @@ enum
     LSM303_MAGRATE_220 = 0x07  // 200 Hz
 };
 
-GrinlizLSM303* GrinlizLSM303::s_instance;
 
-bool GrinlizLSM303::begin()
+bool GrinlizLSM303::begin(const void*)
 {
     Log.p("---- LSM303 begin ----").eol();
 
@@ -273,59 +272,52 @@ int GrinlizLSM303::available()
     return avail + (overrun ? 1 : 0);
 }
 
-int GrinlizLSM303::flush(int n) 
+void GrinlizLSM303::flushAccel(int n) 
 {
-    return readInner(0, 0, n);
-}
-
-
-int GrinlizLSM303::readInner(Vec3<int32_t>* rawData, Vec3<float>* data, int n)
-{
-    int i = 0;
-
     int avail = available();
-    n = n > avail ? avail : n;
-    if (n == 0) return 0;
-
-    for(i=0; i<n; ++i) {
-        Wire.beginTransmission(LSM303_ADDRESS_ACCEL);
-        Wire.write(LSM303_REGISTER_ACCEL_OUT_X_L_A | 0x80);
-        Wire.endTransmission();
-
-        Wire.requestFrom((byte)LSM303_ADDRESS_ACCEL, (byte)6);
-        
-        while (Wire.available() < 2) {}
-        uint32_t xlo = Wire.read();
-        uint32_t xhi = Wire.read();
-
-        while (Wire.available() < 2) {}
-        uint32_t ylo = Wire.read();
-        uint32_t yhi = Wire.read();
-        
-        while (Wire.available() < 2) {}
-        uint32_t zlo = Wire.read();
-        uint32_t zhi = Wire.read();
-
-        int16_t x = xlo | (xhi << 8);
-        int16_t y = ylo | (yhi << 8);
-        int16_t z = zlo | (zhi << 8);
-
-        if (rawData) {
-            rawData[i].x = x;
-            rawData[i].y = y;
-            rawData[i].z = z;
-        }
-        if (data) {
-            static const float divInv = 1.0f / float(DIV);
-            data[i].x = x * divInv;
-            data[i].y = y * divInv;
-            data[i].z = z * divInv;
-        }
+    int read = avail - n;
+    for (int i = 0; i < read; ++i) {
+        Fixed115 x, y, z;
+        sampleAccel(&x, &y, &z);
     }
-    return n;
 }
 
-bool GrinlizLSM303::recalibrateMag()
+
+bool GrinlizLSM303::sampleAccel(Fixed115* fx, Fixed115* fy, Fixed115* fz)
+{
+    int avail = available();
+    if (!avail)
+        return false;
+
+    Wire.beginTransmission(LSM303_ADDRESS_ACCEL);
+    Wire.write(LSM303_REGISTER_ACCEL_OUT_X_L_A | 0x80);
+    Wire.endTransmission();
+
+    Wire.requestFrom((byte)LSM303_ADDRESS_ACCEL, (byte)6);
+    
+    while (Wire.available() < 2) {}
+    uint32_t xlo = Wire.read();
+    uint32_t xhi = Wire.read();
+
+    while (Wire.available() < 2) {}
+    uint32_t ylo = Wire.read();
+    uint32_t yhi = Wire.read();
+    
+    while (Wire.available() < 2) {}
+    uint32_t zlo = Wire.read();
+    uint32_t zhi = Wire.read();
+
+    int16_t x = xlo | (xhi << 8);
+    int16_t y = ylo | (yhi << 8);
+    int16_t z = zlo | (zhi << 8);
+
+    *fx = divToFixed<Fixed115>(x, DIV);
+    *fy = divToFixed<Fixed115>(y, DIV);
+    *fz = divToFixed<Fixed115>(z, DIV);
+    return true;
+}
+
+void GrinlizLSM303::recalibrateMag()
 {
     /*Log.p("recalibrateMag()").p(" queue=")
         .p(dataValid(WARM_T, m_min, m_max) ? 1 : 0)
@@ -358,16 +350,14 @@ bool GrinlizLSM303::recalibrateMag()
         // Either way, throw it away and start to recompute.
         m_minQueued.set(INT_MAX, INT_MAX, INT_MAX);
         m_maxQueued.set(INT_MIN, INT_MIN, INT_MIN);
-        return true;
     }
-    return false;
 }
 
-int GrinlizLSM303::readMag(Vec3<int32_t>* rawData, Vec3<float>* data)
+bool GrinlizLSM303::sampleMag(Vec3<int32_t>* rawData)
 {
     uint8_t status = read8(LSM303_ADDRESS_MAG, STATUS_REG_M);
     if ((status & (1<<3)) == 0 && (status & (1<<7)) == 0) 
-        return 0;
+        return false;
 
     Wire.beginTransmission(LSM303_ADDRESS_MAG);
     Wire.write(OUTX_LOW_REG_M);
@@ -399,7 +389,7 @@ int GrinlizLSM303::readMag(Vec3<int32_t>* rawData, Vec3<float>* data)
     m_max.z = glMax(z, m_max.z);
 
     if (!magDataValid())
-        return 0;
+        return false;
 
     m_minQueued.x = glMin(x, m_minQueued.x);
     m_minQueued.y = glMin(y, m_minQueued.y);
@@ -409,23 +399,10 @@ int GrinlizLSM303::readMag(Vec3<int32_t>* rawData, Vec3<float>* data)
     m_maxQueued.y = glMax(y, m_maxQueued.y);
     m_maxQueued.z = glMax(z, m_maxQueued.z);
 
-    if (rawData) {
-        rawData->x = x;
-        rawData->y = y;
-        rawData->z = z; 
-    }
-    if (data) {
-        float vx = -1.0f + 2.0f * (x - m_min.x) / (m_max.x - m_min.x);
-        float vy = -1.0f + 2.0f * (y - m_min.y) / (m_max.y - m_min.y);
-        float vz = -1.0f + 2.0f * (z - m_min.z) / (m_max.z - m_min.z);
-
-        float len2 = vx * vx + vy * vy + vz * vz;
-        float lenInv = 1.0f / sqrtf(len2);
-        data->x = vx * lenInv;
-        data->y = vy * lenInv;
-        data->z = vz * lenInv;
-    }
-    return 1;
+    rawData->x = x;
+    rawData->y = y;
+    rawData->z = z; 
+    return true;
 }
 
 void GrinlizLSM303::write8(uint8_t address, uint8_t reg, uint8_t value) const
@@ -450,4 +427,60 @@ uint8_t GrinlizLSM303::read8(uint8_t address, uint8_t reg) const
 
     return value;
 }
+
+
+void GrinlizLSM303::log(int nSamples)
+{
+    flushAccel(0);
+
+    uint32_t start = millis();
+    static const int N = 20;
+    if (nSamples > N)
+        nSamples = N;
+    int n = 0;
+
+    Vec3<Fixed115> data[N];
+    while(n < nSamples) {
+        if(sampleAccel(data + n))
+            n++;
+    }
+    float samplesPerSecond = nSamples * 1000.0f / (millis() - start);
+
+    for(int i=0; i<nSamples; ++i) {
+        Fixed115 g2 = data[i].x * data[i].x + data[i].y * data[i].y + data[i].z * data[i].z;
+        Log.v3(data[i]).p(" g2=").p(g2).p(" g=").p(sqrt(g2)).eol();
+    }
+    Log.p("Samples per second: ").p(samplesPerSecond).eol();
+    delay(10);
+
+    Vec3<int32_t> mag;
+    if (!sampleMag(&mag)) {
+        Log.p("No magnetometer data.").eol();
+    }
+    else {
+        int count = 0;
+        uint32_t start = millis();
+        while(count < 10) {
+            if (sampleMag(&mag)) {
+                count++;
+
+                Vec3<int32_t> magMin = getMagMin();
+                Vec3<int32_t> magMax = getMagMax();
+                Vec3<int32_t> range = magMax - magMin;
+                Log.p("Mag=").v3(mag).p(" range=").v3(range).eol();
+            }
+        }
+        uint32_t end = millis();
+
+        Log.p("Mag: ").v3(mag).eol();
+
+        Vec3<int32_t> vMin = getMagMin();
+        Vec3<int32_t> vMax = getMagMax();
+        Vec3<int32_t> vDelta = vMax - vMin;
+
+        Log.p("Mag delta: ").v3(vDelta).eol();
+        Log.p("Mag/s: ").p(10 * 1000.0f / (end - start)).eol();
+    }
+}
+
 

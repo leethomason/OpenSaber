@@ -37,6 +37,7 @@ class CMDParser
 {
 public:
     CMDParser(SaberDB& database, BladeColor& bladeColor, const Manifest& manifest);
+    CStr<64> desc;
 
     bool push(int c);
    

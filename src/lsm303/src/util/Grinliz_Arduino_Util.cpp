@@ -20,9 +20,11 @@
   SOFTWARE.
 */
 
-#include "Grinliz_Arduino_Util.h"
 #include <Arduino.h>
 #include <SPI.h>
+
+#include "Grinliz_Arduino_Util.h"
+#include "pwmwrite.h"
 
 LEDManager::LEDManager(uint8_t pin, bool on)
 {
@@ -36,7 +38,7 @@ void LEDManager::set(bool on)
 {
     m_on = on;
     if (m_analogMode)
-        analogWrite(m_pin, m_on ? 255 : 0);
+        PWMWriteColor(m_pin, m_on ? 255 : 0);
     else
         digitalWrite(m_pin, m_on ? HIGH : LOW);
     m_nBlink = 0;
@@ -47,7 +49,7 @@ bool LEDManager::isOn() const
     return m_on;
 }
 
-void LEDManager::blink(uint8_t n, uint32_t cycle, BlinkHandler h, uint8_t style)
+void LEDManager::blink(uint32_t currentTime, uint8_t n, uint32_t cycle, BlinkHandler h, uint8_t style)
 {
     //SPrint.p("blink n=").p(n).p(" cycle=").p(cycle).eol();
 
@@ -66,15 +68,15 @@ void LEDManager::blink(uint8_t n, uint32_t cycle, BlinkHandler h, uint8_t style)
         m_handler = h;
         m_nBlink = n;
         m_cycle = cycle > 0 ? cycle : 1;
-        m_startTime = millis();
+        m_startTime = currentTime;
     }
 }
 
-void LEDManager::process()
+void LEDManager::process(uint32_t currentTime)
 {
     if (m_nBlink)
     {
-        uint32_t mill = millis();
+        uint32_t mill = currentTime;
         uint32_t dMillis = mill - m_startTime;
 
         uint32_t n = dMillis / m_cycle;
@@ -90,19 +92,19 @@ void LEDManager::process()
         {
             if (m_style == BLINK_BREATH)
             {
-                FixedNorm dt(dMillis % m_cycle, m_cycle);
-                int32_t val = 128 + iSin(dt).scale(128);
+                FixedNorm dt = divToFixed<FixedNorm>(dMillis % m_cycle, m_cycle);
+                int32_t val = 128 + scale(sinLerp(dt), 128);
                 if (val < 0)
                     val = 0;
                 if (val > 255)
                     val = 255;
                 m_analogMode = true;
-                analogWrite(m_pin, (uint8_t)val);
+                PWMWriteColor(m_pin, (uint8_t)val);
             }
             else
             {
                 if (m_analogMode)
-                    analogWrite(m_pin, ((p & 1) == m_style) ? 0 : 255);
+                    PWMWriteColor(m_pin, ((p & 1) == m_style) ? 0 : 255);
                 else
                     digitalWrite(m_pin, ((p & 1) == m_style) ? LOW : HIGH);
             }
@@ -120,12 +122,12 @@ void LEDManager::process()
     }
 }
 
-int LEDManager::numBlinks() const
+int LEDManager::numBlinks(uint32_t currentTime) const
 {
     if (m_startTime == 0)
         return 0;
 
-    uint32_t n = (millis() - m_startTime) / m_cycle;
+    uint32_t n = (currentTime - m_startTime) / m_cycle;
     return n + 1;
 }
 
@@ -271,25 +273,6 @@ void SPLog::eol() const
 void AssertOut(const char *message, const char *file, int line)
 {
     Log.p("ASSERT: ").p(message).p(" ").p(file).p(" ").p(line).eol();
-}
-
-void AssertOut2(const char *message, int x, int y, const char *file, int line)
-{
-    Log.p("ASSERT: ").p(message).p(" ").p(file).p(" ").p(line).eol();
-    Log.p("   value0=").p(x).p(" value1=").p(y).eol();
-}
-
-SPITransaction::SPITransaction(uint8_t cs, const SPISettings &settings)
-{
-    SPI.beginTransaction(settings);
-    digitalWrite(cs, LOW);
-    this->cs = cs;
-}
-
-SPITransaction::~SPITransaction()
-{
-    digitalWrite(cs, HIGH);
-    SPI.endTransaction();
 }
 
 ProfileData *ProfileData::root = 0;

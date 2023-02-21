@@ -44,39 +44,44 @@ struct MemUnit {
 
 static_assert(sizeof(MemUnit) == 16, "16 byte MemUnit");
 
-struct ConfigUnit {
-    static const int NUM_CONFIG = 8;
-    char name[MemUnit::NAME_LEN];
-    uint8_t soundFont, bc_r, bc_b, bc_g;
-    uint8_t ic_r, ic_b, ic_g, reserve;
+struct MemPalette {
+    static constexpr int NUM_PALETTES = 8;
+    struct RGB {
+        uint8_t r;
+        uint8_t g;
+        uint8_t b;
+    };
+    
+    uint8_t soundFont = 0;
+    RGB bladeColor = { 0, 0, 0 };
+    RGB impactColor = { 0, 0, 0 };
 };
-
-static_assert(sizeof(ConfigUnit) == 16, "16 byte ConfigUnit");
-static_assert(sizeof(ConfigUnit) == sizeof(MemUnit), "MemUnit and ConfigUnit should be the same size");
-
 
 struct MemImage {
     static const int NUM_DIR = 4;
     static const int NUM_FILES = 96 - NUM_DIR;
-    static const int NUM = NUM_DIR + NUM_FILES;
-    static const size_t SIZE = NUM * sizeof(MemUnit);
+    static const int NUM_MEMUNITS = NUM_DIR + NUM_FILES;
 
-    MemUnit unit[NUM];
+    static const size_t SIZE_DESC = 64;                                                 // null filled terminated string. Follows the MemUnits.
+    static const size_t SIZE_PALETTE = MemPalette::NUM_PALETTES * sizeof(MemPalette);   // palettes - follows the description
+    
+    static const size_t SIZE_MEMUNITS = NUM_MEMUNITS * sizeof(MemUnit);
+    static const size_t SIZE_BASE = SIZE_MEMUNITS + SIZE_DESC + SIZE_PALETTE;
+
+    MemUnit unit[NUM_MEMUNITS];
 };
 
 
 class Manifest
 {
     public:
-        static const size_t IMAGE_SIZE = MemImage::SIZE;
-
         Manifest();
         // Used by the SPI readed to initialize the block of memory.
         MemImage* getBasePtr() { return &image; }
+        static uint32_t DescAddr() { return MemImage::SIZE_MEMUNITS; }
+        static uint32_t PaletteAddr(int index) { return MemImage::SIZE_MEMUNITS + MemImage::SIZE_DESC + index * sizeof(MemPalette); }
 
-        uint32_t dirHash() const;
         const MemUnit& getUnit(int id) const;
-        const ConfigUnit& getConfig(int id) const;
         
         int getDir(const char* dir) const;
         int getFile(int dir, const char* fname) const;

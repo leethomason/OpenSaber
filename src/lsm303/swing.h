@@ -23,8 +23,18 @@
 #pragma once
 
 #include <stdint.h>
-#include "Grinliz_Util.h"
-#ifdef _WIN32
+#include "./src/util/Grinliz_Util.h"
+
+#ifdef _MSC_VER
+#define FILTER_MAG_X	4
+#define FILTER_MAG_Y	4
+#define FILTER_MAG_Z	4
+#define SWING_SAMPLES	8
+#else
+#include "pins.h"	// for SWING_SAMPLES and FILTER_MAG_X/Y/Z
+#endif
+
+/*
 // The FILTER constants run an average over the accelerometer
 // data. They are turned first, to get stable accelerometer
 // readings when the saber is on or off.
@@ -37,11 +47,8 @@
 // small, dead spots become annoying.
 #	define SWING_SAMPLES 8
 // The maximum rad/sec of the swing. Used for the sound envelope.
-#	define SWING_MAX 12
-#else
-#	include "pins.h"
-#endif
-
+#	define SWING_MAX 16
+*/
 /*
 The Swing algorithm translation rotation of the blade into sound level.
 It is currently based on an LSM303 accel + mag chip. Some notes:
@@ -62,46 +69,24 @@ public:
 	void push(const Vec3<int32_t>& x, const Vec3<int32_t>& xMin, const Vec3<int32_t>& xMax);
 	// speed in radians / second
 	float speed() const { return m_speed; }
+	// from -1 to 1
+	float dotOrigin() const { return m_dot;}
 
-	// Where the swing "starts", probably any starting location is fine.
-	// Maybe even idle times?
-	void setOrigin();
-	// Gets the dot product of current and origin, which is essentially the
-	// mix betwen swing sounds. Returns -1 to 1
-	float dotOrigin() const { return m_dotOrigin; }
-
-	const Vec3<float>& pos() const { return m_normal; }
-	const Vec3<float>& origin() const { return m_origin; }
+	void setOrigin() { m_setOrigin = true;}
 
 	static bool test();
 
 private:
-	Vec3<float> normalize(const Vec3<int32_t> x, const Vec3<int32_t>& x0, const Vec3<int32_t>& x1);
+	Vec3<float> calcVec(const Vec3<int32_t>& vec, const Vec3<int32_t>& mMin, const Vec3<int32_t>& mMax) const;
+  float calcDot(const Vec3<int32_t>& x, const Vec3<int32_t>& mMin, const Vec3<int32_t>& mMax) const;
 
-	bool m_init;
-	float m_speed;
-	float m_dotOrigin;
-	Vec3<float> m_normal;
-	Vec3<float> m_origin;
-	Vec3<int32_t> m_prevSample;
-	AverageSample<int32_t, int32_t, SWING_SAMPLES> swingAve;
-};
-
-class MagFilter
-{
-public:
-	MagFilter() {}
-
-	void push(const Vec3<int32_t>& mag);
-	Vec3<int32_t> average() const {
-		Vec3<int32_t> v(aveMagX.average(), aveMagY.average(), aveMagZ.average());
-		v.div(SCALE);
-		return v;
-	}
-
-private:
-	static const int32_t SCALE = 4;
-	AverageSample<int32_t, int32_t, FILTER_MAG_X> aveMagX;
-	AverageSample<int32_t, int32_t, FILTER_MAG_Y> aveMagY;
-	AverageSample<int32_t, int32_t, FILTER_MAG_Z> aveMagZ;
+	bool m_init = false;
+	bool m_setOrigin = false;
+	float m_speed = 0;	
+	float m_dot = 0;
+	Vec3<float> m_dotOrigin;
+	AverageSample<int32_t, SWING_SAMPLES> swingAve;
+	AverageSample<int32_t, FILTER_MAG_X> xInputAve;
+	AverageSample<int32_t, FILTER_MAG_Y> yInputAve;
+	AverageSample<int32_t, FILTER_MAG_Z> zInputAve;
 };

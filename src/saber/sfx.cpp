@@ -141,7 +141,7 @@ int SFX::getTrack(int sound)
 
     int track = m_sfxType[sound].start + m_random.rand(m_sfxType[sound].count);
 
-    if (track < MemImage::NUM_DIR || track >= MemImage::NUM) {
+    if (track < MemImage::NUM_DIR || track >= MemImage::NUM_MEMUNITS) {
         Log.p("track=").p(track).p(" sound=").p(sound).eol();
         ASSERT(track >= MemImage::NUM_DIR);
         ASSERT(track < MemImage::NUM);

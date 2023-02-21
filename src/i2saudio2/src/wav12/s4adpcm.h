@@ -32,7 +32,7 @@
 #   include <assert.h>
 #	define W12ASSERT assert
 #else
-#   define W12ASSERT
+#   define W12ASSERT(x)
 #endif
 
 /* 

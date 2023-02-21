@@ -56,31 +56,14 @@ bool MemUnit::nameMatch(const char* n) const
 
 Manifest::Manifest()
 {
-    memset(image.unit, 0, MemImage::SIZE);
+    memset(image.unit, 0, MemImage::SIZE_MEMUNITS);
 }
 
 const MemUnit& Manifest::getUnit(int id) const
 {
     if (id < 0) id = 0;
-    if (id >= MemImage::NUM) id = MemImage::NUM - 1;
+    if (id >= MemImage::NUM_MEMUNITS) id = MemImage::NUM_MEMUNITS - 1;
     return image.unit[id];
-}
-
-const ConfigUnit& Manifest::getConfig(int id) const
-{
-    if (id < 0) id = 0;
-    if (id >= MemImage::NUM) id = MemImage::NUM - 1;
-    return *((const ConfigUnit*)(& image.unit[id]));
-}
-
-
-uint32_t Manifest::dirHash() const
-{
-    uint32_t h = 0;
-    for(int i=0; i< MemImage::NUM_DIR; ++i) {
-        h = image.unit[i].nameHash(h);
-    }
-    return h;
 }
 
 int Manifest::find(const char* name, int start, int n) const
