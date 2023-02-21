@@ -1,0 +1,3 @@
+* check mounting hardware works with 2mm mount
+* set pin
+* switch to rails to hold pcb
