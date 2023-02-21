@@ -1023,7 +1023,7 @@ function zLenOfBaffles(n, dzButtress) = n * dzButtress * 2 - dzButtress;
 
 module baffleMCBattery( outer,          // outer diameter 
                         n,              // number of baffles 
-                        dzButtress,     // thickness of the baffle
+                        dz,             // thickness of the baffle
                         nPostBaffles=0,// number of additional baffles, that don't have the battery cutout
                         dFirst=0,       // make the back baffle this diameter (0 to use standard)
                         dzFirst=0,      // make the first baffle this thicknes  (0 to use standard)
@@ -1038,7 +1038,10 @@ module baffleMCBattery( outer,          // outer diameter
                         thermalReliefOffset=0
                     )
 {
+    slices = n * 2 - 1;
+    dzButtress = dz / slices;
     totalN = n + nPostBaffles;
+
     for(i=[0:totalN-1]) {
         translate([0, 0, i*dzButtress*2])  {
             hasBattery = i < n;
@@ -1103,6 +1106,45 @@ module pcbPillar(dBoost=0) {
                 cylinder(h=50, d1=8 + dBoost, d2=5 + dBoost);
                 cylinder(h=100, d=D_M2);
             }
+}
+
+module pcbHolder2(d, t, dzSection, dzToPCB, pcbDim, mount) 
+{
+    W = pcbDim[0];
+    Y = pcbDim[1];
+    DZ = pcbDim[2];
+
+    difference() {
+        tube(h=dzSection, do=d, di=d-t);
+        translate([-W/2, 0, dzToPCB]) {
+            cube(size=[W, d, DZ]);
+        }
+    }
+    intersection() {
+        cylinder(h=dzSection, d=d);
+        for(m = mount) {
+            translate([0, Y, dzToPCB]) {
+                color("plum") union() {
+                    x = m[0];
+                    z = m[1];
+                    type = m[2];
+                    translate([x, 0, dzToPCB + z]) 
+                    {
+                        if (type == "pillar") {
+                            pcbPillar();
+                        }
+                        else if (type == "buttress") {
+                            shouldMirror = x < 0;
+                            if (shouldMirror)
+                                mirror([1,0,0]) pcbButtress();
+                            else
+                                pcbButtress();
+                        }
+                    }            
+                }
+            }
+        }
+    }
 }
 
 /*

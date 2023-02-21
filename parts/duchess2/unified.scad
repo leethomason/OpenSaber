@@ -4,12 +4,12 @@ use <../inset.scad>
 include <dim.scad>
 
 $fn = 80;
-DRAW_AFT = false;
-DRAW_FORE = false;
+DRAW_AFT = true;
+DRAW_FORE = true;
 DRAW_BRIDGE = false;
 DRAW_RING = false;
 DRAW_CHAMBER = false;
-DRAW_SPACER = true;
+DRAW_SPACER = false;
 DRAW_BRASS = false;
 
 EPS = 0.01;
