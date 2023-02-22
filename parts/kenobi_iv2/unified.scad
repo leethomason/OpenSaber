@@ -2,7 +2,7 @@ include <dim.scad>
 use <../shapes.scad>
 use <../commonUnified.scad>
 
-$fn = 40;
+$fn = 80;
 N_BAFFLES = 8;
 T = 4.0;
 EPS = 0.01;
