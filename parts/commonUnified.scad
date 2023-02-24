@@ -1096,16 +1096,22 @@ module pcbButtress(buff=0)
                 [[-2,0], [-2,-2], [14,-30], [14,0]]
             );
         translate([0, -50, 0]) rotate([-90, 0, 0]) cylinder(h=50, d=D_M2);
+        translate([0, -1.0, 0]) rotate([-90, 0, 0])
+            cylinder(h=1.1, d2=D_M2 + 0.5, d1=D_M2);
     } 
 }
 
 module pcbPillar(dBoost=0) {
-    translate([0, -50, 0]) 
-        rotate([-90, 0, 0])
-            difference() {
-                cylinder(h=50, d1=8 + dBoost, d2=5 + dBoost);
-                cylinder(h=100, d=D_M2);
-            }
+    difference() {
+        translate([0, -50, 0]) 
+            rotate([-90, 0, 0])
+                difference() {
+                    cylinder(h=50, d1=8 + dBoost, d2=5 + dBoost);
+                    cylinder(h=100, d=D_M2);
+                }
+        translate([0, -1, 0]) rotate([-90, 0, 0])
+            cylinder(h=1.1, d2=D_M2 + 0.5, d1=D_M2);
+    }
 }
 
 module pcbHolder2(d, t, dzSection, dzToPCB, pcbDim, mount) 

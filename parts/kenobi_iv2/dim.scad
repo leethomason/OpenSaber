@@ -10,7 +10,7 @@ D1 = 29.0;
 // See: Z_BATTERY_18650 = 65 + 4;
 DZ_BATTERY = 65 + 4;
 
-DZ_PCB = 0.95 * 25.4;
+DZ_PCB = 0.975 * 25.4;
 DY_PCB_TOP = 10.0; // FIXME
 DY_PCB_BOTTOM = DY_PCB_TOP - 1.6;
 
