@@ -26,6 +26,7 @@
 #include "rgb2hsv.h"
 #include "renderer.h"   // for drawing the bitmap directly to framebuffer
 #include "assets.h"     // source for bitmap
+#include "saberdb.h"
 
 
 VectorUI::VectorUI()
@@ -89,7 +90,7 @@ void VectorUI::DrawMultiBar(VRender* ren, int x, bool flip, int yCutoff)
 {
     int bias = flip ? -1 : 1;
 
-    for (int r = 0; r < 8; ++r) {
+    for (int r = 0; r < NUM_PALETTES; ++r) {
         Fixed115 d = r - Fixed115{ 7.0 / 2.0 };
         Fixed115 fx = Fixed115{ 0.8 } * d * d;
         DrawBar(ren, x + static_cast<int>(fx) * bias , 29 - r * 4, BAR_W, 1, r < yCutoff ? 255 : 0);

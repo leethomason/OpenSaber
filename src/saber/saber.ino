@@ -175,13 +175,13 @@ void BlockDrawOLED(const BlockDrawChunk* chunks, int n)
 
 void setupManifestData()
 {
-    MemPalette memPalette[SaberDB::NUM_PALETTES];
+    MemPalette memPalette[NUM_PALETTES];
 
     spiFlash.readMemory(0, (uint8_t*) manifest.getBasePtr(), MemImage::SIZE_MEMUNITS);
     spiFlash.readMemory(Manifest::PaletteAddr(0), (uint8_t*) memPalette, MemImage::SIZE_PALETTE);
     spiFlash.readMemory(Manifest::DescAddr(), (uint8_t*) cmdParser.desc.c_str(), MemImage::SIZE_DESC);
     
-    for(int i=0; i<SaberDB::NUM_PALETTES; ++i) {
+    for(int i=0; i<NUM_PALETTES; ++i) {
         SaberDB::Palette pal;
         pal.soundFont = memPalette[i].soundFont;
         pal.bladeColor.r = memPalette[i].bladeColor.r;
@@ -355,7 +355,7 @@ void buttonAReleaseHandler(const Button&)
 bool setPaletteFromHoldCount(int count)
 {
     changePalette(count - 1);
-    return count <= SaberDB::NUM_PALETTES;
+    return count <= NUM_PALETTES;
 }
 
 bool setVolumeFromHoldCount(int count)

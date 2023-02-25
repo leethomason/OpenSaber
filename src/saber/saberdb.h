@@ -30,6 +30,8 @@
 
 class Manifest;
 
+static constexpr int NUM_PALETTES = 8;
+
 class SaberDB
 {
 public:
@@ -46,8 +48,6 @@ public:
         return palette[m_currentPalette].soundFont;
     }
     void setSoundFont(int f);
-
-    static const int NUM_PALETTES = 8;
 
     struct Palette {
         int soundFont;
