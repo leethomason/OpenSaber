@@ -512,7 +512,7 @@ void processAccel(uint32_t msec, uint32_t)
         float speed = swing.speed();
         sfx.sm_setSwing(speed, (int)((1.0f + dot)*128.0f));
 
-#if true && (SERIAL_DEBUG == 1)
+#if false && (SERIAL_DEBUG == 1)
         static const int BURST = 5;
         static int32_t lastLog = 0;
         static int burstLog = 0;

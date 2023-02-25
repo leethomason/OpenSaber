@@ -83,7 +83,7 @@
 // ----------------------------------
 #define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_CLAN
-#define SABER_SUB_MODEL				SABER_SUB_MODEL_APPRENTICE
+#define SABER_SUB_MODEL				SABER_SUB_MODEL_BLACK
 // ----------------------------------
 
 #define SABER_SOUND_SD 				1	// external memory card
@@ -889,6 +889,7 @@
 	#define FILTER_MAG_X	40		// really bouncy in the x.
 	#define FILTER_MAG_Y	20
 	#define FILTER_MAG_Z	16
+	#define SWING_SAMPLES	12
 	#define VOLTMETER_TUNE				1038
 #	elif SABER_SUB_MODEL == SABER_SUB_MODEL_APP_LE
 	#define FILTER_MAG_X	20
