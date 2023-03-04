@@ -3,6 +3,7 @@ use <../shapes.scad>
 use <../commonUnified.scad>
 
 $fn = 80;
+//$fa = 1.0;
 N_BAFFLES = 8;
 T = 4.0;
 EPS = 0.01;
@@ -26,7 +27,7 @@ translate([0, 0, M0])
 translate([0, 0, M_MC])
     baffleMCBattery(D0, N_BAFFLES, DZ_BATTERY, bridgeStyle=4, thermalRelief=3);
 
-*translate([0, 0, M_MC]) color("red") battery(D0, "18650");
+translate([0, 0, M_MC]) color("red") battery(D0, "18650");
 
 difference() {
     union() {
