@@ -11,7 +11,7 @@ EPS = 0.01;
 module ringLock()
 {
     translate([0, 0, M_AL + 10.1]) {
-        tube(h=5.0, di=D0, do=34.9);
+        tube(h=5.0, di=D0, do=34.9  - 0.5);
     }
 }
 
@@ -25,7 +25,7 @@ module inner()
 translate([0, 0, M0])
     speakerHolder(D0, DZ_SPKR_HOLDER, 1.5, "cls28");
 translate([0, 0, M_MC])
-    baffleMCBattery(D0, N_BAFFLES, DZ_BATTERY, bridgeStyle=4, thermalRelief=3);
+    baffleMCBattery(D0, N_BAFFLES, DZ_BATTERY, bridgeStyle=5, thermalRelief=3);
 
 translate([0, 0, M_MC]) color("red") battery(D0, "18650");
 

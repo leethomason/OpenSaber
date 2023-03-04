@@ -54,15 +54,15 @@ module triCapsule(theta0, theta1, r=2, _mirror=false)
 
     hull() {
         rotate([0, 0, theta0]) 
-            polygonYZ(20, [[0, -r], [-r, 0], [0, r]]);
+            polygonYZ(100, [[0, -r], [-r, 0], [0, r]]);
         rotate([0, 0, theta1]) 
-            polygonYZ(20, [[0, -r], [r, 0], [0, r]]);
+            polygonYZ(100, [[0, -r], [r, 0], [0, r]]);
     }
     if (_mirror == true) hull() {
         mirror([1,0,0]) rotate([0, -0, theta0]) 
-            polygonYZ(20, [[0, -r], [-r, 0], [0, r]]);
+            polygonYZ(100, [[0, -r], [-r, 0], [0, r]]);
         mirror([1,0,0]) rotate([0, -0, theta1]) 
-            polygonYZ(20, [[0, -r], [r, 0], [0, r]]);
+            polygonYZ(100, [[0, -r], [r, 0], [0, r]]);
     }
 }
 
@@ -295,7 +295,7 @@ module dynamicHeatSinkHolder(diameter)
 
     difference() {
         cylinder(h=DZ, d=diameter);
-        cylinder(h=DZ + EPS, d=D_HEAT_SINK_THREAD);
+        translate([0, 0, -EPS]) cylinder(h=100, d=D_HEAT_SINK_THREAD);
     }
 }
 
@@ -528,6 +528,8 @@ module bridgeAndRail(bridge, d, dz, bottomRail=true, bridgeOnlyBottom=false)
                     bridge3(d, dz);
                 else if (bridge == 4)
                     bridge4(d, dz);
+                else if (bridge == 5)
+                    bridge5(d, dz);
             }
         }
         if (bottomRail) {
@@ -1258,16 +1260,21 @@ D_ADVANCED_LED      = 20.000; // hole where the light shines.
 D_HEATSINK          = 25.6;
 
 
-module emitterTeeth(delta=0)
+module emitterTeeth(d, delta=0, isCutout=false)
 {
     N_ADVANCED_TEETH = 6;
     TEETH_Y = 7 + delta;
 
-    for(r=[0:5]) {
-        rotate([0, 0, r*60])
-            translate([0, -TEETH_Y/2, 0])
-                cube(size=[50, TEETH_Y, H_TEETH]);
-    }
+   intersection() {
+        tube(h=H_TEETH, do=isCutout ? 100 : d, di=isCutout ? 1.0 : D_HEATSINK);
+        union() {
+            for(r=[0:5]) {
+                rotate([0, 0, r*60])
+                    translate([0, -TEETH_Y/2, 0])
+                        cube(size=[50, TEETH_Y, H_TEETH]);
+            }
+        }
+   }
 }
 
 function emitterZ() = H_ADVANCED_THREAD + H_HEATSINK + H_RING;
@@ -1309,10 +1316,7 @@ module emitterHolder(d)
         }
     }
     translate([0, 0, H_ADVANCED_THREAD - H_TEETH]) {
-        intersection() {
-            tube(h=H_TEETH, do=d, di=D_HEATSINK);
-            emitterTeeth();
-        }
+        emitterTeeth(d);
     }
 }
 

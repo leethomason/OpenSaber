@@ -113,6 +113,31 @@ module bridge4(d, dz)
     mirror([-1, 0, 0]) bridge4UpperWall(d, dz);
 }
 
+module bridge5(d, dz)
+{
+    EPS = 0.1;
+    D_BATTERY = 18.50 + 0.5;    // An 1850. Huh. 
+    difference() {
+        intersection() 
+        {
+            tube(h=dz, do=d - 2.0, di=d - 8.0);
+            union() {
+                translate([-d, -d*0.35, -EPS]) {
+                    polygonYZ(d*2, [[0,0], [dz*2, dz*2], [dz*2, 0]]);
+                }        
+                translate([-d, 0, 0]) {
+                    polygonYZ(d*2, [
+                        [0,0], [dz, dz+EPS*2], 
+                        [d*0.4, dz+EPS*2], [d*0.25, 0]
+                    ]);
+                }        
+            }
+        }
+        translate([0, d/2 - D_BATTERY/2, 0])
+            cylinder(d=D_BATTERY + 1.0, h = dz+EPS);
+    }
+}
+
 module bridge3(d, dz)
 {
     difference() {
