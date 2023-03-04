@@ -10,7 +10,7 @@ EPS = 0.01;
 module ringLock()
 {
     translate([0, 0, M_AL + 10.1]) {
-        tube(h=5.0, di=D0, do=34.9  - 0.5);
+        tube(h=5.0, di=D0, do=34.9  - 1.3);
     }
 }
 
