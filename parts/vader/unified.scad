@@ -2,8 +2,9 @@ include <dim.scad>
 use <../shapes.scad>
 use <../commonUnified.scad>
 
-//$fn = 30;
-$fn = 60;
+//$fn = 80; // overrides fs; num fragments
+$fa = 6;   // minimum angle (default 12)
+$fs = 0.8;  // minimum size (default 2)
 
 T = 6.5;
 JOINT = 8;
@@ -11,9 +12,9 @@ KEYJOINT_T = 5.0;
 D_PORT =  7.9;
 EPS = 0.01;
 
-DRAW_AFT = true;
+DRAW_AFT = false;
 DRAW_FORE = true;
-DRAM_EMITTER = true;
+DRAM_EMITTER = false;
 
 module flatBottom()
 {
@@ -37,7 +38,7 @@ if (DRAW_FORE) color("cadetblue") {
                 dynamicHeatSinkHolder(D0);
 
             color("silver") translate([0, 0, M_SECTION0])
-                tube(h=DZ_SECTION0, di=D0 - T, do=D0);
+                tube(h=DZ_SECTION0 + EPS, di=D0 - T, do=D0);
             color("white") translate([0, 0, M_HEATSINK])
                 emitterTeeth(D0);
 
@@ -69,15 +70,29 @@ if (DRAW_FORE) color("cadetblue") {
             translate([0, 0, M_SECTION0 + 50 + 10 * i]) triCapsule(240, 260, 2, false);
         }
 
+        // bottom
         hull() {
             translate([0, 0, M_SECTION0 + 20]) rotate([90, 0, 0]) cylinder(h=100, d=16);
             translate([0, 0, M_SECTION0 + 40]) rotate([90, 0, 0]) cylinder(h=100, d=16);
         }
 
+        // back top
         hull() {
             translate([-3, 0, M_SECTION0 + 10]) rotate([-90, 0, 0]) cylinder(h=100, d=12);
             translate([ 3, 0, M_SECTION0 + 10]) rotate([-90, 0, 0]) cylinder(h=100, d=12);
         }
+
+        // front top
+        hull() {
+            translate([-3, 0, M_SECTION0 + 65]) rotate([-90, 0, 0]) cylinder(h=100, d=6);
+            translate([ 3, 0, M_SECTION0 + 65]) rotate([-90, 0, 0]) cylinder(h=100, d=6);
+        }
+        // front bottom
+        hull() {
+            translate([-3, 0, M_SECTION0 + 65]) rotate([90, 0, 0]) cylinder(h=100, d=6);
+            translate([ 3, 0, M_SECTION0 + 65]) rotate([90, 0, 0]) cylinder(h=100, d=6);
+        }
+
         flatBottom();
     }
 }
