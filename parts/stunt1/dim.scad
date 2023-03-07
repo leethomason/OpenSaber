@@ -1,6 +1,7 @@
 // Tuned per build. Measurement is from the back
 // of the chassis, after the pommel. 
 
+/*
 // Graflex
 DZ_AFT = 85;
 DZ_FORE = 0.0;
@@ -14,9 +15,8 @@ BATTERY_TYPE = "18500";
 EMITTER = "none";
 ACCESS_PCB = true;
 DZ_PCB = 15;
+*/
 
-
-/*
 // Vader
 DZ_AFT = 176.0 - 2.5;
 DZ_FORE = 0.0;
@@ -31,7 +31,6 @@ BATTERY_TYPE = "18500";
 EMITTER = "closed";    // adds extra length to hold dynamic heat sink
 ACCESS_PCB = true;     // makes the PCB switches accessible from the pommel
 DZ_PCB = 30;
-*/
 
 
 DZ_TOTAL = DZ_AFT + DZ_FORE;    // excluding emitter

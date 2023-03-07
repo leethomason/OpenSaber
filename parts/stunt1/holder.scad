@@ -21,7 +21,7 @@ module holder() {
                 WPCB = 17.145;  // exact size
                 C = -WPCB/2;
 
-                translate([0, Y_TWEAK, 0]) rotate([ROT, 0, 0]) 
+                *translate([0, Y_TWEAK, 0]) rotate([ROT, 0, 0]) 
                 pcbHolder(0, 
                         4, 
                         DZ_PCB,   // dz

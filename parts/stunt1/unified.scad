@@ -3,13 +3,15 @@ use <../commonUnified.scad>
 use <../shapes.scad>
 use <holder.scad>
 
-DRAW_HOLDER = false;
-DRAW_BODY   = true;
+$fa = 6;   // minimum angle (default 12)
+$fs = 0.8;  // minimum size (default 2)
+
+DRAW_HOLDER = true;
+DRAW_BODY   = false;
 DRAW_EMITTER = false;
 
 DZ_BODY = (EMITTER == "closed") ? (DZ_TOTAL - emitterZ()) : DZ_TOTAL;
 
-$fn = 80;
 EPS = .01;
 EPS2 = 2 * EPS;
 

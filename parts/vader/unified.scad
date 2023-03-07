@@ -12,7 +12,7 @@ KEYJOINT_T = 5.0;
 D_PORT =  7.9;
 EPS = 0.01;
 
-DRAW_AFT = false;
+DRAW_AFT = true;
 DRAW_FORE = true;
 DRAM_EMITTER = false;
 
@@ -55,7 +55,7 @@ if (DRAW_FORE) color("cadetblue") {
         // Switch 
         translate([0, 0, M_SWITCH]) rotate([-90, 0, 0]) cylinder(h=100, d=17.0 + 1.0);
         // Alignment
-        translate([0, 0, M_BOLT0]) rotate([-90, 0, 0]) cylinder(h=100, d=3.5);
+        translate([0, 0, M_BOLT0]) rotate([-90, 0, 0]) cylinder(h=100, d=3.5);tt
         translate([0, 0, M_BOLT1]) rotate([-90, 0, 0]) cylinder(h=100, d=3.5);
         // Port
         translate([0, 0, M_PORT]) rotate([-90, 0, ROT_PORT]) cylinder(h=100, d=D_PORT);
