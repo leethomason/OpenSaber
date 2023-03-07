@@ -1109,7 +1109,7 @@ module pcbPillar(dBoost=0) {
             rotate([-90, 0, 0])
                 difference() {
                     cylinder(h=50, d1=8 + dBoost, d2=5 + dBoost);
-                    cylinder(h=100, d=D_M2);
+                    cylinder(h=100, d=D_M2 + 0.4);
                 }
         translate([0, -1, 0]) rotate([-90, 0, 0])
             cylinder(h=1.1, d2=D_M2 + 0.5, d1=D_M2);
@@ -1434,5 +1434,6 @@ module forwardAdvanced(d, dz,
 
 baffleMCBattery( 32,    // outer diameter 
                  12,    // number of baffles 
-                 3,     // thickness of the baffle
-                 bridgeStyle = 2);
+                 Z_BATTERY_18650,     // length
+                 bridgeStyle = 5);
+color("red") battery(32, "18650");

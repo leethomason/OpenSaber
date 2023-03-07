@@ -47,7 +47,7 @@ difference() {
     }
 }
 
-*translate([0, 0, M_MC]) color("red") battery(D0, "18650");
+translate([0, 0, M_MC]) color("red") battery(D0, "18650");
 
 difference() {
     union() {
