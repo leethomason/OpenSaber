@@ -539,7 +539,7 @@ module bridgeAndRail(bridge, d, dz, bottomRail=true, bridgeOnlyBottom=false)
     }
 }
 
-TROUGH_0 = 10;
+TROUGH_0 = 12;
 TROUGH_1 = 10;
 TROUGH_2 = 14;
 
@@ -1419,7 +1419,7 @@ module forwardAdvanced(d, dz,
 }
 
 
-$fn = 80;
+//$fn = 80;
 *oneBaffle(30, 4, 
     battery=false,
     mc=false,

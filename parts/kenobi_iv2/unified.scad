@@ -2,8 +2,10 @@ include <dim.scad>
 use <../shapes.scad>
 use <../commonUnified.scad>
 
-$fn = 80;
-//$fa = 1.0;
+//$fn = 80; // overrides fs; num fragments
+$fa = 6;   // minimum angle (default 12)
+$fs = 0.8;  // minimum size (default 2)
+
 N_BAFFLES = 8;
 T = 4.0;
 EPS = 0.01;
@@ -90,6 +92,19 @@ difference() {
         translate([0, 0, M_FORE_PLATE + 6.0]) rotate([90, 0, 0]) cylinder(h=100, d=D);
     } 
 
+    // side cutouts
+    hull() {
+        D = 4.0;
+        translate([-50, -7, M_PCB + 9.0]) rotate([0, 90, 0]) cylinder(h=100, d=D);
+        translate([-50, -7, M_PCB + 16.0]) rotate([0, 90, 0]) cylinder(h=100, d=D);
+    } 
+    hull() {
+        D = 4.0;
+        translate([-50,  5, M_FORE_PLATE + 12.0]) rotate([0, 90, 0]) cylinder(h=100, d=D);
+        translate([-50, -5, M_FORE_PLATE + 12.0]) rotate([0, 90, 0]) cylinder(h=100, d=D);
+    } 
+
+    // set pin
     translate([0, 0, M_SET_PIN]) rotate([0, 90, 0]) cylinder(h=100, d=4);
     translate([0, 0, M_SET_PIN]) rotate([0, -90, 0]) cylinder(h=100, d=4);
 

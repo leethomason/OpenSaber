@@ -64,6 +64,7 @@
 #define SABER_MODEL_LEIA_PS		   25	// Itsy, one LED UI, essentially a clan saber
 #define SABER_MODEL_DUCHESS   	   27   // Itsy 4a, Dotstar UI, LSM6D Gyro
 #define SABER_MODEL_DARKSABER	   28   // Itsy 4a, Dotstar UI, LSM6D Gyro
+#define SABER_MODEL_VADER	   	   29   // Itsy 4, Dotstar UI, LSM6D Gyro
 
 #define SABER_SUB_MODEL_NONE		0
 #define SABER_SUB_MODEL_LUNA		1
@@ -81,9 +82,9 @@
 #define SABER_SUB_MODEL_B			13
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_CLAN
-#define SABER_SUB_MODEL				SABER_SUB_MODEL_BLACK
+#define SERIAL_DEBUG 				1
+#define SABER_MODEL 				SABER_MODEL_VADER
+#define SABER_SUB_MODEL				SABER_SUB_MODEL_NONE
 // ----------------------------------
 
 #define SABER_SOUND_SD 				1	// external memory card
@@ -1073,6 +1074,41 @@
 	static const int32_t BLUE_I   = 350;
 	static const int32_t BLUE_R   = 1800;
 	*/
+
+	static const int VOLUME_1 = 32;
+	static const int VOLUME_2 = 64;
+	static const int VOLUME_3 = 128;
+	static const int VOLUME_4 = 255;
+#elif (SABER_MODEL == SABER_MODEL_VADER)
+	#define ID_STR "Vader Cree PhotoRed-Green-RoyalBlue"
+
+	#define PCB_VERSION 				PCB_ITSY_4A			// actually 4c, but may not matter
+	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
+	#define SABER_VOLTMETER()			1			
+	#define SABER_UI_LED				SABER_LED_DOTSTAR
+	#define SABER_UI_BRIGHTNESS			128	// max 256			
+	#define ITSY_DOTSTAR_UI				1
+	#define SABER_NUM_LEDS 			    1
+	#define SABER_UI_START				0
+	#define SABER_UI_COUNT				1
+
+	#define VOLTMETER_TUNE				1059	// fixme
+	#define SABER_LOCK()				0
+
+	#define SWING_SAMPLES	12
+
+	// Specified at 350mA, which is the conservative values.
+	static const int32_t RED_VF   = 2100;	// Photo Red
+	static const int32_t RED_I    = 450;	// fixme: worth powering up the red channel?
+	static const int32_t RED_R    = 2350;
+
+	static const int32_t GREEN_VF = 3200;
+	static const int32_t GREEN_I  = 400;
+	static const int32_t GREEN_R  = 1000;
+
+	static const int32_t BLUE_VF  = 3100;
+	static const int32_t BLUE_I   = 400;
+	static const int32_t BLUE_R   = 1350;
 
 	static const int VOLUME_1 = 32;
 	static const int VOLUME_2 = 64;
