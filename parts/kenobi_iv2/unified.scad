@@ -1,3 +1,15 @@
+
+
+
+
+
+
+
+
+
+
+
+
 include <dim.scad>
 use <../shapes.scad>
 use <../commonUnified.scad>
@@ -36,7 +48,8 @@ difference() {
         translate([0, 0, M0])
             speakerHolder(D0, DZ_SPKR_HOLDER, 1.5, "cls28");
         translate([0, 0, M_MC])
-            baffleMCBattery(D0, N_BAFFLES, DZ_BATTERY, bridgeStyle=5, thermalRelief=3);
+            baffleMCBattery2(D0, N_BAFFLES, DZ_BATTERY);
+            //baffleMCBattery(D0, N_BAFFLES, DZ_BATTERY, bridgeStyle=5, thermalRelief=3);
     }
     // EXPERIMENT drop in battery
     translate([0, 0, M_MC]) {
@@ -47,7 +60,7 @@ difference() {
     }
 }
 
-translate([0, 0, M_MC]) color("red") battery(D0, "18650");
+*translate([0, 0, M_MC]) color("red") battery(D0, "18650");
 
 difference() {
     union() {

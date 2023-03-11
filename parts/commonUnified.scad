@@ -539,9 +539,9 @@ module bridgeAndRail(bridge, d, dz, bottomRail=true, bridgeOnlyBottom=false)
     }
 }
 
-TROUGH_0 = 12;
-TROUGH_1 = 10;
-TROUGH_2 = 14;
+TROUGH_0 = 12;  // top
+TROUGH_1 = 10;  // between battery & mc
+TROUGH_2 = 13;  // bottom opening
 
 module oneBaffle(   d,
                     dz,
@@ -576,7 +576,8 @@ module oneBaffle(   d,
             else {
                 cylinder(h=dz, d=d + dExtra);
             }
-            bridgeAndRail(bridge, d, dz, bottomRail=bottomRail, bridgeOnlyBottom=bridgeOnlyBottom);
+            E = 0.02;
+            bridgeAndRail(bridge, d, dz + E*2, bottomRail=bottomRail, bridgeOnlyBottom=bridgeOnlyBottom);
         }
 
         if (battery) {
@@ -1089,13 +1090,86 @@ module baffleMCBattery( outer,          // outer diameter
     }
 }
 
+module baffleMCBattery2(d, nBaffles, dz) 
+{
+    slices = nBaffles * 2 - 1;
+    dzSlice = dz / slices;
+
+    LONG = 200;
+    D = 50;
+
+    OFF0 = 1;
+    OFF1 = 18;
+
+    difference() {
+        cylinder(h=dz, d=d);
+
+        hull() {
+            translate([0, d/2 - D_BATTERY/2, -EPS])
+                cylinder(h=LONG, d=D_BATTERY);
+            translate([0, 50, -EPS])
+                cylinder(h=LONG, d=D_BATTERY);
+        }
+        translate([-X_MC/2, d/2 - D_BATTERY - Y_MC, -EPS])
+            cube(size=[X_MC, Y_MC, LONG]);
+
+        // Top
+        translate([-TROUGH_0/2, 5, -EPS]) cube(size=[TROUGH_0, 20, LONG]);
+        // Middle
+        translate([-TROUGH_1/2, -5, -EPS]) cube(size=[TROUGH_1, 10, LONG]);
+        // Bottom
+        translate([-TROUGH_2/2, -d/2-1, -EPS]) cube(size=[TROUGH_2, 10, LONG]);
+
+        // Cut the baffles:
+        for(i=[0:nBaffles-1]) {
+            translate([0, 0, dzSlice + i * 2 * dzSlice]) {
+                tube(h=dzSlice, di=d - OFF0, do=D);  // outside
+                cylinder(h=dzSlice, d=d - OFF1);
+            }
+        }
+        // punch the vents:
+        for(i=[0:nBaffles-1]) {
+            slope = dzSlice;
+            H = 4;
+            translate([-D/2, d*0.00, dzSlice + i * 2 * dzSlice]) {
+                polygonYZ(h=D, points=[
+                    [0, 0], [slope, dzSlice],
+                    [H+slope, dzSlice], [H, 0]
+                ]);
+            }
+            translate([-D/2, -d*0.32, dzSlice + i * 2 * dzSlice]) {
+                polygonYZ(h=D, points=[
+                    [0, 0], [slope, dzSlice],
+                    [H+slope, dzSlice], [H, 0]
+                ]);
+            }
+            /*
+            translate([-D/2, -d*0.05, dzSlice + i * 2 * dzSlice]) {
+                polygonYZ(h=D, points=[
+                    [0, 0], [-slope, dzSlice],
+                    [-H-slope, dzSlice], [-H, 0]
+                ]);
+            }
+            */
+            if ((i-2)%3 == 0) {
+                T = X_MC;
+                translate([-T/2, -d/2, dzSlice + i * 2 * dzSlice]) {
+                    cube(size=[T, 5, dzSlice]);
+                }
+            }
+        }
+
+    }
+}
+
+
 module pcbButtress(buff=0)
 {    
     BUTTRESS_T = 5 + buff;
     difference() {
         translate([0,0,-BUTTRESS_T/2])
             polygonXY(BUTTRESS_T, 
-                [[-2,0], [-2,-2], [14,-30], [14,0]]
+                [[-3,0], [-2,-2], [14,-30], [14,0]]
             );
         translate([0, -50, 0]) rotate([-90, 0, 0]) cylinder(h=50, d=D_M2);
         translate([0, -1.0, 0]) rotate([-90, 0, 0])
@@ -1419,7 +1493,7 @@ module forwardAdvanced(d, dz,
 }
 
 
-//$fn = 80;
+$fn = 40;
 *oneBaffle(30, 4, 
     battery=false,
     mc=false,
@@ -1432,8 +1506,11 @@ module forwardAdvanced(d, dz,
 
 *boltRing(30.0, 4.0, 12.0, 6.0);
 
-baffleMCBattery( 32,    // outer diameter 
-                 12,    // number of baffles 
-                 Z_BATTERY_18650,     // length
-                 bridgeStyle = 5);
-color("red") battery(32, "18650");
+*baffleMCBattery( 32,    // outer diameter 
+                  12,    // number of baffles 
+                  Z_BATTERY_18650);
+
+*baffleMCBattery2( 32,    // outer diameter 
+                  12,    // number of baffles 
+                  Z_BATTERY_18650);
+*color("red") battery(32, "18650");

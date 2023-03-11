@@ -13,7 +13,7 @@ TARGET = 3.0;
 SUPPORT_HEIGHT = 1.0;
 EDGE = 0.6;
 
-TRIM = 0.3;
+TRIM = 0.5;
 EPS = 0.001;
 STRUCTURE = 3.0;
 HANDLE = 10.0;
@@ -80,5 +80,5 @@ module support(x, y, sx, sy, height) {
     support(1.3*INCH_TO_MM, 0.2*INCH_TO_MM, 3.00 + TRIM, 2.50 + TRIM, 0.86);
 
     // Itsy V2/V3/V4 audio amp
-    support(0.1429*INCH_TO_MM, 0.3045*INCH_TO_MM, 3.00 + TRIM, 3.00 + TRIM, 0.8);
+    support(4.9, 7.1, 3.00 + TRIM, 3.00 + TRIM, 0.8);
 }

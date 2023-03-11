@@ -16,7 +16,7 @@ DY_PCB_BOTTOM = DY_PCB_TOP - 1.6;
 
 // 5, 10, 15mm offsets
 DY_PILLAR_TOP = DY_PCB_BOTTOM; // - 10.0;
-DX_PCB = 0.90 * 25.4;
+DX_PCB = 0.90 * 25.4 + 0.4;
 
 DZ_SPKR_HOLDER = 8.5;
 
