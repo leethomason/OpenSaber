@@ -8,12 +8,10 @@ $fs = 0.8;  // minimum size (default 2)
 
 T = 6.5;
 JOINT = 8;
-KEYJOINT_T = 5.0;
 D_PORT =  7.9;
 EPS = 0.01;
 
-DRAW_AFT = true;
-DRAW_FORE = true;
+DRAW_UNIFIED = true;
 DRAM_EMITTER = false;
 
 module flatBottom()
@@ -22,16 +20,12 @@ module flatBottom()
         cube(size=[100, 10.0 + 0.8, 1000]);
 }
 
-if (DRAW_AFT) {
+if (DRAW_UNIFIED) {
     translate([0, 0, M1])
         speakerHolder(D0, DZ_SPKR_HOLDER, 3.0, "cls28");
     translate([0, 0, M_MC])
-        baffleMCBattery(D0, N_BAFFLES, DZ_BATTERY, bridgeStyle=5, thermalRelief=5);
-    translate([0, 0, M_SECTION0])
-        keyJoint(JOINT, D0, D0 - KEYJOINT_T, false);
-}
+        baffleMCBattery2(D0, N_BAFFLES, DZ_BATTERY);
 
-if (DRAW_FORE) color("cadetblue") {
     difference() {
         union() {
             translate([0, 0, M2 - DZ_HEATSINK_CASE - DZ_HEATSINK_THREAD])
@@ -49,9 +43,6 @@ if (DRAW_FORE) color("cadetblue") {
                 rotate([0, 0, ROT_PORT]) translate([-S_PORT/2, D0/2 - 4.8, M_PORT - S_PORT/2]) cube(size=[S_PORT, 10, S_PORT]);
             }
         }        
-        translate([0, 0, M_SECTION0 - EPS])
-            keyJoint(JOINT, D0, D0 - KEYJOINT_T, true);
-
         // Switch 
         translate([0, 0, M_SWITCH]) rotate([-90, 0, 0]) cylinder(h=100, d=17.0 + 1.0);
         // Alignment

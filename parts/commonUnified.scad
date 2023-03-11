@@ -1100,6 +1100,7 @@ module baffleMCBattery2(d, nBaffles, dz)
 
     OFF0 = 1;
     OFF1 = 18;
+    MC_BASE =  d/2 - D_BATTERY - Y_MC;
 
     difference() {
         cylinder(h=dz, d=d);
@@ -1110,7 +1111,7 @@ module baffleMCBattery2(d, nBaffles, dz)
             translate([0, 50, -EPS])
                 cylinder(h=LONG, d=D_BATTERY);
         }
-        translate([-X_MC/2, d/2 - D_BATTERY - Y_MC, -EPS])
+        translate([-X_MC/2, MC_BASE, -EPS])
             cube(size=[X_MC, Y_MC, LONG]);
 
         // Top
@@ -1127,6 +1128,16 @@ module baffleMCBattery2(d, nBaffles, dz)
                 cylinder(h=dzSlice, d=d - OFF1);
             }
         }
+
+        // Don't want overhang on the cuts.
+        // Only matters at larger D
+        for(i=[0:nBaffles-1]) {
+            translate([-X_MC/2, MC_BASE, dzSlice + i * 2 * dzSlice]) {
+                cube(size=[X_MC, D, dzSlice]);
+            }
+        }
+
+
         // punch the vents:
         for(i=[0:nBaffles-1]) {
             slope = dzSlice;
@@ -1143,14 +1154,7 @@ module baffleMCBattery2(d, nBaffles, dz)
                     [H+slope, dzSlice], [H, 0]
                 ]);
             }
-            /*
-            translate([-D/2, -d*0.05, dzSlice + i * 2 * dzSlice]) {
-                polygonYZ(h=D, points=[
-                    [0, 0], [-slope, dzSlice],
-                    [-H-slope, dzSlice], [-H, 0]
-                ]);
-            }
-            */
+            // Thermal relief. Not sure it's needed for new printer.
             if ((i-2)%3 == 0) {
                 T = X_MC;
                 translate([-T/2, -d/2, dzSlice + i * 2 * dzSlice]) {

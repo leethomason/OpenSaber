@@ -3,8 +3,8 @@ INCH_TO_MM = 25.4;
 // Offset from the origin (0,0) to the lower left of the board. Typically 1/2 of 1/10 of an inch
 ORIGIN = 0.05 * INCH_TO_MM;
 // Size of the board
-DX = (2.15 + 0.05) * INCH_TO_MM;
-DY = (0.65 + 0.05) * INCH_TO_MM;
+DX = 2.2 * INCH_TO_MM;
+DY = 0.7 * INCH_TO_MM;
 
 PILLAR = 4.0;
 PILLAR_Z = 5.0;
@@ -13,13 +13,15 @@ TARGET = 3.0;
 SUPPORT_HEIGHT = 1.0;
 EDGE = 0.6;
 
-TRIM = 0.5;
 EPS = 0.001;
 STRUCTURE = 3.0;
 HANDLE = 10.0;
 
 ZSTRUCT = 1.0;
 ZSTRUCT_OUTER = 1.6;
+
+TRIM = 0.35;        // Delta on the components in the holding pit
+SIZE_TRIM = 0.5;    // Extra size on the board
 
 module pillar() {
     translate([-PILLAR/2, -PILLAR/2, 0])
@@ -51,13 +53,11 @@ module support(x, y, sx, sy, height) {
             translate([DX, DY, 0]) pillar();
             translate([0, DY, 0]) pillar();
         }
-        T = 0.15;
-        T1 = 0.35;
         hull() {
-            translate([-T, -T, BASE])
-                cube(size=[DX + T*2, DY + T*2, 10]);
-            translate([-T1, -T1, PILLAR])
-                cube(size=[DX + T1*2, DY + T1*2, 10]);
+            translate([-SIZE_TRIM/2, -SIZE_TRIM/2, BASE])
+                cube(size=[DX + SIZE_TRIM, DY + SIZE_TRIM, 10]);
+            translate([-SIZE_TRIM/2, -SIZE_TRIM/2, PILLAR])
+                cube(size=[DX + SIZE_TRIM, DY + SIZE_TRIM, 10]);
         }
     }
 
