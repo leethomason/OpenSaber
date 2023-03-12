@@ -74,11 +74,11 @@ def cutComp(g, mat, depth, x, y, dx, dy):
     else:
         # y-axis handles
         g.move(z=0)
-        g.move(x=x-half_tool, y=y-dy/2)
+        g.move(x=x-dx/2+half_tool, y=y-dy/2)
         rectangle(g, mat, depth, 0, dy, 0, "bottom")
 
         g.move(z=0)
-        g.move(x=x+half_tool, y=y-dy/2)
+        g.move(x=x+dx/2-half_tool, y=y-dy/2)
         rectangle(g, mat, depth, 0, dy, 0, "bottom")
     g.move(z=0)
 
@@ -101,9 +101,12 @@ for d in drillHoles:
     g.move(z=0)
     drill(g, mat, DEPTH)
 
-travel(g, mat, x=-1.27, y=-1.27 + 17.78/2)
+PCB_W = 55.8
+PCB_H = 17.78
+
+travel(g, mat, x=-1.27, y=-1.27 + PCB_H/2)
 g.move(z=0)
-rectangle(g, mat, DEPTH, 55.88 + mat['tool_size'], 17.78 + mat['tool_size'], 0, "left")
+rectangleTool(g, mat, DEPTH, PCB_W, PCB_H, 0, "left", "outer")
 g.move(z=20)
 
 
