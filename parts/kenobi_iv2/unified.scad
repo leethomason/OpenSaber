@@ -1,15 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
 include <dim.scad>
 use <../shapes.scad>
 use <../commonUnified.scad>

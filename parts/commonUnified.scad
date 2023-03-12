@@ -81,33 +81,6 @@ module columnY(dx, dyFrom0, dz, diameter, baseDX=0, baseDZ=0)
     }
 }
 
-module tjoint(dz, do, di, yTrim, zTrim, slot)
-{
-    RATIO = 0.40; 
-    DY = do * RATIO;
-    HALFY = DY * 0.7;
-    RI = di / 2;
-
-    TRI = [
-        [0, 0,], [10, 0], [10, 15]
-    ];
-
-    translate([0, -DY/2 - yTrim/2, 0]) {
-        cube(size=[100, HALFY + yTrim, dz]);
-    }
-    // Adjust the top to be >45 degrees so it can be printed
-    // without support. Less junk getting cleanup up in the 
-    // slot is a good thing.
-    translate([0, -DY/2 - yTrim/2, dz/2 - zTrim/2]) {
-        cube(size=[100, DY + yTrim, dz/2 + zTrim*2]);
-    }
-    if (slot) {
-        hy = DY / 2;
-        x = sqrt(RI*RI - hy*hy);
-        translate([x, hy, dz/2 - zTrim/2]) polygonXY(h=dz/2 + zTrim*2, points=TRI);
-    }
-}
-
 /*
     The green-sky version of the key joint was large, but
     secure. Problematic is that it clicked together on the y
@@ -141,47 +114,6 @@ module keyJoint(dz, do, di, slot, angle=0)
                 tjoint(dz, do, di, YTRIM, ZTRIM, slot);
             mirror([-1, 0, 0 ]) rotate([0, 0, angle]) 
                 tjoint(dz, do, di, YTRIM, ZTRIM, slot);
-        }
-    }
-}
-
-module cJoint(dz, dOuter, trim)
-{
-    XC = dOuter * 0.35;
-    XT = dOuter * 0.08;
-    D  = dOuter * 0.12;
-
-    translate([XC - XT/2, -50, 0])
-        cube(size=[XT, 100, dz]);
-    translate([XC, -50, dz])
-        rotate([-90, 0, 0])
-            cylinder(d=D - trim, h=100);
-}
-
-module columnJoint(dz, dOuter, trim)
-{
-    intersection() {
-        cylinder(h=100, d=dOuter);
-        union() {
-            cJoint(dz, dOuter, trim);
-            mirror([-1, 0, 0]) cJoint(dz, dOuter, trim);
-        }
-    }
-}
-
-module trainBridge(x, y, z, nBridge)
-{
-    dz = z / (nBridge * 2);
-
-    difference() 
-    {
-        cube(size=[x, y, z]);
-        for(i=[0:nBridge-1]) {
-            translate([0, 0, i*dz*2]) {
-                polygonYZ(h=10, points=[
-                    [0, 0], [y*0.5, 0], [y*0.75, dz/2], [y*0.5, dz], [0, dz]
-                ]);
-            }
         }
     }
 }
@@ -408,20 +340,6 @@ module portCounter()
     H = 30;
     rotate([90, 0, 0]) {
         cylinder(h=H, d=12);
-    }
-}
-
-module speakerBass22()
-{
-    H_SPKR_METAL        =  4;
-    D_SPKR_METAL        =  18; 
-    H_SPKR_PLASTIC      =  4.6;
-    D_SPKR_PLASTIC      =  20;
-
-    color("yellow") {
-        cylinder(h=H_SPKR_PLASTIC + EPS, d=D_SPKR_PLASTIC);
-        translate([0, 0, H_SPKR_PLASTIC])
-            cylinder(h=H_SPKR_METAL, d=D_SPKR_METAL);
     }
 }
 
@@ -653,27 +571,19 @@ module oneBaffle(   d,
 // Resuable parts -----------------------------------
 /*
     type = 
-        "bass22"
         "std28"
-        "bass28"
         "cls28"
+        "std23"
  */
 module speakerHolder(outer, dz, dzToSpkrBack, type, extraZ=0)
 {
     difference() {
         union() {
-            if(type == "bass22") {
-                difference() {
-                    tube(h=dz + extraZ, do=outer, di=18);
-                    translate([0, 0, dzToSpkrBack])
-                        speakerBass22();
-                }
-            }
-            else if (type == "std28" || type == "bass28") {
+            if (type == "std28") {
                 difference() {
                     tube(h=dz + extraZ, do=outer, di=24);
                     translate([0, 0, dzToSpkrBack])
-                        speakerStd28(type == "bass28");
+                        speakerStd28(false);
                 }
             }
             else if (type=="cls28") {
@@ -1020,76 +930,6 @@ module emitterCouplerRing(diameter, t, dz)
 
 }
 
-function nBafflesNeeded(dzButtress, type) = ceil(zBattery(type) / (dzButtress*2));
-
-function zLenOfBaffles(n, dzButtress) = n * dzButtress * 2 - dzButtress;
-
-module baffleMCBattery( outer,          // outer diameter 
-                        n,              // number of baffles 
-                        dz,             // thickness of the baffle
-                        nPostBaffles=0,// number of additional baffles, that don't have the battery cutout
-                        dFirst=0,       // make the back baffle this diameter (0 to use standard)
-                        dzFirst=0,      // make the first baffle this thicknes  (0 to use standard)
-                        extraBaffle=0,  // add this much to the front baffle
-                        bridgeInFront=false,    // set true to contiue bridge. Useful for attaching to a cap.
-                        bridgeStyle = 1,
-                        mc=true,
-                        mcFullDrop=false,
-                        bottomRail=true,
-                        batteryOffset=0,
-                        thermalRelief=0,
-                        thermalReliefOffset=0
-                    )
-{
-    slices = n * 2 - 1;
-    dzButtress = dz / slices;
-    totalN = n + nPostBaffles;
-
-    for(i=[0:totalN-1]) {
-        translate([0, 0, i*dzButtress*2])  {
-            hasBattery = i < n;
-            if (i==0 && dFirst > 0 && dzFirst > 0) {
-                // First baffle can "overflow" decause of
-                // the larger diameter. Use an intersection()
-                // to bring it in.
-                intersection() {
-                    cylinder(h=dzButtress*2, d=dFirst);
-                    oneBaffle(outer, dzFirst, 
-                            battery=hasBattery,
-                            mc=mc,
-                            dExtra=dFirst - outer, 
-                            bridge=bridgeStyle,
-                            mcFullDrop=mcFullDrop,
-                            bottomRail=bottomRail,
-                            batteryOffset=batteryOffset
-                    );
-                }
-            }
-            else {
-                useBottomRail = bottomRail && (thermalRelief == 0 || (((i + 2 + thermalReliefOffset) % thermalRelief) > 0));
-
-                oneBaffle(outer, dzButtress, 
-                    battery=hasBattery,
-                    bridge=bridgeInFront || (i < totalN-1) ? bridgeStyle : 0, 
-                    mc=mc,
-                    mcFullDrop=mcFullDrop,
-                    bottomRail=useBottomRail,
-                    batteryOffset=batteryOffset);
-            }
-        }
-    }
-    if (extraBaffle) {
-        translate([0, 0, (n*2 - 1) * dzButtress]) {
-            oneBaffle(outer, extraBaffle, 
-                bridge=0, 
-                mc=mc, 
-                mcFullDrop=mcFullDrop,
-                bottomRail=bottomRail,
-                batteryOffset=batteryOffset);
-        }
-    }
-}
-
 module baffleMCBattery2(d, nBaffles, dz) 
 {
     slices = nBaffles * 2 - 1;
@@ -1231,94 +1071,6 @@ module pcbHolder2(d, t, dzSection, dzToPCB, pcbDim, mount)
             }
         }
     }
-}
-
-/*
-    outer: diameter of the saber. If 0, not clipped.
-    t: thickness of the wall
-    dz: length of the section
-    dzToPCB: delta to where the pcb start
-    dyPCB: y delta to PCB bottom.
-    size[3]: outer size of the pcb.
-        x and z are obvious
-        y will do a cut above, if > 0
-    mount: array of:
-        x location, z location, "pillar" or "buttress"
-    makeSection: if true, this is a section of the saber, else
-                 just the basic parts are generated.
-    sizePad: pad the size to make it fit more easily
-    angle: rotation of the pcb
-*/
-module pcbHolder(outer, t, dz, dzToPCB, dyPCB, size, mount, 
-    makeSection=true, sizePad=0, holeAccess=false, angle=0, xShift=0, buffButtress=0)
-{
-    difference() 
-    {
-        union() {
-            if (makeSection) {
-                difference() {
-                    tube(h=dz, do=outer, di=outer-t);
-                    translate([-size[0]/2 - sizePad + xShift, dyPCB, dzToPCB - sizePad]) 
-                        cube(size=[size[0] + 2 * sizePad, size[1], size[2] + 2 * sizePad]);
-                }
-            }
-
-            for(m = mount) {
-                intersection() {
-                    cylinder(h=dz, d=outer ? outer : 100);
-
-                    translate([0, dyPCB, dz/2])
-                    rotate([angle, 0, 0])
-                    translate([xShift, 0, -dz/2])
-                    color("plum") union() {
-                        x = m[0];
-                        z = m[1];
-                        type = m[2];
-                        translate([x, 0, dzToPCB + z]) 
-                        {
-                            if (type == "pillar") {
-                                pcbPillar();
-                            }
-                            else if (type == "buttress") {
-                                shouldMirror = x < 0;
-                                if (shouldMirror)
-                                    mirror([1,0,0]) pcbButtress(buffButtress);
-                                else
-                                    pcbButtress(buffButtress);
-                            }
-                        }
-                        
-                    }
-                }
-            }
-        }
-        if (holeAccess == true && angle == 0) {
-            for(m = mount) {
-                x = m[0];
-                z = m[1];
-                translate([x, dyPCB, dzToPCB + z]) 
-                    rotate([-90, 0, 0])
-                        cylinder(h=50, d=4);
-            }
-        }
-    }
-}
-
-OLED_DISPLAY_W           = 23 + 1;
-OLED_DISPLAY_L           = 32 + 1;
-OLED_DISPLAY_MOUNT_W     = 17;
-OLED_DISPLAY_MOUNT_L     = 26;
-
-module oledHolder(diameter, t, dz, dzToPCB, dyPCB)
-{
-    pcbHolder(diameter, t, dz, dzToPCB, dyPCB, 
-              [OLED_DISPLAY_W, 20, OLED_DISPLAY_L],
-              [
-                [-OLED_DISPLAY_MOUNT_W/2, (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L)/2, "buttress" ],
-                [ OLED_DISPLAY_MOUNT_W/2, (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L)/2, "buttress" ],
-                [-OLED_DISPLAY_MOUNT_W/2, OLED_DISPLAY_MOUNT_L + (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L)/2, "buttress" ],
-                [ OLED_DISPLAY_MOUNT_W/2, OLED_DISPLAY_MOUNT_L + (OLED_DISPLAY_L - OLED_DISPLAY_MOUNT_L)/2, "buttress" ]
-              ]);
 }
 
 /*
