@@ -37,7 +37,6 @@ difference() {
             speakerHolder(D0, DZ_SPKR_HOLDER, 1.5, "cls28");
         translate([0, 0, M_MC])
             baffleMCBattery2(D0, N_BAFFLES, DZ_BATTERY);
-            //baffleMCBattery(D0, N_BAFFLES, DZ_BATTERY, bridgeStyle=5, thermalRelief=3);
     }
     // EXPERIMENT drop in battery
     translate([0, 0, M_MC]) {
@@ -53,9 +52,8 @@ difference() {
 difference() {
     union() {
         translate([0, 0, M_PCB]) {
-            DZ_SECTION = DZ_PCB;
             pcbHolder2(
-                D0, T, DZ_SECTION, -EPS, 
+                D0, T+2, DZ_PCB_SECTION, PCB_OFFSET, 
                 [DX_PCB, DY_PILLAR_TOP, DZ_PCB],
                 [
                     [22.86 / 2 - 19.685, 2.54, "buttress"],
@@ -64,26 +62,11 @@ difference() {
                     [22.86 / 2 - 3.175,  22.225, "buttress"]
                 ]
             );
-
-            // Lip to hold pcb
-            intersection() {
-                cylinder(h=100, d=D0);
-                difference() {
-                    union() {
-                        translate([DX_PCB/2 - 1.0, -D0/2, 0])
-                            cube(size=[10, D0, DZ_SECTION]);
-                        mirror([-1, 0, 0]) translate([DX_PCB/2 - 1.0, -D0/2, 0])
-                            cube(size=[10, D0, DZ_SECTION]);
-                    }
-                    translate([-DX_PCB/2, DY_PCB_BOTTOM, 0])
-                        cube(size=[DX_PCB, 100, DZ_PCB]);
-                }
-            }
         }
         // Front tube
         intersection() {
             inner();
-            FRONT_T = 8;
+            FRONT_T = 4;
             translate([0, 0, M_FORE_PLATE - EPS]) {
                 LEN = 20.0;
                 difference() {

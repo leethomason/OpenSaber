@@ -1054,7 +1054,7 @@ module pcbHolder2(d, t, dzSection, dzToPCB, pcbDim, mount)
                     x = m[0];
                     z = m[1];
                     type = m[2];
-                    translate([x, 0, dzToPCB + z]) 
+                    translate([x, 0, z]) 
                     {
                         if (type == "pillar") {
                             pcbPillar();
