@@ -930,12 +930,13 @@ module emitterCouplerRing(diameter, t, dz)
 
 }
 
-module baffleVent(dz)
+module baffleVent(dz, toBottom=false)
 {
     slope = dz * 1.0;
-    H = 3.5;
+    H = 3.0;
+    BASE = toBottom ? -50  : 0;
     polygonYZ(h=100, points=[
-        [0, 0], [slope, dz],
+        [BASE, 0], [BASE + slope, dz],
         [H+slope, dz], [H, 0]
     ]);
 }
@@ -998,14 +999,19 @@ module baffleMCBattery2(d, nBaffles, dz)
         for(i=[0:nBaffles-1]) {
             slope = dzSlice;
             H = 4;
-            MIN = -0.56;
-            MAX = 0.26;
+            MIN = -0.53;
+            MAX = 0.29;
             NVENT = 5;
 
             for(j=[0:NVENT-1]) {
                 interp = (MIN + (MAX-MIN)*j/(NVENT-1));
                 translate([-D/2, d*interp, dzSlice + i * 2 * dzSlice]) {
-                    baffleVent(dzSlice);
+                    if ((i/2) != floor(i/2)) {
+                        baffleVent(dzSlice, toBottom=j==0);
+                    }
+                    else {
+                        if (j > 0) baffleVent(dzSlice, toBottom=j==0);
+                    }
                 }
             }
         }
