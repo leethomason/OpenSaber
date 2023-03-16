@@ -930,6 +930,22 @@ module emitterCouplerRing(diameter, t, dz)
 
 }
 
+module baffleVent(dz)
+{
+    slope = dz * 1.0;
+    H = 3.5;
+    polygonYZ(h=100, points=[
+        [0, 0], [slope, dz],
+        [H+slope, dz], [H, 0]
+    ]);
+}
+
+/*  Thermal relief is a huge issue.
+    Using a heated bed (60C) gives pretty good adhesion. But the
+    back part still curles up.
+    Narrowing the bottom through_2 didn't really help. There's just not 
+    much holding it to the bed. 
+*/
 module baffleMCBattery2(d, nBaffles, dz) 
 {
     slices = nBaffles * 2 - 1;
@@ -965,7 +981,7 @@ module baffleMCBattery2(d, nBaffles, dz)
         for(i=[0:nBaffles-1]) {
             translate([0, 0, dzSlice + i * 2 * dzSlice]) {
                 tube(h=dzSlice, di=d - OFF0, do=D);  // outside
-                cylinder(h=dzSlice, d=d - OFF1);
+                //cylinder(h=dzSlice, d=d - OFF1);
             }
         }
 
@@ -982,27 +998,17 @@ module baffleMCBattery2(d, nBaffles, dz)
         for(i=[0:nBaffles-1]) {
             slope = dzSlice;
             H = 4;
-            translate([-D/2, d*0.00, dzSlice + i * 2 * dzSlice]) {
-                polygonYZ(h=D, points=[
-                    [0, 0], [slope, dzSlice],
-                    [H+slope, dzSlice], [H, 0]
-                ]);
-            }
-            translate([-D/2, -d*0.32, dzSlice + i * 2 * dzSlice]) {
-                polygonYZ(h=D, points=[
-                    [0, 0], [slope, dzSlice],
-                    [H+slope, dzSlice], [H, 0]
-                ]);
-            }
-            // Thermal relief. Not sure it's needed for new printer.
-            if ((i-2)%3 == 0) {
-                T = X_MC;
-                translate([-T/2, -d/2, dzSlice + i * 2 * dzSlice]) {
-                    cube(size=[T, 5, dzSlice]);
+            MIN = -0.56;
+            MAX = 0.26;
+            NVENT = 5;
+
+            for(j=[0:NVENT-1]) {
+                interp = (MIN + (MAX-MIN)*j/(NVENT-1));
+                translate([-D/2, d*interp, dzSlice + i * 2 * dzSlice]) {
+                    baffleVent(dzSlice);
                 }
             }
         }
-
     }
 }
 
@@ -1039,11 +1045,12 @@ module pcbHolder2(d, t, dzSection, dzToPCB, pcbDim, mount)
     W = pcbDim[0];
     Y = pcbDim[1];
     DZ = pcbDim[2];
+    TRIM = 0.2;     // On each edge
 
     difference() {
         tube(h=dzSection, do=d, di=d-t);
-        translate([-W/2, 0, dzToPCB]) {
-            cube(size=[W, d, DZ]);
+        translate([-W/2 - TRIM, 0, dzToPCB - TRIM]) {
+            cube(size=[W + TRIM*2, d, DZ + TRIM*2]);
         }
     }
     intersection() {

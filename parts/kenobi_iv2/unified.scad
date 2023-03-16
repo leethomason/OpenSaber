@@ -18,8 +18,11 @@ module ringLock()
             tube(h=5.0, di=D0, do=34.9  - 1.3);
         }
         W = 22.0;
-        translate([-W/2, 0, 0]) {
+        *translate([-W/2, 0, 0]) {
             cube(size=[W, 100, 100]);
+        }
+        translate([-50, 10, 0]) {
+            cube(size=[100, 100, 100]);
         }
     }
 }
@@ -45,6 +48,8 @@ difference() {
             translate([0, 50, 0]) cylinder(d=D_BATTERY, h = DZ_BATTERY+EPS);
         }
     }
+    // flatten
+    translate([-20, -D0/2 - EPS - 5.0, -20]) cube(size=[40, 0.5 + 5.0, 200]);
 }
 
 *translate([0, 0, M_MC]) color("red") battery(D0, "18650");
@@ -95,11 +100,11 @@ difference() {
     } 
 
     // side cutouts
-    hull() {
-        D = 4.0;
-        translate([-50, -7, M_PCB + 9.0]) rotate([0, 90, 0]) cylinder(h=100, d=D);
-        translate([-50, -7, M_PCB + 16.0]) rotate([0, 90, 0]) cylinder(h=100, d=D);
-    } 
+    for(i=[0:3]) {
+        translate([-50, -10.5, M_PCB + 7.5 + i*5])
+            baffleVent(2.5);
+    }
+
     hull() {
         D = 4.0;
         translate([-50,  5, M_FORE_PLATE + 12.0]) rotate([0, 90, 0]) cylinder(h=100, d=D);
