@@ -227,7 +227,12 @@ module dynamicHeatSinkHolder(diameter)
 
     difference() {
         cylinder(h=DZ, d=diameter);
-        translate([0, 0, -EPS]) cylinder(h=100, d=D_HEAT_SINK_THREAD);
+        translate([0, 0, -EPS]) 
+            cylinder(
+                h=DZ + EPS*2, 
+                d1=D_HEAT_SINK_THREAD, 
+                d2=D_HEAT_SINK_THREAD + 0.2
+            );
     }
 }
 

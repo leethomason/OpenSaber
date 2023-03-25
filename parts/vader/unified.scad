@@ -12,7 +12,7 @@ D_PORT =  7.9;
 EPS = 0.01;
 
 DRAW_UNIFIED = true;
-DRAM_EMITTER = false;
+DRAW_EMITTER = false;
 
 module flatBottom()
 {
@@ -24,7 +24,7 @@ if (DRAW_UNIFIED) {
     translate([0, 0, M1])
         speakerHolder(D0, DZ_SPKR_HOLDER, 3.0, "cls28");
     translate([0, 0, M_MC])
-        baffleMCBattery2(D0, N_BAFFLES, DZ_BATTERY);
+        baffleMCBattery2(D0, N_BAFFLES, DZ_BATTERY + EPS);
 
     difference() {
         union() {
@@ -46,12 +46,12 @@ if (DRAW_UNIFIED) {
         // Switch 
         translate([0, 0, M_SWITCH]) rotate([-90, 0, 0]) cylinder(h=100, d=17.0 + 1.0);
         // Alignment
-        translate([0, 0, M_BOLT0]) rotate([-90, 0, 0]) cylinder(h=100, d=3.5);
-        translate([0, 0, M_BOLT1]) rotate([-90, 0, 0]) cylinder(h=100, d=3.5);
+        translate([0, 0, M_BOLT0]) rotate([-90, 0, 0]) cylinder(h=100, d=4.4);
+        translate([0, 0, M_BOLT1]) rotate([-90, 0, 0]) cylinder(h=100, d=4.4);
         // Port
         translate([0, 0, M_PORT]) rotate([-90, 0, ROT_PORT]) cylinder(h=100, d=D_PORT);
         // Installation for port:
-        translate([0, 0, M_PORT]) rotate([90, 0, ROT_PORT]) cylinder(h=100, d=16.0);
+        translate([0, 0, M_PORT]) rotate([90, 0, ROT_PORT]) cylinder(h=100, d=16.0 + 0.5);
 
         // vents
         for(i=[0:2]) 
@@ -78,17 +78,11 @@ if (DRAW_UNIFIED) {
             translate([-3, 0, M_SECTION0 + 65]) rotate([-90, 0, 0]) cylinder(h=100, d=6);
             translate([ 3, 0, M_SECTION0 + 65]) rotate([-90, 0, 0]) cylinder(h=100, d=6);
         }
-        // front bottom
-        hull() {
-            translate([-3, 0, M_SECTION0 + 65]) rotate([90, 0, 0]) cylinder(h=100, d=6);
-            translate([ 3, 0, M_SECTION0 + 65]) rotate([90, 0, 0]) cylinder(h=100, d=6);
-        }
-
         flatBottom();
     }
 }
 
-if (DRAM_EMITTER) {
+if (DRAW_EMITTER) {
 
     difference() {
         translate([0, 0, M_HEATSINK]) tube(h=DZ_HEATSINK_CASE, do=D0, di=D_HEATSINK_CASE);
