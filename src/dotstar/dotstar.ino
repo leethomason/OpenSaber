@@ -1,5 +1,5 @@
 #include "DotStar.h"
-#define NUM_LEDS 4
+#define NUM_LEDS 2
 
 osbr::RGB leds[NUM_LEDS];
 DotStar dotstar;
@@ -29,10 +29,17 @@ void setup()
 	}
 
 	dotstar.beginSPI(A3);
-	dotstar.display(leds, NUM_LEDS, 16);
+	dotstar.display(leds, NUM_LEDS, 8);
 }
 
 void loop()
 {
+	uint32_t f = millis() % 1000;
+	uint32_t ch = (millis() / 1000) % 3;
 
+	for (int i = 0; i < NUM_LEDS; i++) {
+		leds[i].set(0);
+		leds[i][ch] = f * 255 / 1000;
+	}
+	dotstar.display(leds, NUM_LEDS, 8);
 }

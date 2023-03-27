@@ -16,8 +16,12 @@ void DotStarUI::Process(
     bool bladeIgnited, 
     const UIRenderData& data)
 {
-    if (ledConfig == 1) {
+    if (ledConfig == 1 || ledConfig == 2) {
         DrawOneLED(uiLEDs, brightness, currentTime, mode, bladeIgnited, data);
+        // The 2 LED setup double the uiLEDs
+        if (ledConfig == 2) {
+            uiLEDs[1] = uiLEDs[0];
+        }
     }
     else {
         DrawMultiLED(uiLEDs, ledConfig, brightness, currentTime, mode, bladeIgnited, data);

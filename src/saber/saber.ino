@@ -111,6 +111,10 @@ DotStar dotstar;                    // Hardware controller.
 #ifdef SABER_UI_START
 DotStarUI dotstarUI(lockSupported);                // It is the DotStarUI regardless of physical pixel protocol
 #endif
+#if ITSY_DOTSTAR_UI()
+DotStar oneDotstar;
+DotStarUI oneDotstarUI(lockSupported);
+#endif
 
 ACCELEROMETER accelMag(PIN_ACCEL_EN);
 
@@ -296,24 +300,26 @@ void setup()
     }
     #endif
 
+#if ITSY_DOTSTAR_UI()
+    {
+        //osbr::RGBA led = 0;
+        oneDotstar.beginSW(40, 41);
+        //delay(2);
+        //oneDotstar.display(&led, 1);
+        Log.p("Itsy dotstar initialized.").eol();
+    }
+#   endif
+
     #if defined(SABER_NUM_LEDS)
     {
-        osbr::RGBA leds[SABER_NUM_LEDS] = {0x01020304};
-        #if SABER_UI_LED == SABER_LED_DOTSTAR
-        {
-#if ITSY_DOTSTAR_UI
-            dotstar.beginSW(40, 41);
-#else
-            dotstar.beginSPI(PIN_DOTSTAR_EN);
-#endif            
-            delay(2);
-            dotstar.display(leds, SABER_NUM_LEDS);
-            delay(2);
-            dotstar.display(leds, SABER_NUM_LEDS);
-            Log.p("Dotstar initialized.").eol();
-        }
-        #endif
-    }
+        //osbr::RGBA leds[SABER_NUM_LEDS] = {0};
+        dotstar.beginSPI(PIN_DOTSTAR_EN);
+        //delay(2);
+        //dotstar.display(leds, SABER_NUM_LEDS);
+        //delay(2);
+        //dotstar.display(leds, SABER_NUM_LEDS);
+        Log.p("SPI Dotstar initialized.").eol();
+}
     #endif
 
     sfx.setVolume(VOLUME_1);
@@ -743,16 +749,32 @@ void loopDisplays(uint32_t msecStable)
     bool normalModeAndOff = uiMode.mode() == UIMode::NORMAL && bladeStateManager.isOff();
     (void)normalModeAndOff;
 
+    // Single dotstar on the microcontroller.
+#if ITSY_DOTSTAR_UI()
+    {
+        osbr::RGBA itsyRGBA;
+        static osbr::RGBA itsyLED = 0;
+
+        // FIXME: what is the acceptable brightneess range?
+        oneDotstarUI.Process(&itsyRGBA, 1, 128, 
+            msecStable, uiMode.mode(), !bladeStateManager.isOff(), uiRenderData);
+        if (itsyRGBA != itsyLED) {
+            itsyLED = itsyRGBA;
+            oneDotstar.display(&itsyLED, 1);
+        }
+    }
+#endif // ITSY_DOTSTAR_UI
+
     // ------------ LEDs ---------- //
-#ifdef SABER_NUM_LEDS
+#if defined(SABER_NUM_LEDS)
     osbr::RGBA rgba[SABER_NUM_LEDS] = {0};
 
-#   ifdef SABER_UI_START
+#   if defined(SABER_UI_START)
     {
-#       ifdef SABER_UI_IDLE_MEDITATION
+#       if defined(SABER_UI_IDLE_MEDITATION)
         if (normalModeAndOff && uiMode.isIdle(msec)) {
             dotstarUI.Process(rgba + SABER_UI_START, SABER_UI_COUNT, SABER_UI_BRIGHTNESS, 
-                msec, UIMode::MEDITATION, false, uiRenderData);
+                msecStable, UIMode::MEDITATION, false, uiRenderData);
             rgba[SABER_UI_START + SABER_UI_COUNT - 1] = osbr::RGBA(uiRenderData.color, SABER_UI_BRIGHTNESS);
         }
         else
@@ -762,7 +784,7 @@ void loopDisplays(uint32_t msecStable)
                 msecStable, uiMode.mode(), !bladeStateManager.isOff(), uiRenderData);
         }
 
-#       ifdef SABER_UI_FADE_OUT
+#       if defined(SABER_UI_FADE_OUT)
         if (normalModeAndOff && uiMode.isIdle(msecStable)) {
             static const uint32_t FADE_TIME = 800;
             uint32_t over = uiMode.millisPastIdle(msecStable);
@@ -778,14 +800,14 @@ void loopDisplays(uint32_t msecStable)
             }
         }
 #       endif  // SABER_UI_FADE_OUT
-#       ifdef SABER_UI_REVERSE
+#       if defined(SABER_UI_REVERSE)
             for(int i=0; i < SABER_UI_COUNT/2; ++i) {
                 glSwap(rgba[i + SABER_UI_START], SABER_UI_START + SABER_UI_COUNT - 1 - i);
             }
 #       endif // SABER_UT_REVERSE
     }
 #   endif // SABER_UI_START
-#   ifdef SABER_CRYSTAL_START
+#   if defined(SABER_CRYSTAL_START)
     {
         if (normalModeAndOff) {
             osbr::RGB rgb;
@@ -797,7 +819,7 @@ void loopDisplays(uint32_t msecStable)
         }
     }
 #   endif // SABER_CRYSTAL_START
-#   ifdef SABER_FLASH_LED
+#   if defined(SABER_FLASH_LED)
     {
         // Flashes a secondary LED with the flash on clash color.
         RGB flashColor = saberDB.impactColor();
@@ -805,6 +827,7 @@ void loopDisplays(uint32_t msecStable)
     }
 #   endif // SABER_FLASH_LED
 
+    /* FIXME why isn't caching working? Something wrong with v4??
     static osbr::RGBA leds[SABER_NUM_LEDS] = {0};
     bool send = false;
 
@@ -817,6 +840,8 @@ void loopDisplays(uint32_t msecStable)
     if (send) {
         dotstar.display(leds, SABER_NUM_LEDS);
     }
+    */
+    dotstar.display(rgba, SABER_NUM_LEDS);
 #endif // SABER_NUM_LEDS
 
 #if SABER_DISPLAY == SABER_DISPLAY_128_32
