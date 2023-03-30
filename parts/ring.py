@@ -22,8 +22,9 @@ def ring(inner, outer, height, stock, mat, g, maker):
         hole(g, mat, drop, d=outer, offset="outside", fill=True)
 
     #ring
-    g.move(z=drop)
-    hole(g, mat, -height - TRIM, d=inner, offset="inside", fill=False)
+    if inner > 0:
+        g.move(z=drop)
+        hole(g, mat, -height - TRIM, d=inner, offset="inside", fill=False)
 
     g.move(z=drop)
     hole(g, mat, -height - TRIM, d=outer, offset="outside", fill=False)
