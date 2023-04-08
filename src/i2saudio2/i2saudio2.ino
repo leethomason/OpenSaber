@@ -125,21 +125,6 @@ void processCmd(const CStr<32>& str)
     }
 }
 
-
-// This just takes time. It doesn't really test anything.
-int test()
-{
-    int32_t total = 0;
-
-    S4ADPCM::State state;
-    const int* table = S4ADPCM::getTable(0);
-    S4ADPCM::decode4(gCompressed, TEST_SOURCE_SAMPLES, 256, false, gTarget, &state, table);
-    for(int i=0; i<TEST_SOURCE_SAMPLES*2; i++) {
-        total += gTarget[i];
-    }
-    return total;
-}
-
 void setup()
 {
     Serial.begin(19200);
@@ -159,32 +144,18 @@ void setup()
     i2sAudioDriver.begin();
 
     scan();
-    uint32_t start = micros();
-    int r = test();
-    uint32_t end = micros();
-    Log.p("test run (micro)=").p(end - start).p(" r=").p(r).eol();
-
-    Log.p("runs/sec=").eol();
-    start = millis();
-    while(true) {
-        r += test();
-        ++nRunsPerSec;
-        end = millis();
-        if (end - start >= 1000) break;
-    }
-    Log.p("runs/sec=").p(nRunsPerSec).p(" r=").p(r).eol();
-
     Log.p("setup() complete.").eol();
 }
 
 CStr<32> cmd;
-static uint32_t lastLoopTime = 0;
-static int nTestCall = 0;
-static int testHash = 0;
 
 void loop()
 {
     #ifdef LOG_PERF
+    static uint32_t lastLoopTime = 0;
+    static int nTestCall = 0;
+    static int testHash = 0;
+
     uint32_t deltaMilli = millis() - lastLoopTime;
     testHash += test();
     ++nTestCall;

@@ -20,7 +20,10 @@ void DotStarUI::Process(
         DrawOneLED(uiLEDs, brightness, currentTime, mode, bladeIgnited, data);
         // The 2 LED setup double the uiLEDs
         if (ledConfig == 2) {
-            uiLEDs[1] = uiLEDs[0];
+            if(mode == UIMode::NORMAL)
+                uiLEDs[1].set(data.color.r, data.color.g, data.color.b, brightness);
+            else
+                uiLEDs[1] = uiLEDs[0];
         }
     }
     else {

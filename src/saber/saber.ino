@@ -312,12 +312,8 @@ void setup()
 
     #if defined(SABER_NUM_LEDS)
     {
-        //osbr::RGBA leds[SABER_NUM_LEDS] = {0};
         dotstar.beginSPI(PIN_DOTSTAR_EN);
-        //delay(2);
-        //dotstar.display(leds, SABER_NUM_LEDS);
-        //delay(2);
-        //dotstar.display(leds, SABER_NUM_LEDS);
+        dotstar.setConfig( SABER_DOTSTAR_CONFIG() );
         Log.p("SPI Dotstar initialized.").eol();
 }
     #endif
@@ -827,7 +823,7 @@ void loopDisplays(uint32_t msecStable)
     }
 #   endif // SABER_FLASH_LED
 
-    /* FIXME why isn't caching working? Something wrong with v4??
+    /* FIXME not sure caching needed. Turned it off, seems fine
     static osbr::RGBA leds[SABER_NUM_LEDS] = {0};
     bool send = false;
 

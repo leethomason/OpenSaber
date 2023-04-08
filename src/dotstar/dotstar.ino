@@ -15,7 +15,7 @@ void setup()
 
 	leds[0].set(0xff0000);
 #if NUM_LEDS > 1
-	leds[1].set(0x00ff00);
+	leds[1].set(0xff0000);
 #endif
 #if NUM_LEDS > 2
 	leds[2].set(0x0000ff);
@@ -29,11 +29,15 @@ void setup()
 	}
 
 	dotstar.beginSPI(A3);
+	dotstar.setConfig(DotStar::RBG);
+	dotstar.display(leds, NUM_LEDS, 8);
+	dotstar.display(leds, NUM_LEDS, 8);
 	dotstar.display(leds, NUM_LEDS, 8);
 }
 
 void loop()
 {
+#if false
 	uint32_t f = millis() % 1000;
 	uint32_t ch = (millis() / 1000) % 3;
 
@@ -42,4 +46,5 @@ void loop()
 		leds[i][ch] = f * 255 / 1000;
 	}
 	dotstar.display(leds, NUM_LEDS, 8);
+#endif
 }

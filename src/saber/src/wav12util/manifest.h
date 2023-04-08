@@ -33,6 +33,8 @@ struct MemUnit {
     uint32_t offset;
     uint32_t size : 24;     // if needed, an extra sample is added so that size==nSamples
     uint32_t table : 4;     // 0-15 to select table
+    uint32_t predictor : 3; // 0-4 
+    uint32_t pad : 1;
 
     uint32_t numSamples() const { return size * 2; }
     uint32_t timeInMSec() const {

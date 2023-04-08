@@ -32,8 +32,19 @@
 #   include <assert.h>
 #	define W12ASSERT assert
 #else
-#   define W12ASSERT(x)
+#   define W12ASSERT
 #endif
+
+// Only fails for x = -2^31
+inline int32_t fastSign(int32_t x) {
+    return int32_t((uint32_t(-x) >> 31) - (uint32_t(x) >> 31));
+}
+
+// I'd prefer std::clamp, but not confident of arduino tools
+template<typename T>
+inline T fastClamp(T x, T lo, T hi) {
+    return std::min(std::max(x, lo), hi);
+}
 
 /* 
     A 4-bit ADPCM encoder/decoder. It is not any of the "official" ADPCM codecs.
@@ -71,6 +82,7 @@
     Nice improvements. I'm very happy with the insights, and fiati.wav
     is audibly improved.
 */
+
 class S4ADPCM
 {
 public:
@@ -78,7 +90,19 @@ public:
     static const int TABLE_SIZE = 9;
 
     struct State {
-        bool high = false;
+        static constexpr int32_t PREDICTOR = 2;
+        static constexpr int32_t N_PREDICTOR = 5; // [0, 4]
+         
+        State(const int32_t* _table, int32_t _predictor) : predictor(_predictor), table(_table) {}
+
+        void init(const int32_t* _table, int32_t _predictor) {
+            table = _table;
+            predictor = _predictor;
+        }
+
+        int high = false;
+        int32_t predictor = PREDICTOR;
+        const int32_t* table = nullptr;
         int32_t prev2 = 0;
         int32_t prev1 = 0;
         int32_t shift = 0;
@@ -86,56 +110,67 @@ public:
         int32_t volumeTarget = 0;
 
         int32_t guess() const {
-            // TotalError = 895  SimpleError = 52945
-            //return 2 * prev1 - prev2;
-            
-            // In between: good numbers across the board,
-            // but favors hum & swing
-            // TotalError = 588  SimpleError = 33127
-            return prev1 + (prev1 - prev2) / 2;
-            
-            // TotalError = 586  SimpleError = 28855
-            //return prev1;
+            // I have experimented and it is mysterious.
+            // Note that hum and swings go down, while everything else (blaster, clash, in/out)
+            // goes up.
+            // 
+            //  prev1
+            //  TotalError = 431  SimpleError = 13140 hum = 44.1 swh01 = 165.3
+            //
+            //  prev1 + (prev1 - prev2) / 4
+            //  TotalError = 422  SimpleError = 13216 hum = 35.3 swh01 = 134.6
+            //
+            //  prev1 + (prev1 - prev2) / 2
+            //  TotalError = 461  SimpleError = 14768 hum = 26.1 swh01 = 101.0
+            //
+            //  prev1 + (prev1 - prev2) * 3 / 4
+            //  TotalError = 558  SimpleError = 18137 hum = 18.5 shh01 = 74.5
+            //
+            return prev1 + (prev1 - prev2) * predictor / 4;
         }
-        void push(int32_t value) {
+        inline void push(int32_t value) {
             prev2 = prev1;
             prev1 = value;
         }
 
-        void doShift(const int* table, int index) {
+        inline void doShift(int index) {
             W12ASSERT(index >= 0 && index < 16);
+            W12ASSERT(table);
 
             int delta = abs(index - ZERO_INDEX); // 0 - 8
-            shift += table[delta];
-            if (shift < 0) shift = 0;
-            if (shift > SHIFT_LIMIT_4) shift = SHIFT_LIMIT_4;
+            shift = fastClamp(shift + table[delta], int32_t(0), SHIFT_LIMIT_4);
         }
     };
 
-    static int encode4(const int16_t* data, int32_t nSamples, uint8_t* compressed, State* state, const int* table);
+    static int encode4(const int16_t* data, int32_t nSamples, uint8_t* compressed, State* state);
     static void decode4(const uint8_t *compressed,
                         int32_t nSamples,
                         int32_t volume, // 256 is neutral; normally 0-256. Above 256 can boost & clip.
                         bool add,   // if true, add to the 'data' buffer, else write to it
-                        int32_t *samples, State *state, const int *table);
+                        int32_t *samples, State *state);
 
-    static const int* getTable(int i) {
+    static const int32_t* getTable(int i) {
         assert(i >= 0 && i < N_TABLES);
         return DELTA_TABLE_4[i];
     }
 
 private:
-    static const int SHIFT_LIMIT_4 = 14;
-    static const int VOLUME_EASING = 32;    // 8, 16, 32, 64? initial test on powerOn sound seemed 32 was good.
+    static const int32_t SHIFT_LIMIT_4 = 14;
+    static const int32_t VOLUME_EASING = 32;    // 8, 16, 32, 64? initial test on powerOn sound seemed 32 was good.
 
     inline static int32_t sat_mult(int32_t a, int32_t b)
     {
-        int64_t s64 = int64_t(a) * int64_t(b);
-        return (int32_t)std::min(std::max(s64, int64_t(INT32_MIN)), int64_t(INT32_MAX));
+        return (int32_t) fastClamp<int64_t>(int64_t(a) * int64_t(b), INT32_MIN, INT32_MAX);
     }
 
     inline static int32_t sat_add(int32_t x, int32_t y)
     {
+        // -O1
+        // compiler         fastClamp   bit hack
+        // ARM gcc 12.2     15          12
+        // RISC-V           9           11
+        // MSVC 64          12          18
+
         int32_t sum = (uint32_t)x + y;
         const static int32_t BIT_SHIFT = sizeof(int32_t) * 8 - 1;
         // This is a wonderfully clever way of saying:
@@ -151,6 +186,6 @@ private:
 
 public:
     static const int N_TABLES = 6;
-    static const int DELTA_TABLE_4[N_TABLES][TABLE_SIZE];
-    static const int STEP[16];
+    static const int32_t DELTA_TABLE_4[N_TABLES][TABLE_SIZE];
+    static const int32_t STEP[16];
 };

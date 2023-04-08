@@ -44,6 +44,7 @@ struct RGB {
         r = _r; g = _g; b = _b;
     }
     RGB(uint32_t c) { set(c); }
+    RGB& operator=(const RGB& rhs) = default;
 
     uint8_t r = 0;
     uint8_t g = 0;
@@ -52,6 +53,10 @@ struct RGB {
 	void set(uint8_t _r, uint8_t _g, uint8_t _b) {
 		r = _r; g = _g; b = _b;
 	}
+
+    void setWhite(uint8_t _w) {
+        r = g = b = _w;
+    }
 
 	void set(uint32_t c) {
 		r = (c & 0xff0000) >> 16;
@@ -76,11 +81,11 @@ struct RGB {
         b = (uint16_t(b) * s) >> 8;
     }
 
-	uint8_t operator[](const int index) const {
+	uint8_t operator[](int index) const {
 		return *(&r + index);
 	}
 
-    uint8_t& operator[](const int index) {
+    uint8_t& operator[](int index) {
         return *(&r + index);
     }
 
@@ -93,14 +98,6 @@ struct RGB {
 	}
 
     int size() const { return 3; } // number of components
-
-    static RGB lerp1024(const RGB& a, const RGB& b, int t1024) {
-        RGB r;
-        r.r = (a.r * (1024 - t1024) + b.r * t1024) / 1024;
-        r.g = (a.g * (1024 - t1024) + b.g * t1024) / 1024;
-        r.b = (a.b * (1024 - t1024) + b.b * t1024) / 1024;
-        return r;
-    }
 };
 
 struct RGBA {
@@ -117,6 +114,7 @@ struct RGBA {
 
     RGBA() {}
     RGBA(const RGBA& other) { r = other.r; g = other.g; b = other.b; a = other.a; }
+    RGBA(const RGB& other, uint8_t alpha) { r = other.r; g = other.g; b = other.b; a = alpha; }
     RGBA(uint32_t c) { set(c); }
     RGBA(int r, int g, int b, int a = 255) {
         this->r = r;
@@ -124,6 +122,7 @@ struct RGBA {
         this->b = b;
         this->a = a;
     }
+    RGBA& operator=(const RGBA& rhs) = default; 
 
     uint8_t r = 0;
     uint8_t g = 0;

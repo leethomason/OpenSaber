@@ -63,6 +63,7 @@ private:
         uint32_t addr = 0;
         uint32_t size = 0;
         int table = 0;
+        int32_t predictor = 2;
         bool loop = false;
 
         void clear() {

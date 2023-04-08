@@ -53,7 +53,7 @@ void DotStar::beginSW(uint8_t clockPin, uint8_t dataPin)
 	digitalWrite(m_clockPin, LOW);	
 }
 
-void DotStar::begin()
+void DotStar::begin() const
 {
     if (swMode()) {
     }
@@ -63,14 +63,27 @@ void DotStar::begin()
 }
 
 
-void DotStar::transfer(uint8_t data)
+void DotStar::transfer(uint8_t data) const
 {
     if (swMode()) swOut(data);
     else SPI.transfer(data);
 }
 
+void DotStar::transferColor(uint8_t r, uint8_t g, uint8_t b)const
+{
+    if (m_config == RBG) {
+        transfer(r);
+        transfer(b);
+        transfer(g);
+    }
+    else {
+        transfer(b);
+        transfer(g);
+        transfer(r);
+    }
+}
 
-void DotStar::end()
+void DotStar::end() const
 {
     if (swMode()) {
     }
@@ -80,7 +93,7 @@ void DotStar::end()
 }
 
 
-void DotStar::swOut(uint8_t n) 
+void DotStar::swOut(uint8_t n) const
 {
 	for(uint8_t i=8; i--; n <<= 1) {
     	if(n & 0x80) 
@@ -93,7 +106,7 @@ void DotStar::swOut(uint8_t n)
 	}
 }
 
-void DotStar::display(const osbr::RGB* led, int nLEDs, uint16_t brightness)
+void DotStar::display(const osbr::RGB* led, int nLEDs, uint16_t brightness) const
 {
     begin();
 	if (m_enable != 255)
@@ -115,9 +128,7 @@ void DotStar::display(const osbr::RGB* led, int nLEDs, uint16_t brightness)
         transfer(bright);
 
         // Color
-        transfer(led->b);
-        transfer(led->g);
-        transfer(led->r);
+        transferColor(led->r, led->g, led->b);
     }
 	
     // End frame.
@@ -131,7 +142,7 @@ void DotStar::display(const osbr::RGB* led, int nLEDs, uint16_t brightness)
 }
 
 
-void DotStar::display(const osbr::RGBA* led, int nLEDs)
+void DotStar::display(const osbr::RGBA* led, int nLEDs) const
 {
     begin();
 	if (m_enable != 255)
@@ -147,11 +158,7 @@ void DotStar::display(const osbr::RGBA* led, int nLEDs)
         // Brightness is 5 bits; 0-31 with high bits always set.
         uint8_t bright = (led->a >> 3) | 0xe0;
         transfer(bright);
-
-        // Color
-        transfer(led->b);
-        transfer(led->g);
-        transfer(led->r);
+        transferColor(led->r, led->g, led->b);
     }
 
 	// End frame.

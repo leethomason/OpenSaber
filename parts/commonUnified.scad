@@ -230,8 +230,8 @@ module dynamicHeatSinkHolder(diameter)
         translate([0, 0, -EPS]) 
             cylinder(
                 h=DZ + EPS*2, 
-                d1=D_HEAT_SINK_THREAD, 
-                d2=D_HEAT_SINK_THREAD + 0.2
+                d1=D_HEAT_SINK_THREAD + 0.2, 
+                d2=D_HEAT_SINK_THREAD + 0.4
             );
     }
 }
@@ -1105,8 +1105,7 @@ H_ADVANCED_THREAD   = 13.8; // larger to make threading easier
 H_RING              = 3.0;
 H_HEATSINK          = 0.5 + 0.890 * INCHES_TO_MM;
 D_ADVANCED_LED      = 20.000; // hole where the light shines.
-D_HEATSINK          = 25.6;
-
+D_HEATSINK          = 25.6 + 0.2;
 
 module emitterTeeth(d, delta=0, isCutout=false)
 {

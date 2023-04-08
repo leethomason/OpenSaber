@@ -25,14 +25,6 @@
 
 #include <stdint.h>
 
-/*
-	Duchess		4a		Testing
-	Clan-Test	2e		No
-	Clan-Tano	2e		No
-	Leia-PS		2e		No
-	Sisters		2e		No
-*/
-
 // --- Configuration ---
 // Note: Serial connection should be set to 19200 baud with a newline after commands.
 
@@ -83,7 +75,7 @@
 #define SABER_SUB_MODEL_B			13
 
 // ----------------------------------
-#define SERIAL_DEBUG 				1
+#define SERIAL_DEBUG 				0
 #define SABER_MODEL 				SABER_MODEL_KENOBI_IV2
 #define SABER_SUB_MODEL				SABER_SUB_MODEL_NONE
 // ----------------------------------
@@ -1116,18 +1108,19 @@
 	static const int VOLUME_3 = 128;
 	static const int VOLUME_4 = 255;
 #elif (SABER_MODEL == SABER_MODEL_KENOBI_IV2)
-	#define ID_STR "Cree RGB"
+	#define ID_STR "Kenobi IV-2 Cree RGB"
 
 	#define PCB_VERSION 				PCB_ITSY_4A			// actually 4c, but may not matter
 	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
 	#define SABER_VOLTMETER()			1			
-	#define SABER_UI_BRIGHTNESS			16	// max 256			
+	#define SABER_UI_BRIGHTNESS			8
 	#define ITSY_DOTSTAR_UI()			0
-	#define SABER_NUM_LEDS 			    4
+	#define SABER_DOTSTAR_CONFIG()		1	// RBG
+	#define SABER_NUM_LEDS 			    2
 	#define SABER_UI_START				0
-	#define SABER_UI_COUNT				4
+	#define SABER_UI_COUNT				2
 
-	#define VOLTMETER_TUNE				1059	// fixme
+	#define VOLTMETER_TUNE				1057
 	#define SABER_LOCK()				0
 
 	#define SWING_SAMPLES	12

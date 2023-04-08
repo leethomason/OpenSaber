@@ -37,7 +37,7 @@ if (DRAW_UNIFIED) {
                 emitterTeeth(D0);
 
             // Build up port:
-            S_PORT = 10.0;
+            S_PORT = 15.0;
             intersection() {
                 cylinder(h=1000, d=D0);
                 rotate([0, 0, ROT_PORT]) translate([-S_PORT/2, D0/2 - 4.8, M_PORT - S_PORT/2]) cube(size=[S_PORT, 10, S_PORT]);
@@ -49,7 +49,10 @@ if (DRAW_UNIFIED) {
         translate([0, 0, M_BOLT0]) rotate([-90, 0, 0]) cylinder(h=100, d=4.4);
         translate([0, 0, M_BOLT1]) rotate([-90, 0, 0]) cylinder(h=100, d=4.4);
         // Port
-        translate([0, 0, M_PORT]) rotate([-90, 0, ROT_PORT]) cylinder(h=100, d=D_PORT);
+        translate([0, 0, M_PORT]) rotate([-90, 0, ROT_PORT]) cylinder(h=100, d=D_PORT + 0.4);
+        // Port nut
+        translate([0, 0, M_PORT]) rotate([-90, 0, ROT_PORT]) translate([0, 0, D0/2-3]) cylinder(h=100, d=12.0);
+        
         // Installation for port:
         translate([0, 0, M_PORT]) rotate([90, 0, ROT_PORT]) cylinder(h=100, d=16.0 + 0.5);
 

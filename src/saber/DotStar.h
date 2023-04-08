@@ -30,27 +30,35 @@
 class DotStar
 {
 public:
+  enum {
+    BGR,  // The default and common case
+    RBG
+  };
+
 	DotStar();
 
 	void beginSPI(uint8_t enablePin);
 	void beginSW(uint8_t clockPin, uint8_t dataPin);
 
 	// Brightness is global; 0-256/255
-	void display(const osbr::RGB* leds, int nLEDs, uint16_t brightness);
+	void display(const osbr::RGB* leds, int nLEDs, uint16_t brightness) const;
 	// Brightness in the alpha channel.
-	void display(const osbr::RGBA* leds, int nLEDs);
+	void display(const osbr::RGBA* leds, int nLEDs) const;
 
 	bool swMode() const { return m_clockPin || m_dataPin; }
 	uint8_t swClockPin() const { return m_clockPin; }
 	uint8_t swDataPin() const { return m_dataPin; }
+  void setConfig(uint8_t config) { m_config = config; }
 
 private:
-	void swOut(uint8_t n);
+	void swOut(uint8_t n) const;
 
-    void begin();
-    void transfer(uint8_t data);
-    void end();
+	void begin() const;
+	void transfer(uint8_t data) const;
+	void transferColor(uint8_t r, uint8_t g, uint8_t b) const;
+	void end() const;
 
+    uint8_t   m_config = 0;
 	uint8_t 	m_enable = 0;
 	uint8_t		m_clockPin = 0;
 	uint8_t		m_dataPin = 0;
