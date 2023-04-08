@@ -409,7 +409,7 @@ void buttonAClickHandler(const Button&)
         // figured out a better option.
         if (uiMode.mode() == UIMode::NORMAL) {
             int power = UIRenderData::powerLevel(voltmeter.averagePower(), 4);
-            ledA.blink(I2SAudioDriver::stableSlowTime(), power, INDICATOR_CYCLE, 0, LEDManager::BLINK_TRAILING);
+            ledA.blink(I2SAudioDriver::stableSlowTime(), power, INDICATOR_CYCLE, 0, LEDManager::BLINK_LEADING);
         }
     }
     else if (bladeStateManager.state() == BladeState::kOn) {
