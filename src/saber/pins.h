@@ -76,7 +76,7 @@
 
 // ----------------------------------
 #define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_KENOBI_IV2
+#define SABER_MODEL 				SABER_MODEL_VADER
 #define SABER_SUB_MODEL				SABER_SUB_MODEL_NONE
 // ----------------------------------
 
@@ -1080,19 +1080,20 @@
 	#define SABER_VOLTMETER()			1			
 	#define SABER_UI_LED				SABER_LED_DOTSTAR
 	#define SABER_UI_BRIGHTNESS			128	// max 256			
-	#define ITSY_DOTSTAR_UI				1
-	#define SABER_NUM_LEDS 			    1
-	#define SABER_UI_START				0
-	#define SABER_UI_COUNT				1
+	#define ITSY_DOTSTAR_UI()				1
 
 	#define VOLTMETER_TUNE				1059	// fixme
 	#define SABER_LOCK()				0
 
 	#define SWING_SAMPLES	12
 
+	#define FILTER_MAG_X	10	// Not used (but needed to compile)
+	#define FILTER_MAG_Y	10	// Not used
+	#define FILTER_MAG_Z	10	// Not used
+
 	// Specified at 350mA, which is the conservative values.
 	static const int32_t RED_VF   = 2100;	// Photo Red
-	static const int32_t RED_I    = 450;	// fixme: worth powering up the red channel?
+	static const int32_t RED_I    = 400;	// fixme: worth powering up the red channel?
 	static const int32_t RED_R    = 2350;
 
 	static const int32_t GREEN_VF = 3200;
