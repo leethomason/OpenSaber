@@ -26,9 +26,6 @@ def ring(inner, outer, height, stock, mat, g, maker):
         g.move(z=drop)
         hole(g, mat, -height - TRIM, d=inner, offset="inside", fill=False)
 
-    g.move(z=drop)
-    hole(g, mat, -height - TRIM, d=outer, offset="outside", fill=False)
-
     if maker:
         g.move(z=0)
         STEP = 20
@@ -38,6 +35,9 @@ def ring(inner, outer, height, stock, mat, g, maker):
             g.move(x=R * math.cos(r), y=R * math.sin(r))
             g.move(z=drop)
             drill(g, mat,-0.5)
+
+    g.move(z=drop)
+    hole(g, mat, -height - TRIM, d=outer, offset="outside", fill=False)
 
     g.move(z=15)
 

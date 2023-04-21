@@ -10,10 +10,13 @@ from drill import drill
 
 L_0805 = 2.0
 W_0805 = 1.5
-W_AND = 4.0     # FIXME
-H_AND = 3.0     # FIXME
-W_MOSFET = 5.0  # FIXME
-H_MOSFET = 3.0  # FIXME
+W_AND = 4.0
+H_AND = 3.0
+W_MOSFET = 3.5
+H_MOSFET = 2.0
+
+X_TRIM = 0.1
+Y_TRIM = 0.1
 
 comp = [
     {"name": "amp10u", "x": 4.76, "y": 12.7, "dx": L_0805, "dy": W_0805 },
@@ -94,7 +97,7 @@ nomad_header(g, mat, CNC_TRAVEL_Z)
 g.absolute()
 
 for c in comp:
-    cutComp(g, mat, DEPTH, c["x"], c["y"], c["dx"], c["dy"])
+    cutComp(g, mat, DEPTH, c["x"], c["y"], c["dx"] + X_TRIM, c["dy"] + Y_TRIM)
 
 for d in drillHoles:
     travel(g, mat, x=d["x"], y=d["y"])    
