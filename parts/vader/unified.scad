@@ -11,8 +11,8 @@ JOINT = 8;
 D_PORT =  7.9;
 EPS = 0.01;
 
-DRAW_UNIFIED = true;
-DRAW_EMITTER = false;
+DRAW_UNIFIED = false;
+DRAW_EMITTER = true;
 
 module flatBottom()
 {
@@ -89,7 +89,7 @@ if (DRAW_EMITTER) {
 
     difference() {
         translate([0, 0, M_HEATSINK]) tube(h=DZ_HEATSINK_CASE, do=D0, di=D_HEATSINK_CASE);
-        translate([0, 0, M_HEATSINK - EPS]) emitterTeeth(D0, 0.2, true);
+        translate([0, 0, M_HEATSINK - EPS]) emitterTeeth(D0, 0.4, true);
 
         Z0 = 5.0;
         Z1 = 14.0;

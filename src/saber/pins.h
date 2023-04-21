@@ -1082,7 +1082,7 @@
 	#define SABER_UI_BRIGHTNESS			128	// max 256			
 	#define ITSY_DOTSTAR_UI()				1
 
-	#define VOLTMETER_TUNE				1059	// fixme
+	#define VOLTMETER_TUNE				1059
 	#define SABER_LOCK()				0
 
 	#define SWING_SAMPLES	12
@@ -1093,14 +1093,14 @@
 
 	// Specified at 350mA, which is the conservative values.
 	static const int32_t RED_VF   = 2100;	// Photo Red
-	static const int32_t RED_I    = 400;	// fixme: worth powering up the red channel?
+	static const int32_t RED_I    = 400;	
 	static const int32_t RED_R    = 2350;
 
 	static const int32_t GREEN_VF = 3200;
 	static const int32_t GREEN_I  = 400;
 	static const int32_t GREEN_R  = 1000;
 
-	static const int32_t BLUE_VF  = 3100;
+	static const int32_t BLUE_VF  = 3100;	// Royal Blue
 	static const int32_t BLUE_I   = 400;
 	static const int32_t BLUE_R   = 1350;
 
