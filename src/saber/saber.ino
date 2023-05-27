@@ -70,10 +70,6 @@ using namespace osbr;
 static const uint32_t INDICATOR_CYCLE         = 1000;
 static const uint32_t IMPACT_MIN_TIME         =  600;   // was 1000
 
-uint32_t lastImpactTime = 0;
-uint32_t lastLoopTime   = 0;
-bool colorWasProcessed = false;
-
 Nada_FlashTransport_SPI flashTransport(SS1, &SPI1);
 Nada_SPIFlash spiFlash(&flashTransport);
 Adafruit_ZeroDMA dma;
@@ -98,7 +94,6 @@ BladePWM    bladePWM;
 Tester      tester;
 bool        lockOn = false;
 LockTimer   lockTimer;
-bool        stillReset = false;
 
 #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LSM303
 Swing       swing;
@@ -117,15 +112,6 @@ DotStarUI oneDotstarUI(lockSupported);
 #endif
 
 ACCELEROMETER accelMag(PIN_ACCEL_EN);
-
-#if SABER_DISPLAY == SABER_DISPLAY_128_32
-static const int DISPLAY_TIMER = 23;
-#else
-static const int DISPLAY_TIMER = 67;
-#endif
-
-Timer2 vbatPrintTimer(1217);
-Timer2 audioPrintTimer(2000);
 
 #if SABER_DISPLAY == SABER_DISPLAY_128_32
 static const int OLED_WIDTH = 128;
@@ -302,10 +288,7 @@ void setup()
 
 #if ITSY_DOTSTAR_UI()
     {
-        //osbr::RGBA led = 0;
         oneDotstar.beginSW(40, 41);
-        //delay(2);
-        //oneDotstar.display(&led, 1);
         Log.p("Itsy dotstar initialized.").eol();
     }
 #   endif
@@ -323,7 +306,6 @@ void setup()
     ledA.set(true); // "power on" light
 
     buttonA.setHoldRepeats(true);  // everything repeats!!
-    lastLoopTime = millis();    // so we don't get a big jump on the first loop()
 
     Log.p("Setup() done.").eol();
 }
@@ -341,9 +323,6 @@ void changePalette(int index)
     const SaberDB::Palette *palette = saberDB.getPalette();
 
     sfx.setFont(saberDB.soundFont());
-    //for(int i=0; i<SaberDB::Palette::NAUDIO; ++i) {
-    //    sfx.setBoost(palette->channelBoost[i], i);
-    //}
     bladeColor.setBladeColor(palette->bladeColor);
     bladeColor.setImpactColor(palette->impactColor);
 }
@@ -363,7 +342,7 @@ bool setPaletteFromHoldCount(int count)
 bool setVolumeFromHoldCount(int count)
 {
     sfx.setVolume(SaberDB::toVolume256(count - 1));
-    return count >= 0 && count <= 5;
+    return count >= 0 && count <= NUM_VOLUMES + 1;
 }
 
 bool setLockFromHoldCount(int count)
@@ -404,11 +383,9 @@ void buttonAClickHandler(const Button&)
         uiMode.nextMode();
         // Turn off blinking so we aren't in a weird state when we change modes.
         ledA.blink(I2SAudioDriver::stableSlowTime(), 0, 0, 0);
-        // Not the best indication: show power if
-        // the modes are cycled. But haven't yet
-        // figured out a better option.
+        // Blink the power level
         if (uiMode.mode() == UIMode::NORMAL) {
-            int power = UIRenderData::powerLevel(voltmeter.averagePower(), 4);
+            int power = UIRenderData::powerLevel(voltmeter.averagePower(), NUM_VOLUMES);
             ledA.blink(I2SAudioDriver::stableSlowTime(), power, INDICATOR_CYCLE, 0, LEDManager::BLINK_LEADING);
         }
     }
@@ -436,7 +413,6 @@ void buttonAHoldHandler(const Button& button)
     if (bladeStateManager.isOff()) {
         bool buttonLEDOn = false;
         int cycle = button.cycle(&buttonLEDOn);
-        //Log.p("button nHolds=").p(button.nHolds()).p(" cycle=").p(cycle).p(" on=").p(buttonOn).eol();
 
         if (uiMode.mode() == UIMode::NORMAL) {
             if (button.nHolds() == 1) {
@@ -454,12 +430,10 @@ void buttonAHoldHandler(const Button& button)
                     if (!setVolumeFromHoldCount(cycle))
                         buttonLEDOn = false;
                 }
-#if SABER_LOCK()
                 else if (uiMode.mode() == UIMode::LOCK) {
                     if (!setLockFromHoldCount(cycle))
                         buttonLEDOn = false;
                 }
-#endif
             }
         }
         ledA.set(buttonLEDOn);
@@ -483,15 +457,8 @@ void processSerial()
     }
 }
 
-void processAccel(uint32_t msec, uint32_t)
+void processMagnetometer()
 {
-    static ProfileData profData("processAccel");
-    ProfileBlock block(&profData);
-
-    // Consistently process the accelerometer queue, even if we don't use the values.
-    // Also look for stalls and hitches.
-    accelMag.flushAccel(4);
-
 #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LSM303
     Vec3<int32_t> magData;
     // readMag() should only return >0 if there is new data from the hardware.
@@ -540,15 +507,24 @@ void processAccel(uint32_t msec, uint32_t)
 #endif        
     }
 #endif
+}
+
+void processAccel(uint32_t msec)
+{
+    static ProfileData profData("processAccel");
+    ProfileBlock block(&profData);
+    static uint32_t lastImpactTime = 0;
+
+    // Consistently process the accelerometer queue, even if we don't use the values.
+    // Also look for stalls and hitches.
+    accelMag.flushAccel(4);
+
+    processMagnetometer();
 
     Vec3<Fixed115> accelData;
     Vec3<int32_t> gyroData;
 
-#if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LSM6D
     while(accelMag.sampleAccel(&accelData, &gyroData))
-#else
-    while(accelMag.sampleAccel(&accelData))
-#endif
     {
 #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LSM6D
         {
@@ -600,23 +576,6 @@ void processAccel(uint32_t msec, uint32_t)
             static constexpr Fixed115 motion{DEFAULT_G_FORCE_MOTION};
             static constexpr Fixed115 impact2{DEFAULT_G_FORCE_IMPACT * DEFAULT_G_FORCE_IMPACT};
 
-            // This workaround no longer makes sense with smoothswing,
-            // and the much more compressed storage.
-            //
-            // The extra check here for the motion time is because some
-            // motion loops are tacked on to the beginning of the idle
-            // loop...which makes sense. (Sortof). But leads to super-long
-            // motion. So if time is above a thresh31old, allow replay.
-            // Actual motion / impact sounds are usually less that 1 second.
-            // TODO this needs a different workaround.
-
-            //#ifdef SABER_SOUND_ON
-            //            bool sfxOverDue = ((msec - lastMotionTime) > 1500) &&
-            //                              ((sfx.lastSFX() == SFX_MOTION) || (sfx.lastSFX() == SFX_IMPACT));
-            //#else
-            //            bool sfxOverDue = false;
-            //#endif
-
             if ((g2Normal >= impact2))
             {
                 // Always flash the blade. Maybe play impact sounds.
@@ -631,8 +590,7 @@ void processAccel(uint32_t msec, uint32_t)
                     else
                         sound = sfx.playSound(SFX_IMPACT, SFX_GREATER_OR_EQUAL);
 
-                    if (sound)
-                    {
+                    if (sound) {
                         Log.p("Impact. g=").p(sqrt(g2)).eol();
                         lastImpactTime = msec;
                     }
@@ -652,7 +610,7 @@ void processAccel(uint32_t msec, uint32_t)
 void loop() {
     static ProfileData data("loop");
     ProfileBlock block(&data);
-    //static uint32_t lastPrintTime = 0;
+    static uint32_t lastLoopTime = 0;
 
     // processSerial() doesn't seem to get called on M0 / ItsyBitsy. 
     // Not sure why.
@@ -662,6 +620,10 @@ void loop() {
 
     const uint32_t msec = millis();
     const uint32_t msecStable = I2SAudioDriver::stableSlowTime();
+
+    if (lastLoopTime == 0) {
+        lastLoopTime = msec - 1;
+    }
     uint32_t delta = msec - lastLoopTime;
     lastLoopTime = msec;
 
@@ -689,7 +651,7 @@ void loop() {
     ledA.process(I2SAudioDriver::stableSlowTime());
 #endif
 
-    processAccel(msec, delta);
+    processAccel(msec);
 
     {
         static uint32_t lastMsecStable = 0;
@@ -706,7 +668,7 @@ void loop() {
         }
     }
 
-    stillReset = sfx.process(bladeStateManager.state(), delta);
+    bool stillReset = sfx.process(bladeStateManager.state(), delta);
     if (stillReset) {
         #if SABER_ACCELEROMETER == SABER_ACCELEROMETER_LSM303
         accelMag.recalibrateMag();
@@ -717,13 +679,6 @@ void loop() {
     // Timing / skip is in the voltmeter class.
     voltmeter.takeSample(msecStable);
     bladePWM.setVoltage(voltmeter.averagePower());
-    
-    #ifdef PROFILE
-    if (vbatPrintTimer.tick(delta)) {
-        Log.p(" ave power=").p(voltmeter.averagePower()).eol();
-        DumpProfile();
-    }
-    #endif    
     loopDisplays(msecStable);
 }
 

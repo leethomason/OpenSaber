@@ -31,6 +31,7 @@
 class Manifest;
 
 static constexpr int NUM_PALETTES = 8;
+static constexpr int NUM_VOLUMES = 4;
 
 class SaberDB
 {

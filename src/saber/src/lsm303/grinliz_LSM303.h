@@ -41,7 +41,7 @@ public:
     void flushAccel(int reserve);
 
     bool sampleAccel(Fixed115* x, Fixed115* y, Fixed115* z);
-    bool sampleAccel(Vec3<Fixed115>* v) {
+    bool sampleAccel(Vec3<Fixed115>* v, Vec3<int32_t>* /*gyro*/) {
         return sampleAccel(&v->x, &v->y, &v->z);
     }
 

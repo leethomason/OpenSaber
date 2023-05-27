@@ -441,7 +441,7 @@ void GrinlizLSM303::log(int nSamples)
 
     Vec3<Fixed115> data[N];
     while(n < nSamples) {
-        if(sampleAccel(data + n))
+        if(sampleAccel(data + n, 0))
             n++;
     }
     float samplesPerSecond = nSamples * 1000.0f / (millis() - start);

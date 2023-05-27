@@ -75,9 +75,9 @@
 #define SABER_SUB_MODEL_B			13
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_VADER
-#define SABER_SUB_MODEL				SABER_SUB_MODEL_NONE
+#define SERIAL_DEBUG 				1
+#define SABER_MODEL 				SABER_MODEL_CLAN
+#define SABER_SUB_MODEL				SABER_SUB_MODEL_PROPHECY_1
 // ----------------------------------
 
 #define SABER_SOUND_SD 				1	// external memory card
@@ -860,12 +860,12 @@
 #elif (SABER_MODEL == SABER_MODEL_CLAN)
 	#define PCB_VERSION 				PCB_ITSY_2E
 	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
+	#define SABER_DOTSTAR_CONFIG()		0	// BGR
 	#define SABER_VOLTMETER()			1			
-	#define SABER_LOCK()				0
 	
 	#define SABER_UI_LED				SABER_LED_DOTSTAR
 	#define SABER_UI_BRIGHTNESS			128	// max 256			
-	#define ITSY_DOTSTAR_UI				1
+	#define ITSY_DOTSTAR_UI()			1
 	#define SABER_NUM_LEDS 			    1
 	#define SABER_UI_START				0
 	#define SABER_UI_COUNT				1
@@ -904,6 +904,7 @@
 	#define FILTER_MAG_X	20
 	#define FILTER_MAG_Y	20
 	#define FILTER_MAG_Z	20
+	#define SWING_SAMPLES	12
 	#define VOLTMETER_TUNE				1033
 	#define SABER_LOCK()	1
 #	elif SABER_SUB_MODEL == SABER_SUB_MODEL_PROPHECY_2
