@@ -129,7 +129,6 @@ module zCapsule(dz0, dz1, r, roundedRect=0)
 	}
 }
 
-
 module xRoofCube(size)
 {
 	x = size[0];
@@ -142,4 +141,21 @@ module xRoofCube(size)
 		[x, y + x],		// gets the 45 degree angle for printing
 		[0, y]
 	]);
+}
+
+module tubeTriTop(h, do, di, theta=50) {
+	tube(h=h, di=di, do=do);
+	intersection() {
+		cylinder(h=h, d=do);
+		a = di / 2;
+		b = a / tan(theta);
+		union() {
+			polygonXY(h=h, points=[
+				[0, a], [a, a], [a, a - b]
+			]);
+			mirror([-1, 0, 0]) polygonXY(h=h, points=[
+				[0, a], [a, a], [a, a - b]
+			]);
+		}
+	}
 }

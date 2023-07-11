@@ -3,7 +3,7 @@
 void SevenSeg::set(const char* str)
 {
     static constexpr int NLETTERS = 75;
-    static const uint8_t sevenSecABC[NLETTERS]= {
+    static constexpr uint8_t sevenSecABC[NLETTERS]= {
     /*  0     1     2     3     4     5     6     7     8     9     :     ;     */
         0x7E, 0x30, 0x6D, 0x79, 0x33, 0x5B, 0x5F, 0x70, 0x7F, 0x7B, 0x00, 0x00, 
     /*  <     =     >     ?     @     A     B     C     D     E     F     G     */
@@ -21,7 +21,7 @@ void SevenSeg::set(const char* str)
     };
 
     // Somewhat mind melting.
-    //      Bubble
+    //      Bubble  PCB
     // a1   g       (1 << 0)
     // a2   d       (1 << 1)
     // a3   f       (1 << 2)
@@ -38,18 +38,18 @@ void SevenSeg::set(const char* str)
     // b7
 
     static constexpr uint16_t abcToBubble[8] = {
-        (1<<0),
-        (1<<2),
-        (1<<9),
-        (1<<1),
-        (1<<10),
-        (1<<4),
-        (1<<5),
+        (1<<0),     // g
+        (1<<2),     // f
+        (1<<9),     // e
+        (1<<1),     // d    
+        (1<<10),    // c
+        (1<<4),     // b
+        (1<<5),     // a
     };
 
     for(int i=0; i<4; i++) {
         m_value[i] = 0;
-        uint8_t ascii = str[i] > 90 ? str[i] - 32 : str[i];
+        uint8_t ascii = str[i];
         if (ascii < 48 || ascii > 122) {
             continue;
         }
@@ -65,18 +65,23 @@ void SevenSeg::set(const char* str)
 
 void SevenSeg::loop(uint32_t now)
 {
-    static constexpr uint32_t DIV = 11;
+    static constexpr uint32_t DIV = 3;      // <10, odd, prime?. Need to find good value in "full code"
     uint32_t cycle = now / DIV;
-    uint32_t index = cycle % 4;
+    uint32_t index = cycle % 4; 
+
     uint32_t value = m_value[index];
 
-    static const uint16_t digit[4] = {
-        (1<<8),
-        (1<<3),
-        (1<<11),
-        (1<<13),
-    };
+    if (m_dp == index) {
+        value |= (1 << 12);
+    }
 
-    value |= digit[index];
-    m_reg.set(value);
+    static constexpr uint16_t C1 = (1 << 8);
+    static constexpr uint16_t C2 = (1 << 3);
+    static constexpr uint16_t C3 = (1 << 11);
+    static constexpr uint16_t C4 = (1 << 13);
+
+    uint16_t mask = C1 | C2 | C3 | C4;
+    static const uint16_t digit[4] = { C1, C2, C3, C4 };
+    mask &= ~digit[index];  // The digit selector is low.
+    m_reg.set(value | mask);
 }

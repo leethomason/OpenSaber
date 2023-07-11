@@ -407,172 +407,6 @@ module baffleHalfBridge(dz, t)
 X_BRIDGE = X_MC/2+1;
 T_BRIDGE = 1.6;
 
-module oneBaffleBottonRail(d, dz) 
-{
-    yMC = -yAtX(X_MC/2, d/2) + 0.5;
-
-    Y = 12.0;
-    
-    intersection() {
-        translate([0, 0, -EPS]) cylinder(h=dz*2 + EPS2, d=d);
-        union() {
-            translate([TROUGH_2 / 2, yMC - 10, -EPS])
-                cube(size=[20, Y, dz*2 + EPS]);
-            translate([X_MC / 2, yMC - 10, -EPS])
-                cube(size=[20, Y, dz*2 + EPS]);
-        }
-    }    
-}
-
-module bridgeAndRail(bridge, d, dz, bottomRail=true, bridgeOnlyBottom=false)
-{
-
-    if (bridge > 0) {
-        if (bridge == 1) 
-        {
-            yBridge = yAtX(X_BRIDGE+T_BRIDGE, d/2);
-
-            translate([X_BRIDGE, -yBridge, dz]) 
-                baffleHalfBridge(dz, T_BRIDGE);        
-            mirror([1, 0, 0]) translate([X_BRIDGE, -yBridge, dz]) 
-                baffleHalfBridge(dz, T_BRIDGE);
-            if (!bridgeOnlyBottom) {
-                translate([X_BRIDGE, yBridge - dz*2, dz]) 
-                    baffleHalfBridge(dz, T_BRIDGE);        
-                mirror([1, 0, 0]) translate([X_BRIDGE, yBridge - dz*2, dz]) 
-                    baffleHalfBridge(dz, T_BRIDGE);
-            }
-        }
-        else {
-            translate([0, 0, dz]) {
-                if (bridge == 2)
-                    bridge2(d, dz);
-                else if (bridge == 3)
-                    bridge3(d, dz);
-                else if (bridge == 4)
-                    bridge4(d, dz);
-                else if (bridge == 5)
-                    bridge5(d, dz);
-            }
-        }
-        if (bottomRail) {
-            oneBaffleBottonRail(d, dz);
-            mirror([1,0,0]) oneBaffleBottonRail(d, dz);
-        }
-    }
-}
-
-TROUGH_0 = 12;  // top
-TROUGH_1 = 10;  // between battery & mc
-TROUGH_2 = 13;  // bottom opening
-
-module oneBaffle(   d,
-                    dz,
-                    battery=true,       // space for the battery
-                    mc=true,            // space for the microcontroller
-                    bridge=1,           // create a bridge to the next baffle. designed to print w/o support material. 
-                    bridgeOnlyBottom=false, // constrain the type1 bridge to the bottom part
-                    dExtra=0,           // additional diameter
-                    scallop=false,      // outside curves
-                    noBottom=true,      // bottom cutout 
-                    cutoutHigh=true,    // open space to the top
-                    bottomRail=true,    // bridge must be >0 for a bottom rail
-                    conduit=false,
-                    slopeFront=false,
-                    mcFullDrop=false,
-                    batteryOffset=0
-                    )     
-{
-    yMC = -yAtX(X_MC/2, d/2) + 1.0;
-
-    difference() {
-        union() {
-            if (slopeFront) {
-                OVERLAP = 0.8;
-                REDUCE = 1;
-
-                cylinder(h=dz - OVERLAP, d=d + dExtra);
-                translate([0, 0, dz-OVERLAP])
-                    cylinder(h=OVERLAP, d1=d + dExtra, 
-                            d2=d + dExtra - 1);
-            }
-            else {
-                cylinder(h=dz, d=d + dExtra);
-            }
-            E = 0.02;
-            bridgeAndRail(bridge, d, dz + E*2, bottomRail=bottomRail, bridgeOnlyBottom=bridgeOnlyBottom);
-        }
-
-        if (battery) {
-            translate([0, -batteryOffset, -EPS]) battery(d);
-        }
-        translate([-TROUGH_1/2, -5, -EPS]) 
-            cube(size=[TROUGH_1, 5, dz + EPS2]);
-
-        if (mc) {
-            translate([0, yMC, -EPS]) 
-                mc();
-        }
-        if (mcFullDrop) {
-            translate([-X_MC/2, yMC-20, -EPS])
-                cube(size=[X_MC, 20, dz+EPS2]);
-        }
-
-        if (scallop) {
-            TUNE_X = 1.2;
-            TUNE_D = 1.6;
-
-            translate([d*TUNE_X, 0, -EPS]) 
-                cylinder(h=dz + EPS2, d=d * TUNE_D);
-            mirror([1,0,0])
-                translate([d*TUNE_X, 0, -EPS]) 
-                    cylinder(h=dz + EPS2, d=d * TUNE_D);
-        }
-
-        if (cutoutHigh) {
-            translate([-TROUGH_0/2, 0, -EPS]) 
-                cube(size=[TROUGH_0, 30, dz + EPS2]);
-        }
-
-        if (noBottom) {
-            translate([-TROUGH_2/2, -20, -EPS])
-                cube(size=[TROUGH_2, 15, dz + EPS2]);
-        }
-
-        if (conduit) {
-            // Easy wiring, stops battery
-            translate([0, 0, -EPS]) {
-                hull() {
-                    //translate([0, d*0.00, 0]) 
-                    //    cylinder(h=dz+EPS2, d = d * 0.6);
-                    translate([0, -d*0.1, 0]) 
-                        cylinder(h=dz+EPS2, d = d * 0.6);
-                }
-                translate([-TROUGH_0/2, 0]) 
-                    cube(size=[TROUGH_0, 30, dz + EPS2]);
-            }
-        }
-        
-        if (isSmall(d)) {
-            SMALL_X = 19.0;
-            // MC held in by case; requires insulation.
-            // Assumes everything is packed in tight. :(
-            // Clear out the bottom:
-            translate([-SMALL_X/2, -20, -EPS])
-                cube(size=[SMALL_X, 20, dz*2 + EPS2]);
-
-            // Trim the bottom.
-            // translate([-50, -d/2, 2]) cube(size=[100, 2, dz*2 + EPS2]);
-
-            // And extra opening on top:
-            W = 13.0;
-            translate([-W/2, 0, -EPS])
-                cube(size=[W, 20, dz*2 + EPS2]);
-        }
-    }
-}
-
-
 // Resuable parts -----------------------------------
 /*
     type = 
@@ -694,60 +528,13 @@ module powerPortRing(diameter, t, dz, dzToPort, portSupportToBack=false, counter
     }
 }
 
-
-module boltRingNoShell(dy_port, bolt_d=0, nut_w=0, nut_y=0)
-{
-    BOLT_D = bolt_d > 0 ? bolt_d : 4.5;
-    NUT_W  = nut_w > 0  ? nut_w  : 8.6;
-    NUT_Y  = nut_y > 0  ? nut_y  : 3.4;
-    DZ_BRIDGE = 8.0;
-    DZ_SLOT = 2.0;
-    
-    H_THREAD = 5.5;
-    D_THREAD = 7.8;
-
-    TRI = [[-50, 0], [0, 0], [-50, -50]];
-
-    difference() {
-        union() {
-            // Top of the holder aligns witht the port, so the nut can be slid in.
-            translate([-50, dy_port, -DZ_BRIDGE/2]) cube(size=[100, 100, DZ_BRIDGE]);                    
-        }
-
-        rotate([-90, 0, 0]) cylinder(h=100, d=BOLT_D);
-        translate([-NUT_W/2, 0, DZ_SLOT/2]) cube(size=[NUT_W, 100, DZ_SLOT]);
-    }
-    // Side blocks
-    {
-        translate([-50, dy_port - NUT_Y, -DZ_BRIDGE/2]) 
-            cube(size=[50 - NUT_W/2, NUT_Y, DZ_BRIDGE]);
-        translate([-NUT_W/2, dy_port - NUT_Y, -DZ_BRIDGE/2]) 
-            polygonXY(h=DZ_BRIDGE, points=TRI);
-    }
-    mirror([-1, 0, 0]) {
-        translate([-50, dy_port - NUT_Y,  -DZ_BRIDGE/2]) 
-            cube(size=[50 - NUT_W/2, NUT_Y, DZ_BRIDGE]);
-        translate([-NUT_W/2, dy_port - NUT_Y, -DZ_BRIDGE/2]) 
-            polygonXY(h=DZ_BRIDGE, points=TRI);
-    }
-    
-    // Triangle holders
-    translate([-BOLT_D/2, dy_port - NUT_Y, -DZ_SLOT/2]) {
-        polygonXY(h=DZ_SLOT, points=TRI);
-    }
-    mirror([-1, 0, 0]) translate([-BOLT_D/2, dy_port - NUT_Y, -DZ_SLOT/2]) {
-        polygonXY(h=DZ_SLOT, points=TRI);
-    }
-}
-
-
 module boltRing(diameter, t, dz, dzToBolt, bolt_d=0, nut_w=0, nut_y=0, dy_port=0)
 {
     BOLT_D = bolt_d > 0 ? bolt_d : 4.5;
     NUT_W  = nut_w > 0  ? nut_w  : 8.6;
     NUT_Y  = nut_y > 0  ? nut_y  : 3.4;
     DZ_BRIDGE = 8.0;
-    DZ_SLOT = 2.0;
+    DZ_SLOT = 2.5;
     
     H_THREAD = 5.5;
     D_THREAD = 7.8;
@@ -765,7 +552,7 @@ module boltRing(diameter, t, dz, dzToBolt, bolt_d=0, nut_w=0, nut_y=0, dy_port=0
         union() {
             difference() {
                 union() {
-                    tube(h=dz, do=diameter, di=diameter - t);
+                    tubeTriTop(h=dz, do=diameter, di=diameter - t);
                     // Top of the holder aligns witht the port, so the nut can be slid in.
                     translate([-50, DY_PORT, dzToBolt - DZ_BRIDGE/2]) cube(size=[100, 100, DZ_BRIDGE]);                    
                 }
@@ -850,32 +637,19 @@ module tactileRing(diameter, t, dz, dzToTactile, hasPinIgnition, dyToPlateBase=0
             cylinder(h=100, d=diameter);
             union() {
                 difference() {
-                    tube(h=dz, do=diameter, di=diameter - t);
-                    translate([-W/2, 0, 0]) cube(size=[W, 100, 100]);
+                    tubeTriTop(h=dz, do=diameter, di=diameter - t);
+                    translate([-W/2, 0, -EPS]) cube(size=[W, 100, 100]);
                 }
                 translate([0, 0, dzToTactile]) {
                     simpleBridge(diameter, DY, 1.0, TACTILE_X, addWidth=TACTILE_X, flatFill=false);
                 }
                 translate([0, 0, dzToTactile - TACTILE_X/2]) {
-                    W = 16.0;
+                    W = 14.0;
                     difference() {
                         translate([-W/2, DY, 0]) cube(size=[W, 4.0, TACTILE_X]);
-                        translate([-TACTILE_X/2, DY, 0]) cube(size=[TACTILE_X, 20, TACTILE_X + EPS]);
+                        translate([-TACTILE_X/2, DY, -EPS]) cube(size=[TACTILE_X, 20, 100]);
                     }
                 }
-            }
-        }
-        H = 6;
-        Z0 = dzToTactile - TACTILE_X/2;
-        Z1 = dz - (dzToTactile + TACTILE_X/2);
-        if (Z0 > 2.0 && Z1 > 1.0) {
-            hull() {            
-                translate([-50, -H + Z0/2, Z0/2]) rotate([0, 90, 0]) cylinder(h=100, d=Z0);
-                translate([-50, H - Z0/2, Z0/2]) rotate([0, 90, 0]) cylinder(h=100, d=Z0);
-            }
-            hull() {            
-                translate([-50, -H + Z1/2, dz - Z1/2]) rotate([0, 90, 0]) cylinder(h=100, d=Z1);
-                translate([-50, 0, dz - Z1/2]) rotate([0, 90, 0]) cylinder(h=100, d=Z1);
             }
         }
     }
@@ -952,7 +726,9 @@ module baffleVent(dz, toBottom=false)
     Narrowing the bottom through_2 didn't really help. There's just not 
     much holding it to the bed. 
 */
-module baffleMCBattery2(d, nBaffles, dz) 
+module baffleMCBattery2(d, nBaffles, dz, 
+        fullBatteryCase=false   // If true, the battery will be fully enclosed
+    ) 
 {
     slices = nBaffles * 2 - 1;
     dzSlice = dz / slices;
@@ -963,6 +739,9 @@ module baffleMCBattery2(d, nBaffles, dz)
     OFF0 = 1;
     OFF1 = 18;
     MC_BASE =  d/2 - D_BATTERY - Y_MC;
+    TROUGH_0 = 12;  // top
+    TROUGH_1 = 10;  // between battery & mc
+    TROUGH_2 = 13;  // bottom opening
 
     difference() {
         cylinder(h=dz, d=d);
@@ -970,14 +749,17 @@ module baffleMCBattery2(d, nBaffles, dz)
         hull() {
             translate([0, d/2 - D_BATTERY/2, -EPS])
                 cylinder(h=LONG, d=D_BATTERY);
-            translate([0, 50, -EPS])
-                cylinder(h=LONG, d=D_BATTERY);
+            if (!fullBatteryCase) {
+                translate([0, 50, -EPS])
+                    cylinder(h=LONG, d=D_BATTERY);
+            }
         }
         translate([-X_MC/2, MC_BASE, -EPS])
             cube(size=[X_MC, Y_MC, LONG]);
 
         // Top
-        translate([-TROUGH_0/2, 5, -EPS]) cube(size=[TROUGH_0, 20, LONG]);
+        if (!fullBatteryCase)
+            translate([-TROUGH_0/2, 5, -EPS]) cube(size=[TROUGH_0, 20, LONG]);
         // Middle
         translate([-TROUGH_1/2, -5, -EPS]) cube(size=[TROUGH_1, 10, LONG]);
         // Bottom
@@ -987,7 +769,6 @@ module baffleMCBattery2(d, nBaffles, dz)
         for(i=[0:nBaffles-1]) {
             translate([0, 0, dzSlice + i * 2 * dzSlice]) {
                 tube(h=dzSlice, di=d - OFF0, do=D);  // outside
-                //cylinder(h=dzSlice, d=d - OFF1);
             }
         }
 
@@ -1267,17 +1048,16 @@ module forwardAdvanced(d, dz,
 
 
 $fn = 40;
-*oneBaffle(30, 4, 
-    battery=false,
-    mc=false,
-    bridge=1,
-    noBottom=false,
-    cutoutHigh=false,
-    conduit=true);
+
+// tactileRing(30.0, 4.0, 16.0, 8.0);
 
 *keyJoint(8, 30, 26, false);
 
 *boltRing(30.0, 4.0, 12.0, 6.0);
+
+tactileRing(30.0, 4.0, 14.0, 7.0);
+
+*tubeTriTop(h=10.0, do=30.0, di=26.0);
 
 *baffleMCBattery( 32,    // outer diameter 
                   12,    // number of baffles 
