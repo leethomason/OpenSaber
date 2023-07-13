@@ -726,9 +726,7 @@ module baffleVent(dz, toBottom=false)
     Narrowing the bottom through_2 didn't really help. There's just not 
     much holding it to the bed. 
 */
-module baffleMCBattery2(d, nBaffles, dz, 
-        fullBatteryCase=false   // If true, the battery will be fully enclosed
-    ) 
+module baffleMCBattery2(d, nBaffles, dz) 
 {
     slices = nBaffles * 2 - 1;
     dzSlice = dz / slices;
@@ -747,19 +745,14 @@ module baffleMCBattery2(d, nBaffles, dz,
         cylinder(h=dz, d=d);
 
         hull() {
-            translate([0, d/2 - D_BATTERY/2, -EPS])
-                cylinder(h=LONG, d=D_BATTERY);
-            if (!fullBatteryCase) {
-                translate([0, 50, -EPS])
-                    cylinder(h=LONG, d=D_BATTERY);
-            }
+            translate([0, d/2 - D_BATTERY/2, -EPS]) cylinder(h=LONG, d=D_BATTERY);
+            translate([0, 50, -EPS]) cylinder(h=LONG, d=D_BATTERY);
         }
         translate([-X_MC/2, MC_BASE, -EPS])
             cube(size=[X_MC, Y_MC, LONG]);
 
         // Top
-        if (!fullBatteryCase)
-            translate([-TROUGH_0/2, 5, -EPS]) cube(size=[TROUGH_0, 20, LONG]);
+        translate([-TROUGH_0/2, 5, -EPS]) cube(size=[TROUGH_0, 20, LONG]);
         // Middle
         translate([-TROUGH_1/2, -5, -EPS]) cube(size=[TROUGH_1, 10, LONG]);
         // Bottom
@@ -840,7 +833,7 @@ module pcbHolder2(d, t, dzSection, dzToPCB, pcbDim, mount)
     TRIM = 0.2;     // On each edge
 
     difference() {
-        tube(h=dzSection, do=d, di=d-t);
+        tubeTriTop(h=dzSection, do=d, di=d-t);
         translate([-W/2 - TRIM, 0, dzToPCB - TRIM]) {
             cube(size=[W + TRIM*2, d, DZ + TRIM*2]);
         }

@@ -30,7 +30,7 @@ difference() {
         rotate([0, 0, 180]) {
             translate([0, 0, M_BACK]) speakerHolder(D0, DZ_SPEAKER + EPS, 3.0, "std28");
             translate([0, 0, M_MC_BATTERY]) {
-                baffleMCBattery2(D0, N_BATT_BAFFLES, DZ_BATTERY, fullBatteryCase=true);
+                baffleMCBattery2(D0, N_BATT_BAFFLES, DZ_BATTERY);
             }
         }
         translate([0, 0, M_MC_BATTERY + DZ_BATTERY]) {
@@ -79,7 +79,9 @@ difference() {
     // Flat bottom
     translate([-50, -D0/2-EPS, -50]) cube(size=[100, 1.0, 1000]);
 
-    //translate([-50, -D0/2, M_MC_BATTERY]) cube(size=[100, 5.0, DZ_BATTERY]);
+    // Flat bottom of the battery section, to give the slicer something
+    // to put supports under.
+    translate([-50, -D0/2, M_MC_BATTERY]) cube(size=[100, 6.0, DZ_BATTERY]);
 
     // Bottom access
     translate([0, -10, M_PORT]) hull() {
