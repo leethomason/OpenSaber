@@ -10,32 +10,28 @@ N_BAFFLES = 8;
 T = 4.0;
 EPS = 0.01;
 D_BATTERY = 19.0;
+MM_TO_IN = 25.4;
+
+module pillar(h)
+{
+    rotate([-90, 0, 0]) difference() {
+        cylinder(d=6.0, h=h);
+        translate([0, 0, -EPS]) cylinder(d=1.8, h=20);
+    }
+}
 
 difference() {
     union() {
-        translate([0, 0, M0])
+        translate([0, 0, M_START])
             difference() {
                 tubeTriTop(h = DZ_SPKR_HOLDER, do = D0, di = D0 - T);
                 translate([-50, -D0/2, -EPS]) cube(size=[100, D0/2 - 9.0, 100]);
             }
         translate([0, 0, M_MC])
             baffleMCBattery2(D0, N_BAFFLES, DZ_BATTERY);
-    }
-    // EXPERIMENT drop in battery
-    translate([0, 0, M_MC]) {
-        hull() {
-            translate([0, D0/2 - D_BATTERY/2, 0]) cylinder(d=D_BATTERY, h = DZ_BATTERY+EPS);
-            translate([0, 50, 0]) cylinder(d=D_BATTERY, h = DZ_BATTERY+EPS);
-        }
-    }
-    // flatten
-    translate([-20, -D0/2 - EPS - 5.0, -20]) cube(size=[40, 0.5 + 5.0, 200]);
-}
+        translate([0, 0, M_BOLT])
+            bottomBoltRing(diameter=D0, t=T, dz=DZ_BOLT, dzToBolt=DZ_BOLT/2); 
 
-*translate([0, 0, M_MC]) color("red") battery(D0, "18650");
-
-difference() {
-    union() {
         translate([0, 0, M_PCB]) {
             pcbHolder2(
                 D0, T+2, DZ_PCB_SECTION, PCB_OFFSET, 
@@ -50,7 +46,7 @@ difference() {
         }
         // Front ring
         translate([0, 0, M_FORE_PLATE - EPS]) {
-            tubeTriTop(h=2.0, do=D0, di=D0 - T);
+            tubeTriTop(h=3.0, do=D0, di=D0 - T);
         }   
     }
 
@@ -78,8 +74,20 @@ difference() {
         translate([4, 0, M_FORE_PLATE + 12.0]) rotate([-90, 0, 0]) cylinder(h=100, d=D);
         translate([-4, 0, M_FORE_PLATE + 12.0]) rotate([-90, 0, 0]) cylinder(h=100, d=D);
     }
-
     // flatten
     translate([-20, -D0/2 - EPS - 5.0, -20]) cube(size=[40, 0.5 + 5.0, 200]);
+
+    // LED control
+    //translate([-DX_LED_CONTROL/2, -D0/2, M_LED_CONTROL]) cube(size=[DX_LED_CONTROL, 8, DZ_LED_CONTROL]);
 }
 
+// LED pillars.
+translate([0, 0, M_LED_CONTROL]) {
+    Y = -7.0;
+    H = 4.0;
+    translate([-DX_LED_CONTROL/2 + 0.1 * MM_TO_IN, Y, 0.1 * MM_TO_IN]) pillar(h=H);
+    translate([-DX_LED_CONTROL/2 + 0.1 * MM_TO_IN, Y, 1.05 * MM_TO_IN]) pillar(h=H);
+    translate([-DX_LED_CONTROL/2 + 0.6 * MM_TO_IN, Y, 1.05 * MM_TO_IN]) pillar(h=H);
+}
+
+*translate([0, 0, M_FRONT]) color("red") cylinder(d=D0, h=1.0);

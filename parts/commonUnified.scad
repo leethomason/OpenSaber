@@ -587,6 +587,45 @@ module boltRing(diameter, t, dz, dzToBolt, bolt_d=0, nut_w=0, nut_y=0, dy_port=0
 }
 
 
+module bottomBoltRing(diameter, t, dz, dzToBolt, bolt_d=0, nut_w=0, nut_y=0)
+{
+    BOLT_D = bolt_d > 0 ? bolt_d : 4.5;
+    NUT_W  = nut_w > 0  ? nut_w  : 8.6;
+    NUT_Y  = nut_y > 0  ? nut_y  : 3.4;
+    DZ_BRIDGE = 8.0;
+    
+    H_THREAD = 5.5;
+    D_THREAD = 7.8;
+    DY_PORT = -diameter/2 + (H_THREAD + (diameter/2 - yAtX(D_THREAD/2, diameter/2)));    // from portRing
+    BASE = -diameter / 2 + t / 2 + 1.0;
+
+    TRI = [[-50, 0], [0, 0], [-50, -50]];
+
+    if (dz < DZ_BRIDGE) {
+        echo("ERROR: boltRing dz too small. Should be:", DZ_BRIDGE);
+    }
+
+    difference() {
+        intersection() {
+            cylinder(h=dz, d=diameter);
+            union() {
+                tubeTriTop(h=dz, do=diameter, di=diameter - t);
+                W = NUT_W * 2;
+                translate([-W/2, -diameter/2, dzToBolt - DZ_BRIDGE/2]) cube(size=[W, NUT_Y * 1.5 + 3.0, DZ_BRIDGE]);
+            }
+        }
+
+        // cut space for the nut
+        translate([-NUT_W/2, BASE, -EPS]) cube(size=[NUT_W, NUT_Y, 100]);
+        // cut space for access
+        W = NUT_W - 3.0;
+        translate([-W/2, BASE, -EPS]) cube(size=[W, 10, 100]);
+        // Bottom hole
+        translate([0, 0, dzToBolt]) rotate([90, 0, 0]) cylinder(h=100, d=BOLT_D);
+    }
+}
+
+
 module switchRing(diameter, t, dz, dzToSwitch, counter=true, switchDY=0)
 {
     difference() {
@@ -1046,9 +1085,9 @@ $fn = 40;
 
 *keyJoint(8, 30, 26, false);
 
-*boltRing(30.0, 4.0, 12.0, 6.0);
+bottomBoltRing(30.0, 4.0, 12.0, 6.0);
 
-tactileRing(30.0, 4.0, 14.0, 7.0);
+*tactileRing(30.0, 4.0, 14.0, 7.0);
 
 *tubeTriTop(h=10.0, do=30.0, di=26.0);
 
