@@ -48,21 +48,11 @@ difference() {
                 ]
             );
         }
-        // Front ring
-        //translate([0, 0, M_FORE_PLATE - EPS]) {
-        //    tubeTriTop(h=3.0, do=D0, di=D0 - T);
-        //}   
+        echo("Front drop:", DZ_BODY - (M_PCB + DZ_PCB_SECTION));
     }
 
     // cutout bolt
     translate([-50, -50, M_BOLT]) cube(size=[100, 50, DZ_BOLT]);
-
-    // cutouts (thermal & wire)
-    /*hull() {
-        D = 10.0;
-        translate([0, 0, M_PCB + 11.0]) rotate([90, 0, 0]) cylinder(h=100, d=D);
-        translate([0, 0, M_PCB + 18.0]) rotate([90, 0, 0]) cylinder(h=100, d=D);
-    }*/
 
     // side cutouts
     for(i=[0:2])
@@ -107,5 +97,28 @@ translate([0, 0, M_LED_CONTROL]) {
     translate([-DX_LED_CONTROL/2 + 0.1 * MM_TO_IN, Y, 1.35 * MM_TO_IN]) pillar(h=H, pos=true);
     translate([-DX_LED_CONTROL/2 + 0.6 * MM_TO_IN, Y, 1.35 * MM_TO_IN]) pillar(h=H, pos=false);
 }
+
+// switch PCB holder
+translate([0, -4.5, -15]) {
+    DZ = 0.6 * 25.4;
+    DX = 0.7 * 25.4;
+    EX = 3.0;
+    difference() {
+        union() {
+            translate([DX/2 - 2, 0, 0]) cube(size=[2, 2, DZ + EX*2]);
+            mirror([-1, 0, 0]) translate([DX/2 - 2, 0, 0]) cube(size=[2, 2, DZ + EX*2]);            
+        }
+        translate([-DX/2, -EPS, EX]) cube(size=[DX, 10, DZ]);
+    }
+}
+
+// 11mm wide
+// switch to front: 5mm
+// port to back: 5.5mm
+M_PORT = M_PCB + 0.3 * 25.4;
+M_SWITCH = M_PCB + 0.6886 * 25.4;
+echo("Back:", M_PORT - 5.5, "Drop:", DZ_BODY - (M_PORT - 5.5));
+echo("Front", M_SWITCH + 5.0, "Drop:", DZ_BODY - (M_SWITCH + 5.0));
+echo("Bolt", M_BOLT, "Drop:", DZ_BODY - M_BOLT);
 
 *translate([0, 0, M_FRONT]) color("red") cylinder(d=D0, h=1.0);
