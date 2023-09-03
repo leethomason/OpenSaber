@@ -84,8 +84,9 @@ difference() {
 intersection() 
 {
     translate([-50, -50, M_BOLT]) cube(size=[100, 50, DZ_BOLT]);
-    translate([0, 0, M_BOLT])
+    rotate([0, 0, BOLT_ROT]) translate([0, 0, M_BOLT])
         bottomBoltRing(diameter=D0, t=T, dz=DZ_BOLT, dzToBolt=DZ_BOLT/2); 
+    echo("Bolt rot:", sin(BOLT_ROT) * D_OUTER/2);
 }
 
 // LED pillars.

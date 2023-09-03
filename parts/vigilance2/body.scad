@@ -1,6 +1,7 @@
 include <dim.scad>
 use <../shapes.scad>
 use <../commonUnified.scad>
+use <chamber.scad>
 
 //$fn = 80; // overrides fs; num fragments
 $fa = 6;   // minimum angle (default 12)
@@ -50,23 +51,7 @@ difference() {
 
 OVER = 5.0;
 translate([0, 0, M_WINDOW - OVER]) {
-    difference() {
-        color("goldenrod") tube(h=DZ_WINDOW + OVER, do=32.0, di=28.9);
-        for(i=[0:N_WINDOW-1]) {
-            NCUTS = 5;
-            DZCUT = 5.0;
-            DW = 2.5;
-
-            rot = i * 360 / N_WINDOW;
-            rotate([0, 0, rot]) 
-            for(i=[0:NCUTS-1]) {
-                translate([0, 0, OVER + DZ_WINDOW/2 - (NCUTS-1)/2 * DZCUT + i * DZCUT]) hull() {
-                    translate([-DW, 0, 0]) rotate([-90, 0, 0]) cylinder(h=100, d=3.2);
-                    translate([DW, 0, 0]) rotate([-90, 0, 0]) cylinder(h=100, d=3.2);
-                }
-            }
-        }
-    }
+    chamber(OVER);
 }
 
 color("red") translate([0, 0, 10.0])    // guess

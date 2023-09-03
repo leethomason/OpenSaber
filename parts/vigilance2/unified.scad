@@ -1,6 +1,7 @@
 use <../commonUnified.scad>
 use <../shapes.scad>
 use <../inset.scad>
+use <chamber.scad>
 
 include <dim.scad>
 
@@ -94,4 +95,10 @@ difference() {
     translate([0, 0, M_PORT]) window();
 }
 
+translate([0, 0, M_CHAMBER]) {
+    chamber();
+}
+
 *color("silver") translate([0, 0, M_WINDOW]) tube(h=DZ_WINDOW, do=D_OUTER, di=D0); 
+color("red") translate([0, 0, M_FORE]) cylinder(h=1.0, d=D_OUTER);
+color("red") translate([0, D_OUTER/2, M_WINDOW]) cylinder(h=DZ_WINDOW, d=1.0);
