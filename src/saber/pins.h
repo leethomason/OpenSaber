@@ -76,8 +76,8 @@
 
 // ----------------------------------
 #define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_CLAN
-#define SABER_SUB_MODEL				SABER_SUB_MODEL_PROPHECY
+#define SABER_MODEL 				SABER_MODEL_DUCHESS
+#define SABER_SUB_MODEL				0
 // ----------------------------------
 
 #define SABER_SOUND_SD 				1	// external memory card
@@ -781,6 +781,8 @@
 	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
 	#define SABER_VOLTMETER()			1			
 	#define SABER_UI_LED				SABER_LED_DOTSTAR
+	#define ITSY_DOTSTAR_UI()			0
+	#define SABER_DOTSTAR_CONFIG()		0	// BGR
 
 	#define SABER_NUM_LEDS 			    5
 	#define SABER_UI_START				0
@@ -789,7 +791,7 @@
 	#define SABER_UI_FADE_OUT
 	#define SABER_CRYSTAL_START	    	4
 	#define SABER_CRYSTAL_BRIGHTNESS 	128		// was 64
-	#define VOLTMETER_TUNE				1028
+	#define VOLTMETER_TUNE				1040
 
 	#define SABER_LOCK()				0
 

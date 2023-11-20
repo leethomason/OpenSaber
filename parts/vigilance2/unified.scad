@@ -34,6 +34,18 @@ difference() {
                 baffleMCBattery2(D0, N_BATT_BAFFLES, DZ_BATTERY);
             }
         }
+
+        // Bumps to hold boards in place.
+        BUMP_TRIM = 0.2;
+        // rear
+        translate([-DX_PCB/2, 3.0, M_MC_BATTERY]) cube(size=[3.0, 2.0, M_MC - M_MC_BATTERY - BUMP_TRIM]);
+        mirror([-1, 0, 0]) translate([-DX_PCB/2, 3.0, M_MC_BATTERY]) cube(size=[3.0, 2.0, M_MC - M_MC_BATTERY - BUMP_TRIM]);
+        // forward between the boards.
+        translate([-DX_PCB/2, 3.0, M_MC_END + BUMP_TRIM]) 
+            cube(size=[3.0, 2.0, M_BUBBLE_PCB - M_MC_END - BUMP_TRIM * 2.0]);
+        mirror([-1, 0, 0]) translate([-DX_PCB/2, 3.0, M_MC_END + BUMP_TRIM]) 
+            cube(size=[3.0, 2.0, M_BUBBLE_PCB - M_MC_END - BUMP_TRIM * 2.0]);
+
         translate([0, 0, M_MC_BATTERY + DZ_BATTERY]) {
             H = DZ_BOARDS - DZ_BATTERY;
             X_MC                = 0.7 * 25.4;
@@ -48,7 +60,7 @@ difference() {
                 translate([-X_MC/2, -MC_BASE, -EPS]) cube(size=[X_MC, 100, 100]);
                 translate([-TR0/2, -12.0, -EPS]) cube(size=[TR0, 100, 100]);
             }
-            // End stops
+            // End stops (at bold ring)
             intersection() {
                 translate([0, 0, H]) cylinder(h=1.0, d=D0);
                 difference() {
@@ -95,10 +107,11 @@ difference() {
     translate([0, 0, M_PORT]) window();
 }
 
-translate([0, 0, M_CHAMBER]) {
-    chamber();
-}
+// Show the PCB locations
+* color("green") translate([-DX_PCB/2, 3.0, M_MC]) cube(size=[DX_PCB, 2.0, M_MC_END - M_MC]);
+* color("olive") translate([-DX_PCB/2, 3.0, M_BUBBLE_PCB]) cube(size=[DX_PCB, 2.0, M_BUBBLE_PCB_END - M_BUBBLE_PCB]);
 
+*translate([0, 0, M_CHAMBER]) chamber();
 *color("silver") translate([0, 0, M_WINDOW]) tube(h=DZ_WINDOW, do=D_OUTER, di=D0); 
-color("red") translate([0, 0, M_FORE]) cylinder(h=1.0, d=D_OUTER);
-color("red") translate([0, D_OUTER/2, M_WINDOW]) cylinder(h=DZ_WINDOW, d=1.0);
+*color("red") translate([0, 0, M_FORE]) cylinder(h=1.0, d=D_OUTER);
+*color("red") translate([0, D_OUTER/2, M_WINDOW]) cylinder(h=DZ_WINDOW, d=1.0);
