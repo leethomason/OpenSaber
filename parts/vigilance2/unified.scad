@@ -35,6 +35,8 @@ difference() {
             }
         }
 
+        /*
+        manufacturing strikes again
         // Bumps to hold boards in place.
         BUMP_TRIM = 0.2;
         // rear
@@ -45,6 +47,7 @@ difference() {
             cube(size=[3.0, 2.0, M_BUBBLE_PCB - M_MC_END - BUMP_TRIM * 2.0]);
         mirror([-1, 0, 0]) translate([-DX_PCB/2, 3.0, M_MC_END + BUMP_TRIM]) 
             cube(size=[3.0, 2.0, M_BUBBLE_PCB - M_MC_END - BUMP_TRIM * 2.0]);
+        */
 
         translate([0, 0, M_MC_BATTERY + DZ_BATTERY]) {
             H = DZ_BOARDS - DZ_BATTERY;
@@ -86,11 +89,13 @@ difference() {
                 M_SWITCH - M_TACTILE_RING);
         }
         translate([0, 0, M_RING_END]) {
-            tubeTriTop(h=2.0, do=D0, di=D0 - T);
+            tubeTriTop(h=M_END - M_RING_END, do=D0, di=D0 - T);
         }
     }
     // Flat bottom
     translate([-50, -D0/2-EPS, -50]) cube(size=[100, 1.0, 1000]);
+
+    switchPlateSimple(0.1);
 
     // Flat bottom of the battery section, to give the slicer something
     // to put supports under.
@@ -111,7 +116,7 @@ difference() {
 * color("green") translate([-DX_PCB/2, 3.0, M_MC]) cube(size=[DX_PCB, 2.0, M_MC_END - M_MC]);
 * color("olive") translate([-DX_PCB/2, 3.0, M_BUBBLE_PCB]) cube(size=[DX_PCB, 2.0, M_BUBBLE_PCB_END - M_BUBBLE_PCB]);
 
-*translate([0, 0, M_CHAMBER]) chamber();
+chamber();
 *color("silver") translate([0, 0, M_WINDOW]) tube(h=DZ_WINDOW, do=D_OUTER, di=D0); 
 *color("red") translate([0, 0, M_FORE]) cylinder(h=1.0, d=D_OUTER);
 *color("red") translate([0, D_OUTER/2, M_WINDOW]) cylinder(h=DZ_WINDOW, d=1.0);
