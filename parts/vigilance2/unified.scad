@@ -25,6 +25,19 @@ module window()
     mirror([-1, 0, 0]) translate([D0/2 - 5, 0, 0]) polygonZY(h=100, points=points); 
 }
 
+module ledPylon2()
+{
+    W = 17;
+    FILM = 12.2;
+    FILM_THICKNESS = 0.8;
+
+    difference() {
+        translate([-W/2, -D0/2, M_END - 5])
+            cube(size=[W, D0/2 + 1, 5]);
+        translate([-FILM/2, -D0/2, M_END - FILM_THICKNESS])
+            cube(size=[FILM, 100, 100]);
+    }
+}
 
 difference() {
     union() {
@@ -112,11 +125,14 @@ difference() {
     translate([0, 0, M_PORT]) window();
 }
 
+* ledPylon2();
+
 // Show the PCB locations
 * color("green") translate([-DX_PCB/2, 3.0, M_MC]) cube(size=[DX_PCB, 2.0, M_MC_END - M_MC]);
 * color("olive") translate([-DX_PCB/2, 3.0, M_BUBBLE_PCB]) cube(size=[DX_PCB, 2.0, M_BUBBLE_PCB_END - M_BUBBLE_PCB]);
 
-chamber();
+*chamber();
+
 *color("silver") translate([0, 0, M_WINDOW]) tube(h=DZ_WINDOW, do=D_OUTER, di=D0); 
 *color("red") translate([0, 0, M_FORE]) cylinder(h=1.0, d=D_OUTER);
 *color("red") translate([0, D_OUTER/2, M_WINDOW]) cylinder(h=DZ_WINDOW, d=1.0);

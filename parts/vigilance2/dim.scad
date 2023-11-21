@@ -47,7 +47,7 @@ DX_BUBBLE = 8.0;
 M_CHAMBER = M_END;
 DZ_CHAMBER = M_FORE - M_END;
 
-DZ_BRASS_OFFSET = 5.0;  // fixme
+DZ_BRASS_OFFSET = 3.0;
 M_BRASS_START = M_CHAMBER + DZ_BRASS_OFFSET;
 M_BRASS_END = M_FORE - DZ_BRASS_OFFSET;
 DZ_BRASS = M_BRASS_END - M_BRASS_START;
@@ -57,6 +57,33 @@ M_WINDOW = M_CHAMBER + 8.0; // fixme
 M_WINDOW_END = M_FORE - DZ_THREAD;
 DZ_WINDOW = M_WINDOW_END - M_WINDOW;
 N_WINDOW = 6;
+
+// ANCHOR_ROD: threaded, holds the crystal in place
+A_ANCHOR_ROD = 0;
+D_ANCHOR_ROD = 3.5;
+R_ANCHOR_ROD = 9.0;
+DEPTH_HEAD_ANCHOR = 3.0;
+D_HEAD_ANCHOR = 6.5;
+
+// TUBE_ROD: hollow tube, holds the piece apart, runs wires through
+A_TUBE_ROD = 60;
+DO_TUBE_ROD = 4.6;
+DI_TUBE_ROD = 3.5;
+DEPTH_TUBE_ROD = 3.0;
+R_TUBE_ROD = 12.0;
+
+// BOLT_ROD: threaded, holds the piece together
+A_BOLT_ROD = 120;
+D_BOLT_ROD = 3.5;
+R_BOLT_ROD = 11.0;
+DEPTH_HEAD_BOLT = 3.0;
+D_HEAD_BOLT = 6.5;
+
+D_ROD_NUT = 9.0;
+DEPTH_ROD_NUT = 4.5;    // with offset for lock washer
+T_TOP_RING = 3.0;
+M_TOP_RING = M_BRASS_END - T_TOP_RING;
+T_BOLT_RING = 2.0;
 
 M_MC = M_MC_BATTERY + 2.0;
 M_MC_END = M_MC + 2.2 * 25.4;
