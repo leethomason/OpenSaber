@@ -44,8 +44,12 @@ DZ_THREAD = 15.0;
 DZ_BUBBLE = 16.0;
 DX_BUBBLE = 8.0;
 
+AL_STOCK_3 = 3.3;
+AL_STOCK_6 = 6.6;
+
 M_CHAMBER = M_END;
 DZ_CHAMBER = M_FORE - M_END;
+DZ_CHAMBER_BASE_PLATE = 6.0;    // just a hint off the std stock?
 
 DZ_BRASS_OFFSET = 3.0;
 M_BRASS_START = M_CHAMBER + DZ_BRASS_OFFSET;
@@ -81,9 +85,9 @@ D_HEAD_BOLT = 6.5;
 
 D_ROD_NUT = 9.0;
 DEPTH_ROD_NUT = 4.5;    // with offset for lock washer
-T_TOP_RING = 3.0;
+T_TOP_RING = AL_STOCK_3;
 M_TOP_RING = M_BRASS_END - T_TOP_RING;
-T_BOLT_RING = 2.0;
+T_BOLT_RING = AL_STOCK_3;
 
 M_MC = M_MC_BATTERY + 2.0;
 M_MC_END = M_MC + 2.2 * 25.4;
