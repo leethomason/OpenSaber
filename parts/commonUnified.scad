@@ -350,7 +350,7 @@ module portCounter()
 
 module speakerStd28(bass)
 {
-    H_SPKR        =  3.2;
+    H_SPKR        =  3.5;
     D_SPKR        =  28;
     X_NOTCH       =  6;
     Z_NOTCH       =  6.0;

@@ -26,7 +26,6 @@ difference() {
         for(i=[0:N_WINDOW-1]) {
             rot = i * 360 / N_WINDOW;
             rotate([0, 0, rot]) {
-                //cube(size=[DX_WINDOW, 100, DZ_WINDOW]);
                 hull() {
                     translate([0, 0, DX_WINDOW/2]) rotate([-90, 0, 0]) cylinder(h=100, d=DX_WINDOW);
                     translate([0, 0, DZ_WINDOW - DX_WINDOW/2]) rotate([-90, 0, 0]) cylinder(h=100, d=DX_WINDOW);

@@ -123,6 +123,10 @@ difference() {
     translate([0, 0, M_PORT]) window();
 }
 
+echo("BUBBLE start", M_BUBBLE, "end", M_BUBBLE_END, "width", DX_BUBBLE);
+echo("PLATE start", M_SWITCH_PLATE_START, "end", M_SWITCH_PLATE_END, "width", DX_SWITCH_PLATE);
+echo("WINDOW start", M_WINDOW, "end", M_WINDOW + DZ_WINDOW, "width", DX_WINDOW);
+
 * ledPylon2();
 
 // Show the PCB locations
@@ -130,7 +134,7 @@ difference() {
 * color("olive") translate([-DX_PCB/2, 3.0, M_BUBBLE_PCB]) cube(size=[DX_PCB, 2.0, M_BUBBLE_PCB_END - M_BUBBLE_PCB]);
 
 *chamber();
+*color("red") translate([0, 0, M_STOP]) cylinder(h=1.0, d=D_OUTER);
 
 *color("silver") translate([0, 0, M_WINDOW]) tube(h=DZ_WINDOW, do=D_OUTER, di=D0); 
-*color("red") translate([0, 0, M_FORE]) cylinder(h=1.0, d=D_OUTER);
 *color("red") translate([0, D_OUTER/2, M_WINDOW]) cylinder(h=DZ_WINDOW, d=1.0);
