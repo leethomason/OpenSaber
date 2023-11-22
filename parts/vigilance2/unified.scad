@@ -25,18 +25,29 @@ module window()
     mirror([-1, 0, 0]) translate([D0/2 - 5, 0, 0]) polygonZY(h=100, points=points); 
 }
 
-module ledPylon2()
+module ledPylon()
 {
-    W = 17;
+    W = 10;
     FILM = 12.2;
-    FILM_THICKNESS = 0.8;
+    FILM_THICKNESS = 1.0;
+    PYLON = 5.0;
+    LED = 5.0;
 
     difference() {
-        translate([-W/2, -D0/2, M_END - 5])
-            cube(size=[W, D0/2 + 1, 5]);
-        translate([-FILM/2, -D0/2, M_END - FILM_THICKNESS])
-            cube(size=[FILM, 100, 100]);
+        translate([-W/2, -D0/2, M_END - PYLON])
+            cube(size=[W, D0/2 + 2, PYLON]);
+        // notch for film
+        translate([-10, -4.0, M_END - 3.0]) 
+            cube(size=[20, 20, FILM_THICKNESS]);
+        // notch for LED
+        translate([-LED/2, -LED/2, M_END - 3.0])
+            cube(size=[LED, 20, 20]); 
     }
+
+    // alignment
+    BIT = 3.0;
+    translate([-BIT/2, -D0/2, M_END - EPS]) 
+        cube(size=[BIT, 12.0, 3.0]);
 }
 
 difference() {
@@ -47,20 +58,6 @@ difference() {
                 baffleMCBattery2(D0, N_BATT_BAFFLES, DZ_BATTERY);
             }
         }
-
-        /*
-        manufacturing strikes again
-        // Bumps to hold boards in place.
-        BUMP_TRIM = 0.2;
-        // rear
-        translate([-DX_PCB/2, 3.0, M_MC_BATTERY]) cube(size=[3.0, 2.0, M_MC - M_MC_BATTERY - BUMP_TRIM]);
-        mirror([-1, 0, 0]) translate([-DX_PCB/2, 3.0, M_MC_BATTERY]) cube(size=[3.0, 2.0, M_MC - M_MC_BATTERY - BUMP_TRIM]);
-        // forward between the boards.
-        translate([-DX_PCB/2, 3.0, M_MC_END + BUMP_TRIM]) 
-            cube(size=[3.0, 2.0, M_BUBBLE_PCB - M_MC_END - BUMP_TRIM * 2.0]);
-        mirror([-1, 0, 0]) translate([-DX_PCB/2, 3.0, M_MC_END + BUMP_TRIM]) 
-            cube(size=[3.0, 2.0, M_BUBBLE_PCB - M_MC_END - BUMP_TRIM * 2.0]);
-        */
 
         translate([0, 0, M_MC_BATTERY + DZ_BATTERY]) {
             H = DZ_BOARDS - DZ_BATTERY;
@@ -104,6 +101,7 @@ difference() {
         translate([0, 0, M_RING_END]) {
             tubeTriTop(h=M_END - M_RING_END, do=D0, di=D0 - T);
         }
+        ledPylon();
     }
     // Flat bottom
     translate([-50, -D0/2-EPS, -50]) cube(size=[100, 1.0, 1000]);
