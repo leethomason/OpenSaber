@@ -69,21 +69,21 @@ DX_WINDOW = 8.0;
 
 // ANCHOR_ROD: threaded, holds the crystal in place
 A_ANCHOR_ROD = 0;
-D_ANCHOR_ROD = 3.5;
+D_ANCHOR_ROD = 3.6;
 R_ANCHOR_ROD = 9.0;
 DEPTH_HEAD_ANCHOR = 3.0;
 D_HEAD_ANCHOR = 6.5;
 
 // TUBE_ROD: hollow tube, holds the piece apart, runs wires through
 A_TUBE_ROD = 60;
-DO_TUBE_ROD = 4.6;
+DO_TUBE_ROD = 4.7;
 DI_TUBE_ROD = 3.5;
 DEPTH_TUBE_ROD = AL_STOCK_3;
 R_TUBE_ROD = 12.0;
 
 // BOLT_ROD: threaded, holds the piece together
 A_BOLT_ROD = 120;
-D_BOLT_ROD = 3.5;
+D_BOLT_ROD = 3.6;
 R_BOLT_ROD = 11.0;
 DEPTH_HEAD_BOLT = AL_STOCK_3;
 D_HEAD_BOLT = 6.5;

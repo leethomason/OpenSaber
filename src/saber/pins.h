@@ -58,6 +58,7 @@
 #define SABER_MODEL_DARKSABER	   28   // Itsy 4a, Dotstar UI, LSM6D Gyro
 #define SABER_MODEL_VADER	   	   29   // Itsy 4, Dotstar UI, LSM6D Gyro
 #define SABER_MODEL_KENOBI_IV2	   30   // Itsy 4, Dotstar UI, LSM6D Gyro
+#define SABER_MODEL_VIGILANCE2	   31   // Itsy 4, Dotstar UI, LSM6D Gyro
 
 #define SABER_SUB_MODEL_NONE		0
 #define SABER_SUB_MODEL_LUNA		1
@@ -75,8 +76,8 @@
 #define SABER_SUB_MODEL_B			13
 
 // ----------------------------------
-#define SERIAL_DEBUG 				0
-#define SABER_MODEL 				SABER_MODEL_DUCHESS
+#define SERIAL_DEBUG 				1
+#define SABER_MODEL 				SABER_MODEL_VIGILANCE2
 #define SABER_SUB_MODEL				0
 // ----------------------------------
 
@@ -1138,6 +1139,45 @@
 	static const int32_t BLUE_VF  = 3100;
 	static const int32_t BLUE_I   = 400;
 	static const int32_t BLUE_R   = 1350;
+
+
+	static const int VOLUME_1 = 32;
+	static const int VOLUME_2 = 64;
+	static const int VOLUME_3 = 128;
+	static const int VOLUME_4 = 255;
+#elif (SABER_MODEL == SABER_MODEL_VIGILANCE2)
+	#define ID_STR "Vigilance-2 Cree RGB"
+
+	#define PCB_VERSION 				PCB_ITSY_4A			// actually 4c, but may not matter
+	#define SABER_SOUND_ON 				SABER_SOUND_FLASH
+	#define SABER_VOLTMETER()			1			
+	#define SABER_UI_BRIGHTNESS			8
+	#define ITSY_DOTSTAR_UI()			0
+	#define SABER_DOTSTAR_CONFIG()		1	// RBG
+	#define SABER_NUM_LEDS 			    1
+	#define SABER_CRYSTAL_START	    	0
+	#define SABER_CRYSTAL_BRIGHTNESS 	128
+
+	#define VOLTMETER_TUNE				1057	// fixme
+	#define SABER_LOCK()				0
+
+	#define SWING_SAMPLES	12
+
+	#define FILTER_MAG_X	10	// Not used (but needed to compile)
+	#define FILTER_MAG_Y	10	// Not used
+	#define FILTER_MAG_Z	10	// Not used
+
+	static const int32_t RED_VF   = 2200;
+	static const int32_t RED_I    = 400;
+	static const int32_t RED_R    = 2350;	// fixme
+
+	static const int32_t GREEN_VF = 3200;
+	static const int32_t GREEN_I  = 400;
+	static const int32_t GREEN_R  = 1000;	// fixme
+
+	static const int32_t BLUE_VF  = 3100;
+	static const int32_t BLUE_I   = 400;
+	static const int32_t BLUE_R   = 1350;	// fixme
 
 
 	static const int VOLUME_1 = 32;

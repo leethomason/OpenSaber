@@ -8,11 +8,17 @@ $fs = 0.8;  // minimum size (default 2)
 EPS = 0.01;
 BIT = 3.2;
 
-DRAW_BRASS = true;
+DRAW_BRASS = false;
 DRAW_BASE_PLATE_1 = true;
 DRAW_BASE_PLATE_2 = true;
-DRAW_INNER_RING = true;
-DRAW_OUTER_RING = true;
+DRAW_INNER_RING = false;
+DRAW_OUTER_RING = false;
+CUTOUT = false;
+
+RING_DEPTH = 0.5;
+RING0 = 10.0;
+RING1 = 17.0;
+RING2 = 24.0;
 
 module switchPlateSimple(trim)
 {
@@ -49,14 +55,15 @@ module boltPlateNuts()
 
 module rods()
 {
+    // Threaded rod to secure the crystal (tension)
     for(r=[A_ANCHOR_ROD:180:A_ANCHOR_ROD + 180]) {
         rotate([0, 0, r]) {
             translate([R_ANCHOR_ROD, 0, M_END - EPS]) {
                 cylinder(h=100, d=D_ANCHOR_ROD);
-                //cylinder(h=DEPTH_HEAD_ANCHOR, d=D_HEAD_ANCHOR);
             }
         }
     }
+    // Tube to run wires (compression)
     for(r=[A_TUBE_ROD:180:A_TUBE_ROD + 180]) {
         rotate([0, 0, r]) {
             translate([R_TUBE_ROD, 0, M_END - EPS]) {
@@ -66,12 +73,15 @@ module rods()
             }
         }
     }
+    // Threaded rod to secure outer ring (tension) with tube coverings
     for(r=[A_BOLT_ROD:180:A_BOLT_ROD + 180]) {
         rotate([0, 0, r]) {
             translate([R_BOLT_ROD, 0, M_END - EPS]) {
                 cylinder(h=100, d=D_BOLT_ROD);
                 cylinder(h=DEPTH_HEAD_BOLT + EPS*2, d=D_HEAD_BOLT);
             }
+            translate([R_BOLT_ROD, 0, M_END + DZ_CHAMBER_BASE_PLATE - RING_DEPTH])
+                cylinder(h=10.0, d=DO_TUBE_ROD);
         }
     }
 }
@@ -135,14 +145,19 @@ module chamber()
         translate([-BIT/2, -50, M_END - EPS]) cube(size=[BIT, 50, 2]);
 
         // base plates fancy cuts
-        *for(r=[30:60:150]) {
-            rotate([0, 0, r])   
-                translate([-20, -BIT/2, M_END + DZ_CHAMBER_BASE_PLATE - 1.0])
-                    cube(size=[40, BIT, 10]);
+        translate([0, 0, M_END + DZ_CHAMBER_BASE_PLATE - RING_DEPTH]) {
+            tube(h=10, di=RING0, do=RING0 + BIT);
+            tube(h=10, di=RING1, do=RING1 + BIT);
         }
-        translate([0, 0, M_END + DZ_CHAMBER_BASE_PLATE - 0.5]) {
-            tube(h=10, di=10.0, do=10.0 + BIT);
-            tube(h=10, di=19.0, do=19.0 + BIT);
+
+        for (it=[0:1]) {
+            for(r=[0:3]) {
+                if (r != 2) {
+                    rotate([0, 0, -30 + r* 20 + 180 * it]) 
+                        translate([RING2/2, 0, M_END + DZ_CHAMBER_BASE_PLATE - RING_DEPTH]) 
+                            cylinder(h=1, d=BIT);
+                }
+            }
         }
     }
 
@@ -176,10 +191,12 @@ module switchPlate()
     }
 }
 
-*difference() {
+difference() {
     chamber();
-    color("white") translate([-100, -100, 0]) cube(size=[100, 200, 1000]);
+    if (CUTOUT) {
+        color("white") translate([-100, -100, 0]) cube(size=[100, 200, 1000]);
+    }
 }
 
-switchPlate();
-echo("SWITCH plate max height", DY_SWITCH_PLATE);
+*switchPlate();
+*echo("SWITCH plate max height", DY_SWITCH_PLATE);
