@@ -11,8 +11,8 @@ BIT = 3.2;
 DRAW_BRASS = false;
 DRAW_BASE_PLATE_1 = true;
 DRAW_BASE_PLATE_2 = true;
-DRAW_INNER_RING = false;
-DRAW_OUTER_RING = false;
+DRAW_INNER_RING = true;
+DRAW_OUTER_RING = true;
 CUTOUT = false;
 
 RING_DEPTH = 0.5;
@@ -153,7 +153,7 @@ module chamber()
         for (it=[0:1]) {
             for(r=[0:3]) {
                 if (r != 2) {
-                    rotate([0, 0, -30 + r* 20 + 180 * it]) 
+                    rotate([0, 0, -30 + r*20 + 180*it]) 
                         translate([RING2/2, 0, M_END + DZ_CHAMBER_BASE_PLATE - RING_DEPTH]) 
                             cylinder(h=1, d=BIT);
                 }

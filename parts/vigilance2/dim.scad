@@ -72,6 +72,7 @@ A_ANCHOR_ROD = 0;
 D_ANCHOR_ROD = 3.6;
 R_ANCHOR_ROD = 9.0;
 DEPTH_HEAD_ANCHOR = 3.0;
+
 D_HEAD_ANCHOR = 6.5;
 
 // TUBE_ROD: hollow tube, holds the piece apart, runs wires through
