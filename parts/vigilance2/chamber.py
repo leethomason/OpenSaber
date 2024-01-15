@@ -3,11 +3,9 @@ from math import radians
 import sys
 from utility import *
 from material import init_material
-from rectangleTool import rectangleTool
 from rectangleTool import rectangle
 from mecode import G
-from hole import hole
-from drill import drill
+from hole import hole2
 
 DECO_DEPTH = -0.5
 D0 = 31.60
@@ -15,9 +13,10 @@ DI_BRASS = 29.0
 DO_BRASS = D0
 EXTRA = 0.2
 
-RING0 = 10.0 + 1.6
-RING1 = 17.0 + 1.6
-RING2 = 24.0 + 1.6
+D_RING0 = 10.0    # center line
+D_RING1 = 17.0    # center line
+R_RING0 = D_RING0/2
+R_RING1 = D_RING1/2
 
 # ANCHOR_ROD: threaded, holds the crystal in place
 A_ANCHOR_ROD = [0, 180]
@@ -40,14 +39,9 @@ D_ROD = 3.6
 A_MAKER = [-30, -10, 30, 150, 170, 210]
 R_MAKER = 12.0
 
-BIT = 3.175
-RING0 = 10.0 + BIT/2
-RING1 = 17.0 + BIT/2
-
 D_LED = 7.0
-
-# chamber material section flatten cut0 cut1
-# section = baseBottom, baseTop, top, topCap
+D_TOP = 12.0
+D_TOP_CAP = 17.0
 
 # Stages:
 # 1. flatten top
@@ -62,6 +56,8 @@ flattenCut = float(sys.argv[3])
 cut0 = float(sys.argv[4])
 cut1 = float(sys.argv[5])
 
+BIT = mat["tool_size"]
+
 g = G(outfile='path.nc', aerotech_include=False, header=None, footer=None)
 nomad_header(g, mat, CNC_TRAVEL_Z)
 g.absolute()
@@ -69,7 +65,7 @@ g.absolute()
 def flatten():
     travel(g, mat, x=0, y=0)
     g.move(z=0)
-    hole(g, mat, flattenCut, d=DO_BRASS, offset="outside", fill=True)
+    hole2(g, mat, flattenCut, DO_BRASS, fill=True)
 
 def bottom(arr):
     r = []
@@ -87,17 +83,12 @@ def holes(arr, r, depth, d):
     for a in arr:
         travel(g, mat, x=r * cos(a), y=r * sin(a))
         g.move(z=flattenCut)
-        if -d > 3.2:
-            hole(g, mat, depth, d=d, offset="inside", fill=True)
-        else:
-            drill(g, mat, depth)
+        hole2(g, mat, depth, d/2)
         g.move(z=2)
 
-def ring(d, depth):
-    travel(g, mat, x=0, y=0)
+def toFlat(x, y):
+    travel(g, mat, x=x, y=y)
     g.move(z=flattenCut)
-    hole(g, mat, depth, d=d, offset="middle", fill=False)
-    g.move(z=2)
 
 if section == "baseBottom":
     flatten()
@@ -106,8 +97,7 @@ if section == "baseBottom":
     holes(bottom(A_BOLT_ROD), R_BOLT_ROD, cut0, D_HEAD)
     # doesn't need LED - cut from top
     # cut the alignment to the carriage:
-    travel(g, mat, x=0, y=-D0/2)
-    g.move(z=flattenCut)
+    toFlat(0, -D0/2)
     rectangle(g, mat, cut0, 0, D0/2, False, "bottom")
     g.move(z=2)
 
@@ -117,17 +107,46 @@ elif section == "baseTop":
     holes(top(A_TUBE_ROD), R_TUBE_ROD, cut0, DO_TUBE_ROD)
     holes(top(A_BOLT_ROD), R_BOLT_ROD, cut0, D_ROD)
 
-    ring(RING0, DECO_DEPTH)
-    ring(RING1, DECO_DEPTH)
-    holes(top(A_MAKER), R_MAKER, DECO_DEPTH, 3.175)
+    toFlat(0, 0,)
+    hole2(g, mat, DECO_DEPTH, R_RING0 + BIT/2, fill=False)
 
-    travel(g, mat, x=0, y=0)
-    g.move(z=flattenCut)
-    hole(g, mat, cut1, d=D_LED, offset="outside", fill=True)    
+    toFlat(0, 0)
+    hole2(g, mat, DECO_DEPTH, R_RING1 + BIT/2, fill=False)
+    holes(top(A_MAKER), R_MAKER, DECO_DEPTH, BIT)
 
-    ring(DI_BRASS + BIT/2, cut0)
-    ring(DO_BRASS + BIT/2, cut1)
+    toFlat(0, 0)
+    hole2(g, mat, cut1, D_LED, fill=True)    
 
+    toFlat(0, 0)
+    hole2(g, mat, cut0, DI_BRASS + BIT, fill=False)
+    hole2(g, mat, cut1, DO_BRASS + BIT, fill=False)
+
+elif section == "top":
+    # all cut through
+    flatten()
+    holes(bottom(A_ANCHOR_ROD), R_ANCHOR_ROD, cut0, D_ROD)
+    holes(bottom(A_TUBE_ROD), R_TUBE_ROD, cut0, DO_TUBE_ROD)
+    holes(bottom(A_BOLT_ROD), R_BOLT_ROD, cut0, D_ROD)
+
+    toFlat(0, 0)
+    hole2(g, mat, cut0, D_TOP, fill=True)
+
+    hole2(g, mat, cut0, DI_BRASS + BIT, fill=False)
+
+elif section == "topCap":
+    # all cut through
+    flatten()
+    holes(bottom(A_ANCHOR_ROD), R_ANCHOR_ROD, cut0, D_NUT)
+    holes(bottom(A_TUBE_ROD), R_TUBE_ROD, cut0, DI_TUBE_ROD)
+    holes(bottom(A_BOLT_ROD), R_BOLT_ROD, cut0, D_ROD)
+    holes(bottom(A_BOLT_ROD), R_BOLT_ROD, -1.0, D_NUT)
+
+    toFlat(0, 0)
+    hole2(g, mat, cut0, d=D_TOP_CAP, fill=False)    
+
+    hole2(g, mat, cut0, DO_BRASS + BIT, fill=False)
+
+g.move(z=2)
 travel(g, mat, x=0, y=0)
 g.move(z=10)
 
