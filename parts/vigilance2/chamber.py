@@ -12,10 +12,8 @@ DI_BRASS = 29.0
 DO_BRASS = D0
 EXTRA = 0.2
 
-D_RING0 = 10.0    # center line
-D_RING1 = 17.0    # center line
+D_RING0 = 12.0    # center line
 R_RING0 = D_RING0/2
-R_RING1 = D_RING1/2
 
 # ANCHOR_ROD: threaded, holds the crystal in place
 A_ANCHOR_ROD = [0, 180]
@@ -89,7 +87,6 @@ def holes(arr, r, depth, d):
         travel(g, mat, x=r * math.cos(a), y=r * math.sin(a))
         g.move(z=flattenCut)
         hole2(g, mat, depth, d=d)
-        g.move(z=2)
 
 def toFlat(x, y):
     travel(g, mat, x=x, y=y)
@@ -116,7 +113,7 @@ elif section == "baseTop":
     hole2(g, mat, DECO_DEPTH, r=R_RING0 + BIT/2, fill=False)
 
     toFlat(0, 0)
-    hole2(g, mat, DECO_DEPTH, r=R_RING1 + BIT/2, fill=False)
+    #hole2(g, mat, DECO_DEPTH, r=R_RING1 + BIT/2, fill=False)
     holes(top(A_MAKER), R_MAKER, DECO_DEPTH, BIT)
 
     toFlat(0, 0)

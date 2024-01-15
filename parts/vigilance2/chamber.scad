@@ -16,7 +16,7 @@ DRAW_OUTER_RING = true;
 CUTOUT = false;
 
 RING_DEPTH = 0.5;
-RING0 = 10.0;
+RING0 = 12.0;
 RING1 = 17.0;
 RING2 = 24.0;
 
@@ -146,8 +146,8 @@ module chamber()
 
         // base plates fancy cuts
         translate([0, 0, M_END + DZ_CHAMBER_BASE_PLATE - RING_DEPTH]) {
-            tube(h=10, di=RING0, do=RING0 + BIT);
-            tube(h=10, di=RING1, do=RING1 + BIT);
+            tube(h=10, di=RING0, do=RING0 + BIT*2);
+            //tube(h=10, di=RING1, do=RING1 + BIT*2);
         }
 
         for (it=[0:1]) {
