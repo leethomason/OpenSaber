@@ -1,4 +1,3 @@
-from cmath import cos, sin
 import sys
 import math
 from utility import *
@@ -55,17 +54,23 @@ section = sys.argv[2]
 flattenCut = float(sys.argv[3])
 cut0 = float(sys.argv[4])
 cut1 = float(sys.argv[5])
-
 BIT = mat["tool_size"]
 
+print("section", section)
+print("flattenCut", flattenCut)
+print("cut0", cut0)
+print("cut1", cut1)
+print("BIT", BIT)
+
 g = G(outfile='path.nc', aerotech_include=False, header=None, footer=None)
+comment(g, section)
 nomad_header(g, mat, CNC_TRAVEL_Z)
 g.absolute()
 
 def flatten():
     travel(g, mat, x=0, y=0)
     g.move(z=0)
-    hole2(g, mat, flattenCut, d=DO_BRASS, fill=True)
+    hole2(g, mat, flattenCut, d=DO_BRASS + BIT*2, fill=True)
 
 def bottom(arr):
     r = []
@@ -91,7 +96,6 @@ def toFlat(x, y):
     g.move(z=flattenCut)
 
 if section == "baseBottom":
-    comment(g, section)
     flatten()
     holes(bottom(A_ANCHOR_ROD), R_ANCHOR_ROD, cut0, D_HEAD)
     holes(bottom(A_TUBE_ROD), R_TUBE_ROD, cut0, DI_TUBE_ROD)
@@ -103,11 +107,10 @@ if section == "baseBottom":
     g.move(z=2)
 
 elif section == "baseTop":
-    comment(g, section)
     flatten()
-    holes(top(A_ANCHOR_ROD), R_ANCHOR_ROD, cut0, D_ROD)
+    holes(top(A_ANCHOR_ROD), R_ANCHOR_ROD, cut1, D_ROD)
     holes(top(A_TUBE_ROD), R_TUBE_ROD, cut0, DO_TUBE_ROD)
-    holes(top(A_BOLT_ROD), R_BOLT_ROD, cut0, D_ROD)
+    holes(top(A_BOLT_ROD), R_BOLT_ROD, cut1, D_ROD)
 
     toFlat(0, 0,)
     hole2(g, mat, DECO_DEPTH, r=R_RING0 + BIT/2, fill=False)
@@ -120,39 +123,39 @@ elif section == "baseTop":
     hole2(g, mat, cut1, d=D_LED, fill=True)    
 
     toFlat(0, 0)
-    hole2(g, mat, cut0, d=DI_BRASS + BIT, fill=False)
-    hole2(g, mat, cut1, d=DO_BRASS + BIT, fill=False)
+    hole2(g, mat, cut0, d=DI_BRASS + BIT*2, fill=False)
+    hole2(g, mat, cut1, d=DO_BRASS + BIT*2, fill=False)
 
 elif section == "top":
-    comment(g, section)
     # all cut through
     flatten()
-    holes(bottom(A_ANCHOR_ROD), R_ANCHOR_ROD, cut0, D_ROD)
+    holes(bottom(A_ANCHOR_ROD), R_ANCHOR_ROD, cut1, D_ROD)
     holes(bottom(A_TUBE_ROD), R_TUBE_ROD, cut0, DO_TUBE_ROD)
-    holes(bottom(A_BOLT_ROD), R_BOLT_ROD, cut0, D_ROD)
+    holes(bottom(A_BOLT_ROD), R_BOLT_ROD, cut1, D_ROD)
 
     toFlat(0, 0)
     hole2(g, mat, cut0, d=D_TOP, fill=True)
 
-    hole2(g, mat, cut0, d=DI_BRASS + BIT, fill=False)
+    hole2(g, mat, cut0, d=DI_BRASS + BIT*2, fill=False)
 
 elif section == "topCap":
-    comment(g, section)
     # all cut through
     flatten()
     holes(bottom(A_ANCHOR_ROD), R_ANCHOR_ROD, cut0, D_NUT)
     holes(bottom(A_TUBE_ROD), R_TUBE_ROD, cut0, DI_TUBE_ROD)
-    holes(bottom(A_BOLT_ROD), R_BOLT_ROD, cut0, D_ROD)
+    holes(bottom(A_BOLT_ROD), R_BOLT_ROD, cut1, D_ROD)
     holes(bottom(A_BOLT_ROD), R_BOLT_ROD, -1.0, D_NUT)
 
     toFlat(0, 0)
     hole2(g, mat, cut0, d=D_TOP_CAP, fill=False)    
 
-    hole2(g, mat, cut0, d=DO_BRASS + BIT, fill=False)
+    hole2(g, mat, cut0, d=DO_BRASS + BIT*2, fill=False)
 
 g.move(z=2)
 travel(g, mat, x=0, y=0)
 g.move(z=10)
+spindle(g)
+
 
 
 
