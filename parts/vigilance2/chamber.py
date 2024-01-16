@@ -93,6 +93,9 @@ def toFlat(x, y):
     g.move(z=flattenCut)
 
 if section == "baseBottom":
+    # cut0: should cut half way through (+eps)
+    # cut1: unused
+
     flatten()
     holes(bottom(A_ANCHOR_ROD), R_ANCHOR_ROD, cut0, D_HEAD)
     holes(bottom(A_TUBE_ROD), R_TUBE_ROD, cut0, DI_TUBE_ROD)
@@ -104,13 +107,16 @@ if section == "baseBottom":
     g.move(z=2)
 
 elif section == "baseTop":
+    # cut0: should cut half way through (+eps)
+    # cut1: all the way through the stock
+
     flatten()
     holes(top(A_ANCHOR_ROD), R_ANCHOR_ROD, cut1, D_ROD)
     holes(top(A_TUBE_ROD), R_TUBE_ROD, cut0, DO_TUBE_ROD)
     holes(top(A_BOLT_ROD), R_BOLT_ROD, cut1, D_ROD)
 
     toFlat(0, 0,)
-    hole2(g, mat, DECO_DEPTH, r=R_RING0 + BIT/2, fill=False)
+    hole2(g, mat, DECO_DEPTH, r=R_RING0 + BIT, fill=False)
 
     toFlat(0, 0)
     #hole2(g, mat, DECO_DEPTH, r=R_RING1 + BIT/2, fill=False)
@@ -124,29 +130,34 @@ elif section == "baseTop":
     hole2(g, mat, cut1, d=DO_BRASS + BIT*2, fill=False)
 
 elif section == "top":
-    # all cut through
+    # cut0: inset for tubes (~1.0mm)
+    # cut1: all the way through the stock
+
     flatten()
     holes(bottom(A_ANCHOR_ROD), R_ANCHOR_ROD, cut1, D_ROD)
     holes(bottom(A_TUBE_ROD), R_TUBE_ROD, cut0, DO_TUBE_ROD)
+    holes(bottom(A_TUBE_ROD), R_TUBE_ROD, cut1, DI_TUBE_ROD)
     holes(bottom(A_BOLT_ROD), R_BOLT_ROD, cut1, D_ROD)
 
     toFlat(0, 0)
-    hole2(g, mat, cut0, d=D_TOP, fill=True)
+    hole2(g, mat, cut1, d=D_TOP, fill=True)
 
-    hole2(g, mat, cut0, d=DI_BRASS + BIT*2, fill=False)
+    hole2(g, mat, cut1, d=DI_BRASS + BIT*2, fill=False)
 
 elif section == "topCap":
-    # all cut through
+    # cut0: inset for nut (~1.0mm)
+    # cut1: all the way through the stock
+
     flatten()
-    holes(bottom(A_ANCHOR_ROD), R_ANCHOR_ROD, cut0, D_NUT)
-    holes(bottom(A_TUBE_ROD), R_TUBE_ROD, cut0, DI_TUBE_ROD)
+    holes(bottom(A_ANCHOR_ROD), R_ANCHOR_ROD, cut1, D_NUT)
+    holes(bottom(A_TUBE_ROD), R_TUBE_ROD, cut1, DI_TUBE_ROD)
     holes(bottom(A_BOLT_ROD), R_BOLT_ROD, cut1, D_ROD)
-    holes(bottom(A_BOLT_ROD), R_BOLT_ROD, -1.0, D_NUT)
+    holes(bottom(A_BOLT_ROD), R_BOLT_ROD, cut0, D_NUT)
 
     toFlat(0, 0)
-    hole2(g, mat, cut0, d=D_TOP_CAP, fill=False)    
+    hole2(g, mat, cut1, d=D_TOP_CAP, fill=False)    
 
-    hole2(g, mat, cut0, d=DO_BRASS + BIT*2, fill=False)
+    hole2(g, mat, cut1, d=DO_BRASS + BIT*2, fill=False)
 
 g.move(z=2)
 travel(g, mat, x=0, y=0)
