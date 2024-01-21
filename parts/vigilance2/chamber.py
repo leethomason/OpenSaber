@@ -8,7 +8,7 @@ from hole import hole2
 
 DECO_DEPTH = -0.5
 D0 = 31.60
-DI_BRASS = 29.0
+DI_BRASS = 29.0 + 0.1
 DO_BRASS = D0
 EXTRA = 0.2
 
