@@ -29,7 +29,7 @@ R_TUBE_ROD = 12.0
 A_BOLT_ROD = [120, 300]
 R_BOLT_ROD = 11.0
 
-D_HEAD = 6.8
+D_HEAD = 6.8 + 0.2
 D_NUT = 9.0
 D_ROD = 3.6
 
@@ -130,7 +130,7 @@ elif section == "baseTop":
     hole2(g, mat, cut1, d=DO_BRASS + BIT*2, fill=False)
 
 elif section == "top":
-    # cut0: inset for tubes (~1.0mm)
+    # cut0: inset for tubes (~1.5mm)
     # cut1: all the way through the stock
 
     flatten()
@@ -158,6 +158,14 @@ elif section == "topCap":
     hole2(g, mat, cut1, d=D_TOP_CAP, fill=False)    
 
     hole2(g, mat, cut1, d=DO_BRASS + BIT*2, fill=False)
+
+elif section == "repair":
+    # cut0: should cut half way through (+eps)
+    # cut1: unused
+
+    holes(bottom(A_ANCHOR_ROD), R_ANCHOR_ROD, cut0, D_HEAD)
+    holes(bottom(A_BOLT_ROD), R_BOLT_ROD, cut0, D_HEAD)
+    g.move(z=2)
 
 g.move(z=2)
 travel(g, mat, x=0, y=0)
